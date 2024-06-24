@@ -32,7 +32,7 @@ const controlHomePage = async function () {
   await model.handleLoadStorage();
 
   // homePageView.login()
-  homePageView.logInOutHandler(controlLoginPage);
+  // homePageView.logInOutHandler(controlLoginPage);
   homePageView._addHandlerCloseModal();
   homePageView.addMobileHandler();
   homePageView._addHandlerCloseSubscribe();
@@ -48,7 +48,7 @@ const controlWorkshopPage = async function () {
   await model.handleLoadStorage();
 
   WorkshopView.svgHandler();
-  WorkshopView.logInOutHandler(controlLoginPage);
+  // WorkshopView.logInOutHandler(controlLoginPage);
   WorkshopView.persistCartNumber(await model.checkCartNumber());
   WorkshopView._moveToTopHandler();
   WorkshopView.addRevealHandler();
@@ -64,7 +64,7 @@ const controlAboutPage = async function () {
   // AboutView.stickyMenuFn();
   AboutView.addRevealHandler();
   AboutView.addMobileHandler();
-  AboutView.logInOutHandler(controlLoginPage);
+  // AboutView.logInOutHandler(controlLoginPage);
 };
 
 const controlContactMePage = async function () {
@@ -75,7 +75,7 @@ const controlContactMePage = async function () {
   ContactMeView.sendHandler();
   ContactMeView.addRevealHandler();
   ContactMeView.addMobileHandler();
-  ContactMeView.logInOutHandler(controlLoginPage);
+  // ContactMeView.logInOutHandler(controlLoginPage);
 };
 
 const controlCategoriesPage = async function () {
@@ -84,7 +84,7 @@ const controlCategoriesPage = async function () {
 
     CategoriesView.svgHandler();
     CategoriesView._moveToTopHandler();
-    categoriesView.logInOutHandler(controlLoginPage);
+    // categoriesView.logInOutHandler(controlLoginPage);
     // CategoriesView.stickyMenuFn();
     CategoriesView._imageFlipper();
     CategoriesView.addRevealHandler();
@@ -117,7 +117,7 @@ const controlCartPage = async function () {
     CartView.addRevealHandler();
     CartView.addMobileHandler();
     CartView._addHandlerDeleteAll(controlDeleteAll);
-    CartView.logInOutHandler(controlLoginPage);
+    // CartView.logInOutHandler(controlLoginPage);
   } catch (err) {
     console.log(err);
   }
