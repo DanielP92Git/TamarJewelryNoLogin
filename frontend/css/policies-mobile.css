@@ -1,0 +1,440 @@
+body {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid black; */
+}
+
+/* html, body {
+    overflow-x: hidden;
+  } */
+
+header {
+  width: 100%;
+  height: 40vh;
+  margin: 0 auto;
+  padding: 0;
+  margin-bottom: 2rem;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid rgb(177, 20, 143); */
+}
+
+.main-image {
+  background-image: url(../imgs/working.jpg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  width: 100%;
+  height: 40vh;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid rgb(177, 20, 143); */
+}
+
+/* ====MENU SETTINGS==== */
+
+.menu {
+  display: flex;
+  flex-flow: column;
+  width: 165px;
+  height: 305px;
+  transition-property: all;
+  transition-duration: 1s;
+  transition-timing-function: ease;
+  position: absolute;
+  top: 20px;
+  left: -250px;
+  z-index: 1;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(20, 177, 35); */
+}
+
+.menu__ul {
+  display: flex;
+  flex-flow: column;
+  justify-content: space-around;
+  align-items: center;
+  max-width: 115%;
+  width: 160px;
+  height: 300px;
+  position: relative;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 5px solid rgb(228, 152, 37); */
+}
+
+.main-nav-tab {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  width: 160px;
+  height: 60px;
+  border-bottom: 1px solid;
+  background-color: rgba(255, 255, 255, 0.808);
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 5px solid rgb(46, 37, 228); */
+}
+
+.main-nav-tab:hover {
+  background-color: rgb(255, 242, 201);
+  cursor: pointer;
+}
+
+.attrib {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  width: 160px;
+  color: black;
+  padding-left: 10px;
+  text-decoration: none;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 5px solid rgb(40, 228, 37); */
+}
+
+.menubars-svg {
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.616);
+  border-radius: 5px;
+  width: 30px;
+  height: 30px;
+  margin: 10px;
+  position: absolute;
+  top: 1%;
+  left: 85%;
+  padding: 2px;
+  z-index: 1;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid lightcoral; */
+}
+
+.menubars-svg:hover {
+  cursor: pointer;
+}
+
+.shoppingcart-svg {
+  display: none;
+}
+
+.cart-number {
+  display: none;
+}
+
+.shoppingcart-mobile {
+  display: flex;
+  flex-flow: row;
+  fill: rgb(0, 0, 0);
+  width: 30px;
+  height: 30px;
+  position: absolute;
+  top: 8%;
+  left: 87%;
+  padding: 3px;
+  border-radius: 5px;
+  background-color: rgba(255, 226, 63, 0.587);
+}
+
+.cart-numbermobile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+  position: relative;
+  right: 1%;
+  top: 0.8%;
+  background-color: rgb(0, 255, 213);
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  text-align: center;
+}
+
+#menubars-svg {
+  fill: rgb(0, 0, 0);
+}
+
+.shoppingcart-svg {
+  display: none;
+}
+
+.cart-number {
+  display: none;
+}
+
+.menu.sticky {
+  display: none;
+}
+
+.main-images-container {
+  display: flex;
+  overflow: hidden;
+  height: 70%;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid rgb(21, 224, 255); */
+}
+
+.workshop-image {
+  width: 100%;
+  transition: transform 1s;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid rgb(20, 177, 93); */
+}
+
+#login-tab {
+  border-bottom: none;
+}
+
+#show-menu-button {
+  display: none;
+}
+
+input[type="checkbox"]:checked + .menu {
+  left: 0;
+}
+
+.categories-list {
+  position: absolute;
+  left: -200px;
+  top: 60px;
+  list-style: none;
+
+  width: 165px;
+  transition-property: all;
+  transition-duration: 1s;
+  transition-timing-function: ease;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 5px solid darkblue */
+}
+
+.category-item {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+
+  height: 60px;
+  background-color: rgba(221, 138, 168, 0.813);
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 2px solid yellowgreen; */
+}
+
+.category-item:hover {
+  background-color: rgba(202, 173, 183, 0.813);
+}
+
+.reveal {
+  display: inline;
+  left: 160px;
+}
+/* ===== END OF MENU SETTINGS==== */
+
+main {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  width: 100%;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 2px solid rgb(37, 136, 228); */
+}
+
+h1 {
+  font-weight: 100;
+  background-color: rgba(255, 166, 0, 0.4);
+  font-family: MS, Lucida Sans Unicode, Lucida Grande, Lucida Sans, Arial,
+    sans-serif;
+  text-align: center;
+  width: 90%;
+  margin-bottom: 2rem;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 2px solid rgb(40, 228, 37); */
+}
+
+.first-row-container {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  margin-bottom: 5rem;
+  padding: 10px;
+
+  width: 97%;
+  max-height: 100%;
+
+  /* ~~~~ FOR DEBUGGING~~~~ */
+  /* border: 2px solid rgb(37, 50, 228); */
+}
+
+.columns-wrap {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  width: 100%;
+  background-color: rgba(245, 245, 220, 0.9);
+  box-shadow: 12px 2px 30px 2px rgb(168, 163, 154);
+  font-size: 1.3vw;
+  padding: 3rem;
+  box-sizing: border-box;
+
+  /* ~~~~ FOR DEBUGGING~~~~ */
+  /* border: 2px solid rgb(37, 183, 228); */
+}
+
+.column-box {
+  display: flex;
+  flex-flow: column;
+  padding: 20px;
+  margin-bottom: 2.5rem;
+  border: 2px solid rgb(203, 203, 181);
+  width: 100%;
+  text-align: center;
+  font-size: 1.3rem;
+
+  /* ~~~~ FOR DEBUGGING~~~~ */
+  /* border: 2px solid rgb(37, 50, 228); */
+}
+
+h3 {
+  margin: 0 15px 25px 15px;
+}
+
+.shipping-policy,
+.return-policy,
+.workshop-description {
+  background-color: rgba(245, 245, 220, 0.9);
+  box-shadow: 12px 2px 30px 2px rgb(168, 163, 154);
+  font-size: 5vw;
+  padding: 3rem;
+  box-sizing: border-box;
+  margin-bottom: 3rem;
+
+  width: 90%;
+  max-height: 100%;
+
+  /* ~~~~ FOR DEBUGGING~~~~ */
+  /* border: 2px solid rgb(37, 155, 228); */
+}
+
+.underline-bold {
+  text-decoration: underline;
+  font-weight: 800;
+}
+
+.go-to-top {
+  position: absolute;
+  top: 150rem;
+  width: 10%;
+
+  border: 1px solid;
+  background-color: rgba(255, 255, 255, 0.712);
+  padding: 5px;
+
+  /* ~~~~ FOR DEBUGGING~~~~ */
+  /* border: 2px solid rgb(37, 155, 228); */
+}
+
+.go-to-top:hover {
+  border: rgb(113, 101, 33), solid;
+  color: rgb(113, 101, 33);
+  cursor: pointer;
+  background-color: rgba(224, 241, 152, 0.377);
+}
+
+.footer {
+  display: flex;
+  flex-flow: row wrap;
+  max-width: 100%;
+  padding-top: 0.5rem;
+  background-color: rgb(132, 132, 132);
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(4, 255, 0); */
+}
+
+.columns-container {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(8, 0, 255); */
+}
+
+.footer-right-column,
+.footer-middle-column,
+.footer-left-column {
+  display: flex;
+  flex-flow: column wrap;
+  align-items: center;
+  width: 30%;
+  padding-top: 10px;
+  padding-bottom: 30px;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(89, 0, 255); */
+}
+
+.footer-middle-column {
+  padding-right: 5px;
+}
+
+.footer-item {
+  color: white;
+  width: 9rem;
+  margin-top: 10px;
+  margin-bottom: 25px;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 1px solid green; */
+}
+
+.attrib-footer {
+  display: flex;
+  flex-flow: row;
+  font-size: 0.7rem;
+  align-items: center;
+  width: 100%;
+  color: black;
+  margin-bottom: 6%;
+  padding-left: 10px;
+  padding-bottom: 5px;
+  border-bottom: 0.5px solid rgb(66, 66, 66);
+  text-decoration: none;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 5px solid rgb(40, 228, 37); */
+}
+
+.rights-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 4rem;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 1px solid rgb(210, 28, 140); */
+}
+
+.rights-text {
+  color: white;
+  text-align: center;
+  font-size: 0.9rem;
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 1px solid green; */
+}

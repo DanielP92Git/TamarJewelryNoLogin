@@ -1,0 +1,6 @@
+html, body, img, header, ul, li, p, svg, div, nav, h1, main, a, label, input, .menubars-svg, #menubars-svg, .container.slider-wrapper, .img-list, .image-item {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-sizing: border-box;
+}

@@ -1,0 +1,95 @@
+#menu {
+    display: flex;
+    flex-flow: column;
+    width: 165px;
+    height: 305px;
+    transition-property: all;
+    transition-duration: 1s;
+    transition-timing-function: ease;
+    position: relative;
+    top: -140px;
+    left: -200px;
+    
+    /* ~~~~ FOR DEBUGGING~~~~*/
+    /* border: 3px solid rgb(20, 177, 35); */
+}
+
+.menubars-svg {
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.616);
+    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    margin: 10px;
+    position: relative;
+    top: -140px;
+    left: -3px;
+    padding: 2px;
+
+    /* ~~~~ FOR DEBUGGING~~~~*/
+    /* border: 3px solid lightcoral; */
+}
+
+#menubars-svg {
+    fill: rgb(0, 0, 0);
+
+}
+
+ul {
+    display: flex;
+    flex-flow: column;
+    justify-content: space-around;
+    align-items: center;
+    max-width: 115%;
+    width: 160px;
+    height: 300px;
+    
+    /* ~~~~ FOR DEBUGGING~~~~*/
+    /* border: 5px solid rgb(228, 152, 37); */
+}
+
+
+li {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+    width: 160px;
+    height: 60px;
+    border-bottom: 1px solid;
+    background-color: rgba(255, 255, 255, 0.808);
+
+    /* ~~~~ FOR DEBUGGING~~~~*/
+    /* border: 5px solid rgb(46, 37, 228); */
+}
+
+#contact-me {
+    border-bottom: none;
+}
+
+a {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    width: 160px;
+    color: black;
+    /* padding: 20px 0; */
+    padding-left: 10px;
+    text-decoration: none;
+
+    /* ~~~~ FOR DEBUGGING~~~~*/
+    /* border: 5px solid rgb(40, 228, 37); */
+}
+
+li:hover {
+    background-color: rgba(255, 255, 255, 0.925);
+    cursor: pointer;
+}
+
+#show-menu-button {
+    display: none;
+}
+
+input[type="checkbox"]:checked + #menu {
+    left: 0;
+}

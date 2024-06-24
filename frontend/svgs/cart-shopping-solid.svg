@@ -1,0 +1,35 @@
+<svg
+   viewBox="0 0 100 100"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="cart-shopping-solid.svg"
+   width="100"
+   height="100"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="5.8671875"
+     inkscape:cx="39.115846"
+     inkscape:cy="62.295606"
+     inkscape:window-width="1920"
+     inkscape:window-height="986"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  
+  <path
+     d="m 4.9999998,9.2183795 c 0,-2.3378112 1.6861769,-4.2186005 3.7820788,-4.2186005 h 7.1701734 c 3.466899,0 6.539832,2.2499202 7.973874,5.624801 h 64.767975 c 4.144527,0 7.170176,4.394373 6.082839,8.859061 l -6.461046,26.770533 c -1.339479,5.519343 -5.830695,9.368813 -10.952243,9.368813 h -45.46366 l 0.850968,5.009591 c 0.346689,1.986257 1.906794,3.42761 3.719034,3.42761 h 45.432141 c 2.095893,0 3.78207,1.880789 3.78207,4.218601 0,2.337811 -1.686177,4.2186 -3.78207,4.2186 H 36.469993 c -5.452488,0 -10.132803,-4.324068 -11.141352,-10.282838 L 17.197186,14.579517 C 17.086873,13.911579 16.566844,13.43698 15.952252,13.43698 H 8.7820786 c -2.0959019,0 -3.7820788,-1.880789 -3.7820788,-4.2186005 z M 25.171051,86.559389 a 7.5641447,8.4372024 0 1 1 15.128288,0 7.5641447,8.4372024 0 1 1 -15.128288,0 z M 78.120065,78.12219 a 7.5641446,8.4372022 0 1 1 0,16.874404 7.5641446,8.4372022 0 1 1 0,-16.874404 z"
+     id="path1"
+     style="stroke-width:0.166432" />
+</svg>

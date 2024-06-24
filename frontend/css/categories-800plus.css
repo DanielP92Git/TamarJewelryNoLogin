@@ -1,0 +1,577 @@
+body {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid black; */
+}
+
+header {
+  background-image: url(../imgs/IMG_9699.jpg);
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  width: 100%;
+  height: 90vh;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid rgb(177, 20, 143); */
+}
+
+/* ~~~~~~ Mobile Menu ~~~~~~~ */
+
+.menubars-svg {
+  display: none;
+}
+
+#menubars-svg {
+  display: none;
+}
+
+#show-menu-button {
+  display: none;
+}
+
+/* ````` Mobile Menu END ``````` */
+
+/* ~~~~~~~ Desktop Navbar ~~~~~~~~~ */
+
+.menu {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 50px;
+  z-index: 7;
+  position: fixed;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 2px solid rgb(20, 177, 35); */
+}
+
+.menu__ul {
+  display: flex;
+  flex-flow: row;
+  justify-content: space-around;
+  background-color: rgba(255, 255, 255, 0.8);
+  width: 100%;
+  height: 50px;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 2px solid rgb(228, 152, 37); */
+}
+
+.main-nav-tab {
+  width: 100%;
+  height: 50px;
+  list-style: none;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 2px solid rgb(46, 37, 228); */
+}
+
+.main-nav-tab:hover {
+  cursor: pointer;
+}
+
+/* .li.sticky:hover {
+  background-color: rgba(212, 199, 171, 0.925);
+} */
+
+a {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  height: 50px;
+  color: black;
+  font-size: 1.1rem;
+  text-decoration: none;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 2px solid rgb(40, 228, 37); */
+}
+
+a:hover {
+  color: rgb(152, 152, 152);
+}
+
+.categories-list {
+  display: flex;
+  flex-flow: column;
+  justify-content: space-evenly;
+  text-align: center;
+  list-style: none;
+  border: 1px solid;
+  position: relative;
+  top: -20rem;
+  background-color: rgba(250, 235, 215, 0.5);
+  transition-property: all;
+  transition-duration: 300ms;
+  transition-timing-function: linear;
+  /* opacity: 0; */
+  /* z-index: -1; */
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid rgb(255, 8, 247); */
+}
+
+.categories-list--active {
+  opacity: 1;
+  z-index: 1;
+  transform: translateY(20rem);
+}
+
+.category-item {
+  position: relative;
+}
+
+.category-item:hover {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+.menu.sticky {
+  /* display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  height: 50px; */
+  z-index: 8;
+
+  transition: all;
+  transition-duration: 500ms;
+  transition-timing-function: ease;
+  position: fixed;
+}
+
+.menu.hidden {
+  opacity: 0;
+  transform: translateY(8rem);
+}
+.icons-container {
+  display: none;
+}
+.shoppingcart-svg {
+  display: flex;
+  flex-flow: row;
+  justify-content: flex-start;
+  width: 25px;
+  height: 25px;
+  left: 600px;
+}
+
+.shoppingcart-svg:hover {
+  fill: rgb(121, 221, 255);
+}
+
+.main-nav-tab.login {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-btn {
+  width: 100px;
+  height: 30px;
+  margin: 5px;
+  border: 1px solid;
+  border-radius: 10px;
+}
+
+.login-btn:hover {
+  color: aqua;
+  cursor: pointer;
+}
+
+.cart-number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+  position: absolute;
+  right: 5.3%;
+  top: 0.8%;
+  background-color: rgb(0, 255, 213);
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  text-align: center;
+}
+
+/* ```````Navbar END`````````` */
+
+.category-title {
+  margin-top: 5px;
+  margin-bottom: 45px;
+  font-weight: 100;
+  font-size: 2.3rem;
+
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
+}
+
+.main {
+  display: flex;
+  flex-flow: column wrap;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 2px solid rgb(40, 228, 37); */
+}
+
+.products-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-evenly;
+  width: 95vw;
+  height: 100%;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(179, 0, 255); */
+}
+
+.item-container {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: space-evenly;
+  position: relative;
+  cursor: pointer;
+  margin-bottom: 3rem;
+  border: 1px solid rgb(182, 182, 182);
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(179, 0, 255); */
+}
+
+.rear-image {
+  opacity: 0;
+  z-index: -1;
+}
+
+.image-item {
+  height: 20rem;
+  width: 20rem;
+  object-fit: cover;
+  margin: 5px;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid red; */
+}
+
+.rear-image {
+  position: absolute;
+  top: 0;
+
+  transition: all;
+  transition-duration: 800ms;
+  transition-property: all;
+}
+
+.front-image {
+  transition: all;
+  transition-duration: 800ms;
+  transition-property: all;
+}
+
+.add-to-cart-btn {
+  cursor: pointer;
+  width: 200px;
+  height: 30px;
+  position: absolute;
+  top: 18rem;
+  background-color: rgba(232, 165, 138, 0.559);
+  border: none;
+  z-index: 2;
+}
+
+.add-to-cart-btn:hover {
+  background-color: rgba(231, 187, 169, 0.559);
+  width: 200px;
+  height: 40px;
+
+  transition: all;
+  transition-duration: 500ms;
+}
+
+.item-price {
+  color: rgb(109, 109, 109);
+  margin: 0.5rem;
+}
+
+.item-description {
+  opacity: 0;
+  position: absolute;
+}
+.item-title_modal {
+  font-size: 1.4rem;
+}
+.item-description_modal {
+  display: flex;
+  flex-flow: column;
+  margin-bottom: 4rem;
+  /* border: 1px solid; */
+}
+
+.large-imgs-container {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 50px;
+  box-shadow: 0px 0px 50px -10px rgba(0, 0, 0, 0.58);
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid red; */
+}
+
+.large-img-item {
+  width: 48%;
+  /* height: 50%; */
+  margin: 5px;
+}
+/* ----------- Slider end ----------------- */
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+
+.go-to-top {
+  border: 1px solid;
+  width: 10%;
+  background-color: rgba(255, 255, 255, 0.712);
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding: 5px;
+  margin-bottom: 60px;
+  margin-top: 80px;
+}
+
+.go-to-top:hover {
+  border: rgb(113, 101, 33), solid;
+  color: rgb(113, 101, 33);
+  cursor: pointer;
+  background-color: rgba(196, 106, 181, 0.377);
+}
+
+.footer {
+  width: 100%;
+  background-color: rgba(161, 160, 65, 0.249);
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(4, 255, 0); */
+}
+
+.columns-container {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(4, 255, 0); */
+}
+
+.footer-right-column,
+.footer-middle-column,
+.footer-left-column {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  width: 50%;
+  padding-top: 10px;
+  padding-bottom: 30px;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(89, 0, 255); */
+}
+.footer-middle-column {
+  height: 100%;
+}
+
+.footer-item {
+  color: white;
+  width: auto;
+  height: auto;
+  padding: 0;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-size: 1rem;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 1px solid green; */
+}
+
+.footer-item:hover {
+  color: black;
+}
+
+.rights-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 4rem;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 1px solid rgb(210, 28, 140); */
+}
+
+.rights-text {
+  color: white;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 1px solid green; */
+}
+
+/* Modal Item Preview */
+
+.modal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  height: 100%;
+}
+
+.item-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0px;
+
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  z-index: 100;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 1px solid green; */
+}
+
+.modal-reveal {
+  display: flex;
+}
+
+.modal-item-container {
+  display: flex;
+  justify-content: space-evenly;
+  background-color: rgba(250, 240, 255, 0.8);
+  background-image: linear-gradient(
+    to top right,
+    rgba(155, 136, 183, 0.4),
+    rgba(154, 191, 201, 0.4)
+  );
+  width: 80%;
+  height: 90%;
+  padding: 20px;
+
+  /* border: 2px solid fuchsia; */
+}
+
+.close-modal-btn {
+  position: absolute;
+  left: 88%;
+  bottom: 90%;
+  width: 1rem;
+  height: 1rem;
+}
+
+.close-modal-btn:hover {
+  cursor: pointer;
+}
+
+.images-container {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  max-width: 60%;
+
+  /* border: 1px solid blue; */
+}
+
+.big-image {
+  height: 70%;
+
+  /* border: 1px solid red; */
+}
+
+.small-images-container {
+  display: flex;
+  flex-flow: row;
+  /* justify-content: space-around; */
+  margin-top: 15px;
+  max-width: 90%;
+  width: 80%;
+  /* height: 40%; */
+  overflow-x: scroll;
+
+
+  /* border: 1px solid green; */
+}
+
+.small-image {
+  padding: 5px;
+  width: 25%;
+  height: 100%;
+
+  /* border: 1px solid rgb(36, 190, 232); */
+}
+
+.small-image:hover {
+  color:  white;
+  cursor: pointer;
+}
+
+.item-specs {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  border: 1px solid rgba(246, 255, 224, 0.4);
+  width: 40%;
+  height: 100%;
+  padding: 25px;
+}
+
+.item-title_modal {
+  font-weight: 800;
+  margin-bottom: 5rem;
+}
+
+.item-description {
+  margin-bottom: 5rem;
+}
+
+.price-text {
+  font-weight: 800;
+}
+
+/* .item-price_modal {
+} */
+
+.add-to-cart-btn_modal {
+  align-self: center;
+  cursor: pointer;
+  width: 200px;
+  height: 30px;
+  position: absolute;
+  top: 23rem;
+  background-color: rgba(232, 165, 138, 0.559);
+  border: none;
+  z-index: 2;
+}
+
+.add-to-cart-btn_modal:hover {
+  background-color: rgba(231, 187, 169, 0.559);
+  width: 200px;
+  height: 40px;
+
+  transition: all;
+  transition-duration: 500ms;
+}

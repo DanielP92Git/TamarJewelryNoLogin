@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   viewBox="0 0 100 100"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="bars-solid.svg"
+   width="100"
+   height="100"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="5.8671875"
+     inkscape:cx="51.217044"
+     inkscape:cy="47.296937"
+     inkscape:window-width="1920"
+     inkscape:window-height="986"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg1" />
+  <!--! Font Awesome Pro 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. -->
+  <path
+     d="m 7.546382,19.675988 c 0,-3.354594 2.710208,-6.064803 6.064803,-6.064803 h 72.77763 c 3.354594,0 6.064803,2.710209 6.064803,6.064803 0,3.354594 -2.710209,6.064802 -6.064803,6.064802 h -72.77763 c -3.354595,0 -6.064803,-2.710208 -6.064803,-6.064802 z m 0,30.324012 c 0,-3.354594 2.710208,-6.064802 6.064803,-6.064802 h 72.77763 c 3.354594,0 6.064803,2.710208 6.064803,6.064802 0,3.354594 -2.710209,6.064807 -6.064803,6.064807 H 13.611185 C 10.25659,56.064807 7.546382,53.354594 7.546382,50 Z m 84.907236,30.324016 c 0,3.354596 -2.710209,6.064798 -6.064803,6.064798 h -72.77763 c -3.354595,0 -6.064803,-2.710202 -6.064803,-6.064798 0,-3.354594 2.710208,-6.064808 6.064803,-6.064808 h 72.77763 c 3.354594,0 6.064803,2.710214 6.064803,6.064808 z"
+     id="path1"
+     style="stroke-width:0.189525" />
+</svg>

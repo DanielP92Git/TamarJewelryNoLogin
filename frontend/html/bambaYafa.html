@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta ="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="../css/bambaYafa-desktop.css" />
+    <script type="module" defer src="../js/controller.js"></script>
+  </head>
+  <body id="bambot">
+    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" style="display: none">
+      <symbol viewBox="0 0 100 100" id="delete-svg">
+        <path
+          d="M 95.664918,13.635782 C 98.460227,10.752089 98.014956,6.4689567 94.650692,4.0729473 91.286428,1.6769369 86.28951,2.0586028 83.494202,4.9422952 L 49.999999,39.398187 16.505794,4.9422952 C 13.710488,2.0586028 8.713569,1.6769369 5.3493062,4.0729473 1.9850435,6.4689567 1.5397734,10.752089 4.3350801,13.635782 L 39.684575,50 4.3350801,86.364219 c -2.7953067,2.883692 -2.3500366,7.166829 1.0142261,9.562835 3.3642628,2.39601 8.3611818,2.01434 11.1564878,-0.869346 L 49.999999,60.601813 83.494202,95.057708 c 2.795308,2.883686 7.792226,3.265356 11.15649,0.869346 3.364264,-2.396006 3.809535,-6.679143 1.014226,-9.562835 L 60.315422,50 Z"
+          id="path1"
+          style="stroke-width: 0.229023"
+        />
+      </symbol>
+    </svg>
+    <header>
+      <h1 class="login-title">Login</h1>
+          <div class="loginsignup-fields">
+          <!-- <form class="loginsignup-fields"> -->
+            <input
+              name="email"
+              type="email"
+              placeholder="Email Address"
+              id="email-input"
+            />
+            <input
+              name="password"
+              type="password"
+              placeholder="Password"
+              id="password-input"
+            />
+          <!-- </form> -->
+        </div>
+        <button class="continue-button">Continue</button>
+      <div class="navbar">
+        <a href="../index.html" target="_blank"
+          ><img src="../imgs/tamar-logo.png" alt="" class="nav-logo"
+        /></a>
+
+        <h1 class="dashboard-title">Admin Dashboard</h1>
+        <img alt="" class="nav-Profile" />
+      </div>
+    </header>
+    <main id="main-container">
+      <aside class="sidebar">
+        <div>
+          <div class="sidebar_add-products">
+            <img src="../imgs/svgs/upload.svg" class="plus-icon" alt="" />
+            <p>Add Product</p>
+          </div>
+          <div class="sidebar_products-list">
+            <img src="../imgs/svgs/bars-solid.svg" class="list-icon" alt="" />
+            <p>Products List</p>
+          </div>
+        </div>
+      </aside>
+      <section class="page-content"></section>
+    </main>
+  </body>
+</html>
