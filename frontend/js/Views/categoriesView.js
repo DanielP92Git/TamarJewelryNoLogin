@@ -91,9 +91,7 @@ class CategoriesView extends View {
   generatePreview(data, itemInfo, imgMrk) {
     const image = data.querySelector(".front-image").src;
     const title = data.querySelector(".item-title").textContent;
-    console.log('itemInfo:',itemInfo, 'data:',data);
     const smallImage = itemInfo.smallImages;
-    console.log(smallImage);
     const id = data.id;
     const description = data.querySelector(".item-description").innerHTML;
 
@@ -123,8 +121,21 @@ class CategoriesView extends View {
 
     this._modal.insertAdjacentHTML("afterbegin", markup);
 
+    const smallImgsContainer = document.querySelector('.small-images-container')
+    
+    smallImgsContainer.addEventListener("mouseover", (e) => {
+      const bigImg = document.querySelector(".big-image");
+      bigImg.src = e.target.closest(".small-image").src;
+    });
+    smallImgsContainer.addEventListener("mouseout", () => {
+      const bigImg = document.querySelector(".big-image");
+      bigImg.src = image;
+    });
+
     const closeBtn = document.querySelector(".close-modal-btn");
     const addToCartModal = document.querySelector(".add-to-cart-btn_modal");
+
+
 
     closeBtn.addEventListener("click", this._closeItemModal.bind(this));
 
