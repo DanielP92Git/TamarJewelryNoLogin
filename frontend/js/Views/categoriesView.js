@@ -99,7 +99,8 @@ class CategoriesView extends View {
 
     const markup = `<div class="item-overlay">
     <div class="modal-item-container">
-      <svg class="close-modal-btn"><use xlink:href="#close-svg"></use></svg>
+      <!--  <svg class="close-modal-btn"><use xlink:href="#close-svg"></use></svg>-->
+      <div class="close-modal-btn">X</div>
       <div class="images-container">
       <img class="big-image" src="${image}" alt="">
       
