@@ -24,7 +24,6 @@ const fetchUserCartAPI = async function () {
 
 export const handleLoadStorage = async function () {
   try {
-    // get cart if user is not logged in
     if (!localStorage.getItem("auth-token")) {
       const data = await JSON.parse(localStorage.getItem("cart"));
       if (!data) return;
@@ -52,7 +51,6 @@ export const handleLoadStorage = async function () {
                 image: product.image,
                 price: product.new_price,
                 id: product.id,
-                quantity: product.quantity,
                 amount: 1,
               });
             }
@@ -68,6 +66,7 @@ export const handleLoadStorage = async function () {
 export const setItems = async function (data) {
   // const userStorage = await handleLoadStorage()
   const allProducts = await getAPI();
+  console.log("2: user data:", data);
 
   const filtered = Object.entries(data).filter(([id, amount]) => {
     if (amount > 0) return id;
@@ -82,7 +81,6 @@ export const setItems = async function (data) {
           description: product.description,
           image: product.image,
           price: product.new_price,
-          qauntity: product.qauntity,
           id: product.id,
           amount: 1,
         });
@@ -106,7 +104,6 @@ export const setPreviewItem = async function (data) {
           description: product.description,
           image: product.image,
           price: product.new_price,
-          quantity: product.qauntity,
           id: product.id,
           amount: 1,
         });
@@ -160,19 +157,10 @@ const createLocalStorage = function () {
   localStorage.setItem("cart", JSON.stringify(cart));
 };
 
-export const addToLocalStorage = async function (data) {
-  const allProducts = await getAPI();
-  const itemId = data.getAttribute("data-id");
-  let prodQuantity;
-  const quant = allProducts.filter((product) => {
-    if (product.id == itemId) {
-      prodQuantity = product.quantity;
-    }
-  });
-  // console.log(prodQuantity);
-  // console.log(itemId);
+export const addToLocalStorage = function (data) {
   const itemImage = data.querySelector(".front-image").src;
   const itemTitle = data.querySelector(".item-title").textContent;
+  const itemId = data.dataset.id;
   let itemPrice = data
     .querySelector(".item-price")
     .textContent.replace("$", "");
@@ -182,26 +170,23 @@ export const addToLocalStorage = async function (data) {
     title: itemTitle,
     image: itemImage,
     price: itemPrice,
-    quantity: +quant,
-    id: +itemId,
+    id: itemId,
   };
-  // console.log(itemData.id)
+
   // 2) Update item to cart
   addToLocalCart(itemData);
 };
 
 const addToLocalCart = function (data) {
-  // console.log('2',data.quantity);
   cart.push({
     title: data.title,
     image: data.image,
     price: data.price,
-    id: +data.id,
-    quantity: data.qauntity,
+    id: data.id,
     amount: 1,
   });
+
   createLocalStorage();
-  // console.log(cart);
 };
 
 export const checkCartNumber = async function () {

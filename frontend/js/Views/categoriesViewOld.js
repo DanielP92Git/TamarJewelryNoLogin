@@ -57,13 +57,12 @@ class CategoriesView extends View {
 
   addHandlerPreview(handler, data) {
     const _openItemModal = function (e) {
-      // console.log(data);
+      console.log(data);
       const clicked = e.target.closest(".item-container");
       const id = clicked.dataset.id;
       const filtered = data.find((prod) => prod.id == id);
       const addToCart = e.target.closest(".add-to-cart-btn");
-      const smallImage = filtered.smallImagesLocal;
-      // console.log(smallImage);
+      const smallImage = filtered.smallImages;
       const imageMarkup = smallImage
         .map(
           (x) => `
@@ -74,6 +73,7 @@ class CategoriesView extends View {
 
       if (!clicked) return;
       if (addToCart) return;
+      // this.generatePreview(clicked, handler, data);
       this.generatePreview(clicked, filtered, imageMarkup);
     };
 
@@ -91,8 +91,7 @@ class CategoriesView extends View {
   generatePreview(data, itemInfo, imgMrk) {
     const image = data.querySelector(".front-image").src;
     const title = data.querySelector(".item-title").textContent;
-    console.log('itemInfo:',itemInfo, 'data:',data);
-    const smallImage = itemInfo.smallImagesLocal;
+    const smallImage = itemInfo.smallImages;
     console.log(smallImage);
     const id = data.id;
     const description = data.querySelector(".item-description").innerHTML;
@@ -136,10 +135,11 @@ class CategoriesView extends View {
   generateProduct(data) {
     const checkCategory = document.body.dataset.category;
     const filtered = data.filter((item) => item.category === checkCategory);
+    // console.log(filtered);
     return filtered
       .map(
-        (item) => `<div class="item-container" data-id="${item.id}" data-quant="${item.quantity}">
-       <img class="image-item front-image" src=${item.imageLocal} />
+        (item) => `<div class="item-container" data-id="${item.id}">
+       <img class="image-item front-image" src=${item.image} />
        <img class="image-item rear-image" src=${item.image} />
        <button class="add-to-cart-btn">Add to Cart</button>
        <div class="item-title">${item.name}</div>
@@ -153,7 +153,6 @@ class CategoriesView extends View {
   }
 
   renderProducts(data) {
-    // console.log(data);
     const markup = this.generateProduct(data);
     this._parentElement.insertAdjacentHTML("afterbegin", markup);
   }

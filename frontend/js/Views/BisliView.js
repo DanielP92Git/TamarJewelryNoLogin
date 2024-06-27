@@ -13,7 +13,6 @@ class BisliView extends View {
   };
 
   pageAuth = function () {
-
     const continueBtn = document.querySelector(".continue-button");
 
     continueBtn.addEventListener("click", (e) => {
@@ -39,7 +38,6 @@ class BisliView extends View {
     })
       .then((response) => response.json())
       .then((responseData) => {
-        console.log(responseData);
         if (responseData.success && responseData.adminCheck === "admin") {
           localStorage.setItem("auth-token", responseData.token);
           alert("Login Successfuly!");
@@ -70,20 +68,12 @@ class BisliView extends View {
       });
   };
 
-  addProduct = async (e, productDetails) => {
+  addProduct = async (e, productDetails, form) => {
     try {
       e.preventDefault();
-
       let product = productDetails;
-      let image = product.image;
-      let smallImages = product.multiImages;
-
-      let formData = new FormData();
-      formData.append("mainImage", image);
-
-      smallImages.forEach((sImage) => {
-        formData.append("smallImages", sImage);
-      });
+      console.log(product);
+      let formData = new FormData(form);
 
       let responseData = await fetch(`${host}/upload`, {
         method: "POST",
@@ -95,11 +85,15 @@ class BisliView extends View {
 
       let data = await responseData.json();
 
-      data.success ? alert("Image Uploded!") : alert("Something went wrong");
-      product.image = data.mainImageUrl;
-      product.multiImages = data.smallImagesUrl;
-
+      console.log(data);
+      
       if (data.success) {
+        alert("Image Uploded!");
+        product.image = data.mainImageUrl;
+        product.imageLocal = data.mainImageUrlLocal;
+        product.multiImages = data.smallImagesUrl;
+        product.multiImagesLocal = data.smallImagesUrlLocal;
+
         await fetch(`${host}/addproduct`, {
           method: "POST",
           headers: {
@@ -112,6 +106,8 @@ class BisliView extends View {
           .then((respData) => {
             respData.success ? alert("Product Added!") : alert("Failed");
           });
+      } else {
+        alert("Something went wrong");
       }
     } catch (err) {
       console.log(err);
@@ -120,17 +116,19 @@ class BisliView extends View {
 
   addProductHandler = function () {
     const addProductBtn = document.querySelector(".addproduct-btn");
-    const form = document.getElementById("form");
+    const form = document.getElementById("uploadForm");
+    form.addEventListener("submit", (e) => {
+      e.preventDefault()
 
-    addProductBtn.addEventListener("click", (e) => {
       const prodName = document.getElementById("name").value;
       const prodOldPrice = document.getElementById("old-price").value;
       const prodNewPrice = document.getElementById("new-price").value;
       const prodDescription = document.getElementById("description").value;
       const prodCategory = document.getElementById("category").value;
-      const prodImage = document.querySelector(".file-input").files[0];
+      const quantity = document.getElementById("quantity").value;
+      const prodImage = document.getElementById("mainImage").files[0];
       const multiProdImage = Array.from(
-        document.querySelector(".multi-file-input").files
+        document.getElementById("smallImages").files
       );
 
       const data = {
@@ -138,13 +136,15 @@ class BisliView extends View {
         image: prodImage,
         multiImages: multiProdImage,
         category: prodCategory,
+        quantity: quantity,
         description: prodDescription,
         oldPrice: +prodOldPrice,
         newPrice: +prodNewPrice,
       };
+      console.log('data:',data);
 
-      this.addProduct(e, data);
-      // console.log(e, data);
+      this.addProduct(e, data, form);
+      // this.addProduct(e, form);
     });
   };
 
@@ -163,14 +163,17 @@ class BisliView extends View {
   loadAddProductsPage = function () {
     this.clear();
 
-    const markup = `<div class="add-product">
-    <div class="addproduct-itemfield">
-      <p>Product Title</p>
-      <input 
+    const markup = `
+    <form id="uploadForm">
+     <div class="add-product">
+     <div class="addproduct-itemfield">
+       <p>Product Title</p>
+       <input 
         type="text"
         name="name"
         id="name"
         placeholder="Type here"
+        value="test123"
       />
     </div>
     <div class="addproduct-price">
@@ -181,6 +184,7 @@ class BisliView extends View {
           name="old_price"
           id="old-price"
           placeholder="Type here"
+          value="12"
         />
       </div>
       <div class="addproduct-itemfield">
@@ -190,6 +194,7 @@ class BisliView extends View {
           name="new_price"
           id="new-price"
           placeholder="Type here"
+          value=""13
         />
       </div>
     </div>
@@ -200,6 +205,7 @@ class BisliView extends View {
         name="description"
         id="description"
         placeholder="Type here"
+        value="test32123"
       />
     </div>
     <div class="addproduct-itemfield">
@@ -213,6 +219,199 @@ class BisliView extends View {
         <option value="crochet-necklaces">Crochet Necklaces</option>
         <option value="bracelets">Bracelets</option>
         <option value="hoop-earrings">Hoop Earrings</option>
+      </select>
+      <p>Quantity</p>
+      <select
+        name="quantity"
+        id="quantity"
+        class="quantity-selector"
+      >
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        
+      </select>
+    </div>
+    <br>
+    <div class="addproduct-itemfield">
+      
+             <label for="mainImage">Main Image:</label>
+              <input
+                type="file"
+                name="mainImage"
+                id="mainImage"
+                required/>
+              <br>
+
+              <label for="smallImages">Small Images:</label>
+              
+                <input
+                  type="file"
+                  name="smallImages"
+                  id="smallImages"
+                  multiple/>
+
+    </div>
+                  <br>
+                  <button class="addproduct-btn">
+                     Submit
+                  </button>
+      </form>
+    
+    
+  `;
+
+    pageContent.insertAdjacentHTML("afterbegin", markup);
+    this.addProductHandler();
+  };
+
+  loadProductsPage = function (data) {
+    this.clear();
+    const markup = `<div class="list-product">
+    <h1>All Products List</h1>
+    <div class="listproduct-format-main">
+      <p>Products</p>
+      <p>Title</p>
+      <p>Old Price</p>
+      <p>New Price</p>
+      <p>Category</p>
+      <p>Quantity</p>
+      <p>Remove</p>
+    </div>
+    <div class="listproduct-allproducts">
+      <hr />
+`;
+    pageContent.insertAdjacentHTML("afterbegin", markup);
+    this.loadProducts(data);
+  };
+
+  loadProducts = function (data) {
+    const markup = data
+      .map((item) => {
+        return ` 
+      <div data-id="${item.id}" class="listproduct-format-main listproduct-format">
+        <img
+        src="${item.imageLocal}"
+        alt=""
+        class="listproduct-product-icon"/>
+        <p>${item.name}</p>
+        <p>${item.old_price}</p>
+        <p>${item.new_price}</p>
+        <p>${item.category}</p>
+        <p>${item.quantity}</p>
+        <svg class="delete-svg">
+          <use xlink:href="#delete-svg"></use>
+        </svg>
+        <button class="edit-btn">Edit</button>
+       </div>
+       <hr/>
+        `;
+      })
+      .join("");
+
+    const productList = document.querySelector(".listproduct-allproducts");
+
+    productList.insertAdjacentHTML("afterbegin", markup);
+
+    productList.addEventListener("click", (e) => {
+      const deleteBtn = e.target.closest(".delete-svg");
+      const productId = e.target.closest(".listproduct-format").dataset.id;
+      if (!deleteBtn) return;
+      this.removeProduct(+productId);
+    });
+    this.testEdit();
+  };
+
+  testEdit = async function () {
+    const editBtn = document.querySelector(".listproduct-allproducts");
+
+    editBtn.addEventListener("click", async (e) => {
+      const productId = e.target.closest(".listproduct-format").dataset.id;
+      // const title = product.querySelector('.title').textContent
+      const id = +productId;
+
+      const response = await fetch(`${host}/findProduct`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id: id }),
+      });
+      const respData = await response.json();
+      console.log(respData.productData);
+
+      this.editProductForm(respData.productData);
+    });
+  };
+
+  editProductForm(data) {
+    this.clear();
+
+    const markup = `<div class="add-product">
+    <div class="addproduct-itemfield">
+      <p>Product Title</p>
+      <input 
+        type="text"
+        name="name"
+        id="name"
+        value="${data.name}"
+      />
+    </div>
+    <div class="addproduct-price">
+      <div class="addproduct-itemfield">
+        <p>Price</p>
+        <input
+          type="text"
+          name="old_price"
+          id="old-price"
+          value="${data.old_price}"
+        />
+      </div>
+      <div class="addproduct-itemfield">
+        <p>Offer Price</p>
+        <input
+          type="text"
+          name="new_price"
+          id="new-price"
+          value="${data.new_price}"
+        />
+      </div>
+    </div>
+    <div class="addproduct-itemfield">
+      <p>Product Description</p>
+      <input
+        type="text"
+        name="description"
+        id="description"
+        value="${data.description}"
+      />
+    </div>
+    <div class="addproduct-itemfield">
+      <p>Product Category</p>
+      <select
+        name="category"
+        id="category"
+        class="add-product-selector"
+      >
+        <option value="necklaces">Necklaces</option>
+        <option value="crochet-necklaces">Crochet Necklaces</option>
+        <option value="bracelets">Bracelets</option>
+        <option value="hoop-earrings">Hoop Earrings</option>
+      </select>
+      <p>Quantity</p>
+      <select
+        name="quantity"
+        id="quantity"
+        class="quantity-selector"
+      >
+        <option value="0">0</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        
       </select>
     </div>
     <div class="addproduct-itemfield">
@@ -258,60 +457,53 @@ class BisliView extends View {
   `;
 
     pageContent.insertAdjacentHTML("afterbegin", markup);
-    this.addProductHandler();
-  };
+    this.updateProduct(data.id);
+  }
 
-  loadProductsPage = function (data) {
-    this.clear();
-    const markup = `<div class="list-product">
-    <h1>All Products List</h1>
-    <div class="listproduct-format-main">
-      <p>Products</p>
-      <p>Title</p>
-      <p>Old Price</p>
-      <p>New Price</p>
-      <p>Category</p>
-      <p>Remove</p>
-    </div>
-    <div class="listproduct-allproducts">
-      <hr />
-`;
-    pageContent.insertAdjacentHTML("afterbegin", markup);
-    this.loadProducts(data);
-  };
+  updateProduct = function (id) {
+    const addProductBtn = document.querySelector(".addproduct-btn");
 
-  loadProducts = function (data) {
-    const markup = data
-      .map((item) => {
-        return ` 
-      <div data-id="${item.id}" class="listproduct-format-main listproduct-format">
-        <img
-        src="${item.image}"
-        alt=""
-        class="listproduct-product-icon"/>
-        <p>${item.name}</p>
-        <p>${item.old_price}</p>
-        <p>${item.new_price}</p>
-        <p>${item.category}</p>
-        <svg class="delete-svg">
-          <use xlink:href="#delete-svg"></use>
-        </svg>
-       </div>
-       <hr/>
-        `;
-      })
-      .join("");
+    addProductBtn.addEventListener("click", (e) => {
+      const prodName = document.getElementById("name").value;
+      const prodOldPrice = document.getElementById("old-price").value;
+      const prodNewPrice = document.getElementById("new-price").value;
+      const prodDescription = document.getElementById("description").value;
+      const prodCategory = document.getElementById("category").value;
+      const prodImage = document.querySelector(".file-input").files[0];
+      const quantity = document.querySelector('.quantity-selector').value
+      const multiProdImage = Array.from(
+        document.querySelector(".multi-file-input").files
+      );
 
-    const productList = document.querySelector(".listproduct-allproducts");
-
-    productList.insertAdjacentHTML("afterbegin", markup);
-
-    productList.addEventListener("click", (e) => {
-      const deleteBtn = e.target.closest(".delete-svg");
-      const productId = e.target.closest(".listproduct-format").dataset.id;
-      if (!deleteBtn) return;
-      this.removeProduct(+productId);
+      const data = {
+        id: id,
+        name: prodName,
+        image: prodImage,
+        multiImages: multiProdImage,
+        category: prodCategory,
+        quantity: +quantity,
+        description: prodDescription,
+        oldPrice: +prodOldPrice,
+        newPrice: +prodNewPrice,
+      };
+      this.sendUpdatedProduct(e, data);
     });
+  };
+
+  sendUpdatedProduct = async function (e, data) {
+    e.preventDefault();
+    await fetch(`${host}/updateproduct`, {
+      method: "POST",
+      headers: {
+        Accept: "multipart/form-data",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    })
+      .then((resp) => resp.json())
+      .then((respData) => {
+        respData.success ? alert("Product Added!") : alert("Failed");
+      });
   };
 }
 export default new BisliView();
