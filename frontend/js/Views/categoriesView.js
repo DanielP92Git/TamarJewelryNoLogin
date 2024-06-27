@@ -139,7 +139,7 @@ class CategoriesView extends View {
     return filtered
       .map(
         (item) => `<div class="item-container" data-id="${item.id}" data-quant="${item.quantity}">
-       <img class="image-item front-image" src=${item.imageLocal} />
+       <img class="image-item front-image" src=${item.image} />
        <img class="image-item rear-image" src=${item.image} />
        <button class="add-to-cart-btn">Add to Cart</button>
        <div class="item-title">${item.name}</div>
