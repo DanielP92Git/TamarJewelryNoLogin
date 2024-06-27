@@ -1,0 +1,14 @@
+{
+  "extends": "@parcel/config-default",
+  "transformers": {
+    "*.svg": [
+      "@parcel/transformer-svg",
+      "..."
+    ]
+  },
+  "optimizers": {
+    "*.svg": [
+      "@parcel/optimizer-svgo"
+    ]
+  }
+}
