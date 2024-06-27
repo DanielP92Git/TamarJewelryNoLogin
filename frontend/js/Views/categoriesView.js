@@ -62,7 +62,7 @@ class CategoriesView extends View {
       const id = clicked.dataset.id;
       const filtered = data.find((prod) => prod.id == id);
       const addToCart = e.target.closest(".add-to-cart-btn");
-      const smallImage = filtered.smallImagesLocal;
+      const smallImage = filtered.smallImages;
       // console.log(smallImage);
       const imageMarkup = smallImage
         .map(
@@ -92,7 +92,7 @@ class CategoriesView extends View {
     const image = data.querySelector(".front-image").src;
     const title = data.querySelector(".item-title").textContent;
     console.log('itemInfo:',itemInfo, 'data:',data);
-    const smallImage = itemInfo.smallImagesLocal;
+    const smallImage = itemInfo.smallImages;
     console.log(smallImage);
     const id = data.id;
     const description = data.querySelector(".item-description").innerHTML;
