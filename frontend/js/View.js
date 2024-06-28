@@ -106,10 +106,10 @@ export default class View {
       const parent = document.querySelector('.menubars-toggle');
       parent.classList.toggle('close');
       const checkIcon = parent.classList.contains('close');
-      let icon = '-svg';
-      icon = (!checkIcon ? 'close' : 'menubars') + icon;
+      let icon = '-solid.svg';
+      icon = (!checkIcon ? './imgs/svgs/bars-' : './imgs/svgs/x-') + icon;
 
-      document.querySelector('.menubars-use').setAttribute('href', `#${icon}`);
+      menuBars.setAttribute('src', `${icon}`);
 
       if (icon !== 'close-svg') {
         if (categoriesList.classList.contains('reveal')) {
