@@ -11,7 +11,7 @@ class CartView extends View {
   _summaryDetails = document.querySelector(".summary-details");
   _checkoutBtn = document.querySelector(".checkout-btn");
   _deleteAllBtn = document.querySelector(".delete-all");
-  _host = process.env.API_URL
+  _host = process.env.API_URL;
 
   addCartViewHandler(handler) {
     handler();
@@ -64,9 +64,9 @@ class CartView extends View {
       this._cartEmpty.classList.add("remove");
       this._deleteAllBtn.classList.add("delete-all-active");
       return model.cart
-      .map(
-        (x) =>
-          `     
+        .map(
+          (x) =>
+            `     
           <div class="cart-item" id="${x.id}">
             <img src='${x.image}' class="item-img" alt="" />
             <div class="item-title">${x.title}</div>
@@ -74,10 +74,12 @@ class CartView extends View {
             <div class="item-price">${x.price}$</div>
             <div class="delete-item">X</div>
             </div>`
-          )
-          .join("");
-        }
-        }
+        )
+        .join("");
+    } else {
+      this._itemsBox.innerHTML = "";
+    }
+  }
 
   _generateSummaryMarkup(cartNum, num, ship = 10) {
     if (cartNum === 0) return;
