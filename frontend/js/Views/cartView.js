@@ -60,7 +60,9 @@ class CartView extends View {
   }
 
   _generateMarkup(cartNum) {
-    if (cartNum !== 0) {
+    if (cartNum === 0) {
+      return;
+    } else {
       this._cartEmpty.classList.add("remove");
       this._deleteAllBtn.classList.add("delete-all-active");
       return model.cart
@@ -76,8 +78,6 @@ class CartView extends View {
             </div>`
         )
         .join("");
-    } else {
-      this._itemsBox.innerHTML = "";
     }
   }
 
