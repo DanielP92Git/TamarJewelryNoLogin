@@ -101,13 +101,12 @@ export default class View {
   svgHandler() {
     const menuBars = document.querySelector('.menubars-svg');
     const categoriesList = document.querySelector('.categories-list');
-
     const changeSVG = function () {
       const parent = document.querySelector('.menubars-toggle');
       parent.classList.toggle('close');
       const checkIcon = parent.classList.contains('close');
-      let icon = 'solid.svg';
-      icon = (!checkIcon ? '../imgs/svgs/bars-' : '../imgs/svgs/x-') + icon;
+      // let icon = 'solid.svg';
+      let icon = (!checkIcon ? '../imgs/svgs/bars-solid.svg' : '../imgs/svgs/x-solid.svg');
 
       menuBars.setAttribute('src', `${icon}`);
 
