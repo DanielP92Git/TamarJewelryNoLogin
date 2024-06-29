@@ -106,7 +106,7 @@ export default class View {
       const parent = document.querySelector('.menubars-toggle');
       parent.classList.toggle('close');
       const checkIcon = parent.classList.contains('close');
-      let icon = '-solid.svg';
+      let icon = 'solid.svg';
       icon = (!checkIcon ? './imgs/svgs/bars-' : './imgs/svgs/x-') + icon;
 
       menuBars.setAttribute('src', `${icon}`);
