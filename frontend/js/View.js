@@ -1,3 +1,5 @@
+import closeSvg from '../imgs/svgs/x-solid.svg'
+import barsSvg from '../imgs/svgs/bars-solid.svg'
 export default class View {
   _data;
   _goToTop = document.querySelector('.go-to-top');
@@ -106,7 +108,7 @@ export default class View {
       parent.classList.toggle('close');
       const checkIcon = parent.classList.contains('close');
       // let icon = 'solid.svg';
-      let icon = (!checkIcon ? '../imgs/svgs/bars-solid.svg' : '../imgs/svgs/x-solid.svg');
+      let icon = (!checkIcon ? `./imgs/svgs/${closeSvg}` : `./imgs/svgs/${barsSvg}`);
 
       menuBars.setAttribute('src', `${icon}`);
 
