@@ -108,7 +108,7 @@ export default class View {
       parent.classList.toggle('close');
       const checkIcon = parent.classList.contains('close');
       // let icon = 'solid.svg';
-      let icon = (!checkIcon ? `./imgs/svgs/${closeSvg}` : `./imgs/svgs/${barsSvg}`);
+      let icon = (!checkIcon ? `${closeSvg}` : `${barsSvg}`);
 
       menuBars.setAttribute('src', `${icon}`);
 
