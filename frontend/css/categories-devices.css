@@ -178,7 +178,7 @@ input[type="checkbox"]:checked + .menu {
   background-color: rgba(255, 226, 63, 0.587);
 }
 
-.cart-number-mobile {
+.cart-number {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -202,10 +202,6 @@ input[type="checkbox"]:checked + .menu {
   display: none;
 }
 
-.cart-number {
-  display: none;
-}
-
 .toggle-svg {
   display: none;
 }
@@ -215,10 +211,6 @@ input[type="checkbox"]:checked + .menu {
 }
 
 .shoppingcart-svg {
-  display: none;
-}
-
-.cart-number {
   display: none;
 }
 
