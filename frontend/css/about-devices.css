@@ -208,7 +208,6 @@ input[type="checkbox"]:checked + .menu {
   height: 30px;
   padding: 3px;
   position: relative;
-  border: 1px solid black;
   border-radius: 5px;
 }
 .cart-number {

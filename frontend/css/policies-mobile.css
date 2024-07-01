@@ -131,12 +131,8 @@ header {
   fill: rgb(0, 0, 0);
   width: 30px;
   height: 30px;
-  position: absolute;
-  top: 8%;
-  left: 87%;
   padding: 3px;
   border-radius: 5px;
-  background-color: rgba(255, 226, 63, 0.587);
 }
 
 .cart-number {
