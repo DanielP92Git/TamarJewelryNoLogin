@@ -50,27 +50,27 @@
     </svg> -->
     <header>
       <div class="logo"></div>
-      <a class="attrib" href="../html/cart.html">
-        <!-- <svg class="shoppingcart-mobile">
-          <use xlink:href="#shoppingcartsvg"></use>
-        </svg> -->
-        <img
-              src="../imgs/svgs/cart-shopping-solid.svg"
-              alt=""
-              class="shoppingcart-mobile"
-            />
-      </a>
-      <label for="show-menu-button" class="menubars-svg">
-        <!-- <svg class="menubars-toggle close">
-          <use class="menubars-use" xlink:href="#menubars-svg"></use>
-        </svg> -->
+      <div class="icons-container">
         <img
           src="../imgs/svgs/bars-solid.svg"
           alt=""
           class="menubars-svg menubars-toggle close"
         />
-      </label>
-      <input type="checkbox" id="show-menu-button" />
+        <div class="shoppingcart-container">
+          <span class="cart-number cart-number-mobile">0</span>
+
+          <a href="../html/cart.html">
+            <!-- <svg class="shoppingcart-mobile">
+              <use xlink:href="#shoppingcart-svg"></use>
+            </svg> -->
+            <img
+              src="../imgs/svgs/cart-shopping-solid.svg"
+              alt=""
+              class="shoppingcart-mobile"
+            />
+          </a>
+        </div>
+      </div>
 
       <nav class="menu">
         <ul class="menu__ul">
