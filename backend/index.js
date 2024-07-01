@@ -621,7 +621,8 @@ app.post("/create-checkout-session", async (req, res) => {
     let [getProdQuant] = product;
     // console.log(prodQuant.quantity);
     if (!product) {
-      return res.status(404).send("Product not found");
+      throw new Error('Product not found')
+      // return res.status(404).send("Product not found");
     }
 
     if (getProdQuant.quantity == 0) {

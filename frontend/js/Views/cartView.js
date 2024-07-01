@@ -73,7 +73,6 @@ class CartView extends View {
           <div class="cart-item" id="${x.id}">
             <img src='${x.image}' class="item-img" alt="" />
             <div class="item-title">${x.title}</div>
-            <div class="item-description">${x.description}</div>
             <div class="item-price">${x.price}$</div>
             <div class="delete-item">X</div>
             </div>`
