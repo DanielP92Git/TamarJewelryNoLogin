@@ -249,7 +249,7 @@ main {
   align-items: center;
   border-radius: 1rem;
   background-color: aliceblue;
-  margin-right: 1rem;
+  margin-bottom: 2rem;
   box-shadow: -5px 10px 30px -10px;
 
   /* justify-content: space-evenly; */
