@@ -30,6 +30,7 @@ header {
   position: relative;
   top: 10px;
   left: -200px;
+  z-index: 10;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(20, 177, 35); */

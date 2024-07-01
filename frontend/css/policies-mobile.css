@@ -48,7 +48,7 @@ header {
   position: absolute;
   top: 20px;
   left: -250px;
-  z-index: 1;
+  z-index: 10;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(20, 177, 35); */
