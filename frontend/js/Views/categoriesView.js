@@ -164,10 +164,14 @@ class CategoriesView extends View {
       .join("");
   }
 
-  renderProducts(data) {
-    // console.log(data);
-    const markup = this.generateProduct(data);
+  async renderProducts(data) {
+    const spinner = document.querySelector('.loader');
+    await data
+    if (data) {
+      spinner.classList.toggle('spinner-hidden')
+      const markup = this.generateProduct(data);
     this._parentElement.insertAdjacentHTML("afterbegin", markup);
+    }
   }
 }
 
