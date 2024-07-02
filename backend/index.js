@@ -642,7 +642,7 @@ app.post("/create-checkout-session", async (req, res) => {
 
         return {
           price_data: {
-            currency: "usd",
+            currency: "ILS",
             product_data: {
               name: myItem.name,
             },
