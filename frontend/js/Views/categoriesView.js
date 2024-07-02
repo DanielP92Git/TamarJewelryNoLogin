@@ -95,7 +95,7 @@ class CategoriesView extends View {
     const id = data.id;
     const description = data.querySelector(".item-description").innerHTML;
 
-    let price = data.querySelector(".item-price").textContent.replace("$", "");
+    let price = data.querySelector(".item-price").textContent.replace("₪", "");
 
     const markup = `<div class="item-overlay">
     <div class="modal-item-container">
