@@ -80,14 +80,18 @@ header {
 }
 
 .icons-container {
-  margin-top: 1rem;
+  display: flex;
+  flex-flow: row-reverse;
+  justify-content: end;
+  align-items: center;
   position: absolute;
-  height: 7rem;
-  width: 10%;
-  align-self: flex-end;
-  /* border: 2px solid darkcyan; */
-
+  height: 13%;
+  width: 100%;
+  padding-right: 0.8rem;
   z-index: 10;
+  background-color: white;
+
+  /* border: 2px solid darkcyan; */
 }
 
 .menubars-svg {

@@ -167,12 +167,12 @@ input[type="checkbox"]:checked + .menu {
   justify-content: end;
   align-items: center;
   position: absolute;
-  height: 20%;
+  height: 13%;
   width: 100%;
   padding-right: 0.8rem;
   z-index: 10;
   background-color: white;
-  
+
   /* border: 2px solid darkcyan; */
 }
 
