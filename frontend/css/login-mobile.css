@@ -167,7 +167,7 @@ input[type="checkbox"]:checked + .menu {
   justify-content: end;
   align-items: center;
   position: absolute;
-  height: 13%;
+  height: 8%;
   width: 100%;
   padding-right: 0.8rem;
   z-index: 10;
@@ -185,7 +185,6 @@ input[type="checkbox"]:checked + .menu {
   height: 30px;
   padding: 2px;
   margin-left: 1.5rem;
-  
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid lightcoral; */
