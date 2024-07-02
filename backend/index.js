@@ -631,25 +631,34 @@ app.post("/create-checkout-session", async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
-      line_items: req.body.items.map((item) => {
-        const myItem = {
-          name: item.title,
-          price: item.price * 100,
-          quantity: item.amount,
-          productId: item.id,
-        };
-
-        return {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: myItem.name,
-            },
-            unit_amount: myItem.price,
+      line_items: req.body.items.map((item) => ({
+        price_data: {
+          currency: 'usd',
+          product_data: {
+            name: item.title,
           },
-          quantity: myItem.quantity,
-        };
-      }),
+          unit_amount: item.price * 100,
+        },
+        quantity: item.amount,
+        
+        // const myItem = {
+        //   name: item.title,
+        //   price: item.price * 100,
+        //   quantity: item.amount,
+        //   productId: item.id,
+        // };
+
+        // return {
+        //   price_data: {
+        //     currency: "usd",
+        //     product_data: {
+        //       name: myItem.name,
+        //     },
+        //     unit_amount: myItem.price,
+        //   },
+        //   quantity: myItem.quantity,
+        // };
+      })),
 
       shipping_address_collection: {
         allowed_countries: ["US", "IL"],
