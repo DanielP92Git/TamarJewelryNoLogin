@@ -73,7 +73,7 @@ class CartView extends View {
           <div class="cart-item" id="${x.id}">
             <img src='${x.image}' class="item-img" alt="" />
             <div class="item-title">${x.title}</div>
-            <div class="item-price">${x.price}$</div>
+            <div class="item-price">₪${x.price}</div>
             <div class="delete-item">X</div>
             </div>`
         )
@@ -87,15 +87,15 @@ class CartView extends View {
     <div class="price-summary-container">
           <div class="total-container subtotal">
             <span class="total-text">Subtotal:</span>
-            <span class="total-price">${num}$</span>
+            <span class="total-price">₪${num}</span>
           </div>
           <div class="total-container shipping">
             <span class="total-text">Shipping:</span>
-            <span class="total-price">${ship}$</span>
+            <span class="total-price">₪${ship}</span>
           </div>
           <div class="total-container total">
             <span class="total-text">Total:</span>
-            <span class="total-price">${num + ship}$</span>
+            <span class="total-price">₪${num + ship}</span>
           </div>
         </div>`;
   }

@@ -175,7 +175,7 @@ export const addToLocalStorage = async function (data) {
   const itemTitle = data.querySelector(".item-title").textContent;
   let itemPrice = data
     .querySelector(".item-price")
-    .textContent.replace("$", "");
+    .textContent.replace("₪", "");
 
   // 1) Generate data:
   const itemData = {
