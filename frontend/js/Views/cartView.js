@@ -46,9 +46,10 @@ class CartView extends View {
           items: [...data],
         }),
       })
-        .then((res) => {
+        .then(async (res) => {
           if (res.ok) return res.json();
-          return res.json().then((json) => Promise.reject(json));
+          const json = await res.json();
+          return await Promise.reject(json);
         })
         .then(({ url }) => {
           window.location = url;

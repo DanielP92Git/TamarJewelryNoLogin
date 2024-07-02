@@ -633,14 +633,14 @@ app.post("/create-checkout-session", async (req, res) => {
       mode: "payment",
       line_items: req.body.items.map((item) => ({
         price_data: {
-          currency: 'usd',
+          currency: 'ils',
           product_data: {
             name: item.title,
           },
           unit_amount: item.price * 100,
         },
         quantity: item.amount,
-        
+
         // const myItem = {
         //   name: item.title,
         //   price: item.price * 100,
@@ -668,7 +668,7 @@ app.post("/create-checkout-session", async (req, res) => {
           shipping_rate_data: {
             type: "fixed_amount",
             fixed_amount: {
-              amount: 1000,
+              amount: 1500,
               currency: "usd",
             },
             display_name: "Standard Shipping",
