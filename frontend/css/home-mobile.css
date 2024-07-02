@@ -249,7 +249,9 @@ p {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(46, 37, 228); */
 }
-
+.contact {
+  border-bottom: none;
+}
 .main-nav-tab:hover {
   background-color: rgba(255, 255, 255, 0.925);
   cursor: pointer;

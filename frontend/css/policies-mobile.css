@@ -81,7 +81,9 @@ header {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(46, 37, 228); */
 }
-
+.contact {
+  border-bottom: none;
+}
 .main-nav-tab:hover {
   background-color: rgb(255, 242, 201);
   cursor: pointer;
@@ -147,6 +149,7 @@ header {
   position: relative;
   border-radius: 5px;
 }
+
 .cart-number {
   display: none;
 }
