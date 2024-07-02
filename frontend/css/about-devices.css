@@ -231,8 +231,8 @@ input[type="checkbox"]:checked + .menu {
   z-index: 10;
 }
 
-.shoppingcart-svg {
-  display: none;
+.menubars-svg:hover {
+  cursor: pointer;
 }
 
 .shoppingcart-svg {
