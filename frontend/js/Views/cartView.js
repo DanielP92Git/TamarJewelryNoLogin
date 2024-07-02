@@ -81,7 +81,7 @@ class CartView extends View {
     }
   }
 
-  _generateSummaryMarkup(cartNum, num, ship = 10) {
+  _generateSummaryMarkup(cartNum, num, ship = 50) {
     if (cartNum === 0) return;
     return `
     <div class="price-summary-container">
