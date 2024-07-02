@@ -77,7 +77,6 @@ app.post(
 
 async function handleCheckoutSession(session) {
   const productId = session.metadata.productId; // Extract the actual product ID from session or metadata
-  console.log('3. From Function:');
   if (productId) {
     const product = await Product.findOne({id: productId});
     if (product) {
