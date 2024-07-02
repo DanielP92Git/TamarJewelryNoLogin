@@ -89,7 +89,9 @@ header {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(46, 37, 228); */
 }
-
+.contact {
+  border-bottom: none;
+}
 .main-nav-tab:hover {
   background-color: rgb(255, 242, 201);
   cursor: pointer;
@@ -167,12 +169,12 @@ input[type="checkbox"]:checked + .menu {
   justify-content: end;
   align-items: center;
   position: absolute;
-  height: 20%;
+  height: 8%;
   width: 100%;
   padding-right: 0.8rem;
   z-index: 10;
   background-color: white;
-  
+
   /* border: 2px solid darkcyan; */
 }
 
@@ -185,7 +187,6 @@ input[type="checkbox"]:checked + .menu {
   height: 30px;
   padding: 2px;
   margin-left: 1.5rem;
-  
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid lightcoral; */
