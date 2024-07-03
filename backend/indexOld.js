@@ -127,11 +127,11 @@ const Product = mongoose.model("Product", {
     type: String,
     required: true,
   },
-  new_price: {
+  ils_price: {
     type: Number,
     required: true,
   },
-  old_price: {
+  usd_price: {
     type: Number,
     required: true,
   },
@@ -177,8 +177,8 @@ app.post("/addproduct", async (req, res) => {
     smallImages: req.body.multiImages,
     category: req.body.category,
     description: req.body.description,
-    new_price: req.body.newPrice,
-    old_price: req.body.oldPrice,
+    ils_price: req.body.newPrice,
+    usd_price: req.body.oldPrice,
   });
 
   console.log(product);

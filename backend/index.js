@@ -66,7 +66,7 @@ app.post(
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      console.log("2. From webhook:", session.metadata.productId);
+      console.log('2. From webhook:', session.metadata.productId);
       // Fulfill the purchase
       handleCheckoutSession(session);
     }
@@ -78,28 +78,31 @@ app.post(
 async function handleCheckoutSession(session) {
   const productId = session.metadata.productId; // Extract the actual product ID from session or metadata
   if (productId) {
-    const product = await Product.findOne({ id: productId });
+    const product = await Product.findOne({id: productId});
     if (product) {
       product.quantity -= 1;
       await product.save();
-      let newQuantity = product.quantity;
+      let newQuantity = product.quantity
       console.log(
         `Product ${productId} quantity reduced. New quantity: ${newQuantity}`
       );
       if (newQuantity == 0) {
         const response = await fetch(`${process.env.API_URL}/removeproduct`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             id: productId,
-          }),
-        });
+          })
+        })
 
-        const data = await response.json();
+        const data = await response.json()
         if (data.success) {
           console.log(`Product with id: ${data.id} is deleted from database`);
         }
       }
+
+
+
     }
   } else {
     console.error("Product not found");
@@ -202,11 +205,11 @@ const Product = mongoose.model("Product", {
     type: Number,
     required: true,
   },
-  new_price: {
+  ils_price: {
     type: Number,
     required: true,
   },
-  old_price: {
+  usd_price: {
     type: Number,
     required: true,
   },
@@ -256,8 +259,8 @@ app.post("/addproduct", async (req, res) => {
     category: req.body.category,
     quantity: +req.body.quantity,
     description: req.body.description,
-    new_price: req.body.newPrice,
-    old_price: req.body.oldPrice,
+    ils_price: req.body.newPrice,
+    usd_price: req.body.oldPrice,
   });
 
   // console.log(product);
@@ -273,8 +276,8 @@ app.post("/updateproduct", async (req, res) => {
   const id = req.body.id;
   const updatedFields = {
     name: req.body.name,
-    old_price: req.body.oldPrice,
-    new_price: req.body.newPrice,
+    usd_price: req.body.oldPrice,
+    ils_price: req.body.newPrice,
     description: req.body.description,
     quantity: req.body.quantity,
   };
@@ -283,8 +286,8 @@ app.post("/updateproduct", async (req, res) => {
   let product = await Product.findOne({ id: id });
 
   product.name = updatedFields.name;
-  product.old_price = updatedFields.old_price;
-  product.new_price = updatedFields.new_price;
+  product.usd_price = updatedFields.usd_price;
+  product.ils_price = updatedFields.ils_price;
   product.description = updatedFields.description;
   product.quantity = updatedFields.quantity;
 
@@ -617,7 +620,7 @@ app.post("/create-checkout-session", async (req, res) => {
     let [getProdQuant] = product;
     // console.log(prodQuant.quantity);
     if (!product) {
-      throw new Error("Product not found");
+      throw new Error('Product not found')
       // return res.status(404).send("Product not found");
     }
 
@@ -629,11 +632,11 @@ app.post("/create-checkout-session", async (req, res) => {
       payment_method_types: ["card"],
       mode: "payment",
       line_items: req.body.items.map((item) => {
-        let converted = item.price * 100;
+        let inCents = item.price * 100;
 
         const myItem = {
           name: item.title,
-          price: converted / 4,
+          price: inCents,
           quantity: item.amount,
           productId: item.id,
         };
@@ -702,7 +705,7 @@ app.post("/create-checkout-session", async (req, res) => {
         productId: getProductId.id.toString(), // .toString()??? Include the product ID in the session metadata
       },
     });
-    console.log("1. From stripe session:", session.metadata.productId);
+    console.log('1. From stripe session:', session.metadata.productId);
 
     // res.json({ url: session.url });
     res.json({ sessionId: session.id, url: session.url });

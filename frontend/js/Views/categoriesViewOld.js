@@ -146,7 +146,7 @@ class CategoriesView extends View {
       <div class="item-description">
         ${item.description}
        </div>
-       <div class="item-price">$${item.new_price}</div>
+       <div class="item-price">$${item.ils_price}</div>
      </div>`
       )
       .join("");

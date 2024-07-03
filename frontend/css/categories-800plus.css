@@ -215,6 +215,17 @@ a:hover {
     "Lucida Sans", Arial, sans-serif;
 }
 
+#currency {
+  margin-bottom: 1rem;
+
+  width: 5rem;
+  height: 2rem;
+}
+
+#currency:hover {
+  cursor: pointer;
+}
+
 .main {
   display: flex;
   flex-flow: column wrap;

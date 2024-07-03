@@ -62,41 +62,70 @@ class CartView extends View {
 
   _generateMarkup(cartNum) {
     if (cartNum === 0) {
-      this._itemsBox.classList.add('remove')
+      this._itemsBox.classList.add("remove");
     } else {
-      this._itemsBox.classList.remove('remove')
+      this._itemsBox.classList.remove("remove");
       this._cartEmpty.classList.add("remove");
       this._deleteAllBtn.classList.add("delete-all-active");
-      return model.cart
-        .map(
-          (x) =>
-            `     
-          <div class="cart-item" id="${x.id}">
-            <img src='${x.image}' class="item-img" alt="" />
-            <div class="item-title">${x.title}</div>
-            <div class="item-price">₪${x.price}</div>
+      let checkCurrency = model.cart[0].currency;
+      if (checkCurrency == "$") {
+        return model.cart
+          .map(
+            (item) =>
+              `     
+          <div class="cart-item" id="${item.id}">
+            <img src='${item.image}' class="item-img" alt="" />
+            <div class="item-title">${item.title}</div>
+            <div class="item-price">${
+              item.currency == "$"
+                ? `$${item.price}`
+                : `$${Number((item.price / 3).toFixed(0))}`
+            }</div>
             <div class="delete-item">X</div>
+            <!-- <img src="${deleteSvg}" class="delete-item"/> -->
             </div>`
-        )
-        .join("");
+          )
+          .join("");
+      } else {
+        return model.cart
+          .map(
+            (item) =>
+              `     
+        <div class="cart-item" id="${item.id}">
+          <img src='${item.image}' class="item-img" alt="" />
+          <div class="item-title">${item.title}</div>
+          <div class="item-price">${
+            item.currency == "$"
+              ? `₪${Number((item.price * 4).toFixed(0))}`
+              : `₪${item.price}`
+          }</div>
+          <div class="delete-item">X</div>
+          <!-- <img src="${deleteSvg}" class="delete-item"/> -->
+          </div>`
+          )
+          .join("");
+      }
     }
   }
 
-  _generateSummaryMarkup(cartNum, num, ship = 50) {
+  _generateSummaryMarkup(cartNum, price, ship = 30) {
     if (cartNum === 0) return;
+    let checkCurrency = model.cart[0].currency;
+    let isInUsd = checkCurrency == "$";
+    let currency = isInUsd ? "$" : "₪";
     return `
     <div class="price-summary-container">
-          <div class="total-container subtotal">
+          <!--<div class="total-container subtotal">
             <span class="total-text">Subtotal:</span>
-            <span class="total-price">₪${num}</span>
-          </div>
-          <div class="total-container shipping">
+            <span class="total-price">₪${price}</span>
+          </div>-->
+          <!--<div class="total-container shipping">
             <span class="total-text">Shipping:</span>
             <span class="total-price">₪${ship}</span>
-          </div>
+          </div>-->
           <div class="total-container total">
             <span class="total-text">Total:</span>
-            <span class="total-price">₪${num + ship}</span>
+            <span class="total-price">${currency}${price}</span>
           </div>
         </div>`;
   }
@@ -144,8 +173,36 @@ class CartView extends View {
 
   _calculateTotal() {
     if (model.checkCartNumber() === 0) return;
-    const num = model.cart.map((x) => +x.price).reduce((x, y) => x + y, 0);
-    return Number(num.toFixed(2));
+    console.log(model.cart);
+
+    let checkCurrency = model.cart[0].currency;
+
+    if (checkCurrency == "₪") {
+      const convertPrice = model.cart
+        .map((itm) => {
+          if (itm.currency == "$") {
+            return itm.price * 4;
+          }
+          return +itm.price;
+        })
+        .reduce((x, y) => x + y, 0);
+      console.log(convertPrice);
+
+      return Number(convertPrice.toFixed(0));
+    }
+    if (checkCurrency == "$") {
+      const convertPrice = model.cart
+        .map((itm) => {
+          if (itm.currency == "₪") {
+            return itm.price / 3;
+          }
+          return +itm.price;
+        })
+        .reduce((x, y) => x + y, 0);
+      console.log(convertPrice);
+
+      return Number(convertPrice.toFixed(0));
+    }
   }
 }
 export default new CartView();

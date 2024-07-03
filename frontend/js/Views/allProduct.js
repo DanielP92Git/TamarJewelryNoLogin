@@ -6,8 +6,8 @@ let allProduct = [
     name: "Necklace 1",
     category: "necklaces",
     image: p1_img,
-    new_price: 50.0,
-    old_price: 80.5,
+    ils_price: 50.0,
+    usd_price: 80.5,
   },
 ];
 
