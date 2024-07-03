@@ -27,6 +27,8 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
+app.use(express.static(path.join(__dirname, "frontend")));
+
 app.use(cors(corsOptions));
 
 app.use(cookieParser());
@@ -213,7 +215,6 @@ const Product = mongoose.model("Product", {
 //* APIs
 //
 
-app.use(express.static(path.join(__dirname, "frontend")));
 
 app.get("/", (req, res) => res.send("API endpoint is running"));
 
