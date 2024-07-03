@@ -149,7 +149,6 @@ class CartView extends View {
   }
 
   _removeItem(cartNum) {
-    console.log(cartNum);
     if (cartNum !== 0) {
       this._itemsBox.innerHTML = "";
       this.render(cartNum);
@@ -173,7 +172,6 @@ class CartView extends View {
 
   _calculateTotal() {
     if (model.checkCartNumber() === 0) return;
-    console.log(model.cart);
 
     let checkCurrency = model.cart[0].currency;
 
@@ -186,7 +184,6 @@ class CartView extends View {
           return +itm.price;
         })
         .reduce((x, y) => x + y, 0);
-      console.log(convertPrice);
 
       return Number(convertPrice.toFixed(0));
     }
@@ -199,7 +196,6 @@ class CartView extends View {
           return +itm.price;
         })
         .reduce((x, y) => x + y, 0);
-      console.log(convertPrice);
 
       return Number(convertPrice.toFixed(0));
     }

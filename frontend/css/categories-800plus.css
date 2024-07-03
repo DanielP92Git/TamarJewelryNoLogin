@@ -339,7 +339,8 @@ a:hover {
 }
 
 .add-to-cart-btn:hover {
-  background-color: rgba(231, 187, 169, 0.559);
+  border: 1px solid black;
+  background-color: rgb(255, 194, 194);
   width: 200px;
   height: 40px;
 

@@ -14,19 +14,6 @@ const fs = require("fs");
 //* MAIN SETTINGS
 //
 const allowedOrigins = [`${process.env.HOST}`, `${process.env.API_URL}`];
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     if (allowedOrigins.includes(origin) || !origin) {
-//       console.log("Allowed origin:", origin);
-//       callback(null, true);
-//     } else {
-//       console.error("Blocked by CORS:", origin);
-//       callback(new Error("Not allowed by CORS"));
-//     }
-//   },
-//   credentials: true,
-//   optionsSuccessStatus: 200,
-// };
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -231,7 +218,7 @@ app.use(express.static(path.join(__dirname, "frontend")));
 app.get("/", (req, res) => res.send("API endpoint is running"));
 
 app.get("/admin", (req, res) => {
-  // console.log("Fetch admin");
+
   res.sendFile(path.join(__dirname, "html/bambaYafa.html")).status(200);
 });
 
@@ -262,7 +249,7 @@ app.post("/addproduct", async (req, res) => {
     usd_price: req.body.oldPrice,
   });
 
-  // console.log(product);
+
   await product.save();
   console.log("Saved");
   res.json({
@@ -280,8 +267,8 @@ app.post("/updateproduct", async (req, res) => {
     description: req.body.description,
     quantity: req.body.quantity,
   };
-  // console.log(updatedFields);
 
+  
   let product = await Product.findOne({ id: id });
 
   product.name = updatedFields.name;
@@ -403,13 +390,13 @@ app.post("/signup", async (req, res) => {
       user
         .save()
         .then(() => {
-          // console.log(result);
+
           res.status(201).json({
             message: "User Created!",
           });
         })
         .catch((err) => {
-          // console.log(err);
+
           res.status(500).json({
             errors: err,
           });
@@ -498,7 +485,7 @@ app.post("/removeAll", fetchUser, async (req, res) => {
 });
 
 app.post("/findProduct", async (req, res) => {
-  // console.log(req.body.id);
+
   let productData = await Product.findOne({ id: req.body.id });
   res.json({ productData });
 });
@@ -702,8 +689,8 @@ app.post("/create-checkout-session", async (req, res) => {
         productId: getProductId.id.toString(),
       },
     });
-    console.log('1. From stripe session:', session.metadata.productId);
 
+    
     res.json({ sessionId: session.id, url: session.url });
   } catch (err) {
     res.status(500).json({ err });

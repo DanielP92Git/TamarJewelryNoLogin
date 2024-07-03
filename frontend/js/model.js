@@ -114,7 +114,7 @@ export const setPreviewItem = async function (data) {
     });
   });
 
-  // console.log('Cart items:',cart);
+
 };
 
 //////////////////////
@@ -149,7 +149,7 @@ export const addToUserStorage = (data) => {
     body: JSON.stringify({ itemId: itemId }),
   })
     .then((response) => response.json())
-    .then((idData) => console.log(idData)); // Here 'data' is the item's id number
+    .then((idData) => idData); // Here 'data' is the item's id number
 };
 
 /////////////////////////////////
@@ -169,8 +169,6 @@ export const addToLocalStorage = async function (data) {
       prodQuantity = product.quantity;
     }
   });
-  // console.log(prodQuantity);
-  // console.log(itemId);
   const itemImage = data.querySelector(".front-image").src;
   const itemTitle = data.querySelector(".item-title").textContent;
   const currencyCheck = data.dataset.currency
@@ -193,7 +191,6 @@ export const addToLocalStorage = async function (data) {
 };
 
 const addToLocalCart = function (data) {
-  // console.log('2',data.quantity);
   cart.push({
     title: data.title,
     image: data.image,

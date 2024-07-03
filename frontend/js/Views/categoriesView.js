@@ -57,13 +57,11 @@ class CategoriesView extends View {
 
   addHandlerPreview(handler, data) {
     const _openItemModal = function (e) {
-      // console.log(data);
       const clicked = e.target.closest(".item-container");
       const id = clicked.dataset.id;
       const filtered = data.find((prod) => prod.id == id);
       const addToCart = e.target.closest(".add-to-cart-btn");
       const smallImage = filtered.smallImages;
-      // console.log(smallImage);
       const imageMarkup = smallImage
         .map(
           (x) => `
@@ -95,7 +93,6 @@ class CategoriesView extends View {
     const title = data.querySelector(".item-title").textContent;
     const description = data.querySelector(".item-description").innerHTML;
     const checkCurrency = data.dataset.currency
-    console.log(checkCurrency);
     let selectedUsd = checkCurrency == "$";
     let curSign = selectedUsd ? "$" : "₪";
 
