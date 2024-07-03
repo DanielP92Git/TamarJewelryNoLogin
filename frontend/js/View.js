@@ -7,7 +7,7 @@ export default class View {
   _menu = document.querySelector(".menu");
   _categoriesTab = document.querySelector(".categories-tab");
   _categoriesList = document.querySelector(".categories-list");
-  _cartNumber = document.querySelector(".cart-number");
+  _cartNumber = document.querySelectorAll(".cart-number");
   _cartNewValue = 0;
   _loginBtn = document.querySelector(".login-btn");
 
