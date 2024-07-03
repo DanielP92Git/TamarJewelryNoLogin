@@ -1,5 +1,6 @@
 import View from "../View.js";
 import * as model from "../model.js";
+import deleteSvg from "../../imgs/svgs/x-solid.svg";
 require("dotenv").config();
 
 class CartView extends View {
@@ -81,8 +82,7 @@ class CartView extends View {
                 ? `$${item.price}`
                 : `$${Number((item.price / 3).toFixed(0))}`
             }</div>
-            <div class="delete-item">X</div>
-            <!-- <img src="${deleteSvg}" class="delete-item"/> -->
+            <img src="${deleteSvg}" class="delete-item"/>
             </div>`
           )
           .join("");
