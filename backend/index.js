@@ -66,7 +66,7 @@ app.post(
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      console.log('2. From webhook:', session.metadata.productId);
+      console.log("2. From webhook:", session.metadata.productId);
       // Fulfill the purchase
       handleCheckoutSession(session);
     }
@@ -78,31 +78,28 @@ app.post(
 async function handleCheckoutSession(session) {
   const productId = session.metadata.productId; // Extract the actual product ID from session or metadata
   if (productId) {
-    const product = await Product.findOne({id: productId});
+    const product = await Product.findOne({ id: productId });
     if (product) {
       product.quantity -= 1;
       await product.save();
-      let newQuantity = product.quantity
+      let newQuantity = product.quantity;
       console.log(
         `Product ${productId} quantity reduced. New quantity: ${newQuantity}`
       );
       if (newQuantity == 0) {
         const response = await fetch(`${process.env.API_URL}/removeproduct`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             id: productId,
-          })
-        })
+          }),
+        });
 
-        const data = await response.json()
+        const data = await response.json();
         if (data.success) {
           console.log(`Product with id: ${data.id} is deleted from database`);
         }
       }
-
-
-
     }
   } else {
     console.error("Product not found");
@@ -620,7 +617,7 @@ app.post("/create-checkout-session", async (req, res) => {
     let [getProdQuant] = product;
     // console.log(prodQuant.quantity);
     if (!product) {
-      throw new Error('Product not found')
+      throw new Error("Product not found");
       // return res.status(404).send("Product not found");
     }
 
@@ -631,34 +628,27 @@ app.post("/create-checkout-session", async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
-      line_items: req.body.items.map((item) => ({
-        price_data: {
-          currency: 'ils',
-          product_data: {
-            name: item.title,
+      line_items: req.body.items.map((item) => {
+        let converted = item.price * 100;
+
+        const myItem = {
+          name: item.title,
+          price: converted / 4,
+          quantity: item.amount,
+          productId: item.id,
+        };
+
+        return {
+          price_data: {
+            currency: "usd",
+            product_data: {
+              name: myItem.name,
+            },
+            unit_amount: myItem.price,
           },
-          unit_amount: item.price * 100,
-        },
-        quantity: item.amount,
-
-        // const myItem = {
-        //   name: item.title,
-        //   price: item.price * 100,
-        //   quantity: item.amount,
-        //   productId: item.id,
-        // };
-
-        // return {
-        //   price_data: {
-        //     currency: "usd",
-        //     product_data: {
-        //       name: myItem.name,
-        //     },
-        //     unit_amount: myItem.price,
-        //   },
-        //   quantity: myItem.quantity,
-        // };
-      })),
+          quantity: myItem.quantity,
+        };
+      }),
 
       shipping_address_collection: {
         allowed_countries: ["US", "IL"],
@@ -712,7 +702,7 @@ app.post("/create-checkout-session", async (req, res) => {
         productId: getProductId.id.toString(), // .toString()??? Include the product ID in the session metadata
       },
     });
-    console.log('1. From stripe session:', session.metadata.productId);
+    console.log("1. From stripe session:", session.metadata.productId);
 
     // res.json({ url: session.url });
     res.json({ sessionId: session.id, url: session.url });
