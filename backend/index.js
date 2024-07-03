@@ -66,7 +66,6 @@ app.post(
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      console.log('2. From webhook:', session.metadata.productId);
       // Fulfill the purchase
       handleCheckoutSession(session);
     }
@@ -614,11 +613,9 @@ app.post("/create-checkout-session", async (req, res) => {
   // const shippingRate = await stripe.shippingRates.retrieve('shr_1P5Tdw03Qr2omCV4v8GI30UM')
   try {
     const [getProductId] = req.body.items;
-    // console.log('req.body:',req.body);
-    // console.log('productId:',productId.id);
     const product = await Product.find({ id: getProductId.id });
     let [getProdQuant] = product;
-    // console.log(prodQuant.quantity);
+
     if (!product) {
       throw new Error('Product not found')
       // return res.status(404).send("Product not found");
@@ -702,12 +699,11 @@ app.post("/create-checkout-session", async (req, res) => {
       success_url: `${process.env.HOST}/index.html`,
       cancel_url: `${process.env.HOST}/html/cart.html`,
       metadata: {
-        productId: getProductId.id.toString(), // .toString()??? Include the product ID in the session metadata
+        productId: getProductId.id.toString(),
       },
     });
     console.log('1. From stripe session:', session.metadata.productId);
 
-    // res.json({ url: session.url });
     res.json({ sessionId: session.id, url: session.url });
   } catch (err) {
     res.status(500).json({ err });
