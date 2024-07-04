@@ -123,15 +123,15 @@ class CategoriesView extends View {
     );
     const closeBtn = document.querySelector(".close-modal-btn");
     const addToCartModal = document.querySelector(".add-to-cart-btn_modal");
+    let bigImg = document.querySelector(".big-image");
 
-    smallImgsContainer.addEventListener("mouseover", (e) => {
-      const bigImg = document.querySelector(".big-image");
+    smallImgsContainer.addEventListener("click", (e) => {
       bigImg.src = e.target.closest(".small-image").src;
     });
-    smallImgsContainer.addEventListener("mouseout", (e) => {
-      const bigImg = document.querySelector(".big-image");
-      bigImg.src = image;
-    });
+    // smallImgsContainer.addEventListener("mouseout", (e) => {
+    //   const bigImg = document.querySelector(".big-image");
+    //   bigImg.src = image;
+    // });
 
     closeBtn.addEventListener("click", this._closeItemModal.bind(this));
 

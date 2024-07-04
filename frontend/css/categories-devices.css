@@ -67,8 +67,9 @@ header {
   border-bottom: none;
 }
 
-#currency {
-  margin:1rem 1.5rem 0 0;
+#currency,
+#sort {
+  margin: 1rem 1.5rem 0 0;
   align-self: flex-end;
 
   width: 5rem;
@@ -170,7 +171,6 @@ input[type="checkbox"]:checked + .menu {
   height: 30px;
   padding: 2px;
   margin-left: 1.5rem;
-  
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid lightcoral; */
