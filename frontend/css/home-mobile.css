@@ -649,7 +649,7 @@ main {
   justify-content: flex-end;
   align-items: center;
   position: fixed;
-  top: 42%;
+  top: 90vh;
   width: 100%;
   z-index: 10;
   
