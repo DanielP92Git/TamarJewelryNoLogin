@@ -13,6 +13,7 @@ class CartView extends View {
   _checkoutBtn = document.querySelector(".checkout-btn");
   _deleteAllBtn = document.querySelector(".delete-all");
   _host = process.env.API_URL;
+  _rate = 3.8
 
   addCartViewHandler(handler) {
     handler();
@@ -37,7 +38,9 @@ class CartView extends View {
   }
 
   _addHandlerCheckout(data) {
-    this._checkoutBtn.addEventListener("click", () => {
+    this._checkoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      let currency = data[0].currency; // data is model.cart
       fetch(`${this._host}/create-checkout-session`, {
         method: "POST",
         headers: {
@@ -45,6 +48,7 @@ class CartView extends View {
         },
         body: JSON.stringify({
           items: [...data],
+          currency: currency,
         }),
       })
         .then(async (res) => {
@@ -80,7 +84,7 @@ class CartView extends View {
             <div class="item-price">${
               item.currency == "$"
                 ? `$${item.price}`
-                : `$${Number((item.price / 3).toFixed(0))}`
+                : `$${Number((item.price / this._rate).toFixed(0))}`
             }</div>
             <img src="${deleteSvg}" class="delete-item"/>
             </div>`
@@ -96,7 +100,7 @@ class CartView extends View {
           <div class="item-title">${item.title}</div>
           <div class="item-price">${
             item.currency == "$"
-              ? `₪${Number((item.price * 3.7).toFixed(0))}`
+              ? `₪${Number((item.price * this._rate).toFixed(0))}`
               : `₪${item.price}`
           }</div>
           <div class="delete-item">X</div>
@@ -179,7 +183,7 @@ class CartView extends View {
       const convertPrice = model.cart
         .map((itm) => {
           if (itm.currency == "$") {
-            return itm.price * 4;
+            return itm.price * this._rate;
           }
           return +itm.price;
         })
@@ -191,7 +195,7 @@ class CartView extends View {
       const convertPrice = model.cart
         .map((itm) => {
           if (itm.currency == "₪") {
-            return itm.price / 3;
+            return itm.price / this._rate;
           }
           return +itm.price;
         })
