@@ -1,8 +1,6 @@
-// import React, { useEffect, useState, useContext } from "react";
 import View from "../View.js";
 import { controlAddToCart } from "../controller.js";
-// import { createRoot } from "react-dom/client";
-// import all_product from "../../Assets/all_product.js";
+import closeSvg from '../../imgs/svgs/x-solid.svg'
 
 //////////////////////////////////////////////////////////
 /**
@@ -72,7 +70,7 @@ class CategoriesView extends View {
 
       if (!clicked) return;
       if (addToCart) return;
-      this.generatePreview(clicked, filtered, imageMarkup);
+      this.generatePreview(clicked, imageMarkup);
     };
 
     this._parentElement.addEventListener("click", _openItemModal.bind(this));
@@ -86,9 +84,7 @@ class CategoriesView extends View {
     modal.innerHTML = "";
   }
 
-  generatePreview(data, itemInfo, imgMrk, currency = "usd") {
-    // const smallImage = itemInfo.smallImagesLocal;
-    // const id = data.id;
+  generatePreview(data, imgMrk) {
     const image = data.querySelector(".front-image").src;
     const title = data.querySelector(".item-title").textContent;
     const description = data.querySelector(".item-description").innerHTML;
@@ -100,7 +96,7 @@ class CategoriesView extends View {
    
     const markup = `<div class="item-overlay">
     <div class="modal-item-container">
-      <img src="../../imgs/svgs/x-solid.svg" class="close-modal-btn" alt="">
+      <img class="close-modal-btn" src="${closeSvg}" alt="">
       <div class="images-container">
       <img class="big-image" src="${image}" alt="">
       
