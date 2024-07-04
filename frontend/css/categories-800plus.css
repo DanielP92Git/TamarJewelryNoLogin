@@ -478,7 +478,7 @@ a:hover {
 }
 
 .rights-text {
-  color: white;
+  color: rgb(130, 130, 130);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */
@@ -580,13 +580,13 @@ a:hover {
   background: #7a7a7aa2;
 }
 
-::-webkit-scrollbar-thumb  {
+::-webkit-scrollbar-thumb {
   border-radius: 55px;
   background: #646846a3;
   height: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-cursor: pointer;
+  cursor: pointer;
 }
 
 .small-image {
@@ -598,7 +598,7 @@ cursor: pointer;
 }
 
 .small-image:hover {
-  color:  white;
+  color: white;
   cursor: pointer;
 }
 

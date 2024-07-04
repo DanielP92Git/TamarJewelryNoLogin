@@ -313,7 +313,7 @@ main {
   border-radius: 1rem;
   padding: 15px;
 
-    /* ~~~~ FOR DEBUGGING~~~~*/
+  /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid burlywood; */
 }
 
@@ -339,8 +339,6 @@ main {
   background-color: rgb(255, 99, 99);
   cursor: pointer;
 }
-
-
 
 .summary-container {
   display: flex;
@@ -506,7 +504,7 @@ main {
 }
 
 .rights-text {
-  color: white;
+  color: rgb(130, 130, 130);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */
