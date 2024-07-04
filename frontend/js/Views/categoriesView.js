@@ -97,10 +97,10 @@ class CategoriesView extends View {
     let curSign = selectedUsd ? "$" : "₪";
 
     let price = data.querySelector(".item-price").textContent.replace(/[$₪]/g, "");
-
+   
     const markup = `<div class="item-overlay">
     <div class="modal-item-container">
-      <svg class="close-modal-btn"><use xlink:href="#close-svg"></use></svg>
+      <img src="../../imgs/svgs/x-solid.svg" class="close-modal-btn" alt="">
       <div class="images-container">
       <img class="big-image" src="${image}" alt="">
       
