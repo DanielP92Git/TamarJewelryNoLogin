@@ -96,7 +96,7 @@ class CartView extends View {
           <div class="item-title">${item.title}</div>
           <div class="item-price">${
             item.currency == "$"
-              ? `₪${Number((item.price * 4).toFixed(0))}`
+              ? `₪${Number((item.price * 3.7).toFixed(0))}`
               : `₪${item.price}`
           }</div>
           <div class="delete-item">X</div>

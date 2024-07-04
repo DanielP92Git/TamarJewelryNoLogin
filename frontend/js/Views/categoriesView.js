@@ -164,7 +164,7 @@ class CategoriesView extends View {
         ${item.description}
        </div>
        <div class="item-price">${curSign}${
-            selectedUsd ? Number((item.ils_price / 3).toFixed(0)) : item.ils_price
+            selectedUsd ? Number((item.ils_price / 3.7).toFixed(0)) : item.ils_price
           }</div>
      </div>`
       )
