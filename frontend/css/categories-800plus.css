@@ -215,6 +215,13 @@ a:hover {
     "Lucida Sans", Arial, sans-serif;
 }
 
+#sort {
+  margin-bottom: 1rem;
+
+  width: 9rem;
+  height: 2rem;
+}
+
 #currency {
   margin-bottom: 1rem;
 
@@ -222,7 +229,8 @@ a:hover {
   height: 2rem;
 }
 
-#currency:hover {
+#currency:hover,
+#sort:hover {
   cursor: pointer;
 }
 
