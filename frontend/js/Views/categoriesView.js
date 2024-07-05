@@ -12,6 +12,7 @@ class CategoriesView extends View {
   _parentElement = document.querySelector(".products-container");
   _main = document.querySelector(".main");
   _modal = document.querySelector(".modal");
+  _host = process.env.API_URL;
 
   addCategoriesHandler = function (handler) {
     window.addEventListener("load", handler);
@@ -182,37 +183,86 @@ class CategoriesView extends View {
     
   }
 
-  generateProduct(data, currency = "usd") {
-    const checkCategory = document.body.dataset.category;
-    const filtered = data.filter((item) => item.category === checkCategory);
+  infiniteScroll(currency = "usd") {
+    const spinner = document.querySelector(".loader");
+    let page = 1;
+    const limit = 6;
+    let isLoading = false;
+    const productsContainer = document.querySelector('.products-container');
 
     let selectedUsd = currency == "usd";
     let curSign = selectedUsd ? "$" : "₪";
 
-    const markup = filtered
-      .map(
-        (item) =>
-          `
-        <div class="item-container" data-id="${item.id}" data-quant="${item.quantity}" data-currency=${curSign}>
-       <img class="image-item front-image" src=${item.image} />
-       <img class="image-item rear-image" src=${item.image} />
-       <button class="add-to-cart-btn">Add to Cart</button>
-       <div class="item-title">${item.name}</div>
-      <div class="item-description">
-        ${item.description}
-       </div>
-       <div class="item-price">${curSign}${
-            selectedUsd ? Number((item.ils_price / 3.7).toFixed(0)) : item.ils_price
-          }</div>
-     </div>`
-      )
-      .join("");
+    const checkCategory = document.body.dataset.category;
+    const fetchProducts = async () => {
+      if (isLoading) return;
+      isLoading = true;
+      spinner.classList.remove("spinner-hidden");
 
-    const spinner = document.querySelector(".loader");
-    if (data) {
-      spinner.classList.toggle("spinner-hidden");
-      this._parentElement.insertAdjacentHTML("afterbegin", markup);
-    }
+      try {
+        const response = await fetch(
+          `${this._host}/chunkProducts?page=${page}&limit=${limit}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ checkCategory }),
+          }
+        );
+        const products = await response.json();
+        
+        if (products.length === 0) {
+          window.removeEventListener('scroll', scrollHandler);
+          return;
+        }
+
+        const markup = products
+          .map(
+            (item) =>
+              `
+          <div class="item-container" data-id="${item.id}" data-quant="${
+                item.quantity
+              }" data-currency=${curSign}>
+         <img class="image-item front-image" src=${item.image} />
+         <img class="image-item rear-image" src=${item.image} />
+         <button class="add-to-cart-btn">Add to Cart</button>
+         <div class="item-title">${item.name}</div>
+        <div class="item-description">
+          ${item.description}
+         </div>
+         <div class="item-price">${curSign}${
+                selectedUsd
+                  ? Number((item.ils_price / 3.7).toFixed(0))
+                  : item.ils_price
+              }</div>
+       </div>`
+          )
+          .join("");
+        
+        spinner.classList.add("spinner-hidden");
+       
+        productsContainer.insertAdjacentHTML("beforeend", markup);
+
+        page++
+      } catch (err) {
+        console.error("Failed to fetch products", err);
+      } 
+      finally {
+        isLoading = false;
+        spinner.classList.add("spinner-hidden");
+      }
+    };
+
+    const scrollHandler = function () {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 500
+      ) {
+        fetchProducts();
+      }
+    };
+
+    window.addEventListener("scroll", scrollHandler);
+    fetchProducts();
   }
 
   currencyHandler(data) {

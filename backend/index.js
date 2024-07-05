@@ -66,31 +66,28 @@ app.post(
 async function handleCheckoutSession(session) {
   const productId = session.metadata.productId; // Extract the actual product ID from session or metadata
   if (productId) {
-    const product = await Product.findOne({id: productId});
+    const product = await Product.findOne({ id: productId });
     if (product) {
       product.quantity -= 1;
       await product.save();
-      let newQuantity = product.quantity
+      let newQuantity = product.quantity;
       console.log(
         `Product ${productId} quantity reduced. New quantity: ${newQuantity}`
       );
       if (newQuantity == 0) {
         const response = await fetch(`${process.env.API_URL}/removeproduct`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             id: productId,
-          })
-        })
+          }),
+        });
 
-        const data = await response.json()
+        const data = await response.json();
         if (data.success) {
           console.log(`Product with id: ${data.id} is deleted from database`);
         }
       }
-
-
-
     }
   } else {
     console.error("Product not found");
@@ -215,11 +212,9 @@ const Product = mongoose.model("Product", {
 //* APIs
 //
 
-
 app.get("/", (req, res) => res.send("API endpoint is running"));
 
 app.get("/admin", (req, res) => {
-
   res.sendFile(path.join(__dirname, "html/bambaYafa.html")).status(200);
 });
 
@@ -250,7 +245,6 @@ app.post("/addproduct", async (req, res) => {
     usd_price: req.body.oldPrice,
   });
 
-
   await product.save();
   console.log("Saved");
   res.json({
@@ -269,7 +263,6 @@ app.post("/updateproduct", async (req, res) => {
     quantity: req.body.quantity,
   };
 
-  
   let product = await Product.findOne({ id: id });
 
   product.name = updatedFields.name;
@@ -301,6 +294,22 @@ app.get("/allproducts", async (req, res) => {
   let products = await Product.find({});
   console.log("All Products Fetched");
   res.send(products);
+});
+
+app.post("/chunkProducts", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  console.log("page:", page, "limit:", limit, "skip:", skip);
+  let category = req.body.checkCategory;
+  try {
+    const products = await Product.find({ category: category })
+      .skip(skip)
+      .limit(limit);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch products:", err });
+  }
 });
 
 const authUser = async function (req, res, next) {
@@ -391,13 +400,11 @@ app.post("/signup", async (req, res) => {
       user
         .save()
         .then(() => {
-
           res.status(201).json({
             message: "User Created!",
           });
         })
         .catch((err) => {
-
           res.status(500).json({
             errors: err,
           });
@@ -486,7 +493,6 @@ app.post("/removeAll", fetchUser, async (req, res) => {
 });
 
 app.post("/findProduct", async (req, res) => {
-
   let productData = await Product.findOne({ id: req.body.id });
   res.json({ productData });
 });
@@ -603,21 +609,29 @@ app.post("/create-checkout-session", async (req, res) => {
     const [getProductId] = req.body.items;
     const product = await Product.find({ id: getProductId.id });
     let [getProdQuant] = product;
-    let reqCurrency = req.body.currency
+    let reqCurrency = req.body.currency;
 
     if (!product) {
-      throw new Error('Product not found')
+      throw new Error("Product not found");
     }
 
     if (getProdQuant.quantity == 0) {
-      return res.status(400).send("This product/s are out of stock. Please delete it from your cart and try again");
+      return res
+        .status(400)
+        .send(
+          "This product/s are out of stock. Please delete it from your cart and try again"
+        );
     }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
       line_items: req.body.items.map((item) => {
-        let inCents = reqCurrency == '$' ? item.price * 100 : Number((item.price / `${process.env.USD_ILS_RATE}`).toFixed(0)) * 100 ;
+        let inCents =
+          reqCurrency == "$"
+            ? item.price * 100
+            : Number((item.price / `${process.env.USD_ILS_RATE}`).toFixed(0)) *
+              100;
 
         const myItem = {
           name: item.title,
@@ -691,7 +705,6 @@ app.post("/create-checkout-session", async (req, res) => {
       },
     });
 
-    
     res.json({ sessionId: session.id, url: session.url });
   } catch (err) {
     res.status(500).json({ err });

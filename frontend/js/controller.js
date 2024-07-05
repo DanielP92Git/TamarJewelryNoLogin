@@ -94,7 +94,7 @@ const controlCategoriesPage = async function () {
     // 1) Load products from API
     const data = await model.getAPI();
     // 2) Render products
-    CategoriesView.generateProduct(data);
+    CategoriesView.infiniteScroll()
     CategoriesView.currencyHandler(data)
     CategoriesView.sortHandler(data)
     model.setPreviewItem(data);
