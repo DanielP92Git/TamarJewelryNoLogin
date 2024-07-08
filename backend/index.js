@@ -10,23 +10,14 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const fs = require("fs");
 
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID
+const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET
+const baseUrl = process.env.PAYPAL_BASE_URL
+
 //
 //* MAIN SETTINGS
 //
 const allowedOrigins = [`${process.env.HOST}`, `${process.env.API_URL}`];
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     if (allowedOrigins.includes(origin) || !origin) {
-//       console.log("Allowed origin:", origin);
-//       callback(null, true);
-//     } else {
-//       console.error("Blocked by CORS:", origin);
-//       callback(new Error("Not allowed by CORS"));
-//     }
-//   },
-//   credentials: true,
-//   optionsSuccessStatus: 200,
-// };
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -39,6 +30,8 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
 };
+
+app.use(express.static(path.join(__dirname, "frontend")));
 
 app.use(cors(corsOptions));
 
@@ -66,7 +59,6 @@ app.post(
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
-      console.log('2. From webhook:', session.metadata.productId);
       // Fulfill the purchase
       handleCheckoutSession(session);
     }
@@ -78,31 +70,28 @@ app.post(
 async function handleCheckoutSession(session) {
   const productId = session.metadata.productId; // Extract the actual product ID from session or metadata
   if (productId) {
-    const product = await Product.findOne({id: productId});
+    const product = await Product.findOne({ id: productId });
     if (product) {
       product.quantity -= 1;
       await product.save();
-      let newQuantity = product.quantity
+      let newQuantity = product.quantity;
       console.log(
         `Product ${productId} quantity reduced. New quantity: ${newQuantity}`
       );
       if (newQuantity == 0) {
         const response = await fetch(`${process.env.API_URL}/removeproduct`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             id: productId,
-          })
-        })
+          }),
+        });
 
-        const data = await response.json()
+        const data = await response.json();
         if (data.success) {
           console.log(`Product with id: ${data.id} is deleted from database`);
         }
       }
-
-
-
     }
   } else {
     console.error("Product not found");
@@ -227,12 +216,9 @@ const Product = mongoose.model("Product", {
 //* APIs
 //
 
-app.use(express.static(path.join(__dirname, "frontend")));
-
 app.get("/", (req, res) => res.send("API endpoint is running"));
 
 app.get("/admin", (req, res) => {
-  // console.log("Fetch admin");
   res.sendFile(path.join(__dirname, "html/bambaYafa.html")).status(200);
 });
 
@@ -263,7 +249,6 @@ app.post("/addproduct", async (req, res) => {
     usd_price: req.body.oldPrice,
   });
 
-  // console.log(product);
   await product.save();
   console.log("Saved");
   res.json({
@@ -281,7 +266,6 @@ app.post("/updateproduct", async (req, res) => {
     description: req.body.description,
     quantity: req.body.quantity,
   };
-  // console.log(updatedFields);
 
   let product = await Product.findOne({ id: id });
 
@@ -314,6 +298,22 @@ app.get("/allproducts", async (req, res) => {
   let products = await Product.find({});
   console.log("All Products Fetched");
   res.send(products);
+});
+
+app.post("/chunkProducts", async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  console.log("page:", page, "limit:", limit, "skip:", skip);
+  let category = req.body.checkCategory;
+  try {
+    const products = await Product.find({ category: category })
+      .skip(skip)
+      .limit(limit);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch products:", err });
+  }
 });
 
 const authUser = async function (req, res, next) {
@@ -404,13 +404,11 @@ app.post("/signup", async (req, res) => {
       user
         .save()
         .then(() => {
-          // console.log(result);
           res.status(201).json({
             message: "User Created!",
           });
         })
         .catch((err) => {
-          // console.log(err);
           res.status(500).json({
             errors: err,
           });
@@ -499,7 +497,6 @@ app.post("/removeAll", fetchUser, async (req, res) => {
 });
 
 app.post("/findProduct", async (req, res) => {
-  // console.log(req.body.id);
   let productData = await Product.findOne({ id: req.body.id });
   res.json({ productData });
 });
@@ -614,25 +611,31 @@ app.post("/create-checkout-session", async (req, res) => {
   // const shippingRate = await stripe.shippingRates.retrieve('shr_1P5Tdw03Qr2omCV4v8GI30UM')
   try {
     const [getProductId] = req.body.items;
-    // console.log('req.body:',req.body);
-    // console.log('productId:',productId.id);
     const product = await Product.find({ id: getProductId.id });
     let [getProdQuant] = product;
-    // console.log(prodQuant.quantity);
+    let reqCurrency = req.body.currency;
+
     if (!product) {
-      throw new Error('Product not found')
-      // return res.status(404).send("Product not found");
+      throw new Error("Product not found");
     }
 
     if (getProdQuant.quantity == 0) {
-      return res.status(400).send("Product is out of stock");
+      return res
+        .status(400)
+        .send(
+          "This product/s are out of stock. Please delete it from your cart and try again"
+        );
     }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       mode: "payment",
       line_items: req.body.items.map((item) => {
-        let inCents = item.price * 100;
+        let inCents =
+          reqCurrency == "$"
+            ? item.price * 100
+            : Number((item.price / `${process.env.USD_ILS_RATE}`).toFixed(0)) *
+              100;
 
         const myItem = {
           name: item.title,
@@ -702,15 +705,131 @@ app.post("/create-checkout-session", async (req, res) => {
       success_url: `${process.env.HOST}/index.html`,
       cancel_url: `${process.env.HOST}/html/cart.html`,
       metadata: {
-        productId: getProductId.id.toString(), // .toString()??? Include the product ID in the session metadata
+        productId: getProductId.id.toString(),
       },
     });
-    console.log('1. From stripe session:', session.metadata.productId);
 
-    // res.json({ url: session.url });
     res.json({ sessionId: session.id, url: session.url });
   } catch (err) {
     res.status(500).json({ err });
+  }
+});
+
+const generateAccessToken = async () => {
+  try {
+    if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+      throw new Error("MISSING_API_CREDENTIALS");
+    }
+    const auth = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`);
+
+    const response = await fetch(`${baseUrl}/v1/oauth2/token`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Basic ${auth}`,
+      },
+      body: "grant_type=client_credentials",
+    });
+
+    const data = await response.json();
+    return data.access_token;
+  } catch (error) {
+    console.error("Failed to generate Access Token:", error);
+  }
+};
+
+const createOrder = async (cart) => {
+  // use the cart information passed from the front-end to calculate the purchase unit details
+  console.log(
+    "shopping cart information passed from the frontend createOrder() callback:",
+    cart,
+  );
+
+  const accessToken = await generateAccessToken();
+  const url = `${baseUrl}/v2/checkout/orders`;
+  const payload = {
+    intent: "CAPTURE",
+    purchase_units: [
+      {
+        amount: {
+          currency_code: "USD",
+          value: "100.00",
+        },
+      },
+    ],
+  };
+
+  const response = await fetch(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+      // Uncomment one of these to force an error for negative testing (in sandbox mode only). Documentation:
+      // https://developer.paypal.com/tools/sandbox/negative-testing/request-headers/
+      // "PayPal-Mock-Response": '{"mock_application_codes": "MISSING_REQUIRED_PARAMETER"}'
+      // "PayPal-Mock-Response": '{"mock_application_codes": "PERMISSION_DENIED"}'
+      // "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
+    },
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+
+  return handleResponse(response);
+};
+
+const captureOrder = async (orderID) => {
+  const accessToken = await generateAccessToken();
+  const url = `${baseUrl}/v2/checkout/orders/${orderID}/capture`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${accessToken}`,
+      // Uncomment one of these to force an error for negative testing (in sandbox mode only). Documentation:
+      // https://developer.paypal.com/tools/sandbox/negative-testing/request-headers/
+      // "PayPal-Mock-Response": '{"mock_application_codes": "INSTRUMENT_DECLINED"}'
+      // "PayPal-Mock-Response": '{"mock_application_codes": "TRANSACTION_REFUSED"}'
+      // "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
+    },
+  });
+
+  return handleResponse(response);
+};
+
+async function handleResponse(response) {
+  try {
+    const jsonResponse = await response.json();
+    return {
+      jsonResponse,
+      httpStatusCode: response.status,
+    };
+  } catch (error) {
+    console.error(error)
+    const errorMessage = await response.text();
+    throw new Error(errorMessage);
+  }
+}
+
+app.post("/orders", async (req, res) => {
+  try {
+    // use the cart information passed from the front-end to calculate the order amount detals
+    const { cart } = req.body;
+    const { jsonResponse, httpStatusCode } = await createOrder(cart);
+    res.status(httpStatusCode).json(jsonResponse);
+  } catch (error) {
+    console.error("Failed to create order:", error);
+    res.status(500).json({ error: "Failed to create order." });
+  }
+});
+
+app.post("/orders/:orderID/capture", async (req, res) => {
+  try {
+    const { orderID } = req.params;
+    const { jsonResponse, httpStatusCode } = await captureOrder(orderID);
+    res.status(httpStatusCode).json(jsonResponse);
+  } catch (error) {
+    console.error("Failed to create order:", error);
+    res.status(500).json({ error: "Failed to capture order." });
   }
 });
 

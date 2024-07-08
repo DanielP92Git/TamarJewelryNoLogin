@@ -74,6 +74,7 @@ header {
   cursor: pointer;
 }
 
+
 /* .li.sticky:hover {
   background-color: rgba(212, 199, 171, 0.925);
 } */
@@ -434,7 +435,7 @@ h1 {
 }
 
 .rights-text {
-  color: white;
+  color: rgb(130, 130, 130);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */

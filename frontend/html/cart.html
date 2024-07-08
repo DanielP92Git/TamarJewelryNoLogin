@@ -15,6 +15,8 @@
       href="../css/cart-800plus.css"
       media="(min-width: 700px)"
     />
+    <script class="paypal-script" src="https://www.paypal.com/sdk/js?client-id=AQ_Op8cY6HHktDWw0X4y73ydkfGKeN-Tm3T20iWIDPIo4M7OpehX2QYZD0_gpDgtg7RkdRKL51foMNP7&currency=USD"></script>
+    <script type="module" src="../js/controller.js" defer></script>
     <script type="module" defer src="../js/controller.js"></script>
   </head>
   <body id="cart">
@@ -116,7 +118,7 @@
           <li class="main-nav-tab">
             <a class="attrib" href="../html/about.html">About</a>
           </li>
-          <li class="main-nav-tab">
+          <li class="main-nav-tab contact">
             <a class="attrib" href="../html/contact-me.html">Contact Me</a>
           </li>
           <!-- <li class="main-nav-tab login" id="login-tab" href="#">
@@ -187,7 +189,13 @@
             <span class="total-price">140$</span>
           </div> -->
         </div>
-        <button class="checkout-btn">Check Me Out!</button>
+        <div class="checkout-btns-container">
+          <p class="check-me-out">Check Me Out With:</p>
+          <img src="../imgs/svgs/cc-stripe.svg" class="stripe-svg" alt="" />
+          <div id="paypal"></div>
+        </div>
+      </div>
+      <div class="result-message"></div>
       </div>
     </main>
     <footer class="footer">

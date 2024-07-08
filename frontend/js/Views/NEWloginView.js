@@ -91,7 +91,6 @@ class LoginView extends View {
           }
           if (data.success) {
             localStorage.setItem("auth-token", data.token);
-            // console.log(`${process.env.HOST}`);
             window.location.assign(`/html/bambaYafa.html`)
           //   const resp = await fetch(`${process.env.API_URL}/admin`, {
           //     method: 'GET',

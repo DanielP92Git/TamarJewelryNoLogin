@@ -114,7 +114,7 @@ export const setPreviewItem = async function (data) {
     });
   });
 
-  // console.log('Cart items:',cart);
+
 };
 
 //////////////////////
@@ -149,7 +149,7 @@ export const addToUserStorage = (data) => {
     body: JSON.stringify({ itemId: itemId }),
   })
     .then((response) => response.json())
-    .then((idData) => console.log(idData)); // Here 'data' is the item's id number
+    .then((idData) => idData); // Here 'data' is the item's id number
 };
 
 /////////////////////////////////
@@ -164,13 +164,12 @@ export const addToLocalStorage = async function (data) {
   const allProducts = await getAPI();
   const itemId = data.getAttribute("data-id");
   let prodQuantity;
-  const quant = allProducts.filter((product) => {
+  allProducts.find((product) => {
     if (product.id == itemId) {
       prodQuantity = product.quantity;
+      return prodQuantity
     }
   });
-  // console.log(prodQuantity);
-  // console.log(itemId);
   const itemImage = data.querySelector(".front-image").src;
   const itemTitle = data.querySelector(".item-title").textContent;
   const currencyCheck = data.dataset.currency
@@ -185,7 +184,7 @@ export const addToLocalStorage = async function (data) {
     image: itemImage,
     price: itemPrice,
     currency: currencyCheck,
-    quantity: +quant,
+    quantity: prodQuantity,
     id: +itemId,
   };
   // 2) Update item to cart
@@ -193,7 +192,6 @@ export const addToLocalStorage = async function (data) {
 };
 
 const addToLocalCart = function (data) {
-  // console.log('2',data.quantity);
   cart.push({
     title: data.title,
     image: data.image,

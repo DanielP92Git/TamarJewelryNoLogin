@@ -274,7 +274,7 @@ p {
 .categories-list {
   position: absolute;
   left: -200px;
-  top: 70px;
+  top: 60px;
   list-style: none;
 
   width: 165px;
@@ -306,7 +306,6 @@ p {
 .reveal {
   display: inline;
   left: 160px;
-  top: 50px;
 }
 
 .category-text {
@@ -642,4 +641,36 @@ main {
   font-size: 0.9rem;
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */
+}
+
+.whatsapp-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: fixed;
+  top: 85vh;
+  width: 100%;
+  z-index: 10;
+  
+  /* border: 2px solid red; */
+}
+
+.whatsapp-atr {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background-color: rgb(255, 255, 255);
+  border: 1px solid rgb(60, 143, 37);
+  border-radius: 10%;
+  z-index: 10;
+  /* margin-right: 5%; */
+}
+
+.whatsapp-svg {
+  width: 40px;
+  height: 40px;
+  justify-self: self-end;
+  /* border: 1px solid red; */
 }
