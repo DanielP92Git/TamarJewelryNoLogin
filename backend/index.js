@@ -742,15 +742,15 @@ const createOrder = async (cart) => {
   // use the cart information passed from the front-end to calculate the purchase unit details
   console.log(
     "shopping cart information passed from the frontend createOrder() callback:",
-    cart
+    cart,
   );
   let totalAmount = cart
-    .reduce((total, item) => {
-      let itemTotal =
-        parseFloat(item.unit_amount.value) * parseInt(item.quantity);
-      return total + itemTotal;
-    }, 0)
-    .toFixed(2);
+  .reduce((total, item) => {
+    let itemTotal =
+      parseFloat(item.unit_amount.value) * parseInt(item.quantity);
+    return total + itemTotal;
+  }, 0)
+  .toFixed(2);
 
   const currencyData = cart[0].unit_amount.currency_code;
 
@@ -785,11 +785,6 @@ const createOrder = async (cart) => {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
-      // Uncomment one of these to force an error for negative testing (in sandbox mode only). Documentation:
-      // https://developer.paypal.com/tools/sandbox/negative-testing/request-headers/
-      // "PayPal-Mock-Response": '{"mock_application_codes": "MISSING_REQUIRED_PARAMETER"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "PERMISSION_DENIED"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
     },
     method: "POST",
     body: JSON.stringify(payload),
@@ -807,11 +802,6 @@ const captureOrder = async (orderID) => {
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${accessToken}`,
-      // Uncomment one of these to force an error for negative testing (in sandbox mode only). Documentation:
-      // https://developer.paypal.com/tools/sandbox/negative-testing/request-headers/
-      // "PayPal-Mock-Response": '{"mock_application_codes": "INSTRUMENT_DECLINED"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "TRANSACTION_REFUSED"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
     },
   });
 
@@ -826,7 +816,7 @@ async function handleResponse(response) {
       httpStatusCode: response.status,
     };
   } catch (error) {
-    console.error(error);
+    console.error(error)
     const errorMessage = await response.text();
     throw new Error(errorMessage);
   }
