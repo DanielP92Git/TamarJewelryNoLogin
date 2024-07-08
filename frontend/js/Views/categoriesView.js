@@ -223,7 +223,7 @@ class CategoriesView extends View {
 
     try {
       const response = await fetch(
-        `${process.env.API_URL}/allProducts`, // Adjust endpoint to fetch all products
+        `http://localhost:4000/allProducts`, // Adjust endpoint to fetch all products
         {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -258,6 +258,42 @@ class CategoriesView extends View {
     this.page = 1;
     this.displayProducts();
   }
+
+  // async fetchProducts() {
+  //   if (this.isLoading) return;
+  //   this.isLoading = true;
+
+  //   const spinner = this.productsContainer.querySelector(".loader");
+  //   spinner.classList.remove("spinner-hidden");
+
+  //   try {
+  //     const response = await fetch(
+  //       `http://localhost:4000/chunkProducts?page=${this.page}&limit=${this.limit}`,
+  //       {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify({
+  //           checkCategory: document.body.dataset.category,
+  //         }),
+  //       }
+  //     );
+  //     const newProducts = await response.json();
+
+  //     if (newProducts.length === 0) {
+  //       window.removeEventListener("scroll", this.scrollHandler);
+  //       return;
+  //     }
+
+  //     this.products = this.products.concat(newProducts);
+  //     this.sortAndDisplayProducts();
+  //     this.page++;
+  //   } catch (err) {
+  //     console.error("Failed to fetch products", err);
+  //   } finally {
+  //     this.isLoading = false;
+  //     spinner.classList.add("spinner-hidden");
+  //   }
+  // }
 
   displayProducts() {
     this.productsContainer.innerHTML = "";

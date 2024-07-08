@@ -416,7 +416,7 @@ main {
   border-radius: 5px;
 }
 
-.checkout-btns-container {
+.checkout-btns-container{
   display: flex;
   flex-flow: column;
   align-items: center;
@@ -424,8 +424,8 @@ main {
 
   /* border: 2px solid red; */
 }
-.check-me-out {
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+.check-me-out{
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 .stripe-svg {
   margin-top: 1rem;
@@ -435,6 +435,7 @@ main {
 
 .stripe-svg:hover {
   cursor: pointer;
+   
 }
 
 #paypal {

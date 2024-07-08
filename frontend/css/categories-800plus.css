@@ -255,10 +255,6 @@ a:hover {
   }
 }
 
-.spinner-hidden {
-  display: none;
-}
-
 .products-container {
   display: flex;
   flex-flow: row wrap;
@@ -648,4 +644,8 @@ a:hover {
   height: 12px;
   border-radius: 50%;
   z-index: 10;
+}
+
+.spinner-hidden {
+  display: none;
 }
