@@ -164,9 +164,10 @@ export const addToLocalStorage = async function (data) {
   const allProducts = await getAPI();
   const itemId = data.getAttribute("data-id");
   let prodQuantity;
-  const quant = allProducts.filter((product) => {
+  allProducts.find((product) => {
     if (product.id == itemId) {
       prodQuantity = product.quantity;
+      return prodQuantity
     }
   });
   const itemImage = data.querySelector(".front-image").src;
@@ -183,7 +184,7 @@ export const addToLocalStorage = async function (data) {
     image: itemImage,
     price: itemPrice,
     currency: currencyCheck,
-    quantity: +quant,
+    quantity: prodQuantity,
     id: +itemId,
   };
   // 2) Update item to cart

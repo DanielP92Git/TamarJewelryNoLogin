@@ -246,28 +246,6 @@ a:hover {
   /* border: 2px solid rgb(40, 228, 37); */
 }
 
-.loader {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: inline-block;
-  position: relative;
-  border: 2px solid #000000;
-  box-sizing: border-box;
-  animation: rotation 1s linear infinite;
-}
-.loader::after {
-  content: "";
-  box-sizing: border-box;
-  position: absolute;
-  left: 4px;
-  top: 4px;
-  border: 2px solid #ac9d54;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-}
-
 @keyframes rotation {
   0% {
     transform: rotate(0deg);
@@ -644,4 +622,30 @@ a:hover {
 
   transition: all;
   transition-duration: 500ms;
+}
+
+.loader {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-block;
+  position: absolute;
+  background-color: rgba(245, 222, 179, 0.427);
+  border: 2px solid #000000;
+  box-sizing: border-box;
+  animation: rotation 1s linear infinite;
+  z-index: 10;
+}
+
+.loader::after {
+  content: "";
+  box-sizing: border-box;
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  border: 2px solid #ac9d54;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  z-index: 10;
 }
