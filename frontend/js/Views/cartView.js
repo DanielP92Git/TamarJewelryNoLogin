@@ -10,9 +10,10 @@ class CartView extends View {
   _summaryTitle = document.querySelector(".summary-title");
   _itemsBox = document.querySelector(".added-items");
   _summaryDetails = document.querySelector(".summary-details");
-  _checkoutBtn = document.querySelector(".checkout-btn");
+  _checkoutBtn = document.querySelector(".stripe-svg");
   _deleteAllBtn = document.querySelector(".delete-all");
   _host = process.env.API_URL;
+  _rate = 3.8;
 
   addCartViewHandler(handler) {
     handler();
@@ -37,14 +38,18 @@ class CartView extends View {
   }
 
   _addHandlerCheckout(data) {
-    this._checkoutBtn.addEventListener("click", () => {
-      fetch(`${this._host}/create-checkout-session`, {
+    this._checkoutBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+      let currency = data[0].currency; // data is model.cart
+      console.log(currency);
+      await fetch(`${this._host}/create-checkout-session`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           items: [...data],
+          currency: currency,
         }),
       })
         .then(async (res) => {
@@ -56,7 +61,7 @@ class CartView extends View {
           window.location = url;
         })
         .catch((e) => {
-          console.error(e.error);
+          console.error(e);
         });
     });
   }
@@ -80,9 +85,9 @@ class CartView extends View {
             <div class="item-price">${
               item.currency == "$"
                 ? `$${item.price}`
-                : `$${Number((item.price / 3).toFixed(0))}`
+                : `$${Number((item.price / this._rate).toFixed(0))}`
             }</div>
-            <img src="${deleteSvg}" class="delete-item"/>
+             <img src="${deleteSvg}" class="delete-item"/> 
             </div>`
           )
           .join("");
@@ -96,7 +101,7 @@ class CartView extends View {
           <div class="item-title">${item.title}</div>
           <div class="item-price">${
             item.currency == "$"
-              ? `₪${Number((item.price * 4).toFixed(0))}`
+              ? `₪${Number((item.price * this._rate).toFixed(0))}`
               : `₪${item.price}`
           }</div>
           <div class="delete-item">X</div>
@@ -173,7 +178,6 @@ class CartView extends View {
 
   _calculateTotal() {
     if (model.checkCartNumber() === 0) return;
-    console.log(model.cart);
 
     let checkCurrency = model.cart[0].currency;
 
@@ -181,12 +185,11 @@ class CartView extends View {
       const convertPrice = model.cart
         .map((itm) => {
           if (itm.currency == "$") {
-            return itm.price * 4;
+            return itm.price * this._rate;
           }
           return +itm.price;
         })
         .reduce((x, y) => x + y, 0);
-      console.log(convertPrice);
 
       return Number(convertPrice.toFixed(0));
     }
@@ -194,15 +197,132 @@ class CartView extends View {
       const convertPrice = model.cart
         .map((itm) => {
           if (itm.currency == "₪") {
-            return itm.price / 3;
+            return itm.price / this._rate;
           }
           return +itm.price;
         })
         .reduce((x, y) => x + y, 0);
-      console.log(convertPrice);
 
       return Number(convertPrice.toFixed(0));
     }
+  }
+
+  // resultMessage(message) {
+  //   const container = document.querySelector("#result-message");
+  //   container.innerHTML = message;
+  // }
+
+  paypalCheckout(cartData) {
+    const currencyVariable = cartData[0].currency == "$" ? "USD" : "ILS";
+    let myScript = document.querySelector(".paypal-script");
+    myScript.setAttribute(
+      "src",
+      `https://www.paypal.com/sdk/js?client-id=AQ_Op8cY6HHktDWw0X4y73ydkfGKeN-Tm3T20iWIDPIo4M7OpehX2QYZD0_gpDgtg7RkdRKL51foMNP7&currency=${currencyVariable}`
+    );
+    let head = document.head;
+    head.insertAdjacentElement("afterbegin", myScript);
+
+    // myScript.addEventListener("load", scriptLoaded, false);
+
+    window.paypal
+      .Buttons({
+        async createOrder() {
+          try {
+            const cartDetails = cartData.map((item) => {
+              const data = {
+                name: item.title,
+                unit_amount: {
+                  currency_code: item.currency == "$" ? "USD" : "ILS",
+                  value: item.price,
+                },
+                quantity: item.quantity,
+              };
+              return data;
+            });
+            const response = await fetch(`${process.env.API_URL}/orders`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                cart: cartDetails,
+              }),
+            });
+
+            const orderData = await response.json();
+            if (orderData.id) {
+              return orderData.id;
+            } else {
+              const errorDetail = orderData?.details?.[0];
+              const errorMessage = errorDetail
+                ? `${errorDetail.issue} ${errorDetail.description} (${orderData.debug_id})`
+                : JSON.stringify(orderData);
+
+              throw new Error(errorMessage);
+            }
+          } catch (error) {
+            console.error(error);
+            console.log(
+              `Could not initiate PayPal Checkout...<br><br>${error}`
+            );
+          }
+        },
+
+        async onApprove(data, actions) {
+          try {
+            const response = await fetch(
+              `${process.env.API_URL}/orders/${data.orderID}/capture`,
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+
+            const orderData = await response.json();
+            // Three cases to handle:
+            //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
+            //   (2) Other non-recoverable errors -> Show a failure message
+            //   (3) Successful transaction -> Show confirmation or thank you message
+
+            const errorDetail = orderData?.details?.[0];
+
+            if (errorDetail?.issue === "INSTRUMENT_DECLINED") {
+              // (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
+              // recoverable state, per https://developer.paypal.com/docs/checkout/standard/customize/handle-funding-failures/
+              return actions.restart();
+            } else if (errorDetail) {
+              // (2) Other non-recoverable errors -> Show a failure message
+              throw new Error(
+                `${errorDetail.description} (${orderData.debug_id})`
+              );
+            } else if (!orderData.purchase_units) {
+              throw new Error(JSON.stringify(orderData));
+            } else {
+              // (3) Successful transaction -> Show confirmation or thank you message
+              // Or go to another URL:  actions.redirect('thank_you.html');
+              const transaction =
+                orderData?.purchase_units?.[0]?.payments?.captures?.[0] ||
+                orderData?.purchase_units?.[0]?.payments?.authorizations?.[0];
+              console.log(
+                `Transaction ${transaction.status}: ${transaction.id}<br><br>See console for all available details`
+              );
+              console.log(
+                "Capture result",
+                orderData,
+                JSON.stringify(orderData, null, 2)
+              );
+            }
+          } catch (error) {
+            console.error(error);
+            console.log(
+              `Sorry, your transaction could not be processed...<br><br>${error}`
+            );
+          }
+        },
+      })
+      .render("#paypal");
   }
 }
 export default new CartView();

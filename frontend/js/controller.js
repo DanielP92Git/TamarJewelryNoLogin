@@ -7,7 +7,6 @@ import WorkshopView from "./Views/workshopView.js";
 import AboutView from "./Views/aboutView.js";
 import ContactMeView from "./Views/contactMeView.js";
 import CartView from "./Views/cartView.js";
-import categoriesView from "./Views/categoriesView.js";
 import LoginView from "./Views/NEWloginView.js";
 import BisliView from "./Views/BisliView.js";
 
@@ -80,25 +79,27 @@ const controlContactMePage = async function () {
 
 const controlCategoriesPage = async function () {
   try {
+    const categoriesView = new CategoriesView(
+      document.getElementById("categories")
+    );
+
     await model.handleLoadStorage();
 
-    CategoriesView.svgHandler();
-    CategoriesView._moveToTopHandler();
-    // categoriesView.logInOutHandler(controlLoginPage);
-    // CategoriesView.stickyMenuFn();
-    CategoriesView._imageFlipper();
-    CategoriesView.addRevealHandler();
-    CategoriesView.addMobileHandler();
+    categoriesView.svgHandler();
+    categoriesView._moveToTopHandler();
+    // catecategoriesView.logInOutHandler(controlLoginPage);
+    // categoriesView.stickyMenuFn();
+    categoriesView._imageFlipper();
+    categoriesView.addRevealHandler();
+    categoriesView.addMobileHandler();
     categoriesView.persistCartNumber(await model.checkCartNumber());
 
     // 1) Load products from API
-    const data = await model.getAPI();
+    const chunkData = await model.getAPI();
     // 2) Render products
-    // categoriesView.renderProducts(data);
-    CategoriesView.generateProduct(data);
-    CategoriesView.currencyHandler(data)
-    model.setPreviewItem(data);
-    CategoriesView.addHandlerPreview(controlAddToCart, data);
+    model.setPreviewItem(chunkData);
+    categoriesView.addHandlerPreview(chunkData);
+    // categoriesView.infiniteScrolling()
   } catch (err) {
     console.error(err);
   }
@@ -112,9 +113,9 @@ const controlCartPage = async function () {
     CartView.render(cartNum);
     CartView._renderSummary(cartNum);
 
-    const cartLoad = model.cart;
-    CartView._addHandlerCheckout(cartLoad);
-
+    const cartData = model.cart;
+    CartView._addHandlerCheckout(cartData);
+    CartView.paypalCheckout(cartData);
     CartView.svgHandler();
     CartView.addRevealHandler();
     CartView.addMobileHandler();
@@ -136,13 +137,13 @@ const controlLoginPage = async function () {
   LoginView.persistCartNumber(await model.checkCartNumber());
 };
 
-export const controlAddToCart = function (data) {
-  // 1) Update cart number
-  CategoriesView.increaseCartNumber();
+// export const controlAddToCart = function (data) {
+//   // 1) Update cart number
+//   categoriesView.increaseCartNumber();
 
-  // 2) Pass data from clicked item and add it to model.cart
-  model.handleAddToCart(data);
-};
+//     // 2) Pass data from clicked item and add it to model.cart
+//     model.handleAddToCart(data);
+// };
 
 const controlDeleteFromCart = async function (id) {
   // 1) Remove from database
@@ -176,7 +177,7 @@ const controlDeleteAll = async function () {
 
 const controlBambaPage = function () {
   // BisliView.pageAuth();
-  BisliView.modeHandler()
+  BisliView.modeHandler();
 };
 
 const init = async function () {
@@ -193,12 +194,13 @@ const init = async function () {
     ContactMeView.addContactMeHandler(controlContactMePage);
   }
   if (document.body.id.includes("categories")) {
-    CategoriesView.addCategoriesHandler(controlCategoriesPage);
+    // const categoriesView = new CategoriesView(document.getElementById('categories'));
+    controlCategoriesPage();
 
     /**
      * ! User clicks add to cart:
      **/
-    CategoriesView.addHandlerAddToCart(controlAddToCart);
+    // categoriesView.addHandlerAddToCart(controlAddToCart);
   }
 
   if (document.body.id.includes("cart")) {

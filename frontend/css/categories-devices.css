@@ -67,8 +67,9 @@ header {
   border-bottom: none;
 }
 
-#currency {
-  margin:1rem 1.5rem 0 0;
+#currency,
+#sort {
+  margin: 1rem 1.5rem 0 0;
   align-self: flex-end;
 
   width: 5rem;
@@ -170,7 +171,6 @@ input[type="checkbox"]:checked + .menu {
   height: 30px;
   padding: 2px;
   margin-left: 1.5rem;
-  
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid lightcoral; */
@@ -268,16 +268,20 @@ main {
   /* border: 3px solid rgb(0, 179, 255); */
 }
 
+
 .loader {
   width: 48px;
   height: 48px;
   border-radius: 50%;
   display: inline-block;
-  position: relative;
+  position: absolute;
+  background-color: rgba(245, 222, 179, 0.427);
   border: 2px solid #000000;
   box-sizing: border-box;
   animation: rotation 1s linear infinite;
+  z-index: 10;
 }
+
 .loader::after {
   content: "";
   box-sizing: border-box;
@@ -288,6 +292,7 @@ main {
   width: 12px;
   height: 12px;
   border-radius: 50%;
+  z-index: 10;
 }
 
 @keyframes rotation {

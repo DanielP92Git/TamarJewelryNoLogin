@@ -313,7 +313,7 @@ main {
   border-radius: 1rem;
   padding: 15px;
 
-    /* ~~~~ FOR DEBUGGING~~~~*/
+  /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid burlywood; */
 }
 
@@ -339,8 +339,6 @@ main {
   background-color: rgb(255, 99, 99);
   cursor: pointer;
 }
-
-
 
 .summary-container {
   display: flex;
@@ -418,27 +416,32 @@ main {
   border-radius: 5px;
 }
 
-.checkout-btn {
-  border-radius: 5px;
-  /* position: absolute; */
-  /* top: 2rem; */
-  border: none;
-  width: 8rem;
-  height: 2rem;
-  background-color: rgb(255, 213, 151);
+.checkout-btns-container{
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: space-between;
+
+  /* border: 2px solid red; */
+}
+.check-me-out{
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+}
+.stripe-svg {
   margin-top: 1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   align-self: center;
-  /* margin: 1rem 0 1rem 1rem; */
-  border: 1px solid;
 }
 
-.checkout-btn:hover {
-  background-color: blanchedalmond;
-  font-size: 1rem;
+.stripe-svg:hover {
   cursor: pointer;
-  width: 8.3rem;
-  height: 2.3rem;
+   
+}
+
+#paypal {
+  border-top: 1px solid black;
+  padding: 2rem;
+  margin-bottom: 2rem;
 }
 
 /* ~~~~~~~~~~~~~~ Footer ~~~~~~~~~~~~~~~~~~~~ */
@@ -506,7 +509,7 @@ main {
 }
 
 .rights-text {
-  color: white;
+  color: rgb(130, 130, 130);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */

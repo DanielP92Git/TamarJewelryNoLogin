@@ -493,26 +493,24 @@ main {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 .categories-container {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
-  align-items: center;
+  display: grid;
+  grid-template-columns:1fr 1fr;
+  
+  row-gap: 10px;
+  column-gap: 10px;
   width: 95%;
   margin-top: 50px;
-  /* position: absolute; */
-  top: 180%;
   box-shadow: 0px 0px 50px -10px rgba(0, 0, 0, 0.58);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid red; */
+  grid-column: 1/2;
 }
 
 .category-box {
-  width: 47%;
-  height: 28rem;
-  margin: 10px;
+  grid-column:  span 1;
   text-decoration: none;
-
+  padding: 1rem;
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid red; */
 }
@@ -621,8 +619,39 @@ main {
 }
 
 .rights-text {
-  color: white;
+  color: rgb(130, 130, 130);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */
+}
+
+.whatsapp-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: fixed;
+  z-index: 9;
+  top: 89%;
+  width: 100%;
+  /* border: 2px solid red; */
+}
+
+.whatsapp-atr {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background-color: rgb(255, 255, 255);
+  border: 1px solid rgb(60, 143, 37);
+  border-radius: 10%;
+  z-index: 10;
+  /* margin-right: 5%; */
+}
+
+.whatsapp-svg {
+  width: 40px;
+  height: 40px;
+  justify-self: self-end;
+  /* border: 1px solid red; */
 }

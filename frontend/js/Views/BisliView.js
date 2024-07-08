@@ -72,7 +72,6 @@ class BisliView extends View {
     try {
       e.preventDefault();
       let product = productDetails;
-      console.log(product);
       let formData = new FormData(form);
 
       let responseData = await fetch(`${host}/upload`, {
@@ -85,7 +84,6 @@ class BisliView extends View {
 
       let data = await responseData.json();
 
-      console.log(data);
       
       if (data.success) {
         alert("Image Uploded!");
@@ -141,7 +139,6 @@ class BisliView extends View {
         oldPrice: +prodOldPrice,
         newPrice: +prodNewPrice,
       };
-      console.log('data:',data);
 
       this.addProduct(e, data, form);
       // this.addProduct(e, form);
@@ -340,7 +337,6 @@ class BisliView extends View {
         body: JSON.stringify({ id: id }),
       });
       const respData = await response.json();
-      console.log(respData.productData);
 
       this.editProductForm(respData.productData);
     });

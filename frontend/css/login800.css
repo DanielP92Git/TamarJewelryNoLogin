@@ -240,7 +240,6 @@ main {
   color: #5c5c5c;
   font-size: 18px;
   font-weight: 500;
-
 }
 
 .hide {
@@ -370,7 +369,7 @@ main {
 }
 
 .rights-text {
-  color: white;
+  color: rgb(130, 130, 130);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */
