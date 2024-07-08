@@ -10,7 +10,7 @@ class CartView extends View {
   _summaryTitle = document.querySelector(".summary-title");
   _itemsBox = document.querySelector(".added-items");
   _summaryDetails = document.querySelector(".summary-details");
-  _checkoutBtn = document.querySelector(".checkout-btn");
+  _checkoutBtn = document.querySelector(".stripe-svg");
   _deleteAllBtn = document.querySelector(".delete-all");
   _host = process.env.API_URL;
   _rate = 3.8;
@@ -38,10 +38,11 @@ class CartView extends View {
   }
 
   _addHandlerCheckout(data) {
-    this._checkoutBtn.addEventListener("click", (e) => {
+    this._checkoutBtn.addEventListener("click", async (e) => {
       e.preventDefault();
       let currency = data[0].currency; // data is model.cart
-      fetch(`${this._host}/create-checkout-session`, {
+      console.log(currency);
+      await fetch(`${this._host}/create-checkout-session`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +61,7 @@ class CartView extends View {
           window.location = url;
         })
         .catch((e) => {
-          console.error(e.error);
+          console.error(e);
         });
     });
   }
@@ -86,7 +87,7 @@ class CartView extends View {
                 ? `$${item.price}`
                 : `$${Number((item.price / this._rate).toFixed(0))}`
             }</div>
-            <img src="${deleteSvg}" class="delete-item"/>
+             <img src="${deleteSvg}" class="delete-item"/> 
             </div>`
           )
           .join("");
@@ -153,6 +154,7 @@ class CartView extends View {
   }
 
   _removeItem(cartNum) {
+    console.log(cartNum);
     if (cartNum !== 0) {
       this._itemsBox.innerHTML = "";
       this.render(cartNum);
@@ -205,14 +207,34 @@ class CartView extends View {
     }
   }
 
+  // resultMessage(message) {
+  //   const container = document.querySelector("#result-message");
+  //   container.innerHTML = message;
+  // }
+
   paypalCheckout(cartData) {
+    const currencyVariable = cartData[0].currency == "$" ? "USD" : "ILS";
+    let myScript = document.querySelector(".paypal-script");
+    myScript.setAttribute(
+      "src",
+      `https://www.paypal.com/sdk/js?client-id=AaT9tGPl-rWXYEgXm6NlUWhsN5BLkqlvYF7ll_sRuf9ifsiwjMmaDQp1EkyD5-KoYtrQQQ-v2TuuqBoX&currency=${currencyVariable}`
+    );
+    let head = document.head;
+    head.insertAdjacentElement("afterbegin", myScript);
+
+    // myScript.addEventListener("load", scriptLoaded, false);
+
     window.paypal
       .Buttons({
         async createOrder() {
           try {
             const cartDetails = cartData.map((item) => {
               const data = {
-                id: item.id,
+                name: item.title,
+                unit_amount: {
+                  currency_code: item.currency == "$" ? "USD" : "ILS",
+                  value: item.price,
+                },
                 quantity: item.quantity,
               };
               return data;
