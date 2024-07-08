@@ -53,9 +53,7 @@ header {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(46, 37, 228); */
 }
-.contact {
-  border-bottom: none;
-}
+
 .main-nav-tab:hover {
   background-color: rgb(255, 242, 201);
   cursor: pointer;
@@ -292,7 +290,7 @@ main {
   align-items: center;
   border: 0.5px solid rgba(0, 0, 0, 0.5);
   border-radius: 5px;
-  padding: 10px 10px;
+  padding: 0 10px;
   margin-bottom: 10px;
   width: 100%;
 
@@ -391,17 +389,17 @@ main {
 }
 
 .price-summary-container {
-  display: flex;
-  flex-flow: column;
-  justify-content: space-between;
-  width: 60%;
-  margin: 30px 10px 30px 0px;
-  /* align-self: flex-end; */
+  width: 40%;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(164, 20, 177); */
 }
-
+.summary-details {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  /* border: 2px solid rgb(164, 20, 177); */
+}
 .total-container {
   display: flex;
   width: 100%;
@@ -419,11 +417,12 @@ main {
 }
 
 .total-price {
-  justify-self: right;
+  align-self: center;
   padding-right: 5px;
   /* margin-right: 5%; */
   /* border: solid firebrick; */
 }
+
 .subtotal,
 .shipping {
   width: 110px;
@@ -477,6 +476,38 @@ main {
   background-color: rgb(245, 0, 0);
   cursor: pointer;
 }
+
+.checkout-btns-container {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  justify-content: space-between;
+
+  /* border: 2px solid red; */
+}
+.check-me-out {
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
+
+.stripe-svg {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  align-self: center;
+  width: 27%;
+}
+
+.stripe-svg:hover {
+  cursor: pointer;
+}
+
+#paypal {
+  border-top: 1px solid black;
+  padding: 2rem;
+  margin-bottom: 2rem;
+
+  width: 90%;
+}
+
 /* ~~~~~~~~~~~~~~ Footer ~~~~~~~~~~~~~~~~~~~~ */
 
 .footer {
