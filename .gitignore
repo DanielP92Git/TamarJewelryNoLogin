@@ -1,6 +1,3 @@
 prettier.config
 .env
-frontend/
-backend/index.js
-backend/indexOld.js
-backend/eslint.config.js
+
