@@ -8,6 +8,12 @@ export const getAPI = async function () {
   return data;
 };
 
+export const chunkProducts = async function () {
+  const response = await fetch(`${host}/chunkProducts`);
+  const data = await response.json();
+  return data;
+};
+
 const fetchUserCartAPI = async function () {
   const response = await fetch(`${host}/getcart`, {
     method: "POST",

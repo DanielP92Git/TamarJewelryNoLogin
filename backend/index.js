@@ -1,18 +1,18 @@
+require("dotenv").config();
 const express = require("express");
 const app = express();
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
 const bcrypt = require("bcrypt");
-require("dotenv").config();
 const mongoose = require("mongoose");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const fs = require("fs");
 
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET
-const baseUrl = process.env.PAYPAL_BASE_URL
+const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
+const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
+const baseUrl = process.env.PAYPAL_BASE_URL;
 
 //
 //* MAIN SETTINGS
@@ -30,8 +30,6 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
 };
-
-app.use(express.static(path.join(__dirname, "frontend")));
 
 app.use(cors(corsOptions));
 
@@ -215,6 +213,8 @@ const Product = mongoose.model("Product", {
 //
 //* APIs
 //
+
+app.use(express.static(path.join(__dirname, "frontend")));
 
 app.get("/", (req, res) => res.send("API endpoint is running"));
 
@@ -742,8 +742,18 @@ const createOrder = async (cart) => {
   // use the cart information passed from the front-end to calculate the purchase unit details
   console.log(
     "shopping cart information passed from the frontend createOrder() callback:",
-    cart,
+    cart
   );
+
+  let totalAmount = cart
+    .reduce((total, item) => {
+      let itemTotal =
+        parseFloat(item.unit_amount.value) * parseInt(item.quantity);
+      return total + itemTotal;
+    }, 0)
+    .toFixed(2);
+
+  const currencyData = cart[0].unit_amount.currency_code;
 
   const accessToken = await generateAccessToken();
   const url = `${baseUrl}/v2/checkout/orders`;
@@ -752,13 +762,26 @@ const createOrder = async (cart) => {
     purchase_units: [
       {
         amount: {
-          currency_code: "USD",
-          value: "100.00",
+          currency_code: currencyData,
+          value: totalAmount,
+          breakdown: {
+            item_total: {
+              currency_code: currencyData,
+              value: totalAmount,
+            },
+          },
         },
+        items: cart,
       },
     ],
+    application_context: {
+      return_url: `${process.env.API_URL}/complete-order`,
+      cancel_url: `${process.env.HOST}/html/cart.html`,
+      user_action: "PAY_NOW",
+      brand_name: "Tamar Kfir Jewelry",
+    },
   };
-
+  
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
@@ -804,7 +827,7 @@ async function handleResponse(response) {
       httpStatusCode: response.status,
     };
   } catch (error) {
-    console.error(error)
+    console.error(error);
     const errorMessage = await response.text();
     throw new Error(errorMessage);
   }
