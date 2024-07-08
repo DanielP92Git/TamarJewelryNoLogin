@@ -217,7 +217,7 @@ class CartView extends View {
     let myScript = document.querySelector(".paypal-script");
     myScript.setAttribute(
       "src",
-      `https://www.paypal.com/sdk/js?client-id=AaT9tGPl-rWXYEgXm6NlUWhsN5BLkqlvYF7ll_sRuf9ifsiwjMmaDQp1EkyD5-KoYtrQQQ-v2TuuqBoX&currency=${currencyVariable}`
+      `https://www.paypal.com/sdk/js?client-id=AQ_Op8cY6HHktDWw0X4y73ydkfGKeN-Tm3T20iWIDPIo4M7OpehX2QYZD0_gpDgtg7RkdRKL51foMNP7&currency=${currencyVariable}`
     );
     let head = document.head;
     head.insertAdjacentElement("afterbegin", myScript);
