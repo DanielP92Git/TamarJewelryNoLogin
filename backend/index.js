@@ -739,90 +739,94 @@ const generateAccessToken = async () => {
 };
 
 const createOrder = async (cart) => {
-  // use the cart information passed from the front-end to calculate the purchase unit details
-  console.log(
-    "shopping cart information passed from the frontend createOrder() callback:",
-    cart
-  );
+  try {
+    // use the cart information passed from the front-end to calculate the purchase unit details
+    console.log(
+      "shopping cart information passed from the frontend createOrder() callback:",
+      cart
+    );
 
-  // Validate and parse the cart items
-  let totalAmount = cart
-    .reduce((total, item) => {
-      // Parse the unit amount and quantity
-      const unitAmount = parseFloat(item.unit_amount.value);
-      const quantity = parseInt(item.quantity, 10);
+    // Validate and parse the cart items
+    let totalAmount = cart
+      .reduce((total, item) => {
+        // Parse the unit amount and quantity
+        const unitAmount = parseFloat(item.unit_amount.value);
+        const quantity = parseInt(item.quantity, 10);
 
-      // Check if unit amount and quantity are valid numbers
-      if (isNaN(unitAmount) || isNaN(quantity) || quantity <= 0) {
-        throw new Error(`Invalid item data: ${JSON.stringify(item)}`);
-      }
+        // Check if unit amount and quantity are valid numbers
+        if (isNaN(unitAmount) || isNaN(quantity) || quantity <= 0) {
+          throw new Error(`Invalid item data: ${JSON.stringify(item)}`);
+        }
 
-      // Calculate the item total
-      const itemTotal = unitAmount * quantity;
-      return total + itemTotal;
-    }, 0)
-    .toFixed(2);
+        // Calculate the item total
+        const itemTotal = unitAmount * quantity;
+        return total + itemTotal;
+      }, 0)
+      .toFixed(2);
 
-  // Check if the total amount is valid
-  if (isNaN(totalAmount)) {
-    throw new Error("Invalid total amount calculated.");
-  }
+    // Check if the total amount is valid
+    if (isNaN(totalAmount)) {
+      throw new Error("Invalid total amount calculated.");
+    }
 
-  // let totalAmount = cart
-  //   .reduce((total, item) => {
-  //     let itemTotal =
-  //       parseFloat(item.unit_amount.value) * parseInt(item.quantity);
-  //     return total + itemTotal;
-  //   }, 0)
-  //   .toFixed(2);
+    // let totalAmount = cart
+    //   .reduce((total, item) => {
+    //     let itemTotal =
+    //       parseFloat(item.unit_amount.value) * parseInt(item.quantity);
+    //     return total + itemTotal;
+    //   }, 0)
+    //   .toFixed(2);
 
-  const currencyData = cart[0].unit_amount.currency_code;
+    const currencyData = cart[0].unit_amount.currency_code;
 
-  const accessToken = await generateAccessToken();
-  const url = `${baseUrl}/v2/checkout/orders`;
-  const payload = {
-    intent: "CAPTURE",
-    purchase_units: [
-      {
-        amount: {
-          currency_code: currencyData,
-          value: totalAmount.toString(),
-          breakdown: {
-            item_total: {
-              currency_code: currencyData,
-              value: totalAmount.toString(),
+    const accessToken = await generateAccessToken();
+    const url = `${baseUrl}/v2/checkout/orders`;
+    const payload = {
+      intent: "CAPTURE",
+      purchase_units: [
+        {
+          amount: {
+            currency_code: currencyData,
+            value: totalAmount.toString(),
+            breakdown: {
+              item_total: {
+                currency_code: currencyData,
+                value: totalAmount.toString(),
+              },
             },
           },
+          items: cart.map((item) => ({
+            ...item,
+            quantity: parseInt(item.quantity, 10).toString(), // Ensure quantity is a string
+          })),
         },
-        items: cart.map((item) => ({
-          ...item,
-          quantity: parseInt(item.quantity, 10).toString(), // Ensure quantity is a string
-        })),
+      ],
+      application_context: {
+        return_url: `${process.env.API_URL}/complete-order`,
+        cancel_url: `${process.env.HOST}/html/cart.html`,
+        user_action: "PAY_NOW",
+        brand_name: "Tamar Kfir Jewelry",
       },
-    ],
-    application_context: {
-      return_url: `${process.env.API_URL}/complete-order`,
-      cancel_url: `${process.env.HOST}/html/cart.html`,
-      user_action: "PAY_NOW",
-      brand_name: "Tamar Kfir Jewelry",
-    },
-  };
+    };
 
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
-      // Uncomment one of these to force an error for negative testing (in sandbox mode only). Documentation:
-      // https://developer.paypal.com/tools/sandbox/negative-testing/request-headers/
-      // "PayPal-Mock-Response": '{"mock_application_codes": "MISSING_REQUIRED_PARAMETER"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "PERMISSION_DENIED"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
-    },
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        // Uncomment one of these to force an error for negative testing (in sandbox mode only). Documentation:
+        // https://developer.paypal.com/tools/sandbox/negative-testing/request-headers/
+        // "PayPal-Mock-Response": '{"mock_application_codes": "MISSING_REQUIRED_PARAMETER"}'
+        // "PayPal-Mock-Response": '{"mock_application_codes": "PERMISSION_DENIED"}'
+        // "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
+      },
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
 
-  return handleResponse(response);
+    return handleResponse(response);
+  } catch (err) {
+    console.log(err);
+  }
 };
 
 const captureOrder = async (orderID) => {
