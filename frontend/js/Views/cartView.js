@@ -213,6 +213,7 @@ class CartView extends View {
   // }
 
   paypalCheckout(cartData) {
+    if (!cartData) return;
     const currencyVariable = cartData[0].currency == "$" ? "USD" : "ILS";
     let myScript = document.querySelector(".paypal-script");
     myScript.setAttribute(
