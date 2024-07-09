@@ -169,13 +169,13 @@ const createLocalStorage = function () {
 export const addToLocalStorage = async function (data) {
   const allProducts = await getAPI();
   const itemId = data.getAttribute("data-id");
-  let prodQuantity;
-  allProducts.find((product) => {
-    if (product.id == itemId) {
-      prodQuantity = product.quantity;
-      return prodQuantity
-    }
-  });
+  let prodQuantity= +data.getAttribute('data-quant')
+  // allProducts.find((product) => {
+  //   if (product.id == itemId) {
+  //     prodQuantity = product.quantity;
+  //     return prodQuantity
+  //   }
+  // });
   const itemImage = data.querySelector(".front-image").src;
   const itemTitle = data.querySelector(".item-title").textContent;
   const currencyCheck = data.dataset.currency
@@ -204,7 +204,7 @@ const addToLocalCart = function (data) {
     price: data.price,
     currency: data.currency,
     id: +data.id,
-    quantity: data.qauntity,
+    quantity: data.quantity,
     amount: 1,
   });
   createLocalStorage();
