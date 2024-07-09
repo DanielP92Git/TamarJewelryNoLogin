@@ -235,7 +235,7 @@ class CartView extends View {
                   currency_code: item.currency == "$" ? "USD" : "ILS",
                   value: item.price,
                 },
-                quantity: item.quantity,
+                quantity: item.quantity.toString(),
               };
               return data;
             });
