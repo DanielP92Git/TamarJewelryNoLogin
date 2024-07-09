@@ -745,13 +745,36 @@ const createOrder = async (cart) => {
     cart
   );
 
+  // Validate and parse the cart items
   let totalAmount = cart
     .reduce((total, item) => {
-      let itemTotal =
-        parseFloat(item.unit_amount.value) * parseInt(item.quantity);
+      // Parse the unit amount and quantity
+      const unitAmount = parseFloat(item.unit_amount.value);
+      const quantity = parseInt(item.quantity, 10);
+
+      // Check if unit amount and quantity are valid numbers
+      if (isNaN(unitAmount) || isNaN(quantity) || quantity <= 0) {
+        throw new Error(`Invalid item data: ${JSON.stringify(item)}`);
+      }
+
+      // Calculate the item total
+      const itemTotal = unitAmount * quantity;
       return total + itemTotal;
     }, 0)
     .toFixed(2);
+
+  // Check if the total amount is valid
+  if (isNaN(totalAmount)) {
+    throw new Error("Invalid total amount calculated.");
+  }
+
+  // let totalAmount = cart
+  //   .reduce((total, item) => {
+  //     let itemTotal =
+  //       parseFloat(item.unit_amount.value) * parseInt(item.quantity);
+  //     return total + itemTotal;
+  //   }, 0)
+  //   .toFixed(2);
 
   const currencyData = cart[0].unit_amount.currency_code;
 
@@ -771,7 +794,10 @@ const createOrder = async (cart) => {
             },
           },
         },
-        items: cart,
+        items: cart.map((item) => ({
+          ...item,
+          quantity: parseInt(item.quantity, 10).toString(), // Ensure quantity is a string
+        })),
       },
     ],
     application_context: {
@@ -781,7 +807,7 @@ const createOrder = async (cart) => {
       brand_name: "Tamar Kfir Jewelry",
     },
   };
-  
+
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
