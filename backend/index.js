@@ -763,11 +763,11 @@ const createOrder = async (cart) => {
       {
         amount: {
           currency_code: currencyData,
-          value: +totalAmount,
+          value: totalAmount.toString(),
           breakdown: {
             item_total: {
               currency_code: currencyData,
-              value: +totalAmount,
+              value: totalAmount.toString(),
             },
           },
         },
