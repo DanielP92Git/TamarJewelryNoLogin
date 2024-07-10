@@ -93,10 +93,10 @@ class CategoriesView extends View {
     this.increaseCartNumber();
     model.handleAddToCart(data);
 
-    let addedMsg = document.querySelector('.added-message')
-    addedMsg.classList.remove('hide')
+    let addedMsg = document.querySelector(".added-message");
+    addedMsg.classList.remove("hide");
     setTimeout(() => {
-      addedMsg.classList.add('hide')
+      addedMsg.classList.add("hide");
     }, 3000);
   }
 
@@ -114,7 +114,9 @@ class CategoriesView extends View {
       const imageMarkup = smallImage
         .map(
           (img) => `
+        <div class="small-image-div">
         <img class="small-image" src="${img}" alt="">
+        </div>
       `
         )
         .join("");
