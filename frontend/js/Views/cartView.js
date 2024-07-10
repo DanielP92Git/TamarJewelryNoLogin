@@ -207,10 +207,6 @@ class CartView extends View {
     }
   }
 
-  // resultMessage(message) {
-  //   const container = document.querySelector("#result-message");
-  //   container.innerHTML = message;
-  // }
 
   paypalCheckout(cartData) {
     if (cartData.length == 0) return;

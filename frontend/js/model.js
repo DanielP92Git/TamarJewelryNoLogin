@@ -8,11 +8,34 @@ export const getAPI = async function () {
   return data;
 };
 
-export const chunkProducts = async function () {
-  const response = await fetch(`${host}/chunkProducts`);
-  const data = await response.json();
-  return data;
+export const fetchProductsByCategory = async function (categoryName) {
+  const category = categoryName;
+  const spinner = document.querySelector(".loader");
+  spinner.classList.remove("spinner-hidden");
+
+  try {
+    const response = await fetch(
+      `${process.env.API_URL}/productsByCategory`, // Adjust endpoint to fetch all products
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ category }),
+      }
+    );
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    console.error("Failed to fetch products", err);
+  } finally {
+    // this.isLoading = false;
+    spinner.classList.add("spinner-hidden");
+  }
 };
+// export const chunkProducts = async function () {
+//   const response = await fetch(`${host}/chunkProducts`);
+//   const data = await response.json();
+//   return data;
+// };
 
 const fetchUserCartAPI = async function () {
   const response = await fetch(`${host}/getcart`, {
@@ -119,8 +142,6 @@ export const setPreviewItem = async function (data) {
       }
     });
   });
-
-
 };
 
 //////////////////////
@@ -169,7 +190,7 @@ const createLocalStorage = function () {
 export const addToLocalStorage = async function (data) {
   const allProducts = await getAPI();
   const itemId = data.getAttribute("data-id");
-  let prodQuantity= +data.getAttribute('data-quant')
+  let prodQuantity = +data.getAttribute("data-quant");
   // allProducts.find((product) => {
   //   if (product.id == itemId) {
   //     prodQuantity = product.quantity;
@@ -178,7 +199,7 @@ export const addToLocalStorage = async function (data) {
   // });
   const itemImage = data.querySelector(".front-image").src;
   const itemTitle = data.querySelector(".item-title").textContent;
-  const currencyCheck = data.dataset.currency
+  const currencyCheck = data.dataset.currency;
 
   let itemPrice = data
     .querySelector(".item-price")

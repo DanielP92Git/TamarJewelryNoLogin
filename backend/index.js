@@ -300,21 +300,27 @@ app.get("/allproducts", async (req, res) => {
   res.send(products);
 });
 
-app.post("/chunkProducts", async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-  console.log("page:", page, "limit:", limit, "skip:", skip);
-  let category = req.body.checkCategory;
-  try {
-    const products = await Product.find({ category: category })
-      .skip(skip)
-      .limit(limit);
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ error: "Failed to fetch products:", err });
-  }
+app.post("/productsByCategory", async (req, res) => {
+  const category = req.body.category;
+  let products = await Product.find({ category: category });
+  res.send(products);
 });
+
+// app.post("/chunkProducts", async (req, res) => {
+//   const page = parseInt(req.query.page) || 1;
+//   const limit = parseInt(req.query.limit) || 10;
+//   const skip = (page - 1) * limit;
+//   console.log("page:", page, "limit:", limit, "skip:", skip);
+//   let category = req.body.checkCategory;
+//   try {
+//     const products = await Product.find({ category: category })
+//       .skip(skip)
+//       .limit(limit);
+//     res.json(products);
+//   } catch (err) {
+//     res.status(500).json({ error: "Failed to fetch products:", err });
+//   }
+// });
 
 const authUser = async function (req, res, next) {
   try {
@@ -781,7 +787,7 @@ const createOrder = async (cart) => {
       brand_name: "Tamar Kfir Jewelry",
     },
   };
-  
+
   const response = await fetch(url, {
     headers: {
       "Content-Type": "application/json",
