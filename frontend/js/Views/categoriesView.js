@@ -201,7 +201,7 @@ class CategoriesView extends View {
 
       this.selectedCurrency = currencySelector.value;
       this.page = 1; // Reset page when currency changes
-      this.fetchAllProducts();
+      this.fetchProductsByCategory();
     });
   }
 
