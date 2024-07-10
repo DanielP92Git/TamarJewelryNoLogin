@@ -164,6 +164,7 @@ class CategoriesView extends View {
         </div>
         <div class="price-text">Price:</div>
         <div class="item-price_modal">${curSign}${price}</div>
+        <button class="add-to-cart-btn_modal">Add to Cart</button>
         <div class="added-message hide">
           <span class="added-span"></span>
             Item added to cart!
