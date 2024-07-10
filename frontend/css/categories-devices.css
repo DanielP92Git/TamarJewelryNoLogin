@@ -575,6 +575,33 @@ main {
   transition-duration: 500ms;
 }
 
+.added-message {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  border: 1px solid;
+  border-radius: 5px;
+  padding: 0 5px 5px 5px;
+  margin-top: 1rem;
+  opacity: 1;
+  transition: all;
+  transition-duration: 1s;
+  background-color: rgba(240, 248, 255, 0.24);
+}
+
+.added-span {
+  position: relative;
+  width: 99%;
+  border: 3px solid rgb(76, 215, 74);
+  border-radius: 5px;
+}
+
+.hide {
+  opacity: 0;
+  transition: all;
+  transition-duration: 1s;
+}
+
 /* ----------- Slider end ----------------- */
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
