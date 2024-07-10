@@ -207,8 +207,8 @@ a:hover {
 /* ```````Navbar END`````````` */
 
 .category-title {
-  margin-top: 5px;
-  margin-bottom: 45px;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
   font-weight: 100;
   font-size: 2.3rem;
 
@@ -216,17 +216,17 @@ a:hover {
     "Lucida Sans", Arial, sans-serif;
 }
 
-#sort {
-  margin-bottom: 1rem;
-
-  width: 9rem;
-  height: 2rem;
-}
-
 #currency {
   margin-bottom: 1rem;
 
   width: 5rem;
+  height: 2rem;
+}
+
+#sort {
+  margin-bottom: 1rem;
+
+  width: 9rem;
   height: 2rem;
 }
 
@@ -244,15 +244,6 @@ a:hover {
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(40, 228, 37); */
-}
-
-@keyframes rotation {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 .products-container {
@@ -274,15 +265,19 @@ a:hover {
   position: relative;
   cursor: pointer;
   margin-bottom: 3rem;
+  /* width: 20rem;
+  height: 22rem; */
   border: 1px solid rgb(182, 182, 182);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(179, 0, 255); */
 }
 
-.rear-image {
-  opacity: 0;
-  z-index: -1;
+.front-image {
+  /* width: 90%; */
+  transition: all;
+  transition-duration: 800ms;
+  transition-property: all;
 }
 
 .image-item {
@@ -298,13 +293,9 @@ a:hover {
 .rear-image {
   position: absolute;
   top: 0;
+  opacity: 0;
+  z-index: -1;
 
-  transition: all;
-  transition-duration: 800ms;
-  transition-property: all;
-}
-
-.front-image {
   transition: all;
   transition-duration: 800ms;
   transition-property: all;
@@ -325,10 +316,14 @@ a:hover {
   border: 1px solid black;
   background-color: rgb(255, 194, 194);
   width: 200px;
-  height: 40px;
+  height: 30px;
 
-  transition: all;
-  transition-duration: 500ms;
+  /* transition: all;
+  transition-duration: 500ms; */
+}
+
+.item-title {
+  top: 2.8rem;
 }
 
 .item-price {
@@ -340,9 +335,11 @@ a:hover {
   opacity: 0;
   position: absolute;
 }
+
 .item-title_modal {
   font-size: 1.4rem;
 }
+
 .item-description_modal {
   display: flex;
   flex-flow: column;
@@ -365,7 +362,6 @@ a:hover {
 
 .large-img-item {
   width: 48%;
-  /* height: 50%; */
   margin: 5px;
 }
 /* ----------- Slider end ----------------- */
@@ -521,13 +517,13 @@ a:hover {
   display: flex;
   flex-flow: column;
   align-items: center;
-  max-width: 60%;
+  width: 60%;
 
   /* border: 1px solid blue; */
 }
 
 .big-image {
-  width: 100%;
+  width: auto;
   height: 70%;
 
   /* border: 1px solid red; */
@@ -535,14 +531,12 @@ a:hover {
 
 .small-images-container {
   display: flex;
-  flex-flow: row;
   margin-top: 15px;
   max-width: 90%;
-  width: 80%;
-  /* height: 40%; */
+  width: 100%;
   overflow-x: scroll;
 
-  /* border: 1px solid green; */
+  border: 1px solid rgb(0, 0, 0);
 }
 
 .small-images-container::-webkit-scrollbar {
@@ -563,12 +557,20 @@ a:hover {
   cursor: pointer;
 }
 
-.small-image {
-  padding: 5px;
+.small-image-div {
+  padding: 4px;
   width: 25%;
   height: 100%;
 
-  /* border: 1px solid rgb(36, 190, 232); */
+  /* border: 2px solid blue; */
+}
+
+.small-image {
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+
+  /* border: 2px solid rgb(0, 255, 30); */
 }
 
 .small-image:hover {
@@ -599,13 +601,15 @@ a:hover {
   font-weight: 800;
 }
 
+/* .item-price_modal {
+} */
+
 .add-to-cart-btn_modal {
   align-self: center;
   cursor: pointer;
   width: 200px;
   height: 30px;
-  position: absolute;
-  top: 23rem;
+  margin-top: 2rem;
   background-color: rgba(232, 165, 138, 0.559);
   border: none;
   z-index: 2;
@@ -618,6 +622,37 @@ a:hover {
 
   transition: all;
   transition-duration: 500ms;
+}
+
+.added-message {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  border: 1px solid;
+  border-radius: 5px;
+  padding: 0 5px 5px 5px;
+  margin-top: 1rem;
+  opacity: 1;
+  transition: all;
+  transition-duration: 1s;
+  background-color: rgba(240, 248, 255, 0.24);
+}
+
+.added-span {
+  position: relative;
+  width: 99%;
+  border: 3px solid rgb(76, 215, 74);
+  border-radius: 5px;
+}
+
+.hide {
+  opacity: 0;
+  transition: all;
+  transition-duration: 1s;
+}
+
+.image-hidden {
+  display: none;
 }
 
 .loader {
@@ -644,6 +679,15 @@ a:hover {
   height: 12px;
   border-radius: 50%;
   z-index: 10;
+}
+
+@keyframes rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .spinner-hidden {

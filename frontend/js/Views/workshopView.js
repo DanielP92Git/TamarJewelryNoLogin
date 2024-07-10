@@ -20,7 +20,7 @@ class WorkshopView extends View {
       );
       setTimeout(() => {
         nextImage();
-      }, 3000);
+      }, 6000);
     };
 
     const nextImage = function () {
