@@ -8,8 +8,8 @@ import * as model from "../model.js";
 /////////////////////////////////////////////////////////
 
 class CategoriesView extends View {
-  constructor(parentElement) {
-    super(parentElement);
+  constructor(parentElement, category) {
+    super(parentElement, category);
     this.page = 1;
     this.limit = 6;
     this.isLoading = false;
@@ -18,16 +18,16 @@ class CategoriesView extends View {
     this.products = [];
     this.productsContainer = document.querySelector(".products-container");
     this.modal = document.querySelector(".modal");
+    this.category = category; // Category passed when navigating to the page
 
     // Initial fetch and setup
-    // this.fetchProducts();
-    this.fetchAllProducts();
+    this.fetchProductsByCategory();
     this.setupScrollListener();
     this.setupCurrencyHandler();
     this.setupSortHandler();
     this.addHandlerAddToCart();
   }
-  // _parentElement = document.querySelector(".products-container");
+
   increaseCartNumber() {
     this._cartNumber.forEach((cartNum) => {
       this._cartNewValue = +cartNum.textContent + 1;
@@ -214,22 +214,25 @@ class CategoriesView extends View {
     });
   }
 
-  async fetchAllProducts() {
+  async fetchProductsByCategory() {
     if (this.isLoading) return;
     this.isLoading = true;
 
+    const category = this.category;
     const spinner = this.productsContainer.querySelector(".loader");
     spinner.classList.remove("spinner-hidden");
 
     try {
       const response = await fetch(
-        `${process.env.API_URL}/allProducts`,
+        `${process.env.API_URL}/productsByCategory`, // Adjust endpoint to fetch all products
         {
-          method: "GET",
+          method: "POST",
           headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ category }),
         }
       );
-      this.products = await response.json();
+      const data = await response.json();
+      this.products = data;
 
       this.sortAndDisplayProducts();
     } catch (err) {
@@ -317,5 +320,4 @@ class CategoriesView extends View {
     this.productsContainer.insertAdjacentHTML("beforeend", markup);
   }
 }
-
 export default CategoriesView;
