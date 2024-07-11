@@ -83,7 +83,6 @@ const controlCategoriesPage = async function () {
     const idAttributeValue = body.id; // Assuming body id is "categories bracelets"
     const idParts = idAttributeValue.split(" ");
     const categoryName = idParts[idParts.length - 1]; // Extracted category name "bracelets"
-    // console.log(categoryName);
     const parentElement = document.querySelector('.parent-element')
     const categoriesView = new CategoriesView(parentElement, categoryName);
 
@@ -99,11 +98,10 @@ const controlCategoriesPage = async function () {
     categoriesView.persistCartNumber(await model.checkCartNumber());
 
     // 1) Load products from API
-    const chunkData = await model.fetchProductsByCategory(categoryName);
+    // const chunkData = await model.fetchProductsByCategory(categoryName);
     // 2) Render products
-    model.setPreviewItem(chunkData);
-    categoriesView.addHandlerPreview(chunkData);
-    // categoriesView.infiniteScrolling()
+    // model.setPreviewItem(chunkData);
+    
   } catch (err) {
     console.error(err);
   }

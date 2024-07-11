@@ -302,9 +302,28 @@ app.get("/allproducts", async (req, res) => {
 
 app.post("/productsByCategory", async (req, res) => {
   const category = req.body.category;
-  let products = await Product.find({ category: category });
-  res.send(products);
+  const page = req.body.page; 
+  const limit = 6;
+
+  try {
+    console.log(page);
+    const skip = (page - 1) * limit;
+
+    // Query products with pagination
+    let products = await Product.find({ category: category })
+      .skip(skip)
+      .limit(limit);
+    res.json(products);
+  } catch (err) {
+    console.log(err);
+  }
 });
+
+// app.post("/productsByCategory", async (req, res) => {
+//   const category = req.body.category;
+//   let products = await Product.find({ category: category });
+//   res.send(products);
+// });
 
 // app.post("/chunkProducts", async (req, res) => {
 //   const page = parseInt(req.query.page) || 1;
