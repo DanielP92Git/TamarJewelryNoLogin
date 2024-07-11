@@ -19,14 +19,14 @@ header {
 }
 
 .main-image {
-  background-image: url(../imgs/eric-fung-Z0GZrpwcc5Y-unsplash.jpg);
+  background-image: url(../imgs/Hero-imgs/DSC_0440.jpg);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
   position: relative;
 
-  width: 100%;
-  height: 100vh;
+  /* width: 100%; */
+  height: 80vh;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(177, 20, 143); */
@@ -494,8 +494,8 @@ main {
 
 .categories-container {
   display: grid;
-  grid-template-columns:1fr 1fr;
-  
+  grid-template-columns: 1fr 1fr;
+
   row-gap: 10px;
   column-gap: 10px;
   width: 95%;
@@ -508,7 +508,7 @@ main {
 }
 
 .category-box {
-  grid-column:  span 1;
+  grid-column: span 1;
   text-decoration: none;
   padding: 1rem;
   /* ~~~~ FOR DEBUGGING~~~~*/
