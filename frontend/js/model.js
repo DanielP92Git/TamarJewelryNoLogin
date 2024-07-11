@@ -8,29 +8,29 @@ export const getAPI = async function () {
   return data;
 };
 
-export const fetchProductsByCategory = async function (categoryName) {
-  const category = categoryName;
-  const spinner = document.querySelector(".loader");
-  spinner.classList.remove("spinner-hidden");
+// export const fetchProductsByCategory = async function (categoryName) {
+//   const category = categoryName;
+//   const spinner = document.querySelector(".loader");
+//   spinner.classList.remove("spinner-hidden");
 
-  try {
-    const response = await fetch(
-      `${process.env.API_URL}/productsByCategory`, // Adjust endpoint to fetch all products
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ category }),
-      }
-    );
-    const data = await response.json();
-    return data;
-  } catch (err) {
-    console.error("Failed to fetch products", err);
-  } finally {
-    // this.isLoading = false;
-    spinner.classList.add("spinner-hidden");
-  }
-};
+//   try {
+//     const response = await fetch(
+//       `${process.env.API_URL}/productsByCategory`, // Adjust endpoint to fetch all products
+//       {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ category }),
+//       }
+//     );
+//     const data = await response.json();
+//     return data;
+//   } catch (err) {
+//     console.error("Failed to fetch products", err);
+//   } finally {
+//     // this.isLoading = false;
+//     spinner.classList.add("spinner-hidden");
+//   }
+// };
 // export const chunkProducts = async function () {
 //   const response = await fetch(`${host}/chunkProducts`);
 //   const data = await response.json();
