@@ -118,7 +118,7 @@ class CategoriesView extends View {
         .map(
           (img) => `
           <div class="small-image-div">
-        <img class="small-image" src="${img}" alt="">
+        <img class="small-image" src="${img}" alt="" loading="lazy">
         </div>
       `
         )
@@ -156,7 +156,7 @@ class CategoriesView extends View {
     <div class="modal-item-container">
       <img class="close-modal-btn" src="${closeSvg}" alt="">
       <div class="images-container">
-      <img class="big-image" src="${image}" alt="">
+      <img class="big-image" src="${image}" alt="" loading="lazy">
       
       <div class="small-images-container">
       ${imgMrk}
@@ -357,8 +357,7 @@ class CategoriesView extends View {
 
     return `
       <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}">
-        <img class="image-item front-image" src="${image}" />
-        <img class="image-item rear-image" src="${image}" />
+        <img class="image-item front-image" src="${image}" loading="lazy"/>
         <button class="add-to-cart-btn">Add to Cart</button>
         <div class="item-title">${name}</div>
         <div class="item-description">${description}</div>
