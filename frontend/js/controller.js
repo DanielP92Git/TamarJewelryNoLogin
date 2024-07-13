@@ -96,11 +96,6 @@ const controlCategoriesPage = async function () {
     categoriesView.addRevealHandler();
     categoriesView.addMobileHandler();
     categoriesView.persistCartNumber(await model.checkCartNumber());
-
-    // 1) Load products from API
-    // const chunkData = await model.fetchProductsByCategory(categoryName);
-    // 2) Render products
-    // model.setPreviewItem(chunkData);
     
   } catch (err) {
     console.error(err);
