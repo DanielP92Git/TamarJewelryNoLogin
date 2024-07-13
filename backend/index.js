@@ -881,6 +881,10 @@ app.post("/orders/:orderID/capture", async (req, res) => {
   }
 });
 
+app.get('/ping', (req, res) => {
+  res.send('Server is awake!');
+});
+
 app.listen(process.env.SERVER_PORT, (error) => {
   if (!error) {
     console.log("Server Running on Port " + process.env.SERVER_PORT);
