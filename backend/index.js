@@ -216,7 +216,7 @@ const Product = mongoose.model("Product", {
 
 app.use(express.static(path.join(__dirname, "frontend")));
 
-app.get("/", (req, res) => res.send("API endpoint is running"));
+app.get("/api", (req, res) => res.send("API endpoint is running"));
 
 app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "html/bambaYafa.html")).status(200);

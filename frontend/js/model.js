@@ -63,7 +63,6 @@ export const handleLoadStorage = async function () {
       if (!userData) return;
       // setItems(data);
 
-      // const userStorage = await handleLoadStorage()
       if (userData) {
         const allProducts = await getAPI();
 
@@ -95,7 +94,6 @@ export const handleLoadStorage = async function () {
 };
 
 export const setItems = async function (data) {
-  // const userStorage = await handleLoadStorage()
   const allProducts = await getAPI();
 
   const filtered = Object.entries(data).filter(([id, amount]) => {
