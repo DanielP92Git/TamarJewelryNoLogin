@@ -223,7 +223,7 @@ app.get("/admin", (req, res) => {
 });
 
 // Add product to database
-app.post("/addproduct", async (req, res) => {
+app.post("/upload", async (req, res) => {
   let products = await Product.find({});
   let id;
 
@@ -608,7 +608,7 @@ app.post("/upload", multipleUpload, (req, res) => {
     });
 
     let makeUrl = smallImages.map(({ filename }) => {
-      return `https://tamarj-api.onrender.com/smallImages/${filename}`;
+      return `${process.env.API_URL}/smallImages/${filename}`;
     });
 
     let localUrl = smallImages.map(({ filename }) => {
@@ -619,7 +619,7 @@ app.post("/upload", multipleUpload, (req, res) => {
       success: 1,
       file: req.files,
 
-      mainImageUrl: `https://tamarj-api.onrender.com/uploads/${req.files.mainImage[0].filename}`,
+      mainImageUrl: `${process.env.API_URL}/${req.files.mainImage[0].filename}`,
       mainImageUrlLocal: `http://localhost:4000/uploads/${req.files.mainImage[0].filename}`,
       smallImagesUrl: makeUrl,
       smallImagesUrlLocal: localUrl,
