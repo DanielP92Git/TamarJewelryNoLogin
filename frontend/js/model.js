@@ -2,11 +2,11 @@ require("dotenv").config();
 export const cart = [];
 const host = process.env.API_URL;
 
-export const getAPI = async function () {
-  const response = await fetch(`${host}/allproducts`);
-  const data = await response.json();
-  return data;
-};
+// export const getAPI = async function () {
+//   const response = await fetch(`${host}/allproducts`);
+//   const data = await response.json();
+//   return data;
+// };
 
 // export const fetchProductsByCategory = async function (categoryName) {
 //   const category = categoryName;
@@ -63,60 +63,60 @@ export const handleLoadStorage = async function () {
       if (!userData) return;
       // setItems(data);
 
-      if (userData) {
-        const allProducts = await getAPI();
+      // if (userData) {
+      //   const allProducts = await getAPI();
 
-        const filtered = Object.entries(userData).filter(([id, amount]) => {
-          if (amount > 0) return id;
-        });
-        const filteredId = filtered.map((arr) => +arr[0]);
+      //   const filtered = Object.entries(userData).filter(([id, amount]) => {
+      //     if (amount > 0) return id;
+      //   });
+      //   const filteredId = filtered.map((arr) => +arr[0]);
 
-        allProducts.filter((product) => {
-          filteredId.forEach((cartId) => {
-            if (cartId == product.id) {
-              cart.push({
-                title: product.name,
-                description: product.description,
-                image: product.image,
-                price: product.ils_price,
-                id: product.id,
-                quantity: product.quantity,
-                amount: 1,
-              });
-            }
-          });
-        });
-      }
+      //   allProducts.filter((product) => {
+      //     filteredId.forEach((cartId) => {
+      //       if (cartId == product.id) {
+      //         cart.push({
+      //           title: product.name,
+      //           description: product.description,
+      //           image: product.image,
+      //           price: product.ils_price,
+      //           id: product.id,
+      //           quantity: product.quantity,
+      //           amount: 1,
+      //         });
+      //       }
+      //     });
+      //   });
+      // }
     } // Here the 'data' is ALL users cartdata
   } catch (err) {
     console.error(err);
   }
 };
 
-export const setItems = async function (data) {
-  const allProducts = await getAPI();
+// export const setItems = async function (data) {
+//   const allProducts = await getAPI();
 
-  const filtered = Object.entries(data).filter(([id, amount]) => {
-    if (amount > 0) return id;
-  });
-  const filteredId = filtered.map((arr) => +arr[0]);
+//   const filtered = Object.entries(data).filter(([id, amount]) => {
+//     if (amount > 0) return id;
+//   });
+//   const filteredId = filtered.map((arr) => +arr[0]);
 
-  allProducts.filter((product) => {
-    filteredId.forEach((cartId) => {
-      if (cartId == product.id) {
-        cart.push({
-          title: product.name,
-          description: product.description,
-          image: product.image,
-          price: product.ils_price,
-          qauntity: product.qauntity,
-          id: product.id,
-          amount: 1,
-        });
-      }
-    });
-  });
-};
+//   allProducts.filter((product) => {
+//     filteredId.forEach((cartId) => {
+//       if (cartId == product.id) {
+//         cart.push({
+//           title: product.name,
+//           description: product.description,
+//           image: product.image,
+//           price: product.ils_price,
+//           qauntity: product.qauntity,
+//           id: product.id,
+//           amount: 1,
+//         });
+//       }
+//     });
+//   });
+// };
 
 export const setPreviewItem = async function (data) {
   const allProducts = data;
@@ -186,7 +186,7 @@ const createLocalStorage = function () {
 };
 
 export const addToLocalStorage = async function (data) {
-  const allProducts = await getAPI();
+  // const allProducts = await getAPI();
   const itemId = data.getAttribute("data-id");
   let prodQuantity = +data.getAttribute("data-quant");
   // allProducts.find((product) => {
