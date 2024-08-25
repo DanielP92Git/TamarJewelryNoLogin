@@ -336,7 +336,7 @@ h1 {
 
 .workshop-costs {
   width: 65vw;
-  height: 35rem;
+  height: 100%;
   font-size: 1.2rem;
   padding: 1rem;
   z-index: 3;
@@ -364,12 +364,12 @@ h1 {
   display: grid;
   grid-template-rows: 1fr 1fr;
   border-bottom: 1px solid;
-  padding: 10px 0 1px 0;
+  padding: 15px 0 1px 0;
 }
 
 .contact-block-last {
   border: none;
-  padding: 10px 0 1px 0;
+  padding: 15px 0 1px 0;
 }
 
 .whatsapp-svg {
@@ -381,8 +381,6 @@ h1 {
 .whatsapp-atr {
   text-decoration: none;
 }
-
-
 
 .go-to-top {
   position: relative;
