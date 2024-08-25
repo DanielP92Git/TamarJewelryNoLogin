@@ -259,6 +259,7 @@ header {
 main {
   display: flex;
   flex-flow: column;
+  align-items: center;
 
   max-height: 160rem;
   width: 100%;
@@ -274,15 +275,16 @@ h1 {
     sans-serif;
   text-align: center;
   width: 100%;
+  margin-bottom: 2rem;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(40, 228, 37); */
 }
 
-.first-row-container,
-.second-row-container {
+.workshop-description-container {
   display: flex;
   flex-flow: column;
+  align-items: center;
   box-sizing: border-box;
   margin-top: 2rem;
   margin-bottom: 2rem;
@@ -294,8 +296,7 @@ h1 {
   /* border: 2px solid rgb(37, 50, 228); */
 }
 
-.workshop-description,
-.workshop-description-second {
+.workshop-description {
   background-color: rgba(245, 245, 220, 0.9);
   box-shadow: 12px 2px 30px 2px rgb(168, 163, 154);
   font-size: 1.2rem;
@@ -309,10 +310,10 @@ h1 {
 }
 
 .workshop-description--img {
-  /* display: none; */
-  width: 100%;
+  width: 70%;
   height: 100%;
-  margin-top: 50px;
+  margin-top: 3rem;
+  margin-bottom: 3rem;
   z-index: -3;
 
   box-shadow: 1px 3px 30px 2px rgba(133, 143, 143, 0.646);
@@ -385,13 +386,23 @@ h1 {
 }
 
 .go-to-top {
-  position: relative;
-  border: 1px solid;
-  width: 25%;
-  background-color: rgba(255, 255, 255, 0.712);
-  padding: 5px;
-  margin: 2rem;
   align-self: center;
+
+  width: 3rem;
+  height: 3rem;
+  margin: 4rem;
+  font-size: 2rem;
+  border: none;
+  border-radius: 50%;
+  background-image: linear-gradient(
+    rgba(255, 166, 0, 0.653),
+    rgba(255, 0, 0, 0.553)
+  );
+  padding: 5px;
+  color: rgb(62, 62, 62);
+
+  /* ~~~~ FOR DEBUGGING~~~~ */
+  /* border: 2px solid rgb(37, 155, 228); */
 }
 
 .footer {
@@ -401,8 +412,6 @@ h1 {
   padding-top: 0.5rem;
   background-color: rgb(132, 132, 132);
   font-family: 'Raleway';
-
-
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */
