@@ -20,9 +20,8 @@ class WorkshopView extends View {
       );
       setTimeout(() => {
         nextImage();
-      }, 6000);
+      }, 4500);
     };
-
     const nextImage = function () {
       if (curImg === maxImages - 1) {
         curImg = 0;
