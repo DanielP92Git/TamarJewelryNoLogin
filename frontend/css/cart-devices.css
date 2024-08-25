@@ -519,6 +519,8 @@ main {
   padding-top: 0.5rem;
   margin-top: 3rem;
   background-color: rgb(132, 132, 132);
+  font-family: 'Raleway';
+
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(255, 51, 0); */

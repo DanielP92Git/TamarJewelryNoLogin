@@ -296,6 +296,7 @@ h1 {
   font-size: 1.2rem;
   padding: 1rem;
   box-sizing: border-box;
+  font-family: 'Raleway';
   padding: 30px;
 }
 
@@ -371,6 +372,7 @@ h1 {
   padding-left: 10px;
   padding-bottom: 5px;
   border-bottom: 0.5px solid rgb(66, 66, 66);
+  font-family: 'Raleway';
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -383,6 +385,8 @@ h1 {
   align-items: center;
   width: 100%;
   height: 4rem;
+  font-family: 'Raleway';
+
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid rgb(210, 28, 140); */

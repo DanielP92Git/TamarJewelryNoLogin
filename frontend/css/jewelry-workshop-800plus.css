@@ -227,7 +227,7 @@ header {
   display: flex;
   flex-flow: column;
   width: 100%;
-  height: 100vh;
+  height: 86vh;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(20, 177, 75); */
@@ -236,8 +236,8 @@ header {
 .slide-images-container {
   display: flex;
   overflow: hidden;
-  height: 80vh;
-  max-height: 80vh;
+  height: 86vh;
+  max-height: 86vh;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(177, 20, 143); */
