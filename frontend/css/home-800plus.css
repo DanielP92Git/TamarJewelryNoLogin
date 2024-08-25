@@ -103,6 +103,7 @@ header {
   height: 50px;
   color: black;
   font-size: 1.1rem;
+  font-family: 'Raleway';
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -293,7 +294,7 @@ a:hover {
 }
 
 .subscribe-label {
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   margin-right: 20px;
   font-size: 1.5rem;
   padding: 5px;
@@ -365,7 +366,7 @@ a:hover {
 }
 
 h1 {
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
   margin: 30px 0px;
   width: 95%;
   font-size: 2.5rem;
@@ -524,12 +525,24 @@ main {
 }
 
 .category-name {
-  color: white;
+  /* display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40%; */
+  color: rgb(82, 82, 82);
   position: relative;
   bottom: 100px;
   left: 50px;
   font-size: 2rem;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-image: linear-gradient( 
+    rgba(255, 255, 255, 0.9),
+    rgba(240, 240, 240, 0.251)
+  );
+  /* background-color:  rgba(0, 0, 0, 0.3); */
+  font-family: 'Raleway';
+  font-weight: 500;
+  text-align: center;
+  border-radius: 3px;
   padding: 5px;
 }
 

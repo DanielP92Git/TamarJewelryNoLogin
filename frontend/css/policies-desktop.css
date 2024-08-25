@@ -103,6 +103,7 @@ a {
   height: 50px;
   color: black;
   font-size: 1.1rem;
+  font-family: 'Raleway';
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -175,6 +176,10 @@ a:hover {
 
 .shoppingcart-svg:hover {
   fill: rgb(121, 221, 255);
+}
+
+.icons-container {
+  display: none;
 }
 
 .main-nav-tab.login {
@@ -275,11 +280,22 @@ h1 {
   text-align: center;
   font-size: 1.2rem;
   margin: 1.3rem;
+  font-family: 'Raleway';
+  word-spacing: 3px;
+  line-height: 1.6rem;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
   /* border: 2px solid rgb(37, 50, 228); */
 }
 
+h2,
+h3 {
+  font-family: 'Raleway';
+}
+.countries {
+  font-weight: 700;
+  text-decoration: underline;
+}
 .shipping-policy,
 .return-policy,
 .workshop-description {
@@ -289,6 +305,7 @@ h1 {
   padding: 3rem;
   box-sizing: border-box;
   margin-bottom: 3rem;
+  font-family: 'Raleway';
 
   width: 70%;
   max-height: 100%;

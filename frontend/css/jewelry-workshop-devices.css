@@ -3,18 +3,6 @@ body {
   overflow-x: hidden;
 }
 
-header {
-  display: flex;
-  flex-flow: column;
-  width: 100%;
-  /* height: 100%; */
-
-  margin-bottom: 2rem;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(177, 20, 143); */
-}
-
 /* ====MENU SETTINGS==== */
 
 .menu {
@@ -76,6 +64,7 @@ header {
   width: 160px;
   color: black;
   padding-left: 10px;
+  font-family: 'Raleway';
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -164,21 +153,61 @@ header {
   display: none;
 }
 
-.main-images-container {
+header {
   display: flex;
+  flex-flow: column;
+  width: 100vw;
+  height: 55vh;
+  position: relative;
+
+  margin-bottom: 2rem;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid rgb(177, 20, 143); */
+}
+
+@media only screen and (max-width: 450px) {
+  header {
+    margin-bottom: -3rem;
+  }
+}
+
+.slide-images-container {
+  display: flex;
+
+  position: absolute;
+  top: 3rem;
+
+  object-fit: contain;
+
+  height: 83%;
+  width: 100%;
+
   overflow: hidden;
-  height: 70%;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(21, 224, 255); */
 }
 
-.workshop-image {
-  width: 100%;
+.slide-image {
+  /* object-fit: contain; */
+  /* position: relative;
+  top: 9rem; */
+  height: 100%;
+  width: 100vw;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid rgb(20, 177, 25); */
+}
+
+.slide-image-img {
+  object-fit: contain;
+  width: 100vw;
+  height: 100%;
   transition: transform 1s;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(20, 177, 93); */
+  /* border: 4px solid rgb(238, 255, 0); */
 }
 
 #login-tab {

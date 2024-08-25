@@ -9,7 +9,7 @@ class WorkshopView extends View {
   * * --Workshop page images slider--
   */
   _imageSlider() {
-    const images = document.querySelectorAll(".workshop-image");
+    const images = document.querySelectorAll(".slide-image-img");
 
     let curImg = 0;
     const maxImages = images.length;
