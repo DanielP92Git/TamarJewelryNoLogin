@@ -290,6 +290,15 @@ h1 {
   /* border: 2px solid rgb(40, 228, 37); */
 }
 
+/* .first-row-container {
+
+} */
+
+.first-row-container {
+  display: flex;
+  flex-flow: column;
+}
+
 .workshop-description {
   background-color: rgba(245, 245, 220, 0.9);
   box-shadow: 12px 2px 30px 2px rgb(168, 163, 154);
@@ -298,6 +307,12 @@ h1 {
   box-sizing: border-box;
   font-family: 'Raleway';
   padding: 30px;
+}
+
+.description-img {
+  width: 50%;
+  margin-top: 3rem;
+ align-self: center;
 }
 
 .go-to-top {
