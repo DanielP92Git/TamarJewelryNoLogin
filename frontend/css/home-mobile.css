@@ -263,8 +263,8 @@ p {
   align-items: center;
   width: 160px;
   color: black;
-  /* padding: 20px 0; */
   padding-left: 10px;
+  font-family: 'Raleway';
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/

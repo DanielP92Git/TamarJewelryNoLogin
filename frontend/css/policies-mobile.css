@@ -96,6 +96,7 @@ header {
   width: 160px;
   color: black;
   padding-left: 10px;
+  font-family: 'Raleway';
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -334,6 +335,7 @@ h1 {
 }
 
 h3 {
+  font-family: 'Raleway';
   margin: 0 15px 25px 15px;
 }
 
