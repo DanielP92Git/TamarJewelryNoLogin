@@ -3,4 +3,5 @@ html, body, img, header, ul, li, p, svg, div, nav, h1, main, a, label, input, .m
     padding: 0;
     border: 0;
     box-sizing: border-box;
+    font-family: 'Raleway';
 }
