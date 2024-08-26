@@ -251,6 +251,7 @@ header {
   object-fit: contain;
   position: relative;
   bottom: 18rem;
+  width: 100vw;
 }
 
 .slide-image-img {
@@ -268,15 +269,22 @@ header {
   top: 6rem;
 }
 
-.slide-image--two,
+/* .slide-image--two,
+.slide-image--three,
 .slide-image--four,
 .slide-image--five,
-.slide-image--six {
+.slide-image--six,
+.slide-image--seven, */
+.slide-image-img {
   object-fit: contain;
   position: relative;
   height: 100%;
   top: 19rem;
-  background-image: linear-gradient(white, rgb(232, 228, 222), white);
+  background-image: linear-gradient(
+    white 10%,
+    rgba(240, 230, 214, 0.564) 35%,
+    white 60%
+  );
 }
 
 .slide-image--eight {
@@ -284,7 +292,11 @@ header {
   position: relative;
   height: 140%;
   top: 19rem;
-  background-image: linear-gradient(white, rgb(230, 230, 230), white);
+  /* background-image: linear-gradient(
+    white 10%,
+    rgba(207, 194, 173, 0.648) 35%,
+    white 60%
+  ); */
 }
 
 main {
