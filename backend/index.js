@@ -110,7 +110,7 @@ app.use(express.json({ limit: "50mb" }));
 //
 
 function headers(req, res, next) {
-  res.header("Access-Control-Allow-Origin", `${process.env.HOST}, ${process.env.API_URL}`);
+  res.header("Access-Control-Allow-Origin", `${process.env.HOST}`);
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
   res.header(
     "Access-Control-Allow-Headers",
