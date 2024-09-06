@@ -85,6 +85,12 @@ async function handleCheckoutSession(session) {
           }),
         });
 
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Error response:', errorText);
+          throw new Error('Failed to fetch product');
+        }
+
         const data = await response.json();
         if (data.success) {
           console.log(`Product with id: ${data.id} is deleted from database`);
@@ -314,6 +320,12 @@ app.post("/productsByCategory", async (req, res) => {
       .skip(skip)
       .limit(limit);
     res.json(products);
+
+    if (!products.ok) {
+      const errorText = await products.text();
+      console.error('Error response:', errorText);
+      throw new Error('Failed to fetch product by category');
+    }
   } catch (err) {
     console.log(err);
   }
