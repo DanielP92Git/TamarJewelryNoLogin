@@ -104,7 +104,7 @@ app.use(express.json({ limit: "50mb" }));
 //
 
 function headers(req, res, next) {
-  res.header("Access-Control-Allow-Origin", `${process.env.HOST}`);
+  res.header("Access-Control-Allow-Origin", `${process.env.HOST}, ${process.env.API_URL}`);
   res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
   res.header(
     "Access-Control-Allow-Headers",
@@ -612,7 +612,7 @@ app.post("/upload", multipleUpload, (req, res) => {
     });
 
     let localUrl = smallImages.map(({ filename }) => {
-      return `http://localhost:4000/smallImages/${filename}`;
+      return `${process.env.API_URL}/smallImages/${filename}`;
     });
 
     res.json({
@@ -620,7 +620,7 @@ app.post("/upload", multipleUpload, (req, res) => {
       file: req.files,
 
       mainImageUrl: `${process.env.API_URL}/${req.files.mainImage[0].filename}`,
-      mainImageUrlLocal: `http://localhost:4000/uploads/${req.files.mainImage[0].filename}`,
+      mainImageUrlLocal: `${process.env.API_URL}/uploads/${req.files.mainImage[0].filename}`,
       smallImagesUrl: makeUrl,
       smallImagesUrlLocal: localUrl,
     });
