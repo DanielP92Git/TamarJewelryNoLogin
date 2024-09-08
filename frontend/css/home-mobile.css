@@ -518,6 +518,7 @@ main {
   height: 20%;
   text-decoration: none;
   position: relative;
+  margin-bottom: 2.5rem;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid red; */

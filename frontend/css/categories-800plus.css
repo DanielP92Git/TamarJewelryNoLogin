@@ -263,13 +263,15 @@ a:hover {
   flex-flow: column;
   align-items: center;
   justify-content: space-evenly;
-  position: relative;
+
   cursor: pointer;
   margin-bottom: 3rem;
+  
+  position: relative;
+  border: 1px solid rgb(182, 182, 182);
+  
   /* width: 20rem;
   height: 22rem; */
-  border: 1px solid rgb(182, 182, 182);
-
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(179, 0, 255); */
 }
