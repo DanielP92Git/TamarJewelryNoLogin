@@ -429,27 +429,24 @@ h1 {
 }
 
 .go-to-top {
-  width: 3rem;
-  height: 3rem;
-  margin: 4rem;
-  font-size: 2rem;
+  position: relative;
+  top: 2rem;
+  width: 10%;
   border: none;
-  border-radius: 50%;
-  background-image: linear-gradient(
-    rgba(255, 166, 0, 0.653),
-    rgba(255, 0, 0, 0.553)
-  );
+  background-color: rgba(89, 107, 134, 0.377);
   padding: 5px;
-  color: rgb(62, 62, 62);
+  margin-bottom: 60px;
+  margin-top: 60px;
+  border-radius: 5px;
+  font-style: italic;
 
-  /* ~~~~ FOR DEBUGGING~~~~ */
-  /* border: 2px solid rgb(37, 155, 228); */
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(89, 0, 255); */
 }
 
 .go-to-top:hover {
   cursor: pointer;
-  padding: 5px;
-  background-image: linear-gradient(rgba(255, 166, 0), rgba(255, 0, 0));
+  background-color: rgba(111, 134, 169, 0.377);
 }
 
 .footer {

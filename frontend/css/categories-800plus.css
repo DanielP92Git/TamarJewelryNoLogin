@@ -371,21 +371,24 @@ a:hover {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 .go-to-top {
-  border: 1px solid;
+  position: relative;
+  top: 2rem;
   width: 10%;
-  background-color: rgba(255, 255, 255, 0.712);
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  border: none;
+  background-color: rgba(89, 107, 134, 0.377);
   padding: 5px;
   margin-bottom: 60px;
-  margin-top: 80px;
+  margin-top: 60px;
+  border-radius: 5px;
+  font-style: italic;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(89, 0, 255); */
 }
 
 .go-to-top:hover {
-  border: rgb(113, 101, 33), solid;
-  color: rgb(113, 101, 33);
   cursor: pointer;
-  background-color: rgba(196, 106, 181, 0.377);
+  background-color: rgba(111, 134, 169, 0.377);
 }
 
 .footer {
