@@ -32,10 +32,10 @@ const controlHomePage = async function () {
 
   // homePageView.login()
   // homePageView.logInOutHandler(controlLoginPage);
-  homePageView._addHandlerCloseModal();
+  // homePageView._addHandlerCloseModal();
   homePageView.addMobileHandler();
-  homePageView._addHandlerCloseSubscribe();
-  homePageView._addHandlerCloseThanks();
+  // homePageView._addHandlerCloseSubscribe();
+  // homePageView._addHandlerCloseThanks();
   homePageView._imageSlider();
   homePageView.svgHandler();
   homePageView._moveToTopHandler();
