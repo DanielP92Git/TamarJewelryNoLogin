@@ -2,72 +2,72 @@ import View from "../View.js";
 
 class HomePageView extends View {
   // Modal window:
-  _modal = document.querySelector(".modal");
-  _overlay = document.querySelector(".overlay");
-  _modalReveal = document.querySelector(".modal-reveal");
+  // _modal = document.querySelector(".modal");
+  // _overlay = document.querySelector(".overlay");
+  // _modalReveal = document.querySelector(".modal-reveal");
   // _btnCloseThanks = document.querySelector('.close-thanks');
 
   addHomePageHandler = function (handler) {
     window.addEventListener("load", handler);
   };
 
-  _addHandlerOpenModal = async function () {
-    try {
-      const timeoutModal = function (modal, overlay) {
-        setTimeout(() => {
-          modal.classList.add("modal-reveal");
-          modal.style.display = "flex";
-          overlay.classList.add("overlay-reveal");
-        }, 1000);
-      };
-      await window.addEventListener(
-        "load",
-        timeoutModal(this._modal, this._overlay)
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
+  // _addHandlerOpenModal = async function () {
+  //   try {
+  //     const timeoutModal = function (modal, overlay) {
+  //       setTimeout(() => {
+  //         modal.classList.add("modal-reveal");
+  //         modal.style.display = "flex";
+  //         overlay.classList.add("overlay-reveal");
+  //       }, 1000);
+  //     };
+  //     await window.addEventListener(
+  //       "load",
+  //       timeoutModal(this._modal, this._overlay)
+  //     );
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
 
-  _addHandlerCloseModal = function () {
-    const btnCloseModal = document.querySelector(".close-modal");
-    btnCloseModal.addEventListener("click", this._closeModal.bind(this));
-  };
+  // _addHandlerCloseModal = function () {
+  //   const btnCloseModal = document.querySelector(".close-modal");
+  //   btnCloseModal.addEventListener("click", this._closeModal.bind(this));
+  // };
 
-  _closeModal = function () {
-    const modalReveal = document.querySelector(".modal-reveal");
+  // _closeModal = function () {
+  //   const modalReveal = document.querySelector(".modal-reveal");
 
-    modalReveal.style.display = "none";
-    this._modal.style.display = "none";
-    this._overlay.classList.remove("overlay-reveal");
-  };
+  //   modalReveal.style.display = "none";
+  //   this._modal.style.display = "none";
+  //   this._overlay.classList.remove("overlay-reveal");
+  // };
 
-  _addHandlerCloseSubscribe = function () {
-    const submitSubscribe = document.querySelector("#submit-subscribe");
-    submitSubscribe.addEventListener("click", this._closeSubscribe.bind(this));
-  };
+  // _addHandlerCloseSubscribe = function () {
+  //   const submitSubscribe = document.querySelector("#submit-subscribe");
+  //   submitSubscribe.addEventListener("click", this._closeSubscribe.bind(this));
+  // };
 
-  _closeSubscribe = function () {
-    const modalReveal = document.querySelector(".modal-reveal");
-    const thanksHide = document.querySelector(".hide");
-    this._modal.style.display = "none";
-    modalReveal.style.display = "none";
-    thanksHide.classList.remove("hide");
-  };
+  // _closeSubscribe = function () {
+  //   const modalReveal = document.querySelector(".modal-reveal");
+  //   const thanksHide = document.querySelector(".hide");
+  //   this._modal.style.display = "none";
+  //   modalReveal.style.display = "none";
+  //   thanksHide.classList.remove("hide");
+  // };
 
-  _addHandlerCloseThanks = function () {
-    const btnCloseThanks = document.querySelector(".close-thanks");
-    btnCloseThanks.addEventListener("click", this._closeThanks.bind(this));
-  };
+  // _addHandlerCloseThanks = function () {
+  //   const btnCloseThanks = document.querySelector(".close-thanks");
+  //   btnCloseThanks.addEventListener("click", this._closeThanks.bind(this));
+  // };
 
-  _closeThanks = function () {
-    const modalReveal = document.querySelector(".modal-reveal");
-    const thanksMsg = document.querySelector(".thanks");
-    modalReveal.style.display - "none";
-    this._modal.style.display = "none";
-    this._overlay.style.display = "none";
-    thanksMsg.style.display = "none";
-  };
+  // _closeThanks = function () {
+  //   const modalReveal = document.querySelector(".modal-reveal");
+  //   const thanksMsg = document.querySelector(".thanks");
+  //   modalReveal.style.display - "none";
+  //   this._modal.style.display = "none";
+  //   this._overlay.style.display = "none";
+  //   thanksMsg.style.display = "none";
+  // };
   // Modal window END
   //````````````````````````````````````````````````````````
 
