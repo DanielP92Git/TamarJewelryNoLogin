@@ -345,7 +345,7 @@ class CategoriesView extends View {
       (this.scrollHandler = () => {
         if (
           window.innerHeight + window.scrollY >=
-            document.body.offsetHeight - 500 &&
+            document.body.offsetHeight - 400 &&
           !this.isLoading
         ) {
           this.page++;
