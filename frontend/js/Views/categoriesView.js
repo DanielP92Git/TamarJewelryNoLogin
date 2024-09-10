@@ -312,19 +312,19 @@ class CategoriesView extends View {
     this.displayProducts();
   }
 
-  displayProducts() {
-    this.productsContainer.innerHTML = '';
-    const spinnerMarkup = `<span class="loader spinner-hidden"></span>`;
-    this.productsContainer.insertAdjacentHTML('afterbegin', spinnerMarkup);
+  // displayProducts() {
+  //   this.productsContainer.innerHTML = '';
+  //   const spinnerMarkup = `<span class="loader spinner-hidden"></span>`;
+  //   this.productsContainer.insertAdjacentHTML('afterbegin', spinnerMarkup);
 
-    const productsToShow = this.products.slice(0, this.limit);
+  //   const productsToShow = this.products.slice(0, this.limit);
 
-    const markup = productsToShow
-      .map(item => this.getProductMarkup(item))
-      .join('');
+  //   const markup = productsToShow
+  //     .map(item => this.getProductMarkup(item))
+  //     .join('');
 
-    this.productsContainer.insertAdjacentHTML('beforeend', markup);
-  }
+  //   this.productsContainer.insertAdjacentHTML('beforeend', markup);
+  // }
   displayMoreProducts() {
     this.productsContainer.innerHTML = '';
     const spinnerMarkup = `<span class="loader spinner-hidden"></span>`;
@@ -339,18 +339,39 @@ class CategoriesView extends View {
     this.productsContainer.insertAdjacentHTML('beforeend', markup);
   }
 
+  // setupScrollListener() {
+  //   window.addEventListener(
+  //     'scroll',
+  //     (this.scrollHandler = () => {
+  //       if (
+  //         window.innerHeight + window.scrollY >=
+  //           document.body.offsetHeight - 400 &&
+  //         !this.isLoading
+  //       ) {
+  //         this.page++;
+  //         this.fetchMoreProducts();
+  //       }
+  //     })
+  //   );
+  // }
+
   setupScrollListener() {
+    let timeout;
     window.addEventListener(
       'scroll',
       (this.scrollHandler = () => {
-        if (
-          window.innerHeight + window.scrollY >=
-            document.body.offsetHeight - 400 &&
-          !this.isLoading
-        ) {
-          this.page++;
-          this.fetchMoreProducts();
-        }
+        if (timeout) clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          const scrollOffset = window.innerHeight * 0.1; // 10% of screen height
+          if (
+            window.innerHeight + window.scrollY >=
+              document.body.offsetHeight - scrollOffset &&
+            !this.isLoading
+          ) {
+            this.page++;
+            this.fetchMoreProducts();
+          }
+        }, 200); // Adjust debounce timing as needed
       })
     );
   }
