@@ -17,7 +17,7 @@ const baseUrl = process.env.PAYPAL_BASE_URL;
 //
 //* MAIN SETTINGS
 //
-const allowedOrigins = [`${process.env.HOST}`, `${process.env.API_URL}`];
+const allowedOrigins = [`${process.env.HOST}`, `${process.env.FULLHOST}`, `${process.env.API_URL}`];
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -110,19 +110,29 @@ app.use(express.json({ limit: '50mb' }));
 //
 
 function headers(req, res, next) {
-  res.header('Access-Control-Allow-Origin', `${process.env.HOST}`);
+  const allowedOrigins = [process.env.HOST, process.env.FULLHOST];
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', ''); // Optional: deny if origin is not allowed
+  }
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, Content-Type, Authorization'
-  );
+  res.header('Access-Control-Allow-Headers', 'Origin, Content-Type, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200); // Handle preflight requests
+  }
+
   next();
 }
 
+app.use(headers);
 app.options('*', headers);
 
-app.use(headers);
 
 //
 //* MONGODB
