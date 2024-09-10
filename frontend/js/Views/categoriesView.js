@@ -21,12 +21,6 @@ class CategoriesView extends View {
     this.category = category; // Category passed when navigating to the page
 
     // Initial fetch and setup
-    // this.fetchProductsByCategory();
-    // this.setupScrollListener();
-    // this.setupCurrencyHandler();
-    // this.setupSortHandler();
-    // this.addHandlerAddToCart();
-    // this.addHandlerPreview();
     window.addEventListener('load', () => {
       this.fetchProductsByCategory();
       this.setupScrollListener();
@@ -107,7 +101,6 @@ class CategoriesView extends View {
   }
 
   addFromPrev(data) {
-    // console.log(data);
     this.increaseCartNumber();
     model.handleAddToCart(data);
 
@@ -120,9 +113,8 @@ class CategoriesView extends View {
 
   //////////////////////////////////////////////////
 
-  addHandlerPreview(data) {
+  addHandlerPreview() {
     const _openItemModal = function (e) {
-      // console.log(data);
       console.log('ok');
       const clicked = e.target.closest('.item-container');
       const id = clicked.dataset.id;
@@ -259,7 +251,6 @@ class CategoriesView extends View {
         }
       );
       const data = await response.json();
-      console.log(data);
       this.products = data;
 
       this.displayProducts();
@@ -276,7 +267,6 @@ class CategoriesView extends View {
     this.isLoading = true;
 
     let page = this.page;
-    console.log(page);
     const category = this.category;
     const spinner = this.productsContainer.querySelector('.loader');
 
@@ -292,7 +282,6 @@ class CategoriesView extends View {
         }
       );
       const data = await response.json();
-      console.log(data);
       this.products.push(...data);
 
       this.displayMoreProducts();
@@ -370,7 +359,7 @@ class CategoriesView extends View {
       (this.scrollHandler = () => {
         if (timeout) clearTimeout(timeout);
         timeout = setTimeout(() => {
-          const scrollOffset = window.innerHeight * 0.4; // 40% of screen height
+          const scrollOffset = window.innerHeight * 0.5; // 50% of screen height
           if (
             window.innerHeight + window.scrollY >=
               document.body.offsetHeight - scrollOffset &&
