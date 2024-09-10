@@ -21,12 +21,20 @@ class CategoriesView extends View {
     this.category = category; // Category passed when navigating to the page
 
     // Initial fetch and setup
-    this.fetchProductsByCategory();
-    this.setupScrollListener();
-    this.setupCurrencyHandler();
-    this.setupSortHandler();
-    this.addHandlerAddToCart();
-    this.addHandlerPreview();
+    // this.fetchProductsByCategory();
+    // this.setupScrollListener();
+    // this.setupCurrencyHandler();
+    // this.setupSortHandler();
+    // this.addHandlerAddToCart();
+    // this.addHandlerPreview();
+    window.addEventListener('load', () => {
+      this.fetchProductsByCategory();
+      this.setupScrollListener();
+      this.setupCurrencyHandler();
+      this.setupSortHandler();
+      this.addHandlerAddToCart();
+      this.addHandlerPreview();
+    });
   }
 
   increaseCartNumber() {
@@ -312,19 +320,19 @@ class CategoriesView extends View {
     this.displayProducts();
   }
 
-  // displayProducts() {
-  //   this.productsContainer.innerHTML = '';
-  //   const spinnerMarkup = `<span class="loader spinner-hidden"></span>`;
-  //   this.productsContainer.insertAdjacentHTML('afterbegin', spinnerMarkup);
+  displayProducts() {
+    this.productsContainer.innerHTML = '';
+    const spinnerMarkup = `<span class="loader spinner-hidden"></span>`;
+    this.productsContainer.insertAdjacentHTML('afterbegin', spinnerMarkup);
 
-  //   const productsToShow = this.products.slice(0, this.limit);
+    const productsToShow = this.products.slice(0, this.limit);
 
-  //   const markup = productsToShow
-  //     .map(item => this.getProductMarkup(item))
-  //     .join('');
+    const markup = productsToShow
+      .map(item => this.getProductMarkup(item))
+      .join('');
 
-  //   this.productsContainer.insertAdjacentHTML('beforeend', markup);
-  // }
+    this.productsContainer.insertAdjacentHTML('beforeend', markup);
+  }
   displayMoreProducts() {
     this.productsContainer.innerHTML = '';
     const spinnerMarkup = `<span class="loader spinner-hidden"></span>`;
@@ -362,7 +370,7 @@ class CategoriesView extends View {
       (this.scrollHandler = () => {
         if (timeout) clearTimeout(timeout);
         timeout = setTimeout(() => {
-          const scrollOffset = window.innerHeight * 0.1; // 10% of screen height
+          const scrollOffset = window.innerHeight * 0.4; // 40% of screen height
           if (
             window.innerHeight + window.scrollY >=
               document.body.offsetHeight - scrollOffset &&
@@ -371,7 +379,7 @@ class CategoriesView extends View {
             this.page++;
             this.fetchMoreProducts();
           }
-        }, 200); // Adjust debounce timing as needed
+        }, 100); // Adjust debounce timing as needed
       })
     );
   }
