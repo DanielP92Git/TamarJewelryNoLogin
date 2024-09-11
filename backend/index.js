@@ -17,7 +17,11 @@ const baseUrl = process.env.PAYPAL_BASE_URL;
 //
 //* MAIN SETTINGS
 //
-const allowedOrigins = [`${process.env.HOST}`, `${process.env.FULLHOST}`, `${process.env.API_URL}`];
+const allowedOrigins = [
+  `${process.env.HOST}`,
+  `${process.env.FULLHOST}`,
+  `${process.env.API_URL}`,
+];
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -120,7 +124,10 @@ function headers(req, res, next) {
   }
 
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  res.header('Access-Control-Allow-Headers', 'Origin, Content-Type, Authorization');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, Content-Type, Authorization'
+  );
   res.header('Access-Control-Allow-Credentials', 'true');
 
   if (req.method === 'OPTIONS') {
@@ -133,14 +140,16 @@ function headers(req, res, next) {
 app.use(headers);
 app.options('*', headers);
 
-
 //
 //* MONGODB
 //
 
 // Database Connection With MongoDB
-mongoose.connect(`${process.env.MONGO_URL}`);
-
+// mongoose.connect(`${process.env.MONGO_URL}`);
+mongoose.connect(`${process.env.MONGO_URL}`, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 // Schema Creating User Model
 const Users = mongoose.model('Users', {
   name: {
@@ -329,13 +338,14 @@ app.post('/productsByCategory', async (req, res) => {
     let products = await Product.find({ category: category })
       .skip(skip)
       .limit(limit);
-    res.json(products);
 
-    if (!products.ok) {
-      const errorText = await products.text();
-      console.error('Error response:', errorText);
-      throw new Error('Failed to fetch product by category');
+    if (!products || products.length === 0) {
+      return res
+        .status(404)
+        .json({ error: 'No products found for the given category' });
     }
+
+    res.json(products);
   } catch (err) {
     console.log(err);
   }
@@ -608,7 +618,7 @@ app.post('/upload', multipleUpload, (req, res) => {
 
       copyFile(sourcePath, targetPath, err => {
         if (err) {
-          console.error('Error copying main image:', err);
+          console.error('Error copying main image', err);
         }
       });
     }
@@ -624,7 +634,7 @@ app.post('/upload', multipleUpload, (req, res) => {
 
       copyFile(sourcePath, targetPath, err => {
         if (err) {
-          console.error('Error copying small image:', err);
+          console.error('Error copying small image', err);
         }
       });
     });
@@ -781,16 +791,16 @@ const generateAccessToken = async () => {
     const data = await response.json();
     return data.access_token;
   } catch (error) {
-    console.error('Failed to generate Access Token:', error);
+    console.error('Failed to generate Access Token', error);
   }
 };
 
 const createOrder = async cart => {
   // use the cart information passed from the front-end to calculate the purchase unit details
-  console.log(
-    'shopping cart information passed from the frontend createOrder() callback:',
-    cart
-  );
+  // console.log(
+  //   'shopping cart information passed from the frontend createOrder() callback',
+  //   cart
+  // );
 
   let totalAmount = cart
     .reduce((total, item) => {
@@ -887,7 +897,7 @@ app.post('/orders', async (req, res) => {
     const { jsonResponse, httpStatusCode } = await createOrder(cart);
     res.status(httpStatusCode).json(jsonResponse);
   } catch (error) {
-    console.error('Failed to create order:', error);
+    console.error('Failed to create order', error);
     res.status(500).json({ error: 'Failed to create order.' });
   }
 });
@@ -898,7 +908,7 @@ app.post('/orders/:orderID/capture', async (req, res) => {
     const { jsonResponse, httpStatusCode } = await captureOrder(orderID);
     res.status(httpStatusCode).json(jsonResponse);
   } catch (error) {
-    console.error('Failed to create order:', error);
+    console.error('Failed to create order', error);
     res.status(500).json({ error: 'Failed to capture order.' });
   }
 });
@@ -907,9 +917,9 @@ app.get('/ping', (req, res) => {
   res.send('Server is awake!');
 });
 
-app.listen(process.env.SERVER_PORT, error => {
+app.listen(process.env.SERVER_PORT || 3000, error => {
   if (!error) {
-    console.log('Server Running on Port ' + process.env.SERVER_PORT);
+    console.log('Server Running on Port ' + process.env.SERVER_PORT || 3000);
   } else {
     console.log('Error : ' + error);
   }
