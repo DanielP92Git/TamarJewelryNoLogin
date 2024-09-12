@@ -131,7 +131,9 @@ class CartView extends View {
           <div class="total-container total">
             <span class="total-text">Total:</span>
             <span class="total-price">${currency}${price}</span>
+            
           </div>
+          <span class="shipping-text">(Shipping costs may apply. Please checkout for options)</span>
         </div>`;
   }
 

@@ -380,7 +380,8 @@ main {
   display: flex;
   flex-flow: column;
   justify-content: space-between;
-  width: 60%;
+  align-items: center;
+  width: 100%;
   margin: 30px 10px 30px 0px;
   /* align-self: flex-end; */
 
@@ -390,13 +391,19 @@ main {
 
 .total-container {
   display: flex;
-  width: 100%;
+  width: 60%;
   justify-content: space-between;
   margin-bottom: 10px;
-  margin-left: 20%;
+  /* margin-left: 20%; */
 
   /* border: solid salmon; */
 }
+
+.shipping-text {
+  font-size: 0.8rem;
+  text-align: center;
+}
+
 
 .total-text {
   font-weight: 600;

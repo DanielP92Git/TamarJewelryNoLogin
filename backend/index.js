@@ -145,11 +145,8 @@ app.options('*', headers);
 //
 
 // Database Connection With MongoDB
-// mongoose.connect(`${process.env.MONGO_URL}`);
-mongoose.connect(`${process.env.MONGO_URL}`, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(`${process.env.MONGO_URL}`);
+
 // Schema Creating User Model
 const Users = mongoose.model('Users', {
   name: {
@@ -327,25 +324,26 @@ app.get('/allproducts', async (req, res) => {
 
 app.post('/productsByCategory', async (req, res) => {
   const category = req.body.category;
-  const page = req.body.page;
+  let page = req.body.page;
   const limit = 6;
 
   try {
-    console.log(page);
-    const skip = (page - 1) * limit;
+    let skip = (page - 1) * limit;
+    console.log('I"m on page:', page, 'skip:', skip, 'products');
+
+    let totalProducts = await Product.countDocuments({ category: category });
 
     // Query products with pagination
     let products = await Product.find({ category: category })
       .skip(skip)
       .limit(limit);
 
-    if (!products || products.length === 0) {
-      return res
-        .status(404)
-        .json({ error: 'No products found for the given category' });
-    }
-
-    res.json(products);
+    // if (!products || products.length === 0) {
+    //   return res
+    //     .status(404)
+    //     .json({ error: 'No products found for the given category' });
+    // }
+    res.json({products, totalProducts});
   } catch (err) {
     console.log(err);
   }

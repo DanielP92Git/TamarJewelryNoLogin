@@ -16,7 +16,14 @@ class CategoriesView extends View {
     this.selectedCurrency = 'usd'; // Default currency;
     this.sortedByPrice = '';
     this.products = [];
-    this.productsContainer = document.querySelector('.products-container');
+    this.totalProducts = 0
+    this.allProductsFetched = false;
+    this.outerProductsContainer = document.querySelector(
+      '.outer-products-container'
+    );
+    this.innerProductsContainer = document.querySelector(
+      '.inner-products-container'
+    );
     this.modal = document.querySelector('.modal');
     this.category = category; // Category passed when navigating to the page
 
@@ -136,7 +143,10 @@ class CategoriesView extends View {
       if (addToCart) return;
       this.generatePreview(clicked, imageMarkup);
     };
-    this.productsContainer.addEventListener('click', _openItemModal.bind(this));
+    this.innerProductsContainer.addEventListener(
+      'click',
+      _openItemModal.bind(this)
+    );
   }
 
   _closeItemModal(e) {
@@ -215,7 +225,7 @@ class CategoriesView extends View {
     const currencySelector = document.getElementById('currency');
 
     currencySelector.addEventListener('change', () => {
-      const spinner = this.productsContainer.querySelector('.loader');
+      const spinner = this.outerProductsContainer.querySelector('.loader');
       spinner.classList.remove('spinner-hidden');
 
       this.selectedCurrency = currencySelector.value;
@@ -238,7 +248,7 @@ class CategoriesView extends View {
     this.isLoading = true;
     let page = this.page;
     const category = this.category;
-    const spinner = this.productsContainer.querySelector('.loader');
+    const spinner = this.outerProductsContainer.querySelector('.loader');
     spinner.classList.remove('spinner-hidden');
 
     try {
@@ -251,8 +261,8 @@ class CategoriesView extends View {
         }
       );
       const data = await response.json();
-      this.products = data;
-
+      // console.log(data);
+      this.products = data.products;
       this.displayProducts();
     } catch (err) {
       console.error('Failed to fetch products', err);
@@ -263,13 +273,14 @@ class CategoriesView extends View {
   }
 
   async fetchMoreProducts() {
-    if (this.isLoading) return;
+    console.log(this.allProductsFetched);
+    if (this.isLoading || this.allProductsFetched) return;
     this.isLoading = true;
 
     let page = this.page;
+    console.log(page);
     const category = this.category;
-    const spinner = this.productsContainer.querySelector('.loader');
-
+    const spinner = this.outerProductsContainer.querySelector('.loader');
     spinner.classList.remove('spinner-hidden');
 
     try {
@@ -282,9 +293,19 @@ class CategoriesView extends View {
         }
       );
       const data = await response.json();
-      this.products.push(...data);
+      console.log(data.totalProducts);
+      console.log(this.products.length);
+      this.totalProducts = data.totalProducts
+      // Check if the products array is empty or if all products have been fetched
+      const noMoreData =
+        this.products.length >= this.totalProducts;
 
-      this.displayMoreProducts();
+      if (noMoreData) {
+        this.allProductsFetched = true;
+      } else {
+        this.products.push(...data.products); // Append new products to the list
+        this.displayMoreProducts(data.products); // Pass only the newly fetched products
+      }
     } catch (err) {
       console.error('Failed to fetch products', err);
     } finally {
@@ -310,9 +331,7 @@ class CategoriesView extends View {
   }
 
   displayProducts() {
-    this.productsContainer.innerHTML = '';
-    const spinnerMarkup = `<span class="loader spinner-hidden"></span>`;
-    this.productsContainer.insertAdjacentHTML('afterbegin', spinnerMarkup);
+    this.innerProductsContainer.innerHTML = '';
 
     const productsToShow = this.products.slice(0, this.limit);
 
@@ -320,12 +339,11 @@ class CategoriesView extends View {
       .map(item => this.getProductMarkup(item))
       .join('');
 
-    this.productsContainer.insertAdjacentHTML('beforeend', markup);
+    this.innerProductsContainer.insertAdjacentHTML('beforeend', markup);
   }
+
   displayMoreProducts() {
-    this.productsContainer.innerHTML = '';
-    const spinnerMarkup = `<span class="loader spinner-hidden"></span>`;
-    this.productsContainer.insertAdjacentHTML('afterbegin', spinnerMarkup);
+    // this.innerProductsContainer.innerHTML = '';
 
     const productsToShow = this.products.slice(this.page, this.limit);
 
@@ -333,45 +351,60 @@ class CategoriesView extends View {
       .map(item => this.getProductMarkup(item))
       .join('');
 
-    this.productsContainer.insertAdjacentHTML('beforeend', markup);
+    this.innerProductsContainer.insertAdjacentHTML('beforeend', markup);
   }
-
-  // setupScrollListener() {
-  //   window.addEventListener(
-  //     'scroll',
-  //     (this.scrollHandler = () => {
-  //       if (
-  //         window.innerHeight + window.scrollY >=
-  //           document.body.offsetHeight - 400 &&
-  //         !this.isLoading
-  //       ) {
-  //         this.page++;
-  //         this.fetchMoreProducts();
-  //       }
-  //     })
-  //   );
-  // }
 
   setupScrollListener() {
     let timeout;
+  
     window.addEventListener(
       'scroll',
       (this.scrollHandler = () => {
         if (timeout) clearTimeout(timeout);
+  
         timeout = setTimeout(() => {
-          const scrollOffset = window.innerHeight * 0.5; // 50% of screen height
+          const scrollTop = window.scrollY; // Current scroll position
+          const windowHeight = window.innerHeight; // Height of the visible window
+          const productsContainerBottom = this.outerProductsContainer.getBoundingClientRect().bottom; // Bottom of the products container
+  
+          // Check if the bottom of the products container is within the viewport
           if (
-            window.innerHeight + window.scrollY >=
-              document.body.offsetHeight - scrollOffset &&
-            !this.isLoading
+            productsContainerBottom <= windowHeight + 100 && // 100px before reaching the bottom of the container
+            !this.isLoading &&
+            !this.allProductsFetched
           ) {
             this.page++;
             this.fetchMoreProducts();
           }
-        }, 100); // Adjust debounce timing as needed
+        }, 100); // Debounce the scroll event to avoid excessive function calls
       })
     );
   }
+  
+  
+  
+
+  // setupScrollListener() {
+  //   let timeout;
+  //   window.addEventListener(
+  //     'scroll',
+  //     (this.scrollHandler = () => {
+  //       if (timeout) clearTimeout(timeout);
+  //       timeout = setTimeout(() => {
+  //         const scrollOffset = window.innerHeight * 0.5; // 50% of screen height
+  //         if (
+  //           window.innerHeight + window.scrollY >=
+  //             document.body.offsetHeight - scrollOffset &&
+  //           !this.isLoading &&
+  //           !this.allProductsFetched
+  //         ) {
+  //           this.page++;
+  //           this.fetchMoreProducts();
+  //         }
+  //       }, 100); // Adjust debounce timing as needed
+  //     })
+  //   );
+  // }
 
   getProductMarkup(item) {
     const { id, quantity, image, name, description, ils_price } = item;
@@ -400,7 +433,7 @@ class CategoriesView extends View {
       .map(item => this.getProductMarkup(item))
       .join('');
 
-    this.productsContainer.insertAdjacentHTML('beforeend', markup);
+    this.innerProductsContainer.insertAdjacentHTML('beforeend', markup);
   }
 }
 export default CategoriesView;

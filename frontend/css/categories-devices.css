@@ -262,6 +262,7 @@ main {
   display: flex;
   flex-flow: column wrap;
   align-items: center;
+  justify-content: space-between;
   height: 100%;
   max-width: 100%;
 
@@ -274,7 +275,7 @@ main {
   height: 48px;
   border-radius: 50%;
   display: inline-block;
-  position: absolute;
+  position: relative;
   background-color: rgba(245, 222, 179, 0.427);
   border: 2px solid #000000;
   box-sizing: border-box;
@@ -308,15 +309,24 @@ main {
   display: none;
 }
 
-.products-container {
+.outer-products-container {
   display: flex;
-  flex-flow: row wrap;
-  justify-content: space-around;
+  flex-flow: column;
+  align-items: center;
   width: 95vw;
-  margin: 2rem 2px -10px 2px;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(179, 0, 255); */
+}
+
+.inner-products-container {
+  display: flex;
+  flex-flow: column;
+  width: 95vw;
+  height: 100%;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(0, 255, 21); */
 }
 
 .item-container {
