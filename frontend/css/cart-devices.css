@@ -390,11 +390,21 @@ main {
 }
 
 .price-summary-container {
-  width: 40%;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  width: 60%;
+  margin-bottom: 1rem;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(164, 20, 177); */
 }
+
+.shipping-text {
+  font-size: 0.8rem;
+  text-align: center;
+}
+
 .summary-details {
   display: flex;
   justify-content: center;
@@ -487,7 +497,7 @@ main {
   /* border: 2px solid red; */
 }
 .check-me-out {
-  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
 }
 
 .stripe-svg {
@@ -520,7 +530,6 @@ main {
   margin-top: 3rem;
   background-color: rgb(132, 132, 132);
   font-family: 'Raleway';
-
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(255, 51, 0); */

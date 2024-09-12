@@ -247,7 +247,17 @@ a:hover {
   /* border: 2px solid rgb(40, 228, 37); */
 }
 
-.products-container {
+.outer-products-container {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  width: 95vw;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(179, 0, 255); */
+}
+
+.inner-products-container {
   display: flex;
   flex-flow: row wrap;
   justify-content: space-evenly;
@@ -255,7 +265,7 @@ a:hover {
   height: 100%;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(179, 0, 255); */
+  /* border: 3px solid rgb(0, 255, 21); */
 }
 
 .item-container {
@@ -665,8 +675,8 @@ a:hover {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  display: inline-block;
-  position: absolute;
+  /* display: inline-block; */
+  /* position: absolute; */
   background-color: rgba(245, 222, 179, 0.427);
   border: 2px solid #000000;
   box-sizing: border-box;
