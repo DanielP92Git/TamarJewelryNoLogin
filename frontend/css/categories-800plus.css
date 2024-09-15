@@ -11,9 +11,17 @@ header {
   background-image: url(../imgs/IMG_9699.jpg);
   background-repeat: no-repeat;
   background-size: cover;
-
+  background-position: center;
   width: 100%;
   height: 90vh;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 4px solid rgb(177, 20, 143); */
+}
+
+.bracelet-hero {
+  background-position: unset;
+
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(177, 20, 143); */
@@ -213,8 +221,8 @@ a:hover {
   font-weight: 100;
   font-size: 2.3rem;
 
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-    "Lucida Sans", Arial, sans-serif;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
+    'Lucida Sans', Arial, sans-serif;
 }
 
 #currency {
@@ -276,10 +284,10 @@ a:hover {
 
   cursor: pointer;
   margin-bottom: 3rem;
-  
+
   position: relative;
   border: 1px solid rgb(182, 182, 182);
-  
+
   /* width: 20rem;
   height: 22rem; */
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -685,7 +693,7 @@ a:hover {
 }
 
 .loader::after {
-  content: "";
+  content: '';
   box-sizing: border-box;
   position: absolute;
   left: 4px;
