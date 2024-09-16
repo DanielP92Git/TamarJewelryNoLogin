@@ -37,12 +37,12 @@ header {
 
 .logo {
   display: block;
-  width: 20%;
+  width: 18%;
   height: auto;
 
   position: absolute;
-  left: 70%;
-  bottom: 10%;
+  left: 3%;
+  bottom: 55%;
 
   z-index: 0;
 
@@ -68,12 +68,8 @@ header {
 /* ~~~~~~~ Desktop Navbar ~~~~~~~~~ */
 
 .menu {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
   width: 100%;
-  height: 50px;
+  height: 15%;
   z-index: 7;
   position: fixed;
 
@@ -84,18 +80,21 @@ header {
 .menu__ul {
   display: flex;
   flex-flow: row;
-  justify-content: space-around;
-  background-color: rgba(255, 255, 255, 0.8);
+  align-items: center;
+  background-color: rgba(255, 255, 255);
   width: 100%;
-  height: 50px;
+  height: 100%;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(228, 152, 37); */
 }
 
 .main-nav-tab {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
   width: 100%;
-  height: 50px;
+  height: 100%;
   list-style: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -104,11 +103,11 @@ header {
 
 .main-nav-tab:hover {
   cursor: pointer;
+  /* animation-name: fillit;
+  animation-duration: 600ms;
+  animation-timing-function: ease;
+  animation-fill-mode: forwards; */
 }
-
-/* .li.sticky:hover {
-  background-color: rgba(212, 199, 171, 0.925);
-} */
 
 .attrib {
   display: flex;
@@ -117,7 +116,7 @@ header {
   align-items: center;
   text-align: center;
   width: 100%;
-  height: 50px;
+  height: 3rem;
   color: black;
   font-size: 1.1rem;
   font-family: 'Raleway';
@@ -127,9 +126,67 @@ header {
   /* border: 2px solid rgb(40, 228, 37); */
 }
 
-a:hover {
+.attrib:hover {
   color: rgb(152, 152, 152);
 }
+
+.attrib-cart {
+  display: flex;
+  flex-flow: row;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  height: 3rem;
+  color: black;
+  font-size: 1.1rem;
+  font-family: 'Raleway';
+  text-decoration: none;
+
+  /* border: 1px solid green; */
+}
+
+.cart-container {
+  display: flex;
+  /* border: 1px solid red; */
+}
+
+.shoppingcart-svg {
+  display: flex;
+  flex-flow: row;
+  justify-content: flex-start;
+  width: 25%;
+  height: 50%;
+
+  /* border: 1px solid; */
+}
+
+.cart-number {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+  position: relative;
+  left: -5%;
+  top: 35%;
+  width: 15px;
+  height: 15px;
+  border: 1px solid black;
+  border-radius: 50%;
+  text-align: center;
+}
+
+/* @keyframes fillit {
+  0% {
+    background-color: none;
+    color: black;
+  }
+
+  100% {
+    background-color: rgb(0, 0, 0);
+    color: white;
+  }
+} */
 
 .categories-list {
   display: flex;
@@ -137,10 +194,10 @@ a:hover {
   justify-content: space-evenly;
   text-align: center;
   list-style: none;
-  border: 1px solid;
-  position: relative;
+  position: absolute;
   top: -20rem;
-  background-color: rgba(250, 235, 215, 0.5);
+  width: 20%;
+  background-color: rgba(250, 235, 215, 0.9);
   transition-property: all;
   transition-duration: 300ms;
   transition-timing-function: linear;
@@ -151,10 +208,11 @@ a:hover {
 .categories-list--active {
   opacity: 1;
   z-index: 1;
-  transform: translateY(20rem);
+  transform: translateY(25.6rem);
 }
 
 .category-item {
+  height: 50px;
   position: relative;
 }
 
@@ -182,36 +240,12 @@ a:hover {
   transform: translateY(8rem);
 }
 
-.shoppingcart-svg {
-  display: flex;
-  flex-flow: row;
-  justify-content: flex-start;
-  width: 25px;
-  height: 25px;
-  left: 600px;
-}
-
 .shoppingcart-svg:hover {
   fill: rgb(121, 221, 255);
 }
 
 .icons-container {
   display: none;
-}
-
-.cart-number {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.8rem;
-  position: absolute;
-  right: 6.5%;
-  top: 10%;
-  width: 15px;
-  height: 15px;
-  border: 1px solid black;
-  border-radius: 50%;
-  text-align: center;
 }
 
 .main-nav-tab.login {
@@ -372,6 +406,28 @@ h1 {
   margin: 30px 0px;
   width: 95%;
   font-size: 2.5rem;
+}
+
+h3 {
+  position: absolute;
+  bottom: -2%;
+  left: 58%;
+  width: 35%;
+  /* height: 25%; */
+  font-size: clamp(1.2rem, 5vw, 5rem);
+  font-variant: small-caps;
+  font-weight: lighter;
+  color: rgba(255, 255, 255, 0.836);
+
+  /* border: 1px solid darkblue; */
+}
+
+h3 span {
+  font-weight: 700;
+  padding: 5px;
+  border-radius: 5px;
+  color: #b1275f;
+  color: #5eb6ae;
 }
 
 .hide {

@@ -17,6 +17,7 @@ header {
   display: flex;
   flex-flow: column;
   width: 100%;
+  height: auto;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(69, 208, 247); */
@@ -24,7 +25,7 @@ header {
 
 .hero-section {
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   position: relative;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -179,6 +180,27 @@ header {
   ~~~~ FOR DEBUGGING~~~~
   border: 3px solid greenyellow;
 } */
+h3 {
+  position: absolute;
+  bottom: -3%;
+  left: 55%;
+  width: 40%;
+  height: 20%;
+  font-size: clamp(1.2rem, 6vw, 4rem);
+  font-variant: small-caps;
+  font-weight: lighter;
+  color: rgba(255, 255, 255, 0.836);
+
+  /* border: 1px solid darkblue; */
+}
+
+h3 span {
+  font-weight: 700;
+  padding: 5px;
+  border-radius: 5px;
+  color: #b1275f;
+  color: #5eb6ae;
+}
 
 .thanks {
   display: none;
@@ -326,8 +348,7 @@ p {
   flex-flow: row-reverse;
   justify-content: end;
   align-items: center;
-  /* position: absolute; */
-  height: 13%;
+  height: 4rem;
   width: 100%;
   padding-right: 0.8rem;
   z-index: 10;
