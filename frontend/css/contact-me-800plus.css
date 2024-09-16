@@ -267,26 +267,22 @@ h1 {
 
 #submit {
   font-size: 1.3rem;
+  padding: 5px;
   width: 25%;
   min-width: 100px;
   height: 80%;
-  border: 1px solid gainsboro;
-  border-radius: 5px;
-  background-image: linear-gradient(rgb(200, 181, 77), rgb(224, 221, 171));
+  background-color: rgba(230, 75, 32, 0.689);
   margin-bottom: 1rem;
+  border-radius: 5px;
+
 
   /* ~~~~FOR DEBUGGING~~~~ */
   /* border: 3px solid rgb(0, 255, 247); */
 }
 
 #submit:hover {
-  font-size: 1.4rem;
-  border-radius: 5px;
+  background-color: rgba(230, 75, 32, 0.9);
   cursor: pointer;
-  background-image: linear-gradient(
-    rgba(205, 183, 58, 0.785),
-    rgba(255, 255, 255, 0.772)
-  );
 }
 
 .submit {
