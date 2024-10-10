@@ -116,7 +116,6 @@ body {
   height: 30px;
   padding: 3px;
   position: relative;
-  border: 1px solid black;
   border-radius: 5px;
 }
 
@@ -395,15 +394,20 @@ h1 {
   font-size: 2rem;
   border: none;
   border-radius: 50%;
-  background-image: linear-gradient(
+  /* background-image: linear-gradient(
     rgba(255, 166, 0, 0.653),
     rgba(255, 0, 0, 0.553)
-  );
+  ); */
+  background-color: black;
   padding: 5px;
   color: rgb(62, 62, 62);
 
   /* ~~~~ FOR DEBUGGING~~~~ */
   /* border: 2px solid rgb(37, 155, 228); */
+}
+
+.arrow-up {
+  width:1rem;
 }
 
 .footer {

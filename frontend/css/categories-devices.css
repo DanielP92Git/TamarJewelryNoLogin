@@ -340,7 +340,6 @@ main {
 
   border: 1px solid rgb(182, 182, 182);
 
-
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(0, 255, 17); */
 }
@@ -616,14 +615,24 @@ main {
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
 .go-to-top {
-  border: 1px solid;
-  width: 15%;
-  background-color: rgba(255, 255, 255, 0.712);
-  /* margin-top: 1rem; */
-  margin-bottom: 1rem;
+  align-self: center;
+
+  width: 3rem;
+  height: 3rem;
+  margin: 4rem;
+  font-size: 2rem;
+  border: none;
+  border-radius: 50%;
+  /* background-image: linear-gradient(
+    rgba(255, 166, 0, 0.653),
+    rgba(255, 0, 0, 0.553)
+  ); */
+  background-color: black;
   padding: 5px;
-  margin-bottom: 60px;
-  margin-top: 30px;
+  color: rgb(62, 62, 62);
+
+  /* ~~~~ FOR DEBUGGING~~~~ */
+  /* border: 2px solid rgb(37, 155, 228); */
 }
 
 .go-to-top:hover {
@@ -631,6 +640,10 @@ main {
   color: rgb(113, 101, 33);
   cursor: pointer;
   background-color: rgba(196, 106, 181, 0.377);
+}
+
+.arrow-up {
+  width: 1rem;
 }
 
 .footer {
