@@ -36,9 +36,9 @@ const controlWorkshopPage = async function (lng) {
   WorkshopView._moveToTopHandler();
   WorkshopView.addRevealHandler();
   WorkshopView._imageSlider();
-  WorkshopView.handleLanguage();
-  WorkshopView.setLanguage(lng);
   WorkshopView.setWorkshopLng(lng);
+  WorkshopView.setLanguage(lng);
+  WorkshopView.handleLanguage();
 };
 
 const controlAboutPage = async function (lng) {
@@ -48,9 +48,9 @@ const controlAboutPage = async function (lng) {
   AboutView.persistCartNumber(await model.checkCartNumber());
   AboutView.addRevealHandler();
   AboutView.addMobileHandler();
-  AboutView.handleLanguage();
-  AboutView.setLanguage(lng);
   AboutView.setAboutDesc(lng);
+  AboutView.setLanguage(lng);
+  AboutView.handleLanguage();
 };
 
 const controlContactMePage = async function (lng) {
