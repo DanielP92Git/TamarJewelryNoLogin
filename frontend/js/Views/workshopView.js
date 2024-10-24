@@ -117,12 +117,13 @@ class WorkshopView extends View {
     const markup = this.handleWorkshopLng(lng);
     descriptionContainer.insertAdjacentHTML('afterbegin', markup);
 
+    this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
-
-    this.addMobileHandler();
-
+    
+    this.setLanguage(lng)
     this.setHeaderLng(lng);
     this.setCostsLng(lng);
+    this.addMobileHandler();
   }
 
   setHeaderLng(lng) {

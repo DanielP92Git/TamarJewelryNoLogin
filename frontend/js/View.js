@@ -31,13 +31,42 @@ export default class View {
     }
   }
 
+  // addMobileHandler() {
+  //   const x = window.matchMedia('(max-width: 699.99px)');
+  //   if (!x.matches) return;
+  //   this._categoriesTab.addEventListener(
+  //     'click',
+  //     this.mobileCategories.bind(this)
+  //   );
+  // }
+
   addMobileHandler() {
     const x = window.matchMedia('(max-width: 699.99px)');
-    if (!x.matches) return;
-    this._categoriesTab.addEventListener(
-      'click',
-      this.mobileCategories.bind(this)
-    );
+
+    // Listen to resize to adapt event listeners dynamically
+    x.addEventListener('change', e => {
+      if (e.matches) {
+        // If it's in mobile view
+        this._categoriesTab.addEventListener(
+          'click',
+          this.mobileCategories.bind(this)
+        );
+      } else {
+        // Remove event listener on larger screens
+        this._categoriesTab.removeEventListener(
+          'click',
+          this.mobileCategories.bind(this)
+        );
+      }
+    });
+
+    // Initial check when the page is first loaded
+    if (x.matches) {
+      this._categoriesTab.addEventListener(
+        'click',
+        this.mobileCategories.bind(this)
+      );
+    }
   }
 
   /**
