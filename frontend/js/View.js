@@ -398,7 +398,7 @@ export default class View {
 
     this.handleFooterMarkup(lng);
     this.handleLanguage();
-    // this.addMobileHandler();
+    this.addMobileHandler();
     this.addRevealHandler();
   }
 
