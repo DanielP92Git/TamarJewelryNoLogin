@@ -587,6 +587,34 @@ main {
   /* border: 3px solid rgb(4, 255, 0); */
 }
 
+.go-to-top {
+  align-self: center;
+
+  width: 3rem;
+  height: 3rem;
+  margin: 4rem;
+  font-size: 2rem;
+  border: none;
+  border-radius: 50%;
+  /* background-image: linear-gradient(
+    rgba(255, 166, 0, 0.653),
+    rgba(255, 0, 0, 0.553)
+  ); */
+  background-color: black;
+  padding: 5px;
+  color: rgb(62, 62, 62);
+
+  /* ~~~~ FOR DEBUGGING~~~~ */
+  /* border: 2px solid rgb(37, 155, 228); */
+}
+
+.go-to-top:hover {
+  border: rgb(113, 101, 33), solid;
+  color: rgb(113, 101, 33);
+  cursor: pointer;
+  background-color: rgba(196, 106, 181, 0.377);
+}
+
 .footer {
   display: flex;
   flex-flow: row wrap;
