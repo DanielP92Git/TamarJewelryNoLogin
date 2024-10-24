@@ -31,7 +31,7 @@ body {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 50px;
+  height: 15%;
   z-index: 7;
   position: fixed;
 
@@ -42,6 +42,7 @@ body {
 .menu__ul {
   display: flex;
   flex-flow: row;
+  align-items: center;
   justify-content: space-around;
   background-color: rgba(255, 255, 255, 0.8);
   width: 100%;
@@ -49,6 +50,11 @@ body {
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(228, 152, 37); */
+}
+
+.ul-heb {
+  display: flex;
+  flex-flow: row-reverse;
 }
 
 .main-nav-tab {
@@ -64,9 +70,44 @@ body {
   cursor: pointer;
 }
 
+#page-title {
+  font-family: Raleway, sans-serif;
+}
+
 /* .li.sticky:hover {
   background-color: rgba(212, 199, 171, 0.925);
 } */
+
+.languages-container {
+  display: flex;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+
+  border-left: 2px solid gray;
+
+  /* border: 1px solid red; */
+}
+
+.languages-container button {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.146);
+  border: none;
+  font-size: 1rem;
+}
+
+.languages-container button:first-child {
+  border-right: 1px solid;
+  padding-right: 5px;
+}
+
+.languages-container button:last-child {
+  padding-left: 5px;
+}
+
+.languages-container button:hover {
+  cursor: pointer;
+  color: gray;
+}
 
 .contact-container {
   display: grid;
@@ -110,7 +151,7 @@ a {
   height: 50px;
   color: black;
   font-size: 1.1rem;
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -173,8 +214,8 @@ a {
   justify-content: space-evenly;
   text-align: center;
   list-style: none;
-  border: 1px solid;
-  position: relative;
+  position: absolute;
+  width: 20%;
   top: -20rem;
   background-color: rgba(250, 235, 215, 0.5);
   transition-property: all;
@@ -187,7 +228,7 @@ a {
 .categories-list--active {
   opacity: 1;
   z-index: 1;
-  transform: translateY(20rem);
+  transform: translateY(25.6rem);
 }
 
 .category-item {
@@ -258,7 +299,7 @@ header {
   display: flex;
   overflow: hidden;
   position: absolute;
-  top: 3.8rem;
+  top: 5rem;
 
   height: 80vh;
   max-height: 80vh;
@@ -371,7 +412,7 @@ h1 {
   word-spacing: 0.5rem;
   line-height: 1.7rem;
   box-sizing: border-box;
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
 
   width: 50%;
   max-height: 100%;
@@ -439,7 +480,7 @@ h1 {
   height: auto;
   font-size: 1.2rem;
   padding: 1rem;
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
 
   text-align: center;
   align-self: center;

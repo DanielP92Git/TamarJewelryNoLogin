@@ -8,15 +8,15 @@ import * as model from '../model.js';
 /////////////////////////////////////////////////////////
 
 class CategoriesView extends View {
-  constructor(parentElement, category) {
-    super(parentElement, category);
+  constructor(parentElement, category, categoryNameHebrew, lang) {
+    super(parentElement, category, categoryNameHebrew, lang);
     this.page = 1;
     this.limit = 6;
     this.isLoading = false;
     this.selectedCurrency = 'usd'; // Default currency;
     this.sortedByPrice = '';
     this.products = [];
-    this.totalProducts = 0
+    this.totalProducts = 0;
     this.allProductsFetched = false;
     this.outerProductsContainer = document.querySelector(
       '.outer-products-container'
@@ -26,16 +26,120 @@ class CategoriesView extends View {
     );
     this.modal = document.querySelector('.modal');
     this.category = category; // Category passed when navigating to the page
+    this.categoryNameHebrew = categoryNameHebrew;
+    this.lang = 'eng';
 
     // Initial fetch and setup
     window.addEventListener('load', () => {
       this.fetchProductsByCategory();
       this.setupScrollListener();
-      this.setupCurrencyHandler();
-      this.setupSortHandler();
       this.addHandlerAddToCart();
       this.addHandlerPreview();
+      let lng = localStorage.getItem('language');
+      if (!lng) {
+        localStorage.setItem('language', 'eng');
+        lng = 'eng';
+      }
+      this.lang = lng;
+      this.setHeaderLng(this.lang);
+      this.setCategoriesLanguage(this.lang);
     });
+  }
+
+  handleCategoriesLanguage() {
+    const hebLng = document.querySelector('.heb-lng');
+    const engLng = document.querySelector('.eng-lng');
+
+    if (hebLng && engLng) {
+      hebLng.addEventListener('click', () => this.changeToHeb());
+      engLng.addEventListener('click', () => this.changeToEng());
+    }
+  }
+
+  changeToHeb = function () {
+    localStorage.setItem('language', `heb`);
+    this.lang = 'heb';
+    this.setCategoriesLanguage(`heb`);
+  };
+
+  changeToEng = function () {
+    localStorage.setItem('language', `eng`);
+    this.lang = 'eng';
+    this.setCategoriesLanguage('eng');
+  };
+
+  setCategoriesLanguage(lng) {
+    this._menu.innerHTML = '';
+
+    const markup = this.handleMenuLanguage(lng);
+    this._menu.insertAdjacentHTML('afterbegin', markup);
+
+    this._categoriesTab = document.querySelector('.categories-tab');
+    this._categoriesList = document.querySelector('.categories-list');
+
+    this.setHeaderLng(lng);
+    this.handleFooterMarkup(lng);
+    this.setLanguage(lng);
+    this.displayProducts();
+    this.setCurSortLng(lng);
+    this.setupSortHandler();
+    this.setupCurrencyHandler();
+
+    this.handleLanguage();
+    this.addMobileHandler();
+    this.addRevealHandler();
+  }
+
+  setCurSortLng(lng) {
+    const curSortContainer = document.querySelector('.currency-sort-container');
+    curSortContainer.innerHTML = '';
+    const markup = this.handleCurSortLng(lng);
+    curSortContainer.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  handleCurSortLng(lng) {
+    const curSortContainer = document.querySelector('.currency-sort-container');
+    curSortContainer.style.direction = 'ltr';
+
+    if (lng === 'eng') {
+      return `<select name="currency" id="currency">
+        <option value="default" class="currency-option">Currency</option>
+        <option value="usd" class="currency-option">USD</option>
+        <option value="ils" class="currency-option">ILS</option>
+      </select>
+      <select name="sort" id="sort">
+        <option value="default" class="sort-option">Sort by:</option>
+        <option value="low-to-high" class="sort-option">
+          Price (Low to High)
+        </option>
+        <option value="high-to-low" class="sort-option">
+          Price (High to Low)
+        </option>
+      </select>`;
+    } else if (lng === 'heb') {
+      curSortContainer.style.direction = 'rtl';
+
+      return `<select name="currency" id="currency">
+        <option value="default" class="currency-option">מטבע</option>
+        <option value="usd" class="currency-option">דולר</option>
+        <option value="ils" class="currency-option">שקל</option>
+      </select>
+      <select name="sort" id="sort">
+        <option value="default" class="sort-option">מיין לפי:</option>
+        <option value="low-to-high" class="sort-option">
+          מחיר (מנמוך לגבוה)
+        </option>
+        <option value="high-to-low" class="sort-option">
+          מחיר (מגבוה לנמוך)
+        </option>
+      </select>`;
+    }
+  }
+
+  setHeaderLng(lng) {
+    const categoryTitle = document.querySelector('.category-title');
+    if (lng === 'eng') categoryTitle.textContent = this.category.toUpperCase();
+    if (lng === 'heb') categoryTitle.textContent = this.categoryNameHebrew;
   }
 
   increaseCartNumber() {
@@ -90,17 +194,18 @@ class CategoriesView extends View {
   }
 
   addToCart(e) {
-    const btn = e.target.closest('.add-to-cart-btn');
+    let btn = e.target.closest('.add-to-cart-btn');
 
     if (!btn) return;
     const item = btn.closest('.item-container');
 
     this.increaseCartNumber();
 
-    btn.textContent = 'Added to Your Cart!';
+    btn.textContent =
+      this.lang === 'eng' ? 'Added to Your Cart!' : 'המוצר נוסף לסל הקניות';
 
     setTimeout(() => {
-      btn.textContent = 'Add to Cart';
+      btn.textContent = this.lang === 'eng' ? 'Added to Cart' : 'הוסף לסל';
       btn.style.backgroundColor = '#e8a58a8f';
     }, 2000);
 
@@ -122,7 +227,6 @@ class CategoriesView extends View {
 
   addHandlerPreview() {
     const _openItemModal = function (e) {
-      console.log('ok');
       const clicked = e.target.closest('.item-container');
       const id = clicked.dataset.id;
       const filtered = this.products.find(prod => prod.id == id);
@@ -187,8 +291,12 @@ class CategoriesView extends View {
         </div>
         <div class="price-text">Price:</div>
         <div class="item-price_modal">${curSign}${price}</div>
-        <button class="add-to-cart-btn_modal">Add to Cart</button>
-        <div class="added-message hide"><span class="added-span"></span>Item added to cart!</div>
+        <button class="add-to-cart-btn_modal">${
+          this.lang === 'eng' ? 'Add to Cart' : ' הוסף לסל'
+        }</button>
+        <div class="added-message hide"><span class="added-span"></span>${
+          this.lang === 'eng' ? 'Item added to cart!' : 'המוצר נוסף לסל הקניות!'
+        }</div>
       </div>
     </div>
   </div>`;
@@ -213,14 +321,6 @@ class CategoriesView extends View {
     });
   }
 
-  // controlAddToCart = function (data) {
-  //   // 1) Update cart number
-  //   this.increaseCartNumber();
-
-  //   // 2) Pass data from clicked item and add it to model.cart
-  //   model.handleAddToCart(data);
-  // };
-
   setupCurrencyHandler() {
     const currencySelector = document.getElementById('currency');
 
@@ -236,9 +336,9 @@ class CategoriesView extends View {
 
   setupSortHandler() {
     const sortSelector = document.getElementById('sort');
-
     sortSelector.addEventListener('change', () => {
       this.sortedByPrice = sortSelector.value;
+    console.log('selector')
       this.sortAndDisplayProducts();
     });
   }
@@ -273,12 +373,12 @@ class CategoriesView extends View {
   }
 
   async fetchMoreProducts() {
-    console.log(this.allProductsFetched);
+    // console.log(this.allProductsFetched);
     if (this.isLoading || this.allProductsFetched) return;
     this.isLoading = true;
 
     let page = this.page;
-    console.log(page);
+    // console.log(page);
     const category = this.category;
     const spinner = this.outerProductsContainer.querySelector('.loader');
     spinner.classList.remove('spinner-hidden');
@@ -293,12 +393,11 @@ class CategoriesView extends View {
         }
       );
       const data = await response.json();
-      console.log(data.totalProducts);
-      console.log(this.products.length);
-      this.totalProducts = data.totalProducts
+      // console.log(data.totalProducts);
+      // console.log(this.products.length);
+      this.totalProducts = data.totalProducts;
       // Check if the products array is empty or if all products have been fetched
-      const noMoreData =
-        this.products.length >= this.totalProducts;
+      const noMoreData = this.products.length >= this.totalProducts;
 
       if (noMoreData) {
         this.allProductsFetched = true;
@@ -315,6 +414,7 @@ class CategoriesView extends View {
   }
 
   sortAndDisplayProducts() {
+  console.log('sort')
     // Sort products by price
     this.products.sort((a, b) => {
       const priceA =
@@ -356,17 +456,18 @@ class CategoriesView extends View {
 
   setupScrollListener() {
     let timeout;
-  
+
     window.addEventListener(
       'scroll',
       (this.scrollHandler = () => {
         if (timeout) clearTimeout(timeout);
-  
+
         timeout = setTimeout(() => {
           const scrollTop = window.scrollY; // Current scroll position
           const windowHeight = window.innerHeight; // Height of the visible window
-          const productsContainerBottom = this.outerProductsContainer.getBoundingClientRect().bottom; // Bottom of the products container
-  
+          const productsContainerBottom =
+            this.outerProductsContainer.getBoundingClientRect().bottom; // Bottom of the products container
+
           // Check if the bottom of the products container is within the viewport
           if (
             productsContainerBottom <= windowHeight + 100 && // 100px before reaching the bottom of the container
@@ -380,9 +481,6 @@ class CategoriesView extends View {
       })
     );
   }
-  
-  
-  
 
   // setupScrollListener() {
   //   let timeout;
@@ -417,7 +515,9 @@ class CategoriesView extends View {
     return `
       <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}">
         <img class="image-item front-image" src="${image}" loading="lazy"/>
-        <button class="add-to-cart-btn">Add to Cart</button>
+        <button class="add-to-cart-btn">${
+          this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל'
+        }</button>
         <div class="item-title">${name}</div>
         <div class="item-description">${description}</div>
         <div class="item-price">${curSign}${price}</div>
