@@ -75,7 +75,7 @@ header {
   width: 160px;
   color: black;
   padding-left: 10px;
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -252,8 +252,7 @@ main {
 }
 
 h1 {
-  font-family: "Montserrat", sans-serif;
-  font-family: "Raleway", sans-serif;
+  font-family: Raleway, sans-serif;
   margin: 20px;
   text-align: center;
 
@@ -339,7 +338,7 @@ h1 {
   padding-top: 0.5rem;
   margin-top: 3rem;
   background-color: rgb(132, 132, 132);
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
 
 
   /* ~~~~ FOR DEBUGGING~~~~*/
