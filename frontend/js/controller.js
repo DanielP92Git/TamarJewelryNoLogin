@@ -37,7 +37,6 @@ const controlWorkshopPage = async function (lng) {
   WorkshopView.addRevealHandler();
   WorkshopView._imageSlider();
   WorkshopView.setWorkshopLng(lng);
-  WorkshopView.setLanguage(lng);
   WorkshopView.handleLanguage();
 };
 
