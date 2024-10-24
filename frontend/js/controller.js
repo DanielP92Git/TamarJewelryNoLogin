@@ -61,9 +61,9 @@ const controlContactMePage = async function (lng) {
   ContactMeView.sendHandler();
   ContactMeView.addRevealHandler();
   ContactMeView.addMobileHandler();
-  ContactMeView.handleLanguage();
-  ContactMeView.setLanguage(lng);
   ContactMeView.setFormLng(lng);
+  ContactMeView.setLanguage(lng);
+  ContactMeView.handleLanguage();
 };
 
 const controlCategoriesPage = async function () {
@@ -90,9 +90,9 @@ const controlCategoriesPage = async function () {
     categoriesView.addRevealHandler();
     categoriesView.addMobileHandler();
     categoriesView.persistCartNumber(await model.checkCartNumber());
+    categoriesView.setCategoriesLng(lng);
+    // categoriesView.setLanguage(lng);
     categoriesView.handleCategoriesLanguage();
-    categoriesView.setLanguage(lng);
-    categoriesView.setCategoriesLanguage(lng);
   } catch (err) {
     console.error(err);
   }

@@ -31,10 +31,12 @@ class CategoriesView extends View {
 
     // Initial fetch and setup
     window.addEventListener('load', () => {
+      this.addMobileHandler();
       this.fetchProductsByCategory();
       this.setupScrollListener();
       this.addHandlerAddToCart();
       this.addHandlerPreview();
+
       let lng = localStorage.getItem('language');
       if (!lng) {
         localStorage.setItem('language', 'eng');
@@ -42,7 +44,7 @@ class CategoriesView extends View {
       }
       this.lang = lng;
       this.setHeaderLng(this.lang);
-      this.setCategoriesLanguage(this.lang);
+      this.setCategoriesLng(this.lang);
     });
   }
 
@@ -59,16 +61,16 @@ class CategoriesView extends View {
   changeToHeb = function () {
     localStorage.setItem('language', `heb`);
     this.lang = 'heb';
-    this.setCategoriesLanguage(`heb`);
+    this.setCategoriesLng(`heb`);
   };
 
   changeToEng = function () {
     localStorage.setItem('language', `eng`);
     this.lang = 'eng';
-    this.setCategoriesLanguage('eng');
+    this.setCategoriesLng('eng');
   };
 
-  setCategoriesLanguage(lng) {
+  setCategoriesLng(lng) {
     this._menu.innerHTML = '';
 
     const markup = this.handleMenuLanguage(lng);
@@ -79,14 +81,16 @@ class CategoriesView extends View {
 
     this.setHeaderLng(lng);
     this.handleFooterMarkup(lng);
-    this.setLanguage(lng);
+
+    // this.setLanguage(lng);
+    this.addMobileHandler();
+    this.handleLanguage();
+
     this.displayProducts();
     this.setCurSortLng(lng);
     this.setupSortHandler();
     this.setupCurrencyHandler();
 
-    this.handleLanguage();
-    this.addMobileHandler();
     this.addRevealHandler();
   }
 
@@ -338,7 +342,7 @@ class CategoriesView extends View {
     const sortSelector = document.getElementById('sort');
     sortSelector.addEventListener('change', () => {
       this.sortedByPrice = sortSelector.value;
-    console.log('selector')
+      console.log('selector');
       this.sortAndDisplayProducts();
     });
   }
@@ -414,7 +418,7 @@ class CategoriesView extends View {
   }
 
   sortAndDisplayProducts() {
-  console.log('sort')
+    console.log('sort');
     // Sort products by price
     this.products.sort((a, b) => {
       const priceA =

@@ -27,6 +27,7 @@ export default class View {
    */
   mobileCategories(e) {
     if (e.target.closest('.categories-tab')) {
+      console.log('clicked')
       this._categoriesList.classList.toggle('reveal');
     }
   }
