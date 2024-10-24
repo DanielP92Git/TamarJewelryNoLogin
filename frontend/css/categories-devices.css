@@ -67,9 +67,17 @@ header {
   border-bottom: none;
 }
 
+.currency-sort-container {
+  display: flex;
+  justify-content: space-evenly;
+  width: 90%;
+  padding: 0.8rem;
+
+  /* border: 1px solid red; */
+}
+
 #currency,
 #sort {
-  margin: 1rem 1.5rem 0 0;
   align-self: flex-end;
 
   width: 5rem;
