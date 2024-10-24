@@ -64,7 +64,7 @@ body {
   width: 160px;
   color: black;
   padding-left: 10px;
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -271,8 +271,7 @@ main {
 h1 {
   font-weight: 100;
   background-color: rgba(255, 166, 0, 0.4);
-  font-family: MS, Lucida Sans Unicode, Lucida Grande, Lucida Sans, Arial,
-    sans-serif;
+  font-family: Raleway, sans-serif;
   text-align: center;
   width: 100%;
   margin-bottom: 2rem;
@@ -302,7 +301,7 @@ h1 {
   font-size: 1.2rem;
   padding: 1rem;
   box-sizing: border-box;
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
   padding: 30px;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
@@ -342,7 +341,7 @@ h1 {
   font-size: 1.2rem;
   padding: 1rem;
   z-index: 3;
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
   align-self: center;
 
   background-color: rgba(245, 245, 220, 0.9);
@@ -416,7 +415,7 @@ h1 {
   max-width: 100%;
   padding-top: 0.5rem;
   background-color: rgb(132, 132, 132);
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */

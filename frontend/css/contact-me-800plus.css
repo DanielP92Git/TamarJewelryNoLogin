@@ -115,7 +115,7 @@ a {
   height: 3rem;
   color: black;
   font-size: 1.1rem;
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
   text-decoration: none;
 
   /* border: 1px solid green; */
@@ -271,8 +271,7 @@ main {
 }
 
 h1 {
-  font-family: 'Montserrat', sans-serif;
-  font-family: 'Raleway', sans-serif;
+  font-family: Raleway, sans-serif;
   margin: 20px;
   width: 100%;
   text-align: center;

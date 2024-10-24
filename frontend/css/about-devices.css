@@ -104,7 +104,7 @@ header {
   width: 160px;
   color: black;
   padding-left: 10px;
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -115,7 +115,7 @@ header {
   display: none;
 }
 
-input[type="checkbox"]:checked + .menu {
+input[type='checkbox']:checked + .menu {
   left: 0;
 }
 
@@ -277,8 +277,7 @@ main {
 h1 {
   font-weight: 100;
   background-color: rgba(255, 166, 0, 0.4);
-  font-family: MS, Lucida Sans Unicode, Lucida Grande, Lucida Sans, Arial,
-    sans-serif;
+  font-family: Raleway, sans-serif;
   text-align: center;
 
   align-self: center;
@@ -305,14 +304,14 @@ h1 {
   font-size: 1.2rem;
   padding: 1rem;
   box-sizing: border-box;
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
   padding: 30px;
 }
 
 .description-img {
   width: 50%;
   margin-top: 3rem;
- align-self: center;
+  align-self: center;
 }
 
 .go-to-top {
@@ -387,7 +386,7 @@ h1 {
   padding-left: 10px;
   padding-bottom: 5px;
   border-bottom: 0.5px solid rgb(66, 66, 66);
-  font-family: 'Raleway';
+  font-family: Raleway, sans-serif;
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -400,8 +399,7 @@ h1 {
   align-items: center;
   width: 100%;
   height: 4rem;
-  font-family: 'Raleway';
-
+  font-family: Raleway, sans-serif;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid rgb(210, 28, 140); */
