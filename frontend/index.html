@@ -74,71 +74,7 @@
         </div>
       </div>
 
-      <nav class="menu">
-        <ul class="menu__ul">
-          <li class="main-nav-tab">
-            <a class="attrib" href="./index.html">Home</a>
-          </li>
-          <li class="main-nav-tab categories-tab">
-            <a class="attrib" href="#">Shop ▾</a>
-            <ul class="categories-list">
-              <li class="category-item category-item--necklace">
-                <a class="attrib" href="./html/categories/necklaces.html"
-                  >Necklaces</a
-                >
-              </li>
-              <li class="category-item category-item--crochet-necklace">
-                <a class="attrib" href="./html/categories/crochetNecklaces.html"
-                  >Crochet Necklaces</a
-                >
-              </li>
-              <li class="category-item category-item--hoops">
-                <a class="attrib" href="./html/categories/hoops.html"
-                  >Hoop Earrings</a
-                >
-              </li>
-              <li class="category-item category-item--dangle">
-                <a class="attrib" href="./html/categories/dangle.html"
-                  >Dangle Earrings</a
-                >
-              </li>
-
-              <li class="category-item category-item--bracelets">
-                <a class="attrib" href="./html/categories/bracelets.html"
-                  >Bracelets</a
-                >
-              </li>
-            </ul>
-          </li>
-          <li class="main-nav-tab">
-            <a class="attrib" href="./html/jewelry-workshop.html"
-              >Jewelry Workshop</a
-            >
-          </li>
-          <li class="main-nav-tab">
-            <a class="attrib" href="./html/about.html">About</a>
-          </li>
-          <li class="main-nav-tab contact">
-            <a class="attrib" href="./html/contact-me.html">Contact Me</a>
-          </li>
-          <!-- <li class="main-nav-tab login" id="login-tab">
-            <a class="attrib login-btn" href="./html/login.html">Login</a>
-          </li> -->
-          <!-- <li class="main-nav-tab login" id="login-tab">
-            <a class="attrib login-btn" href="./html/bambaYafa.html">Dashboard</a>
-          </li> -->
-          <a class="attrib-cart" href="./html/cart.html">
-            <div class="cart-container">
-              <img
-                src="./imgs/svgs/cart-shopping-solid.svg"
-                alt=""
-                class="shoppingcart-svg"
-              />
-              <span class="cart-number">0</span>
-            </div>
-          </a>
-        </ul>
-      </nav>
+      <nav class="menu"></nav>
       <section class="hero-section">
         <img
           src="./imgs/website-images/Wetransfer/N7/DSC_0440_edited.webp"
@@ -217,16 +153,18 @@
             alt=""
             loading="lazy"
           />
-          <span class="category-name">Necklaces</span>
+          <span class="category-name category-name_necklaces">Necklaces</span>
         </a>
-        <a href="./html/categories/crochetNecklaces.html" class="category-box">
+        <a href="./html/categories/dangle.html" class="category-box">
           <img
             class="large-img-item"
-            src="./imgs/Subscribe_conv.webp"
+            src="./imgs/Hero-imgs/_MG_9124.jpg"
             alt=""
             loading="lazy"
           />
-          <span class="category-name">Crochet Necklaces</span>
+          <span class="category-name category-name_dangle"
+            >Dangle Earrings</span
+          >
         </a>
         <a href="./html/categories/hoops.html" class="category-box">
           <img
@@ -235,8 +173,20 @@
             alt=""
             loading="lazy"
           />
-          <span class="category-name">Hoop Earrings</span>
+          <span class="category-name category-name_hoops">Hoop Earrings</span>
         </a>
+        <a href="./html/categories/crochetNecklaces.html" class="category-box">
+          <img
+            class="large-img-item"
+            src="./imgs/Hero-imgs/in.jpg"
+            alt=""
+            loading="lazy"
+          />
+          <span class="category-name category-name_crochet-necklaces"
+            >Crochet Necklaces</span
+          >
+        </a>
+
         <a href="./html/categories/bracelets.html" class="category-box">
           <img
             class="large-img-item"
@@ -244,9 +194,19 @@
             alt=""
             loading="lazy"
           />
-          <span class="category-name">Bracelets</span>
+          <span class="category-name category-name_bracelets">Bracelets</span>
+        </a>
+        <a href="./html/categories/unisex.html" class="category-box">
+          <img
+            class="large-img-item"
+            src="./imgs/Hero-imgs/unisex(Small).jpg"
+            alt=""
+            loading="lazy"
+          />
+          <span class="category-name category-name_unisex">Unisex Jewelry</span>
         </a>
       </div>
+
       <button class="go-to-top">
         <img
           src="./imgs/svgs/arrow-up-solid-white.svg"
@@ -255,8 +215,8 @@
         />
       </button>
     </main>
-    <footer class="footer">
-      <div class="columns-container">
+    <footer class="footer footer_eng">
+      <div class="columns-container columns-container_eng">
         <div class="footer-left-column">
           <a class="attrib-footer" href="#">Home</a>
           <a class="attrib-footer" href="./html/categories/necklaces.html"
@@ -297,5 +257,6 @@
         >
       </div>
     </footer>
+    
   </body>
 </html>

@@ -26,7 +26,11 @@
     <script type="module" defer src="../../js/controller.js"></script>
   </head>
 
-  <body id="categories bracelets" data-category="bracelets">
+  <body
+    id="categories bracelets"
+    data-hebrew="צמידים"
+    data-category="bracelets"
+  >
     <header
       style="background-image: url(../../imgs/website-images/bracelets/B3.jpg)"
       class="bracelet-hero"
@@ -116,21 +120,9 @@
     </header>
     <main class="main">
       <div class="modal"></div>
-      <h1 class="category-title">BRACELETS</h1>
-      <select name="currency" id="currency">
-        <option value="default" class="currency-option">Currency</option>
-        <option value="usd" class="currency-option">USD</option>
-        <option value="ils" class="currency-option">ILS</option>
-      </select>
-      <select name="sort" id="sort">
-        <option value="default" class="sort-option">Sort by:</option>
-        <option value="low-to-high" class="sort-option">
-          Price (Low to High)
-        </option>
-        <option value="high-to-low" class="sort-option">
-          Price (High to Low)
-        </option>
-      </select>
+      <h1 class="category-title"></h1>
+      <div class="currency-sort-container"></div>
+
       <div class="outer-products-container" id="products-container">
         <div class="inner-products-container"></div>
         <span class="loader"></span>

@@ -47,6 +47,11 @@ header {
   /* border: 2px solid rgb(228, 152, 37); */
 }
 
+.ul-heb {
+  display: flex;
+  flex-flow: row-reverse;
+}
+
 .main-nav-tab {
   width: 100%;
   height: 50px;
@@ -80,6 +85,8 @@ header {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(40, 228, 37); */
 }
+
+
 
 .attrib:hover {
   color: rgb(152, 152, 152);
