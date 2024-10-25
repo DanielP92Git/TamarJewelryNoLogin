@@ -101,6 +101,8 @@ header {
   display: flex;
   flex-flow: row;
   align-items: center;
+  justify-content: center;
+
   width: 160px;
   color: black;
   padding-left: 10px;
@@ -115,7 +117,7 @@ header {
   display: none;
 }
 
-input[type="checkbox"]:checked + .menu {
+input[type='checkbox']:checked + .menu {
   left: 0;
 }
 
@@ -141,7 +143,7 @@ input[type="checkbox"]:checked + .menu {
   align-items: center;
 
   height: 60px;
-  background-color: rgba(221, 138, 168, 0.813);
+  background-color: #e1dcc1c7;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid yellowgreen; */
