@@ -65,9 +65,8 @@ header {
   align-items: center;
   justify-content: center;
 
-  width: 160px;
+  width: 100%;
   color: black;
-  padding-left: 10px;
   font-family: Raleway, sans-serif;
   text-decoration: none;
 
