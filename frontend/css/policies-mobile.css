@@ -93,6 +93,8 @@ header {
   display: flex;
   flex-flow: row;
   align-items: center;
+  justify-content: center;
+
   width: 160px;
   color: black;
   padding-left: 10px;
@@ -221,6 +223,30 @@ header {
   display: none;
 }
 
+.languages-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  width: 160px;
+  /* height: 80px; */
+  border-top: 1px solid;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  background-color: rgba(255, 255, 255, 0.808);
+
+  /* border: 2px solid red; */
+}
+
+.languages-container button {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  box-shadow: 0px 0px 10px 5px rgba(128, 128, 128, 0.6);
+  border-radius: 5px;
+  font-size: 1rem;
+  height: 1.6rem;
+  width: 2.5rem;
+}
+
 input[type='checkbox']:checked + .menu {
   left: 0;
 }
@@ -247,7 +273,7 @@ input[type='checkbox']:checked + .menu {
   align-items: center;
 
   height: 60px;
-  background-color: rgba(221, 138, 168, 0.813);
+  background-color: #e1dcc1c7;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid yellowgreen; */
