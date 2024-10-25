@@ -27,9 +27,10 @@ header {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 50px;
+  height: 15%;
   z-index: 7;
   position: fixed;
+  background-color: rgba(255, 255, 255, 0.8);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(20, 177, 35); */
@@ -85,8 +86,6 @@ header {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(40, 228, 37); */
 }
-
-
 
 .attrib:hover {
   color: rgb(152, 152, 152);
@@ -144,9 +143,10 @@ header {
   justify-content: space-evenly;
   text-align: center;
   list-style: none;
-  border: 1px solid;
-  position: relative;
+  position: absolute;
   top: -20rem;
+  width: 20%;
+
   background-color: rgba(250, 235, 215, 0.5);
   transition-property: all;
   transition-duration: 300ms;
@@ -158,7 +158,7 @@ header {
 .categories-list--active {
   opacity: 1;
   z-index: 1;
-  transform: translateY(20rem);
+  transform: translateY(25.6rem);
 }
 
 .category-item {
@@ -210,6 +210,37 @@ header {
 .login-btn:hover {
   color: aqua;
   cursor: pointer;
+}
+
+.languages-container {
+  display: flex;
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0);
+
+  border-left: 2px solid gray;
+
+  /* border: 1px solid red; */
+}
+
+.languages-container button {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.146);
+  border: none;
+  font-size: 1rem;
+}
+
+.languages-container button:first-child {
+  border-right: 1px solid;
+  padding-right: 5px;
+}
+
+.languages-container button:last-child {
+  padding-left: 5px;
+}
+
+.languages-container button:hover {
+  cursor: pointer;
+  color: gray;
 }
 /* ```````Navbar END`````````` */
 
