@@ -1,5 +1,6 @@
 import View from '../View.js';
 import whatsappIcon from '../../imgs/svgs/whatsapp.svg';
+
 class WorkshopView extends View {
   addWorkshopHandler(handler) {
     window.addEventListener('load', () => {
@@ -119,8 +120,8 @@ class WorkshopView extends View {
 
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
-    
-    this.setLanguage(lng)
+
+    this.setLanguage(lng);
     this.setHeaderLng(lng);
     this.setCostsLng(lng);
     this.addMobileHandler();

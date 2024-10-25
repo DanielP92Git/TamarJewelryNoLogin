@@ -63,6 +63,7 @@ class ContactMeView extends View {
     this.setFormLng(`heb`);
     this.setLanguage('heb');
     this.setFooterLng('heb');
+    this.addMobileHandler();
   };
 
   changeToEng = function () {
@@ -71,6 +72,7 @@ class ContactMeView extends View {
     this.setFormLng('eng');
     this.setLanguage('eng');
     this.setFooterLng('eng');
+    this.addMobileHandler();
   };
 
   generateFormLanguage(lng) {
@@ -122,9 +124,11 @@ class ContactMeView extends View {
     formContainer.innerHTML = '';
     const markup = this.generateFormLanguage(lng);
     formContainer.insertAdjacentHTML('afterbegin', markup);
+
+    this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
 
-    this.addMobileHandler()
+    this.addMobileHandler();
   }
 }
 

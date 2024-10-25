@@ -47,8 +47,9 @@ const controlAboutPage = async function (lng) {
   AboutView.persistCartNumber(await model.checkCartNumber());
   AboutView.addRevealHandler();
   AboutView.addMobileHandler();
-  AboutView.setAboutDesc(lng);
+
   AboutView.setLanguage(lng);
+  AboutView.setAboutDesc(lng);
   AboutView.handleLanguage();
 };
 
@@ -60,7 +61,7 @@ const controlContactMePage = async function (lng) {
   ContactMeView.sendHandler();
   ContactMeView.addRevealHandler();
   ContactMeView.addMobileHandler();
-  ContactMeView.handleLanguage();
+
   ContactMeView.setLanguage(lng);
   ContactMeView.setFormLng(lng);
 };

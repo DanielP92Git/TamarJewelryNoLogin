@@ -38,6 +38,8 @@ class HomePageView extends View {
     this.setHomeLanguage('heb');
     this.setLanguage('heb');
     this.setFooterLng('heb');
+    this.addMobileHandler()
+
   };
 
   changeToEng = function () {
@@ -45,6 +47,8 @@ class HomePageView extends View {
     this.setHomeLanguage('eng');
     this.setLanguage('eng');
     this.setFooterLng('eng');
+    this.addMobileHandler()
+
   };
 
   setHomeLanguage(lng) {

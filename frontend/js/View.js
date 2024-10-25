@@ -27,47 +27,47 @@ export default class View {
    */
   mobileCategories(e) {
     if (e.target.closest('.categories-tab')) {
+      console.log('clicked2');
       this._categoriesList.classList.toggle('reveal');
     }
   }
 
-  // addMobileHandler() {
-  //   const x = window.matchMedia('(max-width: 699.99px)');
-  //   if (!x.matches) return;
-  //   this._categoriesTab.addEventListener(
-  //     'click',
-  //     this.mobileCategories.bind(this)
-  //   );
-  // }
-
   addMobileHandler() {
     const x = window.matchMedia('(max-width: 699.99px)');
-
-    // Listen to resize to adapt event listeners dynamically
-    x.addEventListener('change', e => {
-      if (e.matches) {
-        // If it's in mobile view
-        this._categoriesTab.addEventListener(
-          'click',
-          this.mobileCategories.bind(this)
-        );
-      } else {
-        // Remove event listener on larger screens
-        this._categoriesTab.removeEventListener(
-          'click',
-          this.mobileCategories.bind(this)
-        );
-      }
-    });
-
-    // Initial check when the page is first loaded
-    if (x.matches) {
-      this._categoriesTab.addEventListener(
-        'click',
-        this.mobileCategories.bind(this)
-      );
-    }
+    if (!x.matches) return;
+    this._categoriesTab.addEventListener(
+      'click',
+      this.mobileCategories.bind(this)
+    );
   }
+
+  // addMobileHandler() {
+  //   const x = window.matchMedia('(max-width: 699.99px)');
+  //   // Listen to resize to adapt event listeners dynamically
+  //   x.addEventListener('change', e => {
+  //     if (e.matches) {
+  //       // If it's in mobile view
+  //       this._categoriesTab.addEventListener(
+  //         'click', (e)=>
+  //         this.mobileCategories(e).bind(this)
+  //       );
+  //     } else {
+  //       // Remove event listener on larger screens
+  //       this._categoriesTab.removeEventListener(
+  //         'click',
+  //         this.mobileCategories.bind(this)
+  //       );
+  //     }
+  //   });
+
+  //   // Initial check when the page is first loaded
+  //   if (x.matches) {
+  //     this._categoriesTab.addEventListener(
+  //       'click',
+  //       this.mobileCategories.bind(this)
+  //     );
+  //   }
+  // }
 
   /**
    * * --Sticky Menu--
@@ -426,9 +426,10 @@ export default class View {
     this._categoriesList = document.querySelector('.categories-list');
 
     this.handleFooterMarkup(lng);
-    this.handleLanguage();
     this.addMobileHandler();
     this.addRevealHandler();
+
+    this.handleLanguage();
   }
 
   setFooterLng(lng) {
