@@ -58,21 +58,17 @@ class ContactMeView extends View {
   }
 
   changeToHeb = function () {
-    console.log('Heb');
     localStorage.setItem('language', `heb`);
     this.setFormLng(`heb`);
     this.setLanguage('heb');
     this.setFooterLng('heb');
-    this.addMobileHandler();
   };
 
   changeToEng = function () {
-    console.log('Eng');
     localStorage.setItem('language', `eng`);
     this.setFormLng('eng');
     this.setLanguage('eng');
     this.setFooterLng('eng');
-    this.addMobileHandler();
   };
 
   generateFormLanguage(lng) {
@@ -127,8 +123,6 @@ class ContactMeView extends View {
 
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
-
-    this.addMobileHandler();
   }
 }
 

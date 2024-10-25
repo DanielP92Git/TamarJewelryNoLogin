@@ -69,6 +69,7 @@ class CategoriesView extends View {
   };
 
   setCategoriesLanguage(lng) {
+    console.log(lng)
     this._menu.innerHTML = '';
 
     const markup = this.handleMenuLanguage(lng);
@@ -77,17 +78,17 @@ class CategoriesView extends View {
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
 
+    this.svgHandler();
     this.setHeaderLng(lng);
     this.handleFooterMarkup(lng);
-    this.setLanguage(lng);
+    // this.setLanguage(lng);
     this.displayProducts();
     this.setCurSortLng(lng);
     this.setupSortHandler();
     this.setupCurrencyHandler();
-
-    this.handleLanguage();
     this.addMobileHandler();
     this.addRevealHandler();
+    this.handleCategoriesLanguage();
   }
 
   setCurSortLng(lng) {
@@ -338,7 +339,7 @@ class CategoriesView extends View {
     const sortSelector = document.getElementById('sort');
     sortSelector.addEventListener('change', () => {
       this.sortedByPrice = sortSelector.value;
-    console.log('selector')
+      console.log('selector');
       this.sortAndDisplayProducts();
     });
   }
@@ -414,7 +415,7 @@ class CategoriesView extends View {
   }
 
   sortAndDisplayProducts() {
-  console.log('sort')
+    console.log('sort');
     // Sort products by price
     this.products.sort((a, b) => {
       const priceA =

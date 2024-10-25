@@ -63,7 +63,6 @@ class AboutView extends View {
     this.setAboutDesc(`heb`);
     this.setLanguage('heb');
     this.setFooterLng('heb');
-    this.addMobileHandler();
   };
 
   changeToEng = function () {
@@ -71,7 +70,6 @@ class AboutView extends View {
     this.setAboutDesc('eng');
     this.setLanguage('eng');
     this.setFooterLng('eng');
-    this.addMobileHandler();
   };
 
   setAboutDesc(lng) {
@@ -83,9 +81,7 @@ class AboutView extends View {
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
 
-    
     this.setHeaderLng(lng);
-    this.addMobileHandler();
   }
 
   setHeaderLng(lng) {

@@ -60,7 +60,6 @@ class WorkshopView extends View {
 
   changeToHeb = function () {
     localStorage.setItem('language', `heb`);
-    this.setLanguage('heb');
     this.setFooterLng('heb');
     this.setWorkshopLng(`heb`);
     this.setCostsLng(`heb`);
@@ -68,7 +67,6 @@ class WorkshopView extends View {
 
   changeToEng = function () {
     localStorage.setItem('language', `eng`);
-    this.setLanguage('eng');
     this.setFooterLng('eng');
     this.setWorkshopLng('eng');
     this.setCostsLng('eng');
@@ -124,13 +122,12 @@ class WorkshopView extends View {
     this.setLanguage(lng);
     this.setHeaderLng(lng);
     this.setCostsLng(lng);
-    this.addMobileHandler();
   }
 
   setHeaderLng(lng) {
     const pageTitle = document.getElementById('page-title');
     if (lng === 'eng') pageTitle.textContent = 'MY JEWELRY WORKSHOP';
-    if (lng === 'heb') pageTitle.textContent = 'סדנאת התכשיטים שלי';
+    if (lng === 'heb') pageTitle.textContent = 'סדנאות התכשיטים שלי';
   }
 
   handleCostsLng(lng) {
