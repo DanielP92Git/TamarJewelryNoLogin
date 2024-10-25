@@ -39,21 +39,17 @@ class CartView extends View {
   }
 
   changeToHeb = function () {
-    console.log('heb');
     localStorage.setItem('language', `heb`);
     this.setCartLng(`heb`);
   };
 
   changeToEng = function () {
-    console.log('eng');
     localStorage.setItem('language', `eng`);
     this.setCartLng('eng');
   };
 
   setCartLng(lng) {
     this.setLanguage(lng);
-    this.svgHandler();
-    this.addMobileHandler();
 
     if (lng === 'eng') {
       this._cartTitle.textContent = 'Your Cart';
@@ -94,7 +90,6 @@ class CartView extends View {
     this._checkoutBtn.addEventListener('click', async e => {
       e.preventDefault();
       let currency = data[0].currency; // data is model.cart
-      console.log(currency);
       await fetch(`${this._host}/create-checkout-session`, {
         method: 'POST',
         headers: {
@@ -218,7 +213,6 @@ class CartView extends View {
   }
 
   _removeItem(cartNum) {
-    console.log(cartNum);
     if (cartNum !== 0) {
       this._itemsBox.innerHTML = '';
       this.render(cartNum);

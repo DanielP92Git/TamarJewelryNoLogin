@@ -69,7 +69,6 @@ class CategoriesView extends View {
   };
 
   setCategoriesLanguage(lng) {
-    console.log(lng)
     this._menu.innerHTML = '';
 
     const markup = this.handleMenuLanguage(lng);
@@ -233,7 +232,6 @@ class CategoriesView extends View {
       const filtered = this.products.find(prod => prod.id == id);
       const addToCart = e.target.closest('.add-to-cart-btn');
       const smallImage = filtered.smallImages;
-      // console.log(smallImage);
       const imageMarkup = smallImage
         .map(
           img => `
@@ -339,7 +337,6 @@ class CategoriesView extends View {
     const sortSelector = document.getElementById('sort');
     sortSelector.addEventListener('change', () => {
       this.sortedByPrice = sortSelector.value;
-      console.log('selector');
       this.sortAndDisplayProducts();
     });
   }
@@ -362,7 +359,6 @@ class CategoriesView extends View {
         }
       );
       const data = await response.json();
-      // console.log(data);
       this.products = data.products;
       this.displayProducts();
     } catch (err) {
@@ -374,12 +370,10 @@ class CategoriesView extends View {
   }
 
   async fetchMoreProducts() {
-    // console.log(this.allProductsFetched);
     if (this.isLoading || this.allProductsFetched) return;
     this.isLoading = true;
 
     let page = this.page;
-    // console.log(page);
     const category = this.category;
     const spinner = this.outerProductsContainer.querySelector('.loader');
     spinner.classList.remove('spinner-hidden');
@@ -394,8 +388,6 @@ class CategoriesView extends View {
         }
       );
       const data = await response.json();
-      // console.log(data.totalProducts);
-      // console.log(this.products.length);
       this.totalProducts = data.totalProducts;
       // Check if the products array is empty or if all products have been fetched
       const noMoreData = this.products.length >= this.totalProducts;
@@ -415,7 +407,6 @@ class CategoriesView extends View {
   }
 
   sortAndDisplayProducts() {
-    console.log('sort');
     // Sort products by price
     this.products.sort((a, b) => {
       const priceA =

@@ -26,7 +26,6 @@ export default class View {
    */
   mobileCategories(e) {
     if (e.target.closest('.categories-tab')) {
-      console.log('categories tab function initialized');
       this._categoriesList.classList.toggle('reveal');
     }
   }
@@ -203,11 +202,8 @@ export default class View {
   svgHandler() {
     const menuBars = document.querySelector('.menubars-svg');
     const categoriesList = document.querySelector('.categories-list');
-    console.log('svgHandler listening');
 
     const changeSVG = function () {
-      console.log('Bars menu clicked');
-
       const parent = document.querySelector('.menubars-toggle');
       parent.classList.toggle('close');
       const checkIcon = parent.classList.contains('close');
@@ -232,7 +228,6 @@ export default class View {
     };
 
     const toggleMenu = function () {
-      console.log('toggle-menu');
       const parent = document.querySelector('.menubars-toggle');
 
       const checkIcon = parent.classList.contains('close');
@@ -256,13 +251,11 @@ export default class View {
   }
 
   changeToHeb = function () {
-    console.log('heb');
     localStorage.setItem('language', `heb`);
     this.setLanguage(`heb`);
   };
 
   changeToEng = function () {
-    console.log('eng');
     localStorage.setItem('language', `eng`);
     this.setLanguage('eng');
   };

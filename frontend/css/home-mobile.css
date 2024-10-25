@@ -293,9 +293,8 @@ p {
   justify-content: center;
   justify-content: center;
 
-  width: 160px;
+  width: 100%;
   color: black;
-  padding-left: 10px;
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
