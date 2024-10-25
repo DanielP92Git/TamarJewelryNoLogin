@@ -271,7 +271,7 @@ export default class View {
     if (lng === 'eng') {
       return `<ul class="menu__ul ul-eng">
           <li class="main-nav-tab">
-            <a class="attrib" href="../index.html">Home</a>
+            <a class="attrib" href="/index.html">Home</a>
           </li>
           <li class="main-nav-tab categories-tab">
             <a class="attrib" href="#">Shop ▾</a>
@@ -345,7 +345,7 @@ export default class View {
     } else if (lng === 'heb') {
       return `<ul class="menu__ul ul-heb">
           <li class="main-nav-tab">
-            <a class="attrib" href="../index.html">בית </a>
+            <a class="attrib" href="/index.html">בית </a>
           </li>
           <li class="main-nav-tab categories-tab">
             <a class="attrib" href="#">חנות ▾</a>
