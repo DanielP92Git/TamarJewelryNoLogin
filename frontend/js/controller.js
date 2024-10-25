@@ -16,7 +16,7 @@ const controlHomePage = async function (lng) {
   await model.handleLoadStorage();
 
   homePageView.setHomeLanguage(lng);
-  homePageView.handleLanguage();
+  homePageView.handleHomeLanguage();
 
   homePageView._imageSlider();
   homePageView._moveToTopHandler();
@@ -31,10 +31,8 @@ const controlHomePage = async function (lng) {
 const controlWorkshopPage = async function (lng) {
   await model.handleLoadStorage();
 
-  WorkshopView.svgHandler();
   WorkshopView.persistCartNumber(await model.checkCartNumber());
   WorkshopView._moveToTopHandler();
-  WorkshopView.addRevealHandler();
   WorkshopView._imageSlider();
   WorkshopView.setWorkshopLng(lng);
   WorkshopView.handleLanguage();
@@ -43,10 +41,7 @@ const controlWorkshopPage = async function (lng) {
 const controlAboutPage = async function (lng) {
   await model.handleLoadStorage();
 
-  AboutView.svgHandler();
   AboutView.persistCartNumber(await model.checkCartNumber());
-  AboutView.addRevealHandler();
-  AboutView.addMobileHandler();
 
   AboutView.setLanguage(lng);
   AboutView.setAboutDesc(lng);
@@ -56,11 +51,8 @@ const controlAboutPage = async function (lng) {
 const controlContactMePage = async function (lng) {
   await model.handleLoadStorage();
 
-  ContactMeView.svgHandler();
   ContactMeView.persistCartNumber(await model.checkCartNumber());
   ContactMeView.sendHandler();
-  ContactMeView.addRevealHandler();
-  ContactMeView.addMobileHandler();
 
   ContactMeView.setLanguage(lng);
   ContactMeView.setFormLng(lng);
@@ -84,15 +76,12 @@ const controlCategoriesPage = async function () {
 
     await model.handleLoadStorage();
 
-    categoriesView.svgHandler();
     categoriesView._moveToTopHandler();
     categoriesView._imageFlipper();
-    categoriesView.addRevealHandler();
-    categoriesView.addMobileHandler();
+
     categoriesView.persistCartNumber(await model.checkCartNumber());
+
     categoriesView.handleCategoriesLanguage();
-    categoriesView.setLanguage(lng);
-    categoriesView.setCategoriesLanguage(lng);
   } catch (err) {
     console.error(err);
   }
@@ -109,13 +98,10 @@ const controlCartPage = async function (lng) {
     const cartData = model.cart;
     CartView._addHandlerCheckout(cartData);
     CartView.paypalCheckout(cartData);
-    CartView.svgHandler();
-    CartView.addRevealHandler();
-    CartView.addMobileHandler();
     CartView._addHandlerDeleteAll(controlDeleteAll);
+
     CartView.setCartLng(lng);
-    CartView.setLanguage(lng);
-    CartView.handleLanguage();
+    CartView.handleCartLanguage();
   } catch (err) {
     console.log(err);
   }

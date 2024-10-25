@@ -28,7 +28,33 @@ class CartView extends View {
     });
   }
 
+  handleCartLanguage() {
+    const hebLng = document.querySelector('.heb-lng');
+    const engLng = document.querySelector('.eng-lng');
+
+    if (hebLng && engLng) {
+      hebLng.addEventListener('click', () => this.changeToHeb());
+      engLng.addEventListener('click', () => this.changeToEng());
+    }
+  }
+
+  changeToHeb = function () {
+    console.log('heb');
+    localStorage.setItem('language', `heb`);
+    this.setCartLng(`heb`);
+  };
+
+  changeToEng = function () {
+    console.log('eng');
+    localStorage.setItem('language', `eng`);
+    this.setCartLng('eng');
+  };
+
   setCartLng(lng) {
+    this.setLanguage(lng);
+    this.svgHandler();
+    this.addMobileHandler();
+
     if (lng === 'eng') {
       this._cartTitle.textContent = 'Your Cart';
       this._cartEmpty.textContent = 'Your Cart Is Empty';

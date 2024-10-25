@@ -23,7 +23,7 @@ class HomePageView extends View {
    * * --Change Language--
    */
 
-  handleLanguage() {
+  handleHomeLanguage() {
     const hebLng = document.querySelector('.heb-lng');
     const engLng = document.querySelector('.eng-lng');
 
@@ -36,19 +36,13 @@ class HomePageView extends View {
   changeToHeb = function () {
     localStorage.setItem('language', `heb`);
     this.setHomeLanguage('heb');
-    this.setLanguage('heb');
     this.setFooterLng('heb');
-    this.addMobileHandler()
-
   };
 
   changeToEng = function () {
     localStorage.setItem('language', `eng`);
     this.setHomeLanguage('eng');
-    this.setLanguage('eng');
     this.setFooterLng('eng');
-    this.addMobileHandler()
-
   };
 
   setHomeLanguage(lng) {
@@ -60,13 +54,12 @@ class HomePageView extends View {
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
 
-    
     this.setCategoriesLng(lng);
     this.handleFooterMarkup(lng);
-    this.handleLanguage();
+    this.handleHomeLanguage();
 
     this.addRevealHandler();
-    this.addMobileHandler()
+    this.addMobileHandler();
     this.svgHandler();
   }
 

@@ -103,9 +103,8 @@ header {
   align-items: center;
   justify-content: center;
 
-  width: 160px;
+  width: 100%;
   color: black;
-  padding-left: 10px;
   font-family: Raleway, sans-serif;
   text-decoration: none;
 
@@ -324,11 +323,12 @@ h1 {
   flex-flow: column;
 }
 
-.workshop-description {
+.aboutme-description {
   background-color: rgba(245, 245, 220, 0.9);
   box-shadow: 12px 2px 30px 2px rgb(168, 163, 154);
   font-size: 1.2rem;
   padding: 1rem;
+  line-height: 1.8rem;
   box-sizing: border-box;
   font-family: Raleway, sans-serif;
   padding: 30px;

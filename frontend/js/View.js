@@ -1,7 +1,6 @@
 import closeSvg from '../imgs/svgs/x-solid.svg';
 import barsSvg from '../imgs/svgs/bars-solid.svg';
 import shoppingCartIcon from '../imgs/svgs/cart-shopping-solid.svg';
-
 export default class View {
   _data;
   _goToTop = document.querySelector('.go-to-top');
@@ -27,7 +26,7 @@ export default class View {
    */
   mobileCategories(e) {
     if (e.target.closest('.categories-tab')) {
-      console.log('clicked2');
+      console.log('categories tab function initialized');
       this._categoriesList.classList.toggle('reveal');
     }
   }
@@ -198,14 +197,17 @@ export default class View {
   // `````````````````````````````````````````````````````
 
   /**
-   * * --Switch SVG menu button on mobile mode--
+   * * --Switch SVG-icon menu button on mobile mode--
    */
 
   svgHandler() {
     const menuBars = document.querySelector('.menubars-svg');
     const categoriesList = document.querySelector('.categories-list');
+    console.log('svgHandler listening');
 
     const changeSVG = function () {
+      console.log('Bars menu clicked');
+
       const parent = document.querySelector('.menubars-toggle');
       parent.classList.toggle('close');
       const checkIcon = parent.classList.contains('close');
@@ -230,6 +232,7 @@ export default class View {
     };
 
     const toggleMenu = function () {
+      console.log('toggle-menu');
       const parent = document.querySelector('.menubars-toggle');
 
       const checkIcon = parent.classList.contains('close');
@@ -268,7 +271,7 @@ export default class View {
     if (lng === 'eng') {
       return `<ul class="menu__ul ul-eng">
           <li class="main-nav-tab">
-            <a class="attrib" href="./index.html">Home</a>
+            <a class="attrib" href="../index.html">Home</a>
           </li>
           <li class="main-nav-tab categories-tab">
             <a class="attrib" href="#">Shop ▾</a>
@@ -342,7 +345,7 @@ export default class View {
     } else if (lng === 'heb') {
       return `<ul class="menu__ul ul-heb">
           <li class="main-nav-tab">
-            <a class="attrib" href="./index.html">בית </a>
+            <a class="attrib" href="../index.html">בית </a>
           </li>
           <li class="main-nav-tab categories-tab">
             <a class="attrib" href="#">חנות ▾</a>
@@ -419,6 +422,7 @@ export default class View {
   setLanguage(lng) {
     this._menu.innerHTML = '';
 
+    // 1) Render menu
     const markup = this.handleMenuLanguage(lng);
     this._menu.insertAdjacentHTML('afterbegin', markup);
 
@@ -426,9 +430,9 @@ export default class View {
     this._categoriesList = document.querySelector('.categories-list');
 
     this.handleFooterMarkup(lng);
+    this.svgHandler();
     this.addMobileHandler();
     this.addRevealHandler();
-
     this.handleLanguage();
   }
 
@@ -437,7 +441,7 @@ export default class View {
       return ` 
       <div class="columns-container">
         <div class="footer-left-column">
-          <a class="attrib-footer" href="#">Home</a>
+          <a class="attrib-footer" href="/">Home</a>
           <a class="attrib-footer" href="./html/categories/necklaces.html"
             >Necklaces</a
           >
@@ -478,7 +482,7 @@ export default class View {
     `;
     } else if (lng === 'heb') {
       return `
-      <div class="columns-container columns-container_heb" style="display: flex; flex-flow: row-reverse;">
+      <div class="columns-container columns-container_heb" style=" direction:rtl;">
         <div class="footer-left-column">
           <a class="attrib-footer" href="#">בית</a>
           <a class="attrib-footer" href="./html/categories/necklaces.html"
@@ -508,7 +512,7 @@ export default class View {
         </div>
         <div class="footer-right-column">
           <a class="attrib-footer" href="./html/jewelry-workshop.html"
-            >סדנאת תכשיטים</a
+            >סדנאות תכשיטים</a
           >
           <a class="attrib-footer" href="./html/about.html">אודות</a>
         </div>
