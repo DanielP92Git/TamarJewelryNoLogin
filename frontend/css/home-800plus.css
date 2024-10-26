@@ -608,9 +608,9 @@ main {
   position: relative;
   display: flex;
   justify-content: center;
-  /* align-items: center; */
   text-decoration: none;
   padding: 1rem;
+  height: auto;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid red; */

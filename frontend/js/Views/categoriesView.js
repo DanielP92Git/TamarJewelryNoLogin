@@ -8,8 +8,8 @@ import * as model from '../model.js';
 /////////////////////////////////////////////////////////
 
 class CategoriesView extends View {
-  constructor(parentElement, category, categoryNameHebrew, lang) {
-    super(parentElement, category, categoryNameHebrew, lang);
+  constructor(parentElement, category, categoryNameHebrew, lang, cartNum) {
+    super(parentElement, category, categoryNameHebrew, lang, cartNum);
     this.page = 1;
     this.limit = 6;
     this.isLoading = false;
@@ -28,7 +28,6 @@ class CategoriesView extends View {
     this.category = category; // Category passed when navigating to the page
     this.categoryNameHebrew = categoryNameHebrew;
     this.lang = 'eng';
-
     // Initial fetch and setup
     window.addEventListener('load', () => {
       this.fetchProductsByCategory();
@@ -42,7 +41,7 @@ class CategoriesView extends View {
       }
       this.lang = lng;
       this.setHeaderLng(this.lang);
-      this.setCategoriesLanguage(this.lang);
+      this.setCategoriesLanguage(this.lang, cartNum);
     });
   }
 
@@ -68,7 +67,7 @@ class CategoriesView extends View {
     this.setCategoriesLanguage('eng');
   };
 
-  setCategoriesLanguage(lng) {
+  setCategoriesLanguage(lng, cartNum) {
     this._menu.innerHTML = '';
 
     const markup = this.handleMenuLanguage(lng);
@@ -76,11 +75,12 @@ class CategoriesView extends View {
 
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
-
+    this._cartNumber = document.querySelectorAll('.cart-number');
+console.log(cartNum)
     this.svgHandler();
     this.setHeaderLng(lng);
     this.handleFooterMarkup(lng);
-    // this.setLanguage(lng);
+    this.persistCartNumber(cartNum)
     this.displayProducts();
     this.setCurSortLng(lng);
     this.setupSortHandler();
@@ -156,11 +156,15 @@ class CategoriesView extends View {
     });
   }
 
-  persistCartNumber(num) {
-    this._cartNumber.forEach(cartNum => {
-      cartNum.textContent = num;
-    });
-  }
+//   persistCartNumber(num) {
+//     console.log(num)
+//     this._cartNumber = document.querySelectorAll('.cart-number');
+// console.log('here')
+//     this._cartNumber.forEach(cartNum => {
+//       cartNum.textContent = num;
+//     });
+//   }
+
   addCategoriesHandler = function (handler) {
     window.addEventListener('load', handler);
   };
@@ -198,6 +202,7 @@ class CategoriesView extends View {
 
     if (!btn) return;
     const item = btn.closest('.item-container');
+    this._cartNumber = document.querySelectorAll('.cart-number');
 
     this.increaseCartNumber();
 
