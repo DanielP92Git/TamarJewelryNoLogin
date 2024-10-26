@@ -31,31 +31,30 @@ const controlHomePage = async function (lng) {
 const controlWorkshopPage = async function (lng) {
   await model.handleLoadStorage();
 
-  WorkshopView.persistCartNumber(await model.checkCartNumber());
   WorkshopView._moveToTopHandler();
   WorkshopView._imageSlider();
   WorkshopView.setWorkshopLng(lng);
   WorkshopView.handleLanguage();
+  WorkshopView.persistCartNumber(await model.checkCartNumber());
 };
 
 const controlAboutPage = async function (lng) {
   await model.handleLoadStorage();
 
-  AboutView.persistCartNumber(await model.checkCartNumber());
-
   AboutView.setLanguage(lng);
   AboutView.setAboutDesc(lng);
   AboutView.handleLanguage();
+  AboutView.persistCartNumber(await model.checkCartNumber());
 };
 
 const controlContactMePage = async function (lng) {
   await model.handleLoadStorage();
 
-  ContactMeView.persistCartNumber(await model.checkCartNumber());
   ContactMeView.sendHandler();
 
   ContactMeView.setLanguage(lng);
   ContactMeView.setFormLng(lng);
+  ContactMeView.persistCartNumber(await model.checkCartNumber());
 };
 
 const controlCategoriesPage = async function () {
@@ -66,20 +65,21 @@ const controlCategoriesPage = async function () {
     const categoryName = idParts[idParts.length - 1]; // Extracted category name "bracelets"
     const categoryNameHebrew = body.dataset.hebrew; // Extracted category name "bracelets"
     const parentElement = document.querySelector('.parent-element');
+    await model.handleLoadStorage();
+    const cartNum = await model.checkCartNumber();
     let lng = 'eng';
     const categoriesView = new CategoriesView(
       parentElement,
       categoryName,
       categoryNameHebrew,
-      lng
+      lng,
+      cartNum
     );
 
-    await model.handleLoadStorage();
+    console.log(cartNum);
 
     categoriesView._moveToTopHandler();
     categoriesView._imageFlipper();
-
-    categoriesView.persistCartNumber(await model.checkCartNumber());
 
     categoriesView.handleCategoriesLanguage();
   } catch (err) {
@@ -91,7 +91,6 @@ const controlCartPage = async function (lng) {
   try {
     await model.handleLoadStorage();
     const cartNum = await model.checkCartNumber();
-    CartView.persistCartNumber(cartNum);
     CartView.render(cartNum);
     CartView._renderSummary(cartNum, lng);
 
@@ -102,6 +101,7 @@ const controlCartPage = async function (lng) {
 
     CartView.setCartLng(lng);
     CartView.handleCartLanguage();
+    CartView.persistCartNumber(cartNum);
   } catch (err) {
     console.log(err);
   }
@@ -115,9 +115,9 @@ const controlLoginPage = async function () {
   LoginView.continueHandler();
   LoginView.addRevealHandler();
   LoginView.addMobileHandler();
-  LoginView.persistCartNumber(await model.checkCartNumber());
   LoginView.setLanguage(lng);
   LoginView.handleLanguage();
+  LoginView.persistCartNumber(await model.checkCartNumber());
 };
 
 const controlDeleteFromCart = async function (id) {

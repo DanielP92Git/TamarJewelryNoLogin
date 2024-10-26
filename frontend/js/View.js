@@ -141,6 +141,8 @@ export default class View {
   }
 
   persistCartNumber(num) {
+    this._cartNumber = document.querySelectorAll('.cart-number');
+
     this._cartNumber.forEach(cartNum => {
       cartNum.textContent = num;
     });
