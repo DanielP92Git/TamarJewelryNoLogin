@@ -216,6 +216,8 @@ class HomePageView extends View {
   // }
 
   setCategoriesLng(lng) {
+    const categoryName = document.querySelectorAll('.category-name');
+
     let necklacesCategory = document.querySelector('.category-name_necklaces');
     let crochetNecklacesCategory = document.querySelector(
       '.category-name_crochet-necklaces'
@@ -225,6 +227,9 @@ class HomePageView extends View {
     let dangleCategory = document.querySelector('.category-name_dangle');
     let unisexCategory = document.querySelector('.category-name_unisex');
     if (lng === 'eng') {
+      categoryName.forEach(name => {
+        name.style.fontSize = '1.3rem';
+      });
       necklacesCategory.textContent = 'Necklaces';
       crochetNecklacesCategory.textContent = 'Crochet Necklaces';
       hoopsCategory.textContent = 'Hoop Earrings';
@@ -232,6 +237,10 @@ class HomePageView extends View {
       dangleCategory.textContent = 'Dangle Earrings';
       unisexCategory.textContent = 'Unisex Jewelry';
     } else {
+      categoryName.forEach(name => {
+        name.style.fontFamily = "'Amatic SC', sans-serif";
+        name.style.fontSize = '1.3rem';
+      });
       necklacesCategory.textContent = 'שרשראות';
       crochetNecklacesCategory.textContent = 'שרשראות סרוגות';
       hoopsCategory.textContent = 'עגילי חישוק';

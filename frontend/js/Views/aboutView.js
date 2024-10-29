@@ -87,8 +87,14 @@ class AboutView extends View {
   setHeaderLng(lng) {
     const pageTitle = document.getElementById('page-title');
 
-    if (lng === 'eng') pageTitle.textContent = 'ABOUT ME';
-    if (lng === 'heb') pageTitle.textContent = 'אודותי';
+    if (lng === 'eng') {
+      pageTitle.style.fontFamily = 'Raleway, sans-serif';
+      pageTitle.textContent = 'ABOUT ME';
+    }
+    if (lng === 'heb') {
+      pageTitle.style.fontFamily = `'Amatic SC', sans-serif`;
+      pageTitle.textContent = 'אודותי';
+    }
   }
 }
 

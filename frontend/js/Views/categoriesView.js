@@ -76,11 +76,11 @@ class CategoriesView extends View {
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
     this._cartNumber = document.querySelectorAll('.cart-number');
-console.log(cartNum)
+    console.log(cartNum);
     this.svgHandler();
     this.setHeaderLng(lng);
     this.handleFooterMarkup(lng);
-    this.persistCartNumber(cartNum)
+    this.persistCartNumber(cartNum);
     this.displayProducts();
     this.setCurSortLng(lng);
     this.setupSortHandler();
@@ -138,8 +138,16 @@ console.log(cartNum)
 
   setHeaderLng(lng) {
     const categoryTitle = document.querySelector('.category-title');
-    if (lng === 'eng') categoryTitle.textContent = this.category.toUpperCase();
-    if (lng === 'heb') categoryTitle.textContent = this.categoryNameHebrew;
+    if (lng === 'eng') {
+      categoryTitle.style.fontFamily = 'Raleway, sans-serif';
+      categoryTitle.style.fontSize = '1.5rem';
+      categoryTitle.textContent = this.category.toUpperCase();
+    }
+    if (lng === 'heb') {
+      categoryTitle.style.fontFamily = `'Amatic SC', sans-serif`;
+      categoryTitle.style.fontSize = '2.3rem';
+      categoryTitle.textContent = this.categoryNameHebrew;
+    }
   }
 
   increaseCartNumber() {
@@ -156,14 +164,14 @@ console.log(cartNum)
     });
   }
 
-//   persistCartNumber(num) {
-//     console.log(num)
-//     this._cartNumber = document.querySelectorAll('.cart-number');
-// console.log('here')
-//     this._cartNumber.forEach(cartNum => {
-//       cartNum.textContent = num;
-//     });
-//   }
+  //   persistCartNumber(num) {
+  //     console.log(num)
+  //     this._cartNumber = document.querySelectorAll('.cart-number');
+  // console.log('here')
+  //     this._cartNumber.forEach(cartNum => {
+  //       cartNum.textContent = num;
+  //     });
+  //   }
 
   addCategoriesHandler = function (handler) {
     window.addEventListener('load', handler);

@@ -111,7 +111,10 @@ header {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(40, 228, 37); */
 }
-
+.attrib-heb {
+  font-size: 1.4rem;
+  font-family: 'Amatic SC', sans-serif;
+}
 #show-menu-button {
   display: none;
 }
@@ -358,8 +361,8 @@ h1 {
   max-width: 100%;
   padding-top: 0.5rem;
   margin-top: 3rem;
-  background-color: rgb(132, 132, 132);
-
+  border-top: 1px solid;
+  
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */
 }
@@ -411,7 +414,7 @@ h1 {
   margin-bottom: 6%;
   padding-left: 10px;
   padding-bottom: 5px;
-  border-bottom: 0.5px solid rgb(66, 66, 66);
+  border-bottom: 0.5px solid rgba(66, 66, 66, 0.5);
   font-family: Raleway, sans-serif;
   text-decoration: none;
 

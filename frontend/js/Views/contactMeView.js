@@ -95,7 +95,7 @@ class ContactMeView extends View {
     } else if (lng === 'heb') {
       formContainer.style.direction = 'rtl';
 
-      return `<h1>צרו קשר</h1>
+      return `<h1 class="header-heb">צרו קשר</h1>
         <input
           type="text"
           id="name"
@@ -104,14 +104,14 @@ class ContactMeView extends View {
           autofocus
         />
         <input type="text" id="lastname" placeholder="שם משפחה*" required />
-        <input type="email" id="email" placeholder="כתובת דוא"ל*" required />
+        <input type="email" id="email" placeholder="כתובת דואר אלקטרוני*" required />
         <textarea
           type="text"
           id="message"
           rows="3"
           placeholder="הודעתך*"
         ></textarea>
-        <input type="submit" id="submit" value="שלח"/>`;
+        <input type="submit" id="submit" class="submit-heb" value="שלח/י"/>`;
     }
   }
 
