@@ -25,8 +25,10 @@ header {
 }
 
 .hero-section {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
   width: 100%;
-  /* height: 100%; */
   position: relative;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -42,13 +44,8 @@ header {
 }
 
 .logo {
-  display: block;
-
   width: 25%;
-  position: absolute;
-  left: 5%;
-  bottom: 10%;
-
+  margin-bottom: 2rem;
   z-index: 0;
 
   /* border: 1px solid rgb(90, 255, 65); */
@@ -181,6 +178,7 @@ header {
   ~~~~ FOR DEBUGGING~~~~
   border: 3px solid greenyellow;
 } */
+
 h3 {
   position: absolute;
   bottom: -3%;
@@ -240,7 +238,7 @@ p {
   width: 165px;
   height: 305px;
   transition-property: all;
-  transition-duration: 1s;
+  transition-duration: 500ms;
   transition-timing-function: ease;
   position: absolute;
   top: 10px;
@@ -300,7 +298,10 @@ p {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(40, 228, 37); */
 }
-
+.attrib-heb {
+  font-size: 1.4rem;
+  font-family: 'Amatic SC', sans-serif;
+}
 .categories-list {
   position: absolute;
   left: -200px;
@@ -309,7 +310,7 @@ p {
 
   width: 165px;
   transition-property: all;
-  transition-duration: 1s;
+  transition-duration: 500ms;
   transition-timing-function: ease;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -506,6 +507,7 @@ main {
   display: flex;
   flex-flow: row;
   width: 100%;
+  position: relative;
   /* height: 300px; */
 }
 
@@ -526,7 +528,7 @@ main {
   justify-content: center;
   align-items: center;
   position: absolute;
-  top: 4%;
+  top: 2%;
   height: 8%;
   width: 8%;
   background-color: rgba(255, 250, 218, 0.6);
@@ -584,12 +586,12 @@ main {
 }
 
 .category-name {
-  color: white;
+  color: black;
+  background-color: rgba(255, 255, 255, 0.888);
   position: absolute;
   bottom: 10%;
   left: 5%;
   font-size: clamp(2rem, 2vh, 2rem);
-  background-color: rgba(0, 0, 0, 0.1);
   padding: 5px;
 }
 
@@ -648,7 +650,7 @@ main {
   max-width: 100vw;
   height: 100%;
   padding-top: 0.5rem;
-  background-color: rgb(132, 132, 132);
+  border-top: 1px solid;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(255, 51, 0); */
@@ -702,7 +704,7 @@ main {
   margin-bottom: 6%;
   padding-left: 10px;
   padding-bottom: 5px;
-  border-bottom: 0.5px solid rgb(66, 66, 66);
+  border-bottom: 0.5px solid rgba(66, 66, 66, 0.5);
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/

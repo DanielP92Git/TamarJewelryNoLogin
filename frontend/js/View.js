@@ -1,6 +1,6 @@
 import closeSvg from '../imgs/svgs/x-solid.svg';
 import barsSvg from '../imgs/svgs/bars-solid.svg';
-import shoppingCartIcon from '../imgs/svgs/cart-shopping-solid.svg';
+import shoppingCartIcon from '../imgs/svgs/shopping_cart_google.svg';
 export default class View {
   _data;
   _goToTop = document.querySelector('.go-to-top');
@@ -338,56 +338,56 @@ export default class View {
         </div>
         `;
     } else if (lng === 'heb') {
-      return `<ul class="menu__ul ul-heb">
+      return `<ul class="menu__ul ul-heb" >
           <li class="main-nav-tab">
-            <a class="attrib" href="/index.html">בית </a>
+            <a class="attrib attrib-heb" href="/index.html">בית </a>
           </li>
           <li class="main-nav-tab categories-tab">
-            <a class="attrib" href="#">חנות ▾</a>
+            <a class="attrib attrib-heb" href="#">חנות ▾</a>
             <ul class="categories-list">
               <li class="category-item category-item--necklace">
-                <a class="attrib" href="/html/categories/necklaces.html"
+                <a class="attrib attrib-heb" href="/html/categories/necklaces.html"
                   >שרשראות</a
                 >
               </li>
               <li class="category-item category-item--crochet-necklace">
-                <a class="attrib" href="/html/categories/crochetNecklaces.html"
+                <a class="attrib attrib-heb" href="/html/categories/crochetNecklaces.html"
                   >שרשראות סרוגות</a
                 >
               </li>
               <li class="category-item category-item--hoops">
-                <a class="attrib" href="/html/categories/hoops.html"
+                <a class="attrib attrib-heb" href="/html/categories/hoops.html"
                   >עגילי חישוק</a
                 >
               </li>
               <li class="category-item category-item--dangle">
-                <a class="attrib" href="/html/categories/dangle.html"
+                <a class="attrib attrib-heb" href="/html/categories/dangle.html"
                   >עגילים תלויים</a
                 >
               </li>
 
               <li class="category-item category-item--bracelets">
-                <a class="attrib" href="/html/categories/bracelets.html"
+                <a class="attrib attrib-heb" href="/html/categories/bracelets.html"
                   >צמידים</a
                 >
               </li>
               <li class="category-item category-item--unisex">
-                <a class="attrib" href="/html/categories/unisex.html"
+                <a class="attrib attrib-heb" href="/html/categories/unisex.html"
                   >תכשיטי יוניסקס</a
                 >
               </li>
             </ul>
           </li>
           <li class="main-nav-tab">
-            <a class="attrib" href="/html/jewelry-workshop.html"
+            <a class="attrib attrib-heb" href="/html/jewelry-workshop.html"
               >סדנאת תכשיטים</a
             >
           </li>
           <li class="main-nav-tab">
-            <a class="attrib" href="/html/about.html">אודות</a>
+            <a class="attrib attrib-heb" href="/html/about.html">אודות</a>
           </li>
           <li class="main-nav-tab contact">
-            <a class="attrib" href="/html/contact-me.html">צרו קשר</a>
+            <a class="attrib attrib-heb" href="/html/contact-me.html">צרו קשר</a>
           </li>
           <!-- <li class="main-nav-tab login" id="login-tab">
             <a class="attrib login-btn" href="/html/login.html">Login</a>
@@ -477,7 +477,7 @@ export default class View {
     `;
     } else if (lng === 'heb') {
       return `
-      <div class="columns-container columns-container_heb" style=" direction:rtl;">
+      <div class="columns-container columns-container_heb" style=" direction: rtl;">
         <div class="footer-left-column">
           <a class="attrib-footer" href="#">בית</a>
           <a class="attrib-footer" href="./html/categories/necklaces.html"

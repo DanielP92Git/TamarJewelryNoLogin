@@ -126,8 +126,14 @@ class WorkshopView extends View {
 
   setHeaderLng(lng) {
     const pageTitle = document.getElementById('page-title');
-    if (lng === 'eng') pageTitle.textContent = 'MY JEWELRY WORKSHOP';
-    if (lng === 'heb') pageTitle.textContent = 'סדנאות התכשיטים שלי';
+    if (lng === 'eng') {
+      pageTitle.style.fontFamily = 'Raleway, sans-serif';
+      pageTitle.textContent = 'MY JEWELRY WORKSHOP';
+    }
+    if (lng === 'heb') {
+      pageTitle.style.fontFamily = `'Amatic SC', sans-serif`;
+      pageTitle.textContent = 'סדנאות התכשיטים שלי';
+    }
   }
 
   handleCostsLng(lng) {
