@@ -1,6 +1,7 @@
 import 'core-js/actual';
 import 'regenerator-runtime/runtime.js';
 import * as model from './model.js';
+// import { loadMenu } from './menuLoader.js'; // Removed
 import CategoriesView from './Views/categoriesView.js';
 import homePageView from './Views/homePageView.js';
 import WorkshopView from './Views/workshopView.js';
@@ -156,6 +157,9 @@ const controlBambaPage = function () {
 };
 
 const init = async function () {
+  // Load menu for all pages // Removed
+  // await loadMenu(); // Removed
+
   if (document.body.id.includes('home')) {
     homePageView.addHomePageHandler(controlHomePage);
   }
