@@ -33,6 +33,8 @@ const corsOptions = {
   },
   credentials: true,
   optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use(cors(corsOptions));
@@ -230,6 +232,10 @@ const Product = mongoose.model('Product', {
     type: Boolean,
     default: true,
   },
+  security_margin: {
+    type: Number,
+    required: false,
+  },
 });
 
 //
@@ -329,6 +335,7 @@ app.post('/productsByCategory', async (req, res) => {
 
   try {
     let skip = (page - 1) * limit;
+    console.log('Fetching products for category:', category);
     console.log('I"m on page:', page, 'skip:', skip, 'products');
 
     let totalProducts = await Product.countDocuments({ category: category });
@@ -338,14 +345,13 @@ app.post('/productsByCategory', async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-    // if (!products || products.length === 0) {
-    //   return res
-    //     .status(404)
-    //     .json({ error: 'No products found for the given category' });
-    // }
-    res.json({products, totalProducts});
+    if (!products || products.length === 0) {
+      return res.json([]); // Return empty array if no products found
+    }
+    res.json({ products, totalProducts });
   } catch (err) {
-    console.log(err);
+    console.error('Error fetching products by category:', err);
+    res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
 
