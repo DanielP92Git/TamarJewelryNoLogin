@@ -10,10 +10,12 @@
 
     <title>Reach Out | Contact Tamar Kfir Jewelry</title>
     <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat&family=Raleway:wght@200&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Montserrat&family=Raleway:wght@200;400;600&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="../css/standard-reset.css" />
+    <link rel="stylesheet" href="../css/desktop-menu.css" />
+
     <link
       href="https://fonts.googleapis.com/css2?family=Raleway"
       rel="stylesheet"
@@ -35,6 +37,11 @@
       rel="stylesheet"
       href="../css/contact-me-800plus.css"
       media="(min-width: 800px)"
+    />
+    <link
+      rel="stylesheet"
+      href="../css/mobile-menu.css"
+      media="(max-width: 799.9px)"
     />
     <script type="module" defer src="../js/controller.js"></script>
   </head>
@@ -90,27 +97,78 @@
       <nav class="menu"></nav>
     </header>
 
-    <main>
-      <form class="contact-form">
-        <h1>Contact Me</h1>
-        <input
-          type="text"
-          id="name"
-          placeholder="First Name*"
-          required
-          autofocus
-        />
-        <input type="text" id="lastname" placeholder="Last Name*" required />
-        <input type="email" id="email" placeholder="Email Address*" required />
-        <textarea
-          type="text"
-          id="message"
-          rows="3"
-          placeholder="Your Message*"
-        ></textarea>
-        <input type="submit" id="submit" />
-      </form>
-    </main>
+    <div class="contact-main">
+      <div class="contact-container">
+        <h1 class="contact-title">Get in Touch</h1>
+        <p class="contact-subtitle">
+          Have a question or want to collaborate? I'd love to hear from you.
+        </p>
+
+        <form class="contact-form" id="contactForm">
+          <div class="form-group">
+            <div class="input-group">
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder=" "
+                required
+              />
+              <label for="name">First Name</label>
+              <div class="input-highlight"></div>
+            </div>
+
+            <div class="input-group">
+              <input
+                type="text"
+                id="lastname"
+                name="lastname"
+                placeholder=" "
+                required
+              />
+              <label for="lastname">Last Name</label>
+              <div class="input-highlight"></div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              placeholder=" "
+              required
+            />
+            <label for="email">Email Address</label>
+            <div class="input-highlight"></div>
+          </div>
+
+          <div class="input-group full-width">
+            <textarea
+              id="message"
+              name="message"
+              placeholder=" "
+              required
+            ></textarea>
+            <label for="message">Your Message</label>
+            <div class="input-highlight"></div>
+          </div>
+
+          <button type="submit" class="submit-button" id="submit">
+            Send Message
+            <svg class="button-arrow" viewBox="0 0 24 24">
+              <path
+                d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+              />
+            </svg>
+          </button>
+
+          <div class="success-message" id="successMessage">
+            Thank you for your message! I'll get back to you soon.
+          </div>
+        </form>
+      </div>
+    </div>
     <footer class="footer">
       <div class="columns-container">
         <div class="footer-left-column">

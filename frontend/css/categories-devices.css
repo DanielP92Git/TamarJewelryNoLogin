@@ -138,21 +138,6 @@ input[type='checkbox']:checked + .menu {
   left: 0;
 }
 
-.categories-list {
-  position: absolute;
-  left: -200px;
-  top: 60px;
-  list-style: none;
-
-  width: 165px;
-  transition-property: all;
-  transition-duration: 1s;
-  transition-timing-function: ease;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid darkblue */
-}
-
 .category-item {
   display: flex;
   flex-flow: row;
@@ -183,34 +168,6 @@ input[type='checkbox']:checked + .menu {
   /* border: 2px solid yellowgreen; */
 }
 
-.icons-container {
-  display: flex;
-  flex-flow: row-reverse;
-  justify-content: end;
-  align-items: center;
-  position: absolute;
-  height: 8%;
-  width: 100%;
-  padding-right: 0.8rem;
-  z-index: 10;
-  background-color: white;
-
-  /* border: 2px solid darkcyan; */
-}
-
-.menubars-svg {
-  display: flex;
-
-  background-color: rgba(255, 255, 255, 0.616);
-  border-radius: 5px;
-  width: 30px;
-  height: 30px;
-  padding: 2px;
-  margin-left: 1.5rem;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid lightcoral; */
-}
 .shoppingcart-container {
   display: flex;
   align-items: center;
@@ -251,20 +208,12 @@ input[type='checkbox']:checked + .menu {
   z-index: 10;
 }
 
-.menubars-svg:hover {
-  cursor: pointer;
-}
-
 .shoppingcart-svg {
   display: none;
 }
 
 .toggle-svg {
   display: none;
-}
-
-#menubars-svg {
-  fill: rgb(0, 0, 0);
 }
 
 .shoppingcart-svg {
@@ -290,6 +239,55 @@ h1 {
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(40, 228, 37); */
+}
+
+/* Fix for title positioning with icons */
+header {
+  position: relative;
+  min-height: 200px; /* Ensure enough space for header */
+}
+
+.icons-container {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 900;
+}
+
+.category-title {
+  padding: 12px 0;
+  position: relative;
+  z-index: 5;
+  clear: both;
+  width: 100%;
+  text-align: center;
+}
+
+/* Mobile specific styles */
+@media (max-width: 699.99px) {
+  .category-title {
+    background-color: rgba(255, 166, 0, 0.4);
+    font-weight: 300;
+  }
+
+  main {
+    margin-top: 10px;
+    padding-top: 0;
+  }
+}
+
+/* Desktop specific styles */
+@media (min-width: 700px) {
+  .category-title {
+    margin-top: 100px;
+    margin-bottom: 25px;
+    font-size: 2.2rem;
+    letter-spacing: 3px;
+  }
+
+  header {
+    padding-bottom: 0;
+  }
 }
 
 main {
@@ -540,6 +538,7 @@ main {
 .big-image {
   width: 100%;
   height: 80%;
+  object-fit: contain;
 
   /* border: 1px solid red; */
 }
@@ -607,6 +606,7 @@ main {
   background-color: rgba(232, 165, 138, 0.559);
   border: none;
   z-index: 2;
+  margin-top: auto;
 }
 
 .add-to-cart-btn_modal:hover {
@@ -619,30 +619,23 @@ main {
 }
 
 .added-message {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  border: 1px solid;
+  /* display: flex; // Keep display: flex if needed for icon later */
+  /* flex-flow: column; // Keep if needed for icon */
+  /* align-items: center; // Keep if needed for icon */
+  color: #fff; /* White text */
+  background-color: rgba(0, 0, 0, 0.6); /* Darker semi-transparent background */
+  border: none; /* Remove border */
   border-radius: 5px;
-  padding: 0 5px 5px 5px;
+  padding: 10px 15px; /* Uniform padding */
   margin-top: 1rem;
   opacity: 1;
-  transition: all;
-  transition-duration: 1s;
-  background-color: rgba(240, 248, 255, 0.24);
-}
-
-.added-span {
-  position: relative;
-  width: 99%;
-  border: 3px solid rgb(76, 215, 74);
-  border-radius: 5px;
+  transition: opacity 0.5s ease; /* Faster transition on opacity */
+  text-align: center; /* Center text */
 }
 
 .hide {
   opacity: 0;
-  transition: all;
-  transition-duration: 1s;
+  transition: opacity 0.5s ease; /* Faster transition on opacity */
 }
 
 /* ----------- Slider end ----------------- */
@@ -765,4 +758,57 @@ main {
   font-size: 0.9rem;
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */
+}
+
+/* Added rule to hide the container when there's only one image */
+.hide-small-images {
+  display: none;
+}
+
+/* Product Image Loading Styles */
+.product-image-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 100%; /* Maintains 1:1 aspect ratio */
+  background-color: #f8f9fa;
+  overflow: hidden;
+}
+
+.loading-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 30px;
+  height: 30px;
+  margin: -15px 0 0 -15px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #343a40;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  z-index: 1;
+}
+
+.image-item {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.image-item.loaded {
+  opacity: 1;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

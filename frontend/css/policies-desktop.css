@@ -164,38 +164,6 @@ a {
   text-align: center;
 }
 
-.categories-list {
-  display: flex;
-  flex-flow: column;
-  justify-content: space-evenly;
-  text-align: center;
-  list-style: none;
-  border: 1px solid;
-  position: relative;
-  top: -20rem;
-  background-color: rgba(250, 235, 215, 0.5);
-  transition-property: all;
-  transition-duration: 300ms;
-  transition-timing-function: linear;
-  opacity: 0;
-  z-index: -1;
-}
-
-.categories-list--active {
-  opacity: 1;
-  z-index: 1;
-  transform: translateY(20rem);
-}
-
-.category-item {
-  position: relative;
-}
-
-.category-item:hover {
-  cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
 .menu.sticky {
   display: flex;
   flex-flow: row;

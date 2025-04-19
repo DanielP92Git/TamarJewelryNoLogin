@@ -13,6 +13,7 @@ class CartView extends View {
   _checkoutBtn = document.querySelector('.stripe-svg');
   _deleteAllBtn = document.querySelector('.delete-all');
   _checkMeOut = document.querySelector('.check-me-out');
+  _orderSummaryContainer = document.querySelector('.summary');
   _host = process.env.API_URL;
   _rate = 3.8;
 
@@ -38,18 +39,8 @@ class CartView extends View {
     }
   }
 
-  changeToHeb = function () {
-    localStorage.setItem('language', `heb`);
-    this.setCartLng(`heb`);
-  };
-
-  changeToEng = function () {
-    localStorage.setItem('language', `eng`);
-    this.setCartLng('eng');
-  };
-
   setCartLng(lng) {
-    this.setLanguage(lng);
+    // this.setLanguage(lng); // REMOVED: Base setLanguage is called by controller
 
     if (lng === 'eng') {
       this._cartTitle.textContent = 'Your Cart';
@@ -117,10 +108,20 @@ class CartView extends View {
   _generateMarkup(cartNum) {
     if (cartNum === 0) {
       this._itemsBox.classList.add('remove');
+      this._deleteAllBtn.classList.add('remove');
+      this._deleteAllBtn.classList.remove('delete-all-active');
+      return ''; // Return empty string for empty cart
     } else {
       this._itemsBox.classList.remove('remove');
       this._cartEmpty.classList.add('remove');
       this._deleteAllBtn.classList.add('delete-all-active');
+      this._deleteAllBtn.classList.remove('remove');
+
+      // Check if cart is empty before accessing currency
+      if (!model.cart || model.cart.length === 0) {
+        return ''; // Return empty string if no items in cart
+      }
+
       let checkCurrency = model.cart[0].currency;
       if (checkCurrency == '$') {
         return model.cart
@@ -163,9 +164,22 @@ class CartView extends View {
 
   _generateSummaryMarkup(cartNum, price, ship = 30, lng) {
     if (cartNum === 0) return;
+
+    // Check if cart is empty before accessing currency
+    if (!model.cart || model.cart.length === 0) {
+      return '';
+    }
+
     let checkCurrency = model.cart[0].currency;
     let isInUsd = checkCurrency == '$';
     let currency = isInUsd ? '$' : '₪';
+
+    // Determine total label and styling based on language
+    const totalLabel = lng === 'eng' ? 'Total:' : 'סה"כ:';
+    const totalContainerStyle =
+      lng === 'heb' ? 'style="direction: rtl; padding-right: 5px;"' : '';
+    const totalTextStyle = lng === 'heb' ? 'style="margin-right: 0;"' : '';
+
     return `
     <div class="price-summary-container">
           <!--<div class="total-container subtotal">
@@ -176,16 +190,21 @@ class CartView extends View {
             <span class="total-text">Shipping:</span>
             <span class="total-price">₪${ship}</span>
           </div>-->
-          ${
-            lng === 'eng'
-              ? `<div class="total-container total"><span class="total-text">Total:</span><span class="total-price">${currency}${price}</span></div>`
-              : `<div class="total-container total" style="direction: rtl; padding-right: 5px;" ><span class="total-text" style="margin-right: 0;">סה"כ:</span><span class="total-price">${currency}${price}</span></div>`
-          }
-          <!--<div class="total-container total">
+          
+          <!-- Correctly generate total line using variables -->
+          <div class="total-container total" ${totalContainerStyle}>
+            <span class="total-text" ${totalTextStyle}>${totalLabel}</span>
+            <span class="total-price">${currency}${price}</span>
+          </div>
+
+          <!-- Remove the potentially problematic commented-out block -->
+          <!-- 
+          <div class="total-container total">
             <span class="total-text">Total:</span>
             <span class="total-price">${currency}${price}</span>
-            
-          </div>-->
+          </div>
+          -->
+
           ${
             lng === 'eng'
               ? '<span class="shipping-text">(Shipping costs may apply. Please checkout for options)</span>'
@@ -197,18 +216,35 @@ class CartView extends View {
   render(cartNum) {
     const markup = this._generateMarkup(cartNum);
     this._itemsBox.insertAdjacentHTML('beforeend', markup);
+
+    // Hide/show delete all button and order summary container if cart is empty
+    if (cartNum === 0) {
+      this._deleteAllBtn.classList.add('remove');
+      this._deleteAllBtn.classList.remove('delete-all-active');
+      if (this._orderSummaryContainer)
+        this._orderSummaryContainer.classList.add('remove');
+    } else {
+      this._deleteAllBtn.classList.remove('remove');
+      this._deleteAllBtn.classList.add('delete-all-active');
+      if (this._orderSummaryContainer)
+        this._orderSummaryContainer.classList.remove('remove');
+    }
   }
 
   _renderSummary(cartNum, lng) {
     if (cartNum !== 0) {
       this._summaryDetails.innerHTML = '';
       const num = this._calculateTotal();
-      const markup = this._generateSummaryMarkup(cartNum, num, lng);
+      const markup = this._generateSummaryMarkup(cartNum, num, undefined, lng);
       this._summaryDetails.insertAdjacentHTML('afterbegin', markup);
+      if (this._orderSummaryContainer)
+        this._orderSummaryContainer.classList.remove('remove');
     }
     if (cartNum === 0) {
       this._summaryDetails.innerHTML = '';
       this._checkoutBtn.classList.add('remove');
+      if (this._orderSummaryContainer)
+        this._orderSummaryContainer.classList.add('remove');
     }
   }
 
@@ -216,18 +252,24 @@ class CartView extends View {
     if (cartNum !== 0) {
       this._itemsBox.innerHTML = '';
       this.render(cartNum);
-    }
-    if (cartNum === 0) {
+    } else {
+      // cartNum is now 0
       this._itemsBox.innerHTML = '';
       this._cartEmpty.classList.remove('remove');
+      this._deleteAllBtn.classList.add('remove');
       this._deleteAllBtn.classList.remove('delete-all-active');
+      if (this._orderSummaryContainer)
+        this._orderSummaryContainer.classList.add('remove');
     }
   }
 
   _removeAll() {
     this._itemsBox.innerHTML = '';
     this._cartEmpty.classList.remove('remove');
+    this._deleteAllBtn.classList.add('remove');
     this._deleteAllBtn.classList.remove('delete-all-active');
+    if (this._orderSummaryContainer)
+      this._orderSummaryContainer.classList.add('remove');
   }
 
   _clear() {
@@ -235,7 +277,12 @@ class CartView extends View {
   }
 
   _calculateTotal() {
-    if (model.checkCartNumber() === 0) return;
+    if (model.checkCartNumber() === 0) return 0;
+
+    // Check if cart is empty before accessing currency
+    if (!model.cart || model.cart.length === 0) {
+      return 0;
+    }
 
     let checkCurrency = model.cart[0].currency;
 
@@ -266,7 +313,7 @@ class CartView extends View {
   }
 
   paypalCheckout(cartData) {
-    if (cartData.length == 0) return;
+    if (!cartData || cartData.length === 0) return;
     const currencyVariable = cartData[0].currency == '$' ? 'USD' : 'ILS';
     let myScript = document.querySelector('.paypal-script');
     myScript.setAttribute(
@@ -377,6 +424,14 @@ class CartView extends View {
         },
       })
       .render('#paypal');
+  }
+
+  // Override the placeholder from View.js
+  setPageSpecificLanguage(lng, cartNum) {
+    this.setCartLng(lng);
+    // Re-render summary with the new language (now handled correctly)
+    // const cartNum = await model.checkCartNumber(); // No need to fetch again
+    // this._renderSummary(cartNum, lng);
   }
 }
 export default new CartView();

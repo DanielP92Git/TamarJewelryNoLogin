@@ -21,20 +21,27 @@ const allowedOrigins = [
   `${process.env.HOST}`,
   `${process.env.FULLHOST}`,
   `${process.env.API_URL}`,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+  'http://localhost:5000',
+  'http://127.0.0.1:5000',
 ];
 
 const corsOptions = {
-  origin: (origin, callback) => {
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.log('CORS blocked origin:', origin);
+      return callback(null, true);
     }
   },
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'auth-token', 'Accept'],
 };
 
 app.use(cors(corsOptions));
@@ -114,7 +121,7 @@ app.use(express.json({ limit: '50mb' }));
 //
 //* CORS
 //
-
+/* // Commented out custom headers middleware
 function headers(req, res, next) {
   const allowedOrigins = [process.env.HOST, process.env.FULLHOST];
   const origin = req.headers.origin;
@@ -141,6 +148,7 @@ function headers(req, res, next) {
 
 app.use(headers);
 app.options('*', headers);
+*/
 
 //
 //* MONGODB
@@ -329,29 +337,81 @@ app.get('/allproducts', async (req, res) => {
 });
 
 app.post('/productsByCategory', async (req, res) => {
+  console.log('Received productsByCategory request with body:', req.body);
+
+  if (!req.body || !req.body.category) {
+    console.error('Missing category in request');
+    return res.status(400).json({
+      error: 'Category is required',
+      received: req.body,
+    });
+  }
+
   const category = req.body.category;
-  let page = req.body.page;
+  const page = req.body.page || 1;
   const limit = 6;
 
   try {
     let skip = (page - 1) * limit;
-    console.log('Fetching products for category:', category);
-    console.log('I"m on page:', page, 'skip:', skip, 'products');
+    console.log(
+      'Fetching products for category:',
+      category,
+      'page:',
+      page,
+      'skip:',
+      skip,
+      'limit:',
+      limit
+    );
+
+    const categoryExists = await Product.exists({ category: category });
+    console.log('Category exists check:', categoryExists);
+
+    if (!categoryExists) {
+      console.log('Category not found:', category);
+      return res.status(404).json({
+        error: 'Category not found',
+        category: category,
+      });
+    }
 
     let totalProducts = await Product.countDocuments({ category: category });
+    console.log('Total products in category:', totalProducts);
 
-    // Query products with pagination
     let products = await Product.find({ category: category })
       .skip(skip)
       .limit(limit);
+    console.log('Found', products.length, 'products for page', page);
 
     if (!products || products.length === 0) {
-      return res.json([]); // Return empty array if no products found
+      console.log('No products found for this page, returning empty array');
+      return res.json({
+        products: [],
+        total: totalProducts,
+        page: page,
+        hasMore: false,
+      });
     }
-    res.json({ products, totalProducts });
+
+    const response = {
+      products,
+      total: totalProducts,
+      page: page,
+      hasMore: skip + products.length < totalProducts,
+    };
+    console.log(
+      'Sending response with',
+      products.length,
+      'products, hasMore:',
+      response.hasMore
+    );
+    res.json(response);
   } catch (err) {
     console.error('Error fetching products by category:', err);
-    res.status(500).json({ error: 'Failed to fetch products' });
+    res.status(500).json({
+      error: 'Failed to fetch products',
+      message: err.message,
+    });
   }
 });
 
@@ -432,6 +492,32 @@ app.post('/login', authUser, async (req, res) => {
   } catch (err) {
     console.error('Login Error🔥 :', err);
     res.status(500).json({ errors: 'Login - Internal Server Error', err });
+  }
+});
+
+// Token verification endpoint
+app.post('/verify-token', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_KEY);
+    const user = await Users.findById(decoded.user.id);
+
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: 'User not found' });
+    }
+
+    res.json({ success: true, user: { id: user._id, email: user.email } });
+  } catch (err) {
+    console.error('Token verification error:', err);
+    res.status(401).json({ success: false, message: 'Invalid token' });
   }
 });
 
@@ -563,7 +649,6 @@ app.post('/findProduct', async (req, res) => {
 });
 
 // Image Storage Engine
-
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     if (file.fieldname === 'mainImage') {
@@ -588,13 +673,30 @@ const multipleUpload = uploadA.fields([
   { name: 'smallImages', maxCount: 8 },
 ]);
 
-// Creating Upload endpoint for one image:
-app.use('/uploads', express.static('uploads'));
-app.use('../../Online/backend/uploads', express.static('uploads'));
+// Static file serving configuration
+const uploadsDir = path.join(__dirname, 'uploads');
+const smallImagesDir = path.join(__dirname, 'smallImages');
 
-app.use('/smallImages', express.static('smallImages'));
-app.use('../../Online/backend/smallImages', express.static('smallImages'));
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('Created uploads directory:', uploadsDir);
+}
 
+if (!fs.existsSync(smallImagesDir)) {
+  fs.mkdirSync(smallImagesDir, { recursive: true });
+  console.log('Created smallImages directory:', smallImagesDir);
+}
+
+const staticOptions = {
+  setHeaders: res => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  },
+};
+
+// Helper function for copying files
 const copyFile = (source, target, cb) => {
   const rd = fs.createReadStream(source);
   const wr = fs.createWriteStream(target);
@@ -605,6 +707,12 @@ const copyFile = (source, target, cb) => {
 
   rd.pipe(wr);
 };
+
+// Serve static files with proper configuration
+app.use('/uploads', express.static(uploadsDir, staticOptions));
+app.use('/api/uploads', express.static(uploadsDir, staticOptions));
+app.use('/smallImages', express.static(smallImagesDir, staticOptions));
+app.use('/api/smallImages', express.static(smallImagesDir, staticOptions));
 
 app.post('/upload', multipleUpload, (req, res) => {
   try {

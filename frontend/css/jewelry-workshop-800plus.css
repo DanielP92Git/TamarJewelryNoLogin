@@ -211,38 +211,6 @@ a {
   text-align: center;
 }
 
-.categories-list {
-  display: flex;
-  flex-flow: column;
-  justify-content: space-evenly;
-  text-align: center;
-  list-style: none;
-  position: absolute;
-  width: 20%;
-  top: -20rem;
-  background-color: rgba(250, 235, 215, 0.5);
-  transition-property: all;
-  transition-duration: 300ms;
-  transition-timing-function: linear;
-  opacity: 0;
-  z-index: -1;
-}
-
-.categories-list--active {
-  opacity: 1;
-  z-index: 1;
-  transform: translateY(25.6rem);
-}
-
-.category-item {
-  position: relative;
-}
-
-.category-item:hover {
-  cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.5);
-}
-
 .menu.sticky {
   display: flex;
   flex-flow: row;
@@ -301,7 +269,7 @@ header {
 .slide-images-container {
   display: flex;
   overflow: hidden;
-  position: absolute;
+  position: relative;
   top: 5rem;
 
   height: 80vh;
@@ -584,4 +552,66 @@ h1 {
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */
+}
+
+/* Styles removed, buttons will now be visible by default */
+
+/* Desktop Slider Button Styles */
+.slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px; /* Slightly larger on desktop */
+  height: 50px; /* Slightly larger on desktop */
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 3rem;
+  font-weight: bold;
+  font-family: sans-serif;
+  line-height: 0; /* Changed from 1 to 0 to remove extra space */
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  padding: 0;
+  margin: 0;
+  vertical-align: middle;
+}
+
+.slider-btn:hover {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.slider-btn--left {
+  left: 25px; /* Further from the left edge */
+  padding-bottom: 5px; /* Slightly more adjustment for larger desktop button */
+}
+
+.slider-btn--right {
+  right: 25px; /* Further from the right edge */
+  padding-bottom: 5px; /* Slightly more adjustment for larger desktop button */
+}
+
+/* Hide Mobile-specific buttons on desktop */
+.slider-btn--mobile {
+  display: none;
+}
+
+/* Ensure Desktop buttons are visible and positioned */
+.slide-images-container .slider-btn--desktop {
+  display: flex;
+}
+
+/* Position Desktop Buttons */
+.slide-images-container .slider-btn--left.slider-btn--desktop {
+  left: 25px;
+}
+
+.slide-images-container .slider-btn--right.slider-btn--desktop {
+  right: 25px;
 }

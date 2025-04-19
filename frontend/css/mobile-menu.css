@@ -1,0 +1,452 @@
+/* Shared Mobile Menu Styles */
+
+.menu {
+  display: flex;
+  flex-flow: column;
+  width: 85%; /* Make menu wider */
+  max-width: 350px; /* Optional: Add max-width */
+  height: 100%; /* Full height */
+  transition: transform 0.4s ease; /* Smoother transition on transform */
+  position: fixed; /* Fixed positioning */
+  top: 0;
+  left: 0; /* Start at left edge */
+  transform: translateX(-100%); /* Hide off-screen using transform */
+  z-index: 1000; /* Ensure menu is on top */
+  background-color: #fff; /* Solid background */
+  box-shadow: 4px 0px 15px rgba(0, 0, 0, 0.1); /* Add shadow */
+  padding-top: 4rem; /* Add padding to clear potential header */
+  overflow-y: auto; /* Allow scrolling within menu if needed */
+}
+
+.menu.menu-open {
+  transform: translateX(0%); /* Slide in */
+}
+
+.menu__ul {
+  display: flex;
+  flex-flow: column;
+  align-items: stretch; /* Stretch items */
+  width: 100%; /* Full width of menu */
+  position: relative;
+}
+
+/* Base styles for all menu tabs */
+.main-nav-tab {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0; /* Remove padding from the LI itself */
+  background-color: transparent; /* Remove background */
+  text-align: left;
+  border-bottom: none; /* Remove default border */
+}
+
+/* Style for all tab links */
+.main-nav-tab > .attrib {
+  padding: 1rem 1.5rem; /* Apply padding to the link instead */
+  border-bottom: 1px solid #eee; /* Add border to the link */
+  width: 100%;
+  display: block; /* Ensure block display */
+  text-decoration: none;
+  color: #343a40;
+}
+
+/* Specific styling for categories tab */
+.main-nav-tab.categories-tab {
+  flex-direction: column; /* Stack link and list vertically */
+  align-items: stretch; /* Stretch children */
+  position: relative; /* Positioning context */
+  background-color: transparent; /* Match menu background */
+}
+
+/* Added wrapper for better structure control */
+.categories-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Shop button styling */
+.main-nav-tab.categories-tab > .attrib {
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  background-color: transparent;
+}
+
+/* Change background when submenu is active */
+.main-nav-tab.categories-tab:has(.categories-list--active) > .attrib,
+.main-nav-tab.categories-tab:has(.categories-list.categories-list--active)
+  > .attrib {
+  background-color: #f8f9fa;
+  border-bottom: none;
+}
+
+/* Remove down arrow from content since it's already in the markup */
+.main-nav-tab.categories-tab > .attrib::after {
+  content: '';
+}
+
+.contact {
+  /* Example: Remove bottom border if needed */
+  border-bottom: none;
+}
+
+.main-nav-tab:hover {
+  background-color: #f8f9fa; /* Light hover */
+  cursor: pointer;
+}
+
+.attrib {
+  /* Base styles for links inside menu */
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  width: 100%;
+  color: #343a40; /* Darker text */
+  font-family: Raleway, sans-serif;
+  font-size: 1rem; /* Adjust font size */
+  text-decoration: none;
+  padding: 0.5rem 0; /* Adjust padding */
+}
+
+.attrib-heb {
+  font-size: 1.4rem;
+  font-family: 'Amatic SC', sans-serif;
+}
+
+/* Categories list - basic styles that work in both mobile and desktop */
+.categories-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: #f8f9fa;
+  width: 100%;
+  border: none;
+  display: none;
+  overflow: hidden;
+  position: absolute; /* Position it absolutely by default */
+  z-index: 1000; /* Ensure it's on top */
+}
+
+/* Base styles for when categories list is active */
+.categories-list.categories-list--active {
+  display: block;
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Style each category item */
+.category-item {
+  display: block;
+  width: 100%;
+  background-color: #f8f9fa;
+  border: none;
+}
+
+/* Category links */
+.category-item .attrib {
+  padding: 0.8rem 1.5rem 0.8rem 2.5rem; /* Increased indentation */
+  font-size: 0.9rem;
+  display: block;
+  width: 100%;
+  color: #343a40;
+  background-color: #f8f9fa;
+  text-decoration: none;
+  border: none;
+}
+
+.category-item .attrib:hover {
+  background-color: #e9ecef;
+}
+
+/* Last item in categories list should not have a border */
+.category-item:last-child {
+  border-bottom: none;
+}
+
+.languages-container {
+  display: flex;
+  justify-content: center; /* Center the buttons */
+  align-items: center;
+  width: 100%;
+  border-top: 1px solid #eee;
+  padding: 1.5rem; /* Increase padding slightly */
+  margin-top: auto; /* Push to bottom */
+}
+
+.languages-container button {
+  border: 1px solid #5c6ac4; /* Accent color border */
+  background-color: #fff; /* White background */
+  border-radius: 5px; /* Keep rounded corners */
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #5c6ac4; /* Accent color text */
+  height: auto;
+  padding: 0.5rem 1rem; /* Adjust padding for button feel */
+  width: auto;
+  cursor: pointer;
+  margin: 0 0.5rem; /* Reduce space slightly */
+  text-decoration: none;
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease; /* Smooth transitions */
+}
+
+.languages-container button:hover {
+  background-color: #f0f2ff; /* Very light accent background on hover */
+  border-color: #4a57a0; /* Darker border */
+  color: #4a57a0; /* Darker text */
+}
+
+/* Style for the active language button */
+.languages-container button.active-lang {
+  background-color: #5c6ac4; /* Filled background */
+  color: #fff; /* White text */
+  border-color: #5c6ac4;
+  cursor: default;
+}
+
+/* Overlay Styling */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+  z-index: 999; /* Below the menu */
+}
+
+body.menu-active::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile Header Icons */
+.icons-container {
+  position: fixed;
+  top: 15px; /* Increased spacing from top */
+  right: 15px; /* Increased spacing from right */
+  width: auto;
+  z-index: 900; /* Above overlay and menu */
+  display: flex;
+  align-items: center;
+}
+
+/* Hide the original toggle icon when menu is open */
+body.menu-active .icons-container .menubars-svg {
+  visibility: hidden; /* Hide it */
+  opacity: 0;
+  transition: visibility 0s 0.2s, opacity 0.2s ease; /* Delay hiding slightly */
+}
+
+.menubars-svg {
+  display: block;
+  background-color: transparent;
+  border-radius: 5px;
+  width: 30px;
+  height: 30px;
+  padding: 2px;
+  cursor: pointer;
+  color: #343a40;
+  margin-left: 0.8rem; /* Space between cart and menu icon */
+  object-fit: contain; /* Ensure SVG scales correctly within bounds */
+  transition: opacity 0.2s ease; /* Add transition for smoother hide */
+}
+
+/* Styles for the NEW close icon inside the menu */
+.menu-close-container {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+  z-index: 1010;
+}
+
+.menu-close-icon {
+  width: 25px;
+  height: 25px;
+  fill: #343a40;
+  transition: fill 0.2s ease;
+}
+
+.menu-close-icon:hover {
+  fill: #5c6ac4; /* Accent color on hover */
+}
+
+.shoppingcart-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 35px;
+  height: 35px;
+  position: relative;
+}
+
+.shoppingcart-mobile {
+  fill: rgb(0, 0, 0);
+  width: 30px;
+  height: 30px;
+  padding: 3px;
+  position: relative;
+  border-radius: 5px;
+}
+
+.cart-number-mobile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.6rem;
+  position: absolute;
+  left: 55%;
+  top: 35%;
+  background-color: rgba(255, 255, 255);
+  width: 10px;
+  height: 10px;
+  border: 1px solid black;
+  border-radius: 50%;
+  text-align: center;
+  z-index: 10;
+}
+
+/* Hide desktop elements if they exist in mobile view */
+.shoppingcart-svg,
+.cart-number {
+  display: none;
+}
+
+/* Style for mobile nav */
+@media (max-width: 699.99px) {
+  /* This will take precedence over other styles */
+  /* .menu-open .categories-tab {
+    position: relative;
+  } */
+
+  .menu-open .menu__ul {
+    position: relative;
+    /* border: 1px solid blue; */
+  }
+
+  .menu-open .categories-tab {
+    position: relative;
+    height: auto;
+    /* border: 1px solid green; */
+  }
+
+  .menu-open .categories-list {
+    position: relative;
+    width: 100%;
+    z-index: 1;
+
+    /* border: 1px solid red; */
+  }
+
+  .menu-open .categories-list.categories-list--active {
+    display: block;
+  }
+
+  .menu-open .category-item {
+    display: flex;
+    align-items: center;
+    height: 3rem;
+  }
+}
+
+/* DESKTOP DROPDOWN STYLES (Overrides mobile if necessary) */
+@media (min-width: 700px) {
+  /* Ensure the parent tab is the positioning context */
+  .main-nav-tab.categories-tab {
+    position: relative;
+  }
+
+  /* Categories list positioning for desktop */
+  .categories-list {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: auto;
+    min-width: 180px;
+    background-color: #fff;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1100;
+
+    /* Initial hidden state for animation */
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: visibility 0s 0.3s, opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  /* Active state for desktop dropdown */
+  .categories-list.categories-list--active,
+  .main-nav-tab.categories-tab:hover .categories-list {
+    visibility: visible;
+    opacity: 1;
+    transform: translateY(0);
+    transition-delay: 0s;
+    display: block;
+  }
+
+  /* Style list items for desktop */
+  .categories-list .category-item {
+    display: block;
+    width: 100%;
+    background-color: #fff;
+    border: none;
+  }
+
+  .categories-list .category-item .attrib {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    display: block;
+    width: 100%;
+    color: #343a40;
+    background-color: #fff;
+    text-decoration: none;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .categories-list .category-item .attrib:hover {
+    background-color: #f8f9fa;
+  }
+
+  /* Desktop view specific styles */
+  .categories-tab.desktop-view {
+    position: relative;
+  }
+
+  .categories-list.desktop-view {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    z-index: 1000;
+  }
+
+  .categories-tab.desktop-view.active .categories-list.desktop-view,
+  .categories-list.desktop-view.categories-list--active {
+    display: block;
+  }
+
+  .categories-list.desktop-view .category-item {
+    display: block;
+    padding: 8px 16px;
+  }
+
+  .categories-list.desktop-view .category-item:hover {
+    background-color: #f5f5f5;
+  }
+}

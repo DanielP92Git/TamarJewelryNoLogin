@@ -147,21 +147,6 @@ input[type='checkbox']:checked + .menu {
   left: 0;
 }
 
-.categories-list {
-  position: absolute;
-  left: -200px;
-  top: 60px;
-  list-style: none;
-
-  width: 165px;
-  transition-property: all;
-  transition-duration: 1s;
-  transition-timing-function: ease;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid darkblue */
-}
-
 .category-item {
   display: flex;
   flex-flow: row;
@@ -192,34 +177,6 @@ input[type='checkbox']:checked + .menu {
   /* border: 2px solid yellowgreen; */
 }
 
-.icons-container {
-  display: flex;
-  flex-flow: row-reverse;
-  justify-content: end;
-  align-items: center;
-  position: absolute;
-  height: 8%;
-  width: 100%;
-  padding-right: 0.8rem;
-  z-index: 10;
-  background-color: white;
-
-  /* border: 2px solid darkcyan; */
-}
-
-.menubars-svg {
-  display: flex;
-
-  background-color: rgba(255, 255, 255, 0.616);
-  border-radius: 5px;
-  width: 30px;
-  height: 30px;
-  padding: 2px;
-  margin-left: 1.5rem;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid lightcoral; */
-}
 .shoppingcart-container {
   display: flex;
   align-items: center;
@@ -260,20 +217,12 @@ input[type='checkbox']:checked + .menu {
   z-index: 10;
 }
 
-.menubars-svg:hover {
-  cursor: pointer;
-}
-
 .shoppingcart-svg {
   display: none;
 }
 
 .toggle-svg {
   display: none;
-}
-
-#menubars-svg {
-  fill: rgb(0, 0, 0);
 }
 
 .shoppingcart-svg {
@@ -362,7 +311,7 @@ h1 {
   padding-top: 0.5rem;
   margin-top: 3rem;
   border-top: 1px solid;
-  
+
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */
 }
