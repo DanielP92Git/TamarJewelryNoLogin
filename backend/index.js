@@ -41,10 +41,37 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'auth-token', 'Accept'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'auth-token',
+    'Accept',
+    'Origin',
+    'X-Requested-With',
+  ],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  preflightContinue: false,
+  maxAge: 86400, // 24 hours
 };
 
+// Apply CORS middleware before other middleware
 app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
+
+// Add headers middleware
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Content-Type, Authorization, auth-token, Accept, Origin, X-Requested-With'
+  );
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Max-Age', '86400');
+  next();
+});
 
 app.use(cookieParser());
 
@@ -762,8 +789,7 @@ app.post('/upload', multipleUpload, (req, res) => {
     res.json({
       success: 1,
       file: req.files,
-
-      mainImageUrl: `${process.env.API_URL}/${req.files.mainImage[0].filename}`,
+      mainImageUrl: `${process.env.API_URL}/uploads/${req.files.mainImage[0].filename}`,
       mainImageUrlLocal: `${process.env.API_URL}/uploads/${req.files.mainImage[0].filename}`,
       smallImagesUrl: makeUrl,
       smallImagesUrlLocal: localUrl,
