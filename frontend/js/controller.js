@@ -8,8 +8,8 @@ import AboutView from './Views/aboutView.js';
 import ContactMeView from './Views/contactMeView.js';
 import categoriesView from './Views/categoriesView.js';
 import CartView from './Views/cartView.js';
-import LoginView from './Views/NewloginView.js';
-import BisliView from './Views/bisliView.js';
+import LoginView from './Views/NEWloginView.js';
+import BisliView from './Views/BisliView.js';
 
 //----------------------------------------------------
 
