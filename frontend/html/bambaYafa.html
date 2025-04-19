@@ -64,5 +64,369 @@
       </aside>
       <section class="page-content"></section>
     </main>
-  </body>
+  
+    <!-- Fix for mobile menu categories dropdown that also respects desktop view --><script>
+      document.addEventListener("DOMContentLoaded", function () {
+        // Add custom CSS to fix desktop menu alignment and hover
+        const styleElement = document.createElement("style");
+        document.head.appendChild(styleElement);
+        styleElement.textContent = `
+        @media (min-width: 700px) {
+          /* Fix desktop alignment */
+          .menu {
+            display: flex;
+            align-items: center;
+          }
+          .menu .categories-tab {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            position: relative;
+          }
+          .menu .categories-tab > a {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            vertical-align: middle;
+          }
+          
+          /* Fix hover behavior by applying !important to override any other rules */
+          .categories-tab:hover .categories-list {
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            position: absolute !important;
+            top: 100% !important;
+            left: 0 !important;
+            transform: translateY(0) !important;
+            transition-delay: 0s !important;
+            z-index: 2000 !important;
+            min-width: 180px !important;
+            background-color: #fff !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+          }
+          
+          /* Style for category items */
+          .categories-tab:hover .categories-list .category-item {
+            display: block !important;
+            width: 100% !important;
+          }
+          
+          .categories-tab:hover .categories-list .category-item a {
+            padding: 0.8rem 1.5rem !important;
+            font-size: 0.9rem !important;
+            display: block !important;
+            width: 100% !important;
+            color: #343a40 !important;
+            background-color: #fff !important;
+            text-decoration: none !important;
+            border: none !important;
+          }
+          
+          .categories-tab:hover .categories-list .category-item a:hover {
+            background-color: #f8f9fa !important;
+          }
+        }
+      `;
+
+        // Wait for the menu to be fully loaded
+        setTimeout(function () {
+          // Add a click listener to the menu
+          const menu = document.querySelector(".menu");
+          if (menu) {
+            menu.addEventListener("click", handleMenuClick);
+
+            // Add hover functionality for desktop
+            setupDesktopHoverBehavior();
+
+            console.log("Mobile menu fix: Added menu click handler");
+          }
+
+          // Function to restore desktop hover behavior
+          function setupDesktopHoverBehavior() {
+            const isDesktop = window.matchMedia("(min-width: 700px)").matches;
+            if (!isDesktop) return;
+
+            // Find all category tabs
+            const categoryTabs = document.querySelectorAll(".categories-tab");
+            categoryTabs.forEach((tab) => {
+              // Force the categories list to have correct desktop styles
+              const categoriesList = tab.querySelector(".categories-list");
+              if (categoriesList) {
+                // Force absolute position and other essential styles for desktop
+                categoriesList.style.position = "absolute";
+                categoriesList.style.top = "100%";
+                categoriesList.style.left = "0";
+                categoriesList.style.zIndex = "2000";
+
+                tab.addEventListener("mouseenter", function () {
+                  if (window.matchMedia("(min-width: 700px)").matches) {
+                    categoriesList.style.display = "block";
+                    categoriesList.style.visibility = "visible";
+                    categoriesList.style.opacity = "1";
+                    categoriesList.style.transform = "translateY(0)";
+                  }
+                });
+
+                tab.addEventListener("mouseleave", function () {
+                  if (window.matchMedia("(min-width: 700px)").matches) {
+                    categoriesList.style.display = "";
+                    categoriesList.style.visibility = "";
+                    categoriesList.style.opacity = "";
+                    categoriesList.style.transform = "";
+                  }
+                });
+              }
+            });
+          }
+
+          // Function to handle menu clicks
+          function handleMenuClick(event) {
+            // Check if we clicked on the Shop link
+            if (
+              event.target.tagName === "A" &&
+              (event.target.textContent.includes("Shop") ||
+                event.target.textContent.includes("חנות"))
+            ) {
+              // Only prevent default in mobile view to allow normal desktop behavior
+              const isMobile = window.matchMedia(
+                "(max-width: 699.99px)"
+              ).matches;
+              if (isMobile) {
+                event.preventDefault();
+              } else {
+                return; // Exit early for desktop - don't interfere with desktop behavior
+              }
+
+              console.log("Mobile menu fix: Shop link clicked");
+
+              // Get the categories tab
+              const categoriesTab = event.target.closest(".categories-tab");
+              if (!categoriesTab) return;
+
+              // Toggle active state
+              const isActive = categoriesTab.classList.contains("active");
+
+              // First clean up any existing dropdown or residual items
+              cleanupAllDropdowns();
+
+              // Toggle the active class
+              if (isActive) {
+                categoriesTab.classList.remove("active");
+                return;
+              }
+
+              // Add active class
+              categoriesTab.classList.add("active");
+
+              // Get the categories list
+              const originalList =
+                categoriesTab.querySelector(".categories-list");
+              if (!originalList) return;
+
+              // Create container
+              const container = document.createElement("div");
+              container.className = "mobile-dropdown-fix";
+              container.setAttribute("data-mobile-dropdown", "true");
+              container.style.cssText = `
+              width: 100%;
+              background-color: #f8f9fa;
+              display: block;
+              position: static;
+              z-index: 5;
+            `;
+
+              // Clone the list
+              const listClone = originalList.cloneNode(true);
+              listClone.style.cssText = `
+              display: block !important;
+              position: static !important;
+              width: 100% !important;
+              max-height: 500px !important;
+              visibility: visible !important;
+              opacity: 1 !important;
+              padding: 0 !important;
+              margin: 0 !important;
+              background-color: #f8f9fa !important;
+            `;
+
+              // Remove any duplicate Shalom Club items (if they exist)
+              const shalomClubItems = listClone.querySelectorAll(
+                ".category-item--shalom-club"
+              );
+              if (shalomClubItems.length > 1) {
+                for (let i = 1; i < shalomClubItems.length; i++) {
+                  if (shalomClubItems[i].parentNode) {
+                    shalomClubItems[i].parentNode.removeChild(
+                      shalomClubItems[i]
+                    );
+                  }
+                }
+              }
+
+              // Style list items
+              const items = listClone.querySelectorAll(".category-item");
+              items.forEach((item) => {
+                item.style.cssText = `
+                display: block !important;
+                width: 100% !important;
+              `;
+
+                const link = item.querySelector("a");
+                if (link) {
+                  if (link.classList.contains("attrib-heb")) {
+                    link.style.paddingRight = "2.5rem";
+                  } else {
+                    link.style.paddingLeft = "2.5rem";
+                  }
+                }
+              });
+
+              // Add to container and insert
+              container.appendChild(listClone);
+              const nextSibling = categoriesTab.nextElementSibling;
+              if (nextSibling) {
+                categoriesTab.parentNode.insertBefore(container, nextSibling);
+              } else {
+                categoriesTab.parentNode.appendChild(container);
+              }
+            }
+          }
+
+          // Helper function to clean up all dropdowns and stray elements
+          function cleanupAllDropdowns() {
+            // Only run cleanup if we're in mobile view
+            const isMobile = window.matchMedia("(max-width: 699.99px)").matches;
+            if (!isMobile) return;
+
+            // Remove mobile dropdown containers
+            const dropdownContainers = document.querySelectorAll(
+              '.mobile-dropdown-fix, [data-mobile-dropdown="true"]'
+            );
+            dropdownContainers.forEach((container) => {
+              if (container && container.parentNode) {
+                container.parentNode.removeChild(container);
+              }
+            });
+
+            // Remove any active classes from mobile elements
+            const activeTabs = document.querySelectorAll(
+              ".menu .categories-tab.active"
+            );
+            activeTabs.forEach((tab) => {
+              // Only clean up tabs in mobile menu
+              if (
+                window.getComputedStyle(tab.closest(".menu")).flexDirection ===
+                "column"
+              ) {
+                tab.classList.remove("active");
+              }
+            });
+
+            // Fix any stray visible categories by hiding all categories lists in mobile view
+            const allCategoriesLists =
+              document.querySelectorAll(".categories-list");
+            allCategoriesLists.forEach((list) => {
+              // Only affect mobile view categories
+              if (
+                window.getComputedStyle(list.closest(".menu") || document.body)
+                  .flexDirection === "column"
+              ) {
+                list.classList.remove("categories-list--active");
+                list.style.display = "none";
+              }
+            });
+
+            // Fix any stray category item that might still be visible in mobile view
+            const allCategoryItems =
+              document.querySelectorAll(".category-item");
+            allCategoryItems.forEach((item) => {
+              const menuParent = item.closest(".menu");
+              if (
+                menuParent &&
+                window.getComputedStyle(menuParent).flexDirection === "column"
+              ) {
+                if (
+                  !item.closest(".categories-list") ||
+                  !item
+                    .closest(".categories-list")
+                    .classList.contains("categories-list--active")
+                ) {
+                  item.style.display = "none";
+                }
+              }
+            });
+          }
+
+          // Fix desktop styles on load and resize
+          function fixDesktopStyles() {
+            const isDesktop = window.matchMedia("(min-width: 700px)").matches;
+            if (isDesktop) {
+              // Find and fix Shop tab alignment in desktop
+              const shopTabs = document.querySelectorAll(".categories-tab");
+              shopTabs.forEach((tab) => {
+                // Clear any problematic styles
+                tab.style.removeProperty("display");
+                tab.style.removeProperty("position");
+                tab.style.removeProperty("width");
+
+                // Ensure proper alignment with siblings
+                tab.style.alignSelf = "center";
+                tab.style.height = "100%";
+
+                // Fix the Shop link alignment
+                const shopLink = tab.querySelector("a");
+                if (shopLink) {
+                  shopLink.style.display = "flex";
+                  shopLink.style.alignItems = "center";
+                  shopLink.style.height = "100%";
+                  shopLink.style.verticalAlign = "middle";
+                }
+
+                // Make sure categories list has correct desktop styles
+                const categoriesList = tab.querySelector(".categories-list");
+                if (categoriesList) {
+                  categoriesList.style.removeProperty("display");
+                  categoriesList.style.removeProperty("visibility");
+                  categoriesList.style.removeProperty("opacity");
+                  categoriesList.style.position = "absolute";
+                  categoriesList.style.top = "100%";
+                  categoriesList.style.left = "0";
+                  categoriesList.style.zIndex = "2000";
+                }
+              });
+
+              // Re-setup hover behavior
+              setupDesktopHoverBehavior();
+            }
+          }
+
+          // Clean up on page load to ensure a clean state
+          setTimeout(() => {
+            cleanupAllDropdowns();
+            fixDesktopStyles();
+          }, 100);
+
+          // Add event listener to body to close dropdown when clicking outside
+          document.body.addEventListener("click", function (e) {
+            // If the click is outside any categories tab or dropdown
+            if (
+              !e.target.closest(".categories-tab") &&
+              !e.target.closest(".mobile-dropdown-fix")
+            ) {
+              cleanupAllDropdowns();
+            }
+          });
+
+          // Check for window resize and clean up if needed
+          window.addEventListener("resize", function () {
+            cleanupAllDropdowns();
+            fixDesktopStyles();
+          });
+        }, 500); // Half-second delay to ensure everything is loaded
+      });
+    </script>
+
+    <script src="../js/menu-consolidated.js"></script>
+</body>
 </html>

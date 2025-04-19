@@ -2,26 +2,30 @@ import 'core-js/actual';
 import 'regenerator-runtime/runtime.js';
 import * as model from './model.js';
 // import { loadMenu } from './menuLoader.js'; // Removed
-import CategoriesView from './Views/categoriesView.js';
 import homePageView from './Views/homePageView.js';
 import WorkshopView from './Views/workshopView.js';
 import AboutView from './Views/aboutView.js';
 import ContactMeView from './Views/contactMeView.js';
+import categoriesView from './Views/categoriesView.js';
 import CartView from './Views/cartView.js';
-import LoginView from './Views/NEWloginView.js';
-import BisliView from './Views/BisliView.js';
+import LoginView from './Views/NewloginView.js';
+import BisliView from './Views/bisliView.js';
 
 //----------------------------------------------------
 
 const controlHomePage = async function (lng) {
   await model.handleLoadStorage();
+  const cartNum = await model.checkCartNumber();
 
+  // Call base setLanguage first, passing the cart number
+  homePageView.setLanguage(lng, cartNum);
+
+  // Then call page-specific language setup
   homePageView.setHomeLanguage(lng);
   homePageView.handleHomeLanguage();
 
   homePageView._imageSlider();
   homePageView._moveToTopHandler();
-  homePageView.persistCartNumber(await model.checkCartNumber());
 
   // await homePageView._addHandlerOpenModal();
   // homePageView._addHandlerCloseModal();
@@ -31,60 +35,77 @@ const controlHomePage = async function (lng) {
 
 const controlWorkshopPage = async function (lng) {
   await model.handleLoadStorage();
+  const cartNum = await model.checkCartNumber();
+
+  // Call base setLanguage first, passing the cart number
+  WorkshopView.setLanguage(lng, cartNum);
 
   WorkshopView._moveToTopHandler();
   WorkshopView._imageSlider();
+  // Then call page-specific language setup
   WorkshopView.setWorkshopLng(lng);
   WorkshopView.handleLanguage();
-  WorkshopView.persistCartNumber(await model.checkCartNumber());
 };
 
 const controlAboutPage = async function (lng) {
   await model.handleLoadStorage();
+  const cartNum = await model.checkCartNumber();
 
-  AboutView.setLanguage(lng);
+  AboutView.setLanguage(lng, cartNum);
   AboutView.setAboutDesc(lng);
   AboutView.handleLanguage();
-  AboutView.persistCartNumber(await model.checkCartNumber());
 };
 
 const controlContactMePage = async function (lng) {
   await model.handleLoadStorage();
+  const cartNum = await model.checkCartNumber();
 
   ContactMeView.sendHandler();
 
-  ContactMeView.setLanguage(lng);
+  ContactMeView.setLanguage(lng, cartNum);
   ContactMeView.setFormLng(lng);
-  ContactMeView.persistCartNumber(await model.checkCartNumber());
 };
 
 const controlCategoriesPage = async function () {
   try {
     const body = document.querySelector('body');
-    const idAttributeValue = body.id; // Assuming body id is "categories bracelets"
+    const idAttributeValue = body.id;
     const idParts = idAttributeValue.split(' ');
-    const categoryName = idParts[idParts.length - 1]; // Extracted category name "bracelets"
-    const categoryNameHebrew = body.dataset.hebrew; // Extracted category name "bracelets"
+    const categoryName = idParts[idParts.length - 1];
+    const categoryNameHebrew = body.dataset.hebrew;
     const parentElement = document.querySelector('.parent-element');
+
+    // Determine initial language
+    let lng = localStorage.getItem('language') || 'eng';
+    if (!localStorage.getItem('language')) {
+      localStorage.setItem('language', 'eng');
+    }
+
+    // Initialize the singleton instance if not already initialized
+    if (!categoriesView.initialized) {
+      categoriesView.initialize(
+        parentElement,
+        categoryName,
+        categoryNameHebrew,
+        lng
+      );
+    }
+
+    // Load cart data
     await model.handleLoadStorage();
     const cartNum = await model.checkCartNumber();
-    let lng = 'eng';
-    const categoriesView = new CategoriesView(
-      parentElement,
-      categoryName,
-      categoryNameHebrew,
-      lng,
-      cartNum
-    );
 
-    console.log(cartNum);
+    // Set base language/menu (handles cart number persistence)
+    categoriesView.setLanguage(lng, cartNum);
 
+    // Set page-specific content
+    categoriesView.setPageSpecificLanguage(lng, cartNum);
+
+    // Add specific handlers for this page
     categoriesView._moveToTopHandler();
     categoriesView._imageFlipper();
-
-    categoriesView.handleCategoriesLanguage();
   } catch (err) {
-    console.error(err);
+    console.error('Error in controlCategoriesPage:', err);
   }
 };
 
@@ -92,6 +113,10 @@ const controlCartPage = async function (lng) {
   try {
     await model.handleLoadStorage();
     const cartNum = await model.checkCartNumber();
+
+    // Set language (which now handles persistCartNumber)
+    CartView.setLanguage(lng, cartNum);
+
     CartView.render(cartNum);
     CartView._renderSummary(cartNum, lng);
 
@@ -102,7 +127,6 @@ const controlCartPage = async function (lng) {
 
     CartView.setCartLng(lng);
     CartView.handleCartLanguage();
-    CartView.persistCartNumber(cartNum);
   } catch (err) {
     console.log(err);
   }
@@ -160,6 +184,21 @@ const init = async function () {
   // Load menu for all pages // Removed
   // await loadMenu(); // Removed
 
+  // Check if we're on a categories page and initialize directly
+  if (document.body.id.includes('categories')) {
+    // Direct initialization approach
+    const body = document.querySelector('body');
+    const idParts = body.id.split(' ');
+    const categoryName = idParts[idParts.length - 1];
+    const categoryNameHebrew = body.dataset.hebrew;
+
+    // Force immediate initialization regardless of document ready state
+    categoriesView.directInitialize(categoryName, categoryNameHebrew);
+
+    // Also call the regular control function
+    controlCategoriesPage();
+  }
+
   if (document.body.id.includes('home')) {
     homePageView.addHomePageHandler(controlHomePage);
   }
@@ -172,16 +211,6 @@ const init = async function () {
   if (document.body.id.includes('contact-me')) {
     ContactMeView.addContactMeHandler(controlContactMePage);
   }
-  if (document.body.id.includes('categories')) {
-    // const categoriesView = new CategoriesView(document.getElementById('categories'));
-    controlCategoriesPage();
-
-    /**
-     * ! User clicks add to cart:
-     **/
-    // categoriesView.addHandlerAddToCart(controlAddToCart);
-  }
-
   if (document.body.id.includes('cart')) {
     CartView.addCartViewHandler(controlCartPage);
     /**

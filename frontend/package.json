@@ -16,7 +16,7 @@
     "nth-check": "2.1.1"
   },
   "scripts": {
-    "cleanup": "rm -rf .parcel-cache dist",
+    "cleanup": "if exist .parcel-cache rd /s /q .parcel-cache && if exist dist rd /s /q dist",
     "dev": "npm run cleanup && parcel ./index.html",
     "start": "parcel index.html",
     "build": "parcel build index.html --dist-dir ./dist",

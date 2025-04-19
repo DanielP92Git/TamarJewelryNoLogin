@@ -18,34 +18,117 @@ class WorkshopView extends View {
    * * --Workshop page images slider--
    */
   _imageSlider() {
-    const images = document.querySelectorAll('.slide-image-img');
+    const sliderContainer = document.querySelector('.slide-images-container');
+    if (!sliderContainer) return;
+
+    const images = sliderContainer.querySelectorAll('.slide-image-img');
+    if (!images || images.length === 0) return;
+
+    // Get existing buttons
+    const btnLeft = sliderContainer.querySelector('.slider-btn--left');
+    const btnRight = sliderContainer.querySelector('.slider-btn--right');
+
+    if (!btnLeft || !btnRight) {
+      console.error('Slider buttons not found in the HTML');
+      return;
+    }
+
+    // Make sure buttons are visible
+    btnLeft.style.display = 'flex';
+    btnRight.style.display = 'flex';
 
     let curImg = 0;
     const maxImages = images.length;
+    let autoSlideTimeout;
+    const autoSlideDelay = 4500;
+
+    // Function to reset button styles (if they're somehow lost)
+    const resetButtonStyles = () => {
+      const commonStyles = {
+        position: 'absolute',
+        top: '50%',
+        transform: 'translateY(-50%)',
+        zIndex: '100',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        color: 'white',
+        border: 'none',
+        borderRadius: '50%',
+        width: window.innerWidth >= 800 ? '50px' : '40px',
+        height: window.innerWidth >= 800 ? '50px' : '40px',
+        cursor: 'pointer',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        fontSize: window.innerWidth >= 800 ? '3rem' : '2.5rem',
+        fontWeight: 'bold',
+        lineHeight: '0',
+        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+        textAlign: 'center',
+        padding: '0',
+        margin: '0',
+        verticalAlign: 'middle',
+      };
+
+      Object.assign(btnLeft.style, commonStyles, {
+        left: window.innerWidth >= 800 ? '25px' : '10px',
+        paddingBottom: window.innerWidth >= 800 ? '5px' : '4px',
+      });
+
+      Object.assign(btnRight.style, commonStyles, {
+        right: window.innerWidth >= 800 ? '25px' : '10px',
+        paddingBottom: window.innerWidth >= 800 ? '5px' : '4px',
+      });
+    };
+
+    // Apply styles immediately
+    resetButtonStyles();
+
+    // Reapply styles after a short delay (in case they're overridden)
+    setTimeout(resetButtonStyles, 100);
 
     const goToImage = function (slide) {
-      images.forEach(
-        img => (img.style.transform = `translateX(${-100 * slide}%)`)
-      );
-      setTimeout(() => {
-        nextImage();
-      }, 4500);
-    };
-    const nextImage = function () {
-      if (curImg === maxImages - 1) {
-        curImg = 0;
-      } else {
-        curImg++;
-      }
-      goToImage(curImg);
+      images.forEach(img => {
+        img.style.transform = `translateX(${-100 * slide}%)`;
+      });
     };
 
-    const timeOut = function () {
-      setTimeout(() => {
-        goToImage();
-      }, 1000);
+    const restartAutoSlide = function () {
+      clearTimeout(autoSlideTimeout);
+      autoSlideTimeout = setTimeout(nextImage, autoSlideDelay);
     };
-    timeOut();
+
+    const nextImage = function () {
+      curImg = (curImg + 1) % maxImages;
+      goToImage(curImg);
+      restartAutoSlide();
+    };
+
+    const nextSlideManual = function () {
+      curImg = (curImg + 1) % maxImages;
+      goToImage(curImg);
+      restartAutoSlide();
+    };
+
+    const prevSlide = function () {
+      curImg = (curImg - 1 + maxImages) % maxImages;
+      goToImage(curImg);
+      restartAutoSlide();
+    };
+
+    // Initial setup
+    goToImage(0);
+    restartAutoSlide();
+
+    // Ensure we clean up previous event listeners to avoid duplicates
+    const newBtnLeft = btnLeft.cloneNode(true);
+    const newBtnRight = btnRight.cloneNode(true);
+
+    btnLeft.parentNode.replaceChild(newBtnLeft, btnLeft);
+    btnRight.parentNode.replaceChild(newBtnRight, btnRight);
+
+    // Add Event Listeners to the new buttons
+    newBtnLeft.addEventListener('click', prevSlide);
+    newBtnRight.addEventListener('click', nextSlideManual);
   }
 
   handleLanguage() {
@@ -58,19 +141,45 @@ class WorkshopView extends View {
     }
   }
 
-  changeToHeb = function () {
-    localStorage.setItem('language', `heb`);
-    this.setFooterLng('heb');
-    this.setWorkshopLng(`heb`);
-    this.setCostsLng(`heb`);
-  };
+  async changeToHeb() {
+    console.log('[WorkshopView] changeToHeb called');
+    try {
+      // First store the language preference
+      localStorage.setItem('language', 'heb');
 
-  changeToEng = function () {
-    localStorage.setItem('language', `eng`);
-    this.setFooterLng('eng');
-    this.setWorkshopLng('eng');
-    this.setCostsLng('eng');
-  };
+      // Update all the workshop-specific content
+      this.setFooterLng('heb');
+      this.setWorkshopLng('heb');
+      this.setCostsLng('heb');
+
+      // Call the base View's setLanguage method to update the menu
+      await this.setLanguage('heb', 0);
+
+      console.log('[WorkshopView] Hebrew language change completed');
+    } catch (error) {
+      console.error('[WorkshopView] Error in changeToHeb:', error);
+    }
+  }
+
+  async changeToEng() {
+    console.log('[WorkshopView] changeToEng called');
+    try {
+      // First store the language preference
+      localStorage.setItem('language', 'eng');
+
+      // Update all the workshop-specific content
+      this.setFooterLng('eng');
+      this.setWorkshopLng('eng');
+      this.setCostsLng('eng');
+
+      // Call the base View's setLanguage method to update the menu
+      await this.setLanguage('eng', 0);
+
+      console.log('[WorkshopView] English language change completed');
+    } catch (error) {
+      console.error('[WorkshopView] Error in changeToEng:', error);
+    }
+  }
 
   handleWorkshopLng(lng) {
     const descriptionContainer = document.querySelector(
@@ -104,7 +213,7 @@ class WorkshopView extends View {
 
 בסדנה אלמד ואלווה אותך בתהליך יצירת התכשיטים, ואשתף איך תוכלי להמשיך ליצור פריטים חדשים גם בבית. אלמד אותך אילו חומרים כדאי לקנות ואיך לעשות זאת בצורה חסכונית. אתן לך את הידע והכלים הדרושים כדי שתוכלי להמשיך ליצור פריטים ייחודיים משלך. בסדנה נכין עגילים וכמו כן שרשרת או צמיד (תלוי בזמן), ותלמדי כמה טכניקות עבודה עם חומרים שונים, כולל חרוזים ומתכת.
 
-הסדנה אינה דורשת ידע קודם ביצירת תכשיטים. כל החומרים יינתנו על ידי. את גם יכולה להכין הפתעה מיוחדת למישהו ולרכוש את סדנת התכשיטים ככרטיס מתנה.`;
+הסדנה אינה דורשת ידע קודם ביצירת תכשיטים. כל החומרים יינתנו על ידי. את גם יכולה להכין הפתעה מיוחדת למישהו ולרכוש את סדנת התכשיטים ככרטיס מתנה.`;
     }
   }
 
@@ -119,7 +228,6 @@ class WorkshopView extends View {
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
 
-    this.setLanguage(lng);
     this.setHeaderLng(lng);
     this.setCostsLng(lng);
   }
@@ -171,7 +279,7 @@ class WorkshopView extends View {
       return ` מחירי הסדנאות: <br /><br />• סדנא אחת על אחת - 250 ש"ח <br /><br />
         • 2 משתתפות - 220 ש"ח לכל משתתפת <br /><br />• 3 משתתפות
         ומעלה- 200 ש"ח לכל משתתפת <br /><br />
-        *כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי:
+        *כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי:
         <div class="contact-container">
           <div class="contact-block">
             <span>וואטסאפ:</span>
@@ -201,6 +309,12 @@ class WorkshopView extends View {
     costsContainer.innerHTML = '';
     const markup = this.handleCostsLng(lng);
     costsContainer.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  // Override the placeholder from View.js
+  setPageSpecificLanguage(lng, cartNum) {
+    this.setWorkshopLng(lng);
+    this.setCostsLng(lng); // Keep this here as it's workshop specific
   }
 
   // Workshop END

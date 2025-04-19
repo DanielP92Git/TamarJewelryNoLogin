@@ -75,7 +75,7 @@ class ContactMeView extends View {
     const formContainer = document.querySelector('.contact-form');
     if (lng === 'eng') {
       formContainer.style.direction = 'ltr';
-      return `<h1>Contact Me</h1>
+      return `
         <input
           type="text"
           id="name"
