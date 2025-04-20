@@ -9,7 +9,6 @@ import ContactMeView from './Views/contactMeView.js';
 import categoriesView from './Views/categoriesView.js';
 import CartView from './Views/cartView.js';
 import LoginView from './Views/NEWloginView.js';
-import BisliView from '../../admin/BisliView.js';
 
 //----------------------------------------------------
 
@@ -176,8 +175,9 @@ const controlDeleteAll = async function () {
 };
 
 const controlBambaPage = function () {
-  // BisliView now has these methods as part of the exported object
-  BisliView.modeHandler();
+  // Don't use BisliView directly in the frontend controller
+  // The bamba page should be handled by the admin controller
+  console.log('Bamba page should be handled by admin controller');
 };
 
 const init = async function () {
