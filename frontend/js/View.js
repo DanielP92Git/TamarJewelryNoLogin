@@ -582,9 +582,9 @@ export default class View {
                 <a class="attrib attrib-heb" href="/html/categories/unisex.html">
                   תכשיטי יוניסקס</a>
               </li>
-              <li class="category-item category-item--shalom-club">
+              <li class="category-item category-item--shalom-club" style="direction: rtl;">
                 <a class="attrib attrib-heb" href="/html/categories/shalom-club.html">
-                  מועדון שלום</a>
+                  מועדון "שלום"</a>
               </li>
             </ul>
           </li>
