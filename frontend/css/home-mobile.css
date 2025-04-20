@@ -603,23 +603,22 @@ main {
 .footer {
   display: flex;
   flex-flow: row wrap;
-  max-width: 100vw;
-  height: 100%;
+  max-width: 100%;
   padding-top: 0.5rem;
+  margin-top: 3rem;
   border-top: 1px solid;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(255, 51, 0); */
+  /* border: 3px solid rgb(4, 255, 0); */
 }
 
 .columns-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 100%;
-  height: 10%;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(0, 166, 255); */
+  /* border: 3px solid rgb(8, 0, 255); */
 }
 
 .footer-right-column,
@@ -629,8 +628,8 @@ main {
   flex-flow: column wrap;
   align-items: center;
   width: 30%;
-  height: 15rem;
   padding-top: 10px;
+  padding-bottom: 30px;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(89, 0, 255); */
@@ -661,10 +660,11 @@ main {
   padding-left: 10px;
   padding-bottom: 5px;
   border-bottom: 0.5px solid rgba(66, 66, 66, 0.5);
+  font-family: Raleway, sans-serif;
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(228, 37, 139); */
+  /* border: 5px solid rgb(40, 228, 37); */
 }
 
 .rights-container {
@@ -673,9 +673,10 @@ main {
   align-items: center;
   width: 100%;
   height: 4rem;
+  font-family: Raleway, sans-serif;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(238, 142, 240); */
+  /* border: 1px solid rgb(210, 28, 140); */
 }
 
 .rights-text {
@@ -685,6 +686,7 @@ main {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */
 }
+
 
 .whatsapp-container {
   display: flex;
