@@ -18,7 +18,7 @@ const API_URL = (() => {
   if (isProduction) {
     // In production, use the API endpoint on the same domain or a specified API domain
     // Option a: API on same domain but different path (default)
-    url = `${window.location.protocol}//${window.location.host}/api`;
+    url = `https://lobster-app-jipru.ondigitalocean.app/api`;
 
     // Option b: API on a separate subdomain (uncomment if needed)
     // url = `${window.location.protocol}//api.${window.location.hostname}`;

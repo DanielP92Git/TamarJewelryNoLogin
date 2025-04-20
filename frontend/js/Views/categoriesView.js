@@ -27,6 +27,7 @@ class CategoriesView extends View {
     this._categoryNameHebrew = null;
     this.lang = 'eng';
     this.initialized = false;
+    this.isModalOpen = false;
 
     // Make sure we detect when the DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
@@ -435,75 +436,107 @@ class CategoriesView extends View {
     modal.innerHTML = '';
   }
 
-  generatePreview(data, imgMrk, hasMultipleImages) {
-    const image = data.querySelector('.front-image').src;
+  closeModal() {
+    const modal = document.querySelector('.modal');
+    if (modal) {
+      modal.innerHTML = '';
+      this.isModalOpen = false;
+    }
+  }
+
+  generatePreview(item, imageMarkup, hasMultipleImages) {
+    const data = item;
+    if (!data) return;
+
+    const id = data.dataset.id;
+    const quantity = data.dataset.quant;
+    const image = data.querySelector('.image-item').src;
     const title = data.querySelector('.item-title').textContent;
     const description = data.querySelector('.item-description').innerHTML;
-    const checkCurrency = data.dataset.currency;
+    const price = data.querySelector('.item-price').textContent;
+    const currency = data.dataset.currency;
 
-    let selectedUsd = checkCurrency == '$';
-    let curSign = selectedUsd ? '$' : '₪';
+    // We already converted newlines to <br> tags in getProductMarkup
+    // No need to reprocess as we're using innerHTML directly
 
-    let price = data
-      .querySelector('.item-price')
-      .textContent.replace(/[$₪]/g, '');
+    // Close the previous modal if open
+    if (this.isModalOpen) {
+      this.closeModal();
+    }
 
-    // Conditionally add a class to hide the small images container
-    const smallImagesContainerClass = hasMultipleImages
-      ? ''
-      : 'hide-small-images';
+    // Create modal content
+    const modal = document.querySelector('.modal');
+    const addToCartText = this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל';
+    const addedText =
+      this.lang === 'eng' ? 'Added to Cart!' : 'נוסף לסל הקניות';
 
-    const markup = `<div class="item-overlay">
-    <div class="modal-item-container">
-      <img class="close-modal-btn" src="${closeSvg}" alt="">
-      <div class="images-container">
-      <img class="big-image" src="${image}" alt="" loading="lazy">
-      
-      <div class="small-images-container ${smallImagesContainerClass}">
-      ${imgMrk}
-      </div>
-    </div>
-      <div class="item-specs">
-        <div class="item-title_modal">${title}</div>
-
-        <div class="item-description_modal">${description}
+    const modalMarkup = `
+      <div class="item-overlay">
+        <div class="modal-item-container">
+          <img src="${closeSvg}" alt="close-icon" class="close-modal-btn" />
+          <div class="images-container">
+            <img src="${image}" alt="${title}" class="big-image" />
+            ${
+              hasMultipleImages
+                ? `<div class="small-images-container">${imageMarkup}</div>`
+                : ''
+            }
+          </div>
+          <div class="item-specs">
+            <h2 class="item-title_modal">${title}</h2>
+            <p class="item-description_modal">${description}</p>
+            <span class="price-text">${
+              this.lang === 'eng' ? 'Price:' : 'מחיר:'
+            }</span>
+            <p class="item-price_modal">${price}</p>
+            <button class="add-to-cart-btn_modal" data-id="${id}" data-quant="${quantity}">${addToCartText}</button>
+            <p class="added-message hide">${addedText}</p>
+          </div>
         </div>
-        <div class="price-text">Price:</div>
-        <div class="item-price_modal">${curSign}${price}</div>
-        <button class="add-to-cart-btn_modal">${
-          this.lang === 'eng' ? 'Add to Cart' : ' הוסף לסל'
-        }</button>
-        <div class="added-message hide">${
-          this.lang === 'eng' ? 'Item added to cart!' : 'המוצר נוסף לסל הקניות!'
-        }</div>
       </div>
-    </div>
-  </div>`;
+    `;
 
-    this.modal.insertAdjacentHTML('afterbegin', markup);
+    modal.innerHTML = modalMarkup;
+    this.isModalOpen = true;
 
-    const smallImgsContainer = document.querySelector(
-      '.small-images-container'
-    );
-    const closeBtn = document.querySelector('.close-modal-btn');
-    const addToCartModal = document.querySelector('.add-to-cart-btn_modal');
-    let bigImg = document.querySelector('.big-image');
+    // Add event listeners
+    const closeBtn = modal.querySelector('.close-modal-btn');
+    closeBtn.addEventListener('click', this.closeModal.bind(this));
 
-    // Only add event listener if there are small images
-    if (hasMultipleImages) {
-      smallImgsContainer.addEventListener('click', e => {
-        const smallImgElement = e.target.closest('.small-image');
-        if (smallImgElement) {
-          bigImg.src = smallImgElement.src;
+    // Close modal when clicking outside the modal content
+    const overlay = modal.querySelector('.item-overlay');
+    if (overlay) {
+      overlay.addEventListener('click', e => {
+        // Only close if clicking directly on the overlay, not on its children
+        if (e.target === overlay) {
+          this.closeModal();
         }
       });
     }
 
-    closeBtn.addEventListener('click', this._closeItemModal.bind(this));
+    const addToCartBtn = modal.querySelector('.add-to-cart-btn_modal');
+    addToCartBtn.addEventListener('click', () => {
+      const dataObj = {
+        dataset: {
+          id: addToCartBtn.dataset.id,
+          quant: addToCartBtn.dataset.quant,
+        },
+      };
 
-    addToCartModal.addEventListener('click', () => {
-      this.addFromPrev(data);
+      this.addFromPrev(dataObj);
     });
+
+    // Handle small images if present
+    if (hasMultipleImages) {
+      const smallImages = modal.querySelectorAll('.small-image');
+      const bigImage = modal.querySelector('.big-image');
+
+      smallImages.forEach(img => {
+        img.addEventListener('click', () => {
+          bigImage.src = img.src;
+        });
+      });
+    }
   }
 
   setupCurrencyHandler() {
@@ -806,6 +839,11 @@ class CategoriesView extends View {
         ? Number((ils_price / 3.7).toFixed(0))
         : ils_price;
 
+    // Convert newlines in description to <br> tags
+    const formattedDescription = description
+      ? description.replace(/\n/g, '<br>')
+      : '';
+
     return `
       <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}">
         <div class="product-image-container">
@@ -823,7 +861,7 @@ class CategoriesView extends View {
           this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל'
         }</button>
         <div class="item-title">${name}</div>
-        <div class="item-description">${description}</div>
+        <div class="item-description">${formattedDescription}</div>
         <div class="item-price">${curSign}${price}</div>
       </div>`;
   }

@@ -82,7 +82,7 @@ h1 {
 }
 
 .contact-title {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 0.75rem;
@@ -176,7 +176,7 @@ h1 {
 }
 
 /* Modern submit button */
-.submit-button {
+#submit {
   display: flex;
   align-items: center;
   justify-content: center;
