@@ -23,6 +23,7 @@ const allowedOrigins = [
   `${process.env.HOST}`,
   `${process.env.API_URL}`,
   `${process.env.ADMIN_URL}`,
+  `${process.env.FULLHOST}`,
   'http://127.0.0.1:5500',
 ];
 
