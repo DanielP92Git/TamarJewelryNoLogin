@@ -8,13 +8,30 @@ const pageContent = document.querySelector(".page-content");
 
 // API Configuration
 const API_URL = (() => {
-  // During development we have two servers:
-  // 1. The frontend server running on port 5500 (live server)
-  // 2. The backend server running on port 4000 (Node.js API)
+  // Check if we're in a production environment based on the URL
+  const isProduction =
+    window.location.hostname !== "localhost" &&
+    !window.location.hostname.includes("127.0.0.1");
 
-  // Always use the backend server directly for API calls
-  const url = "http://localhost:4000";
-  console.log("Using backend API URL:", url);
+  let url;
+
+  if (isProduction) {
+    // In production, use the API endpoint on the same domain or a specified API domain
+    // Option 1: API on same domain but different path
+    url = `${window.location.protocol}//${window.location.host}/api`;
+
+    // Option 2: API on a separate subdomain (uncomment and modify as needed)
+    // url = `${window.location.protocol}//api.${window.location.hostname}`;
+
+    // Option 3: Completely separate API domain (uncomment and modify as needed)
+    // url = "https://api.yourdomain.com";
+
+    console.log("Using production API URL:", url);
+  } else {
+    // In development, use localhost with the correct port
+    url = "http://localhost:4000";
+    console.log("Using development API URL:", url);
+  }
 
   return url;
 })();
