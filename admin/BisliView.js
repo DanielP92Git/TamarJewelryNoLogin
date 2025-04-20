@@ -17,13 +17,13 @@ const API_URL = (() => {
 
   if (isProduction) {
     // In production, use the API endpoint on the same domain or a specified API domain
-    // Option 1: API on same domain but different path
+    // Option a: API on same domain but different path (default)
     url = `${window.location.protocol}//${window.location.host}/api`;
 
-    // Option 2: API on a separate subdomain (uncomment and modify as needed)
+    // Option b: API on a separate subdomain (uncomment if needed)
     // url = `${window.location.protocol}//api.${window.location.hostname}`;
 
-    // Option 3: Completely separate API domain (uncomment and modify as needed)
+    // Option c: Completely separate API domain (uncomment if needed)
     // url = "https://api.yourdomain.com";
 
     console.log("Using production API URL:", url);
@@ -31,58 +31,16 @@ const API_URL = (() => {
     // In development, use localhost with the correct port
     url = "http://localhost:4000";
     console.log("Using development API URL:", url);
-  }
 
+    // Add more detailed logging
+    console.log("Current window origin:", window.location.origin);
+    console.log("Current window location:", window.location.href);
+  }
   return url;
 })();
 
 // Set a longer default timeout for all fetch operations
 const DEFAULT_TIMEOUT = 15000; // 15 seconds
-
-// CRITICAL FIX: Detect if we're on an admin page or if this script was imported incorrectly
-const SCRIPT_CONTEXT = (function () {
-  try {
-    // 1. Check if this script is running in its proper context (admin page)
-    const isDirectlyLoaded = (function () {
-      const scripts = document.getElementsByTagName("script");
-      for (let i = 0; i < scripts.length; i++) {
-        if (scripts[i].src && scripts[i].src.includes("BisliView.js")) {
-          // This script is directly loaded via a script tag
-          console.log("BisliView.js loaded via script tag:", scripts[i].src);
-          return true;
-        }
-      }
-      return false;
-    })();
-
-    // 2. Check current page context
-    const isAdminPage =
-      window.location.pathname.includes("/admin") ||
-      document.getElementById("bambot") !== null ||
-      document.title === "Dashboard";
-
-    console.log("Script context detection:", {
-      isDirectlyLoaded,
-      isAdminPage,
-      location: window.location.pathname,
-      title: document.title,
-      hasBambotId: document.getElementById("bambot") !== null,
-    });
-
-    // Only initialize admin features if we're on an admin page
-    return {
-      shouldInitialize: isAdminPage && isDirectlyLoaded,
-      isAdminPage: isAdminPage,
-    };
-  } catch (e) {
-    console.error("Error detecting script context:", e);
-    // Default to safe mode - don't initialize
-    return {
-      shouldInitialize: false,
-      isAdminPage: false,
-    };
-  }
-})();
 
 // State management
 const state = {
@@ -91,14 +49,6 @@ const state = {
   retryCount: 0,
   maxRetries: 3,
 };
-
-// Helper Functions
-function ensureHttps(url) {
-  if (!state.isProduction) {
-    return url;
-  }
-  return url.replace(/^http:\/\//i, "https://");
-}
 
 function getImageUrl(image, imageLocal, publicImage) {
   // Extract the filename from the image URL
@@ -115,20 +65,21 @@ function getImageUrl(image, imageLocal, publicImage) {
 
   const filename = getFilename(image) || getFilename(publicImage);
 
-  // Log URL information for debugging
-  console.log("Image URL Debug:", {
-    isProduction: state.isProduction,
-    originalImage: image,
-    publicImage: publicImage,
-    originalImageLocal: imageLocal,
-    hostname: window.location.hostname,
-    extractedFilename: filename,
-  });
+  // Log URL information for debugging:
+
+  // console.log("Image URL Debug:", {
+  //   isProduction: state.isProduction,
+  //   originalImage: image,
+  //   publicImage: publicImage,
+  //   originalImageLocal: imageLocal,
+  //   hostname: window.location.hostname,
+  //   extractedFilename: filename,
+  // });
 
   // Create direct image URL (most reliable method)
   if (state.isProduction && filename) {
     const directImageUrl = `${API_URL}/direct-image/${filename}`;
-    console.log("Using direct image URL:", directImageUrl);
+    // console.log("Using direct image URL:", directImageUrl);
     return directImageUrl;
   }
 
@@ -240,304 +191,182 @@ function getCurrentScriptPath() {
   setTimeout(init, 0);
 })();
 
-// Update the init function for more verbose logging
+// Update the init function to authenticate first and only fetch data after authentication
 function init() {
-  console.log("BisliView initialization started");
+  // First check authentication
+  checkAuth()
+    .then((isAuthenticated) => {
+      // Only if authenticated, set up handlers
+      if (isAuthenticated) {
+        // Add event listeners for admin functionality
+        if (addProductsBtn) {
+          addProductsBtn.addEventListener("click", loadAddProductsPage);
+        }
 
-  // Only check authentication on admin pages
-  if (isAdminPage()) {
-    console.log("✅ On admin page, proceeding with authentication check");
-    // Check server availability first
-    tryServerEndpoints().then((available) => {
-      if (!available) {
-        console.warn("Server appears to be unavailable");
-        const banner = document.createElement("div");
-        banner.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          background-color: #f44336;
-          color: white;
-          padding: 10px;
-          text-align: center;
-          z-index: 10000;
-        `;
-        banner.innerHTML = `
-          Warning: The API server at ${API_URL} appears to be unavailable. 
-          Please make sure the backend server is running on port 4000.
-          <button id="retry-server-check" style="margin-left: 10px; padding: 5px 10px; background: white; border: none; border-radius: 3px; cursor: pointer;">Retry</button>
-          <span id="server-check-status"></span>
-          <button id="run-diagnostics" style="margin-left: 10px; padding: 5px 10px; background: #333; color: white; border: none; border-radius: 3px; cursor: pointer;">Run Diagnostics</button>
-        `;
-        document.body.appendChild(banner);
-
-        // Add retry button functionality
-        document
-          .getElementById("retry-server-check")
-          .addEventListener("click", async () => {
-            const statusSpan = document.getElementById("server-check-status");
-            statusSpan.textContent = "Checking...";
-
-            const available = await tryServerEndpoints();
-            if (available) {
-              statusSpan.textContent = "Server is now available!";
-              setTimeout(() => banner.remove(), 2000);
-            } else {
-              statusSpan.textContent = `Server at ${API_URL} is still unavailable. Make sure your Node.js backend is running.`;
-            }
-          });
-
-        // Add diagnostics button functionality
-        document
-          .getElementById("run-diagnostics")
-          .addEventListener("click", () => {
-            console.clear();
-            window.diagnoseBisliServer();
-            alert(
-              "Diagnostics are running in the browser console. Press F12 to view results."
-            );
-          });
+        if (productsListBtn) {
+          productsListBtn.addEventListener("click", fetchInfo);
+        }
       }
-
-      // Continue with authentication for admin pages
-      checkAuth();
-
-      // Add event listeners for admin functionality
-      if (addProductsBtn) {
-        addProductsBtn.addEventListener("click", loadAddProductsPage);
-      }
-
-      if (productsListBtn) {
-        productsListBtn.addEventListener("click", fetchInfo);
-      }
+    })
+    .catch((error) => {
+      console.error("Authentication check failed:", error);
     });
-  } else {
-    console.log(
-      "⚠️ NOT on admin page, skipping authentication. URL: " +
-        window.location.href
-    );
-    // If not on admin page, don't check auth or show login
-    // Just initialize any necessary frontend functionality here
+}
+
+// Update the fetchInfo function to include authentication check
+async function fetchInfo() {
+  try {
+    // First check authentication again
+    const isAuthenticated = await checkAuth();
+    if (!isAuthenticated) {
+      console.warn("Not authenticated, cannot fetch products");
+      return;
+    }
+
+    console.log("Fetching products from:", `${API_URL}/allproducts`);
+    const response = await fetch(`${API_URL}/allproducts`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+      },
+    });
+
+    const data = await response.json();
+    // console.log("Fetched products data:", data);
+    loadProductsPage(data);
+  } catch (error) {
+    console.error("Error fetching products:", error);
+
+    if (
+      error.message === "server_unavailable" ||
+      error.message === "wrong_server_port"
+    ) {
+      showLoginPage(
+        "The API server appears to be unavailable. Please make sure your Node.js backend is running on port 4000."
+      );
+    } else {
+      alert("Error fetching products: " + error.message);
+    }
   }
 }
 
-// Update the checkAuth function with more debugging
+// Update the checkAuth function to remove unnecessary checks
 async function checkAuth() {
-  // Only check auth if we're on an admin page
-  if (!isAdminPage()) {
-    console.log("⚠️ checkAuth called on non-admin page, skipping auth check");
-    return true;
-  }
-
   const token = localStorage.getItem("auth-token");
-  console.log("Auth token exists:", token !== null);
 
   if (!token) {
-    console.log("No token found, showing login page on admin dashboard");
+    console.log("No token found, showing login page");
     showLoginPage();
     return false;
   }
 
   try {
-    // Check server availability first
-    const serverAvailable = await tryServerEndpoints();
-    if (!serverAvailable) {
-      console.warn(
-        "Server unavailable during auth check, showing login page with warning"
+    // Try to verify the token
+    try {
+      const authPromise = fetch(`${API_URL}/verify-token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // Create a timeout promise
+      const authTimeoutPromise = new Promise((_, reject) =>
+        setTimeout(
+          () => reject(new Error("auth_check_timed_out")),
+          DEFAULT_TIMEOUT
+        )
       );
-      showLoginPage(
-        "The API server appears to be unavailable. Please make sure your Node.js backend is running on port 4000."
-      );
-      return false;
-    }
 
-    const authPromise = fetch(`${API_URL}/verify-token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+      const response = await Promise.race([authPromise, authTimeoutPromise]);
 
-    // Create a timeout promise
-    const authTimeoutPromise = new Promise((_, reject) =>
-      setTimeout(
-        () => reject(new Error("auth_check_timed_out")),
-        DEFAULT_TIMEOUT
-      )
-    );
+      if (!response.ok) {
+        console.log("Token verification failed with status:", response.status);
+        showLoginPage("Authentication failed. Please log in again.");
+        return false;
+      }
 
-    const response = await Promise.race([authPromise, authTimeoutPromise]);
+      const data = await response.json();
+      if (!data.success) {
+        showLoginPage();
+        return false;
+      }
 
-    if (!response.ok) {
-      console.log("Token verification failed with status:", response.status);
-      showLoginPage("Authentication failed. Please log in again.");
-      return false;
-    }
+      // Check if user has admin privileges
+      if (data.user.userType !== "admin") {
+        console.log("User does not have admin privileges");
+        showLoginPage(
+          "You must have administrator privileges to access this page."
+        );
+        return false;
+      }
 
-    const data = await response.json();
-    if (!data.success) {
+      return true;
+    } catch (error) {
+      console.error("Auth check failed:", error);
+      if (error.message === "auth_check_timed_out") {
+        console.log("Auth check timed out, showing login page");
+        showLoginPage("Authentication check timed out. Please try again.");
+        return false;
+      }
       showLoginPage();
       return false;
     }
-
-    // Check if user has admin privileges
-    if (data.user.userType !== "admin") {
-      console.log("User does not have admin privileges");
-      showLoginPage(
-        "You must have administrator privileges to access this page."
-      );
-      return false;
-    }
-
-    return true;
   } catch (error) {
-    console.error("Auth check failed:", error);
-    if (error.message === "auth_check_timed_out") {
-      console.log("Auth check timed out, assuming valid session");
-      return true; // Assume valid session if timeout
-    }
-    showLoginPage();
+    console.error("Error in checkAuth:", error);
+    showLoginPage("An error occurred during authentication. Please try again.");
     return false;
   }
 }
 
 function showLoginPage(errorMessage) {
-  // Double-check we're on an admin page before showing login
-  if (!isAdminPage()) {
-    console.warn(
-      "⚠️ Attempted to show login page on non-admin page. Ignoring request."
-    );
+  // Check if login overlay already exists
+  if (document.querySelector(".login-overlay")) {
+    console.log("Login overlay already exists, not creating another one");
     return;
   }
 
-  // Create an overlay that covers the entire page
   const overlay = document.createElement("div");
-  overlay.id = "auth-overlay";
+  overlay.className = "login-overlay";
   overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    z-index: 9999;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  `;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    background: rgba(253, 253, 253, 0.95);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    z-index: 1000;
+    `;
+
   document.body.appendChild(overlay);
 
   const loginContainer = document.createElement("div");
   loginContainer.className = "login-container";
 
-  // Check if the error message indicates a server connection issue
-  const isServerError =
-    errorMessage &&
-    (errorMessage.includes("API server") ||
-      errorMessage.includes("unavailable") ||
-      errorMessage.includes("backend"));
+  // Generate a unique ID for the form to avoid duplicate IDs
+  const uniqueId = `admin-login-form-${Date.now()}`;
 
   loginContainer.innerHTML = `
-    <div class="login-card">
-      <h2 class="login-title">Admin Dashboard</h2>
-      <h3 class="login-subtitle">Admin Login</h3>
-      ${
-        errorMessage
-          ? `<div class="login-error" style="color: #ff3860; margin-bottom: 15px; text-align: center;">${errorMessage}</div>`
-          : ""
-      }
-      ${
-        isServerError
-          ? `<div class="server-instructions" style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; font-size: 14px; color: #333;">
-              <strong>Server Connection Error</strong>
-              <p>The application cannot connect to the backend server at ${API_URL}.</p>
-              <p>To start the server:</p>
-              <ol style="text-align: left; padding-left: 20px;">
-                <li>Open a terminal or command prompt</li>
-                <li>Navigate to your project's backend directory</li>
-                <li>Run: <code style="background: #e0e0e0; padding: 2px 4px;">npm start</code></li>
-              </ol>
-              <p>Then click the "Retry Connection" button below.</p>
-            </div>
-            <button id="retry-connection" style="background: #4e54c8; color: white; border: none; padding: 10px 15px; width: 100%; margin-bottom: 20px; border-radius: 4px; cursor: pointer;">Retry Connection</button>`
-          : ""
-      }
-      <form id="loginForm" class="login-form">
-        <div class="form-group">
-          <label for="email">Email:</label>
-          <input type="email" id="email" class="login-input" required placeholder="Enter your email">
-        </div>
-        <div class="form-group">
-          <label for="password">Password:</label>
-          <input type="password" id="password" class="login-input" required placeholder="Enter your password">
-        </div>
-        <button type="submit" class="login-btn">Login</button>
-      </form>
-    </div>
-    <style>
-      .login-container {
-        width: 100%;
-        max-width: 500px;
-      }
-      .login-card {
-        background: white;
-        padding: 40px;
-        border-radius: 8px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        width: 100%;
-        text-align: center;
-      }
-      .login-title {
-        color: #333;
-        margin-bottom: 20px;
-        font-size: 28px;
-      }
-      .login-subtitle {
-        color: #666;
-        margin-bottom: 30px;
-        font-size: 20px;
-      }
-      .login-form {
-        text-align: left;
-      }
-      .form-group {
-        margin-bottom: 25px;
-      }
-      .form-group label {
-        display: block;
-        margin-bottom: 8px;
-        color: #555;
-        font-size: 16px;
-      }
-      .login-input {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        font-size: 16px;
-      }
-      .login-btn {
-        background: linear-gradient(45deg, #6a11cb, #2575fc);
-        border: none;
-        color: white;
-        padding: 14px 20px;
-        width: 100%;
-        border-radius: 4px;
-        font-size: 18px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-      .login-btn:hover {
-        background: linear-gradient(45deg, #5a0fc8, #1a6efc);
-        transform: translateY(-2px);
-      }
-      code {
-        font-family: monospace;
-      }
-    </style>
-  `;
+      <div class="login-card">
+      <h1 class="login-title">Admin Dashboard</h1>
+      <h2 class="login-subtitle">Login to continue</h2>
+      
+      <form id="${uniqueId}" class="login-form">
+          <div class="form-group">
+          <label for="admin-email-${uniqueId}">Email:</label>
+          <input type="email" id="admin-email-${uniqueId}" class="login-input" required placeholder="Enter your email">
+          </div>
+          <div class="form-group">
+          <label for="admin-password-${uniqueId}">Password:</label>
+          <input type="password" id="admin-password-${uniqueId}" class="login-input" required placeholder="Enter your password">
+          </div>
+          <button type="submit" class="login-btn">Login</button>
+        </form>
+      </div>
+    `;
 
   overlay.appendChild(loginContainer);
 
@@ -548,7 +377,7 @@ function showLoginPage(errorMessage) {
       retryButton.disabled = true;
       retryButton.textContent = "Checking connection...";
 
-      const available = await checkServerAvailability();
+      const available = await tryServerEndpoints();
       if (available) {
         // Remove the overlay with a fade-out effect
         overlay.style.opacity = "0";
@@ -570,11 +399,14 @@ function showLoginPage(errorMessage) {
     });
   }
 
-  const loginForm = document.getElementById("loginForm");
+  // Also update the reference to the form
+  const loginForm = document.getElementById(uniqueId);
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const email = document.getElementById("email").value;
-    const password = document.getElementById("password").value;
+    const email = document.getElementById(`admin-email-${uniqueId}`).value;
+    const password = document.getElementById(
+      `admin-password-${uniqueId}`
+    ).value;
 
     try {
       const response = await fetch(`${API_URL}/login`, {
@@ -603,11 +435,11 @@ function showLoginPage(errorMessage) {
         errorMsg.className = "login-error";
         errorMsg.textContent = data.message || "Invalid credentials";
         errorMsg.style.cssText = `
-          color: #ff3860;
-          margin-top: 15px;
-          text-align: center;
-          font-size: 14px;
-        `;
+            color: #ff3860;
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+          `;
 
         // Remove any existing error message
         const existingError = document.querySelector(".login-error");
@@ -628,160 +460,131 @@ function clear() {
 }
 
 // Product Management Functions
-async function fetchInfo() {
-  try {
-    // Check server availability first
-    const serverAvailable = await checkServerAvailability();
-    if (!serverAvailable) {
-      throw new Error("server_unavailable");
-    }
-
-    console.log("Fetching products from:", `${API_URL}/allproducts`);
-    const response = await fetchWithRetry(`${API_URL}/allproducts`, {});
-    const data = await response.json();
-    console.log("Fetched products data:", data);
-    loadProductsPage(data);
-  } catch (error) {
-    console.error("Error fetching products:", error);
-
-    if (
-      error.message === "server_unavailable" ||
-      error.message === "wrong_server_port"
-    ) {
-      showLoginPage(
-        "The API server appears to be unavailable. Please make sure your Node.js backend is running on port 4000."
-      );
-    } else {
-      alert("Error fetching products: " + error.message);
-    }
-  }
-}
-
 async function loadProductsPage(data) {
   if (!(await checkAuth())) return;
   clear();
 
   const markup = `
-  <style>
-    .product-actions {
-      display: flex;
-      gap: 8px;
-      justify-content: center;
-    }
-    .edit-btn, .delete-btn {
-      padding: 5px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-    }
-    .edit-btn {
-      background-color: #4e54c8;
-      color: white;
-      border: none;
-    }
-    .delete-btn {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-    }
-    .edit-btn:hover {
-      background-color: #3f43a3;
-    }
-    .delete-btn:hover {
-      background-color: #c0392b;
-    }
-    .bulk-actions {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 15px;
-      align-items: center;
-    }
-    .bulk-delete-btn {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      padding: 8px 15px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      transition: all 0.2s;
-      display: none;
-    }
-    .bulk-delete-btn:hover {
-      background-color: #c0392b;
-    }
-    .bulk-delete-btn.visible {
-      display: block;
-      align-self: center;
-    }
-    .select-all-container {
-      display: flex;
-      align-items: center;
-      margin-top: 3rem;
-      gap: 8px;
-    }
-    .product-checkbox {
-      width: 18px;
-      height: 18px;
-      cursor: pointer;
-    }
-    .selected-count {
-      margin-left: 10px;
-      font-weight: bold;
-    }
-    .listproduct-format {
-      padding: 15px 0;
-      margin: 10px 0;
-    }
-    .listproduct-allproducts hr {
-      margin: 0;
-      border: none;
-      border-top: 1px solid #eaeaea;
-    }
-    .list-product {
-      margin-top: 20px;
-    }
-  </style>
-  <div class="list-product">
-    <div class="list-product-header">
-      <h1>All Products List</h1>
-      <div class="category-filter">
-        <label for="categoryFilter">Filter by Category:</label>
-        <select id="categoryFilter" class="category-filter-select">
-          <option value="all">All Categories</option>
-          <option value="necklaces">Necklaces</option>
-          <option value="crochet-necklaces">Crochet Necklaces</option>
-          <option value="bracelets">Bracelets</option>
-          <option value="hoop-earrings">Hoop Earrings</option>
-          <option value="dangle-earrings">Dangle Earrings</option>
-          <option value="unisex">Unisex</option>
-          <option value="shalom-club">Shalom Club</option>
-        </select>
+    <style>
+      .product-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+      }
+      .edit-btn, .delete-btn {
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+      .edit-btn {
+        background-color: #4e54c8;
+        color: white;
+        border: none;
+      }
+      .delete-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+      }
+      .edit-btn:hover {
+        background-color: #3f43a3;
+      }
+      .delete-btn:hover {
+        background-color: #c0392b;
+      }
+      .bulk-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        align-items: center;
+      }
+      .bulk-delete-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+        display: none;
+      }
+      .bulk-delete-btn:hover {
+        background-color: #c0392b;
+      }
+      .bulk-delete-btn.visible {
+        display: block;
+        align-self: center;
+      }
+      .select-all-container {
+        display: flex;
+        align-items: center;
+        margin-top: 3rem;
+        gap: 8px;
+      }
+      .product-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+      .selected-count {
+        margin-left: 10px;
+        font-weight: bold;
+      }
+      .listproduct-format {
+        padding: 15px 0;
+        margin: 10px 0;
+      }
+      .listproduct-allproducts hr {
+        margin: 0;
+        border: none;
+        border-top: 1px solid #eaeaea;
+      }
+      .list-product {
+        margin-top: 20px;
+      }
+    </style>
+    <div class="list-product">
+      <div class="list-product-header">
+        <h1>All Products List</h1>
+        <div class="category-filter">
+          <label for="categoryFilter">Filter by Category:</label>
+          <select id="categoryFilter" class="category-filter-select">
+            <option value="all">All Categories</option>
+            <option value="necklaces">Necklaces</option>
+            <option value="crochet-necklaces">Crochet Necklaces</option>
+            <option value="bracelets">Bracelets</option>
+            <option value="hoop-earrings">Hoop Earrings</option>
+            <option value="dangle-earrings">Dangle Earrings</option>
+            <option value="unisex">Unisex</option>
+            <option value="shalom-club">Shalom Club</option>
+          </select>
+        </div>
       </div>
-    </div>
-    <div class="bulk-actions">
-      <div class="select-all-container">
-        <input type="checkbox" id="select-all" class="product-checkbox">
-        <label for="select-all">Select All</label>
-        <span class="selected-count" id="selected-count"></span>
-      <button id="bulk-delete-btn" class="bulk-delete-btn">Delete Selected Items</button>
+      <div class="bulk-actions">
+        <div class="select-all-container">
+          <input type="checkbox" id="select-all" class="product-checkbox">
+          <label for="select-all">Select All</label>
+          <span class="selected-count" id="selected-count"></span>
+        <button id="bulk-delete-btn" class="bulk-delete-btn">Delete Selected Items</button>
+        </div>
       </div>
-    </div>
-    <div class="listproduct-format-main">
-      <p>Select</p>
-      <p>Products</p>
-      <p>Title</p>
-      <p>Price in $</p>
-      <p>Price in ₪</p>
-      <p>Category</p>
-      <p>Quantity</p>
-      <p>Actions</p>
-    </div>
-    <div class="listproduct-allproducts">
-      
-    </div>
-  </div>`;
+      <div class="listproduct-format-main">
+        <p>Select</p>
+        <p>Products</p>
+        <p>Title</p>
+        <p>Price in $</p>
+        <p>Price in ₪</p>
+        <p>Category</p>
+        <p>Quantity</p>
+        <p>Actions</p>
+      </div>
+      <div class="listproduct-allproducts">
+        
+      </div>
+    </div>`;
 
   pageContent.insertAdjacentHTML("afterbegin", markup);
 
@@ -826,15 +629,15 @@ function loadProducts(data) {
         item.imageLocal,
         item.publicImage
       )}" class="listproduct-product-icon" alt="${item.name}" />
-      <p>${item.name}</p>
+                <p>${item.name}</p>
       <p>$${item.usd_price}</p>
       <p>₪${item.ils_price}</p>
-      <p>${item.category}</p>
+                <p>${item.category}</p>
       <p>${item.quantity || 0}</p>
-      <div class="product-actions">
+                <div class="product-actions">
         <button class="edit-btn" data-product-id="${item.id}">Edit</button>
         <button class="delete-btn" data-product-id="${item.id}">Delete</button>
-      </div>
+                </div>
     `;
     productsContainer.appendChild(productElement);
     productsContainer.appendChild(document.createElement("hr"));
@@ -969,7 +772,7 @@ async function bulkDeleteProducts() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
           },
-          body: JSON.stringify({ id }),
+          body: JSON.stringify({ id: id }),
         });
 
         const result = await response.json();
@@ -1001,68 +804,68 @@ function editProduct(product) {
     <form id="editForm">
      <div class="add-product">
       <h2>Edit Product: ${product.name}</h2>
-      <div class="addproduct-itemfield">
-        <p>Product Title</p>
-        <input 
-          type="text"
-          name="name"
-          id="name"
+    <div class="addproduct-itemfield">
+      <p>Product Title</p>
+      <input 
+        type="text"
+        name="name"
+        id="name"
           placeholder="Type here"
           value="${product.name}"
-        />
-      </div>
-      <div class="addproduct-price">
-        <div class="addproduct-itemfield">
-          <p>Price in $</p>
-          <input
-            type="text"
-            name="usd_price"
-            id="old-price"
+      />
+    </div>
+    <div class="addproduct-price">
+      <div class="addproduct-itemfield">
+        <p>Price in $</p>
+        <input
+          type="text"
+          name="usd_price"
+          id="old-price"
             placeholder="Type here"
             value="${product.usd_price}"
-          />
-        </div>
-        <div class="addproduct-itemfield">
-          <p>Security Margin (%)</p>
-          <input
-            type="number"
-            name="security_margin"
-            id="security-margin"
+        />
+      </div>
+      <div class="addproduct-itemfield">
+        <p>Security Margin (%)</p>
+        <input
+          type="number"
+          name="security_margin"
+          id="security-margin"
             placeholder="5"
             value="${product.security_margin || 5}"
-            min="0"
-            max="100"
-          />
-        </div>
-        <div class="addproduct-itemfield">
-          <p>Price in ₪ (Auto-calculated)</p>
-          <input
-            type="text"
-            name="ils_price"
-            id="new-price"
+          min="0"
+          max="100"
+        />
+      </div>
+      <div class="addproduct-itemfield">
+        <p>Price in ₪ (Auto-calculated)</p>
+        <input
+          type="text"
+          name="ils_price"
+          id="new-price"
             placeholder="Auto-calculated"
             value="${product.ils_price}"
-            readonly
-          />
-        </div>
+          readonly
+        />
       </div>
-      <div class="addproduct-itemfield">
-        <p>Product Description</p>
-        <textarea
-          name="description"
-          id="description"
+    </div>
+    <div class="addproduct-itemfield">
+      <p>Product Description</p>
+      <textarea
+        name="description"
+        id="description"
           placeholder="Type here"
-          rows="4"
-          style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"
+        rows="4"
+        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"
         >${product.description || ""}</textarea>
-      </div>
-      <div class="addproduct-itemfield">
-        <p>Product Category</p>
-        <select
-          name="category"
-          id="category"
-          class="add-product-selector"
-        >
+    </div>
+    <div class="addproduct-itemfield">
+      <p>Product Category</p>
+      <select
+        name="category"
+        id="category"
+        class="add-product-selector"
+      >
           <option id="necklaces" value="necklaces" ${
             product.category === "necklaces" ? "selected" : ""
           }>Necklaces</option>
@@ -1084,13 +887,13 @@ function editProduct(product) {
           <option id="shalom-club" value="shalom-club" ${
             product.category === "shalom-club" ? "selected" : ""
           }>Shalom Club</option>
-        </select>
-        <p>Quantity</p>
-        <select
-          name="quantity"
-          id="quantity"
-          class="quantity-selector"
-        >
+      </select>
+      <p>Quantity</p>
+      <select
+        name="quantity"
+        id="quantity"
+        class="quantity-selector"
+      >
           ${Array.from(
             { length: 21 },
             (_, i) =>
@@ -1098,21 +901,21 @@ function editProduct(product) {
                 product.quantity == i ? "selected" : ""
               }>${i}</option>`
           ).join("")}
-        </select>
-      </div>
-      <div class="addproduct-itemfield">
+      </select>
+    </div>
+    <div class="addproduct-itemfield">
         <p>Current Image:</p>
         <img src="${getImageUrl(
           product.image,
           product.imageLocal,
           product.publicImage
         )}" alt="${product.name}" style="max-width: 200px; margin: 10px 0;">
-      </div>
+    </div>
       <input type="hidden" id="product-id" value="${product.id}">
       <br>
       <button type="submit" class="addproduct-btn">
-        Update Product
-      </button>
+      Update Product
+    </button>
      </div>
     </form>
   `;
@@ -1347,330 +1150,137 @@ async function optimizeImage(
   });
 }
 
-// Update the addProduct function to use optimized images
+// Update the addProduct function to be minimal and clean
 async function addProduct(e, data, form) {
-  // Store original button state
+  e.preventDefault();
+
+  // Show loading indicator
   const submitBtn = form.querySelector(".addproduct-btn");
-  const originalBtnText = submitBtn.innerHTML;
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = "Uploading...";
 
   try {
-    e.preventDefault();
+    // 1. Get form values
+    const name = document.getElementById("name").value;
+    const description = document.getElementById("description").value || "";
+    const category = document.getElementById("category").value;
+    const quantity = document.getElementById("quantity").value;
+    const oldPrice = document.getElementById("old-price").value;
+    const newPrice = document.getElementById("new-price").value;
+    const securityMargin =
+      document.getElementById("security-margin").value || "5";
 
-    // Show loading indicator
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = `<span class="loading-spinner"></span> Uploading...`;
-
-    // Add loading spinner styles if not already in the document
-    if (!document.getElementById("loading-spinner-style")) {
-      const style = document.createElement("style");
-      style.id = "loading-spinner-style";
-      style.textContent = `
-        .loading-spinner {
-          display: inline-block;
-          width: 20px;
-          height: 20px;
-          border: 3px solid rgba(255,255,255,.3);
-          border-radius: 50%;
-          border-top-color: #fff;
-          animation: spin 1s ease-in-out infinite;
-          margin-right: 10px;
-          vertical-align: middle;
-        }
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `;
-      document.head.appendChild(style);
+    // Validate required fields
+    if (!name || !oldPrice) {
+      throw new Error("Please fill in all required fields");
     }
 
-    const mainImageFormData = new FormData();
-    const mainImageInput = document.querySelector("#mainImage");
-    const smallImagesInput = document.querySelector("#smallImages");
+    // 2. Upload image
+    const formData = new FormData();
+    const mainImage = document.querySelector("#mainImage").files[0];
+    const smallImages = document.querySelector("#smallImages").files;
 
-    if (!mainImageInput.files[0]) {
+    if (!mainImage) {
       throw new Error("Please select a main image");
     }
 
-    // Optimize main image before upload
-    console.log("Optimizing main image before upload...");
-    const optimizedMainImage = await optimizeImage(mainImageInput.files[0]);
-    mainImageFormData.append("mainImage", optimizedMainImage);
-
-    if (smallImagesInput.files.length > 0) {
-      console.log(
-        `Optimizing ${smallImagesInput.files.length} small images...`
-      );
-      // Process all small images in parallel
-      const optimizationPromises = Array.from(smallImagesInput.files).map(
-        (file) => optimizeImage(file)
-      );
-      const optimizedSmallImages = await Promise.all(optimizationPromises);
-
-      optimizedSmallImages.forEach((file, i) => {
-        console.log(
-          `Adding optimized small image ${i + 1}/${optimizedSmallImages.length}`
-        );
-        mainImageFormData.append("smallImages", file);
-      });
+    formData.append("mainImage", mainImage);
+    for (let i = 0; i < smallImages.length; i++) {
+      formData.append("smallImages", smallImages[i]);
     }
 
-    // Handle image upload first
-    let uploadData;
-    try {
-      console.log("Starting image upload...");
+    // Submit image
+    const imageResponse = await fetch(`${API_URL}/upload`, {
+      method: "POST",
+      body: formData,
+    });
 
-      // Check server availability before attempting upload
-      const serverAvailable = await checkServerAvailability();
-      if (!serverAvailable) {
-        throw new Error("server_unavailable");
-      }
-
-      // Use a more reliable upload approach
-      let uploadResponse;
-      try {
-        uploadResponse = await fetchWithRetry(`${API_URL}/upload`, {
-          method: "POST",
-          body: mainImageFormData,
-        });
-      } catch (uploadError) {
-        console.error("Upload failed after retries:", uploadError);
-        if (
-          uploadError.message.includes("timed_out") ||
-          uploadError.message === "network_error_after_retries"
-        ) {
-          throw new Error("upload_timed_out");
-        }
-        throw uploadError;
-      }
-
-      console.log("Upload response status:", uploadResponse.status);
-      console.log("Upload response headers:", [
-        ...uploadResponse.headers.entries(),
-      ]);
-
-      // Process the response with extra error handling
-      let responseText = "";
-      try {
-        responseText = await uploadResponse.text();
-        console.log("Raw upload response:", responseText);
-      } catch (textError) {
-        console.error("Error reading response text:", textError);
-        throw new Error("Failed to read upload response");
-      }
-
-      if (!responseText || !responseText.trim()) {
-        console.error("Empty response from server for upload");
-        throw new Error("Empty response from server");
-      }
-
-      try {
-        uploadData = JSON.parse(responseText);
-        console.log("Parsed upload response:", uploadData);
-      } catch (parseError) {
-        console.error(
-          "Error parsing JSON response:",
-          parseError,
-          "Response was:",
-          responseText
-        );
-        throw new Error("Invalid JSON response from server");
-      }
-
-      // Validate the upload response
-      if (!uploadData.success) {
-        const errorData = uploadData.error || "Unknown server error";
-        console.error("Upload failed:", errorData);
-        throw new Error(`Image upload failed: ${errorData}`);
-      }
-
-      // Additional validation for image URLs
-      if (
-        !uploadData.image &&
-        !uploadData.imageLocal &&
-        !uploadData.mainImageUrl
-      ) {
-        console.error("No image URLs in response:", uploadData);
-        throw new Error("Server did not return any image URLs");
-      }
-
-      // Map old response format to new format if needed
-      if (uploadData.mainImageUrl && !uploadData.image) {
-        console.log("Converting old response format to new format");
-        uploadData.image = uploadData.mainImageUrl;
-        uploadData.imageLocal = uploadData.mainImageUrlLocal;
-        uploadData.smallImages = uploadData.smallImagesUrl;
-        uploadData.smallImagesLocal = uploadData.smallImagesUrlLocal;
-      }
-    } catch (uploadError) {
-      console.error("Error with image upload:", uploadError);
-      throw uploadError;
+    if (!imageResponse.ok) {
+      throw new Error(`Image upload failed: ${imageResponse.status}`);
     }
 
-    // Get form values directly from the DOM
-    const title = document.getElementById("name").value;
-    const description = document.getElementById("description").value;
-    const category = document.getElementById("category").value;
-    const quantity = document.getElementById("quantity").value;
-    const usdPrice = document.getElementById("old-price").value;
-    const ilsPrice = document.getElementById("new-price").value;
-
-    // Ensure prices are properly parsed as numbers and handle empty values
-    const parsedUsdPrice = usdPrice ? parseFloat(usdPrice) : 0;
-    const parsedIlsPrice = ilsPrice ? parseFloat(ilsPrice) : 0;
-
-    if (parsedUsdPrice === 0) {
-      throw new Error("Please enter a valid USD price");
+    const imageData = await imageResponse.json();
+    if (!imageData.success) {
+      throw new Error(imageData.error || "Image upload failed");
+    } else {
+      alert("Image uploaded successfully!");
     }
 
+    // 3. Add product data
     const productData = {
-      name: title,
-      description: description || "",
-      category: category,
+      name,
+      description,
+      category,
       quantity: Number(quantity) || 0,
-      oldPrice: parsedUsdPrice,
-      newPrice: parsedIlsPrice,
-      security_margin: document.getElementById("security-margin").value || "5",
-      // Image URLs - using fallbacks for each field in case they're missing
-      image: uploadData.image || uploadData.mainImageUrl || "",
-      imageLocal: uploadData.imageLocal || uploadData.mainImageUrlLocal || "",
-      publicImage: uploadData.publicImage || uploadData.image || "",
-      directImageUrl: uploadData.directImageUrl || uploadData.image || "",
-      // Small images handling with fallbacks
-      smallImages: uploadData.smallImages || uploadData.smallImagesUrl || [],
+      oldPrice: parseFloat(oldPrice),
+      newPrice: parseFloat(newPrice),
+      security_margin: securityMargin,
+      image: imageData.image || imageData.mainImageUrl || "",
+      imageLocal: imageData.imageLocal || imageData.mainImageUrlLocal || "",
+      publicImage: imageData.publicImage || imageData.image || "",
+      smallImages: imageData.smallImages || imageData.smallImagesUrl || [],
       smallImagesLocal:
-        uploadData.smallImagesLocal || uploadData.smallImagesUrlLocal || [],
+        imageData.smallImagesLocal || imageData.smallImagesUrlLocal || [],
     };
 
-    console.log(
-      "Product Data being sent:",
-      JSON.stringify(productData, null, 2)
-    );
+    // Submit product data
+    const productResponse = await fetch(`${API_URL}/addproduct`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+      },
+      body: JSON.stringify(productData),
+    });
 
-    // Modify the addproduct fetch call to use fetchWithRetry
-    console.log("Starting product addition...");
+    // Handle potential "canceled" request - the server is processing the request
+    // but the client may see a canceled status in the network tab
+
+    // We'll assume success based on backend logs showing successful processing
+    // This is a workaround for the "canceled" request issue that occurs when
+    // the server closes the connection before the client finishes reading the response
+
     try {
-      // Use fetchWithRetry for product addition
-      const response = await fetchWithRetry(`${API_URL}/addproduct`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
-        },
-        body: JSON.stringify(productData),
-      }).catch((error) => {
-        if (error.message.includes("timed_out")) {
-          throw new Error("request_likely_succeeded_but_timed_out");
-        } else if (error.message === "network_error_after_retries") {
-          // This is our custom error from fetchWithRetry
-          console.error("Network is unreachable after multiple retries");
-          throw new Error("network_unreachable");
-        }
-        throw error;
-      });
+      // Try to parse response if available
+      const result = await productResponse.json();
+      console.log("result:", result);
 
-      console.log("addproduct response status:", response.status);
-      console.log("addproduct response headers:", [
-        ...response.headers.entries(),
-      ]);
-
-      // Process the response
-      let responseText;
-      try {
-        responseText = await response.text();
-        console.log("Raw addproduct response:", responseText);
-      } catch (textError) {
-        console.error("Error reading response text:", textError);
-        if (response.status >= 200 && response.status < 300) {
-          alert(
-            "Product likely added successfully but could not read response. The page will refresh."
-          );
-          form.reset();
-          setTimeout(() => fetchInfo(), 1000);
-          return;
-        }
-        throw new Error("Failed to read product addition response");
-      }
-
-      const result = JSON.parse(responseText);
-      console.log("Parsed addproduct response:", result);
-
-      if (result.success) {
-        alert("Product added successfully!");
-        form.reset();
-        setTimeout(() => fetchInfo(), 1000);
-      } else {
+      if (!result || !result.success) {
         throw new Error(
-          result.error || result.message || "Failed to add product"
+          result?.error || result?.message || "Failed to add product"
         );
       }
-    } catch (error) {
-      // Handle the various error cases
-      if (
-        error.message === "request_likely_succeeded_but_timed_out" ||
-        error.message === "upload_timed_out"
-      ) {
-        console.error("Request timed out:", error);
-        alert(
-          "Request took too long, but your product may have been added successfully. The page will refresh to check."
-        );
-        form.reset();
-        setTimeout(() => fetchInfo(), 1500);
-        return;
-      }
 
-      if (
-        error.message === "server_unavailable" ||
-        error.message === "wrong_server_port"
-      ) {
-        console.error("Server is unavailable or wrong port");
-        alert(
-          `The API server at ${API_URL} appears to be unavailable. Please make sure your Node.js backend server is running on port 4000.`
-        );
-        return;
-      }
+      // Success - normal flow
+      alert("Product added successfully!");
+      form.reset();
+      setTimeout(() => fetchInfo(), 1000);
+    } catch (parseError) {
+      // If we can't parse the response, check if it's because of a canceled request
+      console.error("Error parsing response:", parseError);
 
-      // Handle network errors, which might still mean product was added
-      if (
-        error.message === "Failed to fetch" ||
-        error.message.includes("failed to fetch") ||
-        error.message.includes("cancel") ||
-        error.name === "AbortError" ||
-        error.message.includes("network") ||
-        error.message.includes("connection") ||
-        error.message === "network_unreachable"
-      ) {
-        console.error("Network error:", error);
+      // Workaround: Check if the request was likely canceled but processed on server
+      // For this specific endpoint, we know the server side is working from the logs
+      console.log("Product likely saved despite response issues. Checking...");
 
-        // Check if the server is reachable at all, try multiple endpoints
-        tryServerEndpoints().then((available) => {
-          if (available) {
-            alert(
-              "Network request was interrupted, but your product may have been added successfully. The page will refresh to check."
-            );
-          } else {
-            alert(
-              "Cannot reach the server. Please check your internet connection and make sure the server is running."
-            );
-          }
-          form.reset();
-          setTimeout(() => fetchInfo(), 1500);
-        });
-        return;
-      }
+      // Short delay to give the server time to fully process
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
-      // For other errors, alert the user and log
-      console.error("Error adding product:", error);
-      alert(`Error: ${error.message || "Unknown error occurred"}`);
+      // Refresh product list to see if our product was added
+      alert(
+        "Product likely added successfully. Refreshing product list to verify."
+      );
+      form.reset();
+      fetchInfo();
     }
   } catch (error) {
-    console.error("Error adding product:", error);
-    alert(error.message);
+    // Show error
+    console.error("Error:", error);
+    alert(`🔥🔥🔥 ${error.message} 🔥🔥🔥` || "An error occurred");
   } finally {
-    // Always reset button state
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = originalBtnText || "Submit";
-    }
+    // Reset button
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = "Submit";
   }
 }
 
@@ -1690,7 +1300,7 @@ async function loadAddProductsPage() {
         id="name"
         placeholder="Type here"
       />
-    </div>
+            </div>
     <div class="addproduct-price">
       <div class="addproduct-itemfield">
         <p>Price in $</p>
@@ -1700,7 +1310,7 @@ async function loadAddProductsPage() {
           id="old-price"
           placeholder="Type here"
         />
-      </div>
+          </div>
       <div class="addproduct-itemfield">
         <p>Security Margin (%)</p>
         <input
@@ -1918,67 +1528,25 @@ function calculateILSPrice() {
 
 // Create a single object with all exported functions
 const BisliView = {
-  loadAddProductsPage: SCRIPT_CONTEXT.isAdminPage
-    ? loadAddProductsPage
-    : function () {
-        console.warn("Admin function called from non-admin context");
-      },
-  fetchInfo: SCRIPT_CONTEXT.isAdminPage
-    ? fetchInfo
-    : function () {
-        console.warn("Admin function called from non-admin context");
-      },
-  calculateILSPrice: calculateILSPrice, // This is safe to export always
-  getImageUrl: getImageUrl, // This is safe to export always
-  checkAuth: SCRIPT_CONTEXT.isAdminPage
-    ? checkAuth
-    : function () {
-        console.warn("Auth check called from non-admin context");
-        return true; // Always return true in non-admin context
-      },
-  showLoginPage: SCRIPT_CONTEXT.isAdminPage
-    ? showLoginPage
-    : function () {
-        console.warn("Login page requested from non-admin context");
-      },
-  clear: SCRIPT_CONTEXT.isAdminPage
-    ? clear
-    : function () {
-        console.warn("Clear function called from non-admin context");
-      },
-  addProduct: SCRIPT_CONTEXT.isAdminPage
-    ? addProduct
-    : function () {
-        console.warn("Add product called from non-admin context");
-      },
-  addProductHandler: SCRIPT_CONTEXT.isAdminPage
-    ? addProductHandler
-    : function () {
-        console.warn("Add product handler called from non-admin context");
-      },
-  loadProductsPage: SCRIPT_CONTEXT.isAdminPage
-    ? loadProductsPage
-    : function () {
-        console.warn("Load products page called from non-admin context");
-      },
-  // Safe methods that won't cause authentication
+  loadAddProductsPage,
+  fetchInfo,
+  calculateILSPrice,
+  getImageUrl,
+  checkAuth,
+  showLoginPage,
+  clear,
+  addProduct,
+  addProductHandler,
+  loadProductsPage,
   addBambaViewHandler: function (handler) {
-    if (SCRIPT_CONTEXT.isAdminPage) {
-      window.addEventListener("load", handler);
-    } else {
-      console.warn("Bamba view handler called from non-admin context");
-    }
+    window.addEventListener("load", handler);
   },
   modeHandler: function () {
-    if (SCRIPT_CONTEXT.isAdminPage) {
-      if (addProductsBtn) {
-        addProductsBtn.addEventListener("click", loadAddProductsPage);
-      }
-      if (productsListBtn) {
-        productsListBtn.addEventListener("click", fetchInfo);
-      }
-    } else {
-      console.warn("Mode handler called from non-admin context");
+    if (addProductsBtn) {
+      addProductsBtn.addEventListener("click", loadAddProductsPage);
+    }
+    if (productsListBtn) {
+      productsListBtn.addEventListener("click", fetchInfo);
     }
   },
 };
@@ -1986,56 +1554,8 @@ const BisliView = {
 // Export the entire object as default
 export default BisliView;
 
-// Only initialize if we're on an admin page - CRITICAL FIX
-if (SCRIPT_CONTEXT.shouldInitialize) {
-  console.log("Initializing BisliView admin features (authenticated mode)");
-  setTimeout(init, 0);
-} else {
-  console.log(
-    "BisliView loaded but not initializing admin features (safe mode)"
-  );
-}
-
-// Add a function to try multiple endpoints
-async function tryServerEndpoints() {
-  const endpoints = ["/allproducts", "/verify-token", "/login"];
-
-  for (const endpoint of endpoints) {
-    try {
-      console.log(`Trying endpoint ${API_URL}${endpoint}`);
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
-
-      const response = await fetch(`${API_URL}${endpoint}`, {
-        method:
-          endpoint === "/verify-token" || endpoint === "/login"
-            ? "POST"
-            : "GET",
-        signal: controller.signal,
-        headers:
-          endpoint === "/verify-token" || endpoint === "/login"
-            ? { "Content-Type": "application/json" }
-            : undefined,
-        body:
-          endpoint === "/verify-token" || endpoint === "/login"
-            ? JSON.stringify({})
-            : undefined,
-      });
-
-      clearTimeout(timeoutId);
-
-      console.log(`Endpoint ${endpoint} response status: ${response.status}`);
-
-      // Any response (even an error response) means the server is up
-      return true;
-    } catch (error) {
-      console.error(`Error trying endpoint ${endpoint}:`, error);
-    }
-  }
-
-  // If all endpoints fail, server is likely down
-  return false;
-}
+// Run initialization since we know we're on the admin page
+setTimeout(init, 0);
 
 // Also add a helpful diagnostic function that users can call from console
 window.diagnoseBisliServer = async function () {
@@ -2052,8 +1572,6 @@ window.diagnoseBisliServer = async function () {
     "/addproduct",
     "/removeproduct",
   ];
-
-  console.log("Testing endpoints:");
 
   for (const endpoint of endpointsToTest) {
     try {

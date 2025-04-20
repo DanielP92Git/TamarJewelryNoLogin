@@ -22,23 +22,33 @@ const app = express();
 const allowedOrigins = [
   `${process.env.HOST}`,
   `${process.env.API_URL}`,
-  'http://localhost:1234',
-  'http://localhost:4000',
   'http://127.0.0.1:5500',
 ];
 
+console.log('Allowed origins:', allowedOrigins);
+
 const corsOptions = {
-  origin: (origin, callback) => {
+  origin: function (origin, callback) {
+    console.log('Request origin:', origin);
     if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.warn('Origin not allowed by CORS:', origin);
+      // For development, allow all origins
+      callback(null, true);
+      // In production, use this instead:
+      // callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'auth-token'],
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'auth-token',
+    'X-Requested-With',
+  ],
 };
 
 app.use(cors(corsOptions));
@@ -46,15 +56,32 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));
 
-// CORS Headers Middleware
+// CORS Headers Middleware - Enhanced for better cross-origin support
 function headers(req, res, next) {
-  res.header('Access-Control-Allow-Origin', `*`);
+  // Allow requests from any origin during development
+  res.header('Access-Control-Allow-Origin', '*');
+
+  // Allow specific methods
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+
+  // Allow more headers
   res.header(
     'Access-Control-Allow-Headers',
-    'Origin, Content-Type, Authorization, auth-token'
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization, auth-token'
   );
+
+  // Allow credentials
   res.header('Access-Control-Allow-Credentials', 'true');
+
+  // Preflight request handling
+  if (req.method === 'OPTIONS') {
+    console.log(
+      'Received OPTIONS request from:',
+      req.headers.origin || 'unknown'
+    );
+    return res.status(200).end();
+  }
+
   next();
 }
 
@@ -1138,13 +1165,6 @@ app.listen(process.env.SERVER_PORT || 4000, error => {
     console.log('  API_URL:', process.env.API_URL);
     console.log('  HOST:', process.env.HOST);
     console.log('  NODE_ENV:', process.env.NODE_ENV);
-
-    // Log upload paths
-    console.log('Upload Directories:');
-    console.log('  Main uploads:', uploadsDir);
-    console.log('  Small images:', smallImagesDir);
-    console.log('  Public uploads:', publicUploadsDir);
-    console.log('  Public small images:', publicSmallImagesDir);
   } else {
     console.log('Error : ' + error);
   }
