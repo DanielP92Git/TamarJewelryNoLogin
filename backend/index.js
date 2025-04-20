@@ -11,7 +11,14 @@ const fs = require('fs');
 
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
-const baseUrl = process.env.PAYPAL_BASE_URL;
+const baseUrl =
+  process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com';
+
+// Log PayPal configuration for debugging
+console.log('PayPal Configuration:');
+console.log('  API URL:', baseUrl);
+console.log('  Client ID exists:', !!PAYPAL_CLIENT_ID);
+console.log('  Client Secret exists:', !!PAYPAL_CLIENT_SECRET);
 
 // =============================================
 // Initial Setup & Configuration
@@ -381,7 +388,7 @@ app.options('/direct-image/:filename', (req, res) => {
 // =============================================
 // Payment Processing Setup
 // =============================================
-const stripe = require('stripe')(process.env.STRIPE_PUBLISH_KEY_TEST);
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 async function handleCheckoutSession(session) {
   const productId = session.metadata.productId;
@@ -416,11 +423,37 @@ async function handleCheckoutSession(session) {
 
 const generateAccessToken = async () => {
   try {
+    console.log('========= PAYPAL AUTH DEBUG =========');
+    console.log(
+      'Client ID length:',
+      PAYPAL_CLIENT_ID ? PAYPAL_CLIENT_ID.length : 'missing'
+    );
+    console.log(
+      'Client Secret length:',
+      PAYPAL_CLIENT_SECRET ? PAYPAL_CLIENT_SECRET.length : 'missing'
+    );
+    console.log('Base URL:', baseUrl);
+
     if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+      console.error('Missing PayPal credentials:', {
+        clientIdExists: !!PAYPAL_CLIENT_ID,
+        clientSecretExists: !!PAYPAL_CLIENT_SECRET,
+      });
       throw new Error('MISSING_API_CREDENTIALS');
     }
-    const auth = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`);
-    const response = await fetch(`${baseUrl}/v1/oauth2/token`, {
+
+    // In Node.js, btoa is not available directly, so we use Buffer
+    const auth = Buffer.from(
+      `${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`
+    ).toString('base64');
+    console.log(
+      'Auth token generated successfully. Making API request to PayPal...'
+    );
+
+    const tokenUrl = `${baseUrl}/v1/oauth2/token`;
+    console.log('Token URL:', tokenUrl);
+
+    const response = await fetch(tokenUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -428,62 +461,115 @@ const generateAccessToken = async () => {
       },
       body: 'grant_type=client_credentials',
     });
-    const data = await response.json();
-    return data.access_token;
+
+    console.log('PayPal token response status:', response.status);
+
+    const responseText = await response.text();
+    console.log('PayPal response body:', responseText);
+
+    if (!response.ok) {
+      throw new Error(
+        `PayPal token request failed: ${response.status} ${responseText}`
+      );
+    }
+
+    try {
+      const data = JSON.parse(responseText);
+      if (!data.access_token) {
+        throw new Error('No access token received from PayPal');
+      }
+
+      console.log('PayPal access token obtained successfully');
+      return data.access_token;
+    } catch (jsonError) {
+      console.error('Error parsing JSON response:', jsonError);
+      throw new Error(`Failed to parse PayPal response: ${responseText}`);
+    }
   } catch (error) {
     console.error('Failed to generate Access Token:', error);
+    return null; // Return null instead of throwing to prevent crashing the entire request
   }
 };
 
 const createOrder = async cart => {
-  console.log(
-    'shopping cart information passed from the frontend createOrder() callback:',
-    cart
-  );
-  let totalAmount = cart
-    .reduce((total, item) => {
-      let itemTotal =
-        parseFloat(item.unit_amount.value) * parseInt(item.quantity);
-      return total + itemTotal;
-    }, 0)
-    .toFixed(2);
-  const currencyData = cart[0].unit_amount.currency_code;
-  const accessToken = await generateAccessToken();
-  const url = `${baseUrl}/v2/checkout/orders`;
-  const payload = {
-    intent: 'CAPTURE',
-    purchase_units: [
-      {
-        amount: {
-          currency_code: currencyData,
-          value: +totalAmount,
-          breakdown: {
-            item_total: {
-              currency_code: currencyData,
-              value: +totalAmount,
+  try {
+    console.log(
+      'shopping cart information passed from the frontend createOrder() callback:',
+      cart
+    );
+
+    if (!cart || !Array.isArray(cart) || cart.length === 0) {
+      throw new Error('Invalid cart data received');
+    }
+
+    let totalAmount = cart
+      .reduce((total, item) => {
+        let itemTotal =
+          parseFloat(item.unit_amount.value) * parseInt(item.quantity);
+        return total + itemTotal;
+      }, 0)
+      .toFixed(2);
+    const currencyData = cart[0].unit_amount.currency_code;
+    console.log('Attempting to get PayPal access token...');
+    const accessToken = await generateAccessToken();
+
+    console.log('Access token received:', accessToken ? 'Success' : 'Failed');
+
+    if (!accessToken) {
+      throw new Error('Failed to generate PayPal access token');
+    }
+
+    const url = `${baseUrl}/v2/checkout/orders`;
+    console.log('PayPal API URL:', url);
+
+    const payload = {
+      intent: 'CAPTURE',
+      purchase_units: [
+        {
+          amount: {
+            currency_code: currencyData,
+            value: +totalAmount,
+            breakdown: {
+              item_total: {
+                currency_code: currencyData,
+                value: +totalAmount,
+              },
             },
           },
+          items: cart.map(item => ({
+            name: item.name,
+            unit_amount: {
+              currency_code: item.unit_amount.currency_code,
+              value: item.unit_amount.value,
+            },
+            quantity: item.quantity,
+          })),
         },
-        items: cart,
+      ],
+      application_context: {
+        return_url: `${process.env.API_URL}/complete-order`,
+        cancel_url: `${process.env.HOST}/html/cart.html`,
+        user_action: 'PAY_NOW',
+        brand_name: 'Tamar Kfir Jewelry',
       },
-    ],
-    application_context: {
-      return_url: `${process.env.API_URL}/complete-order`,
-      cancel_url: `${process.env.HOST}/html/cart.html`,
-      user_action: 'PAY_NOW',
-      brand_name: 'Tamar Kfir Jewelry',
-    },
-  };
-  console.log(payload.purchase_units[0].unit_amount);
-  const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
-  return handleResponse(response);
+    };
+
+    console.log('PayPal order payload:', JSON.stringify(payload, null, 2));
+
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`,
+      },
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Error creating PayPal order:', error);
+    throw error;
+  }
 };
 
 const captureOrder = async orderID => {
@@ -1122,7 +1208,7 @@ app.post('/create-checkout-session', async (req, res) => {
         },
       ],
       success_url: `${process.env.HOST}/index.html`,
-      cancel_url: `${process.env.HOST}/html/cart.ejs`,
+      cancel_url: `${process.env.HOST}/html/cart.html`,
       metadata: {
         productId: getProductId.id.toString(),
       },
@@ -1138,11 +1224,33 @@ app.post('/create-checkout-session', async (req, res) => {
 app.post('/orders', async (req, res) => {
   try {
     const { cart } = req.body;
-    const { jsonResponse, httpStatusCode } = await createOrder(cart);
-    res.status(httpStatusCode).json(jsonResponse);
+    if (!cart || !Array.isArray(cart) || cart.length === 0) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid cart data. Cart must be a non-empty array.' });
+    }
+
+    console.log(
+      'Creating PayPal order with cart:',
+      JSON.stringify(cart, null, 2)
+    );
+
+    const result = await createOrder(cart);
+    if (!result) {
+      return res.status(500).json({
+        error: 'Failed to create order. See server logs for details.',
+      });
+    }
+
+    console.log('PayPal order creation successful:', result.httpStatusCode);
+    res.status(result.httpStatusCode).json(result.jsonResponse);
   } catch (error) {
     console.error('Failed to create order:', error);
-    res.status(500).json({ error: 'Failed to create order.' });
+    res.status(500).json({
+      error: 'Failed to create order.',
+      message: error.message,
+      details: error.stack,
+    });
   }
 });
 
