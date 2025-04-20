@@ -18,7 +18,7 @@ const API_URL = (() => {
   if (isProduction) {
     // In production, use the API endpoint on the same domain or a specified API domain
     // Option a: API on same domain but different path (default)
-    url = `${window.location.protocol}//${window.location.host}/api`;
+    url = `https://lobster-app-jipru.ondigitalocean.app/api`;
 
     // Option b: API on a separate subdomain (uncomment if needed)
     // url = `${window.location.protocol}//api.${window.location.hostname}`;
@@ -804,13 +804,13 @@ function editProduct(product) {
     <form id="editForm">
      <div class="add-product">
       <h2>Edit Product: ${product.name}</h2>
-    <div class="addproduct-itemfield">
-      <p>Product Title</p>
-      <input 
+     <div class="addproduct-itemfield">
+       <p>Product Title</p>
+       <input 
         type="text"
         name="name"
         id="name"
-          placeholder="Type here"
+        placeholder="Type here"
           value="${product.name}"
       />
     </div>
@@ -821,7 +821,7 @@ function editProduct(product) {
           type="text"
           name="usd_price"
           id="old-price"
-            placeholder="Type here"
+          placeholder="Type here"
             value="${product.usd_price}"
         />
       </div>
@@ -831,7 +831,7 @@ function editProduct(product) {
           type="number"
           name="security_margin"
           id="security-margin"
-            placeholder="5"
+          placeholder="5"
             value="${product.security_margin || 5}"
           min="0"
           max="100"
@@ -843,7 +843,7 @@ function editProduct(product) {
           type="text"
           name="ils_price"
           id="new-price"
-            placeholder="Auto-calculated"
+          placeholder="Auto-calculated"
             value="${product.ils_price}"
           readonly
         />
@@ -854,7 +854,7 @@ function editProduct(product) {
       <textarea
         name="description"
         id="description"
-          placeholder="Type here"
+        placeholder="Type here"
         rows="4"
         style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"
         >${product.description || ""}</textarea>
@@ -912,12 +912,12 @@ function editProduct(product) {
         )}" alt="${product.name}" style="max-width: 200px; margin: 10px 0;">
     </div>
       <input type="hidden" id="product-id" value="${product.id}">
-      <br>
+                  <br>
       <button type="submit" class="addproduct-btn">
       Update Product
-    </button>
+                  </button>
      </div>
-    </form>
+      </form>
   `;
 
   pageContent.insertAdjacentHTML("afterbegin", markup);
@@ -1278,126 +1278,126 @@ async function addProduct(e, data, form) {
 
           // Render the products page
           const markup = `
-            <style>
-              .product-actions {
-                display: flex;
-                gap: 8px;
-                justify-content: center;
-              }
-              .edit-btn, .delete-btn {
-                padding: 5px 10px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 14px;
-                transition: all 0.2s;
-              }
-              .edit-btn {
-                background-color: #4e54c8;
-                color: white;
-                border: none;
-              }
-              .delete-btn {
-                background-color: #e74c3c;
-                color: white;
-                border: none;
-              }
-              .edit-btn:hover {
-                background-color: #3f43a3;
-              }
-              .delete-btn:hover {
-                background-color: #c0392b;
-              }
-              .bulk-actions {
-                display: flex;
-                justify-content: space-between;
-                margin-bottom: 15px;
-                align-items: center;
-              }
-              .bulk-delete-btn {
-                background-color: #e74c3c;
-                color: white;
-                border: none;
-                padding: 8px 15px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 14px;
-                transition: all 0.2s;
-                display: none;
-              }
-              .bulk-delete-btn:hover {
-                background-color: #c0392b;
-              }
-              .bulk-delete-btn.visible {
-                display: block;
-                align-self: center;
-              }
-              .select-all-container {
-                display: flex;
-                align-items: center;
-                margin-top: 3rem;
-                gap: 8px;
-              }
-              .product-checkbox {
-                width: 18px;
-                height: 18px;
-                cursor: pointer;
-              }
-              .selected-count {
-                margin-left: 10px;
-                font-weight: bold;
-              }
-              .listproduct-format {
-                padding: 15px 0;
-                margin: 10px 0;
-              }
-              .listproduct-allproducts hr {
-                margin: 0;
-                border: none;
-                border-top: 1px solid #eaeaea;
-              }
-              .list-product {
-                margin-top: 20px;
-              }
-            </style>
-            <div class="list-product">
-              <div class="list-product-header">
-                <h1>All Products List</h1>
-                <div class="category-filter">
-                  <label for="categoryFilter">Filter by Category:</label>
-                  <select id="categoryFilter" class="category-filter-select">
-                    <option value="all">All Categories</option>
-                    <option value="necklaces">Necklaces</option>
-                    <option value="crochet-necklaces">Crochet Necklaces</option>
-                    <option value="bracelets">Bracelets</option>
-                    <option value="hoop-earrings">Hoop Earrings</option>
-                    <option value="dangle-earrings">Dangle Earrings</option>
-                    <option value="unisex">Unisex</option>
-                    <option value="shalom-club">Shalom Club</option>
-                  </select>
-                </div>
-              </div>
-              <div class="bulk-actions">
-                <div class="select-all-container">
-                  <input type="checkbox" id="select-all" class="product-checkbox">
-                  <label for="select-all">Select All</label>
-                  <span class="selected-count" id="selected-count"></span>
-                <button id="bulk-delete-btn" class="bulk-delete-btn">Delete Selected Items</button>
-                </div>
-              </div>
-              <div class="listproduct-format-main">
-                <p>Select</p>
-                <p>Products</p>
-                <p>Title</p>
-                <p>Price in $</p>
-                <p>Price in ₪</p>
-                <p>Category</p>
-                <p>Quantity</p>
-                <p>Actions</p>
-              </div>
-              <div class="listproduct-allproducts">
-                
-              </div>
-            </div>`;
+    <style>
+      .product-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+      }
+      .edit-btn, .delete-btn {
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+      }
+      .edit-btn {
+        background-color: #4e54c8;
+        color: white;
+        border: none;
+      }
+      .delete-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+      }
+      .edit-btn:hover {
+        background-color: #3f43a3;
+      }
+      .delete-btn:hover {
+        background-color: #c0392b;
+      }
+      .bulk-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        align-items: center;
+      }
+      .bulk-delete-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s;
+        display: none;
+      }
+      .bulk-delete-btn:hover {
+        background-color: #c0392b;
+      }
+      .bulk-delete-btn.visible {
+        display: block;
+        align-self: center;
+      }
+      .select-all-container {
+        display: flex;
+        align-items: center;
+        margin-top: 3rem;
+        gap: 8px;
+      }
+      .product-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+      }
+      .selected-count {
+        margin-left: 10px;
+        font-weight: bold;
+      }
+      .listproduct-format {
+        padding: 15px 0;
+        margin: 10px 0;
+      }
+      .listproduct-allproducts hr {
+        margin: 0;
+        border: none;
+        border-top: 1px solid #eaeaea;
+      }
+      .list-product {
+        margin-top: 20px;
+      }
+    </style>
+    <div class="list-product">
+      <div class="list-product-header">
+        <h1>All Products List</h1>
+        <div class="category-filter">
+          <label for="categoryFilter">Filter by Category:</label>
+          <select id="categoryFilter" class="category-filter-select">
+            <option value="all">All Categories</option>
+            <option value="necklaces">Necklaces</option>
+            <option value="crochet-necklaces">Crochet Necklaces</option>
+            <option value="bracelets">Bracelets</option>
+            <option value="hoop-earrings">Hoop Earrings</option>
+            <option value="dangle-earrings">Dangle Earrings</option>
+            <option value="unisex">Unisex</option>
+            <option value="shalom-club">Shalom Club</option>
+          </select>
+        </div>
+      </div>
+      <div class="bulk-actions">
+        <div class="select-all-container">
+          <input type="checkbox" id="select-all" class="product-checkbox">
+          <label for="select-all">Select All</label>
+          <span class="selected-count" id="selected-count"></span>
+        <button id="bulk-delete-btn" class="bulk-delete-btn">Delete Selected Items</button>
+        </div>
+      </div>
+      <div class="listproduct-format-main">
+        <p>Select</p>
+        <p>Products</p>
+        <p>Title</p>
+        <p>Price in $</p>
+        <p>Price in ₪</p>
+        <p>Category</p>
+        <p>Quantity</p>
+        <p>Actions</p>
+      </div>
+      <div class="listproduct-allproducts">
+        
+      </div>
+    </div>`;
 
           pageContent.insertAdjacentHTML("afterbegin", markup);
 
@@ -1448,19 +1448,19 @@ async function addProduct(e, data, form) {
                     item.imageLocal,
                     item.publicImage
                   )}" class="listproduct-product-icon" alt="${item.name}" />
-                  <p>${item.name}</p>
+                <p>${item.name}</p>
                   <p>$${item.usd_price}</p>
                   <p>₪${item.ils_price}</p>
-                  <p>${item.category}</p>
+                <p>${item.category}</p>
                   <p>${item.quantity || 0}</p>
-                  <div class="product-actions">
+                <div class="product-actions">
                     <button class="edit-btn" data-product-id="${
                       item.id
                     }">Edit</button>
                     <button class="delete-btn" data-product-id="${
                       item.id
                     }">Delete</button>
-                  </div>
+                </div>
                 `;
               productsContainer.appendChild(productElement);
               productsContainer.appendChild(document.createElement("hr"));
@@ -1548,15 +1548,15 @@ async function loadAddProductsPage() {
   const markup = `
     <form id="uploadForm">
      <div class="add-product">
-     <div class="addproduct-itemfield">
-       <p>Product Title</p>
-       <input 
+    <div class="addproduct-itemfield">
+      <p>Product Title</p>
+      <input 
         type="text"
         name="name"
         id="name"
         placeholder="Type here"
       />
-            </div>
+    </div>
     <div class="addproduct-price">
       <div class="addproduct-itemfield">
         <p>Price in $</p>
@@ -1566,7 +1566,7 @@ async function loadAddProductsPage() {
           id="old-price"
           placeholder="Type here"
         />
-          </div>
+      </div>
       <div class="addproduct-itemfield">
         <p>Security Margin (%)</p>
         <input
