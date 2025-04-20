@@ -532,7 +532,6 @@ export default class View {
             <a class="attrib" href="/html/about.html">About</a>
           </li>
           <li class="main-nav-tab">
-            <a class="attrib" href="/html/bambaYafa.html">Admin</a>
           </li>
           <li class="main-nav-tab contact">
             <a class="attrib" href="/html/contact-me.html">Contact Me</a>
