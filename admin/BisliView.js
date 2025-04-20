@@ -1223,84 +1223,312 @@ async function addProduct(e, data, form) {
         imageData.smallImagesLocal || imageData.smallImagesUrlLocal || [],
     };
 
-    // Use XMLHttpRequest instead of fetch - handles network issues differently
-    console.log("Using XMLHttpRequest to send product data");
+    // Ensure we show a success message and redirect to the category
+    const finalizeProductSubmit = () => {
+      // Display success message
+      window.alert("Product was added successfully! 🎉");
 
-    // Create promise-based XMLHttpRequest
-    const addProductXHR = () => {
-      return new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("POST", `${API_URL}/addproduct`, true);
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.setRequestHeader(
-          "Authorization",
-          `Bearer ${localStorage.getItem("auth-token")}`
-        );
+      // Reset form
+      form.reset();
 
-        // Set longer timeout
-        xhr.timeout = 30000; // 30 seconds
+      // Remember the category we want to filter by
+      const targetCategory = productData.category;
+      console.log("Target category for redirect:", targetCategory);
 
-        xhr.onload = function () {
-          if (this.status >= 200 && this.status < 300) {
-            try {
-              const result = JSON.parse(this.responseText);
-              resolve(result);
-            } catch (e) {
-              // Even if parsing fails, consider it successful if status is good
-              resolve({ success: true });
-            }
-          } else {
-            reject(new Error(`Server returned status ${this.status}`));
+      // Reset button state
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = "Submit";
+
+      // Modify the state directly - this will be used when products are loaded
+      state.selectedCategory = targetCategory;
+
+      // We need to bypass the auth check since we're already authenticated
+      // Create a simplified version of loadProductsPage and fetchInfo
+
+      console.log(
+        "Loading products directly with preset category:",
+        targetCategory
+      );
+
+      // Clear the current content
+      clear();
+
+      // Directly fetch products without authentication check
+      const fetchProductsDirectly = async () => {
+        try {
+          console.log("Fetching products directly");
+
+          // Use the existing auth token
+          const token = localStorage.getItem("auth-token");
+
+          // Make the request
+          const response = await fetch(`${API_URL}/allproducts`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+
+          if (!response.ok) {
+            throw new Error(`Server error: ${response.status}`);
           }
-        };
 
-        xhr.onerror = function () {
-          console.error("XHR error occurred");
-          // Check if the product might have been saved despite the error
-          if (submitBtn.innerHTML.includes("...")) {
-            // This suggests the request was in progress
-            resolve({ success: true, possibleSuccess: true });
-          } else {
-            reject(new Error("Network error occurred"));
+          // Get the data
+          const data = await response.json();
+          console.log("Products loaded successfully, rendering page");
+
+          // Render the products page
+          const markup = `
+            <style>
+              .product-actions {
+                display: flex;
+                gap: 8px;
+                justify-content: center;
+              }
+              .edit-btn, .delete-btn {
+                padding: 5px 10px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s;
+              }
+              .edit-btn {
+                background-color: #4e54c8;
+                color: white;
+                border: none;
+              }
+              .delete-btn {
+                background-color: #e74c3c;
+                color: white;
+                border: none;
+              }
+              .edit-btn:hover {
+                background-color: #3f43a3;
+              }
+              .delete-btn:hover {
+                background-color: #c0392b;
+              }
+              .bulk-actions {
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 15px;
+                align-items: center;
+              }
+              .bulk-delete-btn {
+                background-color: #e74c3c;
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s;
+                display: none;
+              }
+              .bulk-delete-btn:hover {
+                background-color: #c0392b;
+              }
+              .bulk-delete-btn.visible {
+                display: block;
+                align-self: center;
+              }
+              .select-all-container {
+                display: flex;
+                align-items: center;
+                margin-top: 3rem;
+                gap: 8px;
+              }
+              .product-checkbox {
+                width: 18px;
+                height: 18px;
+                cursor: pointer;
+              }
+              .selected-count {
+                margin-left: 10px;
+                font-weight: bold;
+              }
+              .listproduct-format {
+                padding: 15px 0;
+                margin: 10px 0;
+              }
+              .listproduct-allproducts hr {
+                margin: 0;
+                border: none;
+                border-top: 1px solid #eaeaea;
+              }
+              .list-product {
+                margin-top: 20px;
+              }
+            </style>
+            <div class="list-product">
+              <div class="list-product-header">
+                <h1>All Products List</h1>
+                <div class="category-filter">
+                  <label for="categoryFilter">Filter by Category:</label>
+                  <select id="categoryFilter" class="category-filter-select">
+                    <option value="all">All Categories</option>
+                    <option value="necklaces">Necklaces</option>
+                    <option value="crochet-necklaces">Crochet Necklaces</option>
+                    <option value="bracelets">Bracelets</option>
+                    <option value="hoop-earrings">Hoop Earrings</option>
+                    <option value="dangle-earrings">Dangle Earrings</option>
+                    <option value="unisex">Unisex</option>
+                    <option value="shalom-club">Shalom Club</option>
+                  </select>
+                </div>
+              </div>
+              <div class="bulk-actions">
+                <div class="select-all-container">
+                  <input type="checkbox" id="select-all" class="product-checkbox">
+                  <label for="select-all">Select All</label>
+                  <span class="selected-count" id="selected-count"></span>
+                <button id="bulk-delete-btn" class="bulk-delete-btn">Delete Selected Items</button>
+                </div>
+              </div>
+              <div class="listproduct-format-main">
+                <p>Select</p>
+                <p>Products</p>
+                <p>Title</p>
+                <p>Price in $</p>
+                <p>Price in ₪</p>
+                <p>Category</p>
+                <p>Quantity</p>
+                <p>Actions</p>
+              </div>
+              <div class="listproduct-allproducts">
+                
+              </div>
+            </div>`;
+
+          pageContent.insertAdjacentHTML("afterbegin", markup);
+
+          // Set category filter to the stored category
+          const categoryFilter = document.getElementById("categoryFilter");
+          if (categoryFilter) {
+            categoryFilter.value = targetCategory;
+
+            // Highlight the filter
+            categoryFilter.style.backgroundColor = "#f0f8ff";
+            categoryFilter.style.border = "2px solid #4e73df";
+            categoryFilter.style.fontWeight = "bold";
+
+            // Remove highlighting after a delay
+            setTimeout(() => {
+              categoryFilter.style.backgroundColor = "";
+              categoryFilter.style.border = "";
+              categoryFilter.style.fontWeight = "";
+            }, 2000);
           }
-        };
 
-        xhr.ontimeout = function () {
-          console.error("XHR request timed out");
-          // The server might still be processing the request
-          resolve({ success: true, possibleSuccess: true });
-        };
+          // Load products with the filtered category
+          const selectedCategory = targetCategory;
+          const filteredData =
+            selectedCategory === "all"
+              ? data
+              : data.filter((product) => product.category === selectedCategory);
 
-        // Set a visual indicator
-        submitBtn.innerHTML = "Sending...";
+          const productsContainer = document.querySelector(
+            ".listproduct-allproducts"
+          );
+          if (productsContainer) {
+            productsContainer.innerHTML = "";
 
-        // Send the data
-        xhr.send(JSON.stringify(productData));
-      });
+            // Generate HTML for each product
+            filteredData.forEach((item) => {
+              const productElement = document.createElement("div");
+              productElement.className =
+                "listproduct-format-main listproduct-format";
+              productElement.innerHTML = `
+                  <div>
+                    <input type="checkbox" class="product-checkbox" data-product-id="${
+                      item.id
+                    }">
+                  </div>
+                  <img src="${getImageUrl(
+                    item.image,
+                    item.imageLocal,
+                    item.publicImage
+                  )}" class="listproduct-product-icon" alt="${item.name}" />
+                  <p>${item.name}</p>
+                  <p>$${item.usd_price}</p>
+                  <p>₪${item.ils_price}</p>
+                  <p>${item.category}</p>
+                  <p>${item.quantity || 0}</p>
+                  <div class="product-actions">
+                    <button class="edit-btn" data-product-id="${
+                      item.id
+                    }">Edit</button>
+                    <button class="delete-btn" data-product-id="${
+                      item.id
+                    }">Delete</button>
+                  </div>
+                `;
+              productsContainer.appendChild(productElement);
+              productsContainer.appendChild(document.createElement("hr"));
+            });
+
+            console.log(
+              `Loaded ${filteredData.length} products in category: ${selectedCategory}`
+            );
+          }
+
+          // Set up event handlers for the product list
+          setupBulkActions();
+          addCategoryFilterHandler(data);
+
+          // Add event listeners for delete and edit buttons
+          document.querySelectorAll(".delete-btn").forEach((deleteBtn) => {
+            deleteBtn.addEventListener("click", async function () {
+              const productId = this.dataset.productId;
+              if (confirm("Are you sure you want to delete this product?")) {
+                try {
+                  const response = await fetch(`${API_URL}/removeproduct`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ id: productId }),
+                  });
+
+                  const result = await response.json();
+                  if (result.success) {
+                    alert("Product deleted successfully!");
+                    fetchProductsDirectly(); // Refresh the product list
+                  } else {
+                    throw new Error(
+                      result.message || "Failed to delete product"
+                    );
+                  }
+                } catch (error) {
+                  console.error("Error deleting product:", error);
+                  alert("Error deleting product: " + error.message);
+                }
+              }
+            });
+          });
+
+          // Add event listeners for edit buttons
+          document.querySelectorAll(".edit-btn").forEach((editBtn) => {
+            editBtn.addEventListener("click", function () {
+              const productId = this.dataset.productId;
+              const product = data.find((p) => p.id == productId);
+              if (product) {
+                editProduct(product);
+              }
+            });
+          });
+        } catch (error) {
+          console.error("Error loading products:", error);
+          alert("Error loading products: " + error.message);
+        }
+      };
+
+      // Execute the direct fetch
+      fetchProductsDirectly();
     };
 
-    try {
-      const result = await addProductXHR();
-      console.log("XHR result:", result);
-
-      if (result.possibleSuccess) {
-        alert(
-          "Product likely added successfully. Refreshing product list to verify."
-        );
-      } else {
-        alert("Product added successfully!");
-      }
-
-      form.reset();
-      setTimeout(() => fetchInfo(), 1000);
-    } catch (error) {
-      console.error("Error adding product:", error);
-
-      // Check server logs to see if product was added despite client error
-      alert(
-        `Error: ${error.message}. Check server logs to confirm if product was added.`
-      );
-    }
+    // Prevent the main function from continuing
+    return;
   } catch (error) {
     // Show error
     console.error("Error:", error);
