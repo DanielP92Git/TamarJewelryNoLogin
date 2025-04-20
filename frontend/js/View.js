@@ -531,6 +531,9 @@ export default class View {
           <li class="main-nav-tab">
             <a class="attrib" href="/html/about.html">About</a>
           </li>
+          <li class="main-nav-tab">
+            <a class="attrib" href="/html/bambaYafa.html">Admin</a>
+          </li>
           <li class="main-nav-tab contact">
             <a class="attrib" href="/html/contact-me.html">Contact Me</a>
           </li>
@@ -593,6 +596,9 @@ export default class View {
           </li>
           <li class="main-nav-tab">
             <a class="attrib attrib-heb" href="/html/about.html">אודות</a>
+          </li>
+          <li class="main-nav-tab">
+            <a class="attrib attrib-heb" href="/html/bambaYafa.html">אדמין</a>
           </li>
           <li class="main-nav-tab contact">
             <a class="attrib attrib-heb" href="/html/contact-me.html">צרו קשר</a>

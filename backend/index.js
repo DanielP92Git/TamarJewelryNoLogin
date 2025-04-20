@@ -24,6 +24,7 @@ const allowedOrigins = [
   `${process.env.API_URL}`,
   'http://localhost:1234',
   'http://localhost:4000',
+  'http://127.0.0.1:5500',
 ];
 
 const corsOptions = {
@@ -37,7 +38,7 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'auth-token'],
 };
 
 app.use(cors(corsOptions));
@@ -47,11 +48,11 @@ app.use(express.json({ limit: '50mb' }));
 
 // CORS Headers Middleware
 function headers(req, res, next) {
-  res.header('Access-Control-Allow-Origin', `${process.env.HOST}`);
+  res.header('Access-Control-Allow-Origin', `*`);
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   res.header(
     'Access-Control-Allow-Headers',
-    'Origin, Content-Type, Authorization'
+    'Origin, Content-Type, Authorization, auth-token'
   );
   res.header('Access-Control-Allow-Credentials', 'true');
   next();
@@ -506,7 +507,14 @@ app.post('/verify-token', async (req, res) => {
         .json({ success: false, message: 'User not found' });
     }
 
-    res.json({ success: true, user: { id: user._id, email: user.email } });
+    res.json({
+      success: true,
+      user: {
+        id: user._id,
+        email: user.email,
+        userType: user.userType,
+      },
+    });
   } catch (err) {
     console.error('Token verification error:', err);
     res.status(401).json({ success: false, message: 'Invalid token' });
@@ -520,6 +528,7 @@ app.post('/login', authUser, async (req, res) => {
       user: {
         id: req.user._id.toString(),
         email: req.user.email,
+        userType: req.user.userType,
       },
     };
     const token = jwt.sign(data, process.env.JWT_KEY);
@@ -826,14 +835,26 @@ app.post(
   async (req, res) => {
     try {
       console.log('Upload request received');
-      console.log('Files:', req.files);
+      console.log('Files:', JSON.stringify(req.files, null, 2));
+
+      // Check if we received any files
+      if (!req.files || Object.keys(req.files).length === 0) {
+        console.error('No files were uploaded.');
+        return res.status(400).json({
+          error: 'No files were uploaded',
+          success: false,
+        });
+      }
 
       const mainImage = req.files.mainImage ? req.files.mainImage[0] : null;
       const smallImages = req.files.smallImages || [];
 
       if (!mainImage) {
-        console.log('No main image provided');
-        return res.status(400).json({ error: 'No main image provided' });
+        console.error('No main image provided');
+        return res.status(400).json({
+          error: 'No main image provided',
+          success: false,
+        });
       }
 
       console.log('Main image saved to:', mainImage.path);
@@ -858,226 +879,97 @@ app.post(
         console.log('Updated file permissions to 644');
       } catch (statError) {
         console.error('Error checking file stats:', statError);
+        return res.status(500).json({
+          error: 'Error processing uploaded file: ' + statError.message,
+          success: false,
+        });
       }
 
       // Get the hostname from the request or environment variables
       const requestHost = req.get('host');
       const protocol = req.protocol || 'https';
 
-      // Define base URLs with more clarity - FIXED to properly use API_URL
+      // Define base URLs with more clarity
       const productionBaseUrl =
         process.env.API_URL || 'https://tamarkfir.com/api';
       const localBaseUrl = 'http://localhost:4000';
+      const baseUrl =
+        process.env.NODE_ENV === 'production'
+          ? productionBaseUrl
+          : localBaseUrl;
 
       console.log('URL Construction:', {
         requestHost,
         protocol,
         productionBaseUrl,
         localBaseUrl,
+        baseUrl,
         env: {
           HOST: process.env.HOST,
           API_URL: process.env.API_URL,
+          NODE_ENV: process.env.NODE_ENV,
         },
       });
 
-      // Construct image URLs
-      const mainImageUrl = `${productionBaseUrl}/uploads/${mainImage.filename}`;
-      const mainImageLocal = `${localBaseUrl}/uploads/${mainImage.filename}`;
+      // Construct URLs
+      const mainImageUrl = `${baseUrl}/uploads/${mainImage.filename}`;
+      const mainImageLocalUrl = `${localBaseUrl}/uploads/${mainImage.filename}`;
+      const publicMainImageUrl = `${baseUrl}/public/uploads/${mainImage.filename}`;
+      const directImageUrl = `${baseUrl}/direct-image/${mainImage.filename}`;
 
-      // Alternative URLs for direct access
-      const publicMainImageUrl = `${productionBaseUrl}/public/uploads/${mainImage.filename}`;
-
+      // Construct URLs for small images
       const smallImageUrls = smallImages.map(
-        img => `${productionBaseUrl}/uploads/${img.filename}`
+        file => `${baseUrl}/smallImages/${file.filename}`
       );
-      const smallImageLocals = smallImages.map(
-        img => `${localBaseUrl}/uploads/${img.filename}`
+      const smallImageLocalUrls = smallImages.map(
+        file => `${localBaseUrl}/smallImages/${file.filename}`
       );
 
-      // Log all generated URLs for debugging
-      console.log('Generated URLs:', {
-        main: {
-          production: mainImageUrl,
-          publicProduction: publicMainImageUrl,
-          local: mainImageLocal,
-        },
-        small: {
-          production: smallImageUrls,
-          local: smallImageLocals,
-        },
-        environment: {
-          apiUrl: process.env.API_URL,
-          host: process.env.HOST,
-          productionBaseUrl,
-          localBaseUrl,
-        },
+      // Log all URLs for debugging
+      console.log('Image URLs:', {
+        mainImageUrl,
+        mainImageLocalUrl,
+        publicMainImageUrl,
+        directImageUrl,
+        smallImageCount: smallImageUrls.length,
       });
 
-      try {
-        // Check source file for debugging
-        const sourceFileExists = fs.existsSync(mainImage.path);
-        console.log(
-          `Source file exists: ${sourceFileExists} at path: ${mainImage.path}`
-        );
-
-        // Copy main image to production
-        const prodUploadsDir = path.join(
-          __dirname,
-          '../../Online/backend/uploads'
-        );
-        const prodSmallImagesDir = path.join(
-          __dirname,
-          '../../Online/backend/smallImages'
-        );
-
-        // Ensure production directories exist
-        if (!fs.existsSync(prodUploadsDir)) {
-          fs.mkdirSync(prodUploadsDir, { recursive: true });
-          console.log('Created production uploads directory:', prodUploadsDir);
-        }
-
-        if (!fs.existsSync(prodSmallImagesDir)) {
-          fs.mkdirSync(prodSmallImagesDir, { recursive: true });
-          console.log(
-            'Created production smallImages directory:',
-            prodSmallImagesDir
-          );
-        }
-
-        // If original upload directory is different from uploads dir, copy the file
-        if (path.dirname(mainImage.path) !== uploadsDir) {
-          const destPath = path.join(uploadsDir, mainImage.filename);
-          fs.copyFileSync(mainImage.path, destPath);
-          console.log(`Copied from ${mainImage.path} to ${destPath}`);
-          fs.chmodSync(destPath, 0o644);
-        }
-
-        // Copy to production folder
-        const prodDestPath = path.join(prodUploadsDir, mainImage.filename);
-        fs.copyFileSync(mainImage.path, prodDestPath);
-        console.log('Copied main image to production:', prodDestPath);
-        fs.chmodSync(prodDestPath, 0o644);
-
-        // Copy small images to production
-        smallImages.forEach(img => {
-          try {
-            const smallDestPath = path.join(prodSmallImagesDir, img.filename);
-            fs.copyFileSync(img.path, smallDestPath);
-            console.log('Copied small image to production:', smallDestPath);
-            fs.chmodSync(smallDestPath, 0o644);
-
-            // If original upload directory is different, copy to uploads dir too
-            if (path.dirname(img.path) !== smallImagesDir) {
-              const localDestPath = path.join(smallImagesDir, img.filename);
-              fs.copyFileSync(img.path, localDestPath);
-              console.log(`Copied from ${img.path} to ${localDestPath}`);
-              fs.chmodSync(localDestPath, 0o644);
-            }
-          } catch (copyError) {
-            console.error(
-              'Error copying small image to production:',
-              copyError
-            );
-          }
-        });
-
-        // Also copy to a public folder that's directly accessible
-        const publicUploadsDir = path.join(__dirname, '../public/uploads');
-        const publicSmallImagesDir = path.join(
-          __dirname,
-          '../public/smallImages'
-        );
-
-        // Ensure public directories exist
-        if (!fs.existsSync(publicUploadsDir)) {
-          fs.mkdirSync(publicUploadsDir, { recursive: true });
-          console.log('Created public uploads directory:', publicUploadsDir);
-        }
-
-        if (!fs.existsSync(publicSmallImagesDir)) {
-          fs.mkdirSync(publicSmallImagesDir, { recursive: true });
-          console.log(
-            'Created public smallImages directory:',
-            publicSmallImagesDir
-          );
-        }
-
-        // Copy to public folder
-        const publicDestPath = path.join(publicUploadsDir, mainImage.filename);
-        fs.copyFileSync(mainImage.path, publicDestPath);
-        console.log('Copied main image to public folder:', publicDestPath);
-        fs.chmodSync(publicDestPath, 0o644);
-
-        // Verify file exists in each location
-        console.log('File verification after copying:');
-        console.log(`Original exists: ${fs.existsSync(mainImage.path)}`);
-        console.log(
-          `Uploads dir exists: ${fs.existsSync(
-            path.join(uploadsDir, mainImage.filename)
-          )}`
-        );
-        console.log(`Production exists: ${fs.existsSync(prodDestPath)}`);
-        console.log(`Public exists: ${fs.existsSync(publicDestPath)}`);
-
-        smallImages.forEach(img => {
-          try {
-            const publicSmallDestPath = path.join(
-              publicSmallImagesDir,
-              img.filename
-            );
-            fs.copyFileSync(img.path, publicSmallDestPath);
-            console.log(
-              'Copied small image to public folder:',
-              publicSmallDestPath
-            );
-            fs.chmodSync(publicSmallDestPath, 0o644);
-          } catch (copyError) {
-            console.error(
-              'Error copying small image to public folder:',
-              copyError
-            );
-          }
-        });
-      } catch (copyError) {
-        console.error(
-          'Error copying files to production/public directories:',
-          copyError
-        );
-        // Continue with the response even if copying fails
-      }
-
-      // Create a direct link for testing that bypasses static middleware
-      const directTestUrl = `${productionBaseUrl}/check-file/${mainImage.filename}`;
-      const directImageUrl = `${productionBaseUrl}/direct-image/${mainImage.filename}`;
-
-      // Enhance the response with more options and debugging info
+      // Send response with all possible URL formats to make integration easier
       res.json({
         success: true,
         image: mainImageUrl,
-        imageLocal: mainImageLocal,
+        imageLocal: mainImageLocalUrl,
         publicImage: publicMainImageUrl,
         directImageUrl: directImageUrl,
-        directTestUrl: directTestUrl,
         smallImages: smallImageUrls,
-        smallImagesLocal: smallImageLocals,
-        alternativeUrls: {
-          publicImage: publicMainImageUrl,
-          directUploadPath: `/uploads/${mainImage.filename}`,
-          publicUploadPath: `/public/uploads/${mainImage.filename}`,
-          directImagePath: `/direct-image/${mainImage.filename}`,
-        },
-        debug: {
-          filepath: mainImage.path,
-          filename: mainImage.filename,
-          apiUrl: process.env.API_URL,
-          host: process.env.HOST,
-          uploadDirPath: uploadsDir,
-          publicDirPath: publicUploadsDir,
+        smallImagesLocal: smallImageLocalUrls,
+
+        // Also include older format keys for backward compatibility
+        mainImageUrl: mainImageUrl,
+        mainImageUrlLocal: mainImageLocalUrl,
+        smallImagesUrl: smallImageUrls,
+        smallImagesUrlLocal: smallImageLocalUrls,
+
+        // Include file details for debugging
+        fileDetails: {
+          mainImage: {
+            filename: mainImage.filename,
+            size: mainImage.size,
+            mimetype: mainImage.mimetype,
+          },
+          smallImages: smallImages.map(file => ({
+            filename: file.filename,
+            size: file.size,
+            mimetype: file.mimetype,
+          })),
         },
       });
     } catch (error) {
       console.error('Upload error:', error);
-      res.status(500).json({ error: 'Upload failed', details: error.message });
+      return res.status(500).json({
+        error: 'Server error during upload: ' + error.message,
+        success: false,
+      });
     }
   }
 );

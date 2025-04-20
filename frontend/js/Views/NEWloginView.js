@@ -1,56 +1,56 @@
-import View from "../View.js";
-require("dotenv").config();
+import View from '../View.js';
+require('dotenv').config();
 
 class LoginView extends View {
-  _signupHere = document.querySelector(".signup-here");
-  _loginHere = document.querySelector(".login-here");
+  _signupHere = document.querySelector('.signup-here');
+  _loginHere = document.querySelector('.login-here');
   addLoginViewHandler(handler) {
-    window.addEventListener("load", handler);
+    window.addEventListener('load', handler);
   }
 
   generateSignup() {
-    const loginBtn = document.querySelector(".loginsignup-login");
-    const signupBtn = document.querySelector(".loginsignup-signup");
+    const loginBtn = document.querySelector('.loginsignup-login');
+    const signupBtn = document.querySelector('.loginsignup-signup');
     // const modeSwitch = document.querySelector(".switch-mode");
-    loginBtn.classList.toggle("hide");
-    signupBtn.classList.toggle("hide");
+    loginBtn.classList.toggle('hide');
+    signupBtn.classList.toggle('hide');
 
-    const loginTitle = document.querySelector(".login-title");
-    loginTitle.textContent = "Signup";
+    const loginTitle = document.querySelector('.login-title');
+    loginTitle.textContent = 'Signup';
 
     const markup = `
     <input name="username" type="text" placeholder="Your Name" id="username-input"/>
     `;
 
-    const logFields = document.querySelector(".loginsignup-fields");
-    logFields.insertAdjacentHTML("afterbegin", markup);
+    const logFields = document.querySelector('.loginsignup-fields');
+    logFields.insertAdjacentHTML('afterbegin', markup);
   }
 
   generateLogin() {
-    const loginBtn = document.querySelector(".loginsignup-login");
-    const signupBtn = document.querySelector(".loginsignup-signup");
-    loginBtn.classList.toggle("hide");
-    signupBtn.classList.toggle("hide");
-    const logFields = document.querySelector(".loginsignup-fields");
-    logFields.innerHTML = "";
-    const loginTitle = document.querySelector(".login-title");
-    loginTitle.textContent = "Login";
+    const loginBtn = document.querySelector('.loginsignup-login');
+    const signupBtn = document.querySelector('.loginsignup-signup');
+    loginBtn.classList.toggle('hide');
+    signupBtn.classList.toggle('hide');
+    const logFields = document.querySelector('.loginsignup-fields');
+    logFields.innerHTML = '';
+    const loginTitle = document.querySelector('.login-title');
+    loginTitle.textContent = 'Login';
     const markup = `<input name="email" type="email" placeholder="Email Address" />
     <input name="password" type="password" placeholder="Password" />`;
-    logFields.insertAdjacentHTML("afterbegin", markup);
+    logFields.insertAdjacentHTML('afterbegin', markup);
   }
 
   changeMode = function () {
     const modeCheck =
-      document.querySelector(".login-title").textContent == "Login";
+      document.querySelector('.login-title').textContent == 'Login';
 
     const signupFn = this._signupHere.addEventListener(
-      "click",
+      'click',
       this.generateSignup
     );
 
     const loginFn = this._loginHere.addEventListener(
-      "click",
+      'click',
       this.generateLogin
     );
 
@@ -77,12 +77,12 @@ class LoginView extends View {
           const serverUrl = `${process.env.API_URL}`;
 
           const response = await fetch(`${serverUrl}/login`, {
-            method: "POST",
+            method: 'POST',
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
             },
             body: JSON.stringify(userFormData),
-            credentials: "include",
+            credentials: 'include',
           });
 
           const data = await response.json();
@@ -90,23 +90,23 @@ class LoginView extends View {
             throw new Error(`HTTP error! Status: ${response.status}`);
           }
           if (data.success) {
-            localStorage.setItem("auth-token", data.token);
-            window.location.assign(`/html/bambaYafa.html`)
-          //   const resp = await fetch(`${process.env.API_URL}/admin`, {
-          //     method: 'GET',
-          //     headers: {
-          //       "Content-Type": "application/json",
-          //     }
-          //   }
-          // )
-          // const respData = await resp.text()
-          // console.log(respData);
+            localStorage.setItem('auth-token', data.token);
+            window.location.assign(`/html/admin-redirect.html`);
+            //   const resp = await fetch(`${process.env.API_URL}/admin`, {
+            //     method: 'GET',
+            //     headers: {
+            //       "Content-Type": "application/json",
+            //     }
+            //   }
+            // )
+            // const respData = await resp.text()
+            // console.log(respData);
           }
-            // const userAdminCheck = data.adminCheck == "admin" 
-            // if (userAdminCheck) {}
+          // const userAdminCheck = data.adminCheck == "admin"
+          // if (userAdminCheck) {}
         } catch (error) {
           console.error(
-            "⛔An error occurred during login. Please try again:",
+            '⛔An error occurred during login. Please try again:',
             error
           );
         }
@@ -127,9 +127,9 @@ class LoginView extends View {
         try {
           const serverUrl = `${process.env.API_URL}`;
           const response = await fetch(`${serverUrl}/signup`, {
-            method: "POST",
+            method: 'POST',
             headers: {
-              "Content-Type": "application/json",
+              'Content-Type': 'application/json',
             },
             body: JSON.stringify(formData),
             // credentials: "include",
@@ -138,38 +138,38 @@ class LoginView extends View {
           const data = await response.json();
 
           if (data.success) {
-            localStorage.setItem("auth-token", data.token);
+            localStorage.setItem('auth-token', data.token);
             alert(data.message);
-            window.location.replace("../index.html");
+            window.location.replace('../index.html');
           } else {
             console.error(data.errors);
           }
         } catch (err) {
           console.error();
           alert(
-            "An error occurred during signup. Please try again.",
-            "Signup Error:",
+            'An error occurred during signup. Please try again.',
+            'Signup Error:',
             err
           );
         }
       };
 
       const modeCheck =
-        document.querySelector(".login-title").textContent == "Login";
+        document.querySelector('.login-title').textContent == 'Login';
       modeCheck ? login(event, formData) : signup(data);
     } catch (err) {
-      console.error("Login error:", err);
+      console.error('Login error:', err);
     }
   };
 
   continueLogin() {
-    const continueBtn = document.querySelector(".continue-button");
-    continueBtn.addEventListener("click", (event) => {
-      const userEmail = document.getElementById("email-input").value;
-      const userPassword = document.getElementById("password-input").value;
+    const continueBtn = document.querySelector('.continue-button');
+    continueBtn.addEventListener('click', event => {
+      const userEmail = document.getElementById('email-input').value;
+      const userPassword = document.getElementById('password-input').value;
 
-      if (userEmail === "" || userPassword === "") {
-        alert("Please enter a valid email or password");
+      if (userEmail === '' || userPassword === '') {
+        alert('Please enter a valid email or password');
         return;
       }
 
@@ -177,22 +177,22 @@ class LoginView extends View {
         email: userEmail,
         password: userPassword,
       };
-      if (userEmail == "" || userPassword == "") {
-        alert("Please enter a valid email or password");
+      if (userEmail == '' || userPassword == '') {
+        alert('Please enter a valid email or password');
       }
       this.loginHandler(event, data);
     });
   }
 
   continueSignup() {
-    const continueBtn = document.querySelector(".continue-button");
-    continueBtn.addEventListener("click", (e) => {
-      const userUsername = document.getElementById("username-input").value;
-      const userEmail = document.getElementById("email-input").value;
-      const userPassword = document.getElementById("password-input").value;
+    const continueBtn = document.querySelector('.continue-button');
+    continueBtn.addEventListener('click', e => {
+      const userUsername = document.getElementById('username-input').value;
+      const userEmail = document.getElementById('email-input').value;
+      const userPassword = document.getElementById('password-input').value;
 
-      if (userUsername === "" || userEmail === "" || userPassword === "") {
-        alert("Please fill out all fields");
+      if (userUsername === '' || userEmail === '' || userPassword === '') {
+        alert('Please fill out all fields');
         return;
       }
 
@@ -208,7 +208,7 @@ class LoginView extends View {
 
   continueHandler = function () {
     const modeCheck =
-      document.querySelector(".login-title").textContent == "Login";
+      document.querySelector('.login-title').textContent == 'Login';
 
     modeCheck ? this.continueLogin() : this.continueSignup();
   };

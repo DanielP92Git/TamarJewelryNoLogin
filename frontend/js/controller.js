@@ -9,7 +9,7 @@ import ContactMeView from './Views/contactMeView.js';
 import categoriesView from './Views/categoriesView.js';
 import CartView from './Views/cartView.js';
 import LoginView from './Views/NEWloginView.js';
-import BisliView from './Views/BisliView.js';
+import BisliView from '../../admin/BisliView.js';
 
 //----------------------------------------------------
 
@@ -176,7 +176,7 @@ const controlDeleteAll = async function () {
 };
 
 const controlBambaPage = function () {
-  // BisliView.pageAuth();
+  // BisliView now has these methods as part of the exported object
   BisliView.modeHandler();
 };
 
