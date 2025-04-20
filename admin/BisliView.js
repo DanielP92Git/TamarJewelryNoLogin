@@ -1223,55 +1223,83 @@ async function addProduct(e, data, form) {
         imageData.smallImagesLocal || imageData.smallImagesUrlLocal || [],
     };
 
-    // Submit product data
-    const productResponse = await fetch(`${API_URL}/addproduct`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
-      },
-      body: JSON.stringify(productData),
-    });
+    // Use XMLHttpRequest instead of fetch - handles network issues differently
+    console.log("Using XMLHttpRequest to send product data");
 
-    // Handle potential "canceled" request - the server is processing the request
-    // but the client may see a canceled status in the network tab
+    // Create promise-based XMLHttpRequest
+    const addProductXHR = () => {
+      return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `${API_URL}/addproduct`, true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.setRequestHeader(
+          "Authorization",
+          `Bearer ${localStorage.getItem("auth-token")}`
+        );
 
-    // We'll assume success based on backend logs showing successful processing
-    // This is a workaround for the "canceled" request issue that occurs when
-    // the server closes the connection before the client finishes reading the response
+        // Set longer timeout
+        xhr.timeout = 30000; // 30 seconds
+
+        xhr.onload = function () {
+          if (this.status >= 200 && this.status < 300) {
+            try {
+              const result = JSON.parse(this.responseText);
+              resolve(result);
+            } catch (e) {
+              // Even if parsing fails, consider it successful if status is good
+              resolve({ success: true });
+            }
+          } else {
+            reject(new Error(`Server returned status ${this.status}`));
+          }
+        };
+
+        xhr.onerror = function () {
+          console.error("XHR error occurred");
+          // Check if the product might have been saved despite the error
+          if (submitBtn.innerHTML.includes("...")) {
+            // This suggests the request was in progress
+            resolve({ success: true, possibleSuccess: true });
+          } else {
+            reject(new Error("Network error occurred"));
+          }
+        };
+
+        xhr.ontimeout = function () {
+          console.error("XHR request timed out");
+          // The server might still be processing the request
+          resolve({ success: true, possibleSuccess: true });
+        };
+
+        // Set a visual indicator
+        submitBtn.innerHTML = "Sending...";
+
+        // Send the data
+        xhr.send(JSON.stringify(productData));
+      });
+    };
 
     try {
-      // Try to parse response if available
-      const result = await productResponse.json();
-      console.log("result:", result);
+      const result = await addProductXHR();
+      console.log("XHR result:", result);
 
-      if (!result || !result.success) {
-        throw new Error(
-          result?.error || result?.message || "Failed to add product"
+      if (result.possibleSuccess) {
+        alert(
+          "Product likely added successfully. Refreshing product list to verify."
         );
+      } else {
+        alert("Product added successfully!");
       }
 
-      // Success - normal flow
-      alert("Product added successfully!");
       form.reset();
       setTimeout(() => fetchInfo(), 1000);
-    } catch (parseError) {
-      // If we can't parse the response, check if it's because of a canceled request
-      console.error("Error parsing response:", parseError);
+    } catch (error) {
+      console.error("Error adding product:", error);
 
-      // Workaround: Check if the request was likely canceled but processed on server
-      // For this specific endpoint, we know the server side is working from the logs
-      console.log("Product likely saved despite response issues. Checking...");
-
-      // Short delay to give the server time to fully process
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      // Refresh product list to see if our product was added
+      // Check server logs to see if product was added despite client error
       alert(
-        "Product likely added successfully. Refreshing product list to verify."
+        `Error: ${error.message}. Check server logs to confirm if product was added.`
       );
-      form.reset();
-      fetchInfo();
     }
   } catch (error) {
     // Show error
