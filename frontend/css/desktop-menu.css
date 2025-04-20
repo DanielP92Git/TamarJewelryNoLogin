@@ -56,6 +56,18 @@ a {
   text-transform: uppercase;
 }
 
+/* Hebrew navigation links - larger font size */
+.attrib.attrib-heb {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.category-item .attrib.attrib-heb {
+  font-size: 1.3rem;
+  font-family: 'Amatic SC', sans-serif;
+  font-weight: bold;
+}
+
 .attrib:hover {
   color: rgb(152, 152, 152);
 }
@@ -73,12 +85,6 @@ a {
   font-size: 1.1rem;
   font-family: Raleway, sans-serif;
   text-decoration: none;
-}
-
-/* Hebrew text styles */
-.attrib-heb {
-  font-size: 1.8rem;
-  font-family: 'Amatic SC', sans-serif;
 }
 
 /* Cart container */
