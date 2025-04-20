@@ -171,7 +171,7 @@
   justify-content: center; /* Center the buttons */
   align-items: center;
   width: 100%;
-  border-top: 1px solid #eee;
+  border-top: 1px transparent;
   padding: 1.5rem; /* Increase padding slightly */
   margin-top: auto; /* Push to bottom */
   margin-bottom: 2rem;
@@ -181,7 +181,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border: 1px solid #5c6ac4; /* Accent color border */
   background-color: #fff; /* White background */
   border-radius: 5px; /* Keep rounded corners */
   font-size: 0.9rem;
@@ -362,10 +361,5 @@ body.menu-active .icons-container .menubars-svg {
     display: flex;
     align-items: center;
     height: 3rem;
-  }
-
-  /* Enhanced styles for language buttons in mobile view */
-  .languages-container {
-    padding: 1.5rem 1rem;
   }
 }
