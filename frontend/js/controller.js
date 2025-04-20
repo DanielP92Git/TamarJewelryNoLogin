@@ -8,7 +8,7 @@ import AboutView from './Views/aboutView.js';
 import ContactMeView from './Views/contactMeView.js';
 import categoriesView from './Views/categoriesView.js';
 import CartView from './Views/cartView.js';
-import LoginView from './Views/NEWloginView.js';
+// User login functionality has been removed
 
 //----------------------------------------------------
 
@@ -131,19 +131,6 @@ const controlCartPage = async function (lng) {
   }
 };
 
-const controlLoginPage = async function () {
-  await model.handleLoadStorage();
-
-  LoginView.svgHandler();
-  LoginView.changeMode();
-  LoginView.continueHandler();
-  LoginView.addRevealHandler();
-  LoginView.addMobileHandler();
-  LoginView.setLanguage(lng);
-  LoginView.handleLanguage();
-  LoginView.persistCartNumber(await model.checkCartNumber());
-};
-
 const controlDeleteFromCart = async function (id) {
   // 1) Remove from database
   await model.removeFromUserCart(id);
@@ -217,9 +204,6 @@ const init = async function () {
      * ! User clicks delete item:
      **/
     CartView._addHandlerDelete(controlDeleteFromCart);
-  }
-  if (document.body.id.includes('login')) {
-    LoginView.addLoginViewHandler(controlLoginPage);
   }
   if (document.body.id.includes('bambot')) {
     BisliView.addBambaViewHandler(controlBambaPage);

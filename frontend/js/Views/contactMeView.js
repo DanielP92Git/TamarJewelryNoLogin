@@ -20,7 +20,7 @@ class ContactMeView extends View {
     const params = {
       name: document.getElementById('name').value,
       lastname: document.getElementById('lastname').value,
-      email: document.getElementById('email').value,
+      email: document.getElementById('contact-email').value,
       message: document.getElementById('message').value,
     };
 
@@ -30,7 +30,7 @@ class ContactMeView extends View {
       });
       (document.getElementById('name').value = ''),
         (document.getElementById('lastname').value = ''),
-        (document.getElementById('email').value = ''),
+        (document.getElementById('contact-email').value = ''),
         (document.getElementById('message').value = ''),
         alert('Message Sent Successfully!');
     } catch (err) {
@@ -84,7 +84,7 @@ class ContactMeView extends View {
           autofocus
         />
         <input type="text" id="lastname" placeholder="Last Name*" required />
-        <input type="email" id="email" placeholder="Email Address*" required />
+        <input type="email" id="contact-email" placeholder="Email Address*" required />
         <textarea
           type="text"
           id="message"
@@ -104,7 +104,7 @@ class ContactMeView extends View {
           autofocus
         />
         <input type="text" id="lastname" placeholder="שם משפחה*" required />
-        <input type="email" id="email" placeholder="כתובת דואר אלקטרוני*" required />
+        <input type="email" id="contact-email" placeholder="כתובת דואר אלקטרוני*" required />
         <textarea
           type="text"
           id="message"
