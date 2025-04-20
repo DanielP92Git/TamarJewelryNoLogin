@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <style>
+    circle {
+      fill: #f8d9c9;
+      stroke: #a16e83;
+      stroke-width: 3;
+    }
+    path {
+      fill: none;
+      stroke: #a16e83;
+      stroke-width: 3;
+      stroke-linecap: round;
+    }
+  </style>
+  <circle cx="50" cy="50" r="40" />
+  <path d="M 35,30 C 40,50 40,70 50,75 C 60,70 60,50 65,30" />
+  <path d="M 40,25 L 60,25" />
+</svg> 
