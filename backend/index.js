@@ -22,6 +22,7 @@ const app = express();
 const allowedOrigins = [
   `${process.env.HOST}`,
   `${process.env.API_URL}`,
+  `${process.env.ADMIN_URL}`,
   'http://127.0.0.1:5500',
 ];
 
@@ -35,9 +36,9 @@ const corsOptions = {
     } else {
       console.warn('Origin not allowed by CORS:', origin);
       // For development, allow all origins
-      callback(null, true);
+      // callback(null, true);
       // In production, use this instead:
-      // callback(new Error('Not allowed by CORS'));
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
