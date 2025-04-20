@@ -39,34 +39,50 @@ const API_URL = (() => {
 // Set a longer default timeout for all fetch operations
 const DEFAULT_TIMEOUT = 15000; // 15 seconds
 
-// Add function to check server availability
-async function checkServerAvailability() {
+// CRITICAL FIX: Detect if we're on an admin page or if this script was imported incorrectly
+const SCRIPT_CONTEXT = (function () {
   try {
-    console.log("Checking server availability at", API_URL);
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    // 1. Check if this script is running in its proper context (admin page)
+    const isDirectlyLoaded = (function () {
+      const scripts = document.getElementsByTagName("script");
+      for (let i = 0; i < scripts.length; i++) {
+        if (scripts[i].src && scripts[i].src.includes("BisliView.js")) {
+          // This script is directly loaded via a script tag
+          console.log("BisliView.js loaded via script tag:", scripts[i].src);
+          return true;
+        }
+      }
+      return false;
+    })();
 
-    // Try to access an endpoint we know should exist
-    // Instead of /ping which doesn't exist, try /allproducts or another endpoint that should exist
-    const response = await fetch(`${API_URL}/allproducts`, {
-      method: "GET",
-      signal: controller.signal,
+    // 2. Check current page context
+    const isAdminPage =
+      window.location.pathname.includes("/admin") ||
+      document.getElementById("bambot") !== null ||
+      document.title === "Dashboard";
+
+    console.log("Script context detection:", {
+      isDirectlyLoaded,
+      isAdminPage,
+      location: window.location.pathname,
+      title: document.title,
+      hasBambotId: document.getElementById("bambot") !== null,
     });
 
-    clearTimeout(timeoutId);
-
-    if (response.ok) {
-      console.log("Server is available at", API_URL);
-      return true;
-    } else {
-      console.warn(`Server responded with non-OK status: ${response.status}`);
-      return false;
-    }
-  } catch (error) {
-    console.error("Server availability check failed:", error);
-    return false;
+    // Only initialize admin features if we're on an admin page
+    return {
+      shouldInitialize: isAdminPage && isDirectlyLoaded,
+      isAdminPage: isAdminPage,
+    };
+  } catch (e) {
+    console.error("Error detecting script context:", e);
+    // Default to safe mode - don't initialize
+    return {
+      shouldInitialize: false,
+      isAdminPage: false,
+    };
   }
-}
+})();
 
 // State management
 const state = {
@@ -146,11 +162,179 @@ function getImageUrl(image, imageLocal, publicImage) {
   return image || publicImage || "/images/no-image.png";
 }
 
-// Auth Functions
+// First, add a helper function to determine if we're on the admin page
+function isAdminPage() {
+  // Get current URL path
+  const path = window.location.pathname;
+  // Check if document has the admin marker ID
+  const hasAdminMarker = document.getElementById("bambot") !== null;
+  // Check title
+  const hasAdminTitle = document.title === "Dashboard";
+
+  // Check if we're loaded from an admin script
+  const scriptSrc = getCurrentScriptPath();
+  const loadedFromAdminScript =
+    scriptSrc &&
+    (scriptSrc.includes("/admin/") || scriptSrc.includes("BisliView.js"));
+
+  // More comprehensive path check
+  const isAdminPath =
+    path.includes("/admin") ||
+    path.endsWith("/BisliView.js") ||
+    path.endsWith("/bambaYafa.html");
+
+  const result =
+    isAdminPath || hasAdminMarker || hasAdminTitle || loadedFromAdminScript;
+
+  console.log("Page detection:", {
+    path: path,
+    title: document.title,
+    hasAdminMarker: hasAdminMarker,
+    hasAdminTitle: hasAdminTitle,
+    isAdminPath: isAdminPath,
+    loadedFromAdminScript: loadedFromAdminScript,
+    scriptSrc: scriptSrc,
+    finalResult: result,
+  });
+
+  return result;
+}
+
+// Helper function to get the current script path
+function getCurrentScriptPath() {
+  // Try to find the script tag that loaded this file
+  const scripts = document.getElementsByTagName("script");
+  for (let i = 0; i < scripts.length; i++) {
+    const src = scripts[i].src;
+    if (src && (src.includes("BisliView.js") || src.includes("/admin/"))) {
+      return src;
+    }
+  }
+  return null;
+}
+
+// Make sure the BisliView script initializes correctly based on page
+(function checkCorrectUsage() {
+  // Get current page URL
+  const currentUrl = window.location.href;
+
+  // If this is a frontend page and we're using BisliView, warn about it
+  if (currentUrl.includes("/frontend/") && !currentUrl.includes("/admin/")) {
+    console.warn(
+      "⚠️ BisliView.js should only be included on admin pages, not frontend pages!"
+    );
+    // Don't do further initialization for frontend pages
+    // This prevents the login page from showing on frontend
+    return;
+  }
+
+  // If we're on a page with frontend/html in the URL, definitely not an admin page
+  if (currentUrl.includes("/frontend/html/")) {
+    console.warn(
+      "🛑 BisliView detected on frontend HTML page. Will not initialize admin features."
+    );
+    return;
+  }
+
+  // Otherwise, proceed with normal initialization
+  setTimeout(init, 0);
+})();
+
+// Update the init function for more verbose logging
+function init() {
+  console.log("BisliView initialization started");
+
+  // Only check authentication on admin pages
+  if (isAdminPage()) {
+    console.log("✅ On admin page, proceeding with authentication check");
+    // Check server availability first
+    tryServerEndpoints().then((available) => {
+      if (!available) {
+        console.warn("Server appears to be unavailable");
+        const banner = document.createElement("div");
+        banner.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          background-color: #f44336;
+          color: white;
+          padding: 10px;
+          text-align: center;
+          z-index: 10000;
+        `;
+        banner.innerHTML = `
+          Warning: The API server at ${API_URL} appears to be unavailable. 
+          Please make sure the backend server is running on port 4000.
+          <button id="retry-server-check" style="margin-left: 10px; padding: 5px 10px; background: white; border: none; border-radius: 3px; cursor: pointer;">Retry</button>
+          <span id="server-check-status"></span>
+          <button id="run-diagnostics" style="margin-left: 10px; padding: 5px 10px; background: #333; color: white; border: none; border-radius: 3px; cursor: pointer;">Run Diagnostics</button>
+        `;
+        document.body.appendChild(banner);
+
+        // Add retry button functionality
+        document
+          .getElementById("retry-server-check")
+          .addEventListener("click", async () => {
+            const statusSpan = document.getElementById("server-check-status");
+            statusSpan.textContent = "Checking...";
+
+            const available = await tryServerEndpoints();
+            if (available) {
+              statusSpan.textContent = "Server is now available!";
+              setTimeout(() => banner.remove(), 2000);
+            } else {
+              statusSpan.textContent = `Server at ${API_URL} is still unavailable. Make sure your Node.js backend is running.`;
+            }
+          });
+
+        // Add diagnostics button functionality
+        document
+          .getElementById("run-diagnostics")
+          .addEventListener("click", () => {
+            console.clear();
+            window.diagnoseBisliServer();
+            alert(
+              "Diagnostics are running in the browser console. Press F12 to view results."
+            );
+          });
+      }
+
+      // Continue with authentication for admin pages
+      checkAuth();
+
+      // Add event listeners for admin functionality
+      if (addProductsBtn) {
+        addProductsBtn.addEventListener("click", loadAddProductsPage);
+      }
+
+      if (productsListBtn) {
+        productsListBtn.addEventListener("click", fetchInfo);
+      }
+    });
+  } else {
+    console.log(
+      "⚠️ NOT on admin page, skipping authentication. URL: " +
+        window.location.href
+    );
+    // If not on admin page, don't check auth or show login
+    // Just initialize any necessary frontend functionality here
+  }
+}
+
+// Update the checkAuth function with more debugging
 async function checkAuth() {
+  // Only check auth if we're on an admin page
+  if (!isAdminPage()) {
+    console.log("⚠️ checkAuth called on non-admin page, skipping auth check");
+    return true;
+  }
+
   const token = localStorage.getItem("auth-token");
+  console.log("Auth token exists:", token !== null);
+
   if (!token) {
-    console.log("No token found, showing login page");
+    console.log("No token found, showing login page on admin dashboard");
     showLoginPage();
     return false;
   }
@@ -220,6 +404,14 @@ async function checkAuth() {
 }
 
 function showLoginPage(errorMessage) {
+  // Double-check we're on an admin page before showing login
+  if (!isAdminPage()) {
+    console.warn(
+      "⚠️ Attempted to show login page on non-admin page. Ignoring request."
+    );
+    return;
+  }
+
   // Create an overlay that covers the entire page
   const overlay = document.createElement("div");
   overlay.id = "auth-overlay";
@@ -1724,106 +1916,85 @@ function calculateILSPrice() {
   document.getElementById("new-price").value = Math.round(ilsPrice);
 }
 
-// Initialize app
-function init() {
-  // Check server availability first
-  tryServerEndpoints().then((available) => {
-    if (!available) {
-      console.warn("Server appears to be unavailable");
-      const banner = document.createElement("div");
-      banner.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        background-color: #f44336;
-        color: white;
-        padding: 10px;
-        text-align: center;
-        z-index: 10000;
-      `;
-      banner.innerHTML = `
-        Warning: The API server at ${API_URL} appears to be unavailable. 
-        Please make sure the backend server is running on port 4000.
-        <button id="retry-server-check" style="margin-left: 10px; padding: 5px 10px; background: white; border: none; border-radius: 3px; cursor: pointer;">Retry</button>
-        <span id="server-check-status"></span>
-        <button id="run-diagnostics" style="margin-left: 10px; padding: 5px 10px; background: #333; color: white; border: none; border-radius: 3px; cursor: pointer;">Run Diagnostics</button>
-      `;
-      document.body.appendChild(banner);
-
-      // Add retry button functionality
-      document
-        .getElementById("retry-server-check")
-        .addEventListener("click", async () => {
-          const statusSpan = document.getElementById("server-check-status");
-          statusSpan.textContent = "Checking...";
-
-          const available = await tryServerEndpoints();
-          if (available) {
-            statusSpan.textContent = "Server is now available!";
-            setTimeout(() => banner.remove(), 2000);
-          } else {
-            statusSpan.textContent = `Server at ${API_URL} is still unavailable. Make sure your Node.js backend is running.`;
-          }
-        });
-
-      // Add diagnostics button functionality
-      document
-        .getElementById("run-diagnostics")
-        .addEventListener("click", () => {
-          console.clear();
-          window.diagnoseBisliServer();
-          alert(
-            "Diagnostics are running in the browser console. Press F12 to view results."
-          );
-        });
-    }
-
-    // Continue with normal initialization
-    checkAuth();
-
-    // Add event listeners
-    if (addProductsBtn) {
-      addProductsBtn.addEventListener("click", loadAddProductsPage);
-    }
-
-    if (productsListBtn) {
-      productsListBtn.addEventListener("click", fetchInfo);
-    }
-  });
-}
-
-// Run initialization
-init();
-
 // Create a single object with all exported functions
 const BisliView = {
-  loadAddProductsPage,
-  fetchInfo,
-  calculateILSPrice,
-  getImageUrl,
-  checkAuth,
-  showLoginPage,
-  clear,
-  addProduct,
-  addProductHandler,
-  loadProductsPage,
-  // Add other public functions your controller needs
+  loadAddProductsPage: SCRIPT_CONTEXT.isAdminPage
+    ? loadAddProductsPage
+    : function () {
+        console.warn("Admin function called from non-admin context");
+      },
+  fetchInfo: SCRIPT_CONTEXT.isAdminPage
+    ? fetchInfo
+    : function () {
+        console.warn("Admin function called from non-admin context");
+      },
+  calculateILSPrice: calculateILSPrice, // This is safe to export always
+  getImageUrl: getImageUrl, // This is safe to export always
+  checkAuth: SCRIPT_CONTEXT.isAdminPage
+    ? checkAuth
+    : function () {
+        console.warn("Auth check called from non-admin context");
+        return true; // Always return true in non-admin context
+      },
+  showLoginPage: SCRIPT_CONTEXT.isAdminPage
+    ? showLoginPage
+    : function () {
+        console.warn("Login page requested from non-admin context");
+      },
+  clear: SCRIPT_CONTEXT.isAdminPage
+    ? clear
+    : function () {
+        console.warn("Clear function called from non-admin context");
+      },
+  addProduct: SCRIPT_CONTEXT.isAdminPage
+    ? addProduct
+    : function () {
+        console.warn("Add product called from non-admin context");
+      },
+  addProductHandler: SCRIPT_CONTEXT.isAdminPage
+    ? addProductHandler
+    : function () {
+        console.warn("Add product handler called from non-admin context");
+      },
+  loadProductsPage: SCRIPT_CONTEXT.isAdminPage
+    ? loadProductsPage
+    : function () {
+        console.warn("Load products page called from non-admin context");
+      },
+  // Safe methods that won't cause authentication
   addBambaViewHandler: function (handler) {
-    window.addEventListener("load", handler);
+    if (SCRIPT_CONTEXT.isAdminPage) {
+      window.addEventListener("load", handler);
+    } else {
+      console.warn("Bamba view handler called from non-admin context");
+    }
   },
   modeHandler: function () {
-    if (addProductsBtn) {
-      addProductsBtn.addEventListener("click", loadAddProductsPage);
-    }
-    if (productsListBtn) {
-      productsListBtn.addEventListener("click", fetchInfo);
+    if (SCRIPT_CONTEXT.isAdminPage) {
+      if (addProductsBtn) {
+        addProductsBtn.addEventListener("click", loadAddProductsPage);
+      }
+      if (productsListBtn) {
+        productsListBtn.addEventListener("click", fetchInfo);
+      }
+    } else {
+      console.warn("Mode handler called from non-admin context");
     }
   },
 };
 
 // Export the entire object as default
 export default BisliView;
+
+// Only initialize if we're on an admin page - CRITICAL FIX
+if (SCRIPT_CONTEXT.shouldInitialize) {
+  console.log("Initializing BisliView admin features (authenticated mode)");
+  setTimeout(init, 0);
+} else {
+  console.log(
+    "BisliView loaded but not initializing admin features (safe mode)"
+  );
+}
 
 // Add a function to try multiple endpoints
 async function tryServerEndpoints() {
