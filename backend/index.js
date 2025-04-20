@@ -1,6 +1,5 @@
 require('dotenv').config();
 const express = require('express');
-const app = express();
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
@@ -14,178 +13,60 @@ const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 const baseUrl = process.env.PAYPAL_BASE_URL;
 
-//
-//* MAIN SETTINGS
-//
+// =============================================
+// Initial Setup & Configuration
+// =============================================
+const app = express();
+
+// CORS Configuration
 const allowedOrigins = [
   `${process.env.HOST}`,
   `${process.env.API_URL}`,
-  'http://localhost:4000',
   'http://localhost:1234',
+  'http://localhost:4000',
 ];
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.indexOf(origin) !== -1) {
+  origin: (origin, callback) => {
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
       callback(null, true);
     } else {
-      console.log('CORS blocked origin:', origin);
-      return callback(null, true);
+      callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   optionsSuccessStatus: 200,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'auth-token',
-    'Accept',
-    'Origin',
-    'X-Requested-With',
-  ],
-  exposedHeaders: ['Content-Range', 'X-Content-Range'],
-  preflightContinue: false,
-  maxAge: 86400, // 24 hours
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-// Apply CORS middleware before other middleware
 app.use(cors(corsOptions));
-
-// Handle preflight requests
-app.options('*', cors(corsOptions));
-
-// Add headers middleware
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization, auth-token, Accept, Origin, X-Requested-With'
-  );
-  res.header('Access-Control-Allow-Credentials', 'true');
-  res.header('Access-Control-Max-Age', '86400');
-  next();
-});
-
 app.use(cookieParser());
-
-// Endpoint to handle Stripe webhook
-app.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }),
-  (request, response) => {
-    const sig = request.headers['stripe-signature'];
-    const payload = request.body;
-    let event;
-
-    try {
-      event = stripe.webhooks.constructEvent(
-        payload,
-        sig,
-        `${process.env.WEBHOOK_SEC}`
-      );
-    } catch (err) {
-      console.log(`⚠️  Webhook signature verification failed.`, err.message);
-      return response.sendStatus(400);
-    }
-
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-      // Fulfill the purchase
-      handleCheckoutSession(session);
-    }
-
-    response.json({ received: true });
-  }
-);
-
-async function handleCheckoutSession(session) {
-  const productId = session.metadata.productId; // Extract the actual product ID from session or metadata
-  if (productId) {
-    const product = await Product.findOne({ id: productId });
-    if (product) {
-      product.quantity -= 1;
-      await product.save();
-      let newQuantity = product.quantity;
-      console.log(
-        `Product ${productId} quantity reduced. New quantity: ${newQuantity}`
-      );
-      if (newQuantity == 0) {
-        const response = await fetch(`${process.env.API_URL}/removeproduct`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: productId,
-          }),
-        });
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.error('Error response:', errorText);
-          throw new Error('Failed to fetch product');
-        }
-
-        const data = await response.json();
-        if (data.success) {
-          console.log(`Product with id: ${data.id} is deleted from database`);
-        }
-      }
-    }
-  } else {
-    console.error('Product not found');
-  }
-}
-
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));
 
-//
-//* CORS
-//
-/* // Commented out custom headers middleware
+// CORS Headers Middleware
 function headers(req, res, next) {
-  const allowedOrigins = [process.env.HOST, process.env.FULLHOST];
-  const origin = req.headers.origin;
-
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    res.header('Access-Control-Allow-Origin', ''); // Optional: deny if origin is not allowed
-  }
-
+  res.header('Access-Control-Allow-Origin', `${process.env.HOST}`);
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
   res.header(
     'Access-Control-Allow-Headers',
     'Origin, Content-Type, Authorization'
   );
   res.header('Access-Control-Allow-Credentials', 'true');
-
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200); // Handle preflight requests
-  }
-
   next();
 }
 
-app.use(headers);
 app.options('*', headers);
-*/
+app.use(headers);
 
-//
-//* MONGODB
-//
-
-// Database Connection With MongoDB
+// =============================================
+// Database Models
+// =============================================
 mongoose.connect(`${process.env.MONGO_URL}`);
 
-// Schema Creating User Model
 const Users = mongoose.model('Users', {
-  name: {
-    type: String,
-  },
+  name: { type: String },
   email: {
     type: String,
     required: true,
@@ -193,281 +74,40 @@ const Users = mongoose.model('Users', {
     match:
       /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/,
   },
-  password: {
-    type: String,
-    required: true,
-  },
-  cartData: {
-    type: Object,
-  },
-  Date: {
-    type: Date,
-    default: Date.now,
-  },
-  userType: {
-    type: String,
-    default: 'user',
-  },
+  password: { type: String, required: true },
+  cartData: { type: Object },
+  Date: { type: Date, default: Date.now },
+  userType: { type: String, default: 'user' },
 });
 
-// Schema for Creating Products
 const Product = mongoose.model('Product', {
-  id: {
-    type: Number,
-    required: true,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  image: {
-    type: String,
-    required: false,
-  },
-  imageLocal: {
-    type: String,
-    required: false,
-  },
-  smallImages: {
-    type: Array,
-    required: false,
-  },
-  smallImagesLocal: {
-    type: Array,
-    required: false,
-  },
-  category: {
-    type: String,
-    required: true,
-  },
-  description: {
-    type: String,
-    required: true,
-  },
-  quantity: {
-    type: Number,
-    required: true,
-  },
-  ils_price: {
-    type: Number,
-    required: true,
-  },
-  usd_price: {
-    type: Number,
-    required: true,
-  },
-  date: {
-    type: Date,
-    default: Date.now,
-  },
-  available: {
-    type: Boolean,
-    default: true,
-  },
-  security_margin: {
-    type: Number,
-    required: false,
-  },
+  id: { type: Number, required: true },
+  name: { type: String, required: false },
+  image: { type: String, required: false },
+  imageLocal: { type: String, required: false },
+  publicImage: { type: String, required: false },
+  directImageUrl: { type: String, required: false },
+  smallImages: { type: Array, required: false },
+  smallImagesLocal: { type: Array, required: false },
+  category: { type: String, required: true },
+  description: { type: String, required: false },
+  quantity: { type: Number, required: false },
+  ils_price: { type: Number, required: false },
+  usd_price: { type: Number, required: false },
+  date: { type: Date, default: Date.now },
+  available: { type: Boolean, default: true },
+  security_margin: { type: Number, required: false },
 });
 
-//
-//* APIs
-//
-
-app.use(express.static(path.join(__dirname, 'frontend')));
-
-app.get('/', (req, res) => res.send('API endpoint is running'));
-
-app.get('/admin', (req, res) => {
-  res.sendFile(path.join(__dirname, 'html/bambaYafa.html')).status(200);
-});
-
-// Add product to database
-app.post('/upload', async (req, res) => {
-  let products = await Product.find({});
-  let id;
-
-  if (products.length > 0) {
-    let last_product_array = products.slice(-1);
-    let last_product = last_product_array[0];
-    id = last_product.id + 1;
-  } else {
-    id = 1;
-  }
-
-  const product = new Product({
-    id: id,
-    name: req.body.name,
-    image: req.body.image,
-    imageLocal: req.body.imageLocal,
-    smallImages: req.body.multiImages,
-    smallImagesLocal: req.body.multiImagesLocal,
-    category: req.body.category,
-    quantity: +req.body.quantity,
-    description: req.body.description,
-    ils_price: req.body.newPrice,
-    usd_price: req.body.oldPrice,
-  });
-
-  await product.save();
-  console.log('Saved');
-  res.json({
-    success: true,
-    name: req.body.name,
-  });
-});
-
-app.post('/updateproduct', async (req, res) => {
-  const id = req.body.id;
-  const updatedFields = {
-    name: req.body.name,
-    usd_price: req.body.oldPrice,
-    ils_price: req.body.newPrice,
-    description: req.body.description,
-    quantity: req.body.quantity,
-  };
-
-  let product = await Product.findOne({ id: id });
-
-  product.name = updatedFields.name;
-  product.usd_price = updatedFields.usd_price;
-  product.ils_price = updatedFields.ils_price;
-  product.description = updatedFields.description;
-  product.quantity = updatedFields.quantity;
-
-  await product.save();
-
-  res.json({
-    success: true,
-  });
-});
-
-// Delete products from database
-app.post('/removeproduct', async (req, res) => {
-  await Product.findOneAndDelete({ id: req.body.id });
-  console.log('Removed');
-  res.json({
-    success: true,
-    id: req.body.id,
-    name: req.body.name,
-  });
-});
-
-// Get all products from database
-app.get('/allproducts', async (req, res) => {
-  let products = await Product.find({});
-  console.log('All Products Fetched');
-  res.send(products);
-});
-
-app.post('/productsByCategory', async (req, res) => {
-  console.log('Received productsByCategory request with body:', req.body);
-
-  if (!req.body || !req.body.category) {
-    console.error('Missing category in request');
-    return res.status(400).json({
-      error: 'Category is required',
-      received: req.body,
-    });
-  }
-
-  const category = req.body.category;
-  const page = req.body.page || 1;
-  const limit = 6;
-
-  try {
-    let skip = (page - 1) * limit;
-    console.log(
-      'Fetching products for category:',
-      category,
-      'page:',
-      page,
-      'skip:',
-      skip,
-      'limit:',
-      limit
-    );
-
-    const categoryExists = await Product.exists({ category: category });
-    console.log('Category exists check:', categoryExists);
-
-    if (!categoryExists) {
-      console.log('Category not found:', category);
-      return res.status(404).json({
-        error: 'Category not found',
-        category: category,
-      });
-    }
-
-    let totalProducts = await Product.countDocuments({ category: category });
-    console.log('Total products in category:', totalProducts);
-
-    let products = await Product.find({ category: category })
-      .skip(skip)
-      .limit(limit);
-    console.log('Found', products.length, 'products for page', page);
-
-    if (!products || products.length === 0) {
-      console.log('No products found for this page, returning empty array');
-      return res.json({
-        products: [],
-        total: totalProducts,
-        page: page,
-        hasMore: false,
-      });
-    }
-
-    const response = {
-      products,
-      total: totalProducts,
-      page: page,
-      hasMore: skip + products.length < totalProducts,
-    };
-    console.log(
-      'Sending response with',
-      products.length,
-      'products, hasMore:',
-      response.hasMore
-    );
-    res.json(response);
-  } catch (err) {
-    console.error('Error fetching products by category:', err);
-    res.status(500).json({
-      error: 'Failed to fetch products',
-      message: err.message,
-    });
-  }
-});
-
-// app.post("/productsByCategory", async (req, res) => {
-//   const category = req.body.category;
-//   let products = await Product.find({ category: category });
-//   res.send(products);
-// });
-
-// app.post("/chunkProducts", async (req, res) => {
-//   const page = parseInt(req.query.page) || 1;
-//   const limit = parseInt(req.query.limit) || 10;
-//   const skip = (page - 1) * limit;
-//   console.log("page:", page, "limit:", limit, "skip:", skip);
-//   let category = req.body.checkCategory;
-//   try {
-//     const products = await Product.find({ category: category })
-//       .skip(skip)
-//       .limit(limit);
-//     res.json(products);
-//   } catch (err) {
-//     res.status(500).json({ error: "Failed to fetch products:", err });
-//   }
-// });
-
+// =============================================
+// Authentication Middleware
+// =============================================
 const authUser = async function (req, res, next) {
   try {
     let user = await Users.findOne({ email: req.body.email });
     if (user) {
       const userTypeCheck =
         user.userType === 'user' || user.userType === 'admin';
-
       if (userTypeCheck) {
         bcrypt.compare(req.body.password, user.password, (err, result) => {
           if (err || !result) {
@@ -475,7 +115,7 @@ const authUser = async function (req, res, next) {
               .status(401)
               .json({ success: false, errors: 'Auth Failed' });
           }
-          console.log('Authenticated successfuly');
+          console.log('Authenticated successfully');
           req.user = user;
           next();
         });
@@ -494,32 +134,360 @@ const authUser = async function (req, res, next) {
   }
 };
 
-// Creating endpoint for login
-app.post('/login', authUser, async (req, res) => {
-  try {
-    const adminCheck = req.user.userType;
-    const data = {
-      user: {
-        id: req.user.id,
-        email: req.user.email,
-      },
-    };
-    const token = jwt.sign(data, process.env.JWT_KEY);
-    if (token) {
-      console.log('Token created for user');
-      res.json({
-        success: true,
-        token,
-        adminCheck,
-      });
+const fetchUser = async (req, res, next) => {
+  const token = req.header('auth-token');
+  if (!token) {
+    res.status(401).send({ errors: 'Please authenticate using valid token' });
+  } else {
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_KEY);
+      req.user = decoded.user;
+      next();
+    } catch (err) {
+      res
+        .status(401)
+        .send({ errors: 'Please authenticate using a valid token', err });
     }
-  } catch (err) {
-    console.error('Login Error🔥 :', err);
-    res.status(500).json({ errors: 'Login - Internal Server Error', err });
   }
+};
+
+// =============================================
+// File Upload Configuration
+// =============================================
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    if (file.fieldname === 'mainImage') {
+      cb(null, './uploads');
+    }
+    if (file.fieldname === 'smallImages') {
+      cb(null, './smallImages');
+    }
+  },
+  filename: function (req, file, cb) {
+    return cb(
+      null,
+      `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
+    );
+  },
 });
 
-// Token verification endpoint
+const upload = multer({ storage: storage });
+
+// =============================================
+// Static File Serving
+// =============================================
+const uploadsDir = path.join(__dirname, 'uploads');
+const smallImagesDir = path.join(__dirname, 'smallImages');
+const publicUploadsDir = path.join(__dirname, '../public/uploads');
+const publicSmallImagesDir = path.join(__dirname, '../public/smallImages');
+
+// Ensure all directories exist
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+  console.log('Created uploads directory:', uploadsDir);
+}
+
+if (!fs.existsSync(smallImagesDir)) {
+  fs.mkdirSync(smallImagesDir, { recursive: true });
+  console.log('Created smallImages directory:', smallImagesDir);
+}
+
+if (!fs.existsSync(publicUploadsDir)) {
+  fs.mkdirSync(publicUploadsDir, { recursive: true });
+  console.log('Created public uploads directory:', publicUploadsDir);
+}
+
+if (!fs.existsSync(publicSmallImagesDir)) {
+  fs.mkdirSync(publicSmallImagesDir, { recursive: true });
+  console.log('Created public smallImages directory:', publicSmallImagesDir);
+}
+
+// Enhanced static file serving options with better CORS support
+const staticOptions = {
+  setHeaders: (res, path) => {
+    // Allow requests from any origin
+    res.setHeader('Access-Control-Allow-Origin', '*');
+
+    // Allow specific methods
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+
+    // Allow credentials
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+
+    // Set long cache time for static assets
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+
+    // Disable content security restrictions
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+
+    // Set content type header based on file extension
+    if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (path.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (path.endsWith('.gif')) {
+      res.setHeader('Content-Type', 'image/gif');
+    }
+  },
+  maxAge: 31536000, // 1 year in seconds
+};
+
+// Configure static file serving for all directories with custom middleware
+app.use('/uploads', (req, res, next) => {
+  console.log(`[Static] Accessing: ${req.path} from uploads dir`);
+  express.static(uploadsDir, staticOptions)(req, res, next);
+});
+
+app.use('/api/uploads', (req, res, next) => {
+  console.log(`[Static] Accessing: ${req.path} from api/uploads`);
+  express.static(uploadsDir, staticOptions)(req, res, next);
+});
+
+app.use('/smallImages', express.static(smallImagesDir, staticOptions));
+app.use('/api/smallImages', express.static(smallImagesDir, staticOptions));
+
+// Add public directory routes
+app.use('/public/uploads', express.static(publicUploadsDir, staticOptions));
+app.use('/api/public/uploads', express.static(publicUploadsDir, staticOptions));
+app.use(
+  '/public/smallImages',
+  express.static(publicSmallImagesDir, staticOptions)
+);
+app.use(
+  '/api/public/smallImages',
+  express.static(publicSmallImagesDir, staticOptions)
+);
+
+// Also serve from root path
+app.use(
+  '/images',
+  express.static(path.join(__dirname, '../public/images'), staticOptions)
+);
+app.use(
+  '/api/images',
+  express.static(path.join(__dirname, '../public/images'), staticOptions)
+);
+
+// Direct file access route for debugging
+app.get('/check-file/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(uploadsDir, filename);
+
+  fs.access(filePath, fs.constants.F_OK, err => {
+    if (err) {
+      console.log(`File ${filename} does not exist in uploads directory`);
+      res.status(404).send({
+        exists: false,
+        message: `File ${filename} not found`,
+        searchPath: filePath,
+      });
+    } else {
+      console.log(`File ${filename} exists in uploads directory`);
+      res.send({
+        exists: true,
+        path: filePath,
+        size: fs.statSync(filePath).size,
+        url: `${process.env.API_URL}/uploads/${filename}`,
+      });
+    }
+  });
+});
+
+// Direct image serving endpoint that bypasses static middleware
+app.get('/direct-image/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(uploadsDir, filename);
+
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+  // Check if file exists
+  fs.access(filePath, fs.constants.F_OK, err => {
+    if (err) {
+      console.log(
+        `Direct image access: File ${filename} not found at ${filePath}`
+      );
+      return res.status(404).send('Image not found');
+    }
+
+    console.log(`Direct image access: Serving ${filename} from ${filePath}`);
+
+    // Set content type based on file extension
+    if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
+      res.setHeader('Content-Type', 'image/jpeg');
+    } else if (filename.endsWith('.png')) {
+      res.setHeader('Content-Type', 'image/png');
+    } else if (filename.endsWith('.gif')) {
+      res.setHeader('Content-Type', 'image/gif');
+    } else {
+      res.setHeader('Content-Type', 'application/octet-stream');
+    }
+
+    // Stream the file
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.on('error', err => {
+      console.error(`Error streaming file ${filename}:`, err);
+      res.status(500).send('Error reading file');
+    });
+
+    fileStream.pipe(res);
+  });
+});
+
+// Add options handler for the direct image endpoint
+app.options('/direct-image/:filename', (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.status(204).end();
+});
+
+// =============================================
+// Payment Processing Setup
+// =============================================
+const stripe = require('stripe')(process.env.STRIPE_PUBLISH_KEY_TEST);
+
+async function handleCheckoutSession(session) {
+  const productId = session.metadata.productId;
+  if (productId) {
+    const product = await Product.findOne({ id: productId });
+    if (product) {
+      product.quantity -= 1;
+      await product.save();
+      let newQuantity = product.quantity;
+      console.log(
+        `Product ${productId} quantity reduced. New quantity: ${newQuantity}`
+      );
+      if (newQuantity == 0) {
+        const response = await fetch(`${process.env.API_URL}/removeproduct`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: productId,
+          }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          console.log(`Product with id: ${data.id} is deleted from database`);
+        }
+      }
+    }
+  } else {
+    console.error('Product not found');
+  }
+}
+
+const generateAccessToken = async () => {
+  try {
+    if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
+      throw new Error('MISSING_API_CREDENTIALS');
+    }
+    const auth = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`);
+    const response = await fetch(`${baseUrl}/v1/oauth2/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Basic ${auth}`,
+      },
+      body: 'grant_type=client_credentials',
+    });
+    const data = await response.json();
+    return data.access_token;
+  } catch (error) {
+    console.error('Failed to generate Access Token:', error);
+  }
+};
+
+const createOrder = async cart => {
+  console.log(
+    'shopping cart information passed from the frontend createOrder() callback:',
+    cart
+  );
+  let totalAmount = cart
+    .reduce((total, item) => {
+      let itemTotal =
+        parseFloat(item.unit_amount.value) * parseInt(item.quantity);
+      return total + itemTotal;
+    }, 0)
+    .toFixed(2);
+  const currencyData = cart[0].unit_amount.currency_code;
+  const accessToken = await generateAccessToken();
+  const url = `${baseUrl}/v2/checkout/orders`;
+  const payload = {
+    intent: 'CAPTURE',
+    purchase_units: [
+      {
+        amount: {
+          currency_code: currencyData,
+          value: +totalAmount,
+          breakdown: {
+            item_total: {
+              currency_code: currencyData,
+              value: +totalAmount,
+            },
+          },
+        },
+        items: cart,
+      },
+    ],
+    application_context: {
+      return_url: `${process.env.API_URL}/complete-order`,
+      cancel_url: `${process.env.HOST}/html/cart.html`,
+      user_action: 'PAY_NOW',
+      brand_name: 'Tamar Kfir Jewelry',
+    },
+  };
+  console.log(payload.purchase_units[0].unit_amount);
+  const response = await fetch(url, {
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+  return handleResponse(response);
+};
+
+const captureOrder = async orderID => {
+  const accessToken = await generateAccessToken();
+  const url = `${baseUrl}/v2/checkout/orders/${orderID}/capture`;
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return handleResponse(response);
+};
+
+async function handleResponse(response) {
+  try {
+    const jsonResponse = await response.json();
+    return {
+      jsonResponse,
+      httpStatusCode: response.status,
+    };
+  } catch (error) {
+    console.error(error);
+    const errorMessage = await response.text();
+    throw new Error(errorMessage);
+  }
+}
+
+// =============================================
+// API Endpoints
+// =============================================
+
+// Authentication Endpoints
 app.post('/verify-token', async (req, res) => {
   try {
     const token = req.headers.authorization?.split(' ')[1];
@@ -545,7 +513,35 @@ app.post('/verify-token', async (req, res) => {
   }
 });
 
-// Creating Endpoint for Registering the User
+app.post('/login', authUser, async (req, res) => {
+  try {
+    const adminCheck = req.user.userType;
+    const data = {
+      user: {
+        id: req.user._id.toString(),
+        email: req.user.email,
+      },
+    };
+    const token = jwt.sign(data, process.env.JWT_KEY);
+    if (token) {
+      console.log('Token created for user:', req.user.email);
+      res.json({
+        success: true,
+        token,
+        adminCheck,
+        message: 'Login successful',
+      });
+    }
+  } catch (err) {
+    console.error('Login Error🔥 :', err);
+    res.status(500).json({
+      success: false,
+      errors: 'Login - Internal Server Error',
+      message: err.message,
+    });
+  }
+});
+
 app.post('/signup', async (req, res) => {
   let findUser = await Users.findOne({ email: req.body.email });
   if (findUser) {
@@ -584,49 +580,208 @@ app.post('/signup', async (req, res) => {
             errors: err,
           });
         });
-
-      // const data = {
-      //   user: {
-      //     id: user.id,
-      //   },
-      // };
-
-      // const token = jwt.sign(data, "secret_ecom");
-      // res.json({ success: true, token });
     }
   });
 });
 
-// Creating middleware to fetch user
-const fetchUser = async (req, res, next) => {
-  const token = req.header('auth-token');
-  if (!token) {
-    res.status(401).send({ errors: 'Please authenticate using valid token' });
-  } else {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_KEY);
-      req.user = decoded.user;
-      next();
-    } catch (err) {
-      res
-        .status(401)
-        .send({ errors: 'Please authenticate using a valid token', err });
-    }
-  }
-};
+// Product Management Endpoints
+app.post('/addproduct', async (req, res) => {
+  try {
+    console.log('\n=== Product Creation Request Details ===');
+    console.log('Complete request body:', req.body);
 
-// Creating endpoint to get cartdata
+    if (!req.body.image) {
+      console.warn(
+        '⚠️ WARNING: No image URL received in request. Request fields:',
+        Object.keys(req.body)
+      );
+      console.warn(
+        'Make sure the frontend is sending the image URL from the upload response'
+      );
+    }
+
+    const products = await Product.find({}).sort({ id: -1 }).limit(1);
+    const nextId = products.length > 0 ? Number(products[0].id) + 1 : 1;
+
+    const securityMargin = parseFloat(req.body.security_margin) || 5;
+    const usdPrice = Number(req.body.oldPrice) || 0;
+    const ilsPrice = Math.round(usdPrice * 3.7 * (1 + securityMargin / 100));
+
+    const mainImageUrl = req.body.image || '';
+    const mainImageLocal = req.body.imageLocal || '';
+    const publicImageUrl = req.body.publicImage || mainImageUrl;
+    const directImageUrl = req.body.directImageUrl || '';
+    const smallImageUrls = Array.isArray(req.body.smallImages)
+      ? req.body.smallImages
+      : [];
+    const smallImageLocals = Array.isArray(req.body.smallImagesLocal)
+      ? req.body.smallImagesLocal
+      : [];
+
+    console.log('Image data to be saved:', {
+      mainImage: {
+        production: mainImageUrl,
+        public: publicImageUrl,
+        direct: directImageUrl,
+        local: mainImageLocal,
+      },
+      smallImages: {
+        production: smallImageUrls,
+        local: smallImageLocals,
+      },
+      alternativeUrls: req.body.alternativeUrls,
+    });
+
+    const product = new Product({
+      id: nextId,
+      name: req.body.name,
+      image: mainImageUrl,
+      imageLocal: mainImageLocal,
+      publicImage: publicImageUrl,
+      directImageUrl: directImageUrl,
+      smallImages: smallImageUrls,
+      smallImagesLocal: smallImageLocals,
+      category: req.body.category,
+      quantity: Number(req.body.quantity) || 0,
+      description: req.body.description,
+      ils_price: ilsPrice,
+      usd_price: usdPrice,
+      security_margin: securityMargin,
+    });
+
+    console.log('Final product data before save:', {
+      id: product.id,
+      name: product.name,
+      image: product.image,
+      imageLocal: product.imageLocal,
+      publicImage: product.publicImage,
+      smallImages: product.smallImages,
+      smallImagesLocal: product.smallImagesLocal,
+      category: product.category,
+      API_URL: process.env.API_URL,
+    });
+
+    await product.save();
+    console.log('Product saved successfully with ID:', nextId);
+
+    res.json({
+      success: true,
+      id: nextId,
+      name: req.body.name,
+      message: !req.body.image
+        ? 'Warning: No image URL was provided'
+        : undefined,
+    });
+  } catch (error) {
+    console.error('Product creation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+app.post('/updateproduct', async (req, res) => {
+  const id = req.body.id;
+  const securityMargin = parseFloat(req.body.security_margin) || 5;
+  const exchangeRate = 3.7;
+
+  const usdPrice = Number(req.body.oldPrice) || 0;
+  const ilsPrice = Math.round(
+    usdPrice * exchangeRate * (1 + securityMargin / 100)
+  );
+
+  const updatedFields = {
+    name: req.body.name,
+    ils_price: ilsPrice,
+    usd_price: usdPrice,
+    security_margin: securityMargin,
+    description: req.body.description,
+    quantity: req.body.quantity,
+    category: req.body.category,
+  };
+
+  let product = await Product.findOne({ id: id });
+
+  product.name = updatedFields.name;
+  product.usd_price = updatedFields.usd_price;
+  product.ils_price = updatedFields.ils_price;
+  product.security_margin = updatedFields.security_margin;
+  product.description = updatedFields.description;
+  product.quantity = updatedFields.quantity;
+  product.category = updatedFields.category;
+
+  await product.save();
+
+  res.json({
+    success: true,
+  });
+});
+
+app.post('/removeproduct', async (req, res) => {
+  await Product.findOneAndDelete({ id: req.body.id });
+  console.log('Removed');
+  res.json({
+    success: true,
+    id: req.body.id,
+    name: req.body.name,
+  });
+});
+
+app.get('/allproducts', async (req, res) => {
+  let products = await Product.find({});
+  console.log('All Products Fetched');
+  res.send(products);
+});
+
+app.post('/productsByCategory', async (req, res) => {
+  const category = req.body.category;
+  const page = req.body.page;
+  const limit = 6;
+
+  try {
+    console.log('Fetching products for category:', category);
+    const skip = (page - 1) * limit;
+
+    let products = await Product.find({ category: category })
+      .skip(skip)
+      .limit(limit);
+
+    if (!products || products.length === 0) {
+      return res.json([]);
+    }
+
+    res.json(products);
+  } catch (err) {
+    console.error('Error fetching products by category:', err);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+app.post('/chunkProducts', async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  let category = req.body.checkCategory;
+  try {
+    const products = await Product.find({ category: category })
+      .skip(skip)
+      .limit(limit);
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch products:', err });
+  }
+});
+
+// Cart Management Endpoints
 app.post('/getcart', fetchUser, async (req, res) => {
   console.log('GetCart');
   let userData = await Users.findOne({ _id: req.user.id });
   res.json(userData.cartData);
 });
 
-// Creating endpoint for adding products in cartdata
-
 app.post('/addtocart', fetchUser, async (req, res) => {
   console.log('added', req.body.itemId);
-
   let userData = await Users.findOne({ _id: req.user.id });
   userData.cartData[req.body.itemId] += 1;
   await Users.findOneAndUpdate(
@@ -636,11 +791,8 @@ app.post('/addtocart', fetchUser, async (req, res) => {
   res.send('Added!');
 });
 
-// Creating endpoint for removing products from cartdata
-
 app.post('/removefromcart', fetchUser, async (req, res) => {
   console.log('removed', req.body.itemId);
-
   let userData = await Users.findOne({ _id: req.user.id });
   if (userData.cartData[req.body.itemId] > 0)
     userData.cartData[req.body.itemId] -= 1;
@@ -654,12 +806,9 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 app.post('/removeAll', fetchUser, async (req, res) => {
   console.log('removed all');
   let userData = await Users.findOne({ _id: req.user.id });
-
   for (let i = 0; i < 300; i++) {
     userData.cartData[i] = 0;
   }
-
-  // userData.cartData[req.body.itemId] = 0;
   await Users.findOneAndUpdate(
     { _id: req.user.id },
     { cartData: userData.cartData }
@@ -667,140 +816,303 @@ app.post('/removeAll', fetchUser, async (req, res) => {
   res.send('Removed All!');
 });
 
-app.post('/findProduct', async (req, res) => {
-  let productData = await Product.findOne({ id: req.body.id });
-  res.json({ productData });
-});
+// File Upload Endpoint
+app.post(
+  '/upload',
+  upload.fields([
+    { name: 'mainImage', maxCount: 1 },
+    { name: 'smallImages', maxCount: 10 },
+  ]),
+  async (req, res) => {
+    try {
+      console.log('Upload request received');
+      console.log('Files:', req.files);
 
-// Image Storage Engine
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    if (file.fieldname === 'mainImage') {
-      cb(null, './uploads');
-    }
-    if (file.fieldname === 'smallImages') {
-      cb(null, './smallImages');
-    }
-  },
-  filename: function (req, file, cb) {
-    return cb(
-      null,
-      `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
-    );
-  },
-});
+      const mainImage = req.files.mainImage ? req.files.mainImage[0] : null;
+      const smallImages = req.files.smallImages || [];
 
-const uploadA = multer({ storage: storage });
+      if (!mainImage) {
+        console.log('No main image provided');
+        return res.status(400).json({ error: 'No main image provided' });
+      }
 
-const multipleUpload = uploadA.fields([
-  { name: 'mainImage', maxCount: 1 },
-  { name: 'smallImages', maxCount: 8 },
-]);
+      console.log('Main image saved to:', mainImage.path);
+      console.log('Main image details:', {
+        filename: mainImage.filename,
+        path: mainImage.path,
+        mimetype: mainImage.mimetype,
+        size: mainImage.size,
+      });
 
-// Static file serving configuration
-const uploadsDir = path.join(__dirname, 'uploads');
-const smallImagesDir = path.join(__dirname, 'smallImages');
+      // Verify the file exists and is readable
+      try {
+        const stats = fs.statSync(mainImage.path);
+        console.log('File stats:', {
+          size: stats.size,
+          permissions: stats.mode.toString(8),
+          isReadable: (stats.mode & fs.constants.S_IRUSR) !== 0,
+        });
 
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log('Created uploads directory:', uploadsDir);
-}
+        // Make sure file has correct permissions (readable by all)
+        fs.chmodSync(mainImage.path, 0o644);
+        console.log('Updated file permissions to 644');
+      } catch (statError) {
+        console.error('Error checking file stats:', statError);
+      }
 
-if (!fs.existsSync(smallImagesDir)) {
-  fs.mkdirSync(smallImagesDir, { recursive: true });
-  console.log('Created smallImages directory:', smallImagesDir);
-}
+      // Get the hostname from the request or environment variables
+      const requestHost = req.get('host');
+      const protocol = req.protocol || 'https';
 
-const staticOptions = {
-  setHeaders: res => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Cache-Control', 'public, max-age=31536000');
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-  },
-};
+      // Define base URLs with more clarity - FIXED to properly use API_URL
+      const productionBaseUrl =
+        process.env.API_URL || 'https://tamarkfir.com/api';
+      const localBaseUrl = 'http://localhost:4000';
 
-// Helper function for copying files
-const copyFile = (source, target, cb) => {
-  const rd = fs.createReadStream(source);
-  const wr = fs.createWriteStream(target);
+      console.log('URL Construction:', {
+        requestHost,
+        protocol,
+        productionBaseUrl,
+        localBaseUrl,
+        env: {
+          HOST: process.env.HOST,
+          API_URL: process.env.API_URL,
+        },
+      });
 
-  rd.on('error', cb);
-  wr.on('error', cb);
-  wr.on('close', () => cb(null));
+      // Construct image URLs
+      const mainImageUrl = `${productionBaseUrl}/uploads/${mainImage.filename}`;
+      const mainImageLocal = `${localBaseUrl}/uploads/${mainImage.filename}`;
 
-  rd.pipe(wr);
-};
+      // Alternative URLs for direct access
+      const publicMainImageUrl = `${productionBaseUrl}/public/uploads/${mainImage.filename}`;
 
-// Serve static files with proper configuration
-app.use('/uploads', express.static(uploadsDir, staticOptions));
-app.use('/api/uploads', express.static(uploadsDir, staticOptions));
-app.use('/smallImages', express.static(smallImagesDir, staticOptions));
-app.use('/api/smallImages', express.static(smallImagesDir, staticOptions));
-
-app.post('/upload', multipleUpload, (req, res) => {
-  try {
-    const mainImage = req.files.mainImage[0].filename;
-    const smallImages = req.files.smallImages;
-
-    // Copy main image to another directory
-    if (mainImage) {
-      const sourcePath = path.join(__dirname, './uploads', mainImage);
-      const targetPath = path.join(
-        __dirname,
-        '../../Online/backend/uploads',
-        mainImage
+      const smallImageUrls = smallImages.map(
+        img => `${productionBaseUrl}/uploads/${img.filename}`
+      );
+      const smallImageLocals = smallImages.map(
+        img => `${localBaseUrl}/uploads/${img.filename}`
       );
 
-      copyFile(sourcePath, targetPath, err => {
-        if (err) {
-          console.error('Error copying main image', err);
-        }
+      // Log all generated URLs for debugging
+      console.log('Generated URLs:', {
+        main: {
+          production: mainImageUrl,
+          publicProduction: publicMainImageUrl,
+          local: mainImageLocal,
+        },
+        small: {
+          production: smallImageUrls,
+          local: smallImageLocals,
+        },
+        environment: {
+          apiUrl: process.env.API_URL,
+          host: process.env.HOST,
+          productionBaseUrl,
+          localBaseUrl,
+        },
       });
+
+      try {
+        // Check source file for debugging
+        const sourceFileExists = fs.existsSync(mainImage.path);
+        console.log(
+          `Source file exists: ${sourceFileExists} at path: ${mainImage.path}`
+        );
+
+        // Copy main image to production
+        const prodUploadsDir = path.join(
+          __dirname,
+          '../../Online/backend/uploads'
+        );
+        const prodSmallImagesDir = path.join(
+          __dirname,
+          '../../Online/backend/smallImages'
+        );
+
+        // Ensure production directories exist
+        if (!fs.existsSync(prodUploadsDir)) {
+          fs.mkdirSync(prodUploadsDir, { recursive: true });
+          console.log('Created production uploads directory:', prodUploadsDir);
+        }
+
+        if (!fs.existsSync(prodSmallImagesDir)) {
+          fs.mkdirSync(prodSmallImagesDir, { recursive: true });
+          console.log(
+            'Created production smallImages directory:',
+            prodSmallImagesDir
+          );
+        }
+
+        // If original upload directory is different from uploads dir, copy the file
+        if (path.dirname(mainImage.path) !== uploadsDir) {
+          const destPath = path.join(uploadsDir, mainImage.filename);
+          fs.copyFileSync(mainImage.path, destPath);
+          console.log(`Copied from ${mainImage.path} to ${destPath}`);
+          fs.chmodSync(destPath, 0o644);
+        }
+
+        // Copy to production folder
+        const prodDestPath = path.join(prodUploadsDir, mainImage.filename);
+        fs.copyFileSync(mainImage.path, prodDestPath);
+        console.log('Copied main image to production:', prodDestPath);
+        fs.chmodSync(prodDestPath, 0o644);
+
+        // Copy small images to production
+        smallImages.forEach(img => {
+          try {
+            const smallDestPath = path.join(prodSmallImagesDir, img.filename);
+            fs.copyFileSync(img.path, smallDestPath);
+            console.log('Copied small image to production:', smallDestPath);
+            fs.chmodSync(smallDestPath, 0o644);
+
+            // If original upload directory is different, copy to uploads dir too
+            if (path.dirname(img.path) !== smallImagesDir) {
+              const localDestPath = path.join(smallImagesDir, img.filename);
+              fs.copyFileSync(img.path, localDestPath);
+              console.log(`Copied from ${img.path} to ${localDestPath}`);
+              fs.chmodSync(localDestPath, 0o644);
+            }
+          } catch (copyError) {
+            console.error(
+              'Error copying small image to production:',
+              copyError
+            );
+          }
+        });
+
+        // Also copy to a public folder that's directly accessible
+        const publicUploadsDir = path.join(__dirname, '../public/uploads');
+        const publicSmallImagesDir = path.join(
+          __dirname,
+          '../public/smallImages'
+        );
+
+        // Ensure public directories exist
+        if (!fs.existsSync(publicUploadsDir)) {
+          fs.mkdirSync(publicUploadsDir, { recursive: true });
+          console.log('Created public uploads directory:', publicUploadsDir);
+        }
+
+        if (!fs.existsSync(publicSmallImagesDir)) {
+          fs.mkdirSync(publicSmallImagesDir, { recursive: true });
+          console.log(
+            'Created public smallImages directory:',
+            publicSmallImagesDir
+          );
+        }
+
+        // Copy to public folder
+        const publicDestPath = path.join(publicUploadsDir, mainImage.filename);
+        fs.copyFileSync(mainImage.path, publicDestPath);
+        console.log('Copied main image to public folder:', publicDestPath);
+        fs.chmodSync(publicDestPath, 0o644);
+
+        // Verify file exists in each location
+        console.log('File verification after copying:');
+        console.log(`Original exists: ${fs.existsSync(mainImage.path)}`);
+        console.log(
+          `Uploads dir exists: ${fs.existsSync(
+            path.join(uploadsDir, mainImage.filename)
+          )}`
+        );
+        console.log(`Production exists: ${fs.existsSync(prodDestPath)}`);
+        console.log(`Public exists: ${fs.existsSync(publicDestPath)}`);
+
+        smallImages.forEach(img => {
+          try {
+            const publicSmallDestPath = path.join(
+              publicSmallImagesDir,
+              img.filename
+            );
+            fs.copyFileSync(img.path, publicSmallDestPath);
+            console.log(
+              'Copied small image to public folder:',
+              publicSmallDestPath
+            );
+            fs.chmodSync(publicSmallDestPath, 0o644);
+          } catch (copyError) {
+            console.error(
+              'Error copying small image to public folder:',
+              copyError
+            );
+          }
+        });
+      } catch (copyError) {
+        console.error(
+          'Error copying files to production/public directories:',
+          copyError
+        );
+        // Continue with the response even if copying fails
+      }
+
+      // Create a direct link for testing that bypasses static middleware
+      const directTestUrl = `${productionBaseUrl}/check-file/${mainImage.filename}`;
+      const directImageUrl = `${productionBaseUrl}/direct-image/${mainImage.filename}`;
+
+      // Enhance the response with more options and debugging info
+      res.json({
+        success: true,
+        image: mainImageUrl,
+        imageLocal: mainImageLocal,
+        publicImage: publicMainImageUrl,
+        directImageUrl: directImageUrl,
+        directTestUrl: directTestUrl,
+        smallImages: smallImageUrls,
+        smallImagesLocal: smallImageLocals,
+        alternativeUrls: {
+          publicImage: publicMainImageUrl,
+          directUploadPath: `/uploads/${mainImage.filename}`,
+          publicUploadPath: `/public/uploads/${mainImage.filename}`,
+          directImagePath: `/direct-image/${mainImage.filename}`,
+        },
+        debug: {
+          filepath: mainImage.path,
+          filename: mainImage.filename,
+          apiUrl: process.env.API_URL,
+          host: process.env.HOST,
+          uploadDirPath: uploadsDir,
+          publicDirPath: publicUploadsDir,
+        },
+      });
+    } catch (error) {
+      console.error('Upload error:', error);
+      res.status(500).json({ error: 'Upload failed', details: error.message });
     }
-
-    // Copy small images to another directory
-    smallImages.forEach(file => {
-      const sourcePath = path.join(__dirname, './smallImages', file.filename);
-      const targetPath = path.join(
-        __dirname,
-        '../../Online/backend/smallImages',
-        file.filename
-      );
-
-      copyFile(sourcePath, targetPath, err => {
-        if (err) {
-          console.error('Error copying small image', err);
-        }
-      });
-    });
-
-    let makeUrl = smallImages.map(({ filename }) => {
-      return `${process.env.API_URL}/smallImages/${filename}`;
-    });
-
-    let localUrl = smallImages.map(({ filename }) => {
-      return `${process.env.API_URL}/smallImages/${filename}`;
-    });
-
-    res.json({
-      success: 1,
-      file: req.files,
-      mainImageUrl: `${process.env.API_URL}/uploads/${req.files.mainImage[0].filename}`,
-      mainImageUrlLocal: `${process.env.API_URL}/uploads/${req.files.mainImage[0].filename}`,
-      smallImagesUrl: makeUrl,
-      smallImagesUrlLocal: localUrl,
-    });
-  } catch (err) {
-    console.error(err);
   }
-});
+);
 
-// Creating payment endpoint
-const stripe = require('stripe')(process.env.STRIPE_PRIVATE_KEY_TEST);
+// Payment Processing Endpoints
+app.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  (request, response) => {
+    const sig = request.headers['stripe-signature'];
+    const payload = request.body;
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(
+        payload,
+        sig,
+        `${process.env.WEBHOOK_SEC}`
+      );
+    } catch (err) {
+      console.log(`⚠️  Webhook signature verification failed.`, err.message);
+      return response.sendStatus(400);
+    }
+
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      console.log('2. From webhook:', session.metadata.productId);
+      handleCheckoutSession(session);
+    }
+
+    response.json({ received: true });
+  }
+);
 
 app.post('/create-checkout-session', async (req, res) => {
-  // const shippingRate = await stripe.shippingRates.retrieve('shr_1P5Tdw03Qr2omCV4v8GI30UM')
   try {
     const [getProductId] = req.body.items;
     const product = await Product.find({ id: getProductId.id });
@@ -812,11 +1124,7 @@ app.post('/create-checkout-session', async (req, res) => {
     }
 
     if (getProdQuant.quantity == 0) {
-      return res
-        .status(400)
-        .send(
-          'This product/s are out of stock. Please delete it from your cart and try again'
-        );
+      return res.status(400).send('Product is out of stock');
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -847,7 +1155,6 @@ app.post('/create-checkout-session', async (req, res) => {
           quantity: myItem.quantity,
         };
       }),
-
       shipping_address_collection: {
         allowed_countries: ['US', 'IL'],
       },
@@ -893,9 +1200,8 @@ app.post('/create-checkout-session', async (req, res) => {
           },
         },
       ],
-
       success_url: `${process.env.HOST}/index.html`,
-      cancel_url: `${process.env.HOST}/html/cart.html`,
+      cancel_url: `${process.env.HOST}/html/cart.ejs`,
       metadata: {
         productId: getProductId.id.toString(),
       },
@@ -903,136 +1209,18 @@ app.post('/create-checkout-session', async (req, res) => {
 
     res.json({ sessionId: session.id, url: session.url });
   } catch (err) {
+    console.log(err);
     res.status(500).json({ err });
   }
 });
 
-const generateAccessToken = async () => {
-  try {
-    if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
-      throw new Error('MISSING_API_CREDENTIALS');
-    }
-    const auth = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`);
-
-    const response = await fetch(`${baseUrl}/v1/oauth2/token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        Authorization: `Basic ${auth}`,
-      },
-      body: 'grant_type=client_credentials',
-    });
-
-    const data = await response.json();
-    return data.access_token;
-  } catch (error) {
-    console.error('Failed to generate Access Token', error);
-  }
-};
-
-const createOrder = async cart => {
-  // use the cart information passed from the front-end to calculate the purchase unit details
-  // console.log(
-  //   'shopping cart information passed from the frontend createOrder() callback',
-  //   cart
-  // );
-
-  let totalAmount = cart
-    .reduce((total, item) => {
-      let itemTotal =
-        parseFloat(item.unit_amount.value) * parseInt(item.quantity);
-      return total + itemTotal;
-    }, 0)
-    .toFixed(2);
-
-  const currencyData = cart[0].unit_amount.currency_code;
-
-  const accessToken = await generateAccessToken();
-  const url = `${baseUrl}/v2/checkout/orders`;
-  const payload = {
-    intent: 'CAPTURE',
-    purchase_units: [
-      {
-        amount: {
-          currency_code: currencyData,
-          value: totalAmount.toString(),
-          breakdown: {
-            item_total: {
-              currency_code: currencyData,
-              value: totalAmount.toString(),
-            },
-          },
-        },
-        items: cart,
-      },
-    ],
-    application_context: {
-      return_url: `${process.env.API_URL}/complete-order`,
-      cancel_url: `${process.env.HOST}/html/cart.html`,
-      user_action: 'PAY_NOW',
-      brand_name: 'Tamar Kfir Jewelry',
-    },
-  };
-
-  const response = await fetch(url, {
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-      // Uncomment one of these to force an error for negative testing (in sandbox mode only). Documentation:
-      // https://developer.paypal.com/tools/sandbox/negative-testing/request-headers/
-      // "PayPal-Mock-Response": '{"mock_application_codes": "MISSING_REQUIRED_PARAMETER"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "PERMISSION_DENIED"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
-    },
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
-
-  return handleResponse(response);
-};
-
-const captureOrder = async orderID => {
-  const accessToken = await generateAccessToken();
-  const url = `${baseUrl}/v2/checkout/orders/${orderID}/capture`;
-
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-      // Uncomment one of these to force an error for negative testing (in sandbox mode only). Documentation:
-      // https://developer.paypal.com/tools/sandbox/negative-testing/request-headers/
-      // "PayPal-Mock-Response": '{"mock_application_codes": "INSTRUMENT_DECLINED"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "TRANSACTION_REFUSED"}'
-      // "PayPal-Mock-Response": '{"mock_application_codes": "INTERNAL_SERVER_ERROR"}'
-    },
-  });
-
-  return handleResponse(response);
-};
-
-async function handleResponse(response) {
-  try {
-    const jsonResponse = await response.json();
-    return {
-      jsonResponse,
-      httpStatusCode: response.status,
-    };
-  } catch (error) {
-    console.error(error);
-    const errorMessage = await response.text();
-    throw new Error(errorMessage);
-  }
-}
-
 app.post('/orders', async (req, res) => {
   try {
-    // use the cart information passed from the front-end to calculate the order amount detals
     const { cart } = req.body;
     const { jsonResponse, httpStatusCode } = await createOrder(cart);
     res.status(httpStatusCode).json(jsonResponse);
   } catch (error) {
-    console.error('Failed to create order', error);
+    console.error('Failed to create order:', error);
     res.status(500).json({ error: 'Failed to create order.' });
   }
 });
@@ -1043,18 +1231,28 @@ app.post('/orders/:orderID/capture', async (req, res) => {
     const { jsonResponse, httpStatusCode } = await captureOrder(orderID);
     res.status(httpStatusCode).json(jsonResponse);
   } catch (error) {
-    console.error('Failed to create order', error);
+    console.error('Failed to create order:', error);
     res.status(500).json({ error: 'Failed to capture order.' });
   }
 });
 
-app.get('/ping', (req, res) => {
-  res.send('Server is awake!');
-});
-
-app.listen(process.env.SERVER_PORT || 3000, error => {
+// =============================================
+// Server Initialization
+// =============================================
+app.listen(process.env.SERVER_PORT || 4000, error => {
   if (!error) {
-    console.log('Server Running on Port ' + process.env.SERVER_PORT || 3000);
+    console.log('Server Running on Port ' + (process.env.SERVER_PORT || 4000));
+    console.log('Environment Variables:');
+    console.log('  API_URL:', process.env.API_URL);
+    console.log('  HOST:', process.env.HOST);
+    console.log('  NODE_ENV:', process.env.NODE_ENV);
+
+    // Log upload paths
+    console.log('Upload Directories:');
+    console.log('  Main uploads:', uploadsDir);
+    console.log('  Small images:', smallImagesDir);
+    console.log('  Public uploads:', publicUploadsDir);
+    console.log('  Public small images:', publicSmallImagesDir);
   } else {
     console.log('Error : ' + error);
   }
