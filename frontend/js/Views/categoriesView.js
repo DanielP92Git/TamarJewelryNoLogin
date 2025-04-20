@@ -545,7 +545,7 @@ class CategoriesView extends View {
     }
 
     try {
-      const apiUrl = 'http://localhost:4000';
+      const apiUrl = `${process.env.API_URL}`;
       const fetchUrl = `${apiUrl}/productsByCategory`;
 
       const payload = { category: this.category, page: this.page };
@@ -687,7 +687,7 @@ class CategoriesView extends View {
         spinner.classList.remove('spinner-hidden');
       }
 
-      const apiUrl = 'http://localhost:4000';
+      const apiUrl = `${process.env.API_URL}`;
       const fetchUrl = `${apiUrl}/productsByCategory`;
 
       const response = await fetch(fetchUrl, {
