@@ -598,12 +598,13 @@ a {
   max-width: 90%;
   width: 100%;
   overflow-x: scroll;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 
-  border: 1px solid rgb(0, 0, 0);
+  /* border: 1px solid rgb(0, 0, 0); */
 }
 
 .small-images-container::-webkit-scrollbar {
-  height: 7px;
+  height: 3px;
 }
 
 .small-images-container::-webkit-scrollbar-track {
@@ -645,10 +646,11 @@ a {
   display: flex;
   flex-flow: column;
   align-items: center;
-  border: 1px solid rgba(246, 255, 224, 0.4);
   width: 40%;
   height: 100%;
   padding: 25px;
+  margin: 0 2rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .item-title_modal {
@@ -691,14 +693,15 @@ a {
   display: flex;
   flex-flow: column;
   align-items: center;
-  border: 1px solid;
+  text-align: center;
+  font-size: 0.8rem;
   border-radius: 5px;
-  padding: 0 5px 5px 5px;
+  padding: 5px;
   margin-top: 1rem;
   opacity: 1;
   transition: all;
   transition-duration: 1s;
-  background-color: rgba(240, 248, 255, 0.24);
+  background-color: rgba(240, 248, 255, 0.749);
 }
 
 .added-span {
@@ -819,4 +822,30 @@ a {
 .product-image.loaded ~ .loading-spinner,
 .loaded + .loading-spinner {
   display: none !important;
+}
+
+/* Styles for the magnifier effect */
+.magnifier-container {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+
+.big-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.magnifier-glass {
+  position: absolute;
+  width: 250px;
+  height: 250px;
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  cursor: none;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  z-index: 1000;
 }

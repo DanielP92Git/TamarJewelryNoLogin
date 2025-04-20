@@ -384,7 +384,36 @@ class CategoriesView extends View {
 
   addFromPrev(data) {
     this.increaseCartNumber();
-    model.handleAddToCart(data);
+
+    // Create a more complete object that mimics the DOM element structure
+    // expected by model.handleAddToCart and addToLocalStorage
+    const modalElement = document.querySelector('.modal');
+    const bigImage = modalElement.querySelector('.big-image');
+    const itemTitle = modalElement.querySelector('.item-title_modal');
+    const itemPrice = modalElement.querySelector('.item-price_modal');
+
+    const mockElement = {
+      dataset: {
+        id: data.dataset.id,
+        quant: data.dataset.quant,
+        currency: this.selectedCurrency,
+      },
+      getAttribute: function (attr) {
+        if (attr === 'data-id') return this.dataset.id;
+        if (attr === 'data-quant') return this.dataset.quant;
+        return null;
+      },
+      querySelector: function (selector) {
+        if (selector === '.front-image') return { src: bigImage.src };
+        if (selector === '.item-title')
+          return { textContent: itemTitle.textContent };
+        if (selector === '.item-price')
+          return { textContent: itemPrice.textContent };
+        return null;
+      },
+    };
+
+    model.handleAddToCart(mockElement);
 
     let addedMsg = document.querySelector('.added-message');
     addedMsg.classList.remove('hide');
@@ -475,7 +504,10 @@ class CategoriesView extends View {
         <div class="modal-item-container">
           <img src="${closeSvg}" alt="close-icon" class="close-modal-btn" />
           <div class="images-container">
-            <img src="${image}" alt="${title}" class="big-image" />
+            <div class="magnifier-container">
+              <img src="${image}" alt="${title}" class="big-image" />
+              <div class="magnifier-glass"></div>
+            </div>
             ${
               hasMultipleImages
                 ? `<div class="small-images-container">${imageMarkup}</div>`
@@ -530,11 +562,61 @@ class CategoriesView extends View {
     if (hasMultipleImages) {
       const smallImages = modal.querySelectorAll('.small-image');
       const bigImage = modal.querySelector('.big-image');
+      const magnifierGlass = modal.querySelector('.magnifier-glass');
 
       smallImages.forEach(img => {
         img.addEventListener('click', () => {
           bigImage.src = img.src;
+          // Also update the magnifier glass background
+          if (magnifierGlass) {
+            magnifierGlass.style.backgroundImage = `url('${img.src}')`;
+          }
         });
+      });
+    }
+
+    // Setup magnifier effect
+    const magnifierContainer = modal.querySelector('.magnifier-container');
+    const magnifierGlass = modal.querySelector('.magnifier-glass');
+    const bigImage = modal.querySelector('.big-image');
+
+    if (magnifierContainer && magnifierGlass && bigImage) {
+      // Initial setup - hide the glass
+      magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
+      magnifierGlass.style.display = 'none';
+
+      // Event handlers for magnifier
+      magnifierContainer.addEventListener('mousemove', function (e) {
+        // Show the glass
+        magnifierGlass.style.display = 'block';
+
+        // Get cursor position
+        const rect = magnifierContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // Prevent the glass from going outside the container
+        const glassWidth = magnifierGlass.offsetWidth / 2;
+        const glassHeight = magnifierGlass.offsetHeight / 2;
+
+        // Position the glass at cursor
+        magnifierGlass.style.left = `${x - glassWidth}px`;
+        magnifierGlass.style.top = `${y - glassHeight}px`;
+
+        // Calculate background position for magnifier
+        const zoomFactor = 2; // Zoom level
+        const bgX = x * zoomFactor - glassWidth;
+        const bgY = y * zoomFactor - glassHeight;
+
+        magnifierGlass.style.backgroundPosition = `-${bgX}px -${bgY}px`;
+        magnifierGlass.style.backgroundSize = `${
+          bigImage.width * zoomFactor
+        }px ${bigImage.height * zoomFactor}px`;
+      });
+
+      // Hide glass when mouse leaves the container
+      magnifierContainer.addEventListener('mouseleave', function () {
+        magnifierGlass.style.display = 'none';
       });
     }
   }
@@ -612,7 +694,7 @@ class CategoriesView extends View {
         }
 
         const data = await response.json();
-
+        console.log('[DEBUG] Fetched data:', data);
         // Check for the updated response format
         if (!data || (!data.products && !Array.isArray(data))) {
           console.error('[CategoriesView] Invalid data format received:', data);
@@ -722,7 +804,7 @@ class CategoriesView extends View {
 
       const apiUrl = `${process.env.API_URL}`;
       const fetchUrl = `${apiUrl}/productsByCategory`;
-
+      console.log('[DEBUG] Fetching more products from:', fetchUrl);
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -734,13 +816,14 @@ class CategoriesView extends View {
       }
 
       const data = await response.json();
+      console.log('[DEBUG] Fetched data:', data);
 
-      if (!data || !data.products) {
+      if (!data) {
         this.allProductsFetched = true;
         return;
       }
 
-      const newProducts = Array.isArray(data.products) ? data.products : [];
+      const newProducts = Array.isArray(data) ? data : [];
 
       if (newProducts.length === 0) {
         this.allProductsFetched = true;
@@ -749,6 +832,7 @@ class CategoriesView extends View {
 
       // Append new products to existing array
       this.products = [...this.products, ...newProducts];
+
       this.displayMoreProducts();
     } catch (err) {
       console.error('[CategoriesView] Failed to fetch more products:', err);
@@ -792,9 +876,10 @@ class CategoriesView extends View {
   }
 
   displayMoreProducts() {
-    // this.innerProductsContainer.innerHTML = '';
+    this.innerProductsContainer.innerHTML = '';
 
-    const productsToShow = this.products.slice(this.page, this.limit);
+    const productsToShow = this.products;
+    console.log('[DEBUG] Products to show:', productsToShow);
 
     const markup = productsToShow
       .map(item => this.getProductMarkup(item))

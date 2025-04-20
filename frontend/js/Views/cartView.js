@@ -314,116 +314,255 @@ class CartView extends View {
 
   paypalCheckout(cartData) {
     if (!cartData || cartData.length === 0) return;
-    const currencyVariable = cartData[0].currency == '$' ? 'USD' : 'ILS';
-    let myScript = document.querySelector('.paypal-script');
-    myScript.setAttribute(
-      'src',
-      `https://www.paypal.com/sdk/js?client-id=AQ_Op8cY6HHktDWw0X4y73ydkfGKeN-Tm3T20iWIDPIo4M7OpehX2QYZD0_gpDgtg7RkdRKL51foMNP7&currency=${currencyVariable}`
+
+    console.log(
+      'Initializing PayPal checkout with cart data:',
+      cartData.length,
+      'items'
     );
-    let head = document.head;
-    head.insertAdjacentElement('afterbegin', myScript);
 
-    // myScript.addEventListener("load", scriptLoaded, false);
+    const currencyVariable = cartData[0].currency == '$' ? 'USD' : 'ILS';
+    console.log('PayPal currency:', currencyVariable);
 
-    window.paypal
-      .Buttons({
-        async createOrder() {
-          try {
-            const cartDetails = cartData.map(item => {
-              const data = {
-                name: item.title,
-                unit_amount: {
-                  currency_code: item.currency == '$' ? 'USD' : 'ILS',
-                  value: item.price,
-                },
-                quantity: item.quantity,
-              };
-              return data;
-            });
-            const response = await fetch(`${process.env.API_URL}/orders`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                cart: cartDetails,
-              }),
-            });
+    // Remove any existing PayPal script to avoid conflicts
+    const existingScript = document.querySelector(
+      'script[src*="paypal.com/sdk/js"]'
+    );
+    if (existingScript) {
+      console.log('Removing existing PayPal script');
+      existingScript.remove();
+    }
 
-            const orderData = await response.json();
-            if (orderData.id) {
-              return orderData.id;
-            } else {
-              const errorDetail = orderData?.details?.[0];
-              const errorMessage = errorDetail
-                ? `${errorDetail.issue} ${errorDetail.description} (${orderData.debug_id})`
-                : JSON.stringify(orderData);
+    // Add RTL styles for PayPal form inputs
+    const rtlStyles = document.createElement('style');
+    rtlStyles.textContent = `
+      .paypal-button-container .paypal-card-form .card-field-input {
+        direction: rtl;
+        text-align: right;
+      }
+      .paypal-button-container input::placeholder,
+      .paypal-button-container .card-field-placeholder {
+        direction: rtl !important;
+        text-align: right !important;
+        right: 0 !important;
+        left: auto !important;
+        padding-right: 10px !important;
+        position: absolute !important;
+      }
+      .paypal-button-container .paypal-card-form .field-wrapper {
+        direction: rtl;
+      }
+      .paypal-button-container .card-field-container,
+      .paypal-button-container .card-billing-address-container,
+      .paypal-button-container .card-field-frame {
+        direction: rtl;
+      }
+      .paypal-button-container .card-field-label {
+        text-align: right;
+        direction: rtl;
+      }
+    `;
+    document.head.appendChild(rtlStyles);
 
-              throw new Error(errorMessage);
-            }
-          } catch (error) {
-            console.error(error);
-            console.log(
-              `Could not initiate PayPal Checkout...<br><br>${error}`
-            );
-          }
-        },
+    // Create new script element
+    let paypalScript = document.createElement('script');
+    paypalScript.src = `https://www.paypal.com/sdk/js?client-id=AQ_Op8cY6HHktDWw0X4y73ydkfGKeN-Tm3T20iWIDPIo4M7OpehX2QYZD0_gpDgtg7RkdRKL51foMNP7&currency=${currencyVariable}`;
+    paypalScript.async = true;
+    paypalScript.className = 'paypal-script';
 
-        async onApprove(data, actions) {
-          try {
-            const response = await fetch(
-              `${process.env.API_URL}/orders/${data.orderID}/capture`,
-              {
+    // Add load and error event handlers
+    paypalScript.addEventListener('load', () => {
+      console.log('PayPal SDK loaded successfully');
+      this._initializePayPalButtons(cartData);
+    });
+
+    paypalScript.addEventListener('error', error => {
+      console.error('Failed to load PayPal SDK:', error);
+      alert('Failed to load PayPal checkout. Please try again later.');
+    });
+
+    // Add the script to the page
+    document.head.appendChild(paypalScript);
+  }
+
+  _initializePayPalButtons(cartData) {
+    if (!window.paypal) {
+      console.error('PayPal SDK not loaded');
+      return;
+    }
+
+    const paypalContainer = document.querySelector('#paypal');
+    if (!paypalContainer) {
+      console.error('PayPal container not found');
+      return;
+    }
+
+    // Clear the container first
+    paypalContainer.innerHTML = '';
+
+    try {
+      window.paypal
+        .Buttons({
+          // Use the existing createOrder and onApprove methods
+          createOrder: async () => {
+            try {
+              const cartDetails = cartData.map(item => {
+                const data = {
+                  name: item.title,
+                  unit_amount: {
+                    currency_code: item.currency == '$' ? 'USD' : 'ILS',
+                    value: item.price,
+                  },
+                  quantity: item.quantity,
+                };
+                return data;
+              });
+
+              console.log(
+                'Sending cart to PayPal API:',
+                JSON.stringify(cartDetails, null, 2)
+              );
+
+              // Check if cart is valid
+              if (!cartDetails || cartDetails.length === 0) {
+                throw new Error(
+                  'Cart is empty. Please add items to your cart.'
+                );
+              }
+
+              const response = await fetch(`${process.env.API_URL}/orders`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },
+                body: JSON.stringify({
+                  cart: cartDetails,
+                }),
+              });
+
+              let responseData;
+              try {
+                responseData = await response.json();
+              } catch (parseError) {
+                console.error('Error parsing response:', parseError);
+                const errorText = await response.text();
+                throw new Error(`Invalid response from server: ${errorText}`);
               }
-            );
 
-            const orderData = await response.json();
-            // Three cases to handle:
-            //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
-            //   (2) Other non-recoverable errors -> Show a failure message
-            //   (3) Successful transaction -> Show confirmation or thank you message
+              console.log('PayPal order API response:', responseData);
 
-            const errorDetail = orderData?.details?.[0];
+              if (!response.ok) {
+                const errorMessage =
+                  responseData.message || responseData.error || 'Unknown error';
+                throw new Error(`Failed to create order: ${errorMessage}`);
+              }
 
-            if (errorDetail?.issue === 'INSTRUMENT_DECLINED') {
-              // (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
-              // recoverable state, per https://developer.paypal.com/docs/checkout/standard/customize/handle-funding-failures/
-              return actions.restart();
-            } else if (errorDetail) {
-              // (2) Other non-recoverable errors -> Show a failure message
-              throw new Error(
-                `${errorDetail.description} (${orderData.debug_id})`
+              if (responseData.jsonResponse && responseData.jsonResponse.id) {
+                console.log('Order ID received:', responseData.jsonResponse.id);
+                return responseData.jsonResponse.id;
+              } else if (responseData.id) {
+                console.log('Direct order ID received:', responseData.id);
+                return responseData.id;
+              } else {
+                console.error('No order ID in response:', responseData);
+                const errorDetail =
+                  responseData?.details?.[0] ||
+                  responseData?.jsonResponse?.details?.[0];
+
+                const errorMessage = errorDetail
+                  ? `${errorDetail.issue} ${errorDetail.description}`
+                  : 'Failed to get order ID from PayPal';
+
+                throw new Error(errorMessage);
+              }
+            } catch (error) {
+              console.error('PayPal createOrder error:', error);
+              alert(`Could not initiate PayPal Checkout: ${error.message}`);
+              throw error;
+            }
+          },
+
+          onApprove: async (data, actions) => {
+            try {
+              console.log('Payment approved, capturing order:', data.orderID);
+
+              const response = await fetch(
+                `${process.env.API_URL}/orders/${data.orderID}/capture`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                }
               );
-            } else if (!orderData.purchase_units) {
-              throw new Error(JSON.stringify(orderData));
-            } else {
-              // (3) Successful transaction -> Show confirmation or thank you message
-              // Or go to another URL:  actions.redirect('thank_you.html');
-              const transaction =
-                orderData?.purchase_units?.[0]?.payments?.captures?.[0] ||
-                orderData?.purchase_units?.[0]?.payments?.authorizations?.[0];
-              console.log(
-                `Transaction ${transaction.status}: ${transaction.id}<br><br>See console for all available details`
-              );
-              console.log(
-                'Capture result',
-                orderData,
-                JSON.stringify(orderData, null, 2)
+
+              if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Failed to capture order: ${errorText}`);
+              }
+
+              const orderData = await response.json();
+              console.log('Order capture response:', orderData);
+
+              // Get the actual order data from the response
+              const actualOrderData = orderData.jsonResponse || orderData;
+
+              // Three cases to handle:
+              //   (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
+              //   (2) Other non-recoverable errors -> Show a failure message
+              //   (3) Successful transaction -> Show confirmation or thank you message
+
+              const errorDetail = actualOrderData?.details?.[0];
+
+              if (errorDetail?.issue === 'INSTRUMENT_DECLINED') {
+                // (1) Recoverable INSTRUMENT_DECLINED -> call actions.restart()
+                // recoverable state, per https://developer.paypal.com/docs/checkout/standard/customize/handle-funding-failures/
+                return actions.restart();
+              } else if (errorDetail) {
+                // (2) Other non-recoverable errors -> Show a failure message
+                throw new Error(
+                  `${errorDetail.description} (${actualOrderData.debug_id})`
+                );
+              } else if (!actualOrderData.purchase_units) {
+                throw new Error(JSON.stringify(actualOrderData));
+              } else {
+                // (3) Successful transaction -> Show confirmation or thank you message
+                // Or go to another URL:  actions.redirect('thank_you.html');
+                const transaction =
+                  actualOrderData?.purchase_units?.[0]?.payments
+                    ?.captures?.[0] ||
+                  actualOrderData?.purchase_units?.[0]?.payments
+                    ?.authorizations?.[0];
+
+                console.log(
+                  `Transaction ${transaction.status}: ${transaction.id}`
+                );
+
+                // Redirect to success page or show confirmation
+                window.location = `${process.env.HOST}/index.html?success=true`;
+              }
+            } catch (error) {
+              console.error('PayPal capture error:', error);
+              alert(
+                `Sorry, your transaction could not be processed: ${error.message}`
               );
             }
-          } catch (error) {
-            console.error(error);
-            console.log(
-              `Sorry, your transaction could not be processed...<br><br>${error}`
+          },
+
+          onError: err => {
+            console.error('PayPal button error:', err);
+            alert(
+              'There was an error with the PayPal checkout. Please try again later.'
             );
-          }
-        },
-      })
-      .render('#paypal');
+          },
+        })
+        .render('#paypal');
+
+      console.log('PayPal buttons rendered successfully');
+    } catch (error) {
+      console.error('Error setting up PayPal buttons:', error);
+      alert('Failed to initialize PayPal checkout. Please try again later.');
+    }
   }
 
   // Override the placeholder from View.js

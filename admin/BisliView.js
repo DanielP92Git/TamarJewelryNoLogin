@@ -1280,7 +1280,7 @@ async function addProduct(e, data, form) {
             border-radius: 4px;
             cursor: pointer;
           ">Add Another Product</button>
-        </div>
+            </div>
       `;
 
       // Add the card to the page
