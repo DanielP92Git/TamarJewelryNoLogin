@@ -818,7 +818,6 @@ main {
   position: relative;
   width: 100%;
   overflow: hidden;
-  
 }
 
 .big-image {
@@ -838,6 +837,37 @@ main {
   box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
   pointer-events: none;
   z-index: 1000;
+}
+
+.tap-to-magnify {
+  position: absolute;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 999;
+  pointer-events: none;
+  animation: pulse 2s infinite;
+  text-align: center;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.05);
+  }
+  100% {
+    opacity: 0.8;
+    transform: translateX(-50%) scale(1);
+  }
 }
 
 @media (max-width: 699.99px) {
