@@ -293,6 +293,10 @@ body.menu-active .icons-container .menubars-svg {
   position: relative;
 }
 
+.attrib-cart {
+  display: none;
+}
+
 .shoppingcart-mobile {
   fill: rgb(0, 0, 0);
   width: 30px;
@@ -300,23 +304,6 @@ body.menu-active .icons-container .menubars-svg {
   padding: 3px;
   position: relative;
   border-radius: 5px;
-}
-
-.cart-number-mobile {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.6rem;
-  position: absolute;
-  left: 55%;
-  top: 35%;
-  background-color: rgba(255, 255, 255);
-  width: 10px;
-  height: 10px;
-  border: 1px solid black;
-  border-radius: 50%;
-  text-align: center;
-  z-index: 10;
 }
 
 /* Hide desktop elements if they exist in mobile view */
@@ -361,5 +348,21 @@ body.menu-active .icons-container .menubars-svg {
     display: flex;
     align-items: center;
     height: 3rem;
+  }
+  .cart-number-mobile {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.6rem;
+    position: absolute;
+    left: 55%;
+    top: 35%;
+    background-color: rgba(255, 255, 255);
+    width: 10px;
+    height: 10px;
+    border: 1px solid black;
+    border-radius: 50%;
+    text-align: center;
+    z-index: 10;
   }
 }
