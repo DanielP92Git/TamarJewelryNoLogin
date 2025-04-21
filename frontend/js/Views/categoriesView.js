@@ -507,11 +507,16 @@ class CategoriesView extends View {
           <img src="${closeSvg}" alt="close-icon" class="close-modal-btn" />
           <div class="images-container">
             <div class="magnifier-container">
-              <img src="${image}" alt="${title}" class="big-image" />
-              <div class="magnifier-glass"></div>
               ${
                 isMobile
                   ? `<div class="tap-to-magnify">${tapToMagnifyText}</div>`
+                  : ''
+              }
+              <img src="${image}" alt="${title}" class="big-image" onload="this.classList.add('loaded'); this.parentNode.classList.add('image-loaded');" />
+              <div class="magnifier-glass"></div>
+              ${
+                isMobile
+                  ? ''
                   : `<div class="magnifier-icon" title="Hover to magnify"></div>`
               }
             </div>
@@ -640,25 +645,34 @@ class CategoriesView extends View {
           offsetY = 0;
         }
 
-        // Check if cursor is within the actual image bounds
+        // Add a small buffer to allow magnification at the edges (5px)
+        const buffer = 5;
+
+        // Check if cursor is within the actual image bounds with buffer
+        // This expanded check helps with edge cases, especially at the bottom
         if (
-          mouseX < offsetX ||
-          mouseX > offsetX + visibleImgWidth ||
-          mouseY < offsetY ||
-          mouseY > offsetY + visibleImgHeight
+          mouseX < offsetX - buffer ||
+          mouseX > offsetX + visibleImgWidth + buffer ||
+          mouseY < offsetY - buffer ||
+          mouseY > offsetY + visibleImgHeight + buffer
         ) {
           return { inBounds: false };
         }
 
         // Calculate the percentage position within the actual image
-        const xPercent = ((mouseX - offsetX) / visibleImgWidth) * 100;
-        const yPercent = ((mouseY - offsetY) / visibleImgHeight) * 100;
+        // Constrain percentages to 0-100 range to handle edge cases
+        let xPercent = ((mouseX - offsetX) / visibleImgWidth) * 100;
+        let yPercent = ((mouseY - offsetY) / visibleImgHeight) * 100;
+
+        // Clamp percentage values between 0 and 100 with a slight buffer for edges
+        xPercent = Math.max(0, Math.min(100, xPercent));
+        yPercent = Math.max(0, Math.min(100, yPercent));
 
         return { inBounds: true, xPercent, yPercent };
       };
 
       if (isMobile) {
-        // For mobile, use touch events
+        // Mobile touch handling code...
         magnifierContainer.addEventListener('touchstart', function (e) {
           if (tapToMagnify) {
             tapToMagnify.style.display = 'none'; // Hide the message when user starts touching
@@ -704,12 +718,36 @@ class CategoriesView extends View {
           const glassWidth = magnifierGlass.offsetWidth / 2;
           const glassHeight = magnifierGlass.offsetHeight / 2;
 
-          // Position the glass at touch point
-          magnifierGlass.style.left = `${x - glassWidth}px`;
-          magnifierGlass.style.top = `${y - glassHeight}px`;
+          // Apply an offset to move the glass above the touch point (finger)
+          // Move it 100px above the finger to ensure it's visible
+          const touchOffset = 100;
+          let offsetX = x - glassWidth;
+          let offsetY = y - glassHeight - touchOffset;
+
+          // Create buffer space for bottom edge
+          const bottomBuffer = 20;
+          const rightBuffer = 20;
+
+          // Make sure the glass doesn't go outside the container with improved constraints
+          offsetX = Math.max(0, offsetX);
+          offsetY = Math.max(0, offsetY);
+
+          // Adjust bottom and right constraints with buffer
+          offsetX = Math.min(
+            rect.width - magnifierGlass.offsetWidth - rightBuffer,
+            offsetX
+          );
+          offsetY = Math.min(
+            rect.height - magnifierGlass.offsetHeight - bottomBuffer,
+            offsetY
+          );
+
+          // Position the glass with the calculated offset
+          magnifierGlass.style.left = `${offsetX}px`;
+          magnifierGlass.style.top = `${offsetY}px`;
 
           // Calculate background position using percentage-based approach
-          const zoomFactor = 2.5; // Zoom level for mobile
+          const zoomFactor = 3.5; // Increased zoom factor for mobile
 
           // Use a higher quality approach for positioning the background
           magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
@@ -724,18 +762,17 @@ class CategoriesView extends View {
       } else {
         // Desktop behavior
         if (magnifierIcon) {
-          // Hide magnifier icon when hovering over image
-          magnifierContainer.addEventListener('mouseenter', function () {
-            magnifierIcon.style.opacity = '0';
-          });
-
-          magnifierContainer.addEventListener('mouseleave', function () {
-            magnifierIcon.style.opacity = '1';
-            magnifierGlass.style.display = 'none';
-          });
+          // Show magnifier icon by default
+          magnifierIcon.style.opacity = '1';
         }
 
-        // Event handlers for magnifier
+        // Event handlers for desktop magnifier
+        magnifierContainer.addEventListener('mouseenter', function () {
+          if (magnifierIcon) {
+            magnifierIcon.style.opacity = '0';
+          }
+        });
+
         magnifierContainer.addEventListener('mousemove', function (e) {
           const rect = magnifierContainer.getBoundingClientRect();
           const x = e.clientX - rect.left;
@@ -752,16 +789,39 @@ class CategoriesView extends View {
           // Show the glass
           magnifierGlass.style.display = 'block';
 
-          // Prevent the glass from going outside the container
+          // Get glass dimensions and adjust for proper centered appearance
           const glassWidth = magnifierGlass.offsetWidth / 2;
           const glassHeight = magnifierGlass.offsetHeight / 2;
 
-          // Position the glass at cursor
-          magnifierGlass.style.left = `${x - glassWidth}px`;
-          magnifierGlass.style.top = `${y - glassHeight}px`;
+          // Calculate desired position
+          let glassX = x - glassWidth;
+          let glassY = y - glassHeight;
+
+          // Create buffer space for bottom edge (20px from container edge)
+          const bottomBuffer = 20;
+          const rightBuffer = 20;
+
+          // Ensure the glass doesn't go outside the container with adjusted constraints
+          // For left and top edges
+          glassX = Math.max(0, glassX);
+          glassY = Math.max(0, glassY);
+
+          // For right and bottom edges - ensure we can view bottom jewelry
+          glassX = Math.min(
+            rect.width - magnifierGlass.offsetWidth - rightBuffer,
+            glassX
+          );
+          glassY = Math.min(
+            rect.height - magnifierGlass.offsetHeight - bottomBuffer,
+            glassY
+          );
+
+          // Position the glass at cursor with constraints applied
+          magnifierGlass.style.left = `${glassX}px`;
+          magnifierGlass.style.top = `${glassY}px`;
 
           // Calculate background position for magnifier
-          const zoomFactor = 3; // Increased zoom factor for desktop
+          const zoomFactor = 3; // Zoom factor for desktop
 
           // Use a higher quality approach for positioning the background
           magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
@@ -776,6 +836,9 @@ class CategoriesView extends View {
 
         magnifierContainer.addEventListener('mouseleave', function () {
           magnifierGlass.style.display = 'none';
+          if (magnifierIcon) {
+            magnifierIcon.style.opacity = '1';
+          }
         });
       }
     }

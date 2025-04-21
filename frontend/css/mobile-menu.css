@@ -236,7 +236,7 @@ body.menu-active::before {
   top: 15px; /* Increased spacing from top */
   right: 15px; /* Increased spacing from right */
   width: auto;
-  z-index: 900; /* Above overlay and menu */
+  z-index: 700; /* Above overlay and menu */
   display: flex;
   align-items: center;
 }
