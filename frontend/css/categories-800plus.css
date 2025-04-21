@@ -573,7 +573,7 @@ a {
   top: 15px;
   width: 1.5rem;
   height: 1.5rem;
-  z-index: 10;
+  z-index: 999;
   cursor: pointer;
   transition: transform 0.2s ease;
   background-color: rgba(255, 255, 255, 0.8);

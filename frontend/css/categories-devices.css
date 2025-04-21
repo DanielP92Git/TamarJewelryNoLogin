@@ -485,12 +485,15 @@ main {
 
 .close-modal-btn {
   position: absolute;
-  left: 88%;
-  bottom: 90%;
-  width: 1rem;
-  height: 1rem;
-
-  z-index: 900;
+  right: 10px;
+  top: 10px;
+  width: 1.5rem;
+  height: 1.5rem;
+  z-index: 999;
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 50%;
+  padding: 5px;
 }
 
 .close-modal-btn:hover {
@@ -967,5 +970,19 @@ main {
 
   .big-image {
     max-height: 50vh;
+  }
+
+  .close-modal-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    width: 1.2rem;
+    height: 1.2rem;
+    z-index: 999;
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    padding: 4px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
   }
 }

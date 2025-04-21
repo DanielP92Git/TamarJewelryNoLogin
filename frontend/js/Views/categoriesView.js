@@ -521,7 +521,7 @@ class CategoriesView extends View {
     const modalMarkup = `
       <div class="item-overlay">
         <div class="modal-item-container">
-          <img src="${closeSvg}" alt="close-icon" class="close-modal-btn" />
+          <img src="${closeSvg}" alt="close" class="close-modal-btn" style="object-fit: contain; display: block;" />
           <div class="images-container">
             <div class="magnifier-container">
               ${
