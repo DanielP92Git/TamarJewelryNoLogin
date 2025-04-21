@@ -979,4 +979,66 @@ export default class View {
     // Add event listeners for add to cart buttons
     this.addCartEventListeners();
   }
+
+  renderMenu() {
+    // Get the language preference from localStorage
+    const lng = localStorage.getItem('language') || 'eng';
+
+    // Get the menu element
+    const menu = document.querySelector('.menu');
+    if (!menu) return;
+
+    // Set menu content based on language
+    menu.innerHTML = this.handleMenuLanguage(lng);
+
+    // Initialize cart number
+    this._cartNumber = document.querySelectorAll('.cart-number');
+    model.checkCartNumber().then(num => {
+      this.persistCartNumber(num);
+    });
+  }
+
+  initializeMobileMenu() {
+    // Add event handlers for mobile menu interactions
+    this.svgHandler();
+
+    console.log('mobileCartNumber', mobileCartNumber);
+    // Initialize mobile cart number
+    const mobileCartNumber = document.querySelector('.cart-number-mobile');
+    if (mobileCartNumber) {
+      model.checkCartNumber().then(num => {
+        mobileCartNumber.textContent = num;
+      });
+    }
+  }
+
+  addCartEventListeners() {
+    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+    addToCartButtons.forEach(button => {
+      // Remove any existing event listeners to avoid duplicates
+      const newButton = button.cloneNode(true);
+      button.parentNode.replaceChild(newButton, button);
+
+      // Add click event listener
+      newButton.addEventListener('click', e => {
+        e.preventDefault();
+        const id = newButton.dataset.id;
+
+        // Call model to handle adding to cart
+        model.handleAddToCart({ dataset: { id } });
+
+        // Update the cart number
+        this.increaseCartNumber();
+
+        // Also update cart number on mobile view
+        const mobileCartNumber = document.querySelector('.cart-number-mobile');
+        if (mobileCartNumber) {
+          const newValue = parseInt(mobileCartNumber.textContent || '0') + 1;
+          mobileCartNumber.textContent = newValue;
+          mobileCartNumber.style.display = 'flex';
+        }
+      });
+    });
+  }
 }
