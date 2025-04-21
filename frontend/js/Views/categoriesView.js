@@ -485,6 +485,10 @@ class CategoriesView extends View {
     const price = data.querySelector('.item-price').textContent;
     const currency = data.dataset.currency;
 
+    // Get the product object from our internal array to access all data including small images
+    const product = this.products.find(prod => prod.id == id);
+    const smallImagesArray = product?.smallImages || [];
+
     // Close the previous modal if open
     if (this.isModalOpen) {
       this.closeModal();
@@ -492,6 +496,19 @@ class CategoriesView extends View {
 
     // Check if we're on mobile
     const isMobile = window.matchMedia('(max-width: 699.99px)').matches;
+
+    // Function to generate small image markup that works better on mobile
+    const generateSmallImageMarkup = images => {
+      return images
+        .map(
+          img => `
+          <div class="small-image-div">
+            <img class="small-image" src="${img}" alt="Product view" loading="lazy">
+          </div>
+        `
+        )
+        .join('');
+    };
 
     // Create modal content
     const modal = document.querySelector('.modal');
@@ -522,7 +539,11 @@ class CategoriesView extends View {
             </div>
             ${
               hasMultipleImages
-                ? `<div class="small-images-container">${imageMarkup}</div>`
+                ? `<div class="small-images-container">${
+                    isMobile
+                      ? generateSmallImageMarkup(smallImagesArray)
+                      : imageMarkup
+                  }</div>`
                 : ''
             }
           </div>
