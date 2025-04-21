@@ -114,6 +114,13 @@ a {
   text-align: center;
 }
 
+/* Arrow indicator for dropdown menus */
+.arrow-indicator {
+  font-size: 0.6rem;
+  margin-left: 4px;
+  display: inline-block;
+}
+
 /* Categories dropdown */
 .categories-list {
   display: flex;
