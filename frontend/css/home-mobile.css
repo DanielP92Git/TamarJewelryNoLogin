@@ -44,8 +44,8 @@ header {
 }
 
 .logo {
-  width: 25%;
-  margin-bottom: 2rem;
+  width: 35%;
+  margin: 2rem;
   z-index: 0;
 
   /* border: 1px solid rgb(90, 255, 65); */
@@ -183,42 +183,33 @@ h3 {
   position: absolute;
   bottom: -3%;
   left: 55%;
-  width: 40%;
-  height: 20%;
   font-size: clamp(1.2rem, 6vw, 4rem);
   font-variant: small-caps;
   font-weight: lighter;
   color: rgba(255, 255, 255, 0.836);
+  padding: 5px;
+  /* border: 1px solid white; */
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 5px rgba(243, 243, 243, 0.6);
 
   /* border: 1px solid darkblue; */
 }
 
-h3 span {
-  font-weight: 700;
+h3 > span {
+  color: white;
+  font-weight: 400;
   padding: 5px;
-  border-radius: 5px;
-  color: #b1275f;
-  color: #5eb6ae;
+  padding-right: 10px;
+}
+
+h3 span:last-child {
+  color: #92e4de;
 }
 
 .thanks {
   display: none;
-  /* flex-flow: column wrap;
-  align-items: center;
 
-  width: 80vw;
-  height: 30vh;
-  background-color: rgba(255, 255, 255, 0.8);
-  position: absolute;
-  top: 20%;
-  margin-top: 60px;
-  padding-top: 10px;
-  font-size: 2rem;
-  text-align: center;
-
-  z-index: 10;
-
-  ~~~~ FOR DEBUGGING~~~~
+  /* ~~~~ FOR DEBUGGING~~~~
   border: 3px solid red; */
 }
 
@@ -302,7 +293,6 @@ p {
   font-size: 1.4rem;
   font-family: 'Amatic SC', sans-serif;
 }
-
 
 .category-item {
   display: flex;
@@ -525,6 +515,62 @@ main {
   /* border: 3px solid rgb(0, 255, 187); */
 }
 
+.categories-tab {
+  display: flex;
+  flex-flow: row;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  /* border: 1px solid red; */
+}
+
+/* Remove previous approaches that didn't work */
+.categories-tab > .attrib::after,
+.category-item .attrib::after {
+  content: none;
+}
+
+/* Add a simple arrow directly to the shop link in HTML */
+.shop-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  text-align: center;
+}
+
+/* Add styles for the arrow span that will be added via JS */
+.arrow-indicator {
+  display: inline-block;
+  margin-left: 5px;
+  font-size: 0.8rem;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.categories-tab--active .arrow-indicator {
+  transform: rotate(180deg);
+}
+
+/* Override desktop menu styling for mobile */
+.categories-list {
+  display: none;
+  position: static;
+  width: 100%;
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  box-shadow: none;
+  background-color: #f5f5f5;
+  margin-top: 0;
+  padding: 0;
+  z-index: 10;
+}
+
+.categories-list--active {
+  display: block;
+}
+
 .category-box {
   width: 90%;
   height: 20%;
@@ -686,7 +732,6 @@ main {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */
 }
-
 
 .whatsapp-container {
   display: flex;

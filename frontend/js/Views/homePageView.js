@@ -77,9 +77,8 @@ class HomePageView extends View {
         `;
       } else if (lng === 'heb') {
         heroText.innerHTML = `
-          היופי <br />
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;של
-          <span>צבעים</span>
+          <span>היופי</span> <br />
+          <span>&nbsp;&nbsp;&nbsp;שבצבעים</span>
         `;
         heroText.style.direction = 'rtl';
         heroText.style.textAlign = 'right';

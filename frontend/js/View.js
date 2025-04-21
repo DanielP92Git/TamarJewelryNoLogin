@@ -112,10 +112,14 @@ export default class View {
       // Open the dropdown
       // console.log('handleMobileDropdown - opening dropdown');
       categoriesList.classList.add('categories-list--active');
+      // Add active class to the categories tab to change the arrow direction
+      categoriesTab.classList.add('categories-tab--active');
     } else {
       // Just remove active class
       // console.log('handleMobileDropdown - closing dropdown');
       categoriesList.classList.remove('categories-list--active');
+      // Remove active class from the categories tab
+      categoriesTab.classList.remove('categories-tab--active');
     }
   }
 
@@ -133,6 +137,14 @@ export default class View {
     const activeTabs = document.querySelectorAll('.categories-tab.active');
     activeTabs.forEach(tab => {
       tab.classList.remove('active');
+    });
+
+    // Remove the categories-tab--active class as well
+    const activeDropdownTabs = document.querySelectorAll(
+      '.categories-tab--active'
+    );
+    activeDropdownTabs.forEach(tab => {
+      tab.classList.remove('categories-tab--active');
     });
   }
   /**
@@ -493,7 +505,7 @@ export default class View {
             <a class="attrib" href="/index.html">Home</a>
           </li>
           <li class="main-nav-tab categories-tab">
-            <a class="attrib" href="#">Shop ▾</a>
+            <a class="attrib" href="#">Shop <span class="arrow-indicator">▼</span></a>
             <ul class="categories-list">
               <li class="category-item category-item--necklace">
                 <a class="attrib" href="/html/categories/necklaces.html">
@@ -556,7 +568,7 @@ export default class View {
             <a class="attrib attrib-heb" href="/index.html">בית </a>
           </li>
           <li class="main-nav-tab categories-tab">
-            <a class="attrib attrib-heb" href="#">חנות ▾</a>
+            <a class="attrib attrib-heb shop-link" href="#">חנות <span class="arrow-indicator">▼</span></a>
             <ul class="categories-list">
               <li class="category-item category-item--necklace">
                 <a class="attrib attrib-heb" href="/html/categories/necklaces.html">
@@ -625,6 +637,9 @@ export default class View {
       console.error('[DEBUG] Menu element not found');
       return;
     }
+
+    // Check if menu was open before language change
+    const wasMenuOpen = menu.classList.contains('menu-open');
 
     // Update menu content
     menu.innerHTML = this.handleMenuLanguage(lng);
@@ -707,6 +722,30 @@ export default class View {
     // Reinitialize the mobile menu toggle after language change
     setTimeout(() => {
       this.svgHandler();
+
+      // Restore menu open state if it was open before
+      if (wasMenuOpen) {
+        const menu = document.querySelector('.menu');
+        const body = document.body;
+
+        // Add open classes
+        menu.classList.add('menu-open');
+        body.classList.add('menu-active');
+
+        // Add close icon again
+        const currentCloseIcon = document.createElement('div');
+        currentCloseIcon.innerHTML = `<svg class="menu-close-icon" viewBox="0 0 100 100">
+          <path d="M 95.664918,13.635782 C 98.460227,10.752089 98.014956,6.4689567 94.650692,4.0729473 91.286428,1.6769369 86.28951,2.0586028 83.494202,4.9422952 L 49.999999,39.398187 16.505794,4.9422952 C 13.710488,2.0586028 8.713569,1.6769369 5.3493062,4.0729473 1.9850435,6.4689567 1.5397734,10.752089 4.3350801,13.635782 L 39.684575,50 4.3350801,86.364219 c -2.7953067,2.883692 -2.3500366,7.166829 1.0142261,9.562835 3.3642628,2.39601 8.3611818,2.01434 11.1564878,-0.869346 L 49.999999,60.601813 83.494202,95.057708 c 2.795308,2.883686 7.792226,3.265356 11.15649,0.869346 3.364264,-2.396006 3.809535,-6.679143 1.014226,-9.562835 L 60.315422,50 Z" />
+        </svg>`;
+        currentCloseIcon.classList.add('menu-close-container');
+        currentCloseIcon.addEventListener('click', e => {
+          e.stopPropagation();
+          menu.classList.remove('menu-open');
+          body.classList.remove('menu-active');
+          currentCloseIcon.remove();
+        });
+        menu.prepend(currentCloseIcon);
+      }
     }, 0);
 
     // Call page-specific language updates if the method exists
