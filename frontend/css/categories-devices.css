@@ -489,6 +489,8 @@ main {
   bottom: 90%;
   width: 1rem;
   height: 1rem;
+
+  z-index: 900;
 }
 
 .close-modal-btn:hover {
