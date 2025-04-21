@@ -485,19 +485,21 @@ class CategoriesView extends View {
     const price = data.querySelector('.item-price').textContent;
     const currency = data.dataset.currency;
 
-    // We already converted newlines to <br> tags in getProductMarkup
-    // No need to reprocess as we're using innerHTML directly
-
     // Close the previous modal if open
     if (this.isModalOpen) {
       this.closeModal();
     }
+
+    // Check if we're on mobile
+    const isMobile = window.matchMedia('(max-width: 699.99px)').matches;
 
     // Create modal content
     const modal = document.querySelector('.modal');
     const addToCartText = this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל';
     const addedText =
       this.lang === 'eng' ? 'Added to Cart!' : 'נוסף לסל הקניות';
+    const tapToMagnifyText =
+      this.lang === 'eng' ? 'Tap to magnify' : 'הקש להגדלה';
 
     const modalMarkup = `
       <div class="item-overlay">
@@ -507,6 +509,11 @@ class CategoriesView extends View {
             <div class="magnifier-container">
               <img src="${image}" alt="${title}" class="big-image" />
               <div class="magnifier-glass"></div>
+              ${
+                isMobile
+                  ? `<div class="tap-to-magnify">${tapToMagnifyText}</div>`
+                  : `<div class="magnifier-icon" title="Hover to magnify"></div>`
+              }
             </div>
             ${
               hasMultipleImages
@@ -579,46 +586,202 @@ class CategoriesView extends View {
     const magnifierContainer = modal.querySelector('.magnifier-container');
     const magnifierGlass = modal.querySelector('.magnifier-glass');
     const bigImage = modal.querySelector('.big-image');
+    const tapToMagnify = modal.querySelector('.tap-to-magnify');
+    const magnifierIcon = modal.querySelector('.magnifier-icon');
 
     if (magnifierContainer && magnifierGlass && bigImage) {
       // Initial setup - hide the glass
       magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
       magnifierGlass.style.display = 'none';
 
-      // Event handlers for magnifier
-      magnifierContainer.addEventListener('mousemove', function (e) {
-        // Show the glass
-        magnifierGlass.style.display = 'block';
+      // Preload the image at high resolution to improve quality
+      const preloadImg = new Image();
+      preloadImg.src = bigImage.src;
+      preloadImg.onload = function () {
+        // Set initial magnifier glass properties with high quality settings
+        magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
+        magnifierGlass.style.backgroundSize = `${300}%`; // Initial zoom factor of 3
+        magnifierGlass.style.imageRendering = 'high-quality';
+        magnifierGlass.style.backfaceVisibility = 'hidden';
+        magnifierGlass.style.transform = 'translateZ(0)';
 
-        // Get cursor position
-        const rect = magnifierContainer.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+        // Store the natural dimensions of the image for calculations
+        bigImage.dataset.naturalWidth = preloadImg.naturalWidth;
+        bigImage.dataset.naturalHeight = preloadImg.naturalHeight;
+      };
 
-        // Prevent the glass from going outside the container
-        const glassWidth = magnifierGlass.offsetWidth / 2;
-        const glassHeight = magnifierGlass.offsetHeight / 2;
+      // Function to calculate correct magnifier position for object-fit: contain images
+      const calculateImageContainPosition = (
+        imgElement,
+        containerRect,
+        mouseX,
+        mouseY
+      ) => {
+        const imgRect = imgElement.getBoundingClientRect();
 
-        // Position the glass at cursor
-        magnifierGlass.style.left = `${x - glassWidth}px`;
-        magnifierGlass.style.top = `${y - glassHeight}px`;
+        // Calculate the dimensions of the actual visible image (not just the container)
+        const imgAspectRatio =
+          imgElement.dataset.naturalWidth / imgElement.dataset.naturalHeight;
+        const containerAspectRatio = containerRect.width / containerRect.height;
 
-        // Calculate background position for magnifier
-        const zoomFactor = 2; // Zoom level
-        const bgX = x * zoomFactor - glassWidth;
-        const bgY = y * zoomFactor - glassHeight;
+        let visibleImgWidth, visibleImgHeight, offsetX, offsetY;
 
-        magnifierGlass.style.backgroundPosition = `-${bgX}px -${bgY}px`;
-        magnifierGlass.style.backgroundSize = `${
-          bigImage.width * zoomFactor
-        }px ${bigImage.height * zoomFactor}px`;
-      });
+        if (imgAspectRatio > containerAspectRatio) {
+          // Image is constrained by width
+          visibleImgWidth = containerRect.width;
+          visibleImgHeight = containerRect.width / imgAspectRatio;
+          offsetX = 0;
+          offsetY = (containerRect.height - visibleImgHeight) / 2;
+        } else {
+          // Image is constrained by height
+          visibleImgHeight = containerRect.height;
+          visibleImgWidth = containerRect.height * imgAspectRatio;
+          offsetX = (containerRect.width - visibleImgWidth) / 2;
+          offsetY = 0;
+        }
 
-      // Hide glass when mouse leaves the container
-      magnifierContainer.addEventListener('mouseleave', function () {
-        magnifierGlass.style.display = 'none';
-      });
+        // Check if cursor is within the actual image bounds
+        if (
+          mouseX < offsetX ||
+          mouseX > offsetX + visibleImgWidth ||
+          mouseY < offsetY ||
+          mouseY > offsetY + visibleImgHeight
+        ) {
+          return { inBounds: false };
+        }
+
+        // Calculate the percentage position within the actual image
+        const xPercent = ((mouseX - offsetX) / visibleImgWidth) * 100;
+        const yPercent = ((mouseY - offsetY) / visibleImgHeight) * 100;
+
+        return { inBounds: true, xPercent, yPercent };
+      };
+
+      if (isMobile) {
+        // For mobile, use touch events
+        magnifierContainer.addEventListener('touchstart', function (e) {
+          if (tapToMagnify) {
+            tapToMagnify.style.display = 'none'; // Hide the message when user starts touching
+          }
+
+          // Show the glass
+          magnifierGlass.style.display = 'block';
+
+          handleTouch(e);
+        });
+
+        magnifierContainer.addEventListener('touchmove', function (e) {
+          e.preventDefault(); // Prevent scrolling while magnifying
+          handleTouch(e);
+        });
+
+        magnifierContainer.addEventListener('touchend', function () {
+          magnifierGlass.style.display = 'none';
+
+          // Show the tap message again after a short delay
+          if (tapToMagnify) {
+            setTimeout(() => {
+              tapToMagnify.style.display = 'block';
+            }, 500);
+          }
+        });
+
+        function handleTouch(e) {
+          const touch = e.touches[0];
+          const rect = magnifierContainer.getBoundingClientRect();
+          const x = touch.clientX - rect.left;
+          const y = touch.clientY - rect.top;
+
+          // Use the improved position calculation
+          const position = calculateImageContainPosition(bigImage, rect, x, y);
+
+          if (!position.inBounds) {
+            magnifierGlass.style.display = 'none';
+            return;
+          }
+
+          // Prevent the glass from going outside the container
+          const glassWidth = magnifierGlass.offsetWidth / 2;
+          const glassHeight = magnifierGlass.offsetHeight / 2;
+
+          // Position the glass at touch point
+          magnifierGlass.style.left = `${x - glassWidth}px`;
+          magnifierGlass.style.top = `${y - glassHeight}px`;
+
+          // Calculate background position using percentage-based approach
+          const zoomFactor = 2.5; // Zoom level for mobile
+
+          // Use a higher quality approach for positioning the background
+          magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
+          magnifierGlass.style.backgroundPosition = `${position.xPercent}% ${position.yPercent}%`;
+          magnifierGlass.style.backgroundSize = `${zoomFactor * 100}%`;
+
+          // Apply additional CSS to improve rendering quality
+          magnifierGlass.style.imageRendering = 'high-quality';
+          magnifierGlass.style.backfaceVisibility = 'hidden';
+          magnifierGlass.style.transform = 'translateZ(0)'; // Hardware acceleration
+        }
+      } else {
+        // Desktop behavior
+        if (magnifierIcon) {
+          // Hide magnifier icon when hovering over image
+          magnifierContainer.addEventListener('mouseenter', function () {
+            magnifierIcon.style.opacity = '0';
+          });
+
+          magnifierContainer.addEventListener('mouseleave', function () {
+            magnifierIcon.style.opacity = '1';
+            magnifierGlass.style.display = 'none';
+          });
+        }
+
+        // Event handlers for magnifier
+        magnifierContainer.addEventListener('mousemove', function (e) {
+          const rect = magnifierContainer.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          // Use the improved position calculation
+          const position = calculateImageContainPosition(bigImage, rect, x, y);
+
+          if (!position.inBounds) {
+            magnifierGlass.style.display = 'none';
+            return;
+          }
+
+          // Show the glass
+          magnifierGlass.style.display = 'block';
+
+          // Prevent the glass from going outside the container
+          const glassWidth = magnifierGlass.offsetWidth / 2;
+          const glassHeight = magnifierGlass.offsetHeight / 2;
+
+          // Position the glass at cursor
+          magnifierGlass.style.left = `${x - glassWidth}px`;
+          magnifierGlass.style.top = `${y - glassHeight}px`;
+
+          // Calculate background position for magnifier
+          const zoomFactor = 3; // Increased zoom factor for desktop
+
+          // Use a higher quality approach for positioning the background
+          magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
+          magnifierGlass.style.backgroundPosition = `${position.xPercent}% ${position.yPercent}%`;
+          magnifierGlass.style.backgroundSize = `${zoomFactor * 100}%`;
+
+          // Apply additional CSS to improve rendering quality
+          magnifierGlass.style.imageRendering = 'high-quality';
+          magnifierGlass.style.backfaceVisibility = 'hidden';
+          magnifierGlass.style.transform = 'translateZ(0)'; // Hardware acceleration
+        });
+
+        magnifierContainer.addEventListener('mouseleave', function () {
+          magnifierGlass.style.display = 'none';
+        });
+      }
     }
+
+    // Show modal
+    modal.classList.add('show');
   }
 
   setupCurrencyHandler() {
