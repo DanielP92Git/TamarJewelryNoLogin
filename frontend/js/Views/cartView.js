@@ -15,7 +15,7 @@ class CartView extends View {
   _checkMeOut = document.querySelector('.check-me-out');
   _orderSummaryContainer = document.querySelector('.summary');
   _host = process.env.API_URL;
-  _rate = 3.8;
+  _rate = process.env.USD_ILS_RATE || 3.7;
 
   addCartViewHandler(handler) {
     window.addEventListener('load', () => {
@@ -207,7 +207,7 @@ class CartView extends View {
 
           ${
             lng === 'eng'
-              ? '<span class="shipping-text">(Shipping costs may apply. Please checkout for options)</span>'
+              ? '<span class="shipping-text">(Shipping costs may apply. Please proceed to checkout for options)</span>'
               : '<span class="shipping-text">(ייתכנו עלויות משלוח. אנא התקדמו לתשלום לבחירת אפשרות המשלוח)</span>'
           }
         </div>`;

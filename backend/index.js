@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
+const sharp = require('sharp');
 
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
@@ -32,6 +33,7 @@ const allowedOrigins = [
   `${process.env.ADMIN_URL}`,
   `${process.env.FULLHOST}`,
   'http://127.0.0.1:5500',
+  'http://localhost:5500', // Added for local admin dashboard
 ];
 
 console.log('Allowed origins:', allowedOrigins);
@@ -119,21 +121,40 @@ const Users = mongoose.model('Users', {
 
 const Product = mongoose.model('Product', {
   id: { type: Number, required: true },
-  name: { type: String, required: false },
-  image: { type: String, required: false },
-  imageLocal: { type: String, required: false },
-  publicImage: { type: String, required: false },
-  directImageUrl: { type: String, required: false },
-  smallImages: { type: Array, required: false },
-  smallImagesLocal: { type: Array, required: false },
+  name: { type: String, required: true },
+  // Legacy image field
+  image: { type: String },
+  // Main image with responsive versions
+  mainImage: {
+    desktop: { type: String },
+    mobile: { type: String },
+    desktopLocal: { type: String },
+    mobileLocal: { type: String },
+    publicDesktop: { type: String },
+    publicMobile: { type: String },
+  },
+  // Small images array with responsive versions
+  smallImages: [
+    {
+      desktop: { type: String },
+      mobile: { type: String },
+      desktopLocal: { type: String },
+      mobileLocal: { type: String },
+    },
+  ],
+  // Additional image URLs for better accessibility
+  imageLocal: { type: String },
+  publicImage: { type: String },
+  directImageUrl: { type: String },
+  // Product details
   category: { type: String, required: true },
-  description: { type: String, required: false },
-  quantity: { type: Number, required: false },
-  ils_price: { type: Number, required: false },
-  usd_price: { type: Number, required: false },
+  description: { type: String },
+  quantity: { type: Number, default: 0 },
+  ils_price: { type: Number },
+  usd_price: { type: Number },
   date: { type: Date, default: Date.now },
   available: { type: Boolean, default: true },
-  security_margin: { type: Number, required: false },
+  security_margin: { type: Number },
 });
 
 // =============================================
@@ -208,7 +229,31 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ storage: storage });
+// Add file filter to accept CR2 files
+const fileFilter = (req, file, cb) => {
+  // Accept CR2 files and common image formats
+  const allowedTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/cr2',
+    'application/octet-stream',
+  ];
+  if (
+    allowedTypes.includes(file.mimetype) ||
+    file.originalname.toLowerCase().endsWith('.cr2')
+  ) {
+    cb(null, true);
+  } else {
+    cb(new Error('File type not supported'), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+});
 
 // =============================================
 // Static File Serving
@@ -712,17 +757,7 @@ app.post('/signup', async (req, res) => {
 app.post('/addproduct', async (req, res) => {
   try {
     console.log('\n=== Product Creation Request Details ===');
-    console.log('Complete request body:', req.body);
-
-    if (!req.body.image) {
-      console.warn(
-        '⚠️ WARNING: No image URL received in request. Request fields:',
-        Object.keys(req.body)
-      );
-      console.warn(
-        'Make sure the frontend is sending the image URL from the upload response'
-      );
-    }
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
 
     const products = await Product.find({}).sort({ id: -1 }).limit(1);
     const nextId = products.length > 0 ? Number(products[0].id) + 1 : 1;
@@ -731,73 +766,72 @@ app.post('/addproduct', async (req, res) => {
     const usdPrice = Number(req.body.oldPrice) || 0;
     const ilsPrice = Math.round(usdPrice * 3.7 * (1 + securityMargin / 100));
 
-    const mainImageUrl = req.body.image || '';
-    const mainImageLocal = req.body.imageLocal || '';
-    const publicImageUrl = req.body.publicImage || mainImageUrl;
-    const directImageUrl = req.body.directImageUrl || '';
-    const smallImageUrls = Array.isArray(req.body.smallImages)
-      ? req.body.smallImages
-      : [];
-    const smallImageLocals = Array.isArray(req.body.smallImagesLocal)
-      ? req.body.smallImagesLocal
-      : [];
+    // Get image URLs from the upload response
+    const mainImageUrls = req.body.mainImage || {};
+    const smallImageUrls = req.body.smallImages || [];
 
-    console.log('Image data to be saved:', {
-      mainImage: {
-        production: mainImageUrl,
-        public: publicImageUrl,
-        direct: directImageUrl,
-        local: mainImageLocal,
-      },
-      smallImages: {
-        production: smallImageUrls,
-        local: smallImageLocals,
-      },
-      alternativeUrls: req.body.alternativeUrls,
-    });
+    console.log('\n=== Image Data Received ===');
+    console.log('Main Image URLs:', JSON.stringify(mainImageUrls, null, 2));
+    console.log('Small Image URLs:', JSON.stringify(smallImageUrls, null, 2));
 
+    // Create the product with new image structure
     const product = new Product({
       id: nextId,
       name: req.body.name,
-      image: mainImageUrl,
-      imageLocal: mainImageLocal,
-      publicImage: publicImageUrl,
-      directImageUrl: directImageUrl,
+      // Legacy image field (using desktop version as default)
+      image: mainImageUrls.desktop || mainImageUrls.publicDesktop || '',
+      imageLocal: mainImageUrls.desktopLocal || '',
+      publicImage: mainImageUrls.publicDesktop || '',
+      // Store all image variations
+      mainImage: mainImageUrls,
+      // Store small images with all variations
       smallImages: smallImageUrls,
-      smallImagesLocal: smallImageLocals,
+      // Also store the direct image URL for better accessibility
+      directImageUrl: mainImageUrls.desktop
+        ? `${process.env.API_URL}/direct-image/${mainImageUrls.desktop
+            .split('/')
+            .pop()}`
+        : null,
+      // Product details
       category: req.body.category,
       quantity: Number(req.body.quantity) || 0,
-      description: req.body.description,
+      description: req.body.description || '',
       ils_price: ilsPrice,
       usd_price: usdPrice,
       security_margin: securityMargin,
     });
 
-    console.log('Final product data before save:', {
-      id: product.id,
-      name: product.name,
-      image: product.image,
-      imageLocal: product.imageLocal,
-      publicImage: product.publicImage,
-      smallImages: product.smallImages,
-      smallImagesLocal: product.smallImagesLocal,
-      category: product.category,
-      API_URL: process.env.API_URL,
-    });
+    console.log('\n=== Product Data Before Save ===');
+    console.log(
+      JSON.stringify(
+        {
+          id: product.id,
+          name: product.name,
+          image: product.image,
+          imageLocal: product.imageLocal,
+          publicImage: product.publicImage,
+          mainImage: product.mainImage,
+          smallImages: product.smallImages,
+          directImageUrl: product.directImageUrl,
+          category: product.category,
+        },
+        null,
+        2
+      )
+    );
 
     await product.save();
-    console.log('Product saved successfully with ID:', nextId);
+    console.log('\n=== Product Saved Successfully ===');
+    console.log('Product ID:', nextId);
 
     res.json({
       success: true,
       id: nextId,
       name: req.body.name,
-      message: !req.body.image
-        ? 'Warning: No image URL was provided'
-        : undefined,
     });
   } catch (error) {
-    console.error('Product creation error:', error);
+    console.error('\n=== Product Creation Error ===');
+    console.error(error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -897,6 +931,33 @@ app.post('/chunkProducts', async (req, res) => {
   }
 });
 
+app.post('/getAllProductsByCategory', async (req, res) => {
+  const category = req.body.category;
+
+  try {
+    console.log('Fetching all products for category:', category);
+
+    // Get all products for the category without pagination
+    const products = await Product.find({ category: category });
+    const total = products.length;
+
+    if (!products || products.length === 0) {
+      return res.json({
+        products: [],
+        total: 0,
+      });
+    }
+
+    res.json({
+      products,
+      total,
+    });
+  } catch (err) {
+    console.error('Error fetching all products by category:', err);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
 // Cart Management Endpoints
 app.post('/getcart', fetchUser, async (req, res) => {
   console.log('GetCart');
@@ -949,8 +1010,8 @@ app.post(
   ]),
   async (req, res) => {
     try {
-      console.log('Upload request received');
-      console.log('Files:', JSON.stringify(req.files, null, 2));
+      console.log('\n=== Upload Request Details ===');
+      console.log('Files received:', JSON.stringify(req.files, null, 2));
 
       // Check if we received any files
       if (!req.files || Object.keys(req.files).length === 0) {
@@ -972,39 +1033,25 @@ app.post(
         });
       }
 
-      console.log('Main image saved to:', mainImage.path);
-      console.log('Main image details:', {
-        filename: mainImage.filename,
-        path: mainImage.path,
-        mimetype: mainImage.mimetype,
-        size: mainImage.size,
-      });
+      console.log('Processing main image:', mainImage.path);
 
-      // Verify the file exists and is readable
-      try {
-        const stats = fs.statSync(mainImage.path);
-        console.log('File stats:', {
-          size: stats.size,
-          permissions: stats.mode.toString(8),
-          isReadable: (stats.mode & fs.constants.S_IRUSR) !== 0,
-        });
+      // Process main image
+      const mainImageResults = await processImage(
+        mainImage.path,
+        mainImage.filename,
+        true
+      );
+      console.log('Main image processing results:', mainImageResults);
 
-        // Make sure file has correct permissions (readable by all)
-        fs.chmodSync(mainImage.path, 0o644);
-        console.log('Updated file permissions to 644');
-      } catch (statError) {
-        console.error('Error checking file stats:', statError);
-        return res.status(500).json({
-          error: 'Error processing uploaded file: ' + statError.message,
-          success: false,
-        });
-      }
+      // Process small images
+      const smallImagesResults = await Promise.all(
+        smallImages.map(async image => {
+          return await processImage(image.path, image.filename, false);
+        })
+      );
+      console.log('Small images processing results:', smallImagesResults);
 
-      // Get the hostname from the request or environment variables
-      const requestHost = req.get('host');
-      const protocol = req.protocol || 'https';
-
-      // Define base URLs with more clarity
+      // Get the base URLs
       const productionBaseUrl =
         process.env.API_URL || 'https://tamarkfir.com/api';
       const localBaseUrl = 'http://localhost:4000';
@@ -1012,73 +1059,48 @@ app.post(
         process.env.NODE_ENV === 'production'
           ? productionBaseUrl
           : localBaseUrl;
+      console.log('Using base URL:', baseUrl);
 
-      console.log('URL Construction:', {
-        requestHost,
-        protocol,
-        productionBaseUrl,
-        localBaseUrl,
-        baseUrl,
-        env: {
-          HOST: process.env.HOST,
-          API_URL: process.env.API_URL,
-          NODE_ENV: process.env.NODE_ENV,
-        },
-      });
-
-      // Construct URLs
-      const mainImageUrl = `${baseUrl}/uploads/${mainImage.filename}`;
-      const mainImageLocalUrl = `${localBaseUrl}/uploads/${mainImage.filename}`;
-      const publicMainImageUrl = `${baseUrl}/public/uploads/${mainImage.filename}`;
-      const directImageUrl = `${baseUrl}/direct-image/${mainImage.filename}`;
+      // Construct URLs for main image
+      const mainImageUrls = {
+        desktop: `${baseUrl}/uploads/${mainImageResults.desktop.filename}`,
+        mobile: `${baseUrl}/uploads/${mainImageResults.mobile.filename}`,
+        desktopLocal: `${localBaseUrl}/uploads/${mainImageResults.desktop.filename}`,
+        mobileLocal: `${localBaseUrl}/uploads/${mainImageResults.mobile.filename}`,
+        publicDesktop: `${baseUrl}/public/uploads/${mainImageResults.desktop.filename}`,
+        publicMobile: `${baseUrl}/public/uploads/${mainImageResults.mobile.filename}`,
+      };
 
       // Construct URLs for small images
-      const smallImageUrls = smallImages.map(
-        file => `${baseUrl}/smallImages/${file.filename}`
-      );
-      const smallImageLocalUrls = smallImages.map(
-        file => `${localBaseUrl}/smallImages/${file.filename}`
-      );
+      const smallImageUrlSets = smallImagesResults.map(result => ({
+        desktop: `${baseUrl}/smallImages/${result.desktop.filename}`,
+        mobile: `${baseUrl}/smallImages/${result.mobile.filename}`,
+        desktopLocal: `${localBaseUrl}/smallImages/${result.desktop.filename}`,
+        mobileLocal: `${localBaseUrl}/smallImages/${result.mobile.filename}`,
+      }));
 
-      // Log all URLs for debugging
-      console.log('Image URLs:', {
-        mainImageUrl,
-        mainImageLocalUrl,
-        publicMainImageUrl,
-        directImageUrl,
-        smallImageCount: smallImageUrls.length,
-      });
+      console.log('\n=== Generated Image URLs ===');
+      console.log('Main Image URLs:', mainImageUrls);
+      console.log('Small Image URLs:', smallImageUrlSets);
 
-      // Send response with all possible URL formats to make integration easier
-      res.json({
+      // Send response with all URL formats
+      const response = {
         success: true,
-        image: mainImageUrl,
-        imageLocal: mainImageLocalUrl,
-        publicImage: publicMainImageUrl,
-        directImageUrl: directImageUrl,
-        smallImages: smallImageUrls,
-        smallImagesLocal: smallImageLocalUrls,
-
-        // Also include older format keys for backward compatibility
-        mainImageUrl: mainImageUrl,
-        mainImageUrlLocal: mainImageLocalUrl,
-        smallImagesUrl: smallImageUrls,
-        smallImagesUrlLocal: smallImageLocalUrls,
-
-        // Include file details for debugging
+        mainImage: mainImageUrls,
+        smallImages: smallImageUrlSets,
         fileDetails: {
           mainImage: {
-            filename: mainImage.filename,
-            size: mainImage.size,
-            mimetype: mainImage.mimetype,
+            desktop: mainImageResults.desktop,
+            mobile: mainImageResults.mobile,
           },
-          smallImages: smallImages.map(file => ({
-            filename: file.filename,
-            size: file.size,
-            mimetype: file.mimetype,
-          })),
+          smallImages: smallImagesResults,
         },
-      });
+      };
+
+      console.log('\n=== Final Response ===');
+      console.log(JSON.stringify(response, null, 2));
+
+      res.json(response);
     } catch (error) {
       console.error('Upload error:', error);
       return res.status(500).json({
@@ -1279,3 +1301,137 @@ app.listen(process.env.SERVER_PORT || 4000, error => {
     console.log('Error : ' + error);
   }
 });
+
+// Image processing function
+const processImage = async (inputPath, filename, isMainImage = true) => {
+  const outputDir = isMainImage ? uploadsDir : smallImagesDir;
+  const publicDir = isMainImage ? publicUploadsDir : publicSmallImagesDir;
+  const results = {};
+
+  try {
+    const baseName = path.parse(filename).name;
+    const isRAW = filename.toLowerCase().endsWith('.cr2');
+
+    // Create WebP versions for both desktop and mobile
+    const desktopFilename = `${baseName}-desktop.webp`;
+    const mobileFilename = `${baseName}-mobile.webp`;
+
+    const desktopPath = path.join(outputDir, desktopFilename);
+    const mobilePath = path.join(outputDir, mobileFilename);
+    const publicDesktopPath = path.join(publicDir, desktopFilename);
+    const publicMobilePath = path.join(publicDir, mobileFilename);
+
+    // Enhanced Sharp configuration for RAW files
+    const sharpOptions = {
+      failOnError: false,
+      raw: isRAW
+        ? {
+            width: 5000,
+            height: 4000,
+            channels: 3,
+            density: 300, // Add DPI setting for better quality
+          }
+        : undefined,
+    };
+
+    // Function to process image with fallback
+    const processWithFallback = async (
+      inputPath,
+      options,
+      outputPath,
+      size
+    ) => {
+      try {
+        // First attempt: Direct RAW processing
+        await sharp(inputPath, options)
+          .rotate() // Auto-rotate based on EXIF
+          .resize({
+            width: size,
+            withoutEnlargement: true,
+            fit: 'inside',
+          })
+          .webp({
+            quality: 85,
+            effort: 6, // Higher compression effort for better quality
+            smartSubsample: true, // Enable smart subsampling
+            nearLossless: true, // Use near-lossless compression
+          })
+          .toFile(outputPath);
+      } catch (error) {
+        console.warn(
+          `First attempt failed for ${filename}, trying fallback method:`,
+          error.message
+        );
+
+        try {
+          // Second attempt: Convert to TIFF first for RAW files
+          if (isRAW) {
+            const tiffPath = path.join(outputDir, `${baseName}-temp.tiff`);
+            await sharp(inputPath, options)
+              .rotate()
+              .toFormat('tiff')
+              .toFile(tiffPath);
+
+            // Then convert TIFF to WebP
+            await sharp(tiffPath)
+              .resize({
+                width: size,
+                withoutEnlargement: true,
+                fit: 'inside',
+              })
+              .webp({
+                quality: 85,
+                effort: 6,
+                smartSubsample: true,
+                nearLossless: true,
+              })
+              .toFile(outputPath);
+
+            // Clean up temporary TIFF file
+            fs.unlink(tiffPath, err => {
+              if (err)
+                console.warn(
+                  `Failed to delete temporary TIFF file: ${err.message}`
+                );
+            });
+          } else {
+            throw error; // Re-throw if not RAW file
+          }
+        } catch (fallbackError) {
+          console.error(
+            `Both attempts failed for ${filename}:`,
+            fallbackError.message
+          );
+          throw fallbackError;
+        }
+      }
+    };
+
+    // Process desktop version
+    await processWithFallback(inputPath, sharpOptions, desktopPath, 1200);
+
+    // Process mobile version
+    await processWithFallback(inputPath, sharpOptions, mobilePath, 600);
+
+    // Copy to public directory if successful
+    await fs.promises.copyFile(desktopPath, publicDesktopPath);
+    await fs.promises.copyFile(mobilePath, publicMobilePath);
+
+    // Return results
+    results.desktop = {
+      filename: desktopFilename,
+      path: desktopPath,
+      publicPath: publicDesktopPath,
+    };
+    results.mobile = {
+      filename: mobileFilename,
+      path: mobilePath,
+      publicPath: publicMobilePath,
+    };
+
+    return results;
+  } catch (error) {
+    console.error(`Error processing image ${filename}:`, error);
+    throw error;
+  }
+};

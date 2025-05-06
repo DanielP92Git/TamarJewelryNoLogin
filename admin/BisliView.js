@@ -50,7 +50,7 @@ const state = {
   maxRetries: 3,
 };
 
-function getImageUrl(image, imageLocal, publicImage) {
+function getImageUrl(image, imageLocal, publicImage, mainImage) {
   // Extract the filename from the image URL
   const getFilename = (url) => {
     if (!url) return null;
@@ -58,28 +58,26 @@ function getImageUrl(image, imageLocal, publicImage) {
     return parts[parts.length - 1];
   };
 
+  // First try the new mainImage structure
+  if (mainImage) {
+    if (state.isProduction) {
+      return mainImage.publicDesktop || mainImage.desktop;
+    }
+    return mainImage.desktopLocal || mainImage.desktop;
+  }
+
+  // Fallback to legacy fields
   if (!image && !publicImage) {
     console.warn("No image URL provided, using fallback");
-    return "/images/no-image.png";
+    // Use API_URL for the fallback image
+    return `${API_URL}/images/no-image.png`;
   }
 
   const filename = getFilename(image) || getFilename(publicImage);
 
-  // Log URL information for debugging:
-
-  // console.log("Image URL Debug:", {
-  //   isProduction: state.isProduction,
-  //   originalImage: image,
-  //   publicImage: publicImage,
-  //   originalImageLocal: imageLocal,
-  //   hostname: window.location.hostname,
-  //   extractedFilename: filename,
-  // });
-
   // Create direct image URL (most reliable method)
   if (state.isProduction && filename) {
     const directImageUrl = `${API_URL}/direct-image/${filename}`;
-    // console.log("Using direct image URL:", directImageUrl);
     return directImageUrl;
   }
 
@@ -108,9 +106,9 @@ function getImageUrl(image, imageLocal, publicImage) {
   // Fallback to whatever URL we have
   console.log(
     "Using fallback image URL:",
-    image || publicImage || "/images/no-image.png"
+    image || publicImage || `${API_URL}/images/no-image.png`
   );
-  return image || publicImage || "/images/no-image.png";
+  return image || publicImage || `${API_URL}/images/no-image.png`;
 }
 
 // First, add a helper function to determine if we're on the admin page
@@ -624,20 +622,38 @@ function loadProducts(data) {
           item.id
         }">
       </div>
-      <img src="${getImageUrl(
-        item.image,
-        item.imageLocal,
-        item.publicImage
-      )}" class="listproduct-product-icon" alt="${item.name}" />
-                <p>${item.name}</p>
+      <picture>
+        <source 
+          media="(min-width: 768px)" 
+          srcset="${item.mainImage?.desktop || item.image}" 
+          type="image/webp"
+        />
+        <source 
+          media="(max-width: 767px)" 
+          srcset="${item.mainImage?.mobile || item.image}" 
+          type="image/webp"
+        />
+        <img 
+          src="${getImageUrl(
+            item.image,
+            item.imageLocal,
+            item.publicImage,
+            item.mainImage
+          )}" 
+          class="listproduct-product-icon" 
+          alt="${item.name}"
+          loading="lazy"
+        />
+      </picture>
+      <p>${item.name}</p>
       <p>$${item.usd_price}</p>
       <p>₪${item.ils_price}</p>
-                <p>${item.category}</p>
+      <p>${item.category}</p>
       <p>${item.quantity || 0}</p>
-                <div class="product-actions">
+      <div class="product-actions">
         <button class="edit-btn" data-product-id="${item.id}">Edit</button>
         <button class="delete-btn" data-product-id="${item.id}">Delete</button>
-                </div>
+      </div>
     `;
     productsContainer.appendChild(productElement);
     productsContainer.appendChild(document.createElement("hr"));
@@ -905,11 +921,29 @@ function editProduct(product) {
     </div>
     <div class="addproduct-itemfield">
         <p>Current Image:</p>
-        <img src="${getImageUrl(
-          product.image,
-          product.imageLocal,
-          product.publicImage
-        )}" alt="${product.name}" style="max-width: 200px; margin: 10px 0;">
+        <picture>
+          <source 
+            media="(min-width: 768px)" 
+            srcset="${product.mainImage?.desktop || product.image}" 
+            type="image/webp"
+          />
+          <source 
+            media="(max-width: 767px)" 
+            srcset="${product.mainImage?.mobile || product.image}" 
+            type="image/webp"
+          />
+          <img 
+            src="${getImageUrl(
+              product.image,
+              product.imageLocal,
+              product.publicImage,
+              product.mainImage
+            )}" 
+            alt="${product.name}" 
+            style="max-width: 200px; margin: 10px 0;"
+            loading="lazy"
+          />
+        </picture>
     </div>
       <input type="hidden" id="product-id" value="${product.id}">
       <br>
@@ -1189,6 +1223,9 @@ async function addProduct(e, data, form) {
       formData.append("smallImages", smallImages[i]);
     }
 
+    console.log("Uploading images...");
+    submitBtn.innerHTML = "Uploading images...";
+
     // Submit image
     const imageResponse = await fetch(`${API_URL}/upload`, {
       method: "POST",
@@ -1202,11 +1239,12 @@ async function addProduct(e, data, form) {
     const imageData = await imageResponse.json();
     if (!imageData.success) {
       throw new Error(imageData.error || "Image upload failed");
-    } else {
-      alert("Image uploaded successfully!");
     }
 
-    // 3. Add product data
+    console.log("Image upload response:", imageData);
+    submitBtn.innerHTML = "Saving product...";
+
+    // 3. Add product data with correct image structure
     const productData = {
       name,
       description,
@@ -1215,150 +1253,120 @@ async function addProduct(e, data, form) {
       oldPrice: parseFloat(oldPrice),
       newPrice: parseFloat(newPrice),
       security_margin: securityMargin,
-      image: imageData.image || imageData.mainImageUrl || "",
-      imageLocal: imageData.imageLocal || imageData.mainImageUrlLocal || "",
-      publicImage: imageData.publicImage || imageData.image || "",
-      smallImages: imageData.smallImages || imageData.smallImagesUrl || [],
-      smallImagesLocal:
-        imageData.smallImagesLocal || imageData.smallImagesUrlLocal || [],
+      // Include all image data from the upload response
+      mainImage: imageData.mainImage,
+      smallImages: imageData.smallImages,
+      // Legacy fields for backward compatibility
+      image: imageData.mainImage?.desktop || "",
+      imageLocal: imageData.mainImage?.desktopLocal || "",
+      publicImage: imageData.mainImage?.publicDesktop || "",
     };
 
-    // Ensure we show a success message and redirect to the category
-    const finalizeProductSubmit = () => {
-      // Display success message
-      window.alert("Product was added successfully! 🎉");
+    console.log(
+      "Sending product data to server:",
+      JSON.stringify(productData, null, 2)
+    );
 
-      // Reset form
-      form.reset();
+    // Send product data to server
+    const productResponse = await fetch(`${API_URL}/addproduct`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+      },
+      body: JSON.stringify(productData),
+    });
 
-      // Remember the category we want to filter by
-      const targetCategory = productData.category;
-      console.log("Target category for redirect:", targetCategory);
-
-      // Reset button state
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = "Submit";
-
-      // Since we're having persistent fetch issues, let's use a more reliable approach
-      // Just show a button that will take the user to the appropriate category when clicked
-
-      // Clear current content
-      clear();
-
-      // Create a success card
-      const successCard = document.createElement("div");
-      successCard.className = "success-card";
-      successCard.style.cssText = `
-        margin: 2rem auto;
-        padding: 2rem;
-        max-width: 600px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        text-align: center;
-      `;
-
-      // Create success content
-      successCard.innerHTML = `
-        <h2 style="color: #28a745; margin-bottom: 1rem;">Product Added Successfully!</h2>
-        <p style="margin-bottom: 2rem;">Your new product has been added to the <strong>${targetCategory}</strong> category.</p>
-        <div style="display: flex; justify-content: center; gap: 1rem;">
-          <button id="view-category-btn" style="
-            padding: 10px 20px;
-            background-color: #4e54c8;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-          ">View ${targetCategory} Products</button>
-          <button id="add-another-btn" style="
-            padding: 10px 20px;
-            background-color: #6c757d;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-          ">Add Another Product</button>
-            </div>
-      `;
-
-      // Add the card to the page
-      pageContent.appendChild(successCard);
-
-      // Add event listeners to buttons
-      document
-        .getElementById("view-category-btn")
-        .addEventListener("click", () => {
-          // Store the category in state for when we load products
-          state.selectedCategory = targetCategory;
-
-          // Use fetchInfo to load products
-          fetchInfo();
-
-          // Give time for the UI to load, then set the filter
-          setTimeout(() => {
-            const categoryFilter = document.getElementById("categoryFilter");
-            if (categoryFilter) {
-              categoryFilter.value = targetCategory;
-
-              // Trigger a change event to apply filtering
-              const event = new Event("change");
-              categoryFilter.dispatchEvent(event);
-            }
-          }, 1000);
-        });
-
-      document
-        .getElementById("add-another-btn")
-        .addEventListener("click", () => {
-          // Just load the add products page again
-          loadAddProductsPage();
-        });
-    };
-
-    // Try to use a basic synchronous XHR first - most reliable
-    try {
-      console.log("Sending product data using synchronous XHR");
-      submitBtn.innerHTML = "Saving product...";
-
-      // Create a synchronous XHR for maximum reliability
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", `${API_URL}/addproduct`, false); // false = synchronous
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.setRequestHeader(
-        "Authorization",
-        `Bearer ${localStorage.getItem("auth-token")}`
-      );
-
-      // Send the request and wait for it to complete (synchronous)
-      xhr.send(JSON.stringify(productData));
-
-      console.log("Synchronous XHR completed with status:", xhr.status);
-
-      // Process the response
-      if (xhr.status >= 200 && xhr.status < 300) {
-        finalizeProductSubmit();
-      } else {
-        alert(`Server error: ${xhr.status}. Please try again.`);
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = "Submit";
-      }
-    } catch (error) {
-      // If synchronous XHR fails, the server probably still processed the request
-      // based on server logs, so still show success
-      console.error("XHR error:", error);
-      finalizeProductSubmit();
+    if (!productResponse.ok) {
+      const errorText = await productResponse.text();
+      throw new Error(`Failed to create product: ${errorText}`);
     }
 
-    // Prevent the main function from continuing
-    return;
+    const productResult = await productResponse.json();
+    if (!productResult.success) {
+      throw new Error(productResult.error || "Failed to create product");
+    }
+
+    // Display success message
+    window.alert("Product was added successfully! 🎉");
+
+    // Reset form
+    form.reset();
+
+    // Remember the category we want to filter by
+    const targetCategory = productData.category;
+    console.log("Target category for redirect:", targetCategory);
+
+    // Reset button state
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = "Submit";
+
+    // Clear current content
+    clear();
+
+    // Create success card
+    const successCard = document.createElement("div");
+    successCard.className = "success-card";
+    successCard.style.cssText = `
+      margin: 2rem auto;
+      padding: 2rem;
+      max-width: 600px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    `;
+
+    // Create success content
+    successCard.innerHTML = `
+      <h2 style="color: #28a745; margin-bottom: 1rem;">Product Added Successfully!</h2>
+      <p style="margin-bottom: 2rem;">Your new product has been added to the <strong>${targetCategory}</strong> category.</p>
+      <div style="display: flex; justify-content: center; gap: 1rem;">
+        <button id="view-category-btn" style="
+          padding: 10px 20px;
+          background-color: #4e54c8;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          font-weight: bold;
+        ">View ${targetCategory} Products</button>
+        <button id="add-another-btn" style="
+          padding: 10px 20px;
+          background-color: #6c757d;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+        ">Add Another Product</button>
+      </div>
+    `;
+
+    // Add the card to the page
+    pageContent.appendChild(successCard);
+
+    // Add event listeners to buttons
+    document
+      .getElementById("view-category-btn")
+      .addEventListener("click", () => {
+        state.selectedCategory = targetCategory;
+        fetchInfo();
+        setTimeout(() => {
+          const categoryFilter = document.getElementById("categoryFilter");
+          if (categoryFilter) {
+            categoryFilter.value = targetCategory;
+            const event = new Event("change");
+            categoryFilter.dispatchEvent(event);
+          }
+        }, 1000);
+      });
+
+    document.getElementById("add-another-btn").addEventListener("click", () => {
+      loadAddProductsPage();
+    });
   } catch (error) {
-    // Show error
     console.error("Error:", error);
-    alert(`🔥🔥🔥 ${error.message} 🔥🔥🔥` || "An error occurred");
-  } finally {
-    // Reset button
+    alert(`Error: ${error.message}`);
     submitBtn.disabled = false;
     submitBtn.innerHTML = "Submit";
   }
@@ -1550,6 +1558,8 @@ function addProductHandler() {
     const prodCategory = document.getElementById("category").value;
     const quantity = document.getElementById("quantity").value;
     const prodNewPrice = document.getElementById("new-price").value;
+    const securityMargin =
+      document.getElementById("security-margin").value || "5";
 
     const prodImage = document.getElementById("mainImage").files[0];
     if (!prodImage) {
@@ -1558,16 +1568,29 @@ function addProductHandler() {
     }
 
     // Check file type
-    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-    if (!validTypes.includes(prodImage.type)) {
-      alert("Please select a valid image file (JPEG, PNG, GIF, or WEBP)");
+    const validTypes = [
+      "image/jpeg",
+      "image/png",
+      "image/gif",
+      "image/webp",
+      "image/cr2",
+      "image/arw",
+      "application/octet-stream",
+    ];
+    const isCR2 = prodImage.name.toLowerCase().endsWith(".cr2");
+    if (!validTypes.includes(prodImage.type) && !isCR2) {
+      alert("Please select a valid image file (JPEG, PNG, GIF, WEBP, or CR2)");
       return;
     }
 
-    // Check file size (limit to 5MB)
-    if (prodImage.size > 5 * 1024 * 1024) {
+    // Check file size (limit to 50MB for RAW files, 5MB for others)
+    const isRAW = isCR2 || prodImage.name.toLowerCase().endsWith(".arw");
+    const maxSize = isRAW ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (prodImage.size > maxSize) {
       alert(
-        "Image file is too large. Please select an image smaller than 5MB."
+        isRAW
+          ? "RAW image file is too large. Please select an image smaller than 50MB."
+          : "Image file is too large. Please select an image smaller than 5MB."
       );
       return;
     }
@@ -1578,15 +1601,17 @@ function addProductHandler() {
 
     const data = {
       name: prodName,
-      image: prodImage,
-      multiImages: multiProdImage,
-      category: prodCategory,
-      quantity: quantity,
       description: prodDescription,
-      oldPrice: +prodOldPrice,
-      newPrice: +prodNewPrice,
+      category: prodCategory,
+      quantity: Number(quantity) || 0,
+      oldPrice: parseFloat(prodOldPrice),
+      newPrice: parseFloat(prodNewPrice),
+      security_margin: securityMargin,
+      // Image data for upload
+      mainImage: prodImage,
+      smallImages: multiProdImage,
     };
-    console.log("data:", data);
+    console.log("Form data:", data);
 
     addProduct(e, data, form);
   });
