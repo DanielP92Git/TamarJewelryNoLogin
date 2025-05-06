@@ -29,6 +29,9 @@ class CategoriesView extends View {
     this.initialized = false;
     this.isModalOpen = false;
     this.exchangeRate = 3.7;
+    this.isProduction =
+      window.location.hostname !== 'localhost' &&
+      window.location.hostname !== '127.0.0.1';
 
     // Add resize observer for debugging
     if (process.env.NODE_ENV !== 'production') {
@@ -525,17 +528,18 @@ class CategoriesView extends View {
     const price = data.querySelector('.item-price').textContent;
     const currency = data.dataset.currency;
 
-    // Get the image URL directly from the clicked item
-    const clickedImageUrl = data.querySelector('.front-image')?.src;
+    // Get the image URL directly from the clicked item and ensure HTTPS
+    const clickedImageUrl = this.ensureHttps(
+      data.querySelector('.front-image')?.src
+    );
 
     // Helper function to get the appropriate image URL based on structure
     const getImageUrl = (imageData, preferDesktop = true) => {
       if (!imageData) return '';
 
-      // If it's a string, return it directly
+      // If it's a string, return it directly with HTTPS
       if (typeof imageData === 'string') {
-        // Make sure it's a valid URL and not just a "/"
-        return imageData.includes('http') ? imageData : '';
+        return imageData.includes('http') ? this.ensureHttps(imageData) : '';
       }
 
       // New structure with desktop/mobile properties
@@ -544,24 +548,26 @@ class CategoriesView extends View {
         if (imageData.desktop || imageData.mobile || imageData.publicDesktop) {
           // Try public URLs first
           if (imageData.publicDesktop && preferDesktop)
-            return imageData.publicDesktop;
+            return this.ensureHttps(imageData.publicDesktop);
           if (imageData.publicMobile && !preferDesktop)
-            return imageData.publicMobile;
+            return this.ensureHttps(imageData.publicMobile);
 
           // Then try regular URLs
-          if (imageData.desktop && preferDesktop) return imageData.desktop;
-          if (imageData.mobile && !preferDesktop) return imageData.mobile;
+          if (imageData.desktop && preferDesktop)
+            return this.ensureHttps(imageData.desktop);
+          if (imageData.mobile && !preferDesktop)
+            return this.ensureHttps(imageData.mobile);
 
           // Then try local URLs
           if (imageData.desktopLocal && preferDesktop)
-            return imageData.desktopLocal;
+            return this.ensureHttps(imageData.desktopLocal);
           if (imageData.mobileLocal && !preferDesktop)
-            return imageData.mobileLocal;
+            return this.ensureHttps(imageData.mobileLocal);
         }
 
         // If it's the old format with direct URLs
-        if (imageData.url) return imageData.url;
-        if (imageData.imageUrl) return imageData.imageUrl;
+        if (imageData.url) return this.ensureHttps(imageData.url);
+        if (imageData.imageUrl) return this.ensureHttps(imageData.imageUrl);
 
         // If we have a string property that looks like a URL
         const values = Object.values(imageData);
@@ -571,23 +577,25 @@ class CategoriesView extends View {
             val.includes('http') &&
             (val.includes('/uploads/') || val.includes('/smallImages/'))
         );
-        if (validUrl) return validUrl;
+        if (validUrl) return this.ensureHttps(validUrl);
       }
 
       return '';
     };
 
-    // Get main image URLs with fallbacks
-    const mainDesktopImage =
+    // Get main image URLs with fallbacks and ensure HTTPS
+    const mainDesktopImage = this.ensureHttps(
       clickedImageUrl ||
-      getImageUrl(product?.mainImage, true) ||
-      product?.image ||
-      '';
+        getImageUrl(product?.mainImage, true) ||
+        product?.image ||
+        ''
+    );
 
-    const mainMobileImage =
+    const mainMobileImage = this.ensureHttps(
       getImageUrl(product?.mainImage, false) ||
-      product?.image ||
-      mainDesktopImage;
+        product?.image ||
+        mainDesktopImage
+    );
 
     // Process small images - ensure we get the actual URLs
     let smallImagesArray = [];
@@ -633,6 +641,8 @@ class CategoriesView extends View {
                 src="${mainDesktopImage}"
                 alt="${title}"
                 loading="lazy"
+                crossorigin="anonymous"
+                onerror="this.onerror=null; this.crossOrigin=''; this.src='${mainDesktopImage}';"
               />
               <div class="loading-indicator">Loading...</div>
             </div>
@@ -650,7 +660,8 @@ class CategoriesView extends View {
                             src="${imgUrl}" 
                             alt="Product view ${index + 1}"
                             loading="lazy"
-                            onerror="this.onerror=null; this.src='${mainDesktopImage}'; console.log('Failed to load small image, falling back to main image');"
+                            crossorigin="anonymous"
+                            onerror="this.onerror=null; this.crossOrigin=''; this.src='${imgUrl}';"
                           />
                         </div>
                       `
@@ -671,12 +682,12 @@ class CategoriesView extends View {
                   }">${description.replace(/\n/g, '<br>')}</div>`
                 : ''
             }
-            <div class="price-container"">
+            <div class="price-container">
               <span class="price-label">${
                 this.lang === 'eng' ? 'Price:' : 'מחיר:'
               }</span>
               <span class="price-text">${price}</span>
-          </div>
+            </div>
             <button class="add-to-cart-btn_modal" data-id="${id}" data-quant="${quantity}" data-price="${price}">
               ${addToCartText}
             </button>
@@ -689,7 +700,13 @@ class CategoriesView extends View {
         <button class="prev-image">❮</button>
         <button class="next-image">❯</button>
         <div class="gallery-container">
-          <img class="gallery-image" src="${mainDesktopImage}" alt="${title}" />
+          <img 
+            class="gallery-image" 
+            src="${mainDesktopImage}" 
+            alt="${title}"
+            crossorigin="anonymous"
+            onerror="this.onerror=null; this.crossOrigin=''; this.src='${mainDesktopImage}';"
+          />
         </div>
       </div>
     `;
@@ -1111,7 +1128,7 @@ class CategoriesView extends View {
     const curSign = this.selectedCurrency === 'usd' ? '$' : '₪';
     const price =
       this.selectedCurrency === 'usd'
-        ? Number((ils_price / 3.7).toFixed(0))
+        ? Number((ils_price / this.exchangeRate).toFixed(0))
         : ils_price;
 
     // Format description
@@ -1119,28 +1136,19 @@ class CategoriesView extends View {
       ? description.replace(/\n/g, '<br>')
       : '';
 
-    // Get desktop and mobile image URLs with proper fallbacks
-    const desktopImage =
+    // Get desktop and mobile image URLs with proper fallbacks and ensure HTTPS
+    const desktopImage = this.ensureHttps(
       item.mainImage?.desktop ||
-      item.mainImage?.publicDesktop ||
-      item.publicImage ||
-      item.image;
-    const mobileImage =
+        item.mainImage?.publicDesktop ||
+        item.publicImage ||
+        item.image
+    );
+    const mobileImage = this.ensureHttps(
       item.mainImage?.mobile ||
-      item.mainImage?.publicMobile ||
-      item.mainImage?.desktop ||
-      item.image;
-
-    // Log image URLs for debugging
-    // console.log('Product Image URLs:', {
-    //   id: id,
-    //   name: name,
-    //   desktop: desktopImage,
-    //   mobile: mobileImage,
-    //   mainImage: item.mainImage,
-    //   publicImage: item.publicImage,
-    //   image: item.image,
-    // });
+        item.mainImage?.publicMobile ||
+        item.mainImage?.desktop ||
+        item.image
+    );
 
     return `
       <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}">
@@ -1151,34 +1159,22 @@ class CategoriesView extends View {
               media="(min-width: 768px)"
               srcset="${desktopImage}"
               type="image/webp"
+              crossorigin="anonymous"
             />
             <source
               media="(max-width: 767px)"
               srcset="${mobileImage}"
               type="image/webp"
+              crossorigin="anonymous"
             />
             <img 
               class="image-item front-image" 
               src="${desktopImage}"
               alt="${name}"
               loading="lazy"
-               onload="
-                 // Hide spinner
-                this.parentElement.parentElement.querySelector('.loading-spinner').style.display = 'none';
-                 // Add loaded class to image
-                 this.classList.add('loaded');
-                // Log which image version is loaded
-                // (function() {
-                //   const isMobile = window.matchMedia('(max-width: 767px)').matches;
-                //   const activeSource = isMobile ? '${mobileImage}' : '${desktopImage}';
-                //   console.log('Loaded image for ' + (isMobile ? 'mobile' : 'desktop') + ':', {
-                //     productId: '${id}',
-                //     productName: '${name}',
-                //     activeSource: activeSource,
-                //     actualSrc: this.currentSrc
-                //   });
-                // }).call(this);
-              "
+              crossorigin="anonymous"
+              onload="this.parentElement.parentElement.querySelector('.loading-spinner').style.display = 'none'; this.classList.add('loaded');"
+              onerror="this.onerror=null; this.crossOrigin=''; this.src='${desktopImage}';"
             />
           </picture>
         </div>
@@ -1345,13 +1341,27 @@ class CategoriesView extends View {
     const prevButton = modal.querySelector('.prev-image');
     const nextButton = modal.querySelector('.next-image');
     let currentImageIndex = 0;
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // Function to close gallery and clean up
+    const closeFullscreenGallery = () => {
+      fullscreenGallery.style.display = 'none';
+      document.body.style.overflow = ''; // Restore scrolling
+      // Remove the gallery state from history
+      if (window.history.state?.isGalleryOpen) {
+        window.history.back();
+      }
+    };
 
     // Function to update gallery image
     const updateGalleryImage = index => {
       const images = Array.from(modal.querySelectorAll('.small-image')).map(
         img => img.src
       );
-      currentImageIndex = (index + images.length) % images.length;
+      if (images.length === 0) return;
+      currentImageIndex =
+        ((index % images.length) + images.length) % images.length;
       galleryImage.src = images[currentImageIndex];
     };
 
@@ -1360,12 +1370,19 @@ class CategoriesView extends View {
       fullscreenGallery.style.display = 'block';
       document.body.style.overflow = 'hidden'; // Prevent scrolling
       updateGalleryImage(currentImageIndex);
+
+      // Add a history entry to handle back button
+      window.history.pushState({ isGalleryOpen: true }, '');
     });
 
     // Close gallery
-    closeGallery.addEventListener('click', () => {
-      fullscreenGallery.style.display = 'none';
-      document.body.style.overflow = ''; // Restore scrolling
+    closeGallery.addEventListener('click', closeFullscreenGallery);
+
+    // Handle phone's back button and browser back button
+    window.addEventListener('popstate', e => {
+      if (fullscreenGallery.style.display === 'block') {
+        closeFullscreenGallery();
+      }
     });
 
     // Navigation buttons
@@ -1377,6 +1394,51 @@ class CategoriesView extends View {
       updateGalleryImage(currentImageIndex + 1);
     });
 
+    // Touch events for mobile swipe
+    fullscreenGallery.addEventListener(
+      'touchstart',
+      e => {
+        touchStartX = e.touches[0].clientX;
+      },
+      { passive: true }
+    );
+
+    fullscreenGallery.addEventListener(
+      'touchmove',
+      e => {
+        touchEndX = e.touches[0].clientX;
+      },
+      { passive: true }
+    );
+
+    fullscreenGallery.addEventListener('touchend', () => {
+      const swipeThreshold = 50; // minimum distance for a swipe
+      const swipeDistance = touchEndX - touchStartX;
+
+      if (Math.abs(swipeDistance) > swipeThreshold) {
+        if (swipeDistance > 0) {
+          // Swiped right - show previous image
+          updateGalleryImage(currentImageIndex - 1);
+        } else {
+          // Swiped left - show next image
+          updateGalleryImage(currentImageIndex + 1);
+        }
+      }
+    });
+
+    // Double tap to close gallery on mobile
+    let lastTap = 0;
+    fullscreenGallery.addEventListener('touchend', e => {
+      const currentTime = new Date().getTime();
+      const tapLength = currentTime - lastTap;
+      if (tapLength < 500 && tapLength > 0) {
+        // Double tap detected
+        closeFullscreenGallery();
+        e.preventDefault();
+      }
+      lastTap = currentTime;
+    });
+
     // Keyboard navigation
     document.addEventListener('keydown', e => {
       if (fullscreenGallery.style.display === 'block') {
@@ -1385,18 +1447,28 @@ class CategoriesView extends View {
         } else if (e.key === 'ArrowRight') {
           updateGalleryImage(currentImageIndex + 1);
         } else if (e.key === 'Escape') {
-          fullscreenGallery.style.display = 'none';
-          document.body.style.overflow = '';
+          closeFullscreenGallery();
         }
       }
     });
 
-    // Close gallery on overlay click
+    // Close gallery when clicking outside the image
     fullscreenGallery.addEventListener('click', e => {
-      if (e.target === fullscreenGallery) {
-        fullscreenGallery.style.display = 'none';
-        document.body.style.overflow = '';
+      // Check if the click was on the gallery container but not on the image or navigation buttons
+      if (
+        e.target === fullscreenGallery ||
+        (e.target !== galleryImage &&
+          e.target !== prevButton &&
+          e.target !== nextButton &&
+          e.target !== closeGallery)
+      ) {
+        closeFullscreenGallery();
       }
+    });
+
+    // Prevent click events on the image from bubbling up
+    galleryImage.addEventListener('click', e => {
+      e.stopPropagation();
     });
 
     // Close button event
@@ -1678,6 +1750,23 @@ class CategoriesView extends View {
         });
       }, 100);
     });
+  }
+
+  // Update the ensureHttps method to handle CORS issues
+  ensureHttps(url) {
+    if (!url) return '';
+
+    // First ensure HTTPS in production
+    if (this.isProduction && url.startsWith('http://')) {
+      url = url.replace('http://', 'https://');
+    }
+
+    // Handle localhost URLs
+    if (url.includes('localhost:4000')) {
+      url = url.replace('localhost:4000', window.location.host);
+    }
+
+    return url;
   }
 }
 
