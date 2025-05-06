@@ -40,7 +40,7 @@ export default class View {
 
     // Check if we're already handling this click
     if (categoriesTab.dataset.processing) {
-      console.log('toggleCategoriesList - already processing click');
+      // console.log('toggleCategoriesList - already processing click');
       return;
     }
 
@@ -460,15 +460,15 @@ export default class View {
 
   // Base language change handlers - triggered by menu buttons via delegation
   changeToHeb = function () {
-    console.log('[View.js] changeToHeb: START');
+    // console.log('[View.js] changeToHeb: START');
     try {
-      console.log('[View.js] changeToHeb: Setting localStorage');
+      // console.log('[View.js] changeToHeb: Setting localStorage');
       localStorage.setItem('language', 'heb');
 
-      console.log('[View.js] changeToHeb: About to call setLanguage');
+      // console.log('[View.js] changeToHeb: About to call setLanguage');
       this.setLanguage('heb', 0);
 
-      console.log('[View.js] changeToHeb: Completed successfully');
+      // console.log('[View.js] changeToHeb: Completed successfully');
     } catch (err) {
       console.error('[View.js] changeToHeb ERROR:', err);
       console.error('Stack trace:', err.stack);
@@ -477,15 +477,15 @@ export default class View {
   };
 
   changeToEng = function () {
-    console.log('[View.js] changeToEng: START');
+    // console.log('[View.js] changeToEng: START');
     try {
-      console.log('[View.js] changeToEng: Setting localStorage');
+      // console.log('[View.js] changeToEng: Setting localStorage');
       localStorage.setItem('language', 'eng');
 
-      console.log('[View.js] changeToEng: About to call setLanguage');
+      // console.log('[View.js] changeToEng: About to call setLanguage');
       this.setLanguage('eng', 0);
 
-      console.log('[View.js] changeToEng: Completed successfully');
+      // console.log('[View.js] changeToEng: Completed successfully');
     } catch (err) {
       console.error('[View.js] changeToEng ERROR:', err);
       console.error('Stack trace:', err.stack);
@@ -1002,7 +1002,7 @@ export default class View {
     // Add event handlers for mobile menu interactions
     this.svgHandler();
 
-    console.log('mobileCartNumber', mobileCartNumber);
+    // console.log('mobileCartNumber', mobileCartNumber);
     // Initialize mobile cart number
     const mobileCartNumber = document.querySelector('.cart-number-mobile');
     if (mobileCartNumber) {

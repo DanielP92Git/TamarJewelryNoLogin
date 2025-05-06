@@ -28,6 +28,12 @@ class CategoriesView extends View {
     this.lang = 'eng';
     this.initialized = false;
     this.isModalOpen = false;
+    this.exchangeRate = 3.7;
+
+    // Add resize observer for debugging
+    if (process.env.NODE_ENV !== 'production') {
+      this.setupImageSourceDebugger();
+    }
 
     // Make sure we detect when the DOM is ready
     document.addEventListener('DOMContentLoaded', () => {
@@ -40,7 +46,6 @@ class CategoriesView extends View {
     });
 
     // IMPORTANT: Direct initialization with a timer as a fail-safe
-    // This will try to initialize after 1 second, but only if we're on a categories page and not already initialized
     setTimeout(() => {
       if (
         !this.initialized &&
@@ -161,6 +166,11 @@ class CategoriesView extends View {
     }
     this.lang = lng;
     this.setHeaderLng(this.lang);
+
+    // Initialize currency and sort toggles
+    this.setCurSortLng(this.lang);
+    this.setupCurrencyHandler();
+    this.setupSortHandler();
   }
 
   // Updated method for page-specific LANGUAGE updates only
@@ -385,41 +395,64 @@ class CategoriesView extends View {
   addFromPrev(data) {
     this.increaseCartNumber();
 
-    // Create a more complete object that mimics the DOM element structure
-    // expected by model.handleAddToCart and addToLocalStorage
-    const modalElement = document.querySelector('.modal');
-    const bigImage = modalElement.querySelector('.big-image');
-    const itemTitle = modalElement.querySelector('.item-title_modal');
-    const itemPrice = modalElement.querySelector('.item-price_modal');
-
+    // Create a complete object with all necessary data
     const mockElement = {
       dataset: {
         id: data.dataset.id,
         quant: data.dataset.quant,
+        price: data.dataset.price,
         currency: this.selectedCurrency,
       },
       getAttribute: function (attr) {
-        if (attr === 'data-id') return this.dataset.id;
-        if (attr === 'data-quant') return this.dataset.quant;
-        return null;
+        switch (attr) {
+          case 'data-id':
+            return this.dataset.id;
+          case 'data-quant':
+            return this.dataset.quant;
+          case 'data-price':
+            return this.dataset.price;
+          default:
+            return null;
+        }
       },
       querySelector: function (selector) {
-        if (selector === '.front-image') return { src: bigImage.src };
-        if (selector === '.item-title')
-          return { textContent: itemTitle.textContent };
-        if (selector === '.item-price')
-          return { textContent: itemPrice.textContent };
-        return null;
+        const modalElement = document.querySelector('.modal');
+        if (!modalElement) return null;
+
+        switch (selector) {
+          case '.front-image':
+            return { src: modalElement.querySelector('.big-image')?.src };
+          case '.item-title':
+            return {
+              textContent:
+                modalElement.querySelector('.item-title_modal')?.textContent,
+            };
+          case '.item-price':
+            return {
+              textContent:
+                modalElement.querySelector('.price-text')?.textContent,
+            };
+          default:
+            return null;
+        }
       },
     };
 
     model.handleAddToCart(mockElement);
 
-    let addedMsg = document.querySelector('.added-message');
-    addedMsg.classList.remove('hide');
-    setTimeout(() => {
-      addedMsg.classList.add('hide');
-    }, 3000);
+    // Update button text
+    const addToCartBtn = document.querySelector('.add-to-cart-btn_modal');
+    if (addToCartBtn) {
+      const originalText = addToCartBtn.textContent;
+      addToCartBtn.textContent =
+        this.lang === 'eng' ? 'Added to Cart!' : 'נוסף לסל!';
+      addToCartBtn.style.backgroundColor = '#4caf50'; // Change to success color
+
+      setTimeout(() => {
+        addToCartBtn.textContent = originalText;
+        addToCartBtn.style.backgroundColor = '#4a90e2'; // Restore original color
+      }, 2000);
+    }
   }
 
   //////////////////////////////////////////////////
@@ -479,413 +512,339 @@ class CategoriesView extends View {
 
     const id = data.dataset.id;
     const quantity = data.dataset.quant;
-    const image = data.querySelector('.image-item').src;
     const title = data.querySelector('.item-title').textContent;
-    const description = data.querySelector('.item-description').innerHTML;
+    const product = this.products.find(prod => prod.id == id);
+    const description = (
+      product?.description ||
+      data.querySelector('.item-description')?.innerHTML ||
+      ''
+    )
+      .replace(/\r\n/g, '\n') // Normalize line endings
+      .replace(/\n{3,}/g, '\n\n') // Replace multiple line breaks with double line breaks
+      .trim(); // Remove extra whitespace
     const price = data.querySelector('.item-price').textContent;
     const currency = data.dataset.currency;
 
-    // Get the product object from our internal array to access all data including small images
-    const product = this.products.find(prod => prod.id == id);
-    const smallImagesArray = product?.smallImages || [];
+    // Get the image URL directly from the clicked item
+    const clickedImageUrl = data.querySelector('.front-image')?.src;
+
+    // Helper function to get the appropriate image URL based on structure
+    const getImageUrl = (imageData, preferDesktop = true) => {
+      if (!imageData) return '';
+
+      // If it's a string, return it directly
+      if (typeof imageData === 'string') {
+        // Make sure it's a valid URL and not just a "/"
+        return imageData.includes('http') ? imageData : '';
+      }
+
+      // New structure with desktop/mobile properties
+      if (typeof imageData === 'object') {
+        // Check if it's the new format with specific properties
+        if (imageData.desktop || imageData.mobile || imageData.publicDesktop) {
+          // Try public URLs first
+          if (imageData.publicDesktop && preferDesktop)
+            return imageData.publicDesktop;
+          if (imageData.publicMobile && !preferDesktop)
+            return imageData.publicMobile;
+
+          // Then try regular URLs
+          if (imageData.desktop && preferDesktop) return imageData.desktop;
+          if (imageData.mobile && !preferDesktop) return imageData.mobile;
+
+          // Then try local URLs
+          if (imageData.desktopLocal && preferDesktop)
+            return imageData.desktopLocal;
+          if (imageData.mobileLocal && !preferDesktop)
+            return imageData.mobileLocal;
+        }
+
+        // If it's the old format with direct URLs
+        if (imageData.url) return imageData.url;
+        if (imageData.imageUrl) return imageData.imageUrl;
+
+        // If we have a string property that looks like a URL
+        const values = Object.values(imageData);
+        const validUrl = values.find(
+          val =>
+            typeof val === 'string' &&
+            val.includes('http') &&
+            (val.includes('/uploads/') || val.includes('/smallImages/'))
+        );
+        if (validUrl) return validUrl;
+      }
+
+      return '';
+    };
+
+    // Get main image URLs with fallbacks
+    const mainDesktopImage =
+      clickedImageUrl ||
+      getImageUrl(product?.mainImage, true) ||
+      product?.image ||
+      '';
+
+    const mainMobileImage =
+      getImageUrl(product?.mainImage, false) ||
+      product?.image ||
+      mainDesktopImage;
+
+    // Process small images - ensure we get the actual URLs
+    let smallImagesArray = [];
+
+    // Handle old format (array of strings)
+    if (Array.isArray(product?.smallImagesLocal)) {
+      smallImagesArray = product.smallImagesLocal;
+    }
+    // Handle old format (array of URLs)
+    else if (Array.isArray(product?.smallImages)) {
+      smallImagesArray = product.smallImages.map(img => {
+        if (typeof img === 'string' && img.includes('http')) {
+          return img;
+        }
+        return getImageUrl(img, true) || getImageUrl(img, false) || '';
+      });
+    }
+
+    // Filter out any invalid URLs
+    smallImagesArray = smallImagesArray.filter(
+      url =>
+        typeof url === 'string' &&
+        url.includes('http') &&
+        (url.includes('/uploads/') || url.includes('/smallImages/'))
+    );
 
     // Close the previous modal if open
     if (this.isModalOpen) {
       this.closeModal();
     }
 
-    // Check if we're on mobile
-    const isMobile = window.matchMedia('(max-width: 699.99px)').matches;
-
-    // Function to generate small image markup that works better on mobile
-    const generateSmallImageMarkup = images => {
-      return images
-        .map(
-          img => `
-          <div class="small-image-div">
-            <img class="small-image" src="${img}" alt="Product view" loading="lazy">
-          </div>
-        `
-        )
-        .join('');
-    };
-
     // Create modal content
     const modal = document.querySelector('.modal');
     const addToCartText = this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל';
-    const addedText =
-      this.lang === 'eng' ? 'Added to Cart!' : 'נוסף לסל הקניות';
-    const tapToMagnifyText =
-      this.lang === 'eng' ? 'Tap to magnify' : 'הקש להגדלה';
 
-    const modalMarkup = `
+    const modalContent = `
       <div class="item-overlay">
-        <div class="modal-item-container">
-          <img src="${closeSvg}" alt="close" class="close-modal-btn" style="object-fit: contain; display: block;" />
+        <div class="modal-content">
           <div class="images-container">
             <div class="magnifier-container">
-              ${
-                isMobile
-                  ? `<div class="tap-to-magnify">${tapToMagnifyText}</div>`
-                  : ''
-              }
-              <img src="${image}" alt="${title}" class="big-image" onload="this.classList.add('loaded'); this.parentNode.classList.add('image-loaded');" />
-              <div class="magnifier-glass"></div>
-              ${
-                isMobile
-                  ? ''
-                  : `<div class="magnifier-icon" title="Hover to magnify"></div>`
-              }
+              <img 
+                class="big-image" 
+                src="${mainDesktopImage}"
+                alt="${title}"
+                loading="lazy"
+              />
+              <div class="loading-indicator">Loading...</div>
             </div>
             ${
-              hasMultipleImages
-                ? `<div class="small-images-container">${
-                    isMobile
-                      ? generateSmallImageMarkup(smallImagesArray)
-                      : imageMarkup
-                  }</div>`
+              smallImagesArray && smallImagesArray.length > 0
+                ? `<div class="small-images-container">
+                    ${smallImagesArray
+                      .map(
+                        (imgUrl, index) => `
+                        <div class="small-image-div${
+                          index === 0 ? ' active' : ''
+                        }" data-index="${index}">
+                          <img 
+                            class="small-image" 
+                            src="${imgUrl}" 
+                            alt="Product view ${index + 1}"
+                            loading="lazy"
+                            onerror="this.onerror=null; this.src='${mainDesktopImage}'; console.log('Failed to load small image, falling back to main image');"
+                          />
+                        </div>
+                      `
+                      )
+                      .join('')}
+                  </div>`
                 : ''
             }
+            </div>
+          <div class="item-specs" dir="${this.lang === 'heb' ? 'rtl' : 'ltr'}">
+            <h2 class="item-title_modal" style="text-align: ${
+              this.lang === 'heb' ? 'right' : 'left'
+            }">${title}</h2>
+            ${
+              description
+                ? `<div class="item-description_modal" style="text-align: ${
+                    this.lang === 'heb' ? 'right' : 'left'
+                  }">${description.replace(/\n/g, '<br>')}</div>`
+                : ''
+            }
+            <div class="price-container"">
+              <span class="price-label">${
+                this.lang === 'eng' ? 'Price:' : 'מחיר:'
+              }</span>
+              <span class="price-text">${price}</span>
           </div>
-          <div class="item-specs">
-            <h2 class="item-title_modal">${title}</h2>
-            <p class="item-description_modal">${description}</p>
-            <span class="price-text">${
-              this.lang === 'eng' ? 'Price:' : 'מחיר:'
-            }</span>
-            <p class="item-price_modal">${price}</p>
-            <button class="add-to-cart-btn_modal" data-id="${id}" data-quant="${quantity}">${addToCartText}</button>
-            <p class="added-message hide">${addedText}</p>
+            <button class="add-to-cart-btn_modal" data-id="${id}" data-quant="${quantity}" data-price="${price}">
+              ${addToCartText}
+            </button>
           </div>
+          <button class="close-modal-btn">✕</button>
+        </div>
+      </div>
+      <div class="fullscreen-gallery">
+        <button class="close-gallery">✕</button>
+        <button class="prev-image">❮</button>
+        <button class="next-image">❯</button>
+        <div class="gallery-container">
+          <img class="gallery-image" src="${mainDesktopImage}" alt="${title}" />
         </div>
       </div>
     `;
 
-    modal.innerHTML = modalMarkup;
+    modal.innerHTML = modalContent;
     this.isModalOpen = true;
-
-    // Add event listeners
-    const closeBtn = modal.querySelector('.close-modal-btn');
-    closeBtn.addEventListener('click', this.closeModal.bind(this));
-
-    // Close modal when clicking outside the modal content
-    const overlay = modal.querySelector('.item-overlay');
-    if (overlay) {
-      overlay.addEventListener('click', e => {
-        // Only close if clicking directly on the overlay, not on its children
-        if (e.target === overlay) {
-          this.closeModal();
-        }
-      });
-    }
-
-    const addToCartBtn = modal.querySelector('.add-to-cart-btn_modal');
-    addToCartBtn.addEventListener('click', () => {
-      const dataObj = {
-        dataset: {
-          id: addToCartBtn.dataset.id,
-          quant: addToCartBtn.dataset.quant,
-        },
-      };
-
-      this.addFromPrev(dataObj);
-    });
-
-    // Handle small images if present
-    if (hasMultipleImages) {
-      const smallImages = modal.querySelectorAll('.small-image');
-      const bigImage = modal.querySelector('.big-image');
-      const magnifierGlass = modal.querySelector('.magnifier-glass');
-
-      smallImages.forEach(img => {
-        img.addEventListener('click', () => {
-          bigImage.src = img.src;
-          // Also update the magnifier glass background
-          if (magnifierGlass) {
-            magnifierGlass.style.backgroundImage = `url('${img.src}')`;
-          }
-        });
-      });
-    }
-
-    // Setup magnifier effect
-    const magnifierContainer = modal.querySelector('.magnifier-container');
-    const magnifierGlass = modal.querySelector('.magnifier-glass');
-    const bigImage = modal.querySelector('.big-image');
-    const tapToMagnify = modal.querySelector('.tap-to-magnify');
-    const magnifierIcon = modal.querySelector('.magnifier-icon');
-
-    if (magnifierContainer && magnifierGlass && bigImage) {
-      // Initial setup - hide the glass
-      magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
-      magnifierGlass.style.display = 'none';
-
-      // Preload the image at high resolution to improve quality
-      const preloadImg = new Image();
-      preloadImg.src = bigImage.src;
-      preloadImg.onload = function () {
-        // Set initial magnifier glass properties with high quality settings
-        magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
-        magnifierGlass.style.backgroundSize = `${300}%`; // Initial zoom factor of 3
-        magnifierGlass.style.imageRendering = 'high-quality';
-        magnifierGlass.style.backfaceVisibility = 'hidden';
-        magnifierGlass.style.transform = 'translateZ(0)';
-
-        // Store the natural dimensions of the image for calculations
-        bigImage.dataset.naturalWidth = preloadImg.naturalWidth;
-        bigImage.dataset.naturalHeight = preloadImg.naturalHeight;
-      };
-
-      // Function to calculate correct magnifier position for object-fit: contain images
-      const calculateImageContainPosition = (
-        imgElement,
-        containerRect,
-        mouseX,
-        mouseY
-      ) => {
-        const imgRect = imgElement.getBoundingClientRect();
-
-        // Calculate the dimensions of the actual visible image (not just the container)
-        const imgAspectRatio =
-          imgElement.dataset.naturalWidth / imgElement.dataset.naturalHeight;
-        const containerAspectRatio = containerRect.width / containerRect.height;
-
-        let visibleImgWidth, visibleImgHeight, offsetX, offsetY;
-
-        if (imgAspectRatio > containerAspectRatio) {
-          // Image is constrained by width
-          visibleImgWidth = containerRect.width;
-          visibleImgHeight = containerRect.width / imgAspectRatio;
-          offsetX = 0;
-          offsetY = (containerRect.height - visibleImgHeight) / 2;
-        } else {
-          // Image is constrained by height
-          visibleImgHeight = containerRect.height;
-          visibleImgWidth = containerRect.height * imgAspectRatio;
-          offsetX = (containerRect.width - visibleImgWidth) / 2;
-          offsetY = 0;
-        }
-
-        // Add a small buffer to allow magnification at the edges (5px)
-        const buffer = 5;
-
-        // Check if cursor is within the actual image bounds with buffer
-        // This expanded check helps with edge cases, especially at the bottom
-        if (
-          mouseX < offsetX - buffer ||
-          mouseX > offsetX + visibleImgWidth + buffer ||
-          mouseY < offsetY - buffer ||
-          mouseY > offsetY + visibleImgHeight + buffer
-        ) {
-          return { inBounds: false };
-        }
-
-        // Calculate the percentage position within the actual image
-        // Constrain percentages to 0-100 range to handle edge cases
-        let xPercent = ((mouseX - offsetX) / visibleImgWidth) * 100;
-        let yPercent = ((mouseY - offsetY) / visibleImgHeight) * 100;
-
-        // Clamp percentage values between 0 and 100 with a slight buffer for edges
-        xPercent = Math.max(0, Math.min(100, xPercent));
-        yPercent = Math.max(0, Math.min(100, yPercent));
-
-        return { inBounds: true, xPercent, yPercent };
-      };
-
-      if (isMobile) {
-        // Mobile touch handling code...
-        magnifierContainer.addEventListener('touchstart', function (e) {
-          if (tapToMagnify) {
-            tapToMagnify.style.display = 'none'; // Hide the message when user starts touching
-          }
-
-          // Show the glass
-          magnifierGlass.style.display = 'block';
-
-          handleTouch(e);
-        });
-
-        magnifierContainer.addEventListener('touchmove', function (e) {
-          e.preventDefault(); // Prevent scrolling while magnifying
-          handleTouch(e);
-        });
-
-        magnifierContainer.addEventListener('touchend', function () {
-          magnifierGlass.style.display = 'none';
-
-          // Show the tap message again after a short delay
-          if (tapToMagnify) {
-            setTimeout(() => {
-              tapToMagnify.style.display = 'block';
-            }, 500);
-          }
-        });
-
-        function handleTouch(e) {
-          const touch = e.touches[0];
-          const rect = magnifierContainer.getBoundingClientRect();
-          const x = touch.clientX - rect.left;
-          const y = touch.clientY - rect.top;
-
-          // Use the improved position calculation
-          const position = calculateImageContainPosition(bigImage, rect, x, y);
-
-          if (!position.inBounds) {
-            magnifierGlass.style.display = 'none';
-            return;
-          }
-
-          // Prevent the glass from going outside the container
-          const glassWidth = magnifierGlass.offsetWidth / 2;
-          const glassHeight = magnifierGlass.offsetHeight / 2;
-
-          // Apply an offset to move the glass above the touch point (finger)
-          // Move it 100px above the finger to ensure it's visible
-          const touchOffset = 100;
-          let offsetX = x - glassWidth;
-          let offsetY = y - glassHeight - touchOffset;
-
-          // Create buffer space for bottom edge
-          const bottomBuffer = 20;
-          const rightBuffer = 20;
-
-          // Make sure the glass doesn't go outside the container with improved constraints
-          offsetX = Math.max(0, offsetX);
-          offsetY = Math.max(0, offsetY);
-
-          // Adjust bottom and right constraints with buffer
-          offsetX = Math.min(
-            rect.width - magnifierGlass.offsetWidth - rightBuffer,
-            offsetX
-          );
-          offsetY = Math.min(
-            rect.height - magnifierGlass.offsetHeight - bottomBuffer,
-            offsetY
-          );
-
-          // Position the glass with the calculated offset
-          magnifierGlass.style.left = `${offsetX}px`;
-          magnifierGlass.style.top = `${offsetY}px`;
-
-          // Calculate background position using percentage-based approach
-          const zoomFactor = 3.5; // Increased zoom factor for mobile
-
-          // Use a higher quality approach for positioning the background
-          magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
-          magnifierGlass.style.backgroundPosition = `${position.xPercent}% ${position.yPercent}%`;
-          magnifierGlass.style.backgroundSize = `${zoomFactor * 100}%`;
-
-          // Apply additional CSS to improve rendering quality
-          magnifierGlass.style.imageRendering = 'high-quality';
-          magnifierGlass.style.backfaceVisibility = 'hidden';
-          magnifierGlass.style.transform = 'translateZ(0)'; // Hardware acceleration
-        }
-      } else {
-        // Desktop behavior
-        if (magnifierIcon) {
-          // Show magnifier icon by default
-          magnifierIcon.style.opacity = '1';
-        }
-
-        // Event handlers for desktop magnifier
-        magnifierContainer.addEventListener('mouseenter', function () {
-          if (magnifierIcon) {
-            magnifierIcon.style.opacity = '0';
-          }
-        });
-
-        magnifierContainer.addEventListener('mousemove', function (e) {
-          const rect = magnifierContainer.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-
-          // Use the improved position calculation
-          const position = calculateImageContainPosition(bigImage, rect, x, y);
-
-          if (!position.inBounds) {
-            magnifierGlass.style.display = 'none';
-            return;
-          }
-
-          // Show the glass
-          magnifierGlass.style.display = 'block';
-
-          // Get glass dimensions and adjust for proper centered appearance
-          const glassWidth = magnifierGlass.offsetWidth / 2;
-          const glassHeight = magnifierGlass.offsetHeight / 2;
-
-          // Calculate desired position
-          let glassX = x - glassWidth;
-          let glassY = y - glassHeight;
-
-          // Create buffer space for bottom edge (20px from container edge)
-          const bottomBuffer = 20;
-          const rightBuffer = 20;
-
-          // Ensure the glass doesn't go outside the container with adjusted constraints
-          // For left and top edges
-          glassX = Math.max(0, glassX);
-          glassY = Math.max(0, glassY);
-
-          // For right and bottom edges - ensure we can view bottom jewelry
-          glassX = Math.min(
-            rect.width - magnifierGlass.offsetWidth - rightBuffer,
-            glassX
-          );
-          glassY = Math.min(
-            rect.height - magnifierGlass.offsetHeight - bottomBuffer,
-            glassY
-          );
-
-          // Position the glass at cursor with constraints applied
-          magnifierGlass.style.left = `${glassX}px`;
-          magnifierGlass.style.top = `${glassY}px`;
-
-          // Calculate background position for magnifier
-          const zoomFactor = 3; // Zoom factor for desktop
-
-          // Use a higher quality approach for positioning the background
-          magnifierGlass.style.backgroundImage = `url('${bigImage.src}')`;
-          magnifierGlass.style.backgroundPosition = `${position.xPercent}% ${position.yPercent}%`;
-          magnifierGlass.style.backgroundSize = `${zoomFactor * 100}%`;
-
-          // Apply additional CSS to improve rendering quality
-          magnifierGlass.style.imageRendering = 'high-quality';
-          magnifierGlass.style.backfaceVisibility = 'hidden';
-          magnifierGlass.style.transform = 'translateZ(0)'; // Hardware acceleration
-        });
-
-        magnifierContainer.addEventListener('mouseleave', function () {
-          magnifierGlass.style.display = 'none';
-          if (magnifierIcon) {
-            magnifierIcon.style.opacity = '1';
-          }
-        });
-      }
-    }
-
-    // Show modal
-    modal.classList.add('show');
+    this._setupModalEventListeners();
   }
 
   setupCurrencyHandler() {
     const currencySelector = document.getElementById('currency');
 
-    currencySelector.addEventListener('change', () => {
+    currencySelector.addEventListener('change', async () => {
       const spinner = this.outerProductsContainer.querySelector('.loader');
       spinner.classList.remove('spinner-hidden');
 
-      this.selectedCurrency = currencySelector.value;
-      this.page = 1; // Reset page when currency changes
-      this.fetchProductsByCategory();
+      try {
+        this.selectedCurrency = currencySelector.value;
+
+        // If we have a sort order active, fetch all products and sort them
+        if (this.sortedByPrice !== '') {
+          const apiUrl = `${process.env.API_URL}`;
+          const response = await fetch(`${apiUrl}/getAllProductsByCategory`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ category: this.category }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (!data || !data.products) {
+            console.error(
+              '[CategoriesView] Invalid data format received:',
+              data
+            );
+            return;
+          }
+
+          // Store all products and sort them
+          this.products = data.products;
+          this.totalProducts = data.total;
+          this.allProductsFetched = true;
+
+          // Sort products by price
+          this.products.sort((a, b) => {
+            // Convert prices to the selected currency
+            const priceA =
+              this.selectedCurrency === 'usd'
+                ? a.ils_price / this.exchangeRate
+                : a.ils_price;
+            const priceB =
+              this.selectedCurrency === 'usd'
+                ? b.ils_price / this.exchangeRate
+                : b.ils_price;
+
+            // Sort based on the converted prices
+            return this.sortedByPrice === 'low-to-high'
+              ? priceA - priceB
+              : priceB - priceA;
+          });
+
+          // Display sorted products
+          this.displayProducts();
+        } else {
+          // If no sort order, just fetch paginated products
+          this.page = 1;
+          await this.fetchProductsByCategory();
+        }
+      } catch (err) {
+        console.error('[CategoriesView] Error in currency handler:', err);
+      } finally {
+        if (spinner) {
+          spinner.classList.add('spinner-hidden');
+        }
+      }
     });
   }
 
   setupSortHandler() {
     const sortSelector = document.getElementById('sort');
-    sortSelector.addEventListener('change', () => {
-      this.sortedByPrice = sortSelector.value;
-      this.sortAndDisplayProducts();
+    sortSelector.addEventListener('change', async () => {
+      const spinner = this.outerProductsContainer?.querySelector('.loader');
+      if (spinner) {
+        spinner.classList.remove('spinner-hidden');
+      }
+
+      try {
+        this.sortedByPrice = sortSelector.value;
+
+        if (this.sortedByPrice === 'default') {
+          // Reset to initial state and fetch with pagination
+          this.page = 1;
+          this.products = [];
+          this.allProductsFetched = false;
+          await this.fetchProductsByCategory();
+        } else {
+          // Always fetch all products for sorting
+          const apiUrl = `${process.env.API_URL}`;
+          const response = await fetch(`${apiUrl}/getAllProductsByCategory`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ category: this.category }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          if (!data || !data.products) {
+            console.error(
+              '[CategoriesView] Invalid data format received:',
+              data
+            );
+            return;
+          }
+
+          // Store all products and sort them
+          this.products = data.products;
+          this.totalProducts = data.total;
+          this.allProductsFetched = true;
+
+          // Sort products by price
+          this.products.sort((a, b) => {
+            // Convert prices to the selected currency
+            const priceA =
+              this.selectedCurrency === 'usd'
+                ? a.ils_price / this.exchangeRate
+                : a.ils_price;
+            const priceB =
+              this.selectedCurrency === 'usd'
+                ? b.ils_price / this.exchangeRate
+                : b.ils_price;
+
+            // Sort based on the converted prices
+            return this.sortedByPrice === 'low-to-high'
+              ? priceA - priceB
+              : priceB - priceA;
+          });
+
+          // Display sorted products
+          this.displayProducts();
+        }
+      } catch (err) {
+        console.error('[CategoriesView] Error in sort handler:', err);
+      } finally {
+        if (spinner) {
+          spinner.classList.add('spinner-hidden');
+        }
+      }
     });
   }
 
@@ -941,7 +900,7 @@ class CategoriesView extends View {
         }
 
         const data = await response.json();
-        console.log('[DEBUG] Fetched data:', data);
+        // console.log('[DEBUG] Fetched data:', data);
         // Check for the updated response format
         if (!data || (!data.products && !Array.isArray(data))) {
           console.error('[CategoriesView] Invalid data format received:', data);
@@ -1051,7 +1010,7 @@ class CategoriesView extends View {
 
       const apiUrl = `${process.env.API_URL}`;
       const fetchUrl = `${apiUrl}/productsByCategory`;
-      console.log('[DEBUG] Fetching more products from:', fetchUrl);
+      // console.log('[DEBUG] Fetching more products from:', fetchUrl);
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1063,7 +1022,7 @@ class CategoriesView extends View {
       }
 
       const data = await response.json();
-      console.log('[DEBUG] Fetched data:', data);
+      // console.log('[DEBUG] Fetched data:', data);
 
       if (!data) {
         this.allProductsFetched = true;
@@ -1093,22 +1052,6 @@ class CategoriesView extends View {
     }
   }
 
-  sortAndDisplayProducts() {
-    // Sort products by price
-    this.products.sort((a, b) => {
-      const priceA =
-        this.selectedCurrency === 'usd' ? a.ils_price / 3.7 : a.ils_price;
-      const priceB =
-        this.selectedCurrency === 'usd' ? b.ils_price / 3.7 : b.ils_price;
-      return this.sortedByPrice === 'low-to-high'
-        ? priceA - priceB
-        : priceB - priceA;
-    });
-
-    this.page = 1;
-    this.displayProducts();
-  }
-
   displayProducts() {
     if (!this.innerProductsContainer) {
       console.error('[CategoriesView] No inner products container found');
@@ -1126,7 +1069,7 @@ class CategoriesView extends View {
     this.innerProductsContainer.innerHTML = '';
 
     const productsToShow = this.products;
-    console.log('[DEBUG] Products to show:', productsToShow);
+    // console.log('[DEBUG] Products to show:', productsToShow);
 
     const markup = productsToShow
       .map(item => this.getProductMarkup(item))
@@ -1171,23 +1114,73 @@ class CategoriesView extends View {
         ? Number((ils_price / 3.7).toFixed(0))
         : ils_price;
 
-    // Convert newlines in description to <br> tags
+    // Format description
     const formattedDescription = description
       ? description.replace(/\n/g, '<br>')
       : '';
+
+    // Get desktop and mobile image URLs with proper fallbacks
+    const desktopImage =
+      item.mainImage?.desktop ||
+      item.mainImage?.publicDesktop ||
+      item.publicImage ||
+      item.image;
+    const mobileImage =
+      item.mainImage?.mobile ||
+      item.mainImage?.publicMobile ||
+      item.mainImage?.desktop ||
+      item.image;
+
+    // Log image URLs for debugging
+    // console.log('Product Image URLs:', {
+    //   id: id,
+    //   name: name,
+    //   desktop: desktopImage,
+    //   mobile: mobileImage,
+    //   mainImage: item.mainImage,
+    //   publicImage: item.publicImage,
+    //   image: item.image,
+    // });
 
     return `
       <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}">
         <div class="product-image-container">
           <div class="loading-spinner"></div>
-          <img class="image-item front-image" src="${image}" loading="lazy" 
+          <picture>
+            <source
+              media="(min-width: 768px)"
+              srcset="${desktopImage}"
+              type="image/webp"
+            />
+            <source
+              media="(max-width: 767px)"
+              srcset="${mobileImage}"
+              type="image/webp"
+            />
+            <img 
+              class="image-item front-image" 
+              src="${desktopImage}"
+              alt="${name}"
+              loading="lazy"
                onload="
                  // Hide spinner
-                 this.parentElement.querySelector('.loading-spinner').style.display = 'none';
+                this.parentElement.parentElement.querySelector('.loading-spinner').style.display = 'none';
                  // Add loaded class to image
                  this.classList.add('loaded');
-               "
-          />
+                // Log which image version is loaded
+                // (function() {
+                //   const isMobile = window.matchMedia('(max-width: 767px)').matches;
+                //   const activeSource = isMobile ? '${mobileImage}' : '${desktopImage}';
+                //   console.log('Loaded image for ' + (isMobile ? 'mobile' : 'desktop') + ':', {
+                //     productId: '${id}',
+                //     productName: '${name}',
+                //     activeSource: activeSource,
+                //     actualSrc: this.currentSrc
+                //   });
+                // }).call(this);
+              "
+            />
+          </picture>
         </div>
         <button class="add-to-cart-btn">${
           this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל'
@@ -1254,6 +1247,436 @@ class CategoriesView extends View {
       if (priceText) {
         priceText.textContent = lng === 'eng' ? 'Price:' : 'מחיר:';
       }
+    });
+  }
+
+  _setupModalEventListeners() {
+    const modal = document.querySelector('.modal');
+    const closeBtn = modal.querySelector('.close-modal-btn');
+    const overlay = modal.querySelector('.item-overlay');
+    const addToCartBtn = modal.querySelector('.add-to-cart-btn_modal');
+    const magnifierContainer = modal.querySelector('.magnifier-container');
+    const magnifierGlass = modal.querySelector('.magnifier-glass');
+    const bigImage = modal.querySelector('.big-image');
+    const tapToMagnify = modal.querySelector('.tap-to-magnify');
+    const magnifierIcon = modal.querySelector('.magnifier-icon');
+    const loadingIndicator = modal.querySelector('.loading-indicator');
+    const isMobile = window.matchMedia('(max-width: 699.99px)').matches;
+
+    // Handle main image loading - only for initial load
+    if (bigImage && !bigImage.complete) {
+      if (loadingIndicator) {
+        loadingIndicator.style.display = 'block';
+      }
+
+      bigImage.onload = () => {
+        bigImage.classList.add('loaded');
+        if (loadingIndicator) {
+          loadingIndicator.style.display = 'none';
+        }
+      };
+
+      bigImage.onerror = () => {
+        if (loadingIndicator) {
+          loadingIndicator.textContent = 'Error loading image';
+          loadingIndicator.style.display = 'block';
+        }
+      };
+    } else if (bigImage) {
+      // Image is already loaded
+      bigImage.classList.add('loaded');
+      if (loadingIndicator) {
+        loadingIndicator.style.display = 'none';
+      }
+    }
+
+    // Handle small images click
+    const smallImages = modal.querySelectorAll('.small-image-div');
+    if (smallImages.length > 0) {
+      smallImages.forEach(imgDiv => {
+        imgDiv.addEventListener('click', () => {
+          // Remove active class from all thumbnails
+          smallImages.forEach(div => div.classList.remove('active'));
+
+          // Add active class to clicked thumbnail
+          imgDiv.classList.add('active');
+
+          // Get the image source from the clicked thumbnail
+          const smallImg = imgDiv.querySelector('.small-image');
+          if (!smallImg) return;
+
+          // Update main image without showing loading indicator
+          if (bigImage) {
+            // Cache the new image first
+            const tempImg = new Image();
+            tempImg.onload = () => {
+              bigImage.src = smallImg.src;
+              bigImage.classList.add('loaded');
+
+              // Update gallery image if it exists
+              const galleryImage = modal.querySelector('.gallery-image');
+              if (galleryImage) {
+                galleryImage.src = smallImg.src;
+              }
+            };
+            tempImg.src = smallImg.src;
+          }
+        });
+
+        // Add hover effect
+        imgDiv.addEventListener('mouseenter', () => {
+          if (!imgDiv.classList.contains('active')) {
+            imgDiv.style.borderColor = '#ddd';
+          }
+        });
+
+        imgDiv.addEventListener('mouseleave', () => {
+          if (!imgDiv.classList.contains('active')) {
+            imgDiv.style.borderColor = 'transparent';
+          }
+        });
+      });
+    }
+
+    // Fullscreen gallery elements
+    const fullscreenGallery = modal.querySelector('.fullscreen-gallery');
+    const galleryImage = modal.querySelector('.gallery-image');
+    const closeGallery = modal.querySelector('.close-gallery');
+    const prevButton = modal.querySelector('.prev-image');
+    const nextButton = modal.querySelector('.next-image');
+    let currentImageIndex = 0;
+
+    // Function to update gallery image
+    const updateGalleryImage = index => {
+      const images = Array.from(modal.querySelectorAll('.small-image')).map(
+        img => img.src
+      );
+      currentImageIndex = (index + images.length) % images.length;
+      galleryImage.src = images[currentImageIndex];
+    };
+
+    // Open fullscreen gallery on main image click
+    magnifierContainer.addEventListener('click', () => {
+      fullscreenGallery.style.display = 'block';
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
+      updateGalleryImage(currentImageIndex);
+    });
+
+    // Close gallery
+    closeGallery.addEventListener('click', () => {
+      fullscreenGallery.style.display = 'none';
+      document.body.style.overflow = ''; // Restore scrolling
+    });
+
+    // Navigation buttons
+    prevButton.addEventListener('click', () => {
+      updateGalleryImage(currentImageIndex - 1);
+    });
+
+    nextButton.addEventListener('click', () => {
+      updateGalleryImage(currentImageIndex + 1);
+    });
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+      if (fullscreenGallery.style.display === 'block') {
+        if (e.key === 'ArrowLeft') {
+          updateGalleryImage(currentImageIndex - 1);
+        } else if (e.key === 'ArrowRight') {
+          updateGalleryImage(currentImageIndex + 1);
+        } else if (e.key === 'Escape') {
+          fullscreenGallery.style.display = 'none';
+          document.body.style.overflow = '';
+        }
+      }
+    });
+
+    // Close gallery on overlay click
+    fullscreenGallery.addEventListener('click', e => {
+      if (e.target === fullscreenGallery) {
+        fullscreenGallery.style.display = 'none';
+        document.body.style.overflow = '';
+      }
+    });
+
+    // Close button event
+    closeBtn.addEventListener('click', this.closeModal.bind(this));
+
+    // Close on overlay click
+    if (overlay) {
+      overlay.addEventListener('click', e => {
+        if (e.target === overlay) {
+          this.closeModal();
+        }
+      });
+    }
+
+    // Add to cart functionality
+    if (addToCartBtn) {
+      addToCartBtn.addEventListener('click', () => {
+        const dataObj = {
+          dataset: {
+            id: addToCartBtn.dataset.id,
+            quant: addToCartBtn.dataset.quant,
+            price: addToCartBtn.dataset.price,
+          },
+        };
+        this.addFromPrev(dataObj);
+      });
+    }
+
+    // Setup magnifier functionality
+    if (magnifierContainer && magnifierGlass && bigImage) {
+      this._setupMagnifier(
+        magnifierContainer,
+        magnifierGlass,
+        bigImage,
+        tapToMagnify,
+        magnifierIcon,
+        isMobile
+      );
+    }
+
+    // Show modal
+    modal.classList.add('show');
+  }
+
+  _setupMagnifier(
+    container,
+    glass,
+    image,
+    tapToMagnify,
+    magnifierIcon,
+    isMobile
+  ) {
+    // Initial setup
+    glass.style.backgroundImage = `url('${image.src}')`;
+    glass.style.display = 'none';
+
+    // Preload image
+    const preloadImg = new Image();
+    preloadImg.src = image.src;
+    preloadImg.onload = () => {
+      glass.style.backgroundImage = `url('${image.src}')`;
+      glass.style.backgroundSize = `${300}%`;
+      glass.style.imageRendering = 'high-quality';
+      glass.style.backfaceVisibility = 'hidden';
+      glass.style.transform = 'translateZ(0)';
+      image.dataset.naturalWidth = preloadImg.naturalWidth;
+      image.dataset.naturalHeight = preloadImg.naturalHeight;
+    };
+
+    const calculateImagePosition = (
+      imgElement,
+      containerRect,
+      mouseX,
+      mouseY
+    ) => {
+      const imgRect = imgElement.getBoundingClientRect();
+      const imgAspectRatio =
+        imgElement.dataset.naturalWidth / imgElement.dataset.naturalHeight;
+      const containerAspectRatio = containerRect.width / containerRect.height;
+
+      let visibleImgWidth, visibleImgHeight, offsetX, offsetY;
+
+      if (imgAspectRatio > containerAspectRatio) {
+        visibleImgWidth = containerRect.width;
+        visibleImgHeight = containerRect.width / imgAspectRatio;
+        offsetX = 0;
+        offsetY = (containerRect.height - visibleImgHeight) / 2;
+      } else {
+        visibleImgHeight = containerRect.height;
+        visibleImgWidth = containerRect.height * imgAspectRatio;
+        offsetX = (containerRect.width - visibleImgWidth) / 2;
+        offsetY = 0;
+      }
+
+      const buffer = 5;
+      if (
+        mouseX < offsetX - buffer ||
+        mouseX > offsetX + visibleImgWidth + buffer ||
+        mouseY < offsetY - buffer ||
+        mouseY > offsetY + visibleImgHeight + buffer
+      ) {
+        return { inBounds: false };
+      }
+
+      let xPercent = ((mouseX - offsetX) / visibleImgWidth) * 100;
+      let yPercent = ((mouseY - offsetY) / visibleImgHeight) * 100;
+
+      xPercent = Math.max(0, Math.min(100, xPercent));
+      yPercent = Math.max(0, Math.min(100, yPercent));
+
+      return { inBounds: true, xPercent, yPercent };
+    };
+
+    if (isMobile) {
+      this._setupMobileMagnifier(
+        container,
+        glass,
+        image,
+        tapToMagnify,
+        calculateImagePosition
+      );
+    } else {
+      this._setupDesktopMagnifier(
+        container,
+        glass,
+        image,
+        magnifierIcon,
+        calculateImagePosition
+      );
+    }
+  }
+
+  _setupMobileMagnifier(
+    container,
+    glass,
+    image,
+    tapToMagnify,
+    calculatePosition
+  ) {
+    const handleTouch = e => {
+      const touch = e.touches[0];
+      const rect = container.getBoundingClientRect();
+      const x = touch.clientX - rect.left;
+      const y = touch.clientY - rect.top;
+
+      const position = calculatePosition(image, rect, x, y);
+      if (!position.inBounds) {
+        glass.style.display = 'none';
+        return;
+      }
+
+      const glassWidth = glass.offsetWidth / 2;
+      const glassHeight = glass.offsetHeight / 2;
+      const touchOffset = 100;
+      let offsetX = x - glassWidth;
+      let offsetY = y - glassHeight - touchOffset;
+
+      const bottomBuffer = 20;
+      const rightBuffer = 20;
+
+      offsetX = Math.max(
+        0,
+        Math.min(rect.width - glass.offsetWidth - rightBuffer, offsetX)
+      );
+      offsetY = Math.max(
+        0,
+        Math.min(rect.height - glass.offsetHeight - bottomBuffer, offsetY)
+      );
+
+      glass.style.left = `${offsetX}px`;
+      glass.style.top = `${offsetY}px`;
+
+      const zoomFactor = 3.5;
+      glass.style.backgroundImage = `url('${image.src}')`;
+      glass.style.backgroundPosition = `${position.xPercent}% ${position.yPercent}%`;
+      glass.style.backgroundSize = `${zoomFactor * 100}%`;
+      glass.style.imageRendering = 'high-quality';
+    };
+
+    container.addEventListener('touchstart', e => {
+      if (tapToMagnify) tapToMagnify.style.display = 'none';
+      glass.style.display = 'block';
+      handleTouch(e);
+    });
+
+    container.addEventListener('touchmove', e => {
+      e.preventDefault();
+      handleTouch(e);
+    });
+
+    container.addEventListener('touchend', () => {
+      glass.style.display = 'none';
+      if (tapToMagnify) {
+        setTimeout(() => {
+          tapToMagnify.style.display = 'block';
+        }, 500);
+      }
+    });
+  }
+
+  _setupDesktopMagnifier(
+    container,
+    glass,
+    image,
+    magnifierIcon,
+    calculatePosition
+  ) {
+    if (magnifierIcon) magnifierIcon.style.opacity = '1';
+
+    container.addEventListener('mouseenter', () => {
+      if (magnifierIcon) magnifierIcon.style.opacity = '0';
+    });
+
+    container.addEventListener('mousemove', e => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const position = calculatePosition(image, rect, x, y);
+      if (!position.inBounds) {
+        glass.style.display = 'none';
+        return;
+      }
+
+      glass.style.display = 'block';
+      const glassWidth = glass.offsetWidth / 2;
+      const glassHeight = glass.offsetHeight / 2;
+      const bottomBuffer = 20;
+      const rightBuffer = 20;
+
+      let glassX = Math.max(
+        0,
+        Math.min(rect.width - glass.offsetWidth - rightBuffer, x - glassWidth)
+      );
+      let glassY = Math.max(
+        0,
+        Math.min(
+          rect.height - glass.offsetHeight - bottomBuffer,
+          y - glassHeight
+        )
+      );
+
+      glass.style.left = `${glassX}px`;
+      glass.style.top = `${glassY}px`;
+
+      const zoomFactor = 3;
+      glass.style.backgroundImage = `url('${image.src}')`;
+      glass.style.backgroundPosition = `${position.xPercent}% ${position.yPercent}%`;
+      glass.style.backgroundSize = `${zoomFactor * 100}%`;
+      glass.style.imageRendering = 'high-quality';
+    });
+
+    container.addEventListener('mouseleave', () => {
+      glass.style.display = 'none';
+      if (magnifierIcon) magnifierIcon.style.opacity = '1';
+    });
+  }
+
+  // Add this new method
+  setupImageSourceDebugger() {
+    let timeout;
+    window.addEventListener('resize', () => {
+      if (timeout) clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        const images = document.querySelectorAll('.front-image');
+        images.forEach(img => {
+          const isMobile = window.matchMedia('(max-width: 767px)').matches;
+          // console.log(
+          //   `Image source after resize (${
+          //     isMobile ? 'mobile' : 'desktop'
+          //   } view):`,
+          //   {
+          //     productId: img.closest('.item-container')?.dataset.id,
+          //     currentSrc: img.currentSrc,
+          //     originalSrc: img.src,
+          //     width: window.innerWidth,
+          //   }
+          // );
+        });
+      }, 100);
     });
   }
 }
