@@ -603,27 +603,41 @@ class CategoriesView extends View {
     // Process small images - ensure we get the actual URLs
     let smallImagesArray = [];
 
+    // Get the base API URL based on environment
+    const apiBaseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lobster-app-jipru.ondigitalocean.app/api'
+        : 'http://localhost:4000';
+
     // Handle old format (array of strings)
     if (Array.isArray(product?.smallImagesLocal)) {
-      smallImagesArray = product.smallImagesLocal;
+      smallImagesArray = product.smallImagesLocal.map(url => {
+        // If it's a full URL, ensure HTTPS
+        if (url.includes('http')) {
+          return this.ensureHttps(url);
+        }
+        // If it's a relative path, construct the full URL
+        return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+      });
     }
     // Handle old format (array of URLs)
     else if (Array.isArray(product?.smallImages)) {
       smallImagesArray = product.smallImages.map(img => {
-        if (typeof img === 'string' && img.includes('http')) {
-          return img;
+        if (typeof img === 'string') {
+          if (img.includes('http')) {
+            return this.ensureHttps(img);
+          }
+          // If it's a relative path, construct the full URL
+          return `${apiBaseUrl}${img.startsWith('/') ? '' : '/'}${img}`;
         }
         return getImageUrl(img, true) || getImageUrl(img, false) || '';
       });
     }
 
-    // Filter out any invalid URLs
-    smallImagesArray = smallImagesArray.filter(
-      url =>
-        typeof url === 'string' &&
-        url.includes('http') &&
-        (url.includes('/uploads/') || url.includes('/smallImages/'))
-    );
+    // Filter out any invalid URLs and ensure HTTPS
+    smallImagesArray = smallImagesArray
+      .filter(url => typeof url === 'string' && url.length > 0)
+      .map(url => this.ensureHttps(url));
 
     // Close the previous modal if open
     if (this.isModalOpen) {
@@ -1757,16 +1771,33 @@ class CategoriesView extends View {
 
   // Update the ensureHttps method to handle API URLs
   ensureHttps(url) {
-    if (!url) return '';
+    if (!url || typeof url !== 'string') return '';
 
-    // First ensure HTTPS in production
-    if (this.isProduction && url.startsWith('http://')) {
-      url = url.replace('http://', 'https://');
+    // Get the base API URL based on environment
+    const apiBaseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lobster-app-jipru.ondigitalocean.app/api'
+        : 'http://localhost:4000';
+
+    // If it's a relative path, construct the full URL with the appropriate base
+    if (!url.startsWith('http')) {
+      return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
     }
 
-    // Handle localhost URLs
-    if (url.includes('localhost:4000')) {
-      url = url.replace('http://localhost:4000', this.apiUrl);
+    // If it's a localhost URL and we're in production, replace with production URL
+    if (
+      process.env.NODE_ENV === 'production' &&
+      url.includes('localhost:4000')
+    ) {
+      return url.replace(
+        'http://localhost:4000',
+        'https://lobster-app-jipru.ondigitalocean.app/api'
+      );
+    }
+
+    // Convert HTTP to HTTPS for production
+    if (process.env.NODE_ENV === 'production' && url.startsWith('http://')) {
+      return url.replace('http://', 'https://');
     }
 
     return url;
