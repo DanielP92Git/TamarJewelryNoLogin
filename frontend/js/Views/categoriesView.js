@@ -32,6 +32,9 @@ class CategoriesView extends View {
     this.isProduction =
       window.location.hostname !== 'localhost' &&
       window.location.hostname !== '127.0.0.1';
+    this.apiUrl = this.isProduction
+      ? 'https://lobster-app-jipru.ondigitalocean.app/api'
+      : 'http://localhost:4000';
 
     // Add resize observer for debugging
     if (process.env.NODE_ENV !== 'production') {
@@ -808,12 +811,14 @@ class CategoriesView extends View {
           await this.fetchProductsByCategory();
         } else {
           // Always fetch all products for sorting
-          const apiUrl = `${process.env.API_URL}`;
-          const response = await fetch(`${apiUrl}/getAllProductsByCategory`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ category: this.category }),
-          });
+          const response = await fetch(
+            `${this.apiUrl}/getAllProductsByCategory`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ category: this.category }),
+            }
+          );
 
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -883,8 +888,7 @@ class CategoriesView extends View {
     }
 
     try {
-      const apiUrl = `${process.env.API_URL}`;
-      const fetchUrl = `${apiUrl}/productsByCategory`;
+      const fetchUrl = `${this.apiUrl}/productsByCategory`;
 
       const payload = { category: this.category, page: this.page };
 
@@ -917,7 +921,6 @@ class CategoriesView extends View {
         }
 
         const data = await response.json();
-        // console.log('[DEBUG] Fetched data:', data);
         // Check for the updated response format
         if (!data || (!data.products && !Array.isArray(data))) {
           console.error('[CategoriesView] Invalid data format received:', data);
@@ -1752,7 +1755,7 @@ class CategoriesView extends View {
     });
   }
 
-  // Update the ensureHttps method to handle CORS issues
+  // Update the ensureHttps method to handle API URLs
   ensureHttps(url) {
     if (!url) return '';
 
@@ -1763,7 +1766,7 @@ class CategoriesView extends View {
 
     // Handle localhost URLs
     if (url.includes('localhost:4000')) {
-      url = url.replace('localhost:4000', window.location.host);
+      url = url.replace('http://localhost:4000', this.apiUrl);
     }
 
     return url;
