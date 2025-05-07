@@ -18,7 +18,7 @@ const API_URL = (() => {
   if (isProduction) {
     // In production, use the API endpoint on the same domain or a specified API domain
     // Option a: API on same domain but different path (default)
-    url = `${process.env.API_URL}`;
+    url = `https://lobster-app-jipru.ondigitalocean.app/api`;
 
     // Option b: API on a separate subdomain (uncomment if needed)
     // url = `${window.location.protocol}//api.${window.location.hostname}`;
@@ -654,6 +654,19 @@ function loadProducts(data) {
   const selectedCategory = categoryFilter ? categoryFilter.value : "all";
   state.selectedCategory = selectedCategory;
 
+  // Check if data is valid before proceeding
+  if (!data || !Array.isArray(data)) {
+    console.error("Invalid product data received:", data);
+    const productsContainer = document.querySelector(
+      ".listproduct-allproducts"
+    );
+    if (productsContainer) {
+      productsContainer.innerHTML =
+        "<p>No products available or error loading products.</p>";
+    }
+    return;
+  }
+
   // Filter products based on category
   const filteredData =
     selectedCategory === "all"
@@ -661,6 +674,11 @@ function loadProducts(data) {
       : data.filter((product) => product.category === selectedCategory);
 
   const productsContainer = document.querySelector(".listproduct-allproducts");
+  if (!productsContainer) {
+    console.error("Products container not found");
+    return;
+  }
+
   productsContainer.innerHTML = "";
 
   // Generate HTML for each product
@@ -1261,9 +1279,22 @@ function editProduct(product) {
           const result = await response.json();
           if (result.success) {
             alert("Image deleted successfully!");
-            // Refresh the edit form
-            const product = await fetchProduct(productId);
-            editProduct(product);
+            // Fetch the product again and refresh the page
+            try {
+              // Fetch fresh data after deletion
+              const refreshedProduct = await fetchProduct(productId);
+              if (refreshedProduct) {
+                // If successful, update the edit form with fresh data
+                editProduct(refreshedProduct);
+              } else {
+                // If product fetch fails, reload the whole product list
+                fetchInfo();
+              }
+            } catch (fetchError) {
+              console.error("Error fetching updated product:", fetchError);
+              // Fallback to reload all products if fetching the single product fails
+              fetchInfo();
+            }
           } else {
             throw new Error(result.message || "Failed to delete image");
           }
@@ -1342,7 +1373,206 @@ async function updateProduct(e) {
 
     if (result.success) {
       alert("Product updated successfully!");
-      loadProductsPage();
+
+      // Save the updated product's category
+      const targetCategory = category;
+      console.log("Target category for redirect:", targetCategory);
+
+      // Store it in state
+      state.selectedCategory = targetCategory;
+
+      // Clear the current content
+      clear();
+
+      try {
+        // Fetch products directly here instead of relying on fetchInfo flow
+        console.log("Fetching products for category redirect");
+        const productsResponse = await fetch(`${API_URL}/allproducts`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+          },
+        });
+
+        if (!productsResponse.ok) {
+          throw new Error(`HTTP error! status: ${productsResponse.status}`);
+        }
+
+        const productsData = await productsResponse.json();
+
+        // Create the products page with the data we just fetched
+        const markup = `
+          <style>
+            .product-actions {
+              display: flex;
+              gap: 8px;
+              justify-content: center;
+            }
+            .edit-btn, .delete-btn {
+              padding: 5px 10px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 14px;
+              transition: all 0.2s;
+            }
+            .edit-btn {
+              background-color: #4e54c8;
+              color: white;
+              border: none;
+            }
+            .delete-btn {
+              background-color: #e74c3c;
+              color: white;
+              border: none;
+            }
+            .edit-btn:hover {
+              background-color: #3f43a3;
+            }
+            .delete-btn:hover {
+              background-color: #c0392b;
+            }
+            .bulk-actions {
+              display: flex;
+              justify-content: space-between;
+              margin-bottom: 15px;
+              align-items: center;
+            }
+            .bulk-delete-btn {
+              background-color: #e74c3c;
+              color: white;
+              border: none;
+              padding: 8px 15px;
+              border-radius: 4px;
+              cursor: pointer;
+              font-size: 14px;
+              transition: all 0.2s;
+              display: none;
+            }
+            .bulk-delete-btn:hover {
+              background-color: #c0392b;
+            }
+            .bulk-delete-btn.visible {
+              display: block;
+              align-self: center;
+            }
+            .select-all-container {
+              display: flex;
+              align-items: center;
+              margin-top: 3rem;
+              gap: 8px;
+            }
+            .product-checkbox {
+              width: 18px;
+              height: 18px;
+              cursor: pointer;
+            }
+            .selected-count {
+              margin-left: 10px;
+              font-weight: bold;
+            }
+            .listproduct-format {
+              padding: 15px 0;
+              margin: 10px 0;
+            }
+            .listproduct-allproducts hr {
+              margin: 0;
+              border: none;
+              border-top: 1px solid #eaeaea;
+            }
+            .list-product {
+              margin-top: 20px;
+            }
+          </style>
+          <div class="list-product">
+            <div class="list-product-header">
+              <h1>All Products List</h1>
+              <div class="category-filter">
+                <label for="categoryFilter">Filter by Category:</label>
+                <select id="categoryFilter" class="category-filter-select">
+                  <option value="all">All Categories</option>
+                  <option value="necklaces">Necklaces</option>
+                  <option value="crochet-necklaces">Crochet Necklaces</option>
+                  <option value="bracelets">Bracelets</option>
+                  <option value="hoop-earrings">Hoop Earrings</option>
+                  <option value="dangle-earrings">Dangle Earrings</option>
+                  <option value="unisex">Unisex</option>
+                  <option value="shalom-club">Shalom Club</option>
+                </select>
+              </div>
+            </div>
+            <div class="bulk-actions">
+              <div class="select-all-container">
+                <input type="checkbox" id="select-all" class="product-checkbox">
+                <label for="select-all">Select All</label>
+                <span class="selected-count" id="selected-count"></span>
+              <button id="bulk-delete-btn" class="bulk-delete-btn">Delete Selected Items</button>
+              </div>
+            </div>
+            <div class="listproduct-format-main">
+              <p>Select</p>
+              <p>Products</p>
+              <p>Title</p>
+              <p>Price in $</p>
+              <p>Price in ₪</p>
+              <p>Category</p>
+              <p>Quantity</p>
+              <p>Actions</p>
+            </div>
+            <div class="listproduct-allproducts">
+              
+            </div>
+          </div>`;
+
+        pageContent.insertAdjacentHTML("afterbegin", markup);
+
+        // Set the category filter to our target category immediately
+        const categoryFilter = document.getElementById("categoryFilter");
+        if (categoryFilter) {
+          categoryFilter.value = targetCategory;
+        }
+
+        // Load products with our data and set up event handlers
+        loadProducts(productsData);
+        addCategoryFilterHandler(productsData);
+        setupBulkActions();
+
+        // Highlight success message
+        const successMsg = document.createElement("div");
+        successMsg.className = "success-message";
+        successMsg.style.cssText = `
+          background-color: #d4edda;
+          color: #155724;
+          padding: 10px 15px;
+          border-radius: 4px;
+          margin-bottom: 15px;
+          font-weight: bold;
+        `;
+        successMsg.textContent = `Product updated successfully and moved to ${targetCategory} category!`;
+
+        // Insert at the top of the product list
+        const listProductHeader = document.querySelector(
+          ".list-product-header"
+        );
+        if (listProductHeader) {
+          listProductHeader.after(successMsg);
+
+          // Auto-remove after 5 seconds
+          setTimeout(() => {
+            successMsg.style.opacity = "0";
+            successMsg.style.transition = "opacity 0.5s ease";
+            setTimeout(() => successMsg.remove(), 500);
+          }, 5000);
+        }
+
+        // Scroll to the product list
+        const listProduct = document.querySelector(".list-product");
+        if (listProduct) {
+          listProduct.scrollIntoView({ behavior: "smooth" });
+        }
+      } catch (error) {
+        console.error("Error in custom category redirect:", error);
+        // Fallback to original approach if our custom loading fails
+        fetchInfo();
+      }
     } else {
       throw new Error(result.message || "Failed to update product");
     }
