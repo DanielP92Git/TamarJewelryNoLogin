@@ -247,14 +247,11 @@ function init() {
     .then((isAuthenticated) => {
       // Only if authenticated, set up handlers
       if (isAuthenticated) {
-        // Add event listeners for admin functionality
-        if (addProductsBtn) {
-          addProductsBtn.addEventListener("click", loadAddProductsPage);
-        }
+        // Initialize event handlers for all buttons
+        initializeEventHandlers();
 
-        if (productsListBtn) {
-          productsListBtn.addEventListener("click", fetchInfo);
-        }
+        // Show the products list by default
+        fetchInfo();
       }
     })
     .catch((error) => {
@@ -368,6 +365,7 @@ async function checkAuth() {
   }
 }
 
+// Update the showLoginPage function to properly initialize the app after login
 function showLoginPage(errorMessage) {
   // Check if login overlay already exists
   if (document.querySelector(".login-overlay")) {
@@ -476,7 +474,12 @@ function showLoginPage(errorMessage) {
 
         setTimeout(() => {
           overlay.remove();
-          loadAddProductsPage();
+
+          // Important: Set up all event handlers before showing any content
+          initializeEventHandlers();
+
+          // Show products list instead of add products form immediately after login
+          fetchInfo();
         }, 500);
       } else {
         // Show error message
@@ -501,6 +504,34 @@ function showLoginPage(errorMessage) {
       alert("Login failed. Please try again.");
     }
   });
+}
+
+// Add a new function to specifically initialize event handlers
+function initializeEventHandlers() {
+  console.log("Initializing event handlers for admin navigation");
+
+  // Add event listeners for admin functionality
+  if (addProductsBtn) {
+    // Remove any existing listeners first to prevent duplicates
+    addProductsBtn.removeEventListener("click", loadAddProductsPage);
+
+    // Add fresh event listener
+    addProductsBtn.addEventListener("click", loadAddProductsPage);
+    console.log("Add Products button handler initialized");
+  } else {
+    console.warn("Add Products button not found in the DOM");
+  }
+
+  if (productsListBtn) {
+    // Remove any existing listeners first to prevent duplicates
+    productsListBtn.removeEventListener("click", fetchInfo);
+
+    // Add fresh event listener
+    productsListBtn.addEventListener("click", fetchInfo);
+    console.log("Products List button handler initialized");
+  } else {
+    console.warn("Products List button not found in the DOM");
+  }
 }
 
 // UI Helpers
