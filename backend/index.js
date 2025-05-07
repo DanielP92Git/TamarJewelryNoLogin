@@ -1462,75 +1462,211 @@ app.post('/deleteproductimage', async (req, res) => {
     console.log(`Deleting image: ${imageType} from product ${productId}`);
     console.log(`Image URL: ${imageUrl}`);
 
-    // Find the product
-    const product = await Product.findOne({ id: Number(productId) });
+    // Helper function to extract filename from URL
+    const getFilename = url => {
+      if (!url) return '';
+      const parts = url.split('/');
+      return parts[parts.length - 1];
+    };
 
-    if (!product) {
-      console.error(`Product with ID ${productId} not found`);
-      return res.status(404).json({
-        success: false,
-        message: 'Product not found',
-      });
-    }
+    // Get the filename from the URL
+    const targetFilename = getFilename(imageUrl);
+    console.log(`Target filename to delete: ${targetFilename}`);
 
-    // Process based on image type
     if (imageType === 'main') {
       console.log('Deleting main image');
 
-      // Clear main image fields
-      product.image = null;
-      product.publicImage = null;
-      product.imageLocal = null;
+      // For main image, we can directly update using MongoDB's update operators
+      await Product.updateOne(
+        { id: Number(productId) },
+        {
+          $set: {
+            image: null,
+            publicImage: null,
+            imageLocal: null,
+            'mainImage.desktop': null,
+            'mainImage.mobile': null,
+            'mainImage.publicDesktop': null,
+            'mainImage.publicMobile': null,
+            'mainImage.desktopLocal': null,
+            'mainImage.mobileLocal': null,
+          },
+        }
+      );
 
-      if (product.mainImage) {
-        product.mainImage.desktop = null;
-        product.mainImage.mobile = null;
-        product.mainImage.publicDesktop = null;
-        product.mainImage.publicMobile = null;
-        product.mainImage.desktopLocal = null;
-        product.mainImage.mobileLocal = null;
-      }
+      console.log('Main image deleted via direct update');
     } else if (imageType === 'small') {
       console.log('Deleting small image');
 
-      // Remove the matching small image
-      if (Array.isArray(product.smallImages)) {
-        // Filter out the matching URL
-        product.smallImages = product.smallImages.filter(img => {
-          // If it's a string
-          if (typeof img === 'string') {
-            return img !== imageUrl;
-          }
+      // First, fetch the product to examine the smallImages
+      const product = await Product.findOne({ id: Number(productId) });
 
-          // If it's an object
-          if (typeof img === 'object' && img !== null) {
-            return !(
-              img.desktop === imageUrl ||
-              img.mobile === imageUrl ||
-              img.publicDesktop === imageUrl ||
-              img.publicMobile === imageUrl ||
-              img.desktopLocal === imageUrl ||
-              img.mobileLocal === imageUrl
-            );
-          }
-
-          return true;
+      if (!product) {
+        console.error(`Product with ID ${productId} not found`);
+        return res.status(404).json({
+          success: false,
+          message: 'Product not found',
         });
       }
 
-      // Also handle legacy fields
-      if (Array.isArray(product.smallImagesLocal)) {
-        product.smallImagesLocal = product.smallImagesLocal.filter(
-          url => url !== imageUrl
+      console.log('Examining smallImages structure...');
+
+      // We need to modify the MongoDB document directly
+      // First, convert character by character URLs to strings for easier comparison
+      const reconstructedUrls = [];
+
+      if (Array.isArray(product.smallImages)) {
+        // Attempt to reconstruct URLs from character-by-character objects
+        for (let i = 0; i < product.smallImages.length; i++) {
+          const img = product.smallImages[i];
+
+          // If it's a Mongoose document with character properties
+          if (img && typeof img === 'object') {
+            // Check for numeric keys like 0, 1, 2, etc.
+            const numericKeys = Object.keys(img)
+              .filter(k => !isNaN(parseInt(k)))
+              .sort((a, b) => parseInt(a) - parseInt(b));
+
+            if (numericKeys.length > 20) {
+              // It's likely a character-by-character array
+              let url = '';
+              numericKeys.forEach(key => {
+                if (img[key]) url += img[key];
+              });
+
+              reconstructedUrls.push({
+                index: i,
+                url: url,
+                type: 'character-by-character',
+              });
+
+              console.log(`Reconstructed URL at index ${i}: ${url}`);
+            }
+            // If it's a regular object with URL properties
+            else if (img.desktop || img.mobile) {
+              reconstructedUrls.push({
+                index: i,
+                url: img.desktop || img.mobile,
+                type: 'object',
+              });
+
+              console.log(
+                `Object URL at index ${i}: ${img.desktop || img.mobile}`
+              );
+            }
+          }
+          // If it's a plain string
+          else if (typeof img === 'string') {
+            reconstructedUrls.push({
+              index: i,
+              url: img,
+              type: 'string',
+            });
+
+            console.log(`String URL at index ${i}: ${img}`);
+          }
+        }
+      }
+
+      // Now check if any of the reconstructed URLs match what we want to delete
+      const matchingIndices = [];
+
+      reconstructedUrls.forEach(item => {
+        if (item.url === imageUrl || item.url.includes(targetFilename)) {
+          console.log(`Found match at index ${item.index}: ${item.url}`);
+          matchingIndices.push(item.index);
+        }
+      });
+
+      if (matchingIndices.length > 0) {
+        console.log(
+          `Will remove images at indices: ${matchingIndices.join(', ')}`
         );
+
+        // ------------------------------------------------------
+        // APPROACH 1: Use MongoDB's $pull operator with a custom filter
+        // This is more reliable for Mongoose subdocuments
+        // ------------------------------------------------------
+        if (matchingIndices.length === 1) {
+          // If only one match, use direct index to remove it
+          const indexToRemove = matchingIndices[0];
+
+          console.log(
+            `Using MongoDB pull by index to remove item at position ${indexToRemove}`
+          );
+
+          // Use MongoDB update to remove the specific element by position
+          const updateResult = await Product.updateOne(
+            { id: Number(productId) },
+            { $unset: { [`smallImages.${indexToRemove}`]: 1 } }
+          );
+
+          // Then pull all null values to clean up the array
+          const pullResult = await Product.updateOne(
+            { id: Number(productId) },
+            { $pull: { smallImages: null } }
+          );
+
+          console.log('MongoDB update result:', updateResult);
+          console.log('MongoDB pull result:', pullResult);
+        } else {
+          // If multiple matches, we need a more complex approach
+          // We'll create a new array without the matched indices
+          const product = await Product.findOne({ id: Number(productId) });
+
+          if (product && Array.isArray(product.smallImages)) {
+            // Filter out the matched indices
+            const newSmallImages = product.smallImages.filter(
+              (_, index) => !matchingIndices.includes(index)
+            );
+
+            console.log(
+              `Original length: ${product.smallImages.length}, New length: ${newSmallImages.length}`
+            );
+
+            // Replace the entire smallImages array
+            const updateResult = await Product.updateOne(
+              { id: Number(productId) },
+              { $set: { smallImages: newSmallImages } }
+            );
+
+            console.log('MongoDB replace array result:', updateResult);
+          }
+        }
+      } else {
+        console.log('No matching small images found');
+      }
+
+      // Also handle legacy smallImagesLocal array if it exists
+      if (product.smallImagesLocal && product.smallImagesLocal.length > 0) {
+        console.log(
+          `Found ${product.smallImagesLocal.length} items in smallImagesLocal array`
+        );
+
+        // Filter out URLs that match our target
+        const newSmallImagesLocal = product.smallImagesLocal.filter(
+          url =>
+            typeof url !== 'string' ||
+            (!url.includes(targetFilename) && url !== imageUrl)
+        );
+
+        if (newSmallImagesLocal.length !== product.smallImagesLocal.length) {
+          console.log(
+            `Removing ${
+              product.smallImagesLocal.length - newSmallImagesLocal.length
+            } items from smallImagesLocal`
+          );
+
+          // Update the smallImagesLocal array
+          await Product.updateOne(
+            { id: Number(productId) },
+            { $set: { smallImagesLocal: newSmallImagesLocal } }
+          );
+        }
       }
     }
 
-    // Save the product
-    await product.save();
-    console.log('Product updated successfully');
-
-    // Return success
+    console.log('Image deletion completed');
     res.json({ success: true });
   } catch (error) {
     console.error('Error deleting image:', error);
