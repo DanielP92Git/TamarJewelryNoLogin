@@ -259,7 +259,170 @@ function init() {
     });
 }
 
-// Update the fetchInfo function to include authentication check
+// Add a new function to show and hide the loading animation
+function showLoadingAnimation() {
+  // Remove any existing loader first
+  const existingLoader = document.querySelector(".products-loader-container");
+  if (existingLoader) {
+    existingLoader.remove();
+  }
+
+  // Create a new loader element
+  const loaderContainer = document.createElement("div");
+  loaderContainer.className = "products-loader-container";
+  loaderContainer.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255, 255, 255, 0.9);
+    z-index: 999;
+    backdrop-filter: blur(5px);
+    transition: opacity 0.3s ease;
+  `;
+
+  // Create the loader animation
+  const loader = document.createElement("div");
+  loader.className = "products-loader";
+
+  // Use a jewelry-themed loader design
+  loader.innerHTML = `
+    <style>
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.8; }
+      }
+      
+      .loader-ring {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        border: 3px solid transparent;
+        border-top-color: #4e54c8;
+        border-bottom-color: #e74c3c;
+        animation: spin 1.5s linear infinite;
+        position: relative;
+      }
+      
+      .loader-ring:before, .loader-ring:after {
+        content: '';
+        position: absolute;
+        border-radius: 50%;
+      }
+      
+      .loader-ring:before {
+        top: 5px;
+        left: 5px;
+        right: 5px;
+        bottom: 5px;
+        border: 3px solid transparent;
+        border-left-color: #f0c419;
+        border-right-color: #4ade80;
+        animation: spin 1s linear infinite reverse;
+      }
+      
+      .loader-ring:after {
+        top: 15px;
+        left: 15px;
+        right: 15px;
+        bottom: 15px;
+        border: 3px solid transparent;
+        border-top-color: #4ade80;
+        border-bottom-color: #f0c419;
+        animation: spin 1.2s linear infinite;
+      }
+      
+      .loader-text {
+        margin-top: 20px;
+        font-family: Arial, sans-serif;
+        color: #333;
+        font-size: 16px;
+        letter-spacing: 1px;
+        text-align: center;
+      }
+      
+      .loader-text span {
+        display: inline-block;
+        animation: pulse 1.5s infinite;
+      }
+      
+      .loader-text span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      
+      .loader-text span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      
+      .shimmer {
+        background: linear-gradient(90deg, 
+          rgba(255,255,255,0) 0%, 
+          rgba(255,255,255,0.8) 50%, 
+          rgba(255,255,255,0) 100%);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite;
+        background-repeat: no-repeat;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+      
+      .product-card-placeholder {
+        height: 100px;
+        background: #f0f0f0;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+      }
+    </style>
+    <div class="loader-ring">
+      <div class="shimmer"></div>
+    </div>
+    <div class="loader-text">
+      <span>L</span><span>o</span><span>a</span><span>d</span><span>i</span><span>n</span><span>g</span>
+      <span>.</span><span>.</span><span>.</span>
+    </div>
+  `;
+
+  loaderContainer.appendChild(loader);
+  document.body.appendChild(loaderContainer);
+
+  return loaderContainer;
+}
+
+function hideLoadingAnimation() {
+  const loader = document.querySelector(".products-loader-container");
+  if (loader) {
+    // Fade out animation
+    loader.style.opacity = "0";
+
+    // Remove after fade completes
+    setTimeout(() => {
+      loader.remove();
+    }, 300);
+  }
+}
+
+// Update the fetchInfo function to include the loading animation
 async function fetchInfo() {
   try {
     // First check authentication again
@@ -269,6 +432,12 @@ async function fetchInfo() {
       return;
     }
 
+    // Show the loading animation
+    const loader = showLoadingAnimation();
+
+    // Add a minimum delay to ensure animation is visible even for fast loads
+    const minDelay = new Promise((resolve) => setTimeout(resolve, 800));
+
     console.log("Fetching products from:", `${API_URL}/allproducts`);
     const response = await fetch(`${API_URL}/allproducts`, {
       headers: {
@@ -277,9 +446,19 @@ async function fetchInfo() {
     });
 
     const data = await response.json();
-    // console.log("Fetched products data:", data);
+
+    // Wait for minimum delay to complete
+    await minDelay;
+
+    // Hide the loading animation
+    hideLoadingAnimation();
+
+    // Load the products page with the fetched data
     loadProductsPage(data);
   } catch (error) {
+    // Hide loading animation in case of error
+    hideLoadingAnimation();
+
     console.error("Error fetching products:", error);
 
     if (
