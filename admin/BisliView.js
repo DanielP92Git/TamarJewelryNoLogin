@@ -18,7 +18,7 @@ const API_URL = (() => {
   if (isProduction) {
     // In production, use the API endpoint on the same domain or a specified API domain
     // Option a: API on same domain but different path (default)
-    url = `https://lobster-app-jipru.ondigitalocean.app/api`;
+    url = `${process.env.API_URL}`;
 
     // Option b: API on a separate subdomain (uncomment if needed)
     // url = `${window.location.protocol}//api.${window.location.hostname}`;
@@ -82,10 +82,43 @@ function getImageUrl(image, imageLocal, publicImage, mainImage) {
     return parts[parts.length - 1];
   };
 
+  // Helper to ensure URLs use production API in production environment
+  const ensureProductionUrl = (url) => {
+    if (!url) return url;
+
+    // If we're in production and URL contains localhost, convert it to use production API_URL
+    if (
+      state.isProduction &&
+      (url.includes("localhost") || url.includes("127.0.0.1"))
+    ) {
+      // Get the filename
+      const filename = getFilename(url);
+
+      // Determine the path part (uploads, smallImages, etc.)
+      let pathPart = "images";
+      if (url.includes("/uploads/")) {
+        pathPart = "uploads";
+      } else if (url.includes("/smallImages/")) {
+        pathPart = "smallImages";
+      }
+
+      // Construct new URL using production API URL
+      return `${API_URL}/${pathPart}/${filename}`;
+    }
+
+    // Make sure URLs use HTTPS in production
+    if (state.isProduction && url.startsWith("http:")) {
+      return url.replace("http:", "https:");
+    }
+
+    return url;
+  };
+
   // First try the new mainImage structure
   if (mainImage) {
     if (state.isProduction) {
-      return mainImage.publicDesktop || mainImage.desktop;
+      const url = mainImage.publicDesktop || mainImage.desktop;
+      return ensureProductionUrl(url);
     }
     return mainImage.desktopLocal || mainImage.desktop;
   }
@@ -107,32 +140,26 @@ function getImageUrl(image, imageLocal, publicImage, mainImage) {
 
   // Try public image next in production
   if (state.isProduction && publicImage) {
-    console.log("Using public image URL:", publicImage);
-    return publicImage;
+    return ensureProductionUrl(publicImage);
   }
 
   // Then try regular image
   if (state.isProduction && image) {
-    // In production, ensure we're using HTTPS
-    if (image.startsWith("http:")) {
-      image = image.replace("http:", "https:");
-    }
-    console.log("Using production image URL:", image);
-    return image;
+    return ensureProductionUrl(image);
   }
 
   // In local development, use local URL
   if (imageLocal) {
-    // console.log("Using local image URL:", imageLocal);
     return imageLocal;
   }
 
   // Fallback to whatever URL we have
-  console.log(
-    "Using fallback image URL:",
-    image || publicImage || `${API_URL}/images/no-image.png`
-  );
-  return image || publicImage || `${API_URL}/images/no-image.png`;
+  let fallbackUrl = image || publicImage || `${API_URL}/images/no-image.png`;
+  if (state.isProduction) {
+    fallbackUrl = ensureProductionUrl(fallbackUrl);
+  }
+
+  return fallbackUrl;
 }
 
 // First, add a helper function to determine if we're on the admin page
@@ -842,23 +869,67 @@ function editProduct(product) {
 
   // Helper to get all main image URLs (desktop, mobile, public, legacy)
   function getAllMainImageUrls(product) {
+    // Extract the filename from the image URL
+    const getFilename = (url) => {
+      if (!url) return null;
+      const parts = url.split("/");
+      return parts[parts.length - 1];
+    };
+
+    // Helper to ensure production URLs
+    const ensureProductionUrl = (url) => {
+      if (!url) return url;
+
+      // Convert localhost URLs to production URLs
+      if (
+        state.isProduction &&
+        (url.includes("localhost") || url.includes("127.0.0.1"))
+      ) {
+        const filename = getFilename(url);
+
+        // Determine the path part
+        let pathPart = "images";
+        if (url.includes("/uploads/")) {
+          pathPart = "uploads";
+        } else if (url.includes("/smallImages/")) {
+          pathPart = "smallImages";
+        }
+
+        return `${API_URL}/${pathPart}/${filename}`;
+      }
+
+      // Ensure HTTPS in production
+      if (state.isProduction && url.startsWith("http:")) {
+        return url.replace("http:", "https:");
+      }
+
+      return url;
+    };
+
     const urls = [];
+
+    // Collect and fix all URLs
     if (product.mainImage) {
-      if (product.mainImage.desktop) urls.push(product.mainImage.desktop);
-      if (product.mainImage.mobile) urls.push(product.mainImage.mobile);
+      if (product.mainImage.desktop)
+        urls.push(ensureProductionUrl(product.mainImage.desktop));
+      if (product.mainImage.mobile)
+        urls.push(ensureProductionUrl(product.mainImage.mobile));
       if (product.mainImage.publicDesktop)
-        urls.push(product.mainImage.publicDesktop);
+        urls.push(ensureProductionUrl(product.mainImage.publicDesktop));
       if (product.mainImage.publicMobile)
-        urls.push(product.mainImage.publicMobile);
+        urls.push(ensureProductionUrl(product.mainImage.publicMobile));
       if (product.mainImage.desktopLocal)
-        urls.push(product.mainImage.desktopLocal);
+        urls.push(ensureProductionUrl(product.mainImage.desktopLocal));
       if (product.mainImage.mobileLocal)
-        urls.push(product.mainImage.mobileLocal);
+        urls.push(ensureProductionUrl(product.mainImage.mobileLocal));
     }
-    if (product.image) urls.push(product.image);
-    if (product.publicImage) urls.push(product.publicImage);
-    if (product.imageLocal) urls.push(product.imageLocal);
-    // Remove duplicates and falsy
+
+    if (product.image) urls.push(ensureProductionUrl(product.image));
+    if (product.publicImage)
+      urls.push(ensureProductionUrl(product.publicImage));
+    if (product.imageLocal) urls.push(ensureProductionUrl(product.imageLocal));
+
+    // Remove duplicates and falsy values
     return [...new Set(urls.filter(Boolean))];
   }
 
@@ -872,23 +943,59 @@ function editProduct(product) {
       return parts[parts.length - 1];
     };
 
+    // Helper to ensure production URLs
+    const ensureProductionUrl = (url) => {
+      if (!url) return url;
+
+      // Convert localhost URLs to production URLs
+      if (
+        state.isProduction &&
+        (url.includes("localhost") || url.includes("127.0.0.1"))
+      ) {
+        const filename = getFilename(url);
+
+        // Determine the path part
+        let pathPart = "images";
+        if (url.includes("/uploads/")) {
+          pathPart = "uploads";
+        } else if (url.includes("/smallImages/")) {
+          pathPart = "smallImages";
+        }
+
+        return `${API_URL}/${pathPart}/${filename}`;
+      }
+
+      // Ensure HTTPS in production
+      if (state.isProduction && url.startsWith("http:")) {
+        return url.replace("http:", "https:");
+      }
+
+      return url;
+    };
+
     // Store unique URLs by filename
     const uniqueUrls = new Map();
 
     // Process smallImages array
     if (Array.isArray(product.smallImages)) {
       product.smallImages.forEach((img) => {
+        // Handle string URLs
         if (typeof img === "string" && img) {
-          const filename = getFilename(img);
-          uniqueUrls.set(filename, img);
-        } else if (typeof img === "object" && img !== null) {
-          // Prioritize mobile version, then fall back to desktop
-          if (img.mobile) {
-            const filename = getFilename(img.mobile);
-            uniqueUrls.set(filename, img.mobile);
-          } else if (img.desktop) {
-            const filename = getFilename(img.desktop);
-            uniqueUrls.set(filename, img.desktop);
+          const fixedUrl = ensureProductionUrl(img);
+          const filename = getFilename(fixedUrl);
+          uniqueUrls.set(filename, fixedUrl);
+        }
+        // Handle object URLs
+        else if (typeof img === "object" && img !== null) {
+          // Process object with URL properties
+          if (img.desktop) {
+            const fixedUrl = ensureProductionUrl(img.desktop);
+            const filename = getFilename(fixedUrl);
+            uniqueUrls.set(filename, fixedUrl);
+          } else if (img.mobile) {
+            const fixedUrl = ensureProductionUrl(img.mobile);
+            const filename = getFilename(fixedUrl);
+            uniqueUrls.set(filename, fixedUrl);
           }
         }
       });
@@ -898,9 +1005,10 @@ function editProduct(product) {
     if (Array.isArray(product.smallImagesLocal)) {
       product.smallImagesLocal.forEach((url) => {
         if (url) {
-          const filename = getFilename(url);
+          const fixedUrl = ensureProductionUrl(url);
+          const filename = getFilename(fixedUrl);
           if (!uniqueUrls.has(filename)) {
-            uniqueUrls.set(filename, url);
+            uniqueUrls.set(filename, fixedUrl);
           }
         }
       });
