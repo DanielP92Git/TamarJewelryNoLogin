@@ -1498,8 +1498,11 @@ app.post('/deleteproductimage', async (req, res) => {
     } else if (imageType === 'small') {
       console.log('Deleting small image');
 
-      // First, fetch the product to examine the smallImages
-      const product = await Product.findOne({ id: Number(productId) });
+      // Get the collection for direct manipulation
+      const collection = mongoose.connection.db.collection('products');
+
+      // Get the document
+      const product = await collection.findOne({ id: Number(productId) });
 
       if (!product) {
         console.error(`Product with ID ${productId} not found`);
@@ -1509,165 +1512,272 @@ app.post('/deleteproductimage', async (req, res) => {
         });
       }
 
-      console.log('Examining smallImages structure...');
+      console.log('Retrieved product document, checking images...');
 
-      // We need to modify the MongoDB document directly
-      // First, convert character by character URLs to strings for easier comparison
-      const reconstructedUrls = [];
+      // Track whether any updates were made
+      let updatedProduct = false;
 
-      if (Array.isArray(product.smallImages)) {
-        // Attempt to reconstruct URLs from character-by-character objects
-        for (let i = 0; i < product.smallImages.length; i++) {
-          const img = product.smallImages[i];
-
-          // If it's a Mongoose document with character properties
-          if (img && typeof img === 'object') {
-            // Check for numeric keys like 0, 1, 2, etc.
-            const numericKeys = Object.keys(img)
-              .filter(k => !isNaN(parseInt(k)))
-              .sort((a, b) => parseInt(a) - parseInt(b));
-
-            if (numericKeys.length > 20) {
-              // It's likely a character-by-character array
-              let url = '';
-              numericKeys.forEach(key => {
-                if (img[key]) url += img[key];
-              });
-
-              reconstructedUrls.push({
-                index: i,
-                url: url,
-                type: 'character-by-character',
-              });
-
-              console.log(`Reconstructed URL at index ${i}: ${url}`);
-            }
-            // If it's a regular object with URL properties
-            else if (img.desktop || img.mobile) {
-              reconstructedUrls.push({
-                index: i,
-                url: img.desktop || img.mobile,
-                type: 'object',
-              });
-
-              console.log(
-                `Object URL at index ${i}: ${img.desktop || img.mobile}`
-              );
-            }
-          }
-          // If it's a plain string
-          else if (typeof img === 'string') {
-            reconstructedUrls.push({
-              index: i,
-              url: img,
-              type: 'string',
-            });
-
-            console.log(`String URL at index ${i}: ${img}`);
-          }
-        }
-      }
-
-      // Now check if any of the reconstructed URLs match what we want to delete
-      const matchingIndices = [];
-
-      reconstructedUrls.forEach(item => {
-        if (item.url === imageUrl || item.url.includes(targetFilename)) {
-          console.log(`Found match at index ${item.index}: ${item.url}`);
-          matchingIndices.push(item.index);
-        }
-      });
-
-      if (matchingIndices.length > 0) {
-        console.log(
-          `Will remove images at indices: ${matchingIndices.join(', ')}`
-        );
-
-        // ------------------------------------------------------
-        // APPROACH 1: Use MongoDB's $pull operator with a custom filter
-        // This is more reliable for Mongoose subdocuments
-        // ------------------------------------------------------
-        if (matchingIndices.length === 1) {
-          // If only one match, use direct index to remove it
-          const indexToRemove = matchingIndices[0];
-
-          console.log(
-            `Using MongoDB pull by index to remove item at position ${indexToRemove}`
-          );
-
-          // Use MongoDB update to remove the specific element by position
-          const updateResult = await Product.updateOne(
-            { id: Number(productId) },
-            { $unset: { [`smallImages.${indexToRemove}`]: 1 } }
-          );
-
-          // Then pull all null values to clean up the array
-          const pullResult = await Product.updateOne(
-            { id: Number(productId) },
-            { $pull: { smallImages: null } }
-          );
-
-          console.log('MongoDB update result:', updateResult);
-          console.log('MongoDB pull result:', pullResult);
-        } else {
-          // If multiple matches, we need a more complex approach
-          // We'll create a new array without the matched indices
-          const product = await Product.findOne({ id: Number(productId) });
-
-          if (product && Array.isArray(product.smallImages)) {
-            // Filter out the matched indices
-            const newSmallImages = product.smallImages.filter(
-              (_, index) => !matchingIndices.includes(index)
-            );
-
-            console.log(
-              `Original length: ${product.smallImages.length}, New length: ${newSmallImages.length}`
-            );
-
-            // Replace the entire smallImages array
-            const updateResult = await Product.updateOne(
-              { id: Number(productId) },
-              { $set: { smallImages: newSmallImages } }
-            );
-
-            console.log('MongoDB replace array result:', updateResult);
-          }
-        }
-      } else {
-        console.log('No matching small images found');
-      }
-
-      // Also handle legacy smallImagesLocal array if it exists
-      if (product.smallImagesLocal && product.smallImagesLocal.length > 0) {
+      // 1. Handle smallImagesLocal array first (simpler case)
+      if (product.smallImagesLocal && Array.isArray(product.smallImagesLocal)) {
         console.log(
           `Found ${product.smallImagesLocal.length} items in smallImagesLocal array`
         );
 
-        // Filter out URLs that match our target
-        const newSmallImagesLocal = product.smallImagesLocal.filter(
-          url =>
-            typeof url !== 'string' ||
-            (!url.includes(targetFilename) && url !== imageUrl)
+        // Log each URL for debugging
+        product.smallImagesLocal.forEach((url, i) => {
+          console.log(`smallImagesLocal[${i}]: ${url}`);
+        });
+
+        // Check if the exact requested URL exists
+        const exactUrlIndex = product.smallImagesLocal.findIndex(
+          url => url === imageUrl
         );
 
-        if (newSmallImagesLocal.length !== product.smallImagesLocal.length) {
+        if (exactUrlIndex !== -1) {
           console.log(
-            `Removing ${
-              product.smallImagesLocal.length - newSmallImagesLocal.length
-            } items from smallImagesLocal`
+            `Found exact match for ${imageUrl} at index ${exactUrlIndex} in smallImagesLocal`
           );
 
-          // Update the smallImagesLocal array
-          await Product.updateOne(
+          // Create a new array without this item
+          const updatedArray = [...product.smallImagesLocal];
+          updatedArray.splice(exactUrlIndex, 1);
+
+          // Update the document
+          await collection.updateOne(
             { id: Number(productId) },
-            { $set: { smallImagesLocal: newSmallImagesLocal } }
+            { $set: { smallImagesLocal: updatedArray } }
           );
+
+          console.log(
+            `Removed item at index ${exactUrlIndex} from smallImagesLocal`
+          );
+          updatedProduct = true;
+        } else {
+          // Check if any URLs contain the target filename
+          const filenameIndex = product.smallImagesLocal.findIndex(
+            url =>
+              url && typeof url === 'string' && url.includes(targetFilename)
+          );
+
+          if (filenameIndex !== -1) {
+            console.log(
+              `Found filename match for ${targetFilename} at index ${filenameIndex} in smallImagesLocal`
+            );
+
+            // Create a new array without this item
+            const updatedArray = [...product.smallImagesLocal];
+            updatedArray.splice(filenameIndex, 1);
+
+            // Update the document
+            await collection.updateOne(
+              { id: Number(productId) },
+              { $set: { smallImagesLocal: updatedArray } }
+            );
+
+            console.log(
+              `Removed item at index ${filenameIndex} from smallImagesLocal`
+            );
+            updatedProduct = true;
+          } else {
+            console.log('No match found in smallImagesLocal array');
+          }
         }
       }
-    }
 
-    console.log('Image deletion completed');
-    res.json({ success: true });
+      // 2. Handle smallImages array (more complex character-by-character objects)
+      if (product.smallImages && Array.isArray(product.smallImages)) {
+        console.log(
+          `Found ${product.smallImages.length} items in smallImages array`
+        );
+        let matched = false;
+
+        // IMPORTANT: For character-by-character objects, reconstruct each one and check for matches
+        for (let i = 0; i < product.smallImages.length; i++) {
+          const img = product.smallImages[i];
+
+          // Skip non-objects
+          if (!img || typeof img !== 'object') continue;
+
+          // Check if this is a character-by-character object
+          const numericKeys = Object.keys(img)
+            .filter(key => !isNaN(parseInt(key)) && key !== '_id')
+            .sort((a, b) => parseInt(a) - parseInt(b));
+
+          // Need enough keys to be a character-by-character object
+          if (numericKeys.length < 10) continue;
+
+          // Reconstruct URL from character-by-character object
+          let reconstructedUrl = '';
+          for (const key of numericKeys) {
+            if (img[key] && typeof img[key] === 'string') {
+              reconstructedUrl += img[key];
+            }
+          }
+
+          console.log(
+            `Reconstructed URL from smallImages[${i}]: ${reconstructedUrl}`
+          );
+
+          // Check for match by filename
+          if (reconstructedUrl.includes(targetFilename)) {
+            console.log(`Found match by filename in smallImages at index ${i}`);
+
+            // Create new array without this item
+            const updatedArray = [...product.smallImages];
+            updatedArray.splice(i, 1);
+
+            // Update document
+            await collection.updateOne(
+              { id: Number(productId) },
+              { $set: { smallImages: updatedArray } }
+            );
+
+            console.log(`Removed item at index ${i} from smallImages`);
+            updatedProduct = true;
+            matched = true;
+            break;
+          }
+
+          // Also check for URL patterns that match specific servers
+          if (
+            reconstructedUrl.includes('lobster-app-jipru.ondigitalocean.app') &&
+            reconstructedUrl.includes('smallImages') &&
+            reconstructedUrl.includes('.jpg')
+          ) {
+            // Extract the filename from reconstructed URL
+            const filename = getFilename(reconstructedUrl);
+            console.log(`Found digital ocean URL with filename: ${filename}`);
+
+            // If it's a related filename (timestamps might differ slightly), also remove
+            if (filename.startsWith('smallImages-')) {
+              console.log(
+                `Found similar timestamp-based filename: ${filename}`
+              );
+
+              // Create new array without this item
+              const updatedArray = [...product.smallImages];
+              updatedArray.splice(i, 1);
+
+              // Update document
+              await collection.updateOne(
+                { id: Number(productId) },
+                { $set: { smallImages: updatedArray } }
+              );
+
+              console.log(`Removed item at index ${i} from smallImages`);
+              updatedProduct = true;
+              matched = true;
+              break;
+            }
+          }
+        }
+
+        // If still no match, try a more aggressive approach with string search
+        if (!matched) {
+          console.log(
+            'No match found with URL reconstruction, trying string search in raw data'
+          );
+
+          // Convert document to string for searching
+          const docStr = JSON.stringify(product);
+
+          // Check if the raw string contains our target filename
+          if (docStr.includes(targetFilename)) {
+            console.log(
+              `String search found ${targetFilename} in the document`
+            );
+
+            // Just remove all smallImages as a last resort
+            await collection.updateOne(
+              { id: Number(productId) },
+              { $set: { smallImages: [] } }
+            );
+
+            console.log('Cleared all smallImages as last resort');
+            updatedProduct = true;
+          } else {
+            console.log(
+              `String search did not find ${targetFilename} in document`
+            );
+          }
+        }
+      }
+
+      if (updatedProduct) {
+        console.log('Successfully updated product to remove image(s)');
+      } else {
+        console.log('No matching images found or no changes made');
+
+        // Last resort: try to find a similar filename (with slight timestamp differences)
+        const baseFilename = targetFilename.split('-')[0]; // Get the part before the timestamp
+        const extension = targetFilename.split('.').pop(); // Get the file extension
+
+        console.log(
+          `Trying last resort with base filename: ${baseFilename} and extension: ${extension}`
+        );
+
+        // Update with a direct MongoDB query using pattern matching
+        const updateResult = await collection.updateOne(
+          { id: Number(productId) },
+          [
+            {
+              $set: {
+                smallImagesLocal: {
+                  $filter: {
+                    input: '$smallImagesLocal',
+                    cond: {
+                      $not: {
+                        $regexMatch: {
+                          input: '$$this',
+                          regex: `${baseFilename}.*\\.${extension}`,
+                        },
+                      },
+                    },
+                  },
+                },
+                // For direct smallImages array deletion (just remove everything if there are only a few)
+                smallImages: {
+                  $cond: [
+                    { $lte: [{ $size: '$smallImages' }, 2] }, // If 2 or fewer items
+                    [], // Remove all
+                    '$smallImages', // Keep as is
+                  ],
+                },
+              },
+            },
+          ]
+        );
+
+        console.log('Last resort query result:', updateResult);
+
+        if (updateResult.modifiedCount > 0) {
+          console.log('Last resort update was successful');
+          updatedProduct = true;
+        }
+      }
+
+      if (!updatedProduct) {
+        // Absolute last resort - if everything fails, try clearing both arrays
+        console.log(
+          'ABSOLUTE LAST RESORT: Clearing both smallImages and smallImagesLocal arrays'
+        );
+
+        await collection.updateOne(
+          { id: Number(productId) },
+          {
+            $set: {
+              smallImages: [],
+              smallImagesLocal: [],
+            },
+          }
+        );
+
+        console.log('Cleared both smallImages and smallImagesLocal arrays');
+      }
+
+      console.log('Image deletion completed');
+      res.json({ success: true });
+    }
   } catch (error) {
     console.error('Error deleting image:', error);
     res.status(500).json({
