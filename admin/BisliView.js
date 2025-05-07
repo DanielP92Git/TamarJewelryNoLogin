@@ -50,6 +50,30 @@ const state = {
   maxRetries: 3,
 };
 
+// Function to calculate ILS price based on USD price and security margin
+function calculateILSPrice() {
+  const usdPriceInput = document.getElementById("old-price");
+  const securityMarginInput = document.getElementById("security-margin");
+  const ilsPriceInput = document.getElementById("new-price");
+
+  if (usdPriceInput && ilsPriceInput) {
+    const usdPrice = parseFloat(usdPriceInput.value) || 0;
+    // Default to 5% if no security margin is provided
+    const securityMargin = securityMarginInput
+      ? parseFloat(securityMarginInput.value) || 5
+      : 5;
+
+    // Current conversion rate (update as needed)
+    const usdToIlsRate = 3.75;
+
+    // Calculate ILS price with security margin
+    const ilsPrice = usdPrice * usdToIlsRate * (1 + securityMargin / 100);
+
+    // Round to 2 decimal places
+    ilsPriceInput.value = ilsPrice.toFixed(2);
+  }
+}
+
 function getImageUrl(image, imageLocal, publicImage, mainImage) {
   // Extract the filename from the image URL
   const getFilename = (url) => {
@@ -99,7 +123,7 @@ function getImageUrl(image, imageLocal, publicImage, mainImage) {
 
   // In local development, use local URL
   if (imageLocal) {
-    console.log("Using local image URL:", imageLocal);
+    // console.log("Using local image URL:", imageLocal);
     return imageLocal;
   }
 
@@ -816,6 +840,79 @@ async function bulkDeleteProducts() {
 function editProduct(product) {
   clear();
 
+  // Helper to get all main image URLs (desktop, mobile, public, legacy)
+  function getAllMainImageUrls(product) {
+    const urls = [];
+    if (product.mainImage) {
+      if (product.mainImage.desktop) urls.push(product.mainImage.desktop);
+      if (product.mainImage.mobile) urls.push(product.mainImage.mobile);
+      if (product.mainImage.publicDesktop)
+        urls.push(product.mainImage.publicDesktop);
+      if (product.mainImage.publicMobile)
+        urls.push(product.mainImage.publicMobile);
+      if (product.mainImage.desktopLocal)
+        urls.push(product.mainImage.desktopLocal);
+      if (product.mainImage.mobileLocal)
+        urls.push(product.mainImage.mobileLocal);
+    }
+    if (product.image) urls.push(product.image);
+    if (product.publicImage) urls.push(product.publicImage);
+    if (product.imageLocal) urls.push(product.imageLocal);
+    // Remove duplicates and falsy
+    return [...new Set(urls.filter(Boolean))];
+  }
+
+  // Helper to get all small image URLs (handle both new and legacy)
+  function getAllSmallImageUrls(product) {
+    // Function to extract filename from URL
+    const getFilename = (url) => {
+      if (!url) return "";
+      // Get the last part of the URL (filename)
+      const parts = url.split("/");
+      return parts[parts.length - 1];
+    };
+
+    // Store unique URLs by filename
+    const uniqueUrls = new Map();
+
+    // Process smallImages array
+    if (Array.isArray(product.smallImages)) {
+      product.smallImages.forEach((img) => {
+        if (typeof img === "string" && img) {
+          const filename = getFilename(img);
+          uniqueUrls.set(filename, img);
+        } else if (typeof img === "object" && img !== null) {
+          // Prioritize mobile version, then fall back to desktop
+          if (img.mobile) {
+            const filename = getFilename(img.mobile);
+            uniqueUrls.set(filename, img.mobile);
+          } else if (img.desktop) {
+            const filename = getFilename(img.desktop);
+            uniqueUrls.set(filename, img.desktop);
+          }
+        }
+      });
+    }
+
+    // Also add from legacy fields if not already present
+    if (Array.isArray(product.smallImagesLocal)) {
+      product.smallImagesLocal.forEach((url) => {
+        if (url) {
+          const filename = getFilename(url);
+          if (!uniqueUrls.has(filename)) {
+            uniqueUrls.set(filename, url);
+          }
+        }
+      });
+    }
+
+    // Return just the unique URLs as an array
+    return Array.from(uniqueUrls.values());
+  }
+
+  const mainImageUrls = getAllMainImageUrls(product);
+  const smallImageUrls = getAllSmallImageUrls(product);
+
   const markup = `
     <form id="editForm">
      <div class="add-product">
@@ -872,7 +969,7 @@ function editProduct(product) {
         id="description"
           placeholder="Type here"
         rows="4"
-        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"
+        class="product-description-textarea"
         >${product.description || ""}</textarea>
     </div>
     <div class="addproduct-itemfield">
@@ -919,35 +1016,91 @@ function editProduct(product) {
           ).join("")}
       </select>
     </div>
-    <div class="addproduct-itemfield">
-        <p>Current Image:</p>
-        <picture>
-          <source 
-            media="(min-width: 768px)" 
-            srcset="${product.mainImage?.desktop || product.image}" 
-            type="image/webp"
-          />
-          <source 
-            media="(max-width: 767px)" 
-            srcset="${product.mainImage?.mobile || product.image}" 
-            type="image/webp"
-          />
-          <img 
-            src="${getImageUrl(
-              product.image,
-              product.imageLocal,
-              product.publicImage,
-              product.mainImage
-            )}" 
-            alt="${product.name}" 
-            style="max-width: 200px; margin: 10px 0;"
-            loading="lazy"
-          />
-        </picture>
+    <div class="current-images">
+      <h3>Current Images</h3>
+      <div class="main-image-section">
+        <p>Main Image</p>
+        <div class="main-image">
+          ${
+            mainImageUrls[0]
+              ? `
+          <img src="${mainImageUrls[0]}" alt="Main Image" loading="lazy" />
+          <button type="button" class="delete-image-btn" data-image-type="main" data-image-url="${encodeURIComponent(
+            mainImageUrls[0]
+          )}" data-product-id="${product.id}">&#10005;</button>
+          `
+              : `<p>No main image</p>`
+          }
+        </div>
+      </div>
+      
+      <div class="small-images-section">
+        <p>Small Images</p>
+        <div class="small-images">
+          ${smallImageUrls
+            .map(
+              (url, idx) => `
+          <div class="small-image">
+            <img src="${url}" alt="Small Image ${idx + 1}" loading="lazy" />
+            <button type="button" class="delete-image-btn" data-image-type="small" data-image-url="${encodeURIComponent(
+              url
+            )}" data-product-id="${product.id}">&#10005;</button>
+          </div>
+        `
+            )
+            .join("")}
+        </div>
+      </div>
     </div>
-      <input type="hidden" id="product-id" value="${product.id}">
-      <br>
-      <button type="submit" class="addproduct-btn">
+    
+    <div class="file-upload-container">
+      <h3>Add New Images</h3>
+      
+      <div class="file-upload-field">
+        <label class="file-upload-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+          New Main Image
+        </label>
+        <div class="file-upload-input">
+          <input
+            type="file"
+            name="mainImage"
+            id="mainImage"
+            accept="image/*"
+          />
+        </div>
+        <p class="file-upload-help">This will replace the current main image. Max size: 5MB</p>
+      </div>
+      
+      <div class="file-upload-field">
+        <label class="file-upload-label">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+            <polyline points="21 11 14 4 7 11"></polyline>
+          </svg>
+          Additional Product Images
+        </label>
+        <div class="file-upload-input">
+          <input
+            type="file"
+            name="smallImages"
+            id="smallImages"
+            multiple
+            accept="image/*"
+          />
+        </div>
+        <p class="file-upload-help">Select multiple images to add to existing gallery. Max size per image: 5MB</p>
+      </div>
+    </div>
+    
+    <input type="hidden" id="product-id" value="${product.id}">
+    <button type="submit" class="addproduct-btn">
       Update Product
     </button>
      </div>
@@ -969,7 +1122,67 @@ function editProduct(product) {
     securityMarginInput.addEventListener("input", calculateILSPrice);
   }
 
+  // Add event listeners for delete image buttons
+  document.querySelectorAll(".delete-image-btn").forEach((btn) => {
+    btn.addEventListener("click", async function () {
+      const imageType = this.dataset.imageType;
+      const productId = this.dataset.productId;
+      const imageUrl = decodeURIComponent(this.dataset.imageUrl);
+
+      if (confirm(`Are you sure you want to delete this ${imageType} image?`)) {
+        try {
+          console.log(`Deleting ${imageType} image: ${imageUrl}`);
+
+          const response = await fetch(`${API_URL}/deleteproductimage`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+            },
+            body: JSON.stringify({
+              productId,
+              imageType,
+              imageUrl,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const result = await response.json();
+          if (result.success) {
+            alert("Image deleted successfully!");
+            // Refresh the edit form
+            const product = await fetchProduct(productId);
+            editProduct(product);
+          } else {
+            throw new Error(result.message || "Failed to delete image");
+          }
+        } catch (error) {
+          console.error("Error deleting image:", error);
+          alert("Error deleting image: " + error.message);
+        }
+      }
+    });
+  });
+
   form.addEventListener("submit", updateProduct);
+}
+
+// Helper function to fetch a single product
+async function fetchProduct(productId) {
+  try {
+    const response = await fetch(`${API_URL}/getproduct/${productId}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching product:", error);
+    throw error;
+  }
 }
 
 async function updateProduct(e) {
@@ -978,33 +1191,50 @@ async function updateProduct(e) {
   const productId = document.getElementById("product-id").value;
   const name = document.getElementById("name").value;
   const usdPrice = document.getElementById("old-price").value;
-  const securityMargin = document.getElementById("security-margin").value;
+  const ilsPrice = document.getElementById("new-price").value;
   const description = document.getElementById("description").value;
   const category = document.getElementById("category").value;
   const quantity = document.getElementById("quantity").value;
+  const securityMargin = document.getElementById("security-margin").value;
+
+  // Get new image files
+  const mainImageFile = document.getElementById("mainImage").files[0];
+  const smallImageFiles = document.getElementById("smallImages").files;
+
+  // Create FormData object for multipart/form-data
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("usd_price", usdPrice);
+  formData.append("ils_price", ilsPrice);
+  formData.append("description", description);
+  formData.append("category", category);
+  formData.append("quantity", quantity);
+  formData.append("security_margin", securityMargin);
+
+  // Append new images if they exist
+  if (mainImageFile) {
+    formData.append("mainImage", mainImageFile);
+  }
+  if (smallImageFiles.length > 0) {
+    Array.from(smallImageFiles).forEach((file, index) => {
+      formData.append(`smallImages`, file);
+    });
+  }
 
   try {
-    const response = await fetch(`${API_URL}/updateproduct`, {
+    const response = await fetch(`${API_URL}/updateproduct/${productId}`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
       },
-      body: JSON.stringify({
-        id: productId,
-        name,
-        oldPrice: usdPrice,
-        security_margin: securityMargin,
-        description,
-        category,
-        quantity,
-      }),
+      body: formData,
     });
 
     const result = await response.json();
+
     if (result.success) {
       alert("Product updated successfully!");
-      fetchInfo(); // Refresh and go back to the products list
+      loadProductsPage();
     } else {
       throw new Error(result.message || "Failed to update product");
     }
@@ -1307,38 +1537,14 @@ async function addProduct(e, data, form) {
     // Create success card
     const successCard = document.createElement("div");
     successCard.className = "success-card";
-    successCard.style.cssText = `
-      margin: 2rem auto;
-      padding: 2rem;
-      max-width: 600px;
-      background-color: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
-    `;
 
     // Create success content
     successCard.innerHTML = `
-      <h2 style="color: #28a745; margin-bottom: 1rem;">Product Added Successfully!</h2>
-      <p style="margin-bottom: 2rem;">Your new product has been added to the <strong>${targetCategory}</strong> category.</p>
-      <div style="display: flex; justify-content: center; gap: 1rem;">
-        <button id="view-category-btn" style="
-          padding: 10px 20px;
-          background-color: #4e54c8;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-          font-weight: bold;
-        ">View ${targetCategory} Products</button>
-        <button id="add-another-btn" style="
-          padding: 10px 20px;
-          background-color: #6c757d;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        ">Add Another Product</button>
+      <h2 class="success-title">Product Added Successfully!</h2>
+      <p class="success-message">Your new product has been added to the <strong>${targetCategory}</strong> category.</p>
+      <div class="success-actions">
+        <button id="view-category-btn" class="view-category-btn">View ${targetCategory} Products</button>
+        <button id="add-another-btn" class="add-another-btn">Add Another Product</button>
       </div>
     `;
 
@@ -1380,123 +1586,152 @@ async function loadAddProductsPage() {
   const markup = `
     <form id="uploadForm">
      <div class="add-product">
+      <div class="addproduct-itemfield">
+        <p>Product Title</p>
+        <input 
+         type="text"
+         name="name"
+         id="name"
+         placeholder="Type here"
+       />
+             </div>
+     <div class="addproduct-price">
+       <div class="addproduct-itemfield">
+         <p>Price in $</p>
+         <input
+           type="text"
+           name="usd_price"
+           id="old-price"
+           placeholder="Type here"
+         />
+           </div>
+       <div class="addproduct-itemfield">
+         <p>Security Margin (%)</p>
+         <input
+           type="number"
+           name="security_margin"
+           id="security-margin"
+           placeholder="5"
+           value="5"
+           min="0"
+           max="100"
+         />
+       </div>
+       <div class="addproduct-itemfield">
+         <p>Price in ₪ (Auto-calculated)</p>
+         <input
+           type="text"
+           name="ils_price"
+           id="new-price"
+           placeholder="Auto-calculated"
+           readonly
+         />
+       </div>
+     </div>
      <div class="addproduct-itemfield">
-       <p>Product Title</p>
-       <input 
-        type="text"
-        name="name"
-        id="name"
-        placeholder="Type here"
-      />
-            </div>
-    <div class="addproduct-price">
-      <div class="addproduct-itemfield">
-        <p>Price in $</p>
-        <input
-          type="text"
-          name="usd_price"
-          id="old-price"
-          placeholder="Type here"
-        />
-          </div>
-      <div class="addproduct-itemfield">
-        <p>Security Margin (%)</p>
-        <input
-          type="number"
-          name="security_margin"
-          id="security-margin"
-          placeholder="5"
-          value="5"
-          min="0"
-          max="100"
-        />
-      </div>
-      <div class="addproduct-itemfield">
-        <p>Price in ₪ (Auto-calculated)</p>
-        <input
-          type="text"
-          name="ils_price"
-          id="new-price"
-          placeholder="Auto-calculated"
-          readonly
-        />
-      </div>
-    </div>
-    <div class="addproduct-itemfield">
-      <p>Product Description</p>
-      <textarea
-        name="description"
-        id="description"
-        placeholder="Type here"
-        rows="4"
-        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit; resize: vertical;"
-      ></textarea>
-    </div>
-    <div class="addproduct-itemfield">
-      <p>Product Category</p>
-      <select
-        name="category"
-        id="category"
-        class="add-product-selector"
-      >
-        <option id="necklaces" value="necklaces">Necklaces</option>
-        <option id="crochet-necklaces" value="crochet-necklaces">Crochet Necklaces</option>
-        <option id="bracelets" value="bracelets">Bracelets</option>
-        <option id="hoop-earrings" value="hoop-earrings">Hoop Earrings</option>
-        <option id="dangle-earrings" value="dangle-earrings">Dangle Earrings</option>
-        <option id="unisex" value="unisex">Unisex</option>
-        <option id="shalom-club" value="shalom-club">Shalom Club</option>
-      </select>
-      <p>Quantity</p>
-      <select
-        name="quantity"
-        id="quantity"
-        class="quantity-selector"
-      >
-        <option id="0" value="0">0</option>
-        <option id="1" value="1" selected>1</option>
-        <option id="2" value="2">2</option>
-        <option id="3" value="3">3</option>
-        <option id="4" value="4">4</option>
-        <option id="5" value="5">5</option>
-        <option id="6" value="6">6</option>
-        <option id="7" value="7">7</option>
-        <option id="8" value="8">8</option>
-        <option id="9" value="9">9</option>
-        <option id="10" value="10">10</option>
-        <option id="11" value="11">11</option>
-        <option id="12" value="12">12</option>
-        <option id="13" value="13">13</option>
-        <option id="14" value="14">14</option>
-        <option id="15" value="15">15</option>
-        <option id="16" value="16">16</option>
-        <option id="17" value="17">17</option>
-        <option id="18" value="18">18</option>
-        <option id="19" value="19">19</option>
-        <option id="20" value="20">20</option>
-      </select>
-    </div>
-    <br>
-    <div class="addproduct-itemfield">
-      <label for="mainImage">Main Image:</label>
-      <input
-        type="file"
-        name="mainImage"
-        id="mainImage"
-        required/>
-      <br>
-      <label for="smallImages">Small Images:</label>
-      <input
-        type="file"
-        name="smallImages"
-        id="smallImages"
-        multiple/>
-    </div>
-    <br>
-    <button class="addproduct-btn">
-       Submit
-    </button>
-    </div>
+       <p>Product Description</p>
+       <textarea
+         name="description"
+         id="description"
+         placeholder="Type here"
+         rows="4"
+         class="product-description-textarea"
+       ></textarea>
+     </div>
+     <div class="addproduct-itemfield">
+       <p>Product Category</p>
+       <select
+         name="category"
+         id="category"
+         class="add-product-selector"
+       >
+         <option id="necklaces" value="necklaces">Necklaces</option>
+         <option id="crochet-necklaces" value="crochet-necklaces">Crochet Necklaces</option>
+         <option id="bracelets" value="bracelets">Bracelets</option>
+         <option id="hoop-earrings" value="hoop-earrings">Hoop Earrings</option>
+         <option id="dangle-earrings" value="dangle-earrings">Dangle Earrings</option>
+         <option id="unisex" value="unisex">Unisex</option>
+         <option id="shalom-club" value="shalom-club">Shalom Club</option>
+       </select>
+       <p>Quantity</p>
+       <select
+         name="quantity"
+         id="quantity"
+         class="quantity-selector"
+       >
+         <option id="0" value="0">0</option>
+         <option id="1" value="1" selected>1</option>
+         <option id="2" value="2">2</option>
+         <option id="3" value="3">3</option>
+         <option id="4" value="4">4</option>
+         <option id="5" value="5">5</option>
+         <option id="6" value="6">6</option>
+         <option id="7" value="7">7</option>
+         <option id="8" value="8">8</option>
+         <option id="9" value="9">9</option>
+         <option id="10" value="10">10</option>
+         <option id="11" value="11">11</option>
+         <option id="12" value="12">12</option>
+         <option id="13" value="13">13</option>
+         <option id="14" value="14">14</option>
+         <option id="15" value="15">15</option>
+         <option id="16" value="16">16</option>
+         <option id="17" value="17">17</option>
+         <option id="18" value="18">18</option>
+         <option id="19" value="19">19</option>
+         <option id="20" value="20">20</option>
+       </select>
+     </div>
+     <div class="file-upload-container">
+       <h3>Product Images</h3>
+       
+       <div class="file-upload-field">
+         <label class="file-upload-label">
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+             <circle cx="8.5" cy="8.5" r="1.5"></circle>
+             <polyline points="21 15 16 10 5 21"></polyline>
+           </svg>
+           Main Product Image
+         </label>
+         <div class="file-upload-input">
+           <input
+             type="file"
+             name="mainImage"
+             id="mainImage"
+             accept="image/*"
+             required
+           />
+         </div>
+         <p class="file-upload-help">This will be the primary image shown for your product. Max size: 5MB</p>
+       </div>
+       
+       <div class="file-upload-field">
+         <label class="file-upload-label">
+           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+             <circle cx="8.5" cy="8.5" r="1.5"></circle>
+             <polyline points="21 15 16 10 5 21"></polyline>
+             <polyline points="21 11 14 4 7 11"></polyline>
+           </svg>
+           Additional Product Images
+         </label>
+         <div class="file-upload-input">
+           <input
+             type="file"
+             name="smallImages"
+             id="smallImages"
+             multiple
+             accept="image/*"
+           />
+         </div>
+         <p class="file-upload-help">Select multiple images to show different angles or details. Max size per image: 5MB</p>
+       </div>
+     </div>
+     <button class="addproduct-btn">
+        Submit
+     </button>
+     </div>
     </form>
   `;
 
@@ -1615,20 +1850,6 @@ function addProductHandler() {
 
     addProduct(e, data, form);
   });
-}
-
-// Calculation function
-function calculateILSPrice() {
-  const usdPrice = parseFloat(document.getElementById("old-price").value) || 0;
-  const securityMargin =
-    parseFloat(document.getElementById("security-margin").value) || 5;
-  const exchangeRate = 3.7; // Base exchange rate
-
-  // Calculate ILS price with security margin
-  const ilsPrice = usdPrice * exchangeRate * (1 + securityMargin / 100);
-
-  // Round to nearest integer
-  document.getElementById("new-price").value = Math.round(ilsPrice);
 }
 
 // Create a single object with all exported functions

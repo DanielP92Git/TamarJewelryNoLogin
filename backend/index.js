@@ -839,41 +839,209 @@ app.post('/addproduct', async (req, res) => {
   }
 });
 
+// Update the old updateproduct endpoint to handle formdata and file uploads
+app.post(
+  '/updateproduct/:id',
+  upload.fields([
+    { name: 'mainImage', maxCount: 1 },
+    { name: 'smallImages', maxCount: 10 },
+  ]),
+  async (req, res) => {
+    try {
+      const productId = req.params.id;
+      console.log(`Updating product ${productId}`);
+      console.log('Form data:', req.body);
+
+      // Find the product
+      const product = await Product.findOne({ id: Number(productId) });
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: 'Product not found',
+        });
+      }
+
+      // Extract form data
+      const {
+        name,
+        usd_price,
+        ils_price,
+        description,
+        category,
+        quantity,
+        security_margin,
+      } = req.body;
+
+      // Update basic product information
+      product.name = name;
+      product.usd_price = Number(usd_price) || 0;
+      product.ils_price = Number(ils_price) || 0;
+      product.description = description || '';
+      product.category = category;
+      product.quantity = Number(quantity) || 0;
+      product.security_margin = Number(security_margin) || 5;
+
+      // Handle file uploads if present
+      let mainImageUpdated = false;
+      let smallImagesUpdated = false;
+
+      // Process main image if uploaded
+      if (req.files && req.files.mainImage && req.files.mainImage.length > 0) {
+        console.log('Processing new main image');
+        const mainImage = req.files.mainImage[0];
+
+        try {
+          const mainImageResults = await processImage(
+            mainImage.path,
+            mainImage.filename,
+            true
+          );
+
+          // Get the base URLs
+          const productionBaseUrl =
+            process.env.API_URL || 'https://tamarkfir.com/api';
+          const localBaseUrl = 'http://localhost:4000';
+          const baseUrl =
+            process.env.NODE_ENV === 'production'
+              ? productionBaseUrl
+              : localBaseUrl;
+
+          // Update main image URLs
+          product.mainImage = {
+            desktop: `${baseUrl}/uploads/${mainImageResults.desktop.filename}`,
+            mobile: `${baseUrl}/uploads/${mainImageResults.mobile.filename}`,
+            desktopLocal: `${localBaseUrl}/uploads/${mainImageResults.desktop.filename}`,
+            mobileLocal: `${localBaseUrl}/uploads/${mainImageResults.mobile.filename}`,
+            publicDesktop: `${baseUrl}/public/uploads/${mainImageResults.desktop.filename}`,
+            publicMobile: `${baseUrl}/public/uploads/${mainImageResults.mobile.filename}`,
+          };
+
+          // Update legacy fields
+          product.image = product.mainImage.desktop;
+          product.imageLocal = product.mainImage.desktopLocal;
+          product.publicImage = product.mainImage.publicDesktop;
+
+          mainImageUpdated = true;
+          console.log('Main image updated');
+        } catch (error) {
+          console.error('Error processing main image:', error);
+          // Continue without updating image if processing fails
+        }
+      }
+
+      // Process small images if uploaded
+      if (
+        req.files &&
+        req.files.smallImages &&
+        req.files.smallImages.length > 0
+      ) {
+        console.log(
+          `Processing ${req.files.smallImages.length} new small images`
+        );
+
+        try {
+          const smallImagesResults = await Promise.all(
+            req.files.smallImages.map(async image => {
+              return await processImage(image.path, image.filename, false);
+            })
+          );
+
+          // Get the base URLs
+          const productionBaseUrl =
+            process.env.API_URL || 'https://tamarkfir.com/api';
+          const localBaseUrl = 'http://localhost:4000';
+          const baseUrl =
+            process.env.NODE_ENV === 'production'
+              ? productionBaseUrl
+              : localBaseUrl;
+
+          // Create small image URL objects
+          const newSmallImages = smallImagesResults.map(result => ({
+            desktop: `${baseUrl}/smallImages/${result.desktop.filename}`,
+            mobile: `${baseUrl}/smallImages/${result.mobile.filename}`,
+            desktopLocal: `${localBaseUrl}/smallImages/${result.desktop.filename}`,
+            mobileLocal: `${localBaseUrl}/smallImages/${result.mobile.filename}`,
+          }));
+
+          // Append new small images to existing ones
+          if (!product.smallImages) {
+            product.smallImages = [];
+          }
+
+          product.smallImages = [...product.smallImages, ...newSmallImages];
+
+          smallImagesUpdated = true;
+          console.log('Small images updated');
+        } catch (error) {
+          console.error('Error processing small images:', error);
+          // Continue without updating small images if processing fails
+        }
+      }
+
+      // Save the updated product
+      await product.save();
+      console.log('Product updated successfully');
+
+      res.json({
+        success: true,
+        message: 'Product updated successfully',
+        mainImageUpdated,
+        smallImagesUpdated,
+      });
+    } catch (error) {
+      console.error('Error updating product:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+);
+
+// Keep the old endpoint for backward compatibility
 app.post('/updateproduct', async (req, res) => {
-  const id = req.body.id;
-  const securityMargin = parseFloat(req.body.security_margin) || 5;
-  const exchangeRate = 3.7;
+  try {
+    const id = req.body.id;
+    const securityMargin = parseFloat(req.body.security_margin) || 5;
+    const exchangeRate = 3.7;
 
-  const usdPrice = Number(req.body.oldPrice) || 0;
-  const ilsPrice = Math.round(
-    usdPrice * exchangeRate * (1 + securityMargin / 100)
-  );
+    const usdPrice = Number(req.body.oldPrice) || 0;
+    const ilsPrice = Math.round(
+      usdPrice * exchangeRate * (1 + securityMargin / 100)
+    );
 
-  const updatedFields = {
-    name: req.body.name,
-    ils_price: ilsPrice,
-    usd_price: usdPrice,
-    security_margin: securityMargin,
-    description: req.body.description,
-    quantity: req.body.quantity,
-    category: req.body.category,
-  };
+    const updatedFields = {
+      name: req.body.name,
+      ils_price: ilsPrice,
+      usd_price: usdPrice,
+      security_margin: securityMargin,
+      description: req.body.description,
+      quantity: req.body.quantity,
+      category: req.body.category,
+    };
 
-  let product = await Product.findOne({ id: id });
+    let product = await Product.findOne({ id: id });
 
-  product.name = updatedFields.name;
-  product.usd_price = updatedFields.usd_price;
-  product.ils_price = updatedFields.ils_price;
-  product.security_margin = updatedFields.security_margin;
-  product.description = updatedFields.description;
-  product.quantity = updatedFields.quantity;
-  product.category = updatedFields.category;
+    product.name = updatedFields.name;
+    product.usd_price = updatedFields.usd_price;
+    product.ils_price = updatedFields.ils_price;
+    product.security_margin = updatedFields.security_margin;
+    product.description = updatedFields.description;
+    product.quantity = updatedFields.quantity;
+    product.category = updatedFields.category;
 
-  await product.save();
+    await product.save();
 
-  res.json({
-    success: true,
-  });
+    res.json({
+      success: true,
+    });
+  } catch (error) {
+    console.error('Error in legacy updateproduct:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
 });
 
 app.post('/removeproduct', async (req, res) => {
@@ -1284,6 +1452,107 @@ app.post('/orders/:orderID/capture', async (req, res) => {
   } catch (error) {
     console.error('Failed to create order:', error);
     res.status(500).json({ error: 'Failed to capture order.' });
+  }
+});
+
+app.post('/deleteproductimage', async (req, res) => {
+  try {
+    const { productId, imageType, imageUrl } = req.body;
+
+    console.log(`Deleting image: ${imageType} from product ${productId}`);
+    console.log(`Image URL: ${imageUrl}`);
+
+    // Find the product
+    const product = await Product.findOne({ id: Number(productId) });
+
+    if (!product) {
+      console.error(`Product with ID ${productId} not found`);
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found',
+      });
+    }
+
+    // Process based on image type
+    if (imageType === 'main') {
+      console.log('Deleting main image');
+
+      // Clear main image fields
+      product.image = null;
+      product.publicImage = null;
+      product.imageLocal = null;
+
+      if (product.mainImage) {
+        product.mainImage.desktop = null;
+        product.mainImage.mobile = null;
+        product.mainImage.publicDesktop = null;
+        product.mainImage.publicMobile = null;
+        product.mainImage.desktopLocal = null;
+        product.mainImage.mobileLocal = null;
+      }
+    } else if (imageType === 'small') {
+      console.log('Deleting small image');
+
+      // Remove the matching small image
+      if (Array.isArray(product.smallImages)) {
+        // Filter out the matching URL
+        product.smallImages = product.smallImages.filter(img => {
+          // If it's a string
+          if (typeof img === 'string') {
+            return img !== imageUrl;
+          }
+
+          // If it's an object
+          if (typeof img === 'object' && img !== null) {
+            return !(
+              img.desktop === imageUrl ||
+              img.mobile === imageUrl ||
+              img.publicDesktop === imageUrl ||
+              img.publicMobile === imageUrl ||
+              img.desktopLocal === imageUrl ||
+              img.mobileLocal === imageUrl
+            );
+          }
+
+          return true;
+        });
+      }
+
+      // Also handle legacy fields
+      if (Array.isArray(product.smallImagesLocal)) {
+        product.smallImagesLocal = product.smallImagesLocal.filter(
+          url => url !== imageUrl
+        );
+      }
+    }
+
+    // Save the product
+    await product.save();
+    console.log('Product updated successfully');
+
+    // Return success
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting image:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+
+// Fetch a single product by id
+app.get('/getproduct/:id', async (req, res) => {
+  try {
+    const product = await Product.findOne({ id: Number(req.params.id) });
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Product not found' });
+    }
+    res.json(product);
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 
