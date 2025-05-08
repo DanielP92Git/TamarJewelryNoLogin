@@ -32,8 +32,11 @@ const allowedOrigins = [
   `${process.env.API_URL}`,
   `${process.env.ADMIN_URL}`,
   `${process.env.FULLHOST}`,
+  'https://lobster-app-jipru.ondigitalocean.app',
   'http://127.0.0.1:5500',
   'http://localhost:5500', // Added for local admin dashboard
+  'http://localhost:1234', // Added for Parcel dev server
+  'http://127.0.0.1:1234', // Added for Parcel dev server alternative
 ];
 
 console.log('Allowed origins:', allowedOrigins);
@@ -69,8 +72,29 @@ app.use(express.json({ limit: '50mb' }));
 
 // CORS Headers Middleware - Enhanced for better cross-origin support
 function headers(req, res, next) {
-  // Allow requests from any origin during development
-  res.header('Access-Control-Allow-Origin', '*');
+  // Get the origin from the request
+  const origin = req.headers.origin;
+  // console.log(`[CORS DEBUG] Request from origin: ${origin || 'unknown'}`);
+  // console.log(`[CORS DEBUG] Request method: ${req.method}`);
+  // console.log(`[CORS DEBUG] Request path: ${req.path}`);
+
+  // Check if origin is in our allowed list
+  if (allowedOrigins.includes(origin)) {
+    // Set specific origin if it's allowed
+    // console.log(`[CORS DEBUG] Origin ${origin} is in allowed list`);
+    res.header('Access-Control-Allow-Origin', origin);
+  } else if (process.env.NODE_ENV !== 'production') {
+    // In development, allow all origins
+    // console.log(`[CORS DEBUG] Development mode, allowing all origins`);
+    res.header('Access-Control-Allow-Origin', '*');
+  } else {
+    // In production, only allow specific origins
+    // console.log(`[CORS DEBUG] Production mode, setting default origin`);
+    res.header(
+      'Access-Control-Allow-Origin',
+      'https://lobster-app-jipru.ondigitalocean.app'
+    );
+  }
 
   // Allow specific methods
   res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
@@ -84,15 +108,20 @@ function headers(req, res, next) {
   // Allow credentials
   res.header('Access-Control-Allow-Credentials', 'true');
 
+  // Add CORS-related headers for images
+  res.header('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.header('Cross-Origin-Embedder-Policy', 'credentialless');
+  res.header('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+
   // Preflight request handling
   if (req.method === 'OPTIONS') {
     console.log(
-      'Received OPTIONS request from:',
-      req.headers.origin || 'unknown'
+      `[CORS DEBUG] Responding to OPTIONS request from: ${origin || 'unknown'}`
     );
     return res.status(200).end();
   }
 
+  // Continue to the next middleware
   next();
 }
 
@@ -287,8 +316,27 @@ if (!fs.existsSync(publicSmallImagesDir)) {
 // Enhanced static file serving options with better CORS support
 const staticOptions = {
   setHeaders: (res, path) => {
-    // Allow requests from any origin
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    console.log(`[Static DEBUG] Setting headers for file: ${path}`);
+
+    // Instead of allowing any origin, use the same origin policy as in the headers middleware
+    const origin = res.req.headers.origin;
+    if (allowedOrigins.includes(origin)) {
+      console.log(`[Static DEBUG] Allowing specific origin: ${origin}`);
+      res.setHeader('Access-Control-Allow-Origin', origin);
+    } else if (process.env.NODE_ENV !== 'production') {
+      console.log(
+        `[Static DEBUG] Development mode, allowing all origins for static files`
+      );
+      res.setHeader('Access-Control-Allow-Origin', '*');
+    } else {
+      console.log(
+        `[Static DEBUG] Production mode, setting default origin for static files`
+      );
+      res.setHeader(
+        'Access-Control-Allow-Origin',
+        'https://lobster-app-jipru.ondigitalocean.app'
+      );
+    }
 
     // Allow specific methods
     res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
@@ -304,6 +352,9 @@ const staticOptions = {
     res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
 
+    // Add Vary header to ensure caching works correctly with CORS
+    res.setHeader('Vary', 'Origin');
+
     // Set content type header based on file extension
     if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
       res.setHeader('Content-Type', 'image/jpeg');
@@ -311,6 +362,8 @@ const staticOptions = {
       res.setHeader('Content-Type', 'image/png');
     } else if (path.endsWith('.gif')) {
       res.setHeader('Content-Type', 'image/gif');
+    } else if (path.endsWith('.webp')) {
+      res.setHeader('Content-Type', 'image/webp');
     }
   },
   maxAge: 31536000, // 1 year in seconds
@@ -318,12 +371,12 @@ const staticOptions = {
 
 // Configure static file serving for all directories with custom middleware
 app.use('/uploads', (req, res, next) => {
-  console.log(`[Static] Accessing: ${req.path} from uploads dir`);
+  console.log(`[Static DEBUG] Accessing: ${req.path} from uploads dir`);
   express.static(uploadsDir, staticOptions)(req, res, next);
 });
 
 app.use('/api/uploads', (req, res, next) => {
-  console.log(`[Static] Accessing: ${req.path} from api/uploads`);
+  console.log(`[Static DEBUG] Accessing: ${req.path} from api/uploads`);
   express.static(uploadsDir, staticOptions)(req, res, next);
 });
 

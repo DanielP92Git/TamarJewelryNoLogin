@@ -29,12 +29,21 @@ class CategoriesView extends View {
     this.initialized = false;
     this.isModalOpen = false;
     this.exchangeRate = 3.7;
+
+    // Fix the environment detection logic
+    // Check if we're in development or production based on window.location
     this.isProduction =
+      process.env.NODE_ENV === 'production' &&
       window.location.hostname !== 'localhost' &&
-      window.location.hostname !== '127.0.0.1';
+      !window.location.hostname.includes('127.0.0.1');
+
+    // Set the correct API URL based on environment
     this.apiUrl = this.isProduction
       ? 'https://lobster-app-jipru.ondigitalocean.app/api'
       : 'http://localhost:4000';
+
+    console.log('Environment:', process.env.NODE_ENV);
+    console.log('Using API URL:', this.apiUrl);
 
     // Add resize observer for debugging
     if (process.env.NODE_ENV !== 'production') {
@@ -160,6 +169,9 @@ class CategoriesView extends View {
   }
 
   initialSetup() {
+    // First fix the header background image in development mode
+    this.fixHeaderBackgroundImage();
+
     this.fetchProductsByCategory();
     this.setupScrollListener();
     this.addHandlerAddToCart();
@@ -603,11 +615,8 @@ class CategoriesView extends View {
     // Process small images - ensure we get the actual URLs
     let smallImagesArray = [];
 
-    // Get the base API URL based on environment
-    const apiBaseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://lobster-app-jipru.ondigitalocean.app/api'
-        : 'http://localhost:4000';
+    // Use the instance variable instead of redefining
+    const apiBaseUrl = this.apiUrl;
 
     // Handle old format (array of strings)
     if (Array.isArray(product?.smallImagesLocal)) {
@@ -745,12 +754,14 @@ class CategoriesView extends View {
 
         // If we have a sort order active, fetch all products and sort them
         if (this.sortedByPrice !== '') {
-          const apiUrl = `${process.env.API_URL}`;
-          const response = await fetch(`${apiUrl}/getAllProductsByCategory`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ category: this.category }),
-          });
+          const response = await fetch(
+            `${this.apiUrl}/getAllProductsByCategory`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ category: this.category }),
+            }
+          );
 
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -884,6 +895,95 @@ class CategoriesView extends View {
     });
   }
 
+  // Improve the fixHeaderBackgroundImage method with better production handling
+  fixHeaderBackgroundImage() {
+    // CRITICAL: Only run in development mode - never modify URLs in production
+    if (this.isProduction) return;
+
+    // Get the header element
+    const header = document.querySelector('header');
+    if (!header) return;
+
+    // Check if it has a background-image style
+    const style = header.getAttribute('style');
+    if (!style || !style.includes('background-image')) return;
+
+    // Extract the URL from the style
+    const urlMatch = style.match(/url\(['"]?([^'"]+)['"]?\)/);
+    if (!urlMatch || !urlMatch[1]) return;
+
+    const originalUrl = urlMatch[1];
+
+    // IMPORTANT: Never modify already absolute URLs or production URLs
+    if (
+      originalUrl.includes('lobster-app-jipru.ondigitalocean.app') ||
+      originalUrl.startsWith('http://') ||
+      originalUrl.startsWith('https://')
+    ) {
+      return;
+    }
+
+    // For simplicity, just prepend the base URL to the original path
+    // This keeps all the path segments intact and doesn't try to parse them
+    const newUrl = originalUrl.startsWith('../../')
+      ? `http://localhost:1234/${originalUrl.substring(6)}` // Remove ../../ prefix
+      : `http://localhost:1234/${originalUrl}`;
+
+    // Set the new background-image style
+    const newStyle = style.replace(originalUrl, newUrl);
+    header.setAttribute('style', newStyle);
+
+    // As a fallback, try adding a direct CSS rule
+    try {
+      const styleSheet = document.createElement('style');
+      styleSheet.textContent = `
+        /* Development-only header background fix */
+        header {
+          background-image: url(${newUrl}) !important;
+          background-position: center !important;
+          background-repeat: no-repeat !important;
+          background-size: cover !important;
+        }
+      `;
+      document.head.appendChild(styleSheet);
+    } catch (err) {
+      // Silent fail
+    }
+  }
+
+  // Update the ensureHttps method with improved URL handling
+  ensureHttps(url) {
+    if (!url || typeof url !== 'string') return '';
+
+    // Use the instance variable instead of redefining
+    const apiBaseUrl = this.apiUrl;
+
+    // If it's a relative path, construct the full URL with the appropriate base
+    if (!url.startsWith('http')) {
+      return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    }
+
+    // PRODUCTION CASE: If it's a localhost URL and we're in production, replace with production URL
+    if (
+      this.isProduction &&
+      (url.includes('localhost:4000') || url.includes('localhost:1234'))
+    ) {
+      return url.replace(
+        /https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/,
+        'https://lobster-app-jipru.ondigitalocean.app/api'
+      );
+    }
+
+    // PRODUCTION CASE: Convert HTTP to HTTPS for production - security requirement
+    if (this.isProduction && url.startsWith('http://')) {
+      return url.replace('http://', 'https://');
+    }
+
+    // No changes needed for development mode or already correct URLs
+    return url;
+  }
+
+  // Now modify the fetchProductsByCategory method to use this function
   async fetchProductsByCategory() {
     if (this.isLoading) {
       return;
@@ -944,11 +1044,19 @@ class CategoriesView extends View {
         // Handle both old and new response formats
         if (Array.isArray(data)) {
           // Old format - direct array of products
-          this.products = data;
+          // Rewrite URLs for all products
+          this.products = data.map(product =>
+            this.rewriteProductImageUrls(product)
+          );
           this.totalProducts = data.length;
         } else {
           // New format - object with products array and metadata
-          this.products = Array.isArray(data.products) ? data.products : [];
+          // Rewrite URLs for all products
+          this.products = Array.isArray(data.products)
+            ? data.products.map(product =>
+                this.rewriteProductImageUrls(product)
+              )
+            : [];
           this.totalProducts = data.total || 0;
 
           // Check if we've reached the end
@@ -983,52 +1091,75 @@ class CategoriesView extends View {
     }
   }
 
-  // Fallback method using XMLHttpRequest
+  // Update the fallbackXhrRequest method
   fallbackXhrRequest(url, payload) {
+    console.warn('[CategoriesView] Using XHR fallback for fetch');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.timeout = 10000; // 10 second timeout
-
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        try {
-          const data = JSON.parse(xhr.responseText);
-
-          if (!data || !data.products) {
-            console.error('[CategoriesView] XHR invalid data format');
-            return;
-          }
-
-          // Store the products array
-          this.products = Array.isArray(data.products) ? data.products : [];
-          this.totalProducts = data.total || 0;
-
-          // Only display if we have products
-          if (this.products.length > 0) {
-            this.displayProducts();
-          } else {
-            this.allProductsFetched = true;
-          }
-        } catch (parseError) {
-          console.error('[CategoriesView] XHR JSON parse error:', parseError);
+    xhr.onreadystatechange = () => {
+      if (xhr.readyState === 4) {
+        const spinner = this.outerProductsContainer?.querySelector('.loader');
+        if (spinner) {
+          spinner.classList.add('spinner-hidden');
         }
-      } else {
-        console.error('[CategoriesView] XHR error with status:', xhr.status);
+
+        if (xhr.status === 200) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+
+            if (Array.isArray(data)) {
+              // Rewrite URLs for all products
+              this.products = data.map(product =>
+                this.rewriteProductImageUrls(product)
+              );
+              this.totalProducts = data.length;
+            } else {
+              // New format with products array and metadata
+              // Rewrite URLs for all products
+              this.products = Array.isArray(data.products)
+                ? data.products.map(product =>
+                    this.rewriteProductImageUrls(product)
+                  )
+                : [];
+              this.totalProducts = data.total || 0;
+            }
+
+            if (this.products.length > 0) {
+              this.displayProducts();
+            } else {
+              this.allProductsFetched = true;
+            }
+          } catch (err) {
+            console.error('[CategoriesView] Error parsing XHR response:', err);
+          }
+        } else {
+          console.error(
+            '[CategoriesView] XHR request failed:',
+            xhr.status,
+            xhr.statusText,
+            xhr.responseText
+          );
+        }
       }
     };
 
-    xhr.onerror = () => {
-      console.error('[CategoriesView] XHR network error');
+    xhr.onerror = e => {
+      console.error('[CategoriesView] XHR network error:', e);
+      const spinner = this.outerProductsContainer?.querySelector('.loader');
+      if (spinner) {
+        spinner.classList.add('spinner-hidden');
+      }
     };
 
-    xhr.ontimeout = () => {
-      console.error('[CategoriesView] XHR request timed out');
-    };
-
-    xhr.send(JSON.stringify(payload));
+    try {
+      xhr.send(JSON.stringify(payload));
+    } catch (err) {
+      console.error('[CategoriesView] Error sending XHR request:', err);
+    }
   }
 
+  // Clean up fetchMoreProducts method by removing debug logging
   async fetchMoreProducts() {
     if (this.isLoading || this.allProductsFetched || !this.initialized) return;
     this.isLoading = true;
@@ -1042,9 +1173,7 @@ class CategoriesView extends View {
         spinner.classList.remove('spinner-hidden');
       }
 
-      const apiUrl = `${process.env.API_URL}`;
-      const fetchUrl = `${apiUrl}/productsByCategory`;
-      // console.log('[DEBUG] Fetching more products from:', fetchUrl);
+      const fetchUrl = `${this.apiUrl}/productsByCategory`;
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1056,14 +1185,16 @@ class CategoriesView extends View {
       }
 
       const data = await response.json();
-      // console.log('[DEBUG] Fetched data:', data);
 
       if (!data) {
         this.allProductsFetched = true;
         return;
       }
 
-      const newProducts = Array.isArray(data) ? data : [];
+      // Apply URL rewriting to the new products before appending them
+      const newProducts = Array.isArray(data)
+        ? data.map(product => this.rewriteProductImageUrls(product))
+        : [];
 
       if (newProducts.length === 0) {
         this.allProductsFetched = true;
@@ -1086,26 +1217,19 @@ class CategoriesView extends View {
     }
   }
 
-  displayProducts() {
-    if (!this.innerProductsContainer) {
-      console.error('[CategoriesView] No inner products container found');
+  // Clean up displayMoreProducts by removing debug logging
+  displayMoreProducts() {
+    // Instead of clearing the container and regenerating all products,
+    // calculate which products are new and only append those
+    const currentProductCount =
+      this.innerProductsContainer.querySelectorAll('.item-container').length;
+    const newProducts = this.products.slice(currentProductCount);
+
+    if (newProducts.length === 0) {
       return;
     }
 
-    this.innerProductsContainer.innerHTML = '';
-    const markup = this.products
-      .map(item => this.getProductMarkup(item))
-      .join('');
-    this.innerProductsContainer.insertAdjacentHTML('beforeend', markup);
-  }
-
-  displayMoreProducts() {
-    this.innerProductsContainer.innerHTML = '';
-
-    const productsToShow = this.products;
-    // console.log('[DEBUG] Products to show:', productsToShow);
-
-    const markup = productsToShow
+    const markup = newProducts
       .map(item => this.getProductMarkup(item))
       .join('');
 
@@ -1140,6 +1264,7 @@ class CategoriesView extends View {
     window.addEventListener('scroll', this.scrollHandler);
   }
 
+  // Clean up getProductMarkup method by removing debug logging
   getProductMarkup(item) {
     const { id, quantity, image, name, description, ils_price } = item;
     const curSign = this.selectedCurrency === 'usd' ? '$' : '₪';
@@ -1769,38 +1894,145 @@ class CategoriesView extends View {
     });
   }
 
-  // Update the ensureHttps method to handle API URLs
-  ensureHttps(url) {
-    if (!url || typeof url !== 'string') return '';
+  async loadAllProductsAndSort() {
+    // Show loading spinner
+    const spinner = this.outerProductsContainer.querySelector('.loader');
+    spinner.classList.remove('spinner-hidden');
 
-    // Get the base API URL based on environment
-    const apiBaseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://lobster-app-jipru.ondigitalocean.app/api'
-        : 'http://localhost:4000';
+    try {
+      const response = await fetch(`${this.apiUrl}/getAllProductsByCategory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          category: this.category,
+        }),
+      });
 
-    // If it's a relative path, construct the full URL with the appropriate base
-    if (!url.startsWith('http')) {
-      return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+      const data = await response.json();
+
+      if (data && data.products) {
+        // Rewrite URLs for all products
+        this.products = data.products.map(product =>
+          this.rewriteProductImageUrls(product)
+        );
+        this.totalProducts = data.total || data.products.length;
+      }
+
+      // Sort products by price
+      if (this.sortedByPrice === 'asc') {
+        this.products.sort((a, b) => {
+          const priceA =
+            this.selectedCurrency === 'usd' ? a.usd_price : a.ils_price;
+          const priceB =
+            this.selectedCurrency === 'usd' ? b.usd_price : b.ils_price;
+          return priceA - priceB;
+        });
+      } else if (this.sortedByPrice === 'desc') {
+        this.products.sort((a, b) => {
+          const priceA =
+            this.selectedCurrency === 'usd' ? a.usd_price : a.ils_price;
+          const priceB =
+            this.selectedCurrency === 'usd' ? b.usd_price : b.ils_price;
+          return priceB - priceA;
+        });
+      }
+
+      // Display sorted products
+      this.displayProducts(true);
+    } catch (error) {
+      console.error('Error loading all products:', error);
+    } finally {
+      // Hide loading spinner
+      spinner.classList.add('spinner-hidden');
+    }
+  }
+
+  displayProducts() {
+    if (!this.innerProductsContainer) {
+      console.error('[CategoriesView] No inner products container found');
+      return;
     }
 
-    // If it's a localhost URL and we're in production, replace with production URL
-    if (
-      process.env.NODE_ENV === 'production' &&
-      url.includes('localhost:4000')
-    ) {
-      return url.replace(
-        'http://localhost:4000',
-        'https://lobster-app-jipru.ondigitalocean.app/api'
+    this.innerProductsContainer.innerHTML = '';
+    const markup = this.products
+      .map(item => this.getProductMarkup(item))
+      .join('');
+    this.innerProductsContainer.insertAdjacentHTML('beforeend', markup);
+  }
+
+  // Restore the rewriteProductImageUrls method that was accidentally removed
+  rewriteProductImageUrls(product) {
+    if (!product || this.isProduction) return product;
+
+    // Create a deep copy to avoid modifying the original object
+    const modifiedProduct = JSON.parse(JSON.stringify(product));
+
+    // Helper function to rewrite URLs
+    const rewriteUrl = url => {
+      if (!url || typeof url !== 'string') return url;
+
+      // Check if it's a production URL
+      if (url.includes('lobster-app-jipru.ondigitalocean.app')) {
+        // Extract the path part after /api
+        const pathMatch = url.match(/\/api(\/.+)$/);
+        if (pathMatch && pathMatch[1]) {
+          // Rewrite to local URL
+          return `http://localhost:4000${pathMatch[1]}`;
+        }
+      }
+      return url;
+    };
+
+    // Rewrite main image URLs
+    if (modifiedProduct.image) {
+      modifiedProduct.image = rewriteUrl(modifiedProduct.image);
+    }
+
+    if (modifiedProduct.publicImage) {
+      modifiedProduct.publicImage = rewriteUrl(modifiedProduct.publicImage);
+    }
+
+    // Rewrite main image structure
+    if (modifiedProduct.mainImage) {
+      for (const key in modifiedProduct.mainImage) {
+        if (typeof modifiedProduct.mainImage[key] === 'string') {
+          modifiedProduct.mainImage[key] = rewriteUrl(
+            modifiedProduct.mainImage[key]
+          );
+        }
+      }
+    }
+
+    // Rewrite small images array (handles both string arrays and object arrays)
+    if (Array.isArray(modifiedProduct.smallImages)) {
+      modifiedProduct.smallImages = modifiedProduct.smallImages.map(img => {
+        if (typeof img === 'string') {
+          return rewriteUrl(img);
+        } else if (typeof img === 'object' && img !== null) {
+          const result = {};
+          for (const key in img) {
+            if (typeof img[key] === 'string') {
+              result[key] = rewriteUrl(img[key]);
+            } else {
+              result[key] = img[key];
+            }
+          }
+          return result;
+        }
+        return img;
+      });
+    }
+
+    // Rewrite smallImagesLocal array
+    if (Array.isArray(modifiedProduct.smallImagesLocal)) {
+      modifiedProduct.smallImagesLocal = modifiedProduct.smallImagesLocal.map(
+        url => {
+          return rewriteUrl(url);
+        }
       );
     }
 
-    // Convert HTTP to HTTPS for production
-    if (process.env.NODE_ENV === 'production' && url.startsWith('http://')) {
-      return url.replace('http://', 'https://');
-    }
-
-    return url;
+    return modifiedProduct;
   }
 }
 
