@@ -347,12 +347,13 @@ main {
   display: flex;
   flex-flow: column;
   align-items: center;
-
   padding: 5px;
   cursor: pointer;
   margin-bottom: 2rem;
-
   border: 1px solid rgb(182, 182, 182);
+  min-height: 22rem;
+  padding-bottom: 3rem;
+  position: relative;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(0, 255, 17); */
@@ -396,20 +397,34 @@ main {
 }
 
 .item-price {
-  position: relative;
+  position: absolute;
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande',
     'Lucida Sans', Arial, sans-serif;
+  bottom: 0.5rem;
+  color: rgb(109, 109, 109);
+  margin: 0.5rem;
 }
 
 .item-description {
-  display: none;
+  display: block;
+  padding: 0.5rem;
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: #555;
+  text-align: center;
+  max-height: 3.6rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .add-to-cart-btn {
   cursor: pointer;
   width: 80%;
   height: 30px;
-  top: 19rem;
+  position: absolute;
+  bottom: 3rem;
   background-color: rgba(232, 165, 138, 0.559);
   border: none;
   margin-top: 1rem;
@@ -423,11 +438,6 @@ main {
 
   transition: all;
   transition-duration: 500ms;
-}
-
-.item-price {
-  color: rgb(109, 109, 109);
-  margin: 0.5rem;
 }
 
 .large-imgs-container {
