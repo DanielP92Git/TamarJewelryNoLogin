@@ -29,21 +29,12 @@ class CategoriesView extends View {
     this.initialized = false;
     this.isModalOpen = false;
     this.exchangeRate = 3.7;
-
-    // Fix the environment detection logic
-    // Check if we're in development or production based on window.location
     this.isProduction =
-      process.env.NODE_ENV === 'production' &&
       window.location.hostname !== 'localhost' &&
-      !window.location.hostname.includes('127.0.0.1');
-
-    // Set the correct API URL based on environment
+      window.location.hostname !== '127.0.0.1';
     this.apiUrl = this.isProduction
       ? 'https://lobster-app-jipru.ondigitalocean.app/api'
       : 'http://localhost:4000';
-
-    console.log('Environment:', process.env.NODE_ENV);
-    console.log('Using API URL:', this.apiUrl);
 
     // Add resize observer for debugging
     if (process.env.NODE_ENV !== 'production') {
@@ -169,9 +160,6 @@ class CategoriesView extends View {
   }
 
   initialSetup() {
-    // First fix the header background image in development mode
-    this.fixHeaderBackgroundImage();
-
     this.fetchProductsByCategory();
     this.setupScrollListener();
     this.addHandlerAddToCart();
@@ -615,8 +603,11 @@ class CategoriesView extends View {
     // Process small images - ensure we get the actual URLs
     let smallImagesArray = [];
 
-    // Use the instance variable instead of redefining
-    const apiBaseUrl = this.apiUrl;
+    // Get the base API URL based on environment
+    const apiBaseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lobster-app-jipru.ondigitalocean.app/api'
+        : 'http://localhost:4000';
 
     // Handle old format (array of strings)
     if (Array.isArray(product?.smallImagesLocal)) {
@@ -657,72 +648,96 @@ class CategoriesView extends View {
     const modal = document.querySelector('.modal');
     const addToCartText = this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל';
 
+    // Check if we have a valid image
+    const hasValidImage =
+      mainDesktopImage &&
+      mainDesktopImage !== '' &&
+      !mainDesktopImage.includes('undefined');
+    const hasSmallImages = smallImagesArray && smallImagesArray.length > 0;
+
     const modalContent = `
       <div class="item-overlay">
         <div class="modal-content">
-          <div class="images-container">
-            <div class="magnifier-container">
-              <img 
-                class="big-image" 
-                src="${mainDesktopImage}"
-                alt="${title}"
-                loading="lazy"
-                crossorigin="anonymous"
-                onerror="this.onerror=null; this.crossOrigin=''; this.src='${mainDesktopImage}';"
-              />
-              <div class="loading-indicator">Loading...</div>
-            </div>
+          <div class="modal-layout">
             ${
-              smallImagesArray && smallImagesArray.length > 0
-                ? `<div class="small-images-container">
-                    ${smallImagesArray
-                      .map(
-                        (imgUrl, index) => `
-                        <div class="small-image-div${
-                          index === 0 ? ' active' : ''
-                        }" data-index="${index}">
-                          <img 
-                            class="small-image" 
-                            src="${imgUrl}" 
-                            alt="Product view ${index + 1}"
-                            loading="lazy"
-                            crossorigin="anonymous"
-                            onerror="this.onerror=null; this.crossOrigin=''; this.src='${imgUrl}';"
-                          />
-                        </div>
-                      `
-                      )
-                      .join('')}
-                  </div>`
+              hasSmallImages
+                ? `
+              <div class="small-images-sidebar">
+                ${smallImagesArray
+                  .map(
+                    (imgUrl, index) => `
+                  <div class="small-image-thumb${
+                    index === 0 ? ' active' : ''
+                  }" data-index="${index}">
+                    <img 
+                      src="${imgUrl}" 
+                      alt="Product view ${index + 1}"
+                      loading="lazy"
+                      crossorigin="anonymous"
+                      onerror="this.onerror=null; this.crossOrigin=''; this.src='${imgUrl}';"
+                    />
+                  </div>
+                `
+                  )
+                  .join('')}
+              </div>
+            `
                 : ''
             }
+            
+            <div class="images-container">
+              ${
+                hasValidImage
+                  ? `<div class="magnifier-container">
+                  <img 
+                    class="big-image" 
+                    src="${mainDesktopImage}"
+                    alt="${title}"
+                    loading="lazy"
+                    crossorigin="anonymous"
+                    onerror="this.onerror=null; this.crossOrigin=''; this.src='${mainDesktopImage}';"
+                  />
+                  <div class="loading-indicator">Loading...</div>
+                  <div class="magnifier-glass"></div>
+                </div>`
+                  : `<div class="error-image-container">
+                  <div>
+                    <img src="data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23aaa' d='M21.9 21.9l-8.9-8.9-8.9 8.9c-.3.3-.7.3-1 0s-.3-.7 0-1l8.9-8.9-8.9-8.9c-.3-.3-.3-.7 0-1s.7-.3 1 0l8.9 8.9 8.9-8.9c.3-.3.7-.3 1 0s.3.7 0 1l-8.9 8.9 8.9 8.9c.3.3.3.7 0 1s-.7.3-1 0z'/%3E%3C/svg%3E" alt="Error Icon" style="width: 48px; height: 48px; margin-bottom: 10px;">
+                    <p>Error loading image</p>
+                  </div>
+                </div>`
+              }
             </div>
-          <div class="item-specs" dir="${this.lang === 'heb' ? 'rtl' : 'ltr'}">
-            <h2 class="item-title_modal" style="text-align: ${
-              this.lang === 'heb' ? 'right' : 'left'
-            }">${title}</h2>
-            ${
-              description
-                ? `<div class="item-description_modal" style="text-align: ${
-                    this.lang === 'heb' ? 'right' : 'left'
-                  }">${description.replace(/\n/g, '<br>')}</div>`
-                : ''
-            }
-            <div class="price-container">
-              <span class="price-label">${
-                this.lang === 'eng' ? 'Price:' : 'מחיר:'
-              }</span>
-              <span class="price-text">${price}</span>
+            
+            <div class="item-specs" dir="${
+              this.lang === 'heb' ? 'rtl' : 'ltr'
+            }">
+              <h2 class="item-title_modal">${title}</h2>
+              ${
+                description
+                  ? `<div class="details-container">
+                      <div class="item-description_modal">${description.replace(
+                        /\n/g,
+                        '<br>'
+                      )}</div>
+                    </div>`
+                  : '<div class="details-container"></div>'
+              }
+              <div class="price-actions-wrapper">
+                <div class="price-box">
+                  <span class="price-text-modal">Price: ${price}</span>
+                </div>
+                <button class="add-to-cart-btn_modal" data-id="${id}" data-quant="${quantity}" data-price="${price}">
+                  ${addToCartText}
+                </button>
+              </div>
             </div>
-            <button class="add-to-cart-btn_modal" data-id="${id}" data-quant="${quantity}" data-price="${price}">
-              ${addToCartText}
-            </button>
           </div>
-          <button class="close-modal-btn">✕</button>
+          <button class="close-modal-btn">&times;</button>
         </div>
       </div>
       <div class="fullscreen-gallery">
-        <button class="close-gallery">✕</button>
+        <button class="close-gallery">&times;</button>
         <button class="prev-image">❮</button>
         <button class="next-image">❯</button>
         <div class="gallery-container">
@@ -754,14 +769,12 @@ class CategoriesView extends View {
 
         // If we have a sort order active, fetch all products and sort them
         if (this.sortedByPrice !== '') {
-          const response = await fetch(
-            `${this.apiUrl}/getAllProductsByCategory`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ category: this.category }),
-            }
-          );
+          const apiUrl = `${process.env.API_URL}`;
+          const response = await fetch(`${apiUrl}/getAllProductsByCategory`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ category: this.category }),
+          });
 
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -895,95 +908,6 @@ class CategoriesView extends View {
     });
   }
 
-  // Improve the fixHeaderBackgroundImage method with better production handling
-  fixHeaderBackgroundImage() {
-    // CRITICAL: Only run in development mode - never modify URLs in production
-    if (this.isProduction) return;
-
-    // Get the header element
-    const header = document.querySelector('header');
-    if (!header) return;
-
-    // Check if it has a background-image style
-    const style = header.getAttribute('style');
-    if (!style || !style.includes('background-image')) return;
-
-    // Extract the URL from the style
-    const urlMatch = style.match(/url\(['"]?([^'"]+)['"]?\)/);
-    if (!urlMatch || !urlMatch[1]) return;
-
-    const originalUrl = urlMatch[1];
-
-    // IMPORTANT: Never modify already absolute URLs or production URLs
-    if (
-      originalUrl.includes('lobster-app-jipru.ondigitalocean.app') ||
-      originalUrl.startsWith('http://') ||
-      originalUrl.startsWith('https://')
-    ) {
-      return;
-    }
-
-    // For simplicity, just prepend the base URL to the original path
-    // This keeps all the path segments intact and doesn't try to parse them
-    const newUrl = originalUrl.startsWith('../../')
-      ? `http://localhost:1234/${originalUrl.substring(6)}` // Remove ../../ prefix
-      : `http://localhost:1234/${originalUrl}`;
-
-    // Set the new background-image style
-    const newStyle = style.replace(originalUrl, newUrl);
-    header.setAttribute('style', newStyle);
-
-    // As a fallback, try adding a direct CSS rule
-    try {
-      const styleSheet = document.createElement('style');
-      styleSheet.textContent = `
-        /* Development-only header background fix */
-        header {
-          background-image: url(${newUrl}) !important;
-          background-position: center !important;
-          background-repeat: no-repeat !important;
-          background-size: cover !important;
-        }
-      `;
-      document.head.appendChild(styleSheet);
-    } catch (err) {
-      // Silent fail
-    }
-  }
-
-  // Update the ensureHttps method with improved URL handling
-  ensureHttps(url) {
-    if (!url || typeof url !== 'string') return '';
-
-    // Use the instance variable instead of redefining
-    const apiBaseUrl = this.apiUrl;
-
-    // If it's a relative path, construct the full URL with the appropriate base
-    if (!url.startsWith('http')) {
-      return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-    }
-
-    // PRODUCTION CASE: If it's a localhost URL and we're in production, replace with production URL
-    if (
-      this.isProduction &&
-      (url.includes('localhost:4000') || url.includes('localhost:1234'))
-    ) {
-      return url.replace(
-        /https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/,
-        'https://lobster-app-jipru.ondigitalocean.app/api'
-      );
-    }
-
-    // PRODUCTION CASE: Convert HTTP to HTTPS for production - security requirement
-    if (this.isProduction && url.startsWith('http://')) {
-      return url.replace('http://', 'https://');
-    }
-
-    // No changes needed for development mode or already correct URLs
-    return url;
-  }
-
-  // Now modify the fetchProductsByCategory method to use this function
   async fetchProductsByCategory() {
     if (this.isLoading) {
       return;
@@ -1044,19 +968,11 @@ class CategoriesView extends View {
         // Handle both old and new response formats
         if (Array.isArray(data)) {
           // Old format - direct array of products
-          // Rewrite URLs for all products
-          this.products = data.map(product =>
-            this.rewriteProductImageUrls(product)
-          );
+          this.products = data;
           this.totalProducts = data.length;
         } else {
           // New format - object with products array and metadata
-          // Rewrite URLs for all products
-          this.products = Array.isArray(data.products)
-            ? data.products.map(product =>
-                this.rewriteProductImageUrls(product)
-              )
-            : [];
+          this.products = Array.isArray(data.products) ? data.products : [];
           this.totalProducts = data.total || 0;
 
           // Check if we've reached the end
@@ -1091,75 +1007,52 @@ class CategoriesView extends View {
     }
   }
 
-  // Update the fallbackXhrRequest method
+  // Fallback method using XMLHttpRequest
   fallbackXhrRequest(url, payload) {
-    console.warn('[CategoriesView] Using XHR fallback for fetch');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = () => {
-      if (xhr.readyState === 4) {
-        const spinner = this.outerProductsContainer?.querySelector('.loader');
-        if (spinner) {
-          spinner.classList.add('spinner-hidden');
-        }
+    xhr.timeout = 10000; // 10 second timeout
 
-        if (xhr.status === 200) {
-          try {
-            const data = JSON.parse(xhr.responseText);
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          const data = JSON.parse(xhr.responseText);
 
-            if (Array.isArray(data)) {
-              // Rewrite URLs for all products
-              this.products = data.map(product =>
-                this.rewriteProductImageUrls(product)
-              );
-              this.totalProducts = data.length;
-            } else {
-              // New format with products array and metadata
-              // Rewrite URLs for all products
-              this.products = Array.isArray(data.products)
-                ? data.products.map(product =>
-                    this.rewriteProductImageUrls(product)
-                  )
-                : [];
-              this.totalProducts = data.total || 0;
-            }
-
-            if (this.products.length > 0) {
-              this.displayProducts();
-            } else {
-              this.allProductsFetched = true;
-            }
-          } catch (err) {
-            console.error('[CategoriesView] Error parsing XHR response:', err);
+          if (!data || !data.products) {
+            console.error('[CategoriesView] XHR invalid data format');
+            return;
           }
-        } else {
-          console.error(
-            '[CategoriesView] XHR request failed:',
-            xhr.status,
-            xhr.statusText,
-            xhr.responseText
-          );
+
+          // Store the products array
+          this.products = Array.isArray(data.products) ? data.products : [];
+          this.totalProducts = data.total || 0;
+
+          // Only display if we have products
+          if (this.products.length > 0) {
+            this.displayProducts();
+          } else {
+            this.allProductsFetched = true;
+          }
+        } catch (parseError) {
+          console.error('[CategoriesView] XHR JSON parse error:', parseError);
         }
+      } else {
+        console.error('[CategoriesView] XHR error with status:', xhr.status);
       }
     };
 
-    xhr.onerror = e => {
-      console.error('[CategoriesView] XHR network error:', e);
-      const spinner = this.outerProductsContainer?.querySelector('.loader');
-      if (spinner) {
-        spinner.classList.add('spinner-hidden');
-      }
+    xhr.onerror = () => {
+      console.error('[CategoriesView] XHR network error');
     };
 
-    try {
-      xhr.send(JSON.stringify(payload));
-    } catch (err) {
-      console.error('[CategoriesView] Error sending XHR request:', err);
-    }
+    xhr.ontimeout = () => {
+      console.error('[CategoriesView] XHR request timed out');
+    };
+
+    xhr.send(JSON.stringify(payload));
   }
 
-  // Clean up fetchMoreProducts method by removing debug logging
   async fetchMoreProducts() {
     if (this.isLoading || this.allProductsFetched || !this.initialized) return;
     this.isLoading = true;
@@ -1173,7 +1066,9 @@ class CategoriesView extends View {
         spinner.classList.remove('spinner-hidden');
       }
 
-      const fetchUrl = `${this.apiUrl}/productsByCategory`;
+      const apiUrl = `${process.env.API_URL}`;
+      const fetchUrl = `${apiUrl}/productsByCategory`;
+      // console.log('[DEBUG] Fetching more products from:', fetchUrl);
       const response = await fetch(fetchUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1185,16 +1080,14 @@ class CategoriesView extends View {
       }
 
       const data = await response.json();
+      // console.log('[DEBUG] Fetched data:', data);
 
       if (!data) {
         this.allProductsFetched = true;
         return;
       }
 
-      // Apply URL rewriting to the new products before appending them
-      const newProducts = Array.isArray(data)
-        ? data.map(product => this.rewriteProductImageUrls(product))
-        : [];
+      const newProducts = Array.isArray(data) ? data : [];
 
       if (newProducts.length === 0) {
         this.allProductsFetched = true;
@@ -1217,19 +1110,26 @@ class CategoriesView extends View {
     }
   }
 
-  // Clean up displayMoreProducts by removing debug logging
-  displayMoreProducts() {
-    // Instead of clearing the container and regenerating all products,
-    // calculate which products are new and only append those
-    const currentProductCount =
-      this.innerProductsContainer.querySelectorAll('.item-container').length;
-    const newProducts = this.products.slice(currentProductCount);
-
-    if (newProducts.length === 0) {
+  displayProducts() {
+    if (!this.innerProductsContainer) {
+      console.error('[CategoriesView] No inner products container found');
       return;
     }
 
-    const markup = newProducts
+    this.innerProductsContainer.innerHTML = '';
+    const markup = this.products
+      .map(item => this.getProductMarkup(item))
+      .join('');
+    this.innerProductsContainer.insertAdjacentHTML('beforeend', markup);
+  }
+
+  displayMoreProducts() {
+    this.innerProductsContainer.innerHTML = '';
+
+    const productsToShow = this.products;
+    // console.log('[DEBUG] Products to show:', productsToShow);
+
+    const markup = productsToShow
       .map(item => this.getProductMarkup(item))
       .join('');
 
@@ -1264,7 +1164,6 @@ class CategoriesView extends View {
     window.addEventListener('scroll', this.scrollHandler);
   }
 
-  // Clean up getProductMarkup method by removing debug logging
   getProductMarkup(item) {
     const { id, quantity, image, name, description, ils_price } = item;
     const curSign = this.selectedCurrency === 'usd' ? '$' : '₪';
@@ -1273,9 +1172,14 @@ class CategoriesView extends View {
         ? Number((ils_price / this.exchangeRate).toFixed(0))
         : ils_price;
 
-    // Format description
+    // Format description with ellipsis for list view
+    const maxDescriptionLength = 150;
     const formattedDescription = description
-      ? description.replace(/\n/g, '<br>')
+      ? description.length > maxDescriptionLength
+        ? description
+            .substring(0, maxDescriptionLength)
+            .replace(/\n/g, '<br>') + '...'
+        : description.replace(/\n/g, '<br>')
       : '';
 
     // Get desktop and mobile image URLs with proper fallbacks and ensure HTTPS
@@ -1320,12 +1224,12 @@ class CategoriesView extends View {
             />
           </picture>
         </div>
-        <button class="add-to-cart-btn">${
-          this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל'
-        }</button>
         <div class="item-title">${name}</div>
         <div class="item-description">${formattedDescription}</div>
         <div class="item-price">${curSign}${price}</div>
+        <button class="add-to-cart-btn">${
+          this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל'
+        }</button>
       </div>`;
   }
 
@@ -1390,6 +1294,8 @@ class CategoriesView extends View {
 
   _setupModalEventListeners() {
     const modal = document.querySelector('.modal');
+    if (!modal) return;
+
     const closeBtn = modal.querySelector('.close-modal-btn');
     const overlay = modal.querySelector('.item-overlay');
     const addToCartBtn = modal.querySelector('.add-to-cart-btn_modal');
@@ -1399,7 +1305,19 @@ class CategoriesView extends View {
     const tapToMagnify = modal.querySelector('.tap-to-magnify');
     const magnifierIcon = modal.querySelector('.magnifier-icon');
     const loadingIndicator = modal.querySelector('.loading-indicator');
+    const fullscreenGallery = modal.querySelector('.fullscreen-gallery');
+    const galleryImage = modal.querySelector('.gallery-image');
+    const closeGallery = modal.querySelector('.close-gallery');
+    const prevButton = modal.querySelector('.prev-image');
+    const nextButton = modal.querySelector('.next-image');
+
     const isMobile = window.matchMedia('(max-width: 699.99px)').matches;
+
+    // Make sure all required elements exist before proceeding
+    if (!closeBtn || !overlay) {
+      console.warn('Modal setup: Some required elements are missing');
+      return;
+    }
 
     // Handle main image loading - only for initial load
     if (bigImage && !bigImage.complete) {
@@ -1429,18 +1347,20 @@ class CategoriesView extends View {
     }
 
     // Handle small images click
-    const smallImages = modal.querySelectorAll('.small-image-div');
-    if (smallImages.length > 0) {
-      smallImages.forEach(imgDiv => {
-        imgDiv.addEventListener('click', () => {
+    const smallImagesInSidebar = modal.querySelectorAll('.small-image-thumb');
+    if (smallImagesInSidebar.length > 0) {
+      smallImagesInSidebar.forEach(imgThumb => {
+        imgThumb.addEventListener('click', () => {
           // Remove active class from all thumbnails
-          smallImages.forEach(div => div.classList.remove('active'));
+          smallImagesInSidebar.forEach(thumb =>
+            thumb.classList.remove('active')
+          );
 
           // Add active class to clicked thumbnail
-          imgDiv.classList.add('active');
+          imgThumb.classList.add('active');
 
           // Get the image source from the clicked thumbnail
-          const smallImg = imgDiv.querySelector('.small-image');
+          const smallImg = imgThumb.querySelector('img');
           if (!smallImg) return;
 
           // Update main image without showing loading indicator
@@ -1452,7 +1372,6 @@ class CategoriesView extends View {
               bigImage.classList.add('loaded');
 
               // Update gallery image if it exists
-              const galleryImage = modal.querySelector('.gallery-image');
               if (galleryImage) {
                 galleryImage.src = smallImg.src;
               }
@@ -1460,161 +1379,122 @@ class CategoriesView extends View {
             tempImg.src = smallImg.src;
           }
         });
-
-        // Add hover effect
-        imgDiv.addEventListener('mouseenter', () => {
-          if (!imgDiv.classList.contains('active')) {
-            imgDiv.style.borderColor = '#ddd';
-          }
-        });
-
-        imgDiv.addEventListener('mouseleave', () => {
-          if (!imgDiv.classList.contains('active')) {
-            imgDiv.style.borderColor = 'transparent';
-          }
-        });
       });
     }
 
-    // Fullscreen gallery elements
-    const fullscreenGallery = modal.querySelector('.fullscreen-gallery');
-    const galleryImage = modal.querySelector('.gallery-image');
-    const closeGallery = modal.querySelector('.close-gallery');
-    const prevButton = modal.querySelector('.prev-image');
-    const nextButton = modal.querySelector('.next-image');
     let currentImageIndex = 0;
     let touchStartX = 0;
     let touchEndX = 0;
 
     // Function to close gallery and clean up
     const closeFullscreenGallery = () => {
-      fullscreenGallery.style.display = 'none';
-      document.body.style.overflow = ''; // Restore scrolling
-      // Remove the gallery state from history
-      if (window.history.state?.isGalleryOpen) {
-        window.history.back();
+      if (fullscreenGallery) {
+        fullscreenGallery.style.display = 'none';
+        document.body.style.overflow = ''; // Restore scrolling
+        // Remove the gallery state from history
+        if (window.history.state?.isGalleryOpen) {
+          window.history.back();
+        }
       }
     };
 
     // Function to update gallery image
     const updateGalleryImage = index => {
-      const images = Array.from(modal.querySelectorAll('.small-image')).map(
-        img => img.src
-      );
+      if (!galleryImage) return;
+
+      const images = Array.from(
+        modal.querySelectorAll('.small-image-thumb img')
+      ).map(img => img.src);
       if (images.length === 0) return;
       currentImageIndex =
         ((index % images.length) + images.length) % images.length;
       galleryImage.src = images[currentImageIndex];
+
+      // Update active thumbnail
+      smallImagesInSidebar.forEach((thumb, i) => {
+        if (i === currentImageIndex) {
+          thumb.classList.add('active');
+        } else {
+          thumb.classList.remove('active');
+        }
+      });
     };
 
     // Open fullscreen gallery on main image click
-    magnifierContainer.addEventListener('click', () => {
-      fullscreenGallery.style.display = 'block';
-      document.body.style.overflow = 'hidden'; // Prevent scrolling
-      updateGalleryImage(currentImageIndex);
+    if (magnifierContainer && fullscreenGallery) {
+      magnifierContainer.addEventListener('click', () => {
+        fullscreenGallery.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
+        updateGalleryImage(currentImageIndex);
 
-      // Add a history entry to handle back button
-      window.history.pushState({ isGalleryOpen: true }, '');
-    });
+        // Add a history entry to handle back button
+        window.history.pushState({ isGalleryOpen: true }, '');
+      });
+    }
 
     // Close gallery
-    closeGallery.addEventListener('click', closeFullscreenGallery);
+    if (closeGallery) {
+      closeGallery.addEventListener('click', closeFullscreenGallery);
+    }
 
     // Handle phone's back button and browser back button
     window.addEventListener('popstate', e => {
-      if (fullscreenGallery.style.display === 'block') {
+      if (fullscreenGallery && fullscreenGallery.style.display === 'block') {
         closeFullscreenGallery();
       }
     });
 
     // Navigation buttons
-    prevButton.addEventListener('click', () => {
-      updateGalleryImage(currentImageIndex - 1);
-    });
+    if (prevButton) {
+      prevButton.addEventListener('click', () => {
+        updateGalleryImage(currentImageIndex - 1);
+      });
+    }
 
-    nextButton.addEventListener('click', () => {
-      updateGalleryImage(currentImageIndex + 1);
-    });
+    if (nextButton) {
+      nextButton.addEventListener('click', () => {
+        updateGalleryImage(currentImageIndex + 1);
+      });
+    }
 
     // Touch events for mobile swipe
-    fullscreenGallery.addEventListener(
-      'touchstart',
-      e => {
-        touchStartX = e.touches[0].clientX;
-      },
-      { passive: true }
-    );
+    if (fullscreenGallery) {
+      fullscreenGallery.addEventListener(
+        'touchstart',
+        e => {
+          touchStartX = e.touches[0].clientX;
+        },
+        { passive: true }
+      );
 
-    fullscreenGallery.addEventListener(
-      'touchmove',
-      e => {
-        touchEndX = e.touches[0].clientX;
-      },
-      { passive: true }
-    );
+      fullscreenGallery.addEventListener(
+        'touchmove',
+        e => {
+          touchEndX = e.touches[0].clientX;
+        },
+        { passive: true }
+      );
 
-    fullscreenGallery.addEventListener('touchend', () => {
-      const swipeThreshold = 50; // minimum distance for a swipe
-      const swipeDistance = touchEndX - touchStartX;
+      fullscreenGallery.addEventListener('touchend', () => {
+        const swipeThreshold = 50; // minimum distance for a swipe
+        const swipeDistance = touchEndX - touchStartX;
 
-      if (Math.abs(swipeDistance) > swipeThreshold) {
-        if (swipeDistance > 0) {
-          // Swiped right - show previous image
-          updateGalleryImage(currentImageIndex - 1);
-        } else {
-          // Swiped left - show next image
-          updateGalleryImage(currentImageIndex + 1);
+        if (Math.abs(swipeDistance) > swipeThreshold) {
+          if (swipeDistance > 0) {
+            // Swiped right - show previous image
+            updateGalleryImage(currentImageIndex - 1);
+          } else {
+            // Swiped left - show next image
+            updateGalleryImage(currentImageIndex + 1);
+          }
         }
-      }
-    });
-
-    // Double tap to close gallery on mobile
-    let lastTap = 0;
-    fullscreenGallery.addEventListener('touchend', e => {
-      const currentTime = new Date().getTime();
-      const tapLength = currentTime - lastTap;
-      if (tapLength < 500 && tapLength > 0) {
-        // Double tap detected
-        closeFullscreenGallery();
-        e.preventDefault();
-      }
-      lastTap = currentTime;
-    });
-
-    // Keyboard navigation
-    document.addEventListener('keydown', e => {
-      if (fullscreenGallery.style.display === 'block') {
-        if (e.key === 'ArrowLeft') {
-          updateGalleryImage(currentImageIndex - 1);
-        } else if (e.key === 'ArrowRight') {
-          updateGalleryImage(currentImageIndex + 1);
-        } else if (e.key === 'Escape') {
-          closeFullscreenGallery();
-        }
-      }
-    });
-
-    // Close gallery when clicking outside the image
-    fullscreenGallery.addEventListener('click', e => {
-      // Check if the click was on the gallery container but not on the image or navigation buttons
-      if (
-        e.target === fullscreenGallery ||
-        (e.target !== galleryImage &&
-          e.target !== prevButton &&
-          e.target !== nextButton &&
-          e.target !== closeGallery)
-      ) {
-        closeFullscreenGallery();
-      }
-    });
-
-    // Prevent click events on the image from bubbling up
-    galleryImage.addEventListener('click', e => {
-      e.stopPropagation();
-    });
+      });
+    }
 
     // Close button event
-    closeBtn.addEventListener('click', this.closeModal.bind(this));
+    if (closeBtn) {
+      closeBtn.addEventListener('click', this.closeModal.bind(this));
+    }
 
     // Close on overlay click
     if (overlay) {
@@ -1894,145 +1774,38 @@ class CategoriesView extends View {
     });
   }
 
-  async loadAllProductsAndSort() {
-    // Show loading spinner
-    const spinner = this.outerProductsContainer.querySelector('.loader');
-    spinner.classList.remove('spinner-hidden');
+  // Update the ensureHttps method to handle API URLs
+  ensureHttps(url) {
+    if (!url || typeof url !== 'string') return '';
 
-    try {
-      const response = await fetch(`${this.apiUrl}/getAllProductsByCategory`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          category: this.category,
-        }),
-      });
+    // Get the base API URL based on environment
+    const apiBaseUrl =
+      process.env.NODE_ENV === 'production'
+        ? 'https://lobster-app-jipru.ondigitalocean.app/api'
+        : 'http://localhost:4000';
 
-      const data = await response.json();
-
-      if (data && data.products) {
-        // Rewrite URLs for all products
-        this.products = data.products.map(product =>
-          this.rewriteProductImageUrls(product)
-        );
-        this.totalProducts = data.total || data.products.length;
-      }
-
-      // Sort products by price
-      if (this.sortedByPrice === 'asc') {
-        this.products.sort((a, b) => {
-          const priceA =
-            this.selectedCurrency === 'usd' ? a.usd_price : a.ils_price;
-          const priceB =
-            this.selectedCurrency === 'usd' ? b.usd_price : b.ils_price;
-          return priceA - priceB;
-        });
-      } else if (this.sortedByPrice === 'desc') {
-        this.products.sort((a, b) => {
-          const priceA =
-            this.selectedCurrency === 'usd' ? a.usd_price : a.ils_price;
-          const priceB =
-            this.selectedCurrency === 'usd' ? b.usd_price : b.ils_price;
-          return priceB - priceA;
-        });
-      }
-
-      // Display sorted products
-      this.displayProducts(true);
-    } catch (error) {
-      console.error('Error loading all products:', error);
-    } finally {
-      // Hide loading spinner
-      spinner.classList.add('spinner-hidden');
-    }
-  }
-
-  displayProducts() {
-    if (!this.innerProductsContainer) {
-      console.error('[CategoriesView] No inner products container found');
-      return;
+    // If it's a relative path, construct the full URL with the appropriate base
+    if (!url.startsWith('http')) {
+      return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
     }
 
-    this.innerProductsContainer.innerHTML = '';
-    const markup = this.products
-      .map(item => this.getProductMarkup(item))
-      .join('');
-    this.innerProductsContainer.insertAdjacentHTML('beforeend', markup);
-  }
-
-  // Restore the rewriteProductImageUrls method that was accidentally removed
-  rewriteProductImageUrls(product) {
-    if (!product || this.isProduction) return product;
-
-    // Create a deep copy to avoid modifying the original object
-    const modifiedProduct = JSON.parse(JSON.stringify(product));
-
-    // Helper function to rewrite URLs
-    const rewriteUrl = url => {
-      if (!url || typeof url !== 'string') return url;
-
-      // Check if it's a production URL
-      if (url.includes('lobster-app-jipru.ondigitalocean.app')) {
-        // Extract the path part after /api
-        const pathMatch = url.match(/\/api(\/.+)$/);
-        if (pathMatch && pathMatch[1]) {
-          // Rewrite to local URL
-          return `http://localhost:4000${pathMatch[1]}`;
-        }
-      }
-      return url;
-    };
-
-    // Rewrite main image URLs
-    if (modifiedProduct.image) {
-      modifiedProduct.image = rewriteUrl(modifiedProduct.image);
-    }
-
-    if (modifiedProduct.publicImage) {
-      modifiedProduct.publicImage = rewriteUrl(modifiedProduct.publicImage);
-    }
-
-    // Rewrite main image structure
-    if (modifiedProduct.mainImage) {
-      for (const key in modifiedProduct.mainImage) {
-        if (typeof modifiedProduct.mainImage[key] === 'string') {
-          modifiedProduct.mainImage[key] = rewriteUrl(
-            modifiedProduct.mainImage[key]
-          );
-        }
-      }
-    }
-
-    // Rewrite small images array (handles both string arrays and object arrays)
-    if (Array.isArray(modifiedProduct.smallImages)) {
-      modifiedProduct.smallImages = modifiedProduct.smallImages.map(img => {
-        if (typeof img === 'string') {
-          return rewriteUrl(img);
-        } else if (typeof img === 'object' && img !== null) {
-          const result = {};
-          for (const key in img) {
-            if (typeof img[key] === 'string') {
-              result[key] = rewriteUrl(img[key]);
-            } else {
-              result[key] = img[key];
-            }
-          }
-          return result;
-        }
-        return img;
-      });
-    }
-
-    // Rewrite smallImagesLocal array
-    if (Array.isArray(modifiedProduct.smallImagesLocal)) {
-      modifiedProduct.smallImagesLocal = modifiedProduct.smallImagesLocal.map(
-        url => {
-          return rewriteUrl(url);
-        }
+    // If it's a localhost URL and we're in production, replace with production URL
+    if (
+      process.env.NODE_ENV === 'production' &&
+      url.includes('localhost:4000')
+    ) {
+      return url.replace(
+        'http://localhost:4000',
+        'https://lobster-app-jipru.ondigitalocean.app/api'
       );
     }
 
-    return modifiedProduct;
+    // Convert HTTP to HTTPS for production
+    if (process.env.NODE_ENV === 'production' && url.startsWith('http://')) {
+      return url.replace('http://', 'https://');
+    }
+
+    return url;
   }
 }
 
