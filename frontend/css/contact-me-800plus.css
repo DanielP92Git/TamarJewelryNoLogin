@@ -290,6 +290,9 @@ h1 {
   /* ~~~~FOR DEBUGGING~~~~ */
   /* border: 3px solid blue; */
 }
+.mobile-lang-selector {
+  display: none;
+}
 .contact-title {
   font-size: 2rem;
   font-weight: 600;

@@ -1,4 +1,4 @@
-require("dotenv").config();
+require('dotenv').config();
 export const cart = [];
 const host = process.env.API_URL;
 
@@ -39,13 +39,13 @@ const host = process.env.API_URL;
 
 const fetchUserCartAPI = async function () {
   const response = await fetch(`${host}/getcart`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      Accept: "application/form-data",
-      "auth-token": `${localStorage.getItem("auth-token")}`,
-      "Content-Type": "application/json",
+      Accept: 'application/form-data',
+      'auth-token': `${localStorage.getItem('auth-token')}`,
+      'Content-Type': 'application/json',
     },
-    body: "",
+    body: '',
   });
   const data = await response.json();
   return data;
@@ -54,8 +54,8 @@ const fetchUserCartAPI = async function () {
 export const handleLoadStorage = async function () {
   try {
     // get cart if user is not logged in
-    if (!localStorage.getItem("auth-token")) {
-      const data = await JSON.parse(localStorage.getItem("cart"));
+    if (!localStorage.getItem('auth-token')) {
+      const data = await JSON.parse(localStorage.getItem('cart'));
       if (!data) return;
       cart.push(...data);
     } else {
@@ -123,10 +123,10 @@ export const setPreviewItem = async function (data) {
   const filtered = Object.entries(data).filter(([id, amount]) => {
     if (amount > 0) return id;
   });
-  const filteredId = filtered.map((arr) => +arr[0]);
+  const filteredId = filtered.map(arr => +arr[0]);
 
-  allProducts.filter((product) => {
-    filteredId.forEach((cartId) => {
+  allProducts.filter(product => {
+    filteredId.forEach(cartId => {
       if (cartId == product.id) {
         cart.push({
           title: product.name,
@@ -149,7 +149,7 @@ export const setPreviewItem = async function (data) {
 
 export const handleAddToCart = function (data) {
   // If NOT logged in:
-  if (!localStorage.getItem("auth-token")) {
+  if (!localStorage.getItem('auth-token')) {
     addToLocalStorage(data);
   }
   // If logged in and there is a token:
@@ -162,19 +162,19 @@ export const handleAddToCart = function (data) {
 // Add to cart if USER LOGGED
 ///////////////////////////
 
-export const addToUserStorage = (data) => {
+export const addToUserStorage = data => {
   const itemId = data.dataset.id;
   fetch(`${host}/addtocart`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      Accept: "application/form-data",
-      "auth-token": `${localStorage.getItem("auth-token")}`,
-      "Content-Type": "application/json",
+      Accept: 'application/form-data',
+      'auth-token': `${localStorage.getItem('auth-token')}`,
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ itemId: itemId }),
   })
-    .then((response) => response.json())
-    .then((idData) => idData); // Here 'data' is the item's id number
+    .then(response => response.json())
+    .then(idData => idData); // Here 'data' is the item's id number
 };
 
 /////////////////////////////////
@@ -182,26 +182,41 @@ export const addToUserStorage = (data) => {
 /////////////////////////////////
 
 const createLocalStorage = function () {
-  localStorage.setItem("cart", JSON.stringify(cart));
+  localStorage.setItem('cart', JSON.stringify(cart));
 };
 
 export const addToLocalStorage = async function (data) {
   // const allProducts = await getAPI();
-  const itemId = data.getAttribute("data-id");
-  let prodQuantity = +data.getAttribute("data-quant");
+  const itemId = data.getAttribute('data-id');
+  let prodQuantity = +data.getAttribute('data-quant');
   // allProducts.find((product) => {
   //   if (product.id == itemId) {
   //     prodQuantity = product.quantity;
   //     return prodQuantity
   //   }
   // });
-  const itemImage = data.querySelector(".front-image").src;
-  const itemTitle = data.querySelector(".item-title").textContent;
-  const currencyCheck = data.dataset.currency;
 
-  let itemPrice = data
-    .querySelector(".item-price")
-    .textContent.replace(/[$₪]/g, "");
+  // Safely get the image element
+  const frontImageEl = data.querySelector('.front-image');
+  const itemImage = frontImageEl ? frontImageEl.src : '';
+
+  // Safely get the title element
+  const titleEl = data.querySelector('.item-title');
+  const itemTitle = titleEl ? titleEl.textContent : '';
+
+  // Get currency from dataset
+  const currencyCheck = data.dataset.currency || 'ils';
+
+  // Safely get the price element
+  const priceEl = data.querySelector('.item-price');
+  let itemPrice = '';
+
+  if (priceEl && priceEl.textContent) {
+    itemPrice = priceEl.textContent.replace(/[$₪]/g, '');
+  } else {
+    console.error('Price element not found or has no text content');
+    itemPrice = '0'; // Default to zero
+  }
 
   // 1) Generate data:
   const itemData = {
@@ -230,9 +245,9 @@ const addToLocalCart = function (data) {
 };
 
 export const checkCartNumber = async function () {
-  if (!localStorage.getItem("auth-token")) {
+  if (!localStorage.getItem('auth-token')) {
     const numberItems = cart
-      .map((item) => item.amount)
+      .map(item => item.amount)
       .reduce((item, itemNext) => item + itemNext, 0);
     return numberItems;
   } else {
@@ -240,28 +255,26 @@ export const checkCartNumber = async function () {
     const filtered = Object.entries(data).filter(([id, amount]) => {
       if (amount > 0) return amount;
     });
-    const itemsAmount = filtered
-      .map((arr) => +arr[1])
-      .reduce((x, y) => x + y, 0);
+    const itemsAmount = filtered.map(arr => +arr[1]).reduce((x, y) => x + y, 0);
     return itemsAmount;
   }
 };
 
 export const removeFromUserCart = async function (itemId) {
-  if (!localStorage.getItem("auth-token")) {
-    const search = cart.findIndex((el) => el.id == itemId);
+  if (!localStorage.getItem('auth-token')) {
+    const search = cart.findIndex(el => el.id == itemId);
     cart.splice(search, 1);
     createLocalStorage();
   }
-  if (localStorage.getItem("auth-token")) {
-    const search = cart.findIndex((el) => el.id == itemId);
+  if (localStorage.getItem('auth-token')) {
+    const search = cart.findIndex(el => el.id == itemId);
     cart.splice(search, 1);
     const response = await fetch(`${host}/removefromcart`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        Accept: "application/form-data",
-        "auth-token": `${localStorage.getItem("auth-token")}`,
-        "Content-Type": "application/json",
+        Accept: 'application/form-data',
+        'auth-token': `${localStorage.getItem('auth-token')}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ itemId: itemId }),
     });
@@ -270,20 +283,20 @@ export const removeFromUserCart = async function (itemId) {
 };
 
 export const deleteAll = async function () {
-  if (!localStorage.getItem("auth-token")) {
+  if (!localStorage.getItem('auth-token')) {
     cart.length = 0;
     createLocalStorage();
   }
 
-  if (localStorage.getItem("auth-token")) {
+  if (localStorage.getItem('auth-token')) {
     await fetch(`${host}/removeAll`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        Accept: "application/form-data",
-        "auth-token": `${localStorage.getItem("auth-token")}`,
-        "Content-Type": "application/json",
+        Accept: 'application/form-data',
+        'auth-token': `${localStorage.getItem('auth-token')}`,
+        'Content-Type': 'application/json',
       },
-      body: "",
+      body: '',
     });
   }
 };

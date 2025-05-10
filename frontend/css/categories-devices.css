@@ -8,13 +8,39 @@ header {
   flex-flow: column;
   width: 100%;
   height: 30%;
-
   margin-bottom: 2rem;
   background-size: cover;
   background-repeat: no-repeat;
+  background-position: center;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(177, 20, 143); */
+}
+
+/* Category-specific header backgrounds as a fallback for mobile */
+body#categories.bracelets header {
+  background-image: url('../imgs/website-images/bracelets/B3.jpg');
+}
+
+body#categories.necklaces header {
+  background-image: url('../imgs/website-images/necklaces/_MG_9133.jpg');
+}
+
+body#categories.hoop-earrings header {
+  background-image: url('../imgs/Hero-imgs/H4-1.jpg');
+}
+
+body#categories.unisex header,
+body#categories.shalom-club header {
+  background-image: url('../imgs/Hero-imgs/IMG_0173.jpg');
+}
+
+body#categories.dangle-earrings header {
+  background-image: url('../imgs/website-images/tamar-jewelry-images/D02A2681.jpg');
+}
+
+body#categories.crochet-necklaces header {
+  background-image: url('../imgs/website-images/crochet-necklaces/Untitled-4.jpg');
 }
 
 /* ====MENU SETTINGS==== */
@@ -224,15 +250,47 @@ input[type='checkbox']:checked + .menu {
   z-index: 10;
 }
 
+.cart-number-mobile-header {
+  position: absolute;
+  top: 5px;
+  left: 70px;
+}
+
 .shoppingcart-svg {
-  display: none;
+  display: none; /* Hide in mobile view only */
+}
+
+/* Show cart icon in desktop view */
+@media (min-width: 800px) {
+  .shoppingcart-svg {
+    display: inline-block !important;
+    visibility: visible !important;
+    width: 25px !important;
+    height: 25px !important;
+    opacity: 1 !important;
+    fill: #000000 !important;
+  }
+
+  .attrib-cart {
+    display: flex !important;
+  }
+
+  .cart-number {
+    display: inline-block !important;
+  }
+
+  .main-nav-tab.cart-tab {
+    display: flex !important;
+    visibility: visible !important;
+  }
+
+  .cart-container {
+    display: flex !important;
+    visibility: visible !important;
+  }
 }
 
 .toggle-svg {
-  display: none;
-}
-
-.shoppingcart-svg {
   display: none;
 }
 
@@ -493,11 +551,19 @@ main {
 }
 
 .modal {
+  display: none;
   width: 100%;
-  height: 100%;
+  height: 0;
+  position: absolute;
+}
 
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid rgb(33, 186, 242); */
+.modal:not(:empty) {
+  display: flex;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 700;
 }
 
 .item-overlay {
@@ -858,23 +924,21 @@ main {
   display: flex;
   flex-flow: row wrap;
   max-width: 100%;
-  height: 100%;
   padding-top: 0.5rem;
-  font-family: Raleway, sans-serif;
+  margin-top: 3rem;
   border-top: 1px solid;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(255, 51, 0); */
+  /* border: 3px solid rgb(4, 255, 0); */
 }
 
 .columns-container {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 100%;
-  height: 10%;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(0, 166, 255); */
+  /* border: 3px solid rgb(8, 0, 255); */
 }
 
 .footer-right-column,
@@ -884,8 +948,8 @@ main {
   flex-flow: column wrap;
   align-items: center;
   width: 30%;
-  height: 15rem;
   padding-top: 10px;
+  padding-bottom: 30px;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(89, 0, 255); */
@@ -916,10 +980,11 @@ main {
   padding-left: 10px;
   padding-bottom: 5px;
   border-bottom: 0.5px solid rgba(66, 66, 66, 0.5);
+  font-family: Raleway, sans-serif;
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(228, 37, 139); */
+  /* border: 5px solid rgb(40, 228, 37); */
 }
 
 .rights-container {
@@ -928,9 +993,10 @@ main {
   align-items: center;
   width: 100%;
   height: 4rem;
+  font-family: Raleway, sans-serif;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(238, 142, 240); */
+  /* border: 1px solid rgb(210, 28, 140); */
 }
 
 .rights-text {

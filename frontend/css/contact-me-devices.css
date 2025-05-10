@@ -53,6 +53,12 @@ h1 {
   text-align: center;
 }
 
+.cart-number-mobile-header {
+  position: absolute;
+  top: 5px;
+  left: 70px;
+}
+
 /* Modern Contact Form Styles */
 .contact-main {
   display: flex;
@@ -90,6 +96,7 @@ h1 {
   letter-spacing: -0.025em;
   background: linear-gradient(to right, var(--primary-color), #38bdf8);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
@@ -265,56 +272,91 @@ h1 {
   transform: translateY(0);
 }
 
-/* Modern footer */
 .footer {
-  margin-top: 0;
-  background: var(--surface-color);
-  border-top: 1px solid var(--border-color);
-  padding: 3rem 1.5rem;
+  display: flex;
+  flex-flow: row wrap;
+  max-width: 100%;
+  padding-top: 0.5rem;
+  margin-top: 3rem;
+  border-top: 1px solid;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(4, 255, 0); */
 }
 
 .columns-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 3rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(8, 0, 255); */
 }
 
 .footer-right-column,
 .footer-middle-column,
 .footer-left-column {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 1rem;
+  flex-flow: column wrap;
+  align-items: center;
+  width: 30%;
+  padding-top: 10px;
+  padding-bottom: 30px;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 3px solid rgb(89, 0, 255); */
+}
+
+.footer-middle-column {
+  padding-right: 5px;
+}
+
+.footer-item {
+  color: white;
+  width: 9rem;
+  margin-top: 10px;
+  margin-bottom: 25px;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 1px solid green; */
 }
 
 .attrib-footer {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border-color);
-  transition: all 0.2s ease;
+  display: flex;
+  flex-flow: row;
+  font-size: 0.7rem;
+  align-items: center;
   width: 100%;
+  color: black;
+  margin-bottom: 6%;
+  padding-left: 10px;
+  padding-bottom: 5px;
+  border-bottom: 0.5px solid rgba(66, 66, 66, 0.5);
+  font-family: Raleway, sans-serif;
   text-decoration: none;
-}
 
-.attrib-footer:hover {
-  color: var(--primary-color);
-  border-bottom-color: var(--primary-color);
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 5px solid rgb(40, 228, 37); */
 }
 
 .rights-container {
-  margin-top: 3rem;
-  padding: 1.5rem 0;
-  border-top: 1px solid var(--border-color);
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 4rem;
+  font-family: Raleway, sans-serif;
+
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 1px solid rgb(210, 28, 140); */
 }
 
 .rights-text {
-  color: var(--text-secondary);
-  font-size: 0.95rem;
+  color: white;
+  text-align: center;
+  font-size: 0.9rem;
+  /* ~~~~ FOR DEBUGGING~~~~*/
+  /* border: 1px solid green; */
 }
 
 /* Styles for categories list accordion */

@@ -65,8 +65,8 @@ class CategoriesView extends View {
         if (!this.initialized) {
           try {
             const body = document.querySelector('body');
-            const idParts = body.id.split(' ');
-            const categoryName = idParts[idParts.length - 1];
+            // Get category from body's class
+            const categoryName = body.className;
             const categoryNameHebrew = body.dataset.hebrew;
 
             this.directInitialize(categoryName, categoryNameHebrew);
@@ -119,8 +119,8 @@ class CategoriesView extends View {
       return;
     }
 
-    const idParts = body.id.split(' ');
-    const categoryName = idParts[idParts.length - 1];
+    // Get category from body's class attribute
+    const categoryName = body.className;
     const categoryNameHebrew = body.dataset.hebrew;
 
     this.initialize(null, categoryName, categoryNameHebrew);
@@ -324,10 +324,29 @@ class CategoriesView extends View {
   }
 
   increaseCartNumber() {
+    // First select ALL cart number elements including mobile version
+    this._cartNumber = document.querySelectorAll(
+      '.cart-number, .cart-number-mobile'
+    );
+
+    if (!this._cartNumber || this._cartNumber.length === 0) {
+      console.error('No cart number elements found');
+      return;
+    }
+
     this._cartNumber.forEach(cartNum => {
       this._cartNewValue = +cartNum.textContent + 1;
       cartNum.textContent = this._cartNewValue;
+
+      // Ensure cart number is visible
+      cartNum.style.display = 'flex';
+      document.body.classList.add('show-cart-icon');
     });
+
+    // Also persist the cart number using the parent View method if available
+    if (typeof super.persistCartNumber === 'function') {
+      super.persistCartNumber(this._cartNewValue);
+    }
   }
 
   decreaseCartNumber() {
@@ -383,7 +402,11 @@ class CategoriesView extends View {
 
     if (!btn) return;
     const item = btn.closest('.item-container');
-    this._cartNumber = document.querySelectorAll('.cart-number');
+
+    // Select ALL cart number elements including mobile version
+    this._cartNumber = document.querySelectorAll(
+      '.cart-number, .cart-number-mobile'
+    );
 
     this.increaseCartNumber();
 
@@ -399,6 +422,12 @@ class CategoriesView extends View {
   }
 
   addFromPrev(data) {
+    // Select cart number elements before increasing
+    this._cartNumber = document.querySelectorAll(
+      '.cart-number, .cart-number-mobile'
+    );
+
+    // Now increase the cart number
     this.increaseCartNumber();
 
     // Create a complete object with all necessary data
@@ -407,7 +436,7 @@ class CategoriesView extends View {
         id: data.dataset.id,
         quant: data.dataset.quant,
         price: data.dataset.price,
-        currency: this.selectedCurrency,
+        currency: this.selectedCurrency || data.dataset.currency || 'ils',
       },
       getAttribute: function (attr) {
         switch (attr) {
@@ -417,6 +446,8 @@ class CategoriesView extends View {
             return this.dataset.quant;
           case 'data-price':
             return this.dataset.price;
+          case 'data-currency':
+            return this.dataset.currency;
           default:
             return null;
         }
@@ -425,18 +456,46 @@ class CategoriesView extends View {
         const modalElement = document.querySelector('.modal');
         if (!modalElement) return null;
 
+        // Store dataset reference to use inside the function
+        const datasetRef = this.dataset;
+
         switch (selector) {
           case '.front-image':
             return { src: modalElement.querySelector('.big-image')?.src };
           case '.item-title':
+            const titleElement =
+              modalElement.querySelector('.item-title_modal');
             return {
-              textContent:
-                modalElement.querySelector('.item-title_modal')?.textContent,
+              textContent: titleElement ? titleElement.textContent : '',
             };
           case '.item-price':
+            // Get price from the modal or use the data-price attribute as fallback
+            const priceElement =
+              modalElement.querySelector('.price-text-modal');
+            let priceText = '';
+
+            if (priceElement && priceElement.textContent) {
+              // Extract just the price part from "Price: $XX" or similar formats
+              const priceMatch =
+                priceElement.textContent.match(/[₪$](\d+(\.\d+)?)/);
+              if (priceMatch && priceMatch[1]) {
+                priceText = priceMatch[1]; // Get just the numeric part
+              } else {
+                // Try to extract any numbers if the above pattern doesn't match
+                const numericMatch =
+                  priceElement.textContent.match(/\d+(\.\d+)?/);
+                if (numericMatch) {
+                  priceText = numericMatch[0];
+                }
+              }
+            }
+
+            // If we have the price in the modal, use it; otherwise construct from our data
+            const currencySymbol = datasetRef.currency === 'usd' ? '$' : '₪';
             return {
-              textContent:
-                modalElement.querySelector('.price-text')?.textContent,
+              textContent: priceText
+                ? `${currencySymbol}${priceText}`
+                : `${currencySymbol}${datasetRef.price}`,
             };
           default:
             return null;
@@ -611,27 +670,43 @@ class CategoriesView extends View {
 
     // Handle old format (array of strings)
     if (Array.isArray(product?.smallImagesLocal)) {
-      smallImagesArray = product.smallImagesLocal.map(url => {
-        // If it's a full URL, ensure HTTPS
-        if (url.includes('http')) {
-          return this.ensureHttps(url);
-        }
-        // If it's a relative path, construct the full URL
-        return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
-      });
+      smallImagesArray = product.smallImagesLocal
+        .filter(url => url && typeof url === 'string' && url.trim() !== '')
+        .map(url => {
+          try {
+            // If it's a full URL, ensure HTTPS
+            if (url.includes('http')) {
+              return this.ensureHttps(url);
+            }
+            // If it's a relative path, construct the full URL
+            return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+          } catch (error) {
+            console.error('Error processing small image URL:', error);
+            return '';
+          }
+        })
+        .filter(url => url !== ''); // Remove any empty strings
     }
     // Handle old format (array of URLs)
     else if (Array.isArray(product?.smallImages)) {
-      smallImagesArray = product.smallImages.map(img => {
-        if (typeof img === 'string') {
-          if (img.includes('http')) {
-            return this.ensureHttps(img);
+      smallImagesArray = product.smallImages
+        .filter(img => img) // Filter out null/undefined entries
+        .map(img => {
+          try {
+            if (typeof img === 'string') {
+              if (img.includes('http')) {
+                return this.ensureHttps(img);
+              }
+              // If it's a relative path, construct the full URL
+              return `${apiBaseUrl}${img.startsWith('/') ? '' : '/'}${img}`;
+            }
+            return getImageUrl(img, true) || getImageUrl(img, false) || '';
+          } catch (error) {
+            console.error('Error processing small image:', error);
+            return '';
           }
-          // If it's a relative path, construct the full URL
-          return `${apiBaseUrl}${img.startsWith('/') ? '' : '/'}${img}`;
-        }
-        return getImageUrl(img, true) || getImageUrl(img, false) || '';
-      });
+        })
+        .filter(url => url !== ''); // Remove any empty strings
     }
 
     // Filter out any invalid URLs and ensure HTTPS
@@ -727,7 +802,9 @@ class CategoriesView extends View {
                 <div class="price-box">
                   <span class="price-text-modal">Price: ${price}</span>
                 </div>
-                <button class="add-to-cart-btn_modal" data-id="${id}" data-quant="${quantity}" data-price="${price}">
+                <button class="add-to-cart-btn_modal" data-id="${id}" data-quant="${quantity}" data-price="${price}" data-currency="${
+      currency || this.selectedCurrency || 'ils'
+    }">
                   ${addToCartText}
                 </button>
               </div>
@@ -1320,29 +1397,41 @@ class CategoriesView extends View {
     }
 
     // Handle main image loading - only for initial load
-    if (bigImage && !bigImage.complete) {
-      if (loadingIndicator) {
-        loadingIndicator.style.display = 'block';
-      }
+    if (bigImage) {
+      // Set up error handling for the main image
+      bigImage.onerror = function () {
+        console.error('Error loading image:', bigImage.src);
+        // Show fallback image or error message
+        bigImage.src =
+          "data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23aaa' d='M21.9 21.9l-8.9-8.9-8.9 8.9c-.3.3-.7.3-1 0s-.3-.7 0-1l8.9-8.9-8.9-8.9c-.3-.3-.3-.7 0-1s.7-.3 1 0l8.9 8.9 8.9-8.9c.3-.3.7-.3 1 0s.3.7 0 1l-8.9 8.9 8.9 8.9c.3.3.3.7 0 1s-.7.3-1 0z'/%3E%3C/svg%3E";
+        bigImage.style.maxWidth = '100px';
+        bigImage.style.maxHeight = '100px';
+        bigImage.style.margin = 'auto';
 
-      bigImage.onload = () => {
-        bigImage.classList.add('loaded');
         if (loadingIndicator) {
           loadingIndicator.style.display = 'none';
         }
+
+        // Add error message below the image
+        const errorMsg = document.createElement('p');
+        errorMsg.textContent = 'Image failed to load';
+        errorMsg.style.textAlign = 'center';
+        errorMsg.style.color = '#666';
+        magnifierContainer.appendChild(errorMsg);
       };
 
-      bigImage.onerror = () => {
+      bigImage.onload = function () {
+        console.log('Image loaded successfully:', bigImage.src);
         if (loadingIndicator) {
-          loadingIndicator.textContent = 'Error loading image';
-          loadingIndicator.style.display = 'block';
+          loadingIndicator.style.display = 'none';
         }
+        bigImage.style.opacity = '1';
+        bigImage.classList.add('loaded');
       };
-    } else if (bigImage) {
-      // Image is already loaded
-      bigImage.classList.add('loaded');
+
+      // Show loading indicator while image loads
       if (loadingIndicator) {
-        loadingIndicator.style.display = 'none';
+        loadingIndicator.style.display = 'block';
       }
     }
 
@@ -1513,6 +1602,8 @@ class CategoriesView extends View {
             id: addToCartBtn.dataset.id,
             quant: addToCartBtn.dataset.quant,
             price: addToCartBtn.dataset.price,
+            currency:
+              this.selectedCurrency || addToCartBtn.dataset.currency || 'ils',
           },
         };
         this.addFromPrev(dataObj);
@@ -1784,6 +1875,23 @@ class CategoriesView extends View {
         ? 'https://lobster-app-jipru.ondigitalocean.app/api'
         : 'http://localhost:4000';
 
+    // CORS WORKAROUND: If we're in development and the URL points to the production server,
+    // rewrite to use local static paths that are known to work with CORS.
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      (url.includes('lobster-app-jipru.ondigitalocean.app/api/uploads/') ||
+        url.includes('lobster-app-jipru.ondigitalocean.app/api/smallImages/'))
+    ) {
+      const filename = url.split('/').pop();
+      if (url.includes('/api/uploads/')) {
+        return `${apiBaseUrl}/uploads/${filename}`;
+      } else if (url.includes('/api/smallImages/')) {
+        return `${apiBaseUrl}/smallImages/${filename}`;
+      }
+      // Fallback if somehow the specific path isn't matched, though it should be.
+      return `${apiBaseUrl}/uploads/${filename}`;
+    }
+
     // If it's a relative path, construct the full URL with the appropriate base
     if (!url.startsWith('http')) {
       return `${apiBaseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
@@ -1806,6 +1914,17 @@ class CategoriesView extends View {
     }
 
     return url;
+  }
+
+  // Add a method to check if an image exists
+  async checkImageExists(url) {
+    try {
+      const response = await fetch(url, { method: 'HEAD', mode: 'no-cors' });
+      return response.ok;
+    } catch (error) {
+      console.error('Error checking image:', error);
+      return false;
+    }
   }
 }
 

@@ -25,16 +25,9 @@ const API_URL = (() => {
 
     // Option c: Completely separate API domain (uncomment if needed)
     // url = "https://api.yourdomain.com";
-
-    console.log("Using production API URL:", url);
   } else {
     // In development, use localhost with the correct port
     url = "http://localhost:4000";
-    console.log("Using development API URL:", url);
-
-    // Add more detailed logging
-    console.log("Current window origin:", window.location.origin);
-    console.log("Current window location:", window.location.href);
   }
   return url;
 })();
@@ -77,89 +70,75 @@ function calculateILSPrice() {
 function getImageUrl(image, imageLocal, publicImage, mainImage) {
   // Extract the filename from the image URL
   const getFilename = (url) => {
-    if (!url) return null;
+    if (!url || typeof url !== "string") return null;
     const parts = url.split("/");
-    return parts[parts.length - 1];
+    return parts.length > 1 ? parts[parts.length - 1] : null; // Ensure there was a split
   };
 
   // Helper to ensure URLs use production API in production environment
   const ensureProductionUrl = (url) => {
-    if (!url) return url;
+    if (!url) return "";
 
-    // If we're in production and URL contains localhost, convert it to use production API_URL
     if (
       state.isProduction &&
       (url.includes("localhost") || url.includes("127.0.0.1"))
     ) {
-      // Get the filename
       const filename = getFilename(url);
+      if (!filename) return ""; // If filename is null, return empty string
 
-      // Determine the path part (uploads, smallImages, etc.)
       let pathPart = "images";
       if (url.includes("/uploads/")) {
         pathPart = "uploads";
       } else if (url.includes("/smallImages/")) {
         pathPart = "smallImages";
       }
-
-      // Construct new URL using production API URL
       return `${API_URL}/${pathPart}/${filename}`;
     }
 
-    // Make sure URLs use HTTPS in production
     if (state.isProduction && url.startsWith("http:")) {
       return url.replace("http:", "https:");
     }
-
     return url;
   };
 
-  // First try the new mainImage structure
+  // Try mainImage structure
   if (mainImage) {
+    let resolvedUrl;
     if (state.isProduction) {
-      const url = mainImage.publicDesktop || mainImage.desktop;
-      return ensureProductionUrl(url);
+      resolvedUrl = ensureProductionUrl(
+        mainImage.publicDesktop || mainImage.desktop
+      );
+    } else {
+      resolvedUrl = mainImage.desktopLocal || mainImage.desktop;
+      if (!resolvedUrl) resolvedUrl = ""; // Convert null to empty string
     }
-    return mainImage.desktopLocal || mainImage.desktop;
+    if (
+      resolvedUrl &&
+      typeof resolvedUrl === "string" &&
+      resolvedUrl.trim() !== ""
+    )
+      return resolvedUrl;
   }
 
-  // Fallback to legacy fields
-  if (!image && !publicImage) {
-    console.warn("No image URL provided, using fallback");
-    // Use API_URL for the fallback image
-    return `${API_URL}/images/no-image.png`;
-  }
+  // Fallback to legacy fields, processed by ensureProductionUrl
+  let legacyUrl =
+    ensureProductionUrl(image) || ensureProductionUrl(publicImage);
+  if (legacyUrl && typeof legacyUrl === "string" && legacyUrl.trim() !== "")
+    return legacyUrl;
 
-  const filename = getFilename(image) || getFilename(publicImage);
-
-  // Create direct image URL (most reliable method)
-  if (state.isProduction && filename) {
-    const directImageUrl = `${API_URL}/direct-image/${filename}`;
-    return directImageUrl;
-  }
-
-  // Try public image next in production
-  if (state.isProduction && publicImage) {
-    return ensureProductionUrl(publicImage);
-  }
-
-  // Then try regular image
-  if (state.isProduction && image) {
-    return ensureProductionUrl(image);
-  }
-
-  // In local development, use local URL
+  // Fallback to imageLocal (should be a direct path or already a full URL)
   if (imageLocal) {
-    return imageLocal;
+    // If imageLocal itself is a full URL, use it; otherwise, it might be a relative path needing API_URL.
+    // However, typically imageLocal was for local dev and might not need full processing.
+    // For safety, ensure it's a non-empty string.
+    if (typeof imageLocal === "string" && imageLocal.trim() !== "")
+      return imageLocal;
   }
 
-  // Fallback to whatever URL we have
-  let fallbackUrl = image || publicImage || `${API_URL}/images/no-image.png`;
-  if (state.isProduction) {
-    fallbackUrl = ensureProductionUrl(fallbackUrl);
-  }
-
-  return fallbackUrl;
+  console.warn(
+    "[BisliView Global getImageUrl] No valid image URL found, returning empty string."
+  );
+  return "";
 }
 
 // First, add a helper function to determine if we're on the admin page
@@ -183,21 +162,9 @@ function isAdminPage() {
     path.endsWith("/BisliView.js") ||
     path.endsWith("/bambaYafa.html");
 
-  const result =
-    isAdminPath || hasAdminMarker || hasAdminTitle || loadedFromAdminScript;
-
-  console.log("Page detection:", {
-    path: path,
-    title: document.title,
-    hasAdminMarker: hasAdminMarker,
-    hasAdminTitle: hasAdminTitle,
-    isAdminPath: isAdminPath,
-    loadedFromAdminScript: loadedFromAdminScript,
-    scriptSrc: scriptSrc,
-    finalResult: result,
-  });
-
-  return result;
+  return (
+    isAdminPath || hasAdminMarker || hasAdminTitle || loadedFromAdminScript
+  );
 }
 
 // Helper function to get the current script path
@@ -428,7 +395,6 @@ async function fetchInfo() {
     // First check authentication again
     const isAuthenticated = await checkAuth();
     if (!isAuthenticated) {
-      console.warn("Not authenticated, cannot fetch products");
       return;
     }
 
@@ -438,7 +404,6 @@ async function fetchInfo() {
     // Add a minimum delay to ensure animation is visible even for fast loads
     const minDelay = new Promise((resolve) => setTimeout(resolve, 800));
 
-    console.log("Fetching products from:", `${API_URL}/allproducts`);
     const response = await fetch(`${API_URL}/allproducts`, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
@@ -479,7 +444,6 @@ async function checkAuth() {
   const token = localStorage.getItem("auth-token");
 
   if (!token) {
-    console.log("No token found, showing login page");
     showLoginPage();
     return false;
   }
@@ -506,7 +470,6 @@ async function checkAuth() {
       const response = await Promise.race([authPromise, authTimeoutPromise]);
 
       if (!response.ok) {
-        console.log("Token verification failed with status:", response.status);
         showLoginPage("Authentication failed. Please log in again.");
         return false;
       }
@@ -519,7 +482,6 @@ async function checkAuth() {
 
       // Check if user has admin privileges
       if (data.user.userType !== "admin") {
-        console.log("User does not have admin privileges");
         showLoginPage(
           "You must have administrator privileges to access this page."
         );
@@ -528,9 +490,7 @@ async function checkAuth() {
 
       return true;
     } catch (error) {
-      console.error("Auth check failed:", error);
       if (error.message === "auth_check_timed_out") {
-        console.log("Auth check timed out, showing login page");
         showLoginPage("Authentication check timed out. Please try again.");
         return false;
       }
@@ -548,7 +508,6 @@ async function checkAuth() {
 function showLoginPage(errorMessage) {
   // Check if login overlay already exists
   if (document.querySelector(".login-overlay")) {
-    console.log("Login overlay already exists, not creating another one");
     return;
   }
 
@@ -687,8 +646,6 @@ function showLoginPage(errorMessage) {
 
 // Add a new function to specifically initialize event handlers
 function initializeEventHandlers() {
-  console.log("Initializing event handlers for admin navigation");
-
   // Add event listeners for admin functionality
   if (addProductsBtn) {
     // Remove any existing listeners first to prevent duplicates
@@ -696,9 +653,6 @@ function initializeEventHandlers() {
 
     // Add fresh event listener
     addProductsBtn.addEventListener("click", loadAddProductsPage);
-    console.log("Add Products button handler initialized");
-  } else {
-    console.warn("Add Products button not found in the DOM");
   }
 
   if (productsListBtn) {
@@ -707,9 +661,6 @@ function initializeEventHandlers() {
 
     // Add fresh event listener
     productsListBtn.addEventListener("click", fetchInfo);
-    console.log("Products List button handler initialized");
-  } else {
-    console.warn("Products List button not found in the DOM");
   }
 }
 
@@ -849,8 +800,21 @@ async function loadProductsPage(data) {
 
   // Set the category filter to the stored category
   const categoryFilter = document.getElementById("categoryFilter");
+  console.log(
+    "[BisliView loadProductsPage] Current state.selectedCategory BEFORE setting filter:",
+    state.selectedCategory
+  );
   if (categoryFilter && state.selectedCategory) {
     categoryFilter.value = state.selectedCategory;
+    console.log(
+      `[BisliView loadProductsPage] Set categoryFilter.value to: ${categoryFilter.value}. Expected: ${state.selectedCategory}`
+    );
+  } else {
+    console.warn(
+      "[BisliView loadProductsPage] Category filter or state.selectedCategory not available. Filter might default to 'all'.",
+      { hasFilter: !!categoryFilter, selectedCat: state.selectedCategory }
+    );
+    if (categoryFilter) categoryFilter.value = "all"; // Ensure it defaults visibly if state is messy
   }
 
   // Load products with the current category filter
@@ -860,9 +824,13 @@ async function loadProductsPage(data) {
 }
 
 function loadProducts(data) {
-  const categoryFilter = document.getElementById("categoryFilter");
-  const selectedCategory = categoryFilter ? categoryFilter.value : "all";
-  state.selectedCategory = selectedCategory;
+  const categoryFilterDOM = document.getElementById("categoryFilter");
+  const selectedCategoryFromDOM = categoryFilterDOM
+    ? categoryFilterDOM.value
+    : "all";
+
+  // The category for filtering should primarily come from what was set in the DOM by loadProductsPage
+  state.selectedCategory = selectedCategoryFromDOM;
 
   // Check if data is valid before proceeding
   if (!data || !Array.isArray(data)) {
@@ -879,9 +847,9 @@ function loadProducts(data) {
 
   // Filter products based on category
   const filteredData =
-    selectedCategory === "all"
+    state.selectedCategory === "all"
       ? data
-      : data.filter((product) => product.category === selectedCategory);
+      : data.filter((product) => product.category === state.selectedCategory);
 
   const productsContainer = document.querySelector(".listproduct-allproducts");
   if (!productsContainer) {
@@ -895,6 +863,18 @@ function loadProducts(data) {
   filteredData.forEach((item) => {
     const productElement = document.createElement("div");
     productElement.className = "listproduct-format-main listproduct-format";
+
+    // Safely get image URLs for srcset, defaulting to empty string if null/undefined
+    const desktopSrc = item.mainImage?.desktop || item.image || "";
+    const mobileSrc = item.mainImage?.mobile || item.image || "";
+    // The main img src will use the full getImageUrl logic
+    const mainImgSrc = getImageUrl(
+      item.image,
+      item.imageLocal,
+      item.publicImage,
+      item.mainImage
+    );
+
     productElement.innerHTML = `
       <div>
         <input type="checkbox" class="product-checkbox" data-product-id="${
@@ -904,21 +884,16 @@ function loadProducts(data) {
       <picture>
         <source 
           media="(min-width: 768px)" 
-          srcset="${item.mainImage?.desktop || item.image}" 
+          srcset="${desktopSrc}" 
           type="image/webp"
         />
         <source 
           media="(max-width: 767px)" 
-          srcset="${item.mainImage?.mobile || item.image}" 
+          srcset="${mobileSrc}" 
           type="image/webp"
         />
         <img 
-          src="${getImageUrl(
-            item.image,
-            item.imageLocal,
-            item.publicImage,
-            item.mainImage
-          )}" 
+          src="${mainImgSrc}" 
           class="listproduct-product-icon" 
           alt="${item.name}"
           loading="lazy"
@@ -1106,7 +1081,7 @@ function editProduct(product) {
 
     // Helper to ensure production URLs
     const ensureProductionUrl = (url) => {
-      if (!url) return url;
+      if (!url) return ""; // Return empty string instead of null/undefined
 
       // Convert localhost URLs to production URLs
       if (
@@ -1464,12 +1439,13 @@ function editProduct(product) {
       const imageType = this.dataset.imageType;
       const productId = this.dataset.productId;
       const imageUrl = decodeURIComponent(this.dataset.imageUrl);
-
+      console.log(imageUrl, imageType, productId);
       if (confirm(`Are you sure you want to delete this ${imageType} image?`)) {
         try {
           console.log(`Deleting ${imageType} image: ${imageUrl}`);
 
-          const response = await fetch(`${API_URL}/deleteproductimage`, {
+          const requestUrl = `${API_URL}/deleteproductimage`;
+          const requestOptions = {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -1480,37 +1456,105 @@ function editProduct(product) {
               imageType,
               imageUrl,
             }),
+          };
+
+          console.log("[BisliView deleteProductImage] Attempting fetch with:", {
+            url: requestUrl,
+            options: requestOptions,
           });
 
+          const response = await fetch(requestUrl, requestOptions);
+
+          // Check if the response was not OK (e.g., 4xx or 5xx status)
           if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            let errorText = await response
+              .text()
+              .catch(() => "Could not retrieve error text from server.");
+            console.error(
+              `HTTP error! status: ${response.status}, body: ${errorText}`
+            );
+            // Ensure errorText is a string
+            errorText =
+              typeof errorText === "string"
+                ? errorText
+                : JSON.stringify(errorText);
+            throw new Error(
+              `Server error: ${response.status}. Details: ${errorText.substring(
+                0,
+                200
+              )}`
+            );
           }
 
           const result = await response.json();
           if (result.success) {
             alert("Image deleted successfully!");
-            // Fetch the product again and refresh the page
-            try {
-              // Fetch fresh data after deletion
-              const refreshedProduct = await fetchProduct(productId);
-              if (refreshedProduct) {
-                // If successful, update the edit form with fresh data
-                editProduct(refreshedProduct);
+
+            // For main image deletion, use the original product object to get the category
+            if (imageType === "main") {
+              if (product && product.category) {
+                // 'product' is from the outer scope of editProduct
+                state.selectedCategory = product.category;
+                console.log(
+                  "[BisliView editProduct] Main image deleted. state.selectedCategory is NOW:",
+                  state.selectedCategory,
+                  "(from product object:",
+                  product.category,
+                  ")"
+                );
               } else {
-                // If product fetch fails, reload the whole product list
+                console.warn(
+                  "[BisliView editProduct] Main image deleted, but product details unavailable to set state.selectedCategory."
+                );
+                state.selectedCategory = "all"; // Fallback
+              }
+              console.log(
+                "[BisliView editProduct] Attempting fetchInfo() for main image deletion redirect..."
+              );
+              try {
+                await fetchInfo(); // Reload the product list view, explicitly await
+                console.log(
+                  "[BisliView] fetchInfo() completed for main image deletion."
+                );
+              } catch (fetchInfoError) {
+                console.error(
+                  "[BisliView] Error occurred during fetchInfo() after main image deletion:",
+                  fetchInfoError
+                );
+                alert(
+                  "Error reloading product list after main image deletion. Please refresh manually."
+                );
+              }
+            } else {
+              // Existing behavior for small images: refresh the edit form
+              try {
+                const refreshedProduct = await fetchProduct(productId);
+                if (refreshedProduct) {
+                  editProduct(refreshedProduct);
+                } else {
+                  fetchInfo();
+                }
+              } catch (fetchError) {
+                console.error("Error fetching updated product:", fetchError);
                 fetchInfo();
               }
-            } catch (fetchError) {
-              console.error("Error fetching updated product:", fetchError);
-              // Fallback to reload all products if fetching the single product fails
-              fetchInfo();
             }
           } else {
-            throw new Error(result.message || "Failed to delete image");
+            // Ensure result.message is a string before throwing
+            const serverMessage =
+              typeof result.message === "string"
+                ? result.message
+                : JSON.stringify(result.message);
+            throw new Error(serverMessage || "Failed to delete image");
           }
         } catch (error) {
-          console.error("Error deleting image:", error);
-          alert("Error deleting image: " + error.message);
+          console.error("Error deleting image:", error); // Original console log
+          // Ensure error.message is always a string for the alert
+          const alertMessage =
+            typeof error.message === "string"
+              ? error.message
+              : "An unexpected error occurred.";
+          alert("Error deleting image: " + alertMessage);
         }
       }
     });
@@ -1798,8 +1842,6 @@ async function fetchWithRetry(url, options, maxRetries = state.maxRetries) {
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`Attempt ${attempt + 1}/${maxRetries + 1} for ${url}`);
-
       // Create a timeout promise
       const fetchPromise = fetch(url, options);
       const timeoutPromise = new Promise((_, reject) =>
@@ -1821,11 +1863,7 @@ async function fetchWithRetry(url, options, maxRetries = state.maxRetries) {
         console.error(`HTTP error ${response.status}: ${errorText}`);
 
         // Special handling for 404 or 405 errors which may indicate wrong port
-        // or that the request is going to the live server (5500) instead of API server (4000)
         if (response.status === 404 || response.status === 405) {
-          console.error(
-            `Likely connecting to the wrong server. Make sure to use ${API_URL} for all API calls.`
-          );
           throw new Error("wrong_server_port");
         }
 
@@ -1834,7 +1872,6 @@ async function fetchWithRetry(url, options, maxRetries = state.maxRetries) {
 
       return response;
     } catch (error) {
-      console.error(`Attempt ${attempt + 1} failed:`, error);
       lastError = error;
 
       // Check if we should immediately return for certain errors
@@ -1843,11 +1880,8 @@ async function fetchWithRetry(url, options, maxRetries = state.maxRetries) {
         error.message.includes("NetworkError") ||
         error.message === "wrong_server_port"
       ) {
-        console.log("Network error detected, may need to check server status");
-
         // If this is our last retry, modify the error message
         if (attempt === maxRetries) {
-          // Create a more descriptive error that will be handled in the calling function
           if (error.message === "wrong_server_port") {
             throw new Error("wrong_server_port");
           } else {
@@ -1862,14 +1896,11 @@ async function fetchWithRetry(url, options, maxRetries = state.maxRetries) {
           1000 * Math.pow(2, attempt) + Math.random() * 1000,
           10000
         );
-        console.log(`Retrying in ${Math.round(delay)}ms...`);
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
 
-  // If we get here, all retries have failed
-  console.error(`All ${maxRetries + 1} attempts failed for ${url}`);
   throw new Error("network_error_after_retries");
 }
 
@@ -1882,16 +1913,9 @@ async function optimizeImage(
 ) {
   return new Promise((resolve, reject) => {
     if (!file || !file.type.startsWith("image/")) {
-      console.log(
-        "Not an image file or no file provided, skipping optimization"
-      );
       resolve(file);
       return;
     }
-
-    console.log(
-      `Optimizing image: ${file.name}, size: ${(file.size / 1024).toFixed(2)}KB`
-    );
 
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -1909,9 +1933,6 @@ async function optimizeImage(
           const ratio = Math.min(maxWidth / width, maxHeight / height);
           width = Math.floor(width * ratio);
           height = Math.floor(height * ratio);
-          console.log(`Resizing image to ${width}x${height}`);
-        } else {
-          console.log("Image dimensions are within limits, no resize needed");
         }
 
         // Create canvas and draw the image
@@ -1926,7 +1947,6 @@ async function optimizeImage(
         canvas.toBlob(
           (blob) => {
             if (!blob) {
-              console.error("Failed to create optimized image blob");
               resolve(file); // Fallback to original file
               return;
             }
@@ -1937,11 +1957,6 @@ async function optimizeImage(
               lastModified: new Date().getTime(),
             });
 
-            console.log(
-              `Optimization complete. Original: ${(file.size / 1024).toFixed(
-                2
-              )}KB, Optimized: ${(optimizedFile.size / 1024).toFixed(2)}KB`
-            );
             resolve(optimizedFile);
           },
           file.type,
@@ -1950,13 +1965,11 @@ async function optimizeImage(
       };
 
       img.onerror = () => {
-        console.error("Error loading image for optimization");
         resolve(file); // Fallback to original
       };
     };
 
     reader.onerror = () => {
-      console.error("Error reading file for optimization");
       resolve(file); // Fallback to original
     };
   });
@@ -2001,7 +2014,6 @@ async function addProduct(e, data, form) {
       formData.append("smallImages", smallImages[i]);
     }
 
-    console.log("Uploading images...");
     submitBtn.innerHTML = "Uploading images...";
 
     // Submit image
@@ -2019,7 +2031,6 @@ async function addProduct(e, data, form) {
       throw new Error(imageData.error || "Image upload failed");
     }
 
-    console.log("Image upload response:", imageData);
     submitBtn.innerHTML = "Saving product...";
 
     // 3. Add product data with correct image structure
@@ -2039,11 +2050,6 @@ async function addProduct(e, data, form) {
       imageLocal: imageData.mainImage?.desktopLocal || "",
       publicImage: imageData.mainImage?.publicDesktop || "",
     };
-
-    console.log(
-      "Sending product data to server:",
-      JSON.stringify(productData, null, 2)
-    );
 
     // Send product data to server
     const productResponse = await fetch(`${API_URL}/addproduct`, {
@@ -2073,7 +2079,9 @@ async function addProduct(e, data, form) {
 
     // Remember the category we want to filter by
     const targetCategory = productData.category;
-    console.log("Target category for redirect:", targetCategory);
+
+    // Store it in state
+    state.selectedCategory = targetCategory;
 
     // Reset button state
     submitBtn.disabled = false;

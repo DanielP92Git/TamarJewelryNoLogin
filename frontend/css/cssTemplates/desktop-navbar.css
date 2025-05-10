@@ -130,20 +130,23 @@ a:hover {
 }
 
 .shoppingcart-svg {
-  display: flex;
+  display: inline-block !important;
   flex-flow: row;
   justify-content: flex-start;
-  width: 25px;
-  height: 25px;
+  width: 25px !important;
+  height: 25px !important;
   left: 600px;
+  visibility: visible !important;
+  opacity: 1 !important;
+  fill: #000000 !important;
 }
 
 .shoppingcart-svg:hover {
-  fill: rgb(121, 221, 255);
+  fill: rgb(121, 221, 255) !important;
 }
 
 .cart-number {
-  display: flex;
+  display: inline-block !important;
   justify-content: center;
   align-items: center;
   font-size: 0.8rem;

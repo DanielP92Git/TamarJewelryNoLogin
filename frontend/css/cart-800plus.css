@@ -1,6 +1,6 @@
 /* ~~~~~~~~~~~~~` Header ~~~~~~~~~~~~~` */
 header {
-  margin-bottom: 5rem;
+  margin-bottom: 1rem;
 }
 
 /* ~~~~~~ Mobile Menu ~~~~~~~ */
@@ -93,6 +93,11 @@ a {
   color: rgb(152, 152, 152);
 }
 
+.main-nav-tab.cart-tab {
+  display: flex;
+  width: auto;
+}
+
 .attrib-cart {
   display: flex;
   flex-flow: row;
@@ -105,29 +110,29 @@ a {
   font-size: 1.1rem;
   font-family: Raleway, sans-serif;
   text-decoration: none;
-
-  /* border: 1px solid green; */
 }
+
 .attrib-heb {
   font-size: 1.8rem;
   font-family: 'Amatic SC', sans-serif;
 }
+
 .cart-container {
   display: flex;
   /* border: 1px solid red; */
 }
 
 .shoppingcart-svg {
-  display: flex;
+  display: inline-block;
   flex-flow: row;
   justify-content: flex-start;
   width: 1.4rem;
-
+  visibility: visible;
   /* border: 1px solid; */
 }
 
 .cart-number {
-  display: flex;
+  display: inline-block !important;
   justify-content: center;
   align-items: center;
   font-size: 0.8rem;
@@ -265,14 +270,11 @@ main {
 .cart-item {
   display: grid;
   grid-template-columns: 1fr 2fr 2fr 1fr;
-
+  align-items: center;
   border: 0.5px solid rgba(0, 0, 0, 0.5);
   border-radius: 5px;
   padding: 15px;
   margin-bottom: 10px;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(109, 177, 20); */
 }
 
 .item-img {
@@ -293,28 +295,30 @@ main {
   margin-left: 10%;
   margin-right: 20%;
   font-size: 1rem;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(114, 20, 177); */
 }
-
+.mobile-lang-selector {
+  display: none;
+}
 .delete-item {
   justify-self: center;
   align-self: center;
-  font-size: 0.8rem;
-  padding: 2px;
-  border-radius: 3px;
-  width: 15px;
-  height: 15px;
-  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #f44336;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  line-height: 1;
 }
 
 .delete-item:hover {
-  cursor: pointer;
-  background-color: red;
-  color: white;
-  padding: 2px;
-  border: solid red;
+  background-color: #d32f2f;
 }
 
 .item-description {

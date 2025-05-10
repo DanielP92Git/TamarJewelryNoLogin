@@ -20,6 +20,32 @@ header {
   /* border: 4px solid rgb(177, 20, 143); */
 }
 
+/* Category-specific header backgrounds as a fallback */
+body#categories.bracelets header {
+  background-image: url('../imgs/website-images/bracelets/B3.jpg');
+}
+
+body#categories.necklaces header {
+  background-image: url('../imgs/website-images/necklaces/_MG_9133.jpg');
+}
+
+body#categories.hoop-earrings header {
+  background-image: url('../imgs/Hero-imgs/H4-1.jpg');
+}
+
+body#categories.unisex header,
+body#categories.shalom-club header {
+  background-image: url('../imgs/Hero-imgs/IMG_0173.jpg');
+}
+
+body#categories.dangle-earrings header {
+  background-image: url('../imgs/website-images/tamar-jewelry-images/D02A2681.jpg');
+}
+
+body#categories.crochet-necklaces header {
+  background-image: url('../imgs/website-images/crochet-necklaces/Untitled-4.jpg');
+}
+
 .bracelet-hero {
   background-position: unset;
 
@@ -126,31 +152,31 @@ a {
   font-size: 1.1rem;
   font-family: Raleway, sans-serif;
   text-decoration: none;
-
-  /* border: 1px solid green; */
 }
 
 .attrib-heb {
   font-size: 1.8rem;
   font-family: 'Amatic SC', sans-serif;
 }
-
+.mobile-lang-selector {
+  display: none;
+}
 .cart-container {
   display: flex;
   /* border: 1px solid red; */
 }
 
 .shoppingcart-svg {
-  display: flex;
+  display: inline-block;
   flex-flow: row;
   justify-content: flex-start;
   width: 1.4rem;
-
+  visibility: visible;
   /* border: 1px solid; */
 }
 
 .cart-number {
-  display: flex;
+  display: inline-block !important;
   justify-content: center;
   align-items: center;
   font-size: 0.8rem;
@@ -567,11 +593,21 @@ a {
 /* Modal Item Preview - Updated Styles */
 
 .modal {
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   width: 100%;
+  height: 0;
+  position: absolute;
+}
+
+.modal:not(:empty) {
+  display: flex;
   height: 100dvh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
 }
 
 .item-overlay {
@@ -1110,4 +1146,9 @@ a {
 /* Ensure item description is hidden in grid view */
 .item-container .item-description {
   display: none;
+}
+
+.main-nav-tab.cart-tab {
+  display: flex;
+  width: auto;
 }

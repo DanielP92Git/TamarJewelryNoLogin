@@ -116,7 +116,11 @@ body {
   text-align: center;
   z-index: 10;
 }
-
+.cart-number-mobile-header {
+  position: absolute;
+  top: 5px;
+  left: 70px;
+}
 .shoppingcart-svg {
   display: none;
 }

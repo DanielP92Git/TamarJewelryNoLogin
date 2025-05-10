@@ -1,6 +1,6 @@
 import closeSvg from '../imgs/svgs/x-solid.svg';
 import barsSvg from '../imgs/svgs/bars-solid.svg';
-import shoppingCartIcon from '../imgs/svgs/shopping_cart_google.svg';
+import shoppingCartIcon from '../imgs/svgs/cart-shopping-solid.svg';
 import * as model from './model.js';
 
 export default class View {
@@ -22,6 +22,9 @@ export default class View {
   _loginBtn = document.querySelector('.login-btn');
   _hebLng = document.querySelector('.heb-lng');
   _engLng = document.querySelector('.eng-lng');
+
+  // Store the reference to the imported SVG
+  CART_ICON_PATH = shoppingCartIcon;
 
   /**
    * * --Mobile View Categories Reveal--
@@ -207,36 +210,41 @@ export default class View {
   ////////////////////////////
 
   increaseCartNumber() {
-    this._cartNumber.forEach(cartNum => {
+    // Get fixed cart count elements
+    const cartNumberElements = document.querySelectorAll('.cart-number-mobile');
+
+    cartNumberElements.forEach(cartNum => {
       this._cartNewValue = +cartNum.textContent + 1;
       cartNum.textContent = this._cartNewValue;
+      // cartNum.style.display = 'flex';
     });
   }
 
   decreaseCartNumber() {
-    this._cartNumber.forEach(cartNum => {
+    // Get fixed cart count elements
+    const cartNumberElements = document.querySelectorAll('.cart-number-mobile');
+
+    cartNumberElements.forEach(cartNum => {
       this._cartNewValue = +cartNum.textContent - 1;
       cartNum.textContent = this._cartNewValue;
+      // cartNum.style.display = this._cartNewValue > 0 ? 'flex' : 'none';
     });
   }
 
   persistCartNumber(num) {
-    // Select both desktop and mobile elements
-    const cartNumberElements = document.querySelectorAll(
-      '.cart-number, .cart-number-mobile'
-    );
+    // Select the fixed cart count elements
+    const cartNumberElements = document.querySelectorAll('.cart-number-mobile');
+
     if (cartNumberElements.length === 0) {
       return;
     }
-    cartNumberElements.forEach((cartNumEl, index) => {
-      // Always show the element and update its text content
-      if (cartNumEl.classList.contains('cart-number-mobile')) {
-        cartNumEl.style.display = 'flex';
-      } else {
-        cartNumEl.style.display = 'inline'; // Or 'block' if needed
-      }
-      cartNumEl.textContent = num; // Set text content to 0 or the actual number
+
+    cartNumberElements.forEach(cartNumEl => {
+      cartNumEl.textContent = num; // Set text content to the actual number
     });
+
+    // Ensure body has show-cart-icon class for visibility
+    document.body.classList.add('show-cart-icon');
   }
 
   // async logInOutHandler() {
@@ -413,9 +421,9 @@ export default class View {
       menuBars.parentNode.replaceChild(oldMenuBars, menuBars);
 
       // Directly add inline style to ensure visibility
-      oldMenuBars.style.display = 'block';
-      oldMenuBars.style.visibility = 'visible';
-      oldMenuBars.style.cursor = 'pointer';
+      // oldMenuBars.style.display = 'block';
+      // oldMenuBars.style.visibility = 'visible';
+      // oldMenuBars.style.cursor = 'pointer';
 
       // Add the new click handler
       oldMenuBars.addEventListener('click', e => {
@@ -499,6 +507,84 @@ export default class View {
   }
 
   handleMenuLanguage(lng) {
+    // Determine if we're on mobile or desktop
+    const isMobile = window.matchMedia('(max-width: 699.99px)').matches;
+
+    // Cart markup as a normal navbar item using CSS classes instead of inline styles
+    const cartMarkup = `
+      <li class="main-nav-tab">
+        <a class="attrib-cart" href="/html/cart.html">
+          <div class="cart-container">
+            <svg class="shoppingcart-svg" viewBox="0 0 100 100">
+              <path d="m 4.9999998,9.2183795 c 0,-2.3378112 1.6861769,-4.2186005 3.7820788,-4.2186005 h 7.1701734 c 3.466899,0 6.539832,2.2499202 7.973874,5.624801 h 64.767975 c 4.144527,0 7.170176,4.394373 6.082839,8.859061 l -6.461046,26.770533 c -1.339479,5.519343 -5.830695,9.368813 -10.952243,9.368813 h -45.46366 l 0.850968,5.009591 c 0.346689,1.986257 1.906794,3.42761 3.719034,3.42761 h 45.432141 c 2.095893,0 3.78207,1.880789 3.78207,4.218601 0,2.337811 -1.686177,4.2186 -3.78207,4.2186 H 36.469993 c -5.452488,0 -10.132803,-4.324068 -11.141352,-10.282838 L 17.197186,14.579517 C 17.086873,13.911579 16.566844,13.43698 15.952252,13.43698 H 8.7820786 c -2.0959019,0 -3.7820788,-1.880789 -3.7820788,-4.2186005 z M 25.171051,86.559389 a 7.5641447,8.4372024 0 1 1 15.128288,0 7.5641447,8.4372024 0 1 1 -15.128288,0 z M 78.120065,78.12219 a 7.5641446,8.4372022 0 1 1 0,16.874404 7.5641446,8.4372022 0 1 1 0,-16.874404 z" />
+            </svg>
+            <span class="cart-number-mobile">0</span>
+          </div>
+        </a>
+      </li>
+    `;
+
+    const ilFlag = `<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-il" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <clipPath id="il-a">
+      <path fill-opacity=".7" d="M0 0h512v512H0z"/>
+    </clipPath>
+  </defs>
+  <g fill-rule="evenodd" clip-path="url(#il-a)">
+    <path fill="#fff" d="M619.4 512H-112V0h731.4z"/>
+    <path fill="#0038b8" d="M619.4 115.2H-112V48h731.4zm0 350.5H-112v-67.2h731.4zm-483-275 110.1 191.6L359 191.6z"/>
+    <path fill="#fff" d="m225.8 317.8 20.9 35.5 21.4-35.3z"/>
+    <path fill="#0038b8" d="M136 320.6 246.2 129l112.4 190.8z"/>
+    <path fill="#fff" d="m225.8 191.6 20.9-35.5 21.4 35.4zM182 271.1l-21.7 36 41-.1-19.3-36zm-21.3-66.5 41.2.3-19.8 36.3zm151.2 67 20.9 35.5-41.7-.5zm20.5-67-41.2.3 19.8 36.3zm-114.3 0L189.7 256l28.8 50.3 52.8 1.2 32-51.5-29.6-52z"/>
+  </g>
+</svg>
+`;
+
+    const usFlag = `<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-us" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+  <path fill="#bd3d44" d="M0 0h512v512H0"/>
+  <path stroke="#fff" stroke-width="40" d="M0 58h512M0 137h512M0 216h512M0 295h512M0 374h512M0 453h512"/>
+  <path fill="#192f5d" d="M0 0h390v275H0z"/>
+  <marker id="us-a" markerHeight="30" markerWidth="30">
+    <path fill="#fff" d="m15 0 9.3 28.6L0 11h30L5.7 28.6"/>
+  </marker>
+  <path fill="none" marker-mid="url(#us-a)" d="m0 0 18 11h65 65 65 65 66L51 39h65 65 65 65L18 66h65 65 65 65 66L51 94h65 65 65 65L18 121h65 65 65 65 66L51 149h65 65 65 65L18 177h65 65 65 65 66L51 205h65 65 65 65L18 232h65 65 65 65 66z"/>
+</svg>
+`;
+
+    // Create the desktop flag selector HTML - for English version with the english-lng-selector class
+    const engDesktopFlagSelector = `
+    <li class="main-nav-tab desktop-lang-selector english-lng-selector">
+      <div class="flag-dropdown">
+        <div class="flag-icon flag-eng${
+          lng === 'eng' ? ' selected' : ''
+        }" data-lang="eng">
+          ${usFlag}
+        </div>
+        <div class="flag-icon flag-heb${
+          lng === 'heb' ? ' selected' : ''
+        }" data-lang="heb">
+          ${ilFlag}
+        </div>
+      </div>
+    </li>`;
+
+    // Create the desktop flag selector HTML - for Hebrew version without the english-lng-selector class
+    const hebDesktopFlagSelector = `
+    <li class="main-nav-tab desktop-lang-selector">
+      <div class="flag-dropdown">
+        <div class="flag-icon flag-eng${
+          lng === 'eng' ? ' selected' : ''
+        }" data-lang="eng">
+          ${usFlag}
+        </div>
+        <div class="flag-icon flag-heb${
+          lng === 'heb' ? ' selected' : ''
+        }" data-lang="heb">
+          ${ilFlag}
+        </div>
+      </div>
+    </li>`;
+
     if (lng === 'eng') {
       return `<ul class="menu__ul ul-eng">
           <li class="main-nav-tab">
@@ -546,21 +632,9 @@ export default class View {
           <li class="main-nav-tab contact">
             <a class="attrib" href="/html/contact-me.html">Contact Me</a>
           </li>
-          <a class="attrib-cart" href="/html/cart.html">
-            <div class="cart-container">
-              <img
-                src=${shoppingCartIcon}
-                alt="shopping cart icon"
-                class="shoppingcart-svg"
-              />
-              <span class="cart-number">0</span>
-            </div>
-          </a>
+          ${engDesktopFlagSelector}
+          ${cartMarkup}
         </ul>
-        <div class="languages-container">
-          <button class="heb-lng">עב</button>
-          <button class="eng-lng">EN</button>
-        </div>
         `;
     } else if (lng === 'heb') {
       return `<ul class="menu__ul ul-heb" >
@@ -609,27 +683,87 @@ export default class View {
           <li class="main-nav-tab contact">
             <a class="attrib attrib-heb" href="/html/contact-me.html">צרו קשר</a>
           </li>
-          <a class="attrib-cart" href="/html/cart.html">
-            <div class="cart-container">
-              <img
-                src=${shoppingCartIcon}
-                alt=""
-                class="shoppingcart-svg"
-              />
-              <span class="cart-number">0</span>
-            </div>
-          </a>
+          ${hebDesktopFlagSelector}
+          ${cartMarkup}
         </ul>
-        <div class="languages-container">
-          <button class="heb-lng">עב</button>
-          <button class="eng-lng">EN</button>
-        </div>
         `;
     }
   }
 
   async setLanguage(lng, cartNum) {
     this.lang = lng;
+
+    const ilFlag = `<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-il" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <clipPath id="il-a">
+      <path fill-opacity=".7" d="M0 0h512v512H0z"/>
+    </clipPath>
+  </defs>
+  <g fill-rule="evenodd" clip-path="url(#il-a)">
+    <path fill="#fff" d="M619.4 512H-112V0h731.4z"/>
+    <path fill="#0038b8" d="M619.4 115.2H-112V48h731.4zm0 350.5H-112v-67.2h731.4zm-483-275 110.1 191.6L359 191.6z"/>
+    <path fill="#fff" d="m225.8 317.8 20.9 35.5 21.4-35.3z"/>
+    <path fill="#0038b8" d="M136 320.6 246.2 129l112.4 190.8z"/>
+    <path fill="#fff" d="m225.8 191.6 20.9-35.5 21.4 35.4zM182 271.1l-21.7 36 41-.1-19.3-36zm-21.3-66.5 41.2.3-19.8 36.3zm151.2 67 20.9 35.5-41.7-.5zm20.5-67-41.2.3 19.8 36.3zm-114.3 0L189.7 256l28.8 50.3 52.8 1.2 32-51.5-29.6-52z"/>
+  </g>
+</svg>
+`;
+
+    const usFlag = `<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-us" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+  <path fill="#bd3d44" d="M0 0h512v512H0"/>
+  <path stroke="#fff" stroke-width="40" d="M0 58h512M0 137h512M0 216h512M0 295h512M0 374h512M0 453h512"/>
+  <path fill="#192f5d" d="M0 0h390v275H0z"/>
+  <marker id="us-a" markerHeight="30" markerWidth="30">
+    <path fill="#fff" d="m15 0 9.3 28.6L0 11h30L5.7 28.6"/>
+  </marker>
+  <path fill="none" marker-mid="url(#us-a)" d="m0 0 18 11h65 65 65 65 66L51 39h65 65 65 65L18 66h65 65 65 65 66L51 94h65 65 65 65L18 121h65 65 65 65 66L51 149h65 65 65 65L18 177h65 65 65 65 66L51 205h65 65 65 65L18 232h65 65 65 65 66z"/>
+</svg>
+`;
+
+    // Add mobile language selector if it doesn't exist
+    if (!document.querySelector('.mobile-lang-selector')) {
+      const mobileLangSelector = document.createElement('div');
+      mobileLangSelector.className = 'mobile-lang-selector';
+      mobileLangSelector.innerHTML = `
+        <div class="flag-dropdown">
+          <div class="flag-icon flag-eng${
+            lng === 'eng' ? ' selected' : ''
+          }" data-lang="eng">
+            ${usFlag}
+          </div>
+          <div class="flag-icon flag-heb${
+            lng === 'heb' ? ' selected' : ''
+          }" data-lang="heb">
+            ${ilFlag}
+          </div>
+        </div>
+      `;
+      const header = document.querySelector('header');
+      if (header) {
+        header.appendChild(mobileLangSelector);
+      } else {
+        document.body.appendChild(mobileLangSelector);
+      }
+
+      // Add event listeners for flag clicks
+      const flagIcons = mobileLangSelector.querySelectorAll('.flag-icon');
+      flagIcons.forEach(flag => {
+        flag.addEventListener('click', e => {
+          const newLang = flag.getAttribute('data-lang');
+          if (newLang === 'heb') {
+            this.changeToHeb();
+          } else {
+            this.changeToEng();
+          }
+        });
+      });
+    } else {
+      // Update the selected option if the selector already exists
+      const select = document.getElementById('mobile-lang-select');
+      if (select) {
+        select.value = lng;
+      }
+    }
 
     // Update menu innerHTML
     const menu = document.querySelector('.menu');
@@ -643,6 +777,24 @@ export default class View {
 
     // Update menu content
     menu.innerHTML = this.handleMenuLanguage(lng);
+
+    // Add event listeners for desktop language flags
+    const desktopFlagIcons = document.querySelectorAll(
+      '.desktop-lang-selector .flag-icon'
+    );
+    desktopFlagIcons.forEach(flag => {
+      flag.addEventListener('click', e => {
+        const newLang = flag.getAttribute('data-lang');
+        if (newLang === 'heb') {
+          this.changeToHeb();
+        } else {
+          this.changeToEng();
+        }
+      });
+    });
+
+    // Ensure cart icon is visible after DOM update
+    // this.ensureCartIconVisibility();
 
     // Add mobile/desktop handlers only if we have the elements
     const categoriesTab = document.querySelector('.categories-tab');
@@ -711,12 +863,9 @@ export default class View {
       engBtn.addEventListener('click', this.changeToEng.bind(this));
     }
 
-    // Re-query elements after DOM update and set cart number again
-    this._cartNumber = document.querySelectorAll('.cart-number');
-    if (this._cartNumber) {
-      this._cartNumber.forEach(element => {
-        element.textContent = typeof cartNum === 'number' ? cartNum : '0';
-      });
+    // Update cart numbers if they exist
+    if (typeof cartNum === 'number') {
+      this.persistCartNumber(cartNum);
     }
 
     // Reinitialize the mobile menu toggle after language change
@@ -753,56 +902,6 @@ export default class View {
       await this.setPageSpecificLanguage(lng, cartNum);
     }
   }
-
-  // Add a new method to handle all menu interactions
-  // setupGlobalMenuHandler() {
-  //   // Remove any existing handler first
-  //   const existingHandler = document.querySelector('.menu');
-  //   if (existingHandler) {
-  //     existingHandler.removeEventListener('click', this._handleMenuClick);
-  //   }
-
-  //   // Add the new handler
-  //   const menu = document.querySelector('.menu');
-  //   if (menu) {
-  //     this._handleMenuClick = this._handleMenuClick.bind(this);
-  //     menu.addEventListener('click', this._handleMenuClick);
-  //   }
-  // }
-
-  // // New centralized menu click handler
-  // _handleMenuClick(event) {
-  //   // Check if the click is on a categories tab or within it
-  //   const targetEl = event.target;
-  //   const categoriesTab = targetEl.closest('.categories-tab');
-
-  //   if (categoriesTab) {
-  //     // Check if we clicked on the shop link, not the dropdown
-  //     const isShopLink =
-  //       targetEl.tagName === 'A' &&
-  //       targetEl.parentNode.classList.contains('categories-tab');
-
-  //     if (isShopLink) {
-  //       event.preventDefault();
-
-  //       // Handle mobile differently
-  //       const isMobile = window.matchMedia('(max-width: 699.99px)').matches;
-
-  //       if (isMobile) {
-  //         // Use the main handleMobileDropdown function
-  //         this.handleMobileDropdown(categoriesTab);
-  //       } else {
-  //         // Desktop behavior
-  //         categoriesTab.classList.toggle('active');
-  //         const categoriesList =
-  //           categoriesTab.querySelector('.categories-list');
-  //         if (categoriesList) {
-  //           categoriesList.classList.toggle('categories-list--active');
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
 
   setFooterLng(lng) {
     if (lng === 'eng') {
@@ -880,26 +979,26 @@ export default class View {
             >תכשיטי יוניסקס</a
           >
           <a class="attrib-footer" href="/html/categories/shalom-club.html"
-            >מועדון שלום</a
+            >מועדון "שלום"</a
           >
         </div>
 
         <div class="footer-middle-column">
           <a class="attrib-footer" href="/html/policies.html"
-            >מדיניות משלוחים וביטולים</a
+            >מדיניות משלוח וביטול</a
           >
           <a class="attrib-footer" href="/html/contact-me.html">צרו קשר</a>
         </div>
         <div class="footer-right-column">
           <a class="attrib-footer" href="/html/jewelry-workshop.html"
-            >סדנאות תכשיטים</a
+            >סדנאת תכשיטים</a
           >
           <a class="attrib-footer" href="/html/about.html">אודות</a>
         </div>
       </div>
       <div class="rights-container">
         <span class="rights-text"
-          >© 2024 Tamar Kfir Jewelry. כל הזכויות שמורות.</span
+          >© 2024 תמר כפיר תכשיטים. כל הזכויות שמורות.</span
         >
       </div>
     `;
@@ -907,10 +1006,10 @@ export default class View {
   }
 
   handleFooterMarkup(lng) {
-    const markup = this.setFooterLng(lng);
-    let footer = document.querySelector('.footer');
-    footer.innerHTML = '';
-    footer.insertAdjacentHTML('afterbegin', markup);
+    const footer = document.querySelector('.footer');
+    if (footer) {
+      footer.innerHTML = this.setFooterLng(lng);
+    }
   }
 
   // Method to generate the categories list markup (example)
@@ -934,111 +1033,5 @@ export default class View {
       )
       .join('');
     return `<ul class="categories-list">${listItems}</ul>`;
-  }
-
-  init() {
-    this.isDesktop = window.matchMedia('(min-width: 700px)').matches;
-
-    // Initialize the menu
-    try {
-      this.renderMenu();
-      this.addMobileHandler();
-      // this.addRevealHandler();
-      this.addStickyMenu();
-      this.initializeMobileMenu();
-    } catch (err) {
-      console.error('[View] Error initializing menu:', err);
-    }
-  }
-
-  displayProducts(products) {
-    const productsContainer = document.querySelector('.products-container');
-    if (!productsContainer) return;
-
-    productsContainer.innerHTML = products
-      .map(
-        product => `
-      <div class="product-card">
-        <div class="product-image-container">
-          <img class="product-image" src="${product.image}" alt="${
-          product.name
-        }" onload="this.classList.add('loaded')">
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">${product.name}</h3>
-          <p class="product-price">$${product.price.toFixed(2)}</p>
-          <button class="add-to-cart-btn" data-id="${
-            product.id
-          }">Add to Cart</button>
-        </div>
-      </div>
-    `
-      )
-      .join('');
-
-    // Add event listeners for add to cart buttons
-    this.addCartEventListeners();
-  }
-
-  renderMenu() {
-    // Get the language preference from localStorage
-    const lng = localStorage.getItem('language') || 'eng';
-
-    // Get the menu element
-    const menu = document.querySelector('.menu');
-    if (!menu) return;
-
-    // Set menu content based on language
-    menu.innerHTML = this.handleMenuLanguage(lng);
-
-    // Initialize cart number
-    this._cartNumber = document.querySelectorAll('.cart-number');
-    model.checkCartNumber().then(num => {
-      this.persistCartNumber(num);
-    });
-  }
-
-  initializeMobileMenu() {
-    // Add event handlers for mobile menu interactions
-    this.svgHandler();
-
-    // console.log('mobileCartNumber', mobileCartNumber);
-    // Initialize mobile cart number
-    const mobileCartNumber = document.querySelector('.cart-number-mobile');
-    if (mobileCartNumber) {
-      model.checkCartNumber().then(num => {
-        mobileCartNumber.textContent = num;
-      });
-    }
-  }
-
-  addCartEventListeners() {
-    const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
-
-    addToCartButtons.forEach(button => {
-      // Remove any existing event listeners to avoid duplicates
-      const newButton = button.cloneNode(true);
-      button.parentNode.replaceChild(newButton, button);
-
-      // Add click event listener
-      newButton.addEventListener('click', e => {
-        e.preventDefault();
-        const id = newButton.dataset.id;
-
-        // Call model to handle adding to cart
-        model.handleAddToCart({ dataset: { id } });
-
-        // Update the cart number
-        this.increaseCartNumber();
-
-        // Also update cart number on mobile view
-        const mobileCartNumber = document.querySelector('.cart-number-mobile');
-        if (mobileCartNumber) {
-          const newValue = parseInt(mobileCartNumber.textContent || '0') + 1;
-          mobileCartNumber.textContent = newValue;
-          mobileCartNumber.style.display = 'flex';
-        }
-      });
-    });
   }
 }
