@@ -395,7 +395,7 @@ body.menu-active .icons-container .menubars-svg {
   position: absolute;
   top: 1rem;
   left: 1rem;
-  z-index: 1000;
+  z-index: 700;
 }
 
 /* Custom flag dropdown for mobile language selector */

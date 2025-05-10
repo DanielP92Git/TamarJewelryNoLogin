@@ -733,6 +733,8 @@ class CategoriesView extends View {
     const modalContent = `
       <div class="item-overlay">
         <div class="modal-content">
+                  <button class="close-modal-btn">&times;</button>
+
           <div class="modal-layout">
             ${
               hasSmallImages
@@ -810,7 +812,6 @@ class CategoriesView extends View {
               </div>
             </div>
           </div>
-          <button class="close-modal-btn">&times;</button>
         </div>
       </div>
       <div class="fullscreen-gallery">
@@ -1643,7 +1644,7 @@ class CategoriesView extends View {
     preloadImg.src = image.src;
     preloadImg.onload = () => {
       glass.style.backgroundImage = `url('${image.src}')`;
-      glass.style.backgroundSize = `${300}%`;
+      // Don't set background size here - we'll set it dynamically in the handlers
       glass.style.imageRendering = 'high-quality';
       glass.style.backfaceVisibility = 'hidden';
       glass.style.transform = 'translateZ(0)';
@@ -1658,24 +1659,40 @@ class CategoriesView extends View {
       mouseY
     ) => {
       const imgRect = imgElement.getBoundingClientRect();
-      const imgAspectRatio =
-        imgElement.dataset.naturalWidth / imgElement.dataset.naturalHeight;
+
+      // Default to image dimensions if naturalWidth/Height not available
+      const naturalWidth =
+        parseInt(imgElement.dataset.naturalWidth) || imgRect.width * 2;
+      const naturalHeight =
+        parseInt(imgElement.dataset.naturalHeight) || imgRect.height * 2;
+
+      const imgAspectRatio = naturalWidth / naturalHeight;
       const containerAspectRatio = containerRect.width / containerRect.height;
 
+      // Calculate the visible dimensions of the image within the container
       let visibleImgWidth, visibleImgHeight, offsetX, offsetY;
 
       if (imgAspectRatio > containerAspectRatio) {
-        visibleImgWidth = containerRect.width;
-        visibleImgHeight = containerRect.width / imgAspectRatio;
-        offsetX = 0;
-        offsetY = (containerRect.height - visibleImgHeight) / 2;
+        // Image is wider than container (constrained by width)
+        visibleImgWidth = imgRect.width;
+        visibleImgHeight = imgRect.width / imgAspectRatio;
+        offsetX = imgRect.left - containerRect.left;
+        offsetY =
+          imgRect.top -
+          containerRect.top +
+          (imgRect.height - visibleImgHeight) / 2;
       } else {
-        visibleImgHeight = containerRect.height;
-        visibleImgWidth = containerRect.height * imgAspectRatio;
-        offsetX = (containerRect.width - visibleImgWidth) / 2;
-        offsetY = 0;
+        // Image is taller than container (constrained by height)
+        visibleImgHeight = imgRect.height;
+        visibleImgWidth = imgRect.height * imgAspectRatio;
+        offsetX =
+          imgRect.left -
+          containerRect.left +
+          (imgRect.width - visibleImgWidth) / 2;
+        offsetY = imgRect.top - containerRect.top;
       }
 
+      // Add buffer zone around the image
       const buffer = 5;
       if (
         mouseX < offsetX - buffer ||
@@ -1686,9 +1703,11 @@ class CategoriesView extends View {
         return { inBounds: false };
       }
 
+      // Calculate the percentage position within the image
       let xPercent = ((mouseX - offsetX) / visibleImgWidth) * 100;
       let yPercent = ((mouseY - offsetY) / visibleImgHeight) * 100;
 
+      // Clamp values to ensure they're within 0-100%
       xPercent = Math.max(0, Math.min(100, xPercent));
       yPercent = Math.max(0, Math.min(100, yPercent));
 
@@ -1719,7 +1738,7 @@ class CategoriesView extends View {
     glass,
     image,
     tapToMagnify,
-    calculatePosition
+    calculateImagePosition
   ) {
     const handleTouch = e => {
       const touch = e.touches[0];
@@ -1727,7 +1746,7 @@ class CategoriesView extends View {
       const x = touch.clientX - rect.left;
       const y = touch.clientY - rect.top;
 
-      const position = calculatePosition(image, rect, x, y);
+      const position = calculateImagePosition(image, rect, x, y);
       if (!position.inBounds) {
         glass.style.display = 'none';
         return;
@@ -1754,7 +1773,8 @@ class CategoriesView extends View {
       glass.style.left = `${offsetX}px`;
       glass.style.top = `${offsetY}px`;
 
-      const zoomFactor = 3.5;
+      // Significantly increase the zoom factor for mobile
+      const zoomFactor = 8;
       glass.style.backgroundImage = `url('${image.src}')`;
       glass.style.backgroundPosition = `${position.xPercent}% ${position.yPercent}%`;
       glass.style.backgroundSize = `${zoomFactor * 100}%`;
@@ -1787,7 +1807,7 @@ class CategoriesView extends View {
     glass,
     image,
     magnifierIcon,
-    calculatePosition
+    calculateImagePosition
   ) {
     if (magnifierIcon) magnifierIcon.style.opacity = '1';
 
@@ -1800,7 +1820,7 @@ class CategoriesView extends View {
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
 
-      const position = calculatePosition(image, rect, x, y);
+      const position = calculateImagePosition(image, rect, x, y);
       if (!position.inBounds) {
         glass.style.display = 'none';
         return;
@@ -1827,9 +1847,11 @@ class CategoriesView extends View {
       glass.style.left = `${glassX}px`;
       glass.style.top = `${glassY}px`;
 
-      const zoomFactor = 3;
+      // Significantly increase the zoom factor for desktop
+      const zoomFactor = 8;
       glass.style.backgroundImage = `url('${image.src}')`;
       glass.style.backgroundPosition = `${position.xPercent}% ${position.yPercent}%`;
+      // Set background size to zoomFactor * 100% for proper enlargement
       glass.style.backgroundSize = `${zoomFactor * 100}%`;
       glass.style.imageRendering = 'high-quality';
     });
