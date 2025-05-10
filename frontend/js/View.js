@@ -594,31 +594,31 @@ export default class View {
             <a class="attrib" href="#">Shop <span class="arrow-indicator">▼</span></a>
             <ul class="categories-list">
               <li class="category-item category-item--necklace">
-                <a class="attrib" href="/html/categories/necklaces.html">
+                <a class="attrib attrib-eng" href="/html/categories/necklaces.html">
                   Necklaces</a>
               </li>
               <li class="category-item category-item--crochet-necklace">
-                <a class="attrib" href="/html/categories/crochetNecklaces.html">
+                <a class="attrib attrib-eng" href="/html/categories/crochetNecklaces.html">
                   Crochet Necklaces</a>
               </li>
               <li class="category-item category-item--hoops">
-                <a class="attrib" href="/html/categories/hoops.html">
+                <a class="attrib attrib-eng" href="/html/categories/hoops.html">
                   Hoop Earrings</a>
               </li>
               <li class="category-item category-item--dangle">
-                <a class="attrib" href="/html/categories/dangle.html">
+                <a class="attrib attrib-eng" href="/html/categories/dangle.html">
                   Dangle Earrings</a>
               </li>
               <li class="category-item category-item--bracelets">
-                <a class="attrib" href="/html/categories/bracelets.html">
+                <a class="attrib attrib-eng" href="/html/categories/bracelets.html">
                   Bracelets</a>
               </li>
               <li class="category-item category-item--unisex">
-                <a class="attrib" href="/html/categories/unisex.html">
+                <a class="attrib attrib-eng" href="/html/categories/unisex.html">
                   Unisex Jewelry</a>
               </li>
               <li class="category-item category-item--shalom-club">
-                <a class="attrib" href="/html/categories/shalom-club.html">
+                <a class="attrib attrib-eng" href="/html/categories/shalom-club.html">
                   Shalom Club</a>
               </li>
             </ul>
@@ -639,10 +639,10 @@ export default class View {
     } else if (lng === 'heb') {
       return `<ul class="menu__ul ul-heb" >
           <li class="main-nav-tab">
-            <a class="attrib attrib-heb" href="/index.html">בית </a>
+            <a class="attrib" href="/index.html">בית </a>
           </li>
           <li class="main-nav-tab categories-tab">
-            <a class="attrib attrib-heb shop-link" href="#">חנות <span class="arrow-indicator">▼</span></a>
+            <a class="attrib shop-link" href="#">חנות <span class="arrow-indicator">▼</span></a>
             <ul class="categories-list">
               <li class="category-item category-item--necklace">
                 <a class="attrib attrib-heb" href="/html/categories/necklaces.html">
@@ -675,13 +675,13 @@ export default class View {
             </ul>
           </li>
           <li class="main-nav-tab">
-            <a class="attrib attrib-heb" href="/html/jewelry-workshop.html">סדנאת תכשיטים</a>
+            <a class="attrib" href="/html/jewelry-workshop.html">סדנאת תכשיטים</a>
           </li>
           <li class="main-nav-tab">
-            <a class="attrib attrib-heb" href="/html/about.html">אודות</a>
+            <a class="attrib" href="/html/about.html">אודות</a>
           </li>
           <li class="main-nav-tab contact">
-            <a class="attrib attrib-heb" href="/html/contact-me.html">צרו קשר</a>
+            <a class="attrib" href="/html/contact-me.html">צרו קשר</a>
           </li>
           ${hebDesktopFlagSelector}
           ${cartMarkup}

@@ -56,18 +56,6 @@ a {
   text-transform: uppercase;
 }
 
-/* Hebrew navigation links - larger font size */
-.attrib.attrib-heb {
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.category-item .attrib.attrib-heb {
-  font-size: 1.3rem;
-  font-family: 'Amatic SC', sans-serif;
-  font-weight: bold;
-}
-
 .attrib:hover {
   color: rgb(152, 152, 152);
 }
@@ -101,7 +89,7 @@ a {
   list-style: none;
   position: absolute;
   top: 100%;
-  width: 20%;
+  width: 15%;
   height: auto;
   background-color: white;
   opacity: 0;
@@ -125,15 +113,15 @@ a {
 
 .category-item {
   position: relative;
-  padding: 8px 0;
+  /* padding: 8px 0; */
   transition: background-color 0.2s ease;
 }
 
-.category-item .attrib {
+/* .category-item .attrib {
   height: 2rem;
   font-size: 1.1rem;
   padding: 0 10px;
-}
+} */
 
 .category-item:hover {
   cursor: pointer;
@@ -312,4 +300,14 @@ a {
   .desktop-lang-selector.english-lng-selector {
     display: none;
   }
+}
+/* Specific styles for attrib elements within English menu */
+.attrib.attrib-eng {
+  font-size: 0.8rem;
+  letter-spacing: 0.8px;
+  /* text-transform: uppercase; */
+}
+
+.attrib.attrib-eng:hover {
+  color: #000000;
 }
