@@ -26,6 +26,11 @@ class HomePageView extends View {
         this.addMobileHandler(categoriesTab);
         this.addRevealHandler(categoriesTab);
       }
+
+      // Ensure the cart icon is visible on the home page
+      setTimeout(() => {
+        this.ensureCartIconVisibility();
+      }, 300);
     });
   };
 
@@ -50,6 +55,10 @@ class HomePageView extends View {
     // Then do homepage-specific updates
     this.setHomeLanguage('heb');
     this.setFooterLng('heb');
+    // Ensure cart icon is visible after language change
+    setTimeout(() => {
+      this.ensureCartIconVisibility();
+    }, 100);
   }
 
   changeToEng() {
@@ -59,31 +68,76 @@ class HomePageView extends View {
     // Then do homepage-specific updates
     this.setHomeLanguage('eng');
     this.setFooterLng('eng');
+    // Ensure cart icon is visible after language change
+    setTimeout(() => {
+      this.ensureCartIconVisibility();
+    }, 100);
+  }
+
+  // Override the ensureCartIconVisibility method to handle home page specific cart icon
+  ensureCartIconVisibility() {
+    // Additional home-page specific fixes
+    if (window.matchMedia('(min-width: 800px)').matches) {
+      // Select cart elements
+      const cartIcon = document.querySelector('.shoppingcart-svg');
+      const cartTab = document.querySelector('.main-nav-tab.cart-tab');
+      const cartContainer = document.querySelector('.cart-container');
+      const cartNumber = document.querySelector('.cart-number');
+
+      // Force visibility on SVG with !important inline styles
+      if (cartIcon) {
+        cartIcon.setAttribute(
+          'style',
+          `
+          display: inline-block !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          width: 25px !important;
+          height: 25px !important;
+          fill: #000000 !important;
+        `
+        );
+      }
+
+      // Force visibility on cart tab
+      if (cartTab) {
+        cartTab.setAttribute(
+          'style',
+          `
+          display: flex !important;
+          visibility: visible !important;
+        `
+        );
+      }
+
+      // Force visibility on cart container
+      if (cartContainer) {
+        cartContainer.setAttribute(
+          'style',
+          `
+          display: flex !important;
+          visibility: visible !important;
+        `
+        );
+      }
+
+      // Force visibility on cart number
+      if (cartNumber) {
+        cartNumber.setAttribute(
+          'style',
+          `
+          display: inline-block !important;
+          visibility: visible !important;
+        `
+        );
+      }
+    }
   }
 
   setHomeLanguage(lng) {
     // Page-specific language setup
     this.setCategoriesLng(lng);
     this.handleFooterMarkup(lng);
-
-    // Update hero section text
-    const heroText = document.querySelector('.hero-section h3');
-    if (heroText) {
-      if (lng === 'eng') {
-        heroText.innerHTML = `
-          The Beauty <br />
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Of
-          <span>Colors</span>
-        `;
-      } else if (lng === 'heb') {
-        heroText.innerHTML = `
-          <span>היופי</span> <br />
-          <span>&nbsp;&nbsp;&nbsp;שבצבעים</span>
-        `;
-        heroText.style.direction = 'rtl';
-        heroText.style.textAlign = 'right';
-      }
-    }
   }
 
   setCategoriesLng(lng) {
@@ -177,8 +231,10 @@ class HomePageView extends View {
   // Override the placeholder from View.js
   setPageSpecificLanguage(lng, cartNum) {
     this.setHomeLanguage(lng);
-    // Footer seems to be handled separately in controller/base View?
-    // this.setFooterLng(lng);
+    // Ensure cart icon is visible after setting language
+    setTimeout(() => {
+      this.ensureCartIconVisibility();
+    }, 100);
   }
 }
 

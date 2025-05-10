@@ -26,6 +26,41 @@ const controlHomePage = async function (lng) {
   homePageView._imageSlider();
   homePageView._moveToTopHandler();
 
+  // Ensure cart icon is visible in desktop view
+  setTimeout(() => {
+    // For desktop view shopping cart in nav menu
+    const cartTab = document.querySelector('.main-nav-tab.cart-tab');
+    const cartContainer = document.querySelector('.cart-container');
+
+    if (window.matchMedia('(min-width: 800px)').matches) {
+      if (cartTab) {
+        cartTab.style.display = 'flex';
+        cartTab.style.visibility = 'visible';
+      }
+
+      if (cartContainer) {
+        cartContainer.style.display = 'flex';
+        cartContainer.style.visibility = 'visible';
+      }
+
+      // Ensure the SVG is properly visible
+      const cartIcon = document.querySelector('.shoppingcart-svg');
+      if (cartIcon) {
+        cartIcon.style.display = 'inline-block';
+        cartIcon.style.visibility = 'visible';
+        cartIcon.style.opacity = '1';
+        cartIcon.style.fill = '#000000';
+      }
+
+      // Also ensure cart number is visible
+      const cartNumber = document.querySelector('.cart-number');
+      if (cartNumber) {
+        cartNumber.style.display = 'inline-block';
+        cartNumber.style.visibility = 'visible';
+      }
+    }
+  }, 500);
+
   // await homePageView._addHandlerOpenModal();
   // homePageView._addHandlerCloseModal();
   // homePageView._addHandlerCloseSubscribe();
@@ -68,9 +103,8 @@ const controlContactMePage = async function (lng) {
 const controlCategoriesPage = async function () {
   try {
     const body = document.querySelector('body');
-    const idAttributeValue = body.id;
-    const idParts = idAttributeValue.split(' ');
-    const categoryName = idParts[idParts.length - 1];
+    // Get category from class instead of ID
+    const categoryName = body.className;
     const categoryNameHebrew = body.dataset.hebrew;
     const parentElement = document.querySelector('.parent-element');
 
@@ -175,8 +209,8 @@ const init = async function () {
   if (document.body.id.includes('categories')) {
     // Direct initialization approach
     const body = document.querySelector('body');
-    const idParts = body.id.split(' ');
-    const categoryName = idParts[idParts.length - 1];
+    // Get category from class instead of ID parts
+    const categoryName = body.className;
     const categoryNameHebrew = body.dataset.hebrew;
 
     // Force immediate initialization regardless of document ready state

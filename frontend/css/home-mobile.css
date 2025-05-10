@@ -370,10 +370,6 @@ p {
   display: none;
 }
 
-.shoppingcart-svg {
-  display: none;
-}
-
 #login-tab {
   border-bottom: none;
 }
@@ -762,5 +758,11 @@ main {
   width: 40px;
   height: 40px;
   justify-self: self-end;
-  /* border: 1px solid red; */
+}
+
+/* Hide the language selector on desktop */
+@media (min-width: 799px) {
+  .mobile-lang-selector {
+    display: none;
+  }
 }

@@ -34,6 +34,7 @@ const allowedOrigins = [
   `${process.env.FULLHOST}`,
   'http://127.0.0.1:5500',
   'http://localhost:5500', // Added for local admin dashboard
+  'http://localhost:1234', // Added for local frontend
 ];
 
 console.log('Allowed origins:', allowedOrigins);
@@ -324,11 +325,40 @@ app.use('/uploads', (req, res, next) => {
 
 app.use('/api/uploads', (req, res, next) => {
   console.log(`[Static] Accessing: ${req.path} from api/uploads`);
+
+  // Add CORS headers for all responses
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   express.static(uploadsDir, staticOptions)(req, res, next);
 });
 
 app.use('/smallImages', express.static(smallImagesDir, staticOptions));
-app.use('/api/smallImages', express.static(smallImagesDir, staticOptions));
+app.use('/api/smallImages', (req, res, next) => {
+  console.log(`[Static] Accessing: ${req.path} from api/smallImages`);
+
+  // Add CORS headers for all responses
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  express.static(smallImagesDir, staticOptions)(req, res, next);
+});
 
 // Add public directory routes
 app.use('/public/uploads', express.static(publicUploadsDir, staticOptions));
@@ -1495,6 +1525,10 @@ app.post('/deleteproductimage', async (req, res) => {
       );
 
       console.log('Main image deleted via direct update');
+      return res.json({
+        success: true,
+        message: 'Main image deleted successfully',
+      });
     } else if (imageType === 'small') {
       console.log('Deleting small image');
 

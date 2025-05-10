@@ -55,6 +55,10 @@ header {
   /* border: 2px solid rgb(230, 37, 16); */
 }
 
+.mobile-lang-selector {
+  display: none;
+}
+
 /* ~~~~~~ Mobile Menu ~~~~~~~ */
 
 .menubars-use {
@@ -140,8 +144,14 @@ a {
   color: rgb(152, 152, 152);
 }
 
+.main-nav-tab.cart-tab {
+  display: flex !important;
+  width: auto;
+  visibility: visible !important;
+}
+
 .attrib-cart {
-  display: flex;
+  display: flex !important;
   flex-flow: row;
   justify-content: center;
   align-items: center;
@@ -152,31 +162,32 @@ a {
   font-size: 1.1rem;
   font-family: Raleway, sans-serif;
   text-decoration: none;
-
-  /* border: 1px solid green; */
+  visibility: visible !important;
 }
+
 .attrib-heb {
   font-size: 1.8rem;
   font-family: 'Amatic SC', sans-serif;
 }
-.cart-container {
-  display: flex;
-  width: 25%;
 
-  /* border: 1px solid red; */
+.cart-container {
+  display: flex !important;
+  width: 25%;
+  visibility: visible !important;
 }
 
 .shoppingcart-svg {
-  display: flex;
+  display: inline-block !important;
   flex-flow: row;
   justify-content: flex-start;
   width: 1.4rem;
-
-  /* border: 1px solid; */
+  visibility: visible !important;
+  opacity: 1 !important;
+  fill: #000000 !important;
 }
 
 .cart-number {
-  display: flex;
+  display: inline-block !important;
   justify-content: center;
   align-items: center;
   font-size: 0.8rem;
@@ -186,6 +197,7 @@ a {
   height: 14px;
   border: 1px solid black;
   border-radius: 50%;
+  visibility: visible !important;
 }
 
 .ul-heb {

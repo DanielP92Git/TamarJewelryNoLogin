@@ -175,6 +175,7 @@
   padding: 1.5rem; /* Increase padding slightly */
   margin-top: auto; /* Push to bottom */
   margin-bottom: 2rem;
+  gap: 1rem;
 }
 
 .languages-container button {
@@ -239,6 +240,10 @@ body.menu-active::before {
   z-index: 700; /* Above overlay and menu */
   display: flex;
   align-items: center;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  padding: 0.2rem 0.5rem;
 }
 
 /* Hide the original toggle icon when menu is open */
@@ -306,12 +311,6 @@ body.menu-active .icons-container .menubars-svg {
   border-radius: 5px;
 }
 
-/* Hide desktop elements if they exist in mobile view */
-.shoppingcart-svg,
-.cart-number {
-  display: none;
-}
-
 /* Style for mobile nav */
 @media (max-width: 699.99px) {
   /* Fix mobile menu structure */
@@ -349,20 +348,158 @@ body.menu-active .icons-container .menubars-svg {
     align-items: center;
     height: 3rem;
   }
-  .cart-number-mobile {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 0.6rem;
-    position: absolute;
-    left: 55%;
-    top: 35%;
-    background-color: rgba(255, 255, 255);
-    width: 10px;
-    height: 10px;
-    border: 1px solid black;
-    border-radius: 50%;
-    text-align: center;
-    z-index: 10;
+}
+
+/* Mobile cart styles */
+.cart-tab {
+  display: flex !important;
+}
+
+.shoppingcart-svg {
+  width: 35px !important; /* Slightly smaller than desktop but still visible */
+  height: 35px !important;
+  fill: #000 !important;
+  display: inline-block !important;
+  visibility: visible !important;
+  position: relative;
+}
+
+/* Mobile menu specific cart styles */
+.menu-open .main-nav-tab .attrib-cart .cart-number-mobile {
+  position: absolute;
+  top: 10px;
+  right: 0;
+  transform: none;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 50%;
+  width: 12px;
+  height: 12px;
+  display: flex;
+  visibility: visible;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  z-index: 100;
+}
+
+.cart-number-mobile-header {
+  position: absolute;
+  top: 8px;
+  left: 75px;
+}
+
+/* Mobile Language Selector */
+.mobile-lang-selector {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1000;
+}
+
+/* Custom flag dropdown for mobile language selector */
+.flag-dropdown {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  padding: 0.2rem 0.5rem;
+  width: auto;
+  min-width: 70px;
+}
+
+.flag-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50% !important;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  padding: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.flag-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  min-width: 16px;
+  min-height: 16px;
+}
+
+.flag-icon.selected {
+  border: 2px solid #5c6ac4;
+  box-shadow: 0 2px 8px rgba(92, 106, 196, 0.15);
+  transform: scale(1.05);
+}
+
+.flag-icon:hover {
+  border: 2px solid #888;
+}
+
+/* Media queries for small mobile screens */
+@media (max-width: 370px) {
+  .mobile-lang-selector {
+    top: 0.7rem;
+    left: 0.7rem;
   }
+
+  .flag-dropdown {
+    padding: 0.12rem 0.3rem;
+    gap: 0.25rem;
+    min-width: 60px;
+  }
+
+  .flag-icon {
+    width: 25px;
+    height: 25px;
+    border-width: 1.5px;
+  }
+}
+
+/* Styles for menu flag icons */
+.menu-flag-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  padding: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.menu-flag-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  min-width: 16px;
+  min-height: 16px;
+}
+
+.menu-flag-icon.selected {
+  border: 2px solid #5c6ac4;
+  box-shadow: 0 2px 8px rgba(92, 106, 196, 0.15);
+  transform: scale(1.05);
+}
+
+.menu-flag-icon:hover {
+  border: 2px solid #888;
 }

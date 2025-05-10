@@ -195,7 +195,9 @@ a {
 .icons-container {
   display: none;
 }
-
+.mobile-lang-selector {
+  display: none;
+}
 .main-nav-tab.login {
   display: flex;
   justify-content: center;

@@ -136,7 +136,7 @@ class CartView extends View {
                 ? `$${item.price}`
                 : `$${Number((item.price / this._rate).toFixed(0))}`
             }</div>
-             <img src="${deleteSvg}" class="delete-item"/> 
+            <button class="delete-item" aria-label="Remove item">✕</button>
             </div>`
           )
           .join('');
@@ -153,8 +153,7 @@ class CartView extends View {
               ? `₪${Number((item.price * this._rate).toFixed(0))}`
               : `₪${item.price}`
           }</div>
-          <div class="delete-item">X</div>
-          <!-- <img src="${deleteSvg}" class="delete-item"/> -->
+          <button class="delete-item" aria-label="Remove item">✕</button>
           </div>`
           )
           .join('');
