@@ -1104,11 +1104,11 @@ a {
 .magnifier-glass {
   display: none;
   position: absolute;
-  border: 2px solid #fff;
+  border: 3px solid #fff;
   border-radius: 50%;
-  width: 150px;
-  height: 150px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  width: 200px;
+  height: 200px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   pointer-events: none;
   z-index: 10;
   background-repeat: no-repeat;
@@ -1116,6 +1116,7 @@ a {
   image-rendering: high-quality;
   backface-visibility: hidden;
   transform: translateZ(0);
+  overflow: hidden;
 }
 
 .magnifier-glass.visible {

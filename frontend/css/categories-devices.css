@@ -563,7 +563,7 @@ main {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 700;
+  z-index: 800;
 }
 
 .item-overlay {
@@ -1094,15 +1094,20 @@ main {
 
 .magnifier-glass {
   position: absolute;
-  width: 190px;
-  height: 190px;
+  width: 200px;
+  height: 200px;
   border-radius: 50%;
   background-repeat: no-repeat;
   cursor: none;
-  border: 2px solid rgba(0, 0, 0, 0.2);
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  border: 3px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
   pointer-events: none;
   z-index: 1000;
+  overflow: hidden;
+  background-color: white;
+  image-rendering: high-quality;
+  backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 .tap-to-magnify {
@@ -1195,21 +1200,6 @@ main {
     height: 30px;
   }
 
-  .close-modal-btn {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    width: 35px;
-    height: 35px;
-    font-size: 20px;
-    background-color: rgba(255, 255, 255, 0.95);
-    color: #333;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
   .close-modal-btn:active {
     transform: scale(0.95);
     background-color: rgba(255, 255, 255, 0.85);
@@ -1218,10 +1208,10 @@ main {
 
 .close-modal-btn {
   position: absolute;
-  right: 15px;
-  top: 15px;
-  width: 32px;
-  height: 32px;
+  right: 5px;
+  top: 5px;
+  width: 25px;
+  height: 25px;
   background-color: rgba(255, 255, 255, 0.9);
   border-radius: 50%;
   border: none;
