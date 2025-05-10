@@ -503,3 +503,8 @@ body.menu-active .icons-container .menubars-svg {
 .menu-flag-icon:hover {
   border: 2px solid #888;
 }
+@media (max-width: 799px) {
+  .desktop-lang-selector {
+    display: none;
+  }
+}

@@ -760,6 +760,12 @@ main {
   justify-self: self-end;
 }
 
+@media (max-width: 799px) {
+  .desktop-lang-selector {
+    display: none;
+  }
+}
+
 /* Hide the language selector on desktop */
 @media (min-width: 799px) {
   .mobile-lang-selector {
