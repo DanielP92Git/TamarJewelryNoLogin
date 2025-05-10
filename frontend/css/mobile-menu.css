@@ -111,10 +111,7 @@
   padding: 0.5rem 0; /* Adjust padding */
 }
 
-.attrib-heb {
-  font-size: 1.4rem;
-  font-family: 'Amatic SC', sans-serif;
-}
+  
 
 /* Categories list - basic styles for mobile */
 .categories-list {
@@ -151,7 +148,7 @@
   font-size: 0.9rem;
   display: block;
   width: 100%;
-  color: #343a40;
+  color: #6c7278;
   background-color: #f8f9fa;
   text-decoration: none;
   border: none;
@@ -356,8 +353,8 @@ body.menu-active .icons-container .menubars-svg {
 }
 
 .shoppingcart-svg {
-  width: 35px !important; /* Slightly smaller than desktop but still visible */
-  height: 35px !important;
+  width: 30px !important; /* Slightly smaller than desktop but still visible */
+  height: 30px !important;
   fill: #000 !important;
   display: inline-block !important;
   visibility: visible !important;

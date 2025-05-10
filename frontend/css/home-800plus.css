@@ -165,11 +165,6 @@ a {
   visibility: visible !important;
 }
 
-.attrib-heb {
-  font-size: 1.8rem;
-  font-family: 'Amatic SC', sans-serif;
-}
-
 .cart-container {
   display: flex !important;
   width: 25%;
