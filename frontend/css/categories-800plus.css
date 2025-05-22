@@ -1153,3 +1153,13 @@ a {
   display: flex;
   width: auto;
 }
+  /* Make modal product image fit nicely */
+  .modal .big-image {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto;
+  }
