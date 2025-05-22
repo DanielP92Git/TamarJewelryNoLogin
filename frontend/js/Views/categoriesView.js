@@ -1422,7 +1422,7 @@ class CategoriesView extends View {
       };
 
       bigImage.onload = function () {
-        console.log('Image loaded successfully:', bigImage.src);
+        // console.log('Image loaded successfully:', bigImage.src);
         if (loadingIndicator) {
           loadingIndicator.style.display = 'none';
         }

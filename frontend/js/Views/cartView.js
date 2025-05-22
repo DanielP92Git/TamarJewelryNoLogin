@@ -314,11 +314,11 @@ class CartView extends View {
   paypalCheckout(cartData) {
     if (!cartData || cartData.length === 0) return;
 
-    console.log(
-      'Initializing PayPal checkout with cart data:',
-      cartData.length,
-      'items'
-    );
+    // console.log(
+    //   'Initializing PayPal checkout with cart data:',
+    //   cartData.length,
+    //   'items'
+    // );
 
     const currencyVariable = cartData[0].currency == '$' ? 'USD' : 'ILS';
     console.log('PayPal currency:', currencyVariable);
@@ -328,7 +328,7 @@ class CartView extends View {
       'script[src*="paypal.com/sdk/js"]'
     );
     if (existingScript) {
-      console.log('Removing existing PayPal script');
+      // console.log('Removing existing PayPal script');
       existingScript.remove();
     }
 
