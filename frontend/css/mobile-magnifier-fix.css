@@ -1,16 +1,27 @@
-/* Mobile magnifier fixes */
+/* Mobile magnifier disabled - remove all magnifier functionality on mobile */
 @media (max-width: 800px) {
   .magnifier-glass {
-    width: 180px !important;
-    height: 180px !important;
-    border: 3px solid rgba(255, 255, 255, 0.4) !important;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5) !important;
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   .tap-to-magnify {
-    background-color: rgba(0, 0, 0, 0.7) !important;
-    padding: 5px 10px !important;
-    font-size: 10px !important;
-    font-weight: bold !important;
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+
+  .magnifier-icon {
+    display: none !important;
+    visibility: hidden !important;
+  }
+
+  .magnifier-container {
+    cursor: default !important;
+  }
+
+  .magnifier-container .big-image {
+    cursor: default !important;
   }
 }

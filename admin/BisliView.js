@@ -1614,6 +1614,13 @@ async function updateProduct(e) {
     });
   }
 
+  // Show spinner in button
+  const submitBtn = document.querySelector("#editForm .addproduct-btn");
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="button-spinner"></span>';
+  }
+
   try {
     const response = await fetch(`${API_URL}/updateproduct/${productId}`, {
       method: "POST",
@@ -1833,6 +1840,11 @@ async function updateProduct(e) {
   } catch (error) {
     console.error("Error updating product:", error);
     alert("Error updating product: " + error.message);
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = "Update Product";
+    }
   }
 }
 
@@ -1979,10 +1991,10 @@ async function optimizeImage(
 async function addProduct(e, data, form) {
   e.preventDefault();
 
-  // Show loading indicator
+  // Show loading spinner in button
   const submitBtn = form.querySelector(".addproduct-btn");
   submitBtn.disabled = true;
-  submitBtn.innerHTML = "Uploading...";
+  submitBtn.innerHTML = '<span class="button-spinner"></span>';
 
   try {
     // 1. Get form values
@@ -2014,7 +2026,7 @@ async function addProduct(e, data, form) {
       formData.append("smallImages", smallImages[i]);
     }
 
-    submitBtn.innerHTML = "Uploading images...";
+    submitBtn.innerHTML = '<span class="button-spinner"></span>';
 
     // Submit image
     const imageResponse = await fetch(`${API_URL}/upload`, {
@@ -2031,7 +2043,7 @@ async function addProduct(e, data, form) {
       throw new Error(imageData.error || "Image upload failed");
     }
 
-    submitBtn.innerHTML = "Saving product...";
+    submitBtn.innerHTML = '<span class="button-spinner"></span>';
 
     // 3. Add product data with correct image structure
     const productData = {
@@ -2129,6 +2141,7 @@ async function addProduct(e, data, form) {
   } catch (error) {
     console.error("Error:", error);
     alert(`Error: ${error.message}`);
+  } finally {
     submitBtn.disabled = false;
     submitBtn.innerHTML = "Submit";
   }
