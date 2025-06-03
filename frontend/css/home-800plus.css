@@ -678,6 +678,8 @@ main {
 .footer {
   width: 100%;
   background-color: rgba(161, 160, 65, 0.249);
+  padding-top: 0.2rem;
+  margin-top: 1rem;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */
@@ -687,6 +689,7 @@ main {
   display: flex;
   justify-content: space-around;
   width: 100%;
+  height: 40%;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */
@@ -699,8 +702,8 @@ main {
   flex-flow: column;
   align-items: center;
   width: 50%;
-  padding-top: 10px;
-  padding-bottom: 30px;
+  padding-top: 3px;
+  padding-bottom: 5px;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(89, 0, 255); */
@@ -709,23 +712,24 @@ main {
 .attrib-footer {
   display: flex;
   flex-flow: row;
+  font-size: 0.65rem;
   align-items: center;
-  width: auto;
-  height: auto;
-  padding: 0;
-  margin-top: 5px;
-  margin-bottom: 5px;
-  text-decoration: none;
+  width: 30%;
+  height: fit-content;
   color: black;
-  border-bottom: 0.5px solid rgb(66, 66, 66);
-  font-size: 1rem;
+  margin-bottom: 1px;
+  padding: 5px;
+  padding-bottom: 10px;
+  font-family: Raleway, sans-serif;
+  text-decoration: none;
+  line-height: 1.2;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(40, 228, 37); */
+  /* border: 1px solid green; */
 }
 
 .attrib-footer:hover {
-  color: black;
+  color: rgb(152, 152, 152);
 }
 
 .rights-container {
@@ -733,7 +737,7 @@ main {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 4rem;
+  height: 1.5rem;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid rgb(210, 28, 140); */
@@ -741,6 +745,7 @@ main {
 
 .rights-text {
   color: rgb(130, 130, 130);
+  font-size: 0.6rem;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */

@@ -1714,15 +1714,8 @@ class CategoriesView extends View {
       return { inBounds: true, xPercent, yPercent };
     };
 
-    if (isMobile) {
-      this._setupMobileMagnifier(
-        container,
-        glass,
-        image,
-        tapToMagnify,
-        calculateImagePosition
-      );
-    } else {
+    // Only setup desktop magnifier - skip mobile magnifier completely
+    if (!isMobile) {
       this._setupDesktopMagnifier(
         container,
         glass,
@@ -1731,75 +1724,7 @@ class CategoriesView extends View {
         calculateImagePosition
       );
     }
-  }
-
-  _setupMobileMagnifier(
-    container,
-    glass,
-    image,
-    tapToMagnify,
-    calculateImagePosition
-  ) {
-    const handleTouch = e => {
-      const touch = e.touches[0];
-      const rect = container.getBoundingClientRect();
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-
-      const position = calculateImagePosition(image, rect, x, y);
-      if (!position.inBounds) {
-        glass.style.display = 'none';
-        return;
-      }
-
-      const glassWidth = glass.offsetWidth / 2;
-      const glassHeight = glass.offsetHeight / 2;
-      const touchOffset = 100;
-      let offsetX = x - glassWidth;
-      let offsetY = y - glassHeight - touchOffset;
-
-      const bottomBuffer = 20;
-      const rightBuffer = 20;
-
-      offsetX = Math.max(
-        0,
-        Math.min(rect.width - glass.offsetWidth - rightBuffer, offsetX)
-      );
-      offsetY = Math.max(
-        0,
-        Math.min(rect.height - glass.offsetHeight - bottomBuffer, offsetY)
-      );
-
-      glass.style.left = `${offsetX}px`;
-      glass.style.top = `${offsetY}px`;
-
-      // Significantly increase the zoom factor for mobile
-      const zoomFactor = 8;
-      glass.style.backgroundImage = `url('${image.src}')`;
-      glass.style.backgroundPosition = `${position.xPercent}% ${position.yPercent}%`;
-      glass.style.backgroundSize = `${zoomFactor * 100}%`;
-      glass.style.imageRendering = 'high-quality';
-    };
-
-    container.addEventListener('touchstart', e => {
-      if (tapToMagnify) tapToMagnify.style.display = 'none';
-      glass.style.display = 'block';
-      handleTouch(e);
-    });
-
-    container.addEventListener('touchmove', e => {
-      e.preventDefault();
-      handleTouch(e);
-    });
-
-    container.addEventListener('touchend', () => {
-      glass.style.display = 'none';
-      if (tapToMagnify) {
-        setTimeout(() => {
-          tapToMagnify.style.display = 'block';
-        }, 500);
-      }
-    });
+    // Mobile magnifier is now disabled - no setup for mobile
   }
 
   _setupDesktopMagnifier(

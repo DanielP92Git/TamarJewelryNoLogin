@@ -646,8 +646,8 @@ main {
   display: flex;
   flex-flow: row wrap;
   max-width: 100%;
-  padding-top: 0.5rem;
-  margin-top: 3rem;
+  padding-top: 0.2rem;
+  margin-top: 1rem;
   border-top: 1px solid;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -670,8 +670,8 @@ main {
   flex-flow: column wrap;
   align-items: center;
   width: 30%;
-  padding-top: 10px;
-  padding-bottom: 30px;
+  padding-top: 3px;
+  padding-bottom: 5px;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(89, 0, 255); */
@@ -681,29 +681,20 @@ main {
   padding-right: 5px;
 }
 
-.footer-item {
-  color: white;
-  width: 9rem;
-  margin-top: 10px;
-  margin-bottom: 25px;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid green; */
-}
-
 .attrib-footer {
   display: flex;
   flex-flow: row;
-  font-size: 0.7rem;
+  font-size: 0.5rem;
   align-items: center;
   width: 100%;
+  height: fit-content;
   color: black;
-  margin-bottom: 6%;
-  padding-left: 10px;
-  padding-bottom: 5px;
-  border-bottom: 0.5px solid rgba(66, 66, 66, 0.5);
+  margin-bottom: 1px;
+  padding: 5px;
+  padding-bottom: 10px;
   font-family: Raleway, sans-serif;
   text-decoration: none;
+  line-height: 1.2;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(40, 228, 37); */
@@ -714,7 +705,7 @@ main {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 4rem;
+  height: 1.5rem;
   font-family: Raleway, sans-serif;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -724,7 +715,7 @@ main {
 .rights-text {
   color: white;
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 0.55rem;
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 1px solid green; */
 }
