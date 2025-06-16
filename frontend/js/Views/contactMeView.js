@@ -76,42 +76,128 @@ class ContactMeView extends View {
     if (lng === 'eng') {
       formContainer.style.direction = 'ltr';
       return `
-        <input
-          type="text"
-          id="name"
-          placeholder="First Name*"
-          required
-          autofocus
-        />
-        <input type="text" id="lastname" placeholder="Last Name*" required />
-        <input type="email" id="contact-email" placeholder="Email Address*" required />
-        <textarea
-          type="text"
-          id="message"
-          rows="3"
-          placeholder="Your Message*"
-        ></textarea>
-        <input type="submit" id="submit" />`;
+        <div class="form-group">
+          <div class="input-group">
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder=" "
+              required
+              autofocus
+            />
+            <label for="name">First Name</label>
+            <div class="input-highlight"></div>
+          </div>
+
+          <div class="input-group">
+            <input
+              type="text"
+              id="lastname"
+              name="lastname"
+              placeholder=" "
+              required
+            />
+            <label for="lastname">Last Name</label>
+            <div class="input-highlight"></div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <input
+            type="email"
+            id="contact-email"
+            name="email"
+            placeholder=" "
+            required
+          />
+          <label for="contact-email">Email Address</label>
+          <div class="input-highlight"></div>
+        </div>
+
+        <div class="input-group full-width">
+          <textarea
+            id="message"
+            name="message"
+            placeholder=" "
+            required
+          ></textarea>
+          <label for="message">Your Message</label>
+          <div class="input-highlight"></div>
+        </div>
+
+        <button type="submit" class="submit-button" id="submit">
+          Send Message
+          <svg class="button-arrow" viewBox="0 0 24 24">
+            <path
+              d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+            />
+          </svg>
+        </button>
+      `;
     } else if (lng === 'heb') {
       formContainer.style.direction = 'rtl';
 
-      return `<h1 class="header-heb">צרו קשר</h1>
-        <input
-          type="text"
-          id="name"
-          placeholder="שם פרטי*"
-          required
-          autofocus
-        />
-        <input type="text" id="lastname" placeholder="שם משפחה*" required />
-        <input type="email" id="contact-email" placeholder="כתובת דואר אלקטרוני*" required />
-        <textarea
-          type="text"
-          id="message"
-          rows="3"
-          placeholder="הודעתך*"
-        ></textarea>
-        <input type="submit" id="submit" class="submit-heb" value="שלח/י"/>`;
+      return `
+        <div class="form-group">
+          <div class="input-group">
+            <input
+              type="text"
+              id="name"
+              name="name"
+              placeholder=" "
+              required
+              autofocus
+            />
+            <label for="name">שם פרטי</label>
+            <div class="input-highlight"></div>
+          </div>
+
+          <div class="input-group">
+            <input
+              type="text"
+              id="lastname"
+              name="lastname"
+              placeholder=" "
+              required
+            />
+            <label for="lastname">שם משפחה</label>
+            <div class="input-highlight"></div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <input
+            type="email"
+            id="contact-email"
+            name="email"
+            placeholder=" "
+            required
+          />
+          <label for="contact-email">כתובת דואר אלקטרוני</label>
+          <div class="input-highlight"></div>
+        </div>
+
+        <div class="input-group full-width">
+          <textarea
+            id="message"
+            name="message"
+            placeholder=" "
+            required
+          ></textarea>
+          <label for="message">הודעתך</label>
+          <div class="input-highlight"></div>
+        </div>
+
+        <button type="submit" class="submit-button submit-heb" id="submit">
+          שלח/י
+          <svg class="button-arrow" viewBox="0 0 24 24">
+            <path
+              d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+            />
+          </svg>
+        </button>
+      `;
     }
   }
 

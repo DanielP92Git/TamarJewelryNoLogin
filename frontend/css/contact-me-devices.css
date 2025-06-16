@@ -55,8 +55,8 @@ h1 {
 
 .cart-number-mobile-header {
   position: absolute;
-  top: 5px;
-  left: 70px;
+  top: 8px;
+  left: 35px;
 }
 
 /* Modern Contact Form Styles */
@@ -129,6 +129,8 @@ h1 {
 /* Modern input styling */
 .input-group {
   position: relative;
+  width: 100%;
+  max-width: 100%;
 }
 
 .input-group input,
@@ -136,18 +138,23 @@ h1 {
   width: 100%;
   padding: 1rem 1.25rem;
   font-size: 1rem;
-  border: 2px solid transparent;
+  border: 2px solid var(--border-color);
   border-radius: 16px;
   background: var(--input-background);
   transition: all 0.3s ease;
   color: var(--text-primary);
   box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+  outline: 2px solid var(--border-color);
+  outline-offset: -2px;
+  box-sizing: border-box;
 }
 
 .input-group textarea {
   min-height: 160px;
+  max-height: 300px;
   resize: vertical;
   line-height: 1.6;
+  overflow-y: auto;
 }
 
 .input-group label {
@@ -167,7 +174,8 @@ h1 {
 .input-group textarea:focus {
   border-color: var(--primary-color);
   background: var(--surface-color);
-  outline: none;
+  outline: 2px solid var(--primary-color);
+  outline-offset: -2px;
   box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1),
     inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
 }
@@ -177,7 +185,7 @@ h1 {
 .input-group textarea:focus ~ label,
 .input-group input:not(:placeholder-shown) ~ label,
 .input-group textarea:not(:placeholder-shown) ~ label {
-  transform: translateY(-1.5rem) scale(0.85);
+  transform: translateY(-1.1rem) scale(0.85);
   color: var(--primary-color);
   font-weight: 500;
 }
@@ -278,7 +286,6 @@ h1 {
   max-width: 100%;
   padding-top: 0.2rem;
   margin-top: 1rem;
-  border-top: 1px solid;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */
