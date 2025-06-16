@@ -31,8 +31,7 @@ body#categories.hoop-earrings header {
   background-image: url('../imgs/Hero-imgs/H4-1.jpg');
 }
 
-body#categories.unisex header,
-body#categories.shalom-club header {
+body#categories.unisex header {
   background-image: url('../imgs/Hero-imgs/IMG_0173.jpg');
 }
 
@@ -42,6 +41,10 @@ body#categories.dangle-earrings header {
 
 body#categories.crochet-necklaces header {
   background-image: url('../imgs/website-images/crochet-necklaces/Untitled-4.jpg');
+}
+
+body#categories.shalom-club header {
+  background-image: url('../imgs/Hero-imgs/shalom-club-hero.webp');
 }
 
 /* ====MENU SETTINGS==== */
