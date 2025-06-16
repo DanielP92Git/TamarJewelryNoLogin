@@ -248,11 +248,12 @@ main {
 
 h1 {
   font-weight: 100;
-  background-color: rgba(255, 166, 0, 0.4);
   font-family: Raleway, sans-serif;
   text-align: center;
   width: 100%;
-  margin-bottom: 2rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(40, 228, 37); */
