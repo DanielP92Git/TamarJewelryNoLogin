@@ -52,6 +52,22 @@ h1 {
   margin-bottom: 1.5rem;
   text-align: center;
 }
+.cart-number-mobile {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.6rem;
+  position: absolute;
+  left: 55%;
+  top: 35%;
+  background-color: rgba(255, 255, 255);
+  width: 10px;
+  height: 10px;
+  border: 1px solid black;
+  border-radius: 50%;
+  text-align: center;
+  z-index: 10;
+}
 
 .cart-number-mobile-header {
   position: absolute;
