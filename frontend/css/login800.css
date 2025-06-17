@@ -150,7 +150,16 @@ a:hover {
   justify-content: center;
   align-items: center;
   height: 50px;
-  z-index: 8;
+  z-index: 15;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 248, 248, 0.95) 50%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
   transition: all;
   transition-duration: 500ms;
@@ -308,10 +317,9 @@ main {
 
 .footer {
   width: 100%;
-  background-color: rgba(161, 160, 65, 0.249);
-  padding-top: 0.2rem;
+  padding-top: 1rem;
   margin-top: 1rem;
-
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */
 }

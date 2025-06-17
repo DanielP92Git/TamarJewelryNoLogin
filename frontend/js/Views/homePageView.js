@@ -1,5 +1,4 @@
 import View from '../View.js';
-import shoppingCartIcon from '../../imgs/svgs/cart-shopping-solid.svg';
 class HomePageView extends View {
   // Modal window:
   // _modal = document.querySelector(".modal");

@@ -24,31 +24,110 @@ header {
   /* border: 4px solid rgb(69, 208, 247); */
 }
 
+/* Modern Hero Section - Mobile */
 .hero-section {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  width: 100%;
   position: relative;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid darkorange; */
-}
-
-.main-image {
   width: 100%;
-  height: auto;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(177, 20, 143); */
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
 }
 
-.logo {
-  width: 35%;
-  margin: 2rem;
-  z-index: 0;
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 1;
+}
 
-  /* border: 1px solid rgb(90, 255, 65); */
+.hero-overlay {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  margin: 1rem;
+  margin-top: 20vh;
+  margin-bottom: 20vh;
+  padding: 1.5rem;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(0, 0, 0, 0.1) 50%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  border-radius: 15px;
+  backdrop-filter: blur(3px);
+}
+
+.hero-logo {
+  width: 80px;
+  height: auto;
+  margin-bottom: 1.5rem;
+  filter: brightness(1.1) contrast(1.1);
+}
+
+.hero-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.hero-title {
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(1.5rem, 8vw, 2.5rem);
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.3;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-subtitle {
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(0.9rem, 4vw, 1.1rem);
+  font-weight: 300;
+  line-height: 1.5;
+  margin: 0;
+  opacity: 0.95;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.hero-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 2rem;
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  text-decoration: none;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.hero-button:hover {
+  background: white;
+  color: #333;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
 }
 
 .modal {
@@ -234,7 +313,7 @@ p {
   position: absolute;
   top: 10px;
   left: -200px;
-  z-index: 10;
+  z-index: 15;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(20, 177, 35); */
@@ -357,7 +436,8 @@ p {
   position: absolute;
   left: 55%;
   top: 35%;
-  background-color: rgba(255, 255, 255);
+  background-color: rgba(255, 255, 255, 0.9);
+  color: black !important;
   width: 10px;
   height: 10px;
   border: 1px solid black;
@@ -410,8 +490,7 @@ main {
   align-items: center;
   justify-content: center;
   position: relative;
-  /* height: 100%; */
-  top: 25%;
+  z-index: 1;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(229, 247, 89); */
@@ -505,7 +584,6 @@ main {
   height: 100%;
   margin-top: 50px;
   padding-top: 2rem;
-  box-shadow: 0px 0px 50px -10px rgba(0, 0, 0, 0.58);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(0, 255, 187); */
@@ -573,9 +651,18 @@ main {
   text-decoration: none;
   position: relative;
   margin-bottom: 2.5rem;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0px 8px 24px -6px rgba(0, 0, 0, 0.35);
+  transition: all 0.3s ease;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid red; */
+}
+
+.category-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0px 12px 32px -4px rgba(0, 0, 0, 0.45);
 }
 
 .large-img-item {
@@ -648,7 +735,7 @@ main {
   max-width: 100%;
   padding-top: 0.2rem;
   margin-top: 1rem;
-  border-top: 1px solid;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */

@@ -25,6 +25,7 @@ const controlHomePage = async function (lng) {
 
   homePageView._imageSlider();
   homePageView._moveToTopHandler();
+  homePageView.stickyMenuFn();
 
   // Ensure cart icon is visible in desktop view
   setTimeout(() => {
@@ -76,6 +77,7 @@ const controlWorkshopPage = async function (lng) {
 
   WorkshopView._moveToTopHandler();
   WorkshopView._imageSlider();
+  WorkshopView.stickyMenuFn();
   // Then call page-specific language setup
   WorkshopView.setWorkshopLng(lng);
   WorkshopView.handleLanguage();
@@ -88,6 +90,7 @@ const controlAboutPage = async function (lng) {
   AboutView.setLanguage(lng, cartNum);
   AboutView.setAboutDesc(lng);
   AboutView.handleLanguage();
+  AboutView.stickyMenuFn();
 };
 
 const controlContactMePage = async function (lng) {
@@ -98,6 +101,7 @@ const controlContactMePage = async function (lng) {
 
   ContactMeView.setLanguage(lng, cartNum);
   ContactMeView.setFormLng(lng);
+  ContactMeView.stickyMenuFn();
 };
 
 const controlCategoriesPage = async function () {
@@ -137,6 +141,7 @@ const controlCategoriesPage = async function () {
     // Add specific handlers for this page
     categoriesView._moveToTopHandler();
     categoriesView._imageFlipper();
+    categoriesView.stickyMenuFn();
   } catch (err) {
     console.error('Error in controlCategoriesPage:', err);
   }
@@ -160,6 +165,7 @@ const controlCartPage = async function (lng) {
 
     CartView.setCartLng(lng);
     CartView.handleCartLanguage();
+    CartView.stickyMenuFn();
   } catch (err) {
     console.log(err);
   }
