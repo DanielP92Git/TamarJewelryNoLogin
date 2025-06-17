@@ -516,7 +516,7 @@ main {
   max-width: 100%;
   padding-top: 0.2rem;
   margin-top: 1rem;
-  border-top: 1px solid;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */

@@ -4,10 +4,10 @@
 .menu {
   display: flex;
   width: 100%;
-  height: 15%;
-  z-index: 7;
+  height: 10%;
+  z-index: 10;
   background-color: rgba(255, 255, 255);
-  position: fixed;
+  position: absolute;
 }
 
 /* Menu list container */
@@ -50,7 +50,7 @@ a {
   width: 100%;
   height: 3rem;
   color: rgb(78, 78, 78);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-family: Raleway, sans-serif;
   text-decoration: none;
   text-transform: uppercase;
@@ -89,17 +89,25 @@ a {
   list-style: none;
   position: absolute;
   top: 100%;
-  width: 15%;
+  width: 200px;
   height: auto;
-  background-color: white;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.95) 0%,
+    rgba(248, 248, 248, 0.95) 50%,
+    rgba(255, 255, 255, 0.95) 100%
+  );
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 15px;
   opacity: 0;
   visibility: hidden;
   z-index: -1;
-  transform: translateY(-10px);
-  transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  border: 1px solid #eee;
-  padding-top: 5px;
+  transform: translateY(-15px) scale(0.95);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 4px 15px rgba(0, 0, 0, 0.1);
+  padding: 10px 0;
+  margin-top: 5px;
 }
 
 /* Add hover effect for the main-nav-tab that contains categories */
@@ -108,24 +116,46 @@ a {
   opacity: 1;
   visibility: visible;
   z-index: 100;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 .category-item {
   position: relative;
-  /* padding: 8px 0; */
-  transition: background-color 0.2s ease;
+  margin: 3px 8px;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
 
-/* .category-item .attrib {
-  height: 2rem;
-  font-size: 1.1rem;
-  padding: 0 10px;
-} */
+.category-item .attrib {
+  height: 2.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0 20px;
+  color: #333 !important;
+  text-shadow: none !important;
+  font-family: 'Raleway', sans-serif;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
 
 .category-item:hover {
   cursor: pointer;
-  background-color: #f8f9fa;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8) 0%,
+    rgba(240, 240, 240, 0.9) 100%
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.category-item:hover .attrib {
+  color: #222 !important;
+  transform: scale(1.02);
 }
 
 /* Remove the old transform approach */
@@ -133,12 +163,15 @@ a {
   opacity: 1;
   visibility: visible;
   z-index: 100;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 /* Sticky menu behavior */
 .menu.sticky {
-  z-index: 8;
+  z-index: 15;
+  
+  backdrop-filter: blur(15px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   transition: all;
   transition-duration: 500ms;
   transition-timing-function: ease;
@@ -194,6 +227,25 @@ a {
   position: relative;
 }
 
+/* Cart number styling */
+.cart-number {
+  display: inline-block !important;
+  justify-content: center;
+  align-items: center;
+  font-size: 0.8rem;
+  position: relative;
+  left: -9%;
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  border-radius: 50%;
+  color: black !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 600;
+  text-shadow: none !important;
+  visibility: visible !important;
+}
+
 /* Make sure the icon is sized properly */
 .shoppingcart-svg {
   display: inline-block !important;
@@ -201,7 +253,6 @@ a {
   opacity: 1 !important;
   width: 25px !important;
   height: 25px !important;
-  fill: #000000 !important;
   position: relative;
 }
 
@@ -246,9 +297,9 @@ a {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: white;
+  backdrop-filter: blur(10px);
   border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   padding: 0.2rem 0.5rem;
   width: 45%;
   /* height: 25%; */

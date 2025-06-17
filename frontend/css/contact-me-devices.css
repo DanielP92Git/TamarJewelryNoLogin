@@ -301,8 +301,7 @@ h1 {
   flex-flow: row wrap;
   max-width: 100%;
   padding-top: 0.2rem;
-  margin-top: 1rem;
-
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */
 }

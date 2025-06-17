@@ -275,13 +275,22 @@ h1 {
 }
 
 .workshop-description {
-  background-color: rgba(245, 245, 220, 0.9);
-  box-shadow: 12px 2px 30px 2px rgb(168, 163, 154);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
   font-size: 1.2rem;
-  padding: 1rem;
+  padding: 2rem;
   box-sizing: border-box;
   font-family: Raleway, sans-serif;
-  padding: 30px;
+  color: rgba(68, 68, 68, 0.9);
+  letter-spacing: 0.5px;
+  line-height: 1.6rem;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
   /* border: 2px solid rgb(37, 155, 228); */
@@ -293,11 +302,17 @@ h1 {
   margin-top: 3rem;
   margin-bottom: 3rem;
   z-index: -3;
-
-  box-shadow: 1px 3px 30px 2px rgba(133, 143, 143, 0.646);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
   /* border: 2px solid rgb(129, 37, 228); */
+}
+
+.workshop-description--img:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .workshop-description--img-second {
@@ -318,13 +333,23 @@ h1 {
   width: 85vw;
   height: 100%;
   font-size: 1.2rem;
-  padding: 1rem;
+  padding: 2rem;
   z-index: 3;
   font-family: Raleway, sans-serif;
   align-self: center;
 
-  background-color: rgba(245, 245, 220, 0.9);
-  box-shadow: 12px 2px 30px 2px rgb(168, 163, 154);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  color: rgba(68, 68, 68, 0.9);
+  letter-spacing: 0.5px;
+  line-height: 1.6rem;
   text-align: center;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
@@ -402,7 +427,7 @@ h1 {
   max-width: 100%;
   padding-top: 0.2rem;
   margin-top: 1rem;
-  border-top: 1px solid;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */

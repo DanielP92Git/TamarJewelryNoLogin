@@ -20,6 +20,8 @@ header {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  margin-bottom: 2rem;
+  position: relative;
 
   height: 80vh;
 
@@ -54,7 +56,7 @@ header {
   position: relative;
   top: 10px;
   left: -200px;
-  z-index: 10;
+  z-index: 1000;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(20, 177, 35); */
@@ -184,7 +186,7 @@ input[type='checkbox']:checked + .menu {
   width: 35px;
   height: 35px;
   position: relative;
-  z-index: 10;
+  z-index: 700;
   /* border: 2px solid blue; */
 }
 
@@ -214,7 +216,7 @@ input[type='checkbox']:checked + .menu {
   border: 1px solid black;
   border-radius: 50%;
   text-align: center;
-  z-index: 10;
+  z-index: 701;
 }
 .cart-number-mobile-header {
   position: absolute;
@@ -270,6 +272,38 @@ h1 {
   /* border: 2px solid rgb(40, 228, 37); */
 }
 
+.about-title-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2.5rem;
+  font-weight: 100;
+  color: white;
+  font-family: 'Raleway', sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+  z-index: 3;
+  text-align: center;
+  width: 90%;
+
+  /* Slide up animation */
+  opacity: 0;
+  animation: slideUpFade 1.2s ease-out 0.5s forwards;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0);
+  }
+}
+
 /* .first-row-container {
 
 } */
@@ -277,13 +311,20 @@ h1 {
 .first-row-container {
   display: flex;
   flex-flow: column;
+  align-items: center;
+}
+
+.title-and-text-container {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
 }
 
 .aboutme-description {
-  background-color: rgba(245, 245, 220, 0.9);
   box-shadow: 12px 2px 30px 2px rgb(168, 163, 154);
+  width: 95%;
   font-size: 1.2rem;
-  padding: 1rem;
+  padding: 0.5rem;
   line-height: 1.8rem;
   box-sizing: border-box;
   font-family: Raleway, sans-serif;
@@ -291,9 +332,10 @@ h1 {
 }
 
 .description-img {
-  width: 50%;
-  margin-top: 3rem;
-  align-self: center;
+  width: calc(100% - 2rem);
+  margin: 3rem auto 0 auto;
+  display: block;
+  box-sizing: border-box;
 }
 
 .go-to-top {
@@ -313,8 +355,8 @@ h1 {
   flex-flow: row wrap;
   max-width: 100%;
   padding-top: 0.2rem;
-  margin-top: 1rem;
-  border-top: 1px solid;
+  margin-top: 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */
