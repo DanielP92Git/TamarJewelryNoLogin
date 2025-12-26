@@ -218,7 +218,12 @@ function init() {
         initializeEventHandlers();
 
         // Show the products list by default
-        fetchInfo();
+        try {
+          await fetchInfo();
+          listReloadSucceeded = true;
+        } catch (fallbackError) {
+          console.error("Fallback fetchInfo() also failed:", fallbackError);
+        }
       }
     })
     .catch((error) => {
@@ -961,6 +966,7 @@ function addCategoryFilterHandler(data) {
     categoryFilter.addEventListener("change", () => {
       loadProducts(data);
       updateSelectedCount(); // Update the count when changing category
+      setupBulkActions(); // Re-bind after list re-render
     });
   }
 }
@@ -970,18 +976,25 @@ function setupBulkActions() {
   const bulkDeleteBtn = document.getElementById("bulk-delete-btn");
 
   if (selectAllCheckbox) {
-    selectAllCheckbox.addEventListener("change", function () {
-      const checkboxes = document.querySelectorAll(".product-checkbox");
-      checkboxes.forEach((checkbox) => {
-        checkbox.checked = this.checked;
+    // Avoid duplicate bindings when setupBulkActions runs multiple times.
+    if (selectAllCheckbox.dataset.bulkActionsBound !== "true") {
+      selectAllCheckbox.addEventListener("change", function () {
+        const checkboxes = document.querySelectorAll(".product-checkbox");
+        checkboxes.forEach((checkbox) => {
+          checkbox.checked = this.checked;
+        });
+        updateSelectedCount();
+        updateBulkDeleteButton();
       });
-      updateSelectedCount();
-      updateBulkDeleteButton();
-    });
+      selectAllCheckbox.dataset.bulkActionsBound = "true";
+    }
   }
 
   // Add event listeners for individual checkboxes
   document.querySelectorAll(".product-checkbox").forEach((checkbox) => {
+    // Skip wiring if already bound on this element.
+    if (checkbox.dataset.bulkActionsBound === "true") return;
+
     checkbox.addEventListener("change", () => {
       updateSelectedCount();
       updateBulkDeleteButton();
@@ -993,12 +1006,20 @@ function setupBulkActions() {
         selectAllCheckbox.checked = allSelected;
       }
     });
+    checkbox.dataset.bulkActionsBound = "true";
   });
 
   // Add event listener for bulk delete button
   if (bulkDeleteBtn) {
-    bulkDeleteBtn.addEventListener("click", bulkDeleteProducts);
+    if (bulkDeleteBtn.dataset.bulkActionsBound !== "true") {
+      bulkDeleteBtn.addEventListener("click", bulkDeleteProducts);
+      bulkDeleteBtn.dataset.bulkActionsBound = "true";
+    }
   }
+
+  // Ensure UI is consistent after (re)binding.
+  updateSelectedCount();
+  updateBulkDeleteButton();
 }
 
 function updateSelectedCount() {
@@ -1148,7 +1169,7 @@ function editProduct(product) {
 
     // Helper to ensure production URLs
     const ensureProductionUrl = (url) => {
-      if (!url) return url;
+      if (!url) return "";
 
       // Convert localhost URLs to production URLs
       if (
@@ -1186,7 +1207,7 @@ function editProduct(product) {
         if (typeof img === "string" && img) {
           const fixedUrl = ensureProductionUrl(img);
           const filename = getFilename(fixedUrl);
-          uniqueUrls.set(filename, fixedUrl);
+          if (fixedUrl && filename) uniqueUrls.set(filename, fixedUrl);
         }
         // Handle object URLs
         else if (typeof img === "object" && img !== null) {
@@ -1194,11 +1215,11 @@ function editProduct(product) {
           if (img.desktop) {
             const fixedUrl = ensureProductionUrl(img.desktop);
             const filename = getFilename(fixedUrl);
-            uniqueUrls.set(filename, fixedUrl);
+            if (fixedUrl && filename) uniqueUrls.set(filename, fixedUrl);
           } else if (img.mobile) {
             const fixedUrl = ensureProductionUrl(img.mobile);
             const filename = getFilename(fixedUrl);
-            uniqueUrls.set(filename, fixedUrl);
+            if (fixedUrl && filename) uniqueUrls.set(filename, fixedUrl);
           }
         }
       });
@@ -1210,7 +1231,7 @@ function editProduct(product) {
         if (url) {
           const fixedUrl = ensureProductionUrl(url);
           const filename = getFilename(fixedUrl);
-          if (!uniqueUrls.has(filename)) {
+          if (fixedUrl && filename && !uniqueUrls.has(filename)) {
             uniqueUrls.set(filename, fixedUrl);
           }
         }
@@ -1633,7 +1654,6 @@ async function updateProduct(e) {
     const result = await response.json();
 
     if (result.success) {
-      alert("Product updated successfully!");
 
       // Save the updated product's category
       const targetCategory = category;
@@ -1644,6 +1664,8 @@ async function updateProduct(e) {
 
       // Clear the current content
       clear();
+
+      let listReloadSucceeded = false;
 
       try {
         // Fetch products directly here instead of relying on fetchInfo flow
@@ -1829,11 +1851,19 @@ async function updateProduct(e) {
         if (listProduct) {
           listProduct.scrollIntoView({ behavior: "smooth" });
         }
+
+        listReloadSucceeded = true;
       } catch (error) {
         console.error("Error in custom category redirect:", error);
         // Fallback to original approach if our custom loading fails
         fetchInfo();
-      }
+
+
+      if (listReloadSucceeded) {
+        alert("Product updated successfully!");
+      } else {
+        alert("Product updated, but reloading the product list failed. Please refresh the page.");
+      }      }
     } else {
       throw new Error(result.message || "Failed to update product");
     }
@@ -2449,8 +2479,8 @@ const BisliView = {
 // Export the entire object as default
 export default BisliView;
 
-// Run initialization since we know we're on the admin page
-setTimeout(init, 0);
+// NOTE: Initialization is scheduled by the checkCorrectUsage() IIFE near the top of this file.
+// Keeping a single scheduling point avoids duplicate auth checks / event handler binding.
 
 // Also add a helpful diagnostic function that users can call from console
 window.diagnoseBisliServer = async function () {
