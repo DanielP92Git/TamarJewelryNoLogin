@@ -218,12 +218,7 @@ function init() {
         initializeEventHandlers();
 
         // Show the products list by default
-        try {
-          await fetchInfo();
-          listReloadSucceeded = true;
-        } catch (fallbackError) {
-          console.error("Fallback fetchInfo() also failed:", fallbackError);
-        }
+        fetchInfo();
       }
     })
     .catch((error) => {
