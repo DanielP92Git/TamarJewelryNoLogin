@@ -1,0 +1,11 @@
+# Cloud Native Buildpacks project configuration
+# This file helps configure the build process and suppress warnings about analyzed.toml
+
+[build]
+  # Build configuration for Digital Ocean App Platform
+  # The analyzed.toml warning is informational and will resolve on subsequent builds
+
+[metadata]
+  # Project metadata
+  version = "0.1.0"
+

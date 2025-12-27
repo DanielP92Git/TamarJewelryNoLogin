@@ -5,6 +5,24 @@ const addProductsBtn = document.querySelector(".sidebar_add-products");
 const productsListBtn = document.querySelector(".sidebar_products-list");
 const sideBar = document.querySelector(".sidebar");
 const pageContent = document.querySelector(".page-content");
+const breadcrumbEl = document.getElementById("page-breadcrumb");
+
+function setActiveNav(active) {
+  // active: "products-list" | "add-product" | "edit-product"
+  const all = document.querySelectorAll(".nav__item");
+  all.forEach((el) => el.classList.remove("is-active"));
+
+  if (active === "products-list") {
+    productsListBtn?.classList.add("is-active");
+    if (breadcrumbEl) breadcrumbEl.textContent = "Products";
+  } else if (active === "add-product") {
+    addProductsBtn?.classList.add("is-active");
+    if (breadcrumbEl) breadcrumbEl.textContent = "Products / New Product";
+  } else if (active === "edit-product") {
+    addProductsBtn?.classList.add("is-active");
+    if (breadcrumbEl) breadcrumbEl.textContent = "Products / Edit Product";
+  }
+}
 
 // API Configuration
 const IS_PRODUCTION =
@@ -221,6 +239,7 @@ function init() {
         initializeEventHandlers();
 
         // Show the products list by default
+        setActiveNav("products-list");
         fetchInfo();
       }
     })
@@ -249,7 +268,7 @@ function showLoadingAnimation() {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(15, 16, 34, 0.82);
     z-index: 999;
     backdrop-filter: blur(5px);
     transition: opacity 0.3s ease;
@@ -319,7 +338,7 @@ function showLoadingAnimation() {
       .loader-text {
         margin-top: 20px;
         font-family: Arial, sans-serif;
-        color: #333;
+        color: rgba(255, 255, 255, 0.88);
         font-size: 16px;
         letter-spacing: 1px;
         text-align: center;
@@ -522,11 +541,12 @@ function showLoginPage(errorMessage) {
       left: 0;
       width: 100%;
       height: 100%;
-    background: rgba(253, 253, 253, 0.95);
+    background: rgba(15, 16, 34, 0.86);
       display: flex;
       justify-content: center;
       align-items: center;
     z-index: 1000;
+    backdrop-filter: blur(12px);
     `;
 
   document.body.appendChild(overlay);
@@ -655,7 +675,10 @@ function initializeEventHandlers() {
     addProductsBtn.removeEventListener("click", loadAddProductsPage);
 
     // Add fresh event listener
-    addProductsBtn.addEventListener("click", loadAddProductsPage);
+    addProductsBtn.addEventListener("click", () => {
+      setActiveNav("add-product");
+      loadAddProductsPage();
+    });
   }
 
   if (productsListBtn) {
@@ -663,7 +686,10 @@ function initializeEventHandlers() {
     productsListBtn.removeEventListener("click", fetchInfo);
 
     // Add fresh event listener
-    productsListBtn.addEventListener("click", fetchInfo);
+    productsListBtn.addEventListener("click", () => {
+      setActiveNav("products-list");
+      fetchInfo();
+    });
   }
 }
 
@@ -677,94 +703,27 @@ async function loadProductsPage(data) {
   if (!(await checkAuth())) return;
   clear();
 
+  setActiveNav("products-list");
+
   const markup = `
-    <style>
-      .product-actions {
-        display: flex;
-        gap: 8px;
-        justify-content: center;
-      }
-      .edit-btn, .delete-btn {
-        padding: 5px 10px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: all 0.2s;
-      }
-      .edit-btn {
-        background-color: #4e54c8;
-        color: white;
-        border: none;
-      }
-      .delete-btn {
-        background-color: #e74c3c;
-        color: white;
-        border: none;
-      }
-      .edit-btn:hover {
-        background-color: #3f43a3;
-      }
-      .delete-btn:hover {
-        background-color: #c0392b;
-      }
-      .bulk-actions {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 15px;
-        align-items: center;
-      }
-      .bulk-delete-btn {
-        background-color: #e74c3c;
-        color: white;
-        border: none;
-        padding: 8px 15px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 14px;
-        transition: all 0.2s;
-        display: none;
-      }
-      .bulk-delete-btn:hover {
-        background-color: #c0392b;
-      }
-      .bulk-delete-btn.visible {
-        display: block;
-        align-self: center;
-      }
-      .select-all-container {
-        display: flex;
-        align-items: center;
-        margin-top: 3rem;
-        gap: 8px;
-      }
-      .product-checkbox {
-        width: 18px;
-        height: 18px;
-        cursor: pointer;
-      }
-      .selected-count {
-        margin-left: 10px;
-        font-weight: bold;
-      }
-      .listproduct-format {
-        padding: 15px 0;
-        margin: 10px 0;
-      }
-      .listproduct-allproducts hr {
-        margin: 0;
-        border: none;
-        border-top: 1px solid #eaeaea;
-      }
-      .list-product {
-        margin-top: 20px;
-      }
-    </style>
-    <div class="list-product">
-      <div class="list-product-header">
-        <h1>All Products List</h1>
-        <div class="category-filter">
-          <label for="categoryFilter">Filter by Category:</label>
-          <select id="categoryFilter" class="category-filter-select">
+    <div class="page">
+      <div class="page__header">
+        <div>
+          <h2 class="page__title">Product Inventory List</h2>
+          <p class="page__subtitle">Monitor stock levels, track reorder points, and manage product availability.</p>
+        </div>
+        <div class="page__actions">
+          <button type="button" class="btn" id="export-products-btn">Export</button>
+          <button type="button" class="btn btn--primary" id="go-add-product-btn">Add Product</button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="control">
+          <input id="productSearch" class="input" type="text" placeholder="Search by product name, ID..." />
+        </div>
+        <div class="control" style="min-width: 220px; flex: 0 0 auto;">
+          <select id="categoryFilter" class="select">
             <option value="all">All Categories</option>
             <option value="necklaces">Necklaces</option>
             <option value="crochet-necklaces">Crochet Necklaces</option>
@@ -775,31 +734,53 @@ async function loadProductsPage(data) {
             <option value="shalom-club">Shalom Club</option>
           </select>
         </div>
-      </div>
-      <div class="bulk-actions">
-        <div class="select-all-container">
-          <input type="checkbox" id="select-all" class="product-checkbox">
-          <label for="select-all">Select All</label>
-          <span class="selected-count" id="selected-count"></span>
-        <button id="bulk-delete-btn" class="bulk-delete-btn">Delete Selected Items</button>
+        <div class="control" style="min-width: 180px; flex: 0 0 auto;">
+          <div class="badge" id="resultsBadge">0 items</div>
         </div>
       </div>
-      <div class="listproduct-format-main">
-        <p>Select</p>
-        <p>Products</p>
-        <p>Title</p>
-        <p>Price in $</p>
-        <p>Price in ₪</p>
-        <p>Category</p>
-        <p>Quantity</p>
-        <p>Actions</p>
-      </div>
-      <div class="listproduct-allproducts">
-        
+
+      <div class="card">
+        <div class="card__header">
+          <div class="card__meta">
+            <label class="badge" style="cursor:pointer; flex-shrink: 0;">
+              <input type="checkbox" id="select-all" class="product-checkbox" style="margin-right:8px;" />
+              Select all
+            </label>
+            <span class="badge" id="selected-count" style="flex-shrink: 0; display: none;"></span>
+            <button id="bulk-delete-btn" class="btn btn--danger" style="height:34px; padding:0 12px;">Delete selected</button>
+          </div>
+        </div>
+        <div class="table">
+          <div class="listproduct-format-main">
+            <p>Select</p>
+            <p>Product</p>
+            <p class="hide-sm">Category</p>
+            <p>Stock Qty</p>
+            <p class="hide-sm">USD</p>
+            <p class="hide-sm">ILS</p>
+            <p>Status</p>
+            <p style="text-align:right;">Actions</p>
+          </div>
+          <div class="listproduct-allproducts"></div>
+        </div>
       </div>
     </div>`;
 
   pageContent.insertAdjacentHTML("afterbegin", markup);
+
+  // Buttons
+  const goAddBtn = document.getElementById("go-add-product-btn");
+  if (goAddBtn) {
+    goAddBtn.addEventListener("click", () => {
+      setActiveNav("add-product");
+      loadAddProductsPage();
+    });
+  }
+
+  const exportBtn = document.getElementById("export-products-btn");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", () => exportProductsCSV(data));
+  }
 
   // Set the category filter to the stored category
   const categoryFilter = document.getElementById("categoryFilter");
@@ -824,6 +805,16 @@ async function loadProductsPage(data) {
   loadProducts(data);
   addCategoryFilterHandler(data);
   setupBulkActions();
+
+  const search = document.getElementById("productSearch");
+  if (search && search.dataset.bound !== "true") {
+    search.addEventListener("input", () => {
+      loadProducts(data);
+      updateSelectedCount();
+      setupBulkActions();
+    });
+    search.dataset.bound = "true";
+  }
 }
 
 function loadProducts(data) {
@@ -831,6 +822,9 @@ function loadProducts(data) {
   const selectedCategoryFromDOM = categoryFilterDOM
     ? categoryFilterDOM.value
     : "all";
+
+  const searchTermRaw = document.getElementById("productSearch")?.value || "";
+  const searchTerm = searchTermRaw.trim().toLowerCase();
 
   // The category for filtering should primarily come from what was set in the DOM by loadProductsPage
   state.selectedCategory = selectedCategoryFromDOM;
@@ -849,10 +843,18 @@ function loadProducts(data) {
   }
 
   // Filter products based on category
-  const filteredData =
+  let filteredData =
     state.selectedCategory === "all"
       ? data
       : data.filter((product) => product.category === state.selectedCategory);
+
+  if (searchTerm) {
+    filteredData = filteredData.filter((product) => {
+      const name = (product.name || "").toLowerCase();
+      const id = String(product.id ?? "").toLowerCase();
+      return name.includes(searchTerm) || id.includes(searchTerm);
+    });
+  }
 
   const productsContainer = document.querySelector(".listproduct-allproducts");
   if (!productsContainer) {
@@ -865,7 +867,7 @@ function loadProducts(data) {
   // Generate HTML for each product
   filteredData.forEach((item) => {
     const productElement = document.createElement("div");
-    productElement.className = "listproduct-format-main listproduct-format";
+    productElement.className = "row listproduct-format";
 
     // Safely get image URLs for srcset, defaulting to empty string if null/undefined
     const desktopSrc = item.mainImage?.desktop || item.image || "";
@@ -878,43 +880,63 @@ function loadProducts(data) {
       item.mainImage
     );
 
+    const qty = Number(item.quantity || 0);
+    let statusClass = "badge--success";
+    let statusText = "In Stock";
+    if (qty <= 0) {
+      statusClass = "badge--danger";
+      statusText = "Out of Stock";
+    } else if (qty <= 5) {
+      statusClass = "badge--warning";
+      statusText = "Low Stock";
+    }
+
     productElement.innerHTML = `
-      <div>
+      <div style="display:flex; align-items:center; justify-content:center;">
         <input type="checkbox" class="product-checkbox" data-product-id="${
           item.id
         }">
       </div>
-      <picture>
-        <source 
-          media="(min-width: 768px)" 
-          srcset="${desktopSrc}" 
-          type="image/webp"
-        />
-        <source 
-          media="(max-width: 767px)" 
-          srcset="${mobileSrc}" 
-          type="image/webp"
-        />
-        <img 
-          src="${mainImgSrc}" 
-          class="listproduct-product-icon" 
-          alt="${item.name}"
-          loading="lazy"
-        />
-      </picture>
-      <p>${item.name}</p>
-      <p>$${item.usd_price}</p>
-      <p>₪${item.ils_price}</p>
-      <p>${item.category}</p>
-      <p>${item.quantity || 0}</p>
-      <div class="product-actions">
-        <button class="edit-btn" data-product-id="${item.id}">Edit</button>
-        <button class="delete-btn" data-product-id="${item.id}">Delete</button>
+      <div class="row__name">
+        <picture>
+          <source media="(min-width: 768px)" srcset="${desktopSrc}" type="image/webp" />
+          <source media="(max-width: 767px)" srcset="${mobileSrc}" type="image/webp" />
+          <img src="${mainImgSrc}" class="listproduct-product-icon" alt="${
+      item.name
+    }" loading="lazy" />
+        </picture>
+        <div style="min-width:0;">
+          <div class="row__title">${item.name}</div>
+          <div class="mono">${String(item.id ?? "")}</div>
+        </div>
+      </div>
+      <div class="mono hide-sm">${item.category ?? ""}</div>
+      <div class="mono">${qty}</div>
+      <div class="mono hide-sm">$${item.usd_price ?? ""}</div>
+      <div class="mono hide-sm">₪${item.ils_price ?? ""}</div>
+      <div>
+        <span class="badge ${statusClass}">${statusText}</span>
+      </div>
+      <div class="actions">
+        <button class="icon-action icon-action--primary edit-btn" title="Edit Product" data-product-id="${
+          item.id
+        }">
+          <span style="font-weight:900;">✎</span>
+        </button>
+        <button class="icon-action icon-action--danger delete-btn" title="Delete Product" data-product-id="${
+          item.id
+        }">
+          <span style="font-weight:900;">✕</span>
+        </button>
       </div>
     `;
     productsContainer.appendChild(productElement);
-    productsContainer.appendChild(document.createElement("hr"));
   });
+
+  const resultsBadge = document.getElementById("resultsBadge");
+  if (resultsBadge) {
+    resultsBadge.textContent = `${filteredData.length} items`;
+  }
 
   // Add event listeners for delete and edit buttons
   document.querySelectorAll(".delete-btn").forEach((deleteBtn) => {
@@ -952,6 +974,7 @@ function loadProducts(data) {
       const productId = this.dataset.productId;
       const product = data.find((p) => p.id == productId);
       if (product) {
+        setActiveNav("edit-product");
         editProduct(product);
       }
     });
@@ -1024,8 +1047,13 @@ function updateSelectedCount() {
   const selectedCount = document.getElementById("selected-count");
   const checkedBoxes = document.querySelectorAll(".product-checkbox:checked");
   if (selectedCount) {
-    selectedCount.textContent =
-      checkedBoxes.length > 0 ? `(${checkedBoxes.length} selected)` : "";
+    if (checkedBoxes.length > 0) {
+      selectedCount.textContent = `(${checkedBoxes.length} selected)`;
+      selectedCount.style.display = "inline-flex";
+    } else {
+      selectedCount.textContent = "";
+      selectedCount.style.display = "none";
+    }
   }
 }
 
@@ -1038,6 +1066,39 @@ function updateBulkDeleteButton() {
     } else {
       bulkDeleteBtn.classList.remove("visible");
     }
+  }
+}
+
+function exportProductsCSV(data) {
+  try {
+    if (!Array.isArray(data)) return;
+    const rows = [
+      ["id", "name", "category", "usd_price", "ils_price", "quantity"].join(
+        ","
+      ),
+      ...data.map((p) =>
+        [
+          JSON.stringify(p.id ?? ""),
+          JSON.stringify(p.name ?? ""),
+          JSON.stringify(p.category ?? ""),
+          JSON.stringify(p.usd_price ?? ""),
+          JSON.stringify(p.ils_price ?? ""),
+          JSON.stringify(p.quantity ?? 0),
+        ].join(",")
+      ),
+    ].join("\n");
+
+    const blob = new Blob([rows], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `products-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    console.error("Export failed:", e);
   }
 }
 
@@ -1088,6 +1149,7 @@ async function bulkDeleteProducts() {
 // Define editProduct function if it doesn't exist
 function editProduct(product) {
   clear();
+  setActiveNav("edit-product");
 
   // Helper to get all main image URLs (desktop, mobile, public, legacy)
   function getAllMainImageUrls(product) {
@@ -1244,200 +1306,244 @@ function editProduct(product) {
   const smallImageUrls = getAllSmallImageUrls(product);
 
   const markup = `
-    <form id="editForm">
-     <div class="add-product">
-      <h2>Edit Product: ${product.name}</h2>
-    <div class="addproduct-itemfield">
-      <p>Product Title</p>
-      <input 
-        type="text"
-        name="name"
-        id="name"
-          placeholder="Type here"
-          value="${product.name}"
-      />
-    </div>
-    <div class="addproduct-price">
-      <div class="addproduct-itemfield">
-        <p>Price in $</p>
-        <input
-          type="text"
-          name="usd_price"
-          id="old-price"
-            placeholder="Type here"
-            value="${product.usd_price}"
-        />
-      </div>
-      <div class="addproduct-itemfield">
-        <p>Security Margin (%)</p>
-        <input
-          type="number"
-          name="security_margin"
-          id="security-margin"
-            placeholder="5"
-            value="${product.security_margin || 5}"
-          min="0"
-          max="100"
-        />
-      </div>
-      <div class="addproduct-itemfield">
-        <p>Price in ₪ (Auto-calculated)</p>
-        <input
-          type="text"
-          name="ils_price"
-          id="new-price"
-            placeholder="Auto-calculated"
-            value="${product.ils_price}"
-          readonly
-        />
-      </div>
-    </div>
-    <div class="addproduct-itemfield">
-      <p>Product Description</p>
-      <textarea
-        name="description"
-        id="description"
-          placeholder="Type here"
-        rows="4"
-        class="product-description-textarea"
-        >${product.description || ""}</textarea>
-    </div>
-    <div class="addproduct-itemfield">
-      <p>Product Category</p>
-      <select
-        name="category"
-        id="category"
-        class="add-product-selector"
-      >
-          <option id="necklaces" value="necklaces" ${
-            product.category === "necklaces" ? "selected" : ""
-          }>Necklaces</option>
-          <option id="crochet-necklaces" value="crochet-necklaces" ${
-            product.category === "crochet-necklaces" ? "selected" : ""
-          }>Crochet Necklaces</option>
-          <option id="bracelets" value="bracelets" ${
-            product.category === "bracelets" ? "selected" : ""
-          }>Bracelets</option>
-          <option id="hoop-earrings" value="hoop-earrings" ${
-            product.category === "hoop-earrings" ? "selected" : ""
-          }>Hoop Earrings</option>
-          <option id="dangle-earrings" value="dangle-earrings" ${
-            product.category === "dangle-earrings" ? "selected" : ""
-          }>Dangle Earrings</option>
-          <option id="unisex" value="unisex" ${
-            product.category === "unisex" ? "selected" : ""
-          }>Unisex</option>
-          <option id="shalom-club" value="shalom-club" ${
-            product.category === "shalom-club" ? "selected" : ""
-          }>Shalom Club</option>
-      </select>
-      <p>Quantity</p>
-      <select
-        name="quantity"
-        id="quantity"
-        class="quantity-selector"
-      >
-          ${Array.from(
-            { length: 21 },
-            (_, i) =>
-              `<option id="${i}" value="${i}" ${
-                product.quantity == i ? "selected" : ""
-              }>${i}</option>`
-          ).join("")}
-      </select>
-    </div>
-    <div class="current-images">
-      <h3>Current Images</h3>
-      <div class="main-image-section">
-        <p>Main Image</p>
-        <div class="main-image">
-          ${
-            mainImageUrls[0]
-              ? `
-          <img src="${mainImageUrls[0]}" alt="Main Image" loading="lazy" />
-          <button type="button" class="delete-image-btn" data-image-type="main" data-image-url="${encodeURIComponent(
-            mainImageUrls[0]
-          )}" data-product-id="${product.id}">&#10005;</button>
-          `
-              : `<p>No main image</p>`
-          }
+    <form id="editForm" class="page">
+      <div class="page__header">
+        <div>
+          <h2 class="page__title">Edit Product</h2>
+          <p class="page__subtitle">${product.name}</p>
+        </div>
+        <div class="page__actions">
+          <button type="button" class="btn" id="cancel-edit-product">Cancel</button>
+          <button type="submit" class="btn btn--primary addproduct-btn">Save Changes</button>
         </div>
       </div>
-      
-      <div class="small-images-section">
-        <p>Small Images</p>
-        <div class="small-images">
-          ${smallImageUrls
-            .map(
-              (url, idx) => `
-          <div class="small-image">
-            <img src="${url}" alt="Small Image ${idx + 1}" loading="lazy" />
-            <button type="button" class="delete-image-btn" data-image-type="small" data-image-url="${encodeURIComponent(
-              url
-            )}" data-product-id="${product.id}">&#10005;</button>
+
+      <div class="split">
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Basic Information</h3>
+            </div>
+            <div class="card__body" style="display:flex; flex-direction:column; gap:14px;">
+              <div class="field">
+                <div class="label">Product Name</div>
+                <input class="input" type="text" name="name" id="name" value="${
+                  product.name
+                }" />
+              </div>
+              <div class="field">
+                <div class="label">Description</div>
+                <textarea class="textarea" name="description" id="description">${
+                  product.description || ""
+                }</textarea>
+              </div>
+            </div>
           </div>
-        `
-            )
-            .join("")}
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Organization</h3>
+            </div>
+            <div class="card__body">
+              <div class="grid-2">
+                <div class="field">
+                  <div class="label">Category</div>
+                  <select class="select" name="category" id="category">
+                    <option id="necklaces" value="necklaces" ${
+                      product.category === "necklaces" ? "selected" : ""
+                    }>Necklaces</option>
+                    <option id="crochet-necklaces" value="crochet-necklaces" ${
+                      product.category === "crochet-necklaces" ? "selected" : ""
+                    }>Crochet Necklaces</option>
+                    <option id="bracelets" value="bracelets" ${
+                      product.category === "bracelets" ? "selected" : ""
+                    }>Bracelets</option>
+                    <option id="hoop-earrings" value="hoop-earrings" ${
+                      product.category === "hoop-earrings" ? "selected" : ""
+                    }>Hoop Earrings</option>
+                    <option id="dangle-earrings" value="dangle-earrings" ${
+                      product.category === "dangle-earrings" ? "selected" : ""
+                    }>Dangle Earrings</option>
+                    <option id="unisex" value="unisex" ${
+                      product.category === "unisex" ? "selected" : ""
+                    }>Unisex</option>
+                    <option id="shalom-club" value="shalom-club" ${
+                      product.category === "shalom-club" ? "selected" : ""
+                    }>Shalom Club</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <div class="label">Quantity</div>
+                  <select class="select" name="quantity" id="quantity">
+                    ${Array.from(
+                      { length: 21 },
+                      (_, i) =>
+                        `<option id="${i}" value="${i}" ${
+                          product.quantity == i ? "selected" : ""
+                        }>${i}</option>`
+                    ).join("")}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Pricing</h3>
+            </div>
+            <div class="card__body">
+              <div class="grid-2">
+                <div class="field">
+                  <div class="label">Price in $</div>
+                  <input class="input" type="text" name="usd_price" id="old-price" value="${
+                    product.usd_price
+                  }" />
+                </div>
+                <div class="field">
+                  <div class="label">Security Margin (%)</div>
+                  <input class="input" type="number" name="security_margin" id="security-margin" value="${
+                    product.security_margin || 5
+                  }" min="0" max="100" />
+                </div>
+              </div>
+              <div class="field" style="margin-top:12px;">
+                <div class="label">Price in ₪ (Auto-calculated)</div>
+                <input class="input" type="text" name="ils_price" id="new-price" value="${
+                  product.ils_price
+                }" readonly />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Media</h3>
+              <div class="card__meta">Current + Upload</div>
+            </div>
+            <div class="card__body" style="display:flex; flex-direction:column; gap:14px;">
+              <div class="field">
+                <div class="label">Current Main Image</div>
+                <div class="thumbs">
+                  ${
+                    mainImageUrls[0]
+                      ? `
+                    <div class="thumb" style="width:88px;height:88px; position:relative;">
+                      <img src="${
+                        mainImageUrls[0]
+                      }" alt="Main Image" loading="lazy" />
+                      <button type="button" class="delete-image-btn" data-image-type="main" data-image-url="${encodeURIComponent(
+                        mainImageUrls[0]
+                      )}" data-product-id="${
+                          product.id
+                        }" style="position:absolute; top:-10px; right:-10px; width:28px; height:28px; border-radius:999px; border:1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.18); color: rgba(239,68,68,.95); cursor:pointer; font-weight:900;">✕</button>
+                    </div>`
+                      : `<span class="help">No main image</span>`
+                  }
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="label">Current Gallery</div>
+                <div class="thumbs">
+                  ${smallImageUrls
+                    .map(
+                      (url, idx) => `
+                    <div class="thumb" style="width:72px;height:72px; position:relative;">
+                      <img src="${url}" alt="Small Image ${
+                        idx + 1
+                      }" loading="lazy" />
+                      <button type="button" class="delete-image-btn" data-image-type="small" data-image-url="${encodeURIComponent(
+                        url
+                      )}" data-product-id="${
+                        product.id
+                      }" style="position:absolute; top:-10px; right:-10px; width:26px; height:26px; border-radius:999px; border:1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.18); color: rgba(239,68,68,.95); cursor:pointer; font-weight:900;">✕</button>
+                    </div>`
+                    )
+                    .join("")}
+                </div>
+              </div>
+
+              <div class="field">
+                <div class="label">Replace Main Image</div>
+                <label class="dropzone" for="mainImage">
+                  <div class="dropzone__title">Click to upload image</div>
+                  <div class="dropzone__sub">Replaces the current main image</div>
+                  <div class="thumbs" id="editMainThumbs"></div>
+                </label>
+                <input type="file" name="mainImage" id="mainImage" accept="image/*" style="display:none;" />
+              </div>
+
+              <div class="field">
+                <div class="label">Add Gallery Images</div>
+                <label class="dropzone" for="smallImages" style="min-height:140px;">
+                  <div class="dropzone__title">Add more photos</div>
+                  <div class="dropzone__sub">Adds to existing gallery</div>
+                  <div class="thumbs" id="editSmallThumbs"></div>
+                </label>
+                <input type="file" name="smallImages" id="smallImages" multiple accept="image/*" style="display:none;" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Product</h3>
+            </div>
+            <div class="card__body">
+              <div class="help">ID</div>
+              <div class="mono" style="margin-top:6px;">${product.id}</div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    
-    <div class="file-upload-container">
-      <h3>Add New Images</h3>
-      
-      <div class="file-upload-field">
-        <label class="file-upload-label">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
-          </svg>
-          New Main Image
-        </label>
-        <div class="file-upload-input">
-          <input
-            type="file"
-            name="mainImage"
-            id="mainImage"
-            accept="image/*"
-          />
-        </div>
-        <p class="file-upload-help">This will replace the current main image. Max size: 5MB</p>
-      </div>
-      
-      <div class="file-upload-field">
-        <label class="file-upload-label">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
-            <polyline points="21 11 14 4 7 11"></polyline>
-          </svg>
-          Additional Product Images
-        </label>
-        <div class="file-upload-input">
-          <input
-            type="file"
-            name="smallImages"
-            id="smallImages"
-            multiple
-            accept="image/*"
-          />
-        </div>
-        <p class="file-upload-help">Select multiple images to add to existing gallery. Max size per image: 5MB</p>
-      </div>
-    </div>
-    
-    <input type="hidden" id="product-id" value="${product.id}">
-    <button type="submit" class="addproduct-btn">
-      Update Product
-    </button>
-     </div>
+
+      <input type="hidden" id="product-id" value="${product.id}">
     </form>
   `;
 
   pageContent.insertAdjacentHTML("afterbegin", markup);
+
+  // Cancel -> back to products list
+  const cancelBtn = document.getElementById("cancel-edit-product");
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      setActiveNav("products-list");
+      fetchInfo();
+    });
+  }
+
+  // Local previews for newly selected images (purely visual)
+  const editMainInput = document.getElementById("mainImage");
+  const editSmallInput = document.getElementById("smallImages");
+  const editMainThumbs = document.getElementById("editMainThumbs");
+  const editSmallThumbs = document.getElementById("editSmallThumbs");
+
+  const renderThumbs = (files, container, max = 5) => {
+    if (!container) return;
+    container.innerHTML = "";
+    const list = Array.from(files || []).slice(0, max);
+    list.forEach((file) => {
+      const wrap = document.createElement("div");
+      wrap.className = "thumb";
+      const img = document.createElement("img");
+      img.alt = file.name;
+      img.loading = "lazy";
+      img.src = URL.createObjectURL(file);
+      wrap.appendChild(img);
+      container.appendChild(wrap);
+    });
+  };
+
+  editMainInput?.addEventListener("change", () => {
+    renderThumbs(editMainInput.files, editMainThumbs, 1);
+  });
+
+  editSmallInput?.addEventListener("change", () => {
+    renderThumbs(editSmallInput.files, editSmallThumbs, 5);
+  });
 
   // Add event listeners
   const form = document.getElementById("editForm");
@@ -1622,6 +1728,10 @@ async function updateProduct(e) {
   formData.append("category", category);
   formData.append("quantity", quantity);
   formData.append("security_margin", securityMargin);
+  // Include fields for backward-compatible legacy update endpoints
+  formData.append("id", productId);
+  formData.append("oldPrice", usdPrice);
+  formData.append("newPrice", ilsPrice);
 
   // Append new images if they exist
   if (mainImageFile) {
@@ -1661,8 +1771,6 @@ async function updateProduct(e) {
 
       // Clear the current content
       clear();
-
-      let listReloadSucceeded = false;
 
       try {
         // Fetch products directly here instead of relying on fetchInfo flow
@@ -1848,18 +1956,19 @@ async function updateProduct(e) {
         if (listProduct) {
           listProduct.scrollIntoView({ behavior: "smooth" });
         }
-
-        listReloadSucceeded = true;
       } catch (error) {
         console.error("Error in custom category redirect:", error);
         // Fallback to original approach if our custom loading fails
-        fetchInfo();
-
-        if (listReloadSucceeded) {
+        try {
+          await fetchInfo();
           alert("Product updated successfully!");
-        } else {
+        } catch (fallbackError) {
+          console.error(
+            "Error during fallback fetchInfo after product update:",
+            fallbackError
+          );
           alert(
-            "Product updated, but reloading the product list failed. Please refresh the page."
+            "Product was updated, but reloading the product list failed. Please refresh the page."
           );
         }
       }
@@ -2183,173 +2292,213 @@ async function addProduct(e, data, form) {
 async function loadAddProductsPage() {
   if (!(await checkAuth())) return;
   clear();
+  setActiveNav("add-product");
 
   const markup = `
-    <form id="uploadForm">
-     <div class="add-product">
-      <div class="addproduct-itemfield">
-        <p>Product Title</p>
-        <input 
-         type="text"
-         name="name"
-         id="name"
-         placeholder="Type here"
-       />
-             </div>
-     <div class="addproduct-price">
-       <div class="addproduct-itemfield">
-         <p>Price in $</p>
-         <input
-           type="text"
-           name="usd_price"
-           id="old-price"
-           placeholder="Type here"
-         />
-           </div>
-       <div class="addproduct-itemfield">
-         <p>Security Margin (%)</p>
-         <input
-           type="number"
-           name="security_margin"
-           id="security-margin"
-           placeholder="5"
-           value="5"
-           min="0"
-           max="100"
-         />
-       </div>
-       <div class="addproduct-itemfield">
-         <p>Price in ₪ (Auto-calculated)</p>
-         <input
-           type="text"
-           name="ils_price"
-           id="new-price"
-           placeholder="Auto-calculated"
-           readonly
-         />
-       </div>
-     </div>
-     <div class="addproduct-itemfield">
-       <p>Product Description</p>
-       <textarea
-         name="description"
-         id="description"
-         placeholder="Type here"
-         rows="4"
-         class="product-description-textarea"
-       ></textarea>
-     </div>
-     <div class="addproduct-itemfield">
-       <p>Product Category</p>
-       <select
-         name="category"
-         id="category"
-         class="add-product-selector"
-       >
-         <option id="necklaces" value="necklaces">Necklaces</option>
-         <option id="crochet-necklaces" value="crochet-necklaces">Crochet Necklaces</option>
-         <option id="bracelets" value="bracelets">Bracelets</option>
-         <option id="hoop-earrings" value="hoop-earrings">Hoop Earrings</option>
-         <option id="dangle-earrings" value="dangle-earrings">Dangle Earrings</option>
-         <option id="unisex" value="unisex">Unisex</option>
-         <option id="shalom-club" value="shalom-club">Shalom Club</option>
-       </select>
-       <p>Quantity</p>
-       <select
-         name="quantity"
-         id="quantity"
-         class="quantity-selector"
-       >
-         <option id="0" value="0">0</option>
-         <option id="1" value="1" selected>1</option>
-         <option id="2" value="2">2</option>
-         <option id="3" value="3">3</option>
-         <option id="4" value="4">4</option>
-         <option id="5" value="5">5</option>
-         <option id="6" value="6">6</option>
-         <option id="7" value="7">7</option>
-         <option id="8" value="8">8</option>
-         <option id="9" value="9">9</option>
-         <option id="10" value="10">10</option>
-         <option id="11" value="11">11</option>
-         <option id="12" value="12">12</option>
-         <option id="13" value="13">13</option>
-         <option id="14" value="14">14</option>
-         <option id="15" value="15">15</option>
-         <option id="16" value="16">16</option>
-         <option id="17" value="17">17</option>
-         <option id="18" value="18">18</option>
-         <option id="19" value="19">19</option>
-         <option id="20" value="20">20</option>
-       </select>
-     </div>
-     <div class="file-upload-container">
-       <h3>Product Images</h3>
-       
-       <div class="file-upload-field">
-         <label class="file-upload-label">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-             <circle cx="8.5" cy="8.5" r="1.5"></circle>
-             <polyline points="21 15 16 10 5 21"></polyline>
-           </svg>
-           Main Product Image
-         </label>
-         <div class="file-upload-input">
-           <input
-             type="file"
-             name="mainImage"
-             id="mainImage"
-             accept="image/*"
-             required
-           />
-         </div>
-         <p class="file-upload-help">This will be the primary image shown for your product. Max size: 5MB</p>
-       </div>
-       
-       <div class="file-upload-field">
-         <label class="file-upload-label">
-           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-             <circle cx="8.5" cy="8.5" r="1.5"></circle>
-             <polyline points="21 15 16 10 5 21"></polyline>
-             <polyline points="21 11 14 4 7 11"></polyline>
-           </svg>
-           Additional Product Images
-         </label>
-         <div class="file-upload-input">
-           <input
-             type="file"
-             name="smallImages"
-             id="smallImages"
-             multiple
-             accept="image/*"
-           />
-         </div>
-         <p class="file-upload-help">Select multiple images to show different angles or details. Max size per image: 5MB</p>
-       </div>
-     </div>
-     <button class="addproduct-btn">
-        Submit
-     </button>
-     </div>
+    <form id="uploadForm" class="page">
+      <div class="page__header">
+        <div>
+          <h2 class="page__title">Add New Product</h2>
+          <p class="page__subtitle">Fill in the details to create a new jewelry listing.</p>
+        </div>
+        <div class="page__actions">
+          <button type="button" class="btn" id="cancel-add-product">Cancel</button>
+          <button type="submit" class="btn btn--primary" id="submit-add-product">Add Product</button>
+        </div>
+      </div>
+
+      <div class="split">
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Basic Information</h3>
+            </div>
+            <div class="card__body" style="display:flex; flex-direction:column; gap:14px;">
+              <div class="field">
+                <div class="label">Product Name</div>
+                <input class="input" type="text" name="name" id="name" placeholder="e.g. 18k Gold Diamond Eternity Ring" />
+              </div>
+
+              <div class="field">
+                <div class="label">Description</div>
+                <textarea class="textarea" name="description" id="description" placeholder="Describe the product details, materials, and craftsmanship..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Organization</h3>
+            </div>
+            <div class="card__body">
+              <div class="grid-2">
+                <div class="field">
+                  <div class="label">Category</div>
+                  <select class="select" name="category" id="category">
+                    <option id="necklaces" value="necklaces">Necklaces</option>
+                    <option id="crochet-necklaces" value="crochet-necklaces">Crochet Necklaces</option>
+                    <option id="bracelets" value="bracelets">Bracelets</option>
+                    <option id="hoop-earrings" value="hoop-earrings">Hoop Earrings</option>
+                    <option id="dangle-earrings" value="dangle-earrings">Dangle Earrings</option>
+                    <option id="unisex" value="unisex">Unisex</option>
+                    <option id="shalom-club" value="shalom-club">Shalom Club</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <div class="label">Quantity</div>
+                  <select class="select" name="quantity" id="quantity">
+                    ${Array.from({ length: 21 }, (_, i) => {
+                      const selected = i === 1 ? "selected" : "";
+                      return `<option id="${i}" value="${i}" ${selected}>${i}</option>`;
+                    }).join("")}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Pricing</h3>
+            </div>
+            <div class="card__body">
+              <div class="grid-2">
+                <div class="field">
+                  <div class="label">Price in $</div>
+                  <input class="input" type="text" name="usd_price" id="old-price" placeholder="0.00" />
+                </div>
+                <div class="field">
+                  <div class="label">Security Margin (%)</div>
+                  <input class="input" type="number" name="security_margin" id="security-margin" placeholder="5" value="5" min="0" max="100" />
+                </div>
+              </div>
+              <div class="field" style="margin-top:12px;">
+                <div class="label">Price in ₪ (Auto-calculated)</div>
+                <input class="input" type="text" name="ils_price" id="new-price" placeholder="Auto-calculated" readonly />
+                <div class="help">ILS is calculated from USD with a security margin.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Media</h3>
+              <div class="card__meta"><span id="media-count">0/0 Files</span></div>
+            </div>
+            <div class="card__body" style="display:flex; flex-direction:column; gap:14px;">
+              <div class="field">
+                <div class="label">Main Image</div>
+                <label class="dropzone" for="mainImage">
+                  <div class="dropzone__title">Click to upload image</div>
+                  <div class="dropzone__sub">or drag and drop here</div>
+                  <div class="thumbs" id="mainImageThumbs"></div>
+                </label>
+                <input type="file" name="mainImage" id="mainImage" accept="image/*" required style="display:none;" />
+                <div class="help">This will be the primary image shown for your product. Max size: 5MB</div>
+              </div>
+
+              <div class="field">
+                <div class="label">Additional Images</div>
+                <label class="dropzone" for="smallImages" style="min-height:140px;">
+                  <div class="dropzone__title">Add more photos</div>
+                  <div class="dropzone__sub">Multiple files supported</div>
+                  <div class="thumbs" id="smallImageThumbs"></div>
+                </label>
+                <input type="file" name="smallImages" id="smallImages" multiple accept="image/*" style="display:none;" />
+                <div class="help">Select multiple images to show different angles or details. Max size per image: 5MB</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Inventory</h3>
+            </div>
+            <div class="card__body">
+              <div class="help">Inventory is driven by your Quantity field.</div>
+              <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+                <span class="badge" id="invCategoryBadge">Category: —</span>
+                <span class="badge" id="invQtyBadge">Qty: —</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </form>
   `;
 
   pageContent.insertAdjacentHTML("afterbegin", markup);
   addProductHandler();
 
-  // Add event listeners for price calculation
-  const usdPriceInput = document.getElementById("old-price");
-  const securityMarginInput = document.getElementById("security-margin");
-
-  if (usdPriceInput) {
-    usdPriceInput.addEventListener("input", calculateILSPrice);
+  // Cancel -> back to products list
+  const cancelBtn = document.getElementById("cancel-add-product");
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      setActiveNav("products-list");
+      fetchInfo();
+    });
   }
 
-  if (securityMarginInput) {
-    securityMarginInput.addEventListener("input", calculateILSPrice);
+  // Keep small inventory badges in sync (purely visual)
+  const categoryEl = document.getElementById("category");
+  const qtyEl = document.getElementById("quantity");
+  const catBadge = document.getElementById("invCategoryBadge");
+  const qtyBadge = document.getElementById("invQtyBadge");
+  const updateInvBadges = () => {
+    if (catBadge && categoryEl)
+      catBadge.textContent = `Category: ${categoryEl.value}`;
+    if (qtyBadge && qtyEl) qtyBadge.textContent = `Qty: ${qtyEl.value}`;
+  };
+  categoryEl?.addEventListener("change", updateInvBadges);
+  qtyEl?.addEventListener("change", updateInvBadges);
+  updateInvBadges();
+
+  // Media previews + count
+  const mainInput = document.getElementById("mainImage");
+  const smallInput = document.getElementById("smallImages");
+  const mainThumbs = document.getElementById("mainImageThumbs");
+  const smallThumbs = document.getElementById("smallImageThumbs");
+  const mediaCount = document.getElementById("media-count");
+
+  const renderThumbs = (files, container, max = 5) => {
+    if (!container) return;
+    container.innerHTML = "";
+    const list = Array.from(files || []).slice(0, max);
+    list.forEach((file) => {
+      const wrap = document.createElement("div");
+      wrap.className = "thumb";
+      const img = document.createElement("img");
+      img.alt = file.name;
+      img.loading = "lazy";
+      img.src = URL.createObjectURL(file);
+      wrap.appendChild(img);
+      container.appendChild(wrap);
+    });
+  };
+
+  const updateMediaCount = () => {
+    const mainCount = mainInput?.files?.length || 0;
+    const smallCount = smallInput?.files?.length || 0;
+    const total = mainCount + smallCount;
+    const max = 1 + 5; // visual hint (main + up to 5 thumbs)
+    if (mediaCount) mediaCount.textContent = `${total}/${max} Files`;
+  };
+
+  if (mainInput) {
+    mainInput.addEventListener("change", () => {
+      renderThumbs(mainInput.files, mainThumbs, 1);
+      updateMediaCount();
+    });
   }
+  if (smallInput) {
+    smallInput.addEventListener("change", () => {
+      renderThumbs(smallInput.files, smallThumbs, 5);
+      updateMediaCount();
+    });
+  }
+  updateMediaCount();
 
   // Calculate initial price if values are present
   calculateILSPrice();

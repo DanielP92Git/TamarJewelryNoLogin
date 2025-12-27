@@ -23,21 +23,77 @@
         />
       </symbol>
     </svg>
-    <header></header>
-    <main id="main-container">
-      <aside class="sidebar">
-        <div>
-          <div class="sidebar_add-products">
-            <img src="./assets/upload.svg" class="plus-icon" alt="" />
-            <p>Add Product</p>
+    <main id="app-shell" class="app-shell">
+      <aside class="sidebar" aria-label="Admin navigation">
+        <div class="sidebar__inner">
+          <div class="brand">
+            <div class="brand__mark" aria-hidden="true">
+              <span class="brand__diamond"></span>
+            </div>
+            <div class="brand__text">
+              <div class="brand__name">Tamar Kfir</div>
+              <div class="brand__sub">Admin Console</div>
+            </div>
           </div>
-          <div class="sidebar_products-list">
-            <img src="./assets/bars-solid.svg" class="list-icon" alt="" />
-            <p>Products List</p>
+
+          <nav class="nav">
+            <div class="nav__section">
+              <div class="nav__label">Products</div>
+
+              <!-- Keep these classes for BisliView hooks -->
+              <button
+                type="button"
+                class="nav__item sidebar_products-list"
+                data-nav="products-list"
+              >
+                <span class="nav__icon" aria-hidden="true">
+                  <img src="./assets/bars-solid.svg" class="list-icon" alt="" />
+                </span>
+                <span class="nav__text">Products List</span>
+              </button>
+
+              <button
+                type="button"
+                class="nav__item sidebar_add-products"
+                data-nav="add-product"
+              >
+                <span class="nav__icon" aria-hidden="true">
+                  <img src="./assets/upload.svg" class="plus-icon" alt="" />
+                </span>
+                <span class="nav__text">Add Product</span>
+              </button>
+            </div>
+          </nav>
+
+          <div class="sidebar__footer">
+            <div class="sidebar__hint">Signed in as admin</div>
           </div>
         </div>
       </aside>
-      <section class="page-content"></section>
+
+      <section class="content">
+        <header class="topbar">
+          <div class="topbar__left">
+            <div class="breadcrumbs" aria-label="Breadcrumb">
+              <span class="breadcrumbs__item">Dashboard</span>
+              <span class="breadcrumbs__sep">/</span>
+              <span
+                class="breadcrumbs__item breadcrumbs__item--current"
+                id="page-breadcrumb"
+                >Products</span
+              >
+            </div>
+          </div>
+          <div class="topbar__right">
+            <button class="icon-btn" type="button" aria-label="Notifications">
+              <span class="icon-dot" aria-hidden="true"></span>
+              <span class="icon-bell" aria-hidden="true"></span>
+            </button>
+          </div>
+        </header>
+
+        <section class="page-content" aria-live="polite"></section>
+      </section>
     </main>
   </body>
 </html>
