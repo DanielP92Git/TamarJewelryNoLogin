@@ -1690,52 +1690,8 @@ app.post(
   }
 );
 
-// Multer error handler (keeps responses JSON and avoids default HTML errors)
-app.use((err, req, res, next) => {
-  if (err && err instanceof multer.MulterError) {
-    const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
-    return res.status(status).json({
-      success: false,
-      error: 'Upload failed',
-      code: err.code,
-      ...(isProd ? {} : { message: err.message }),
-    });
-  }
-  if (
-    err &&
-    typeof err.message === 'string' &&
-    err.message.includes('File type not supported')
-  ) {
-    return res.status(415).json({
-      success: false,
-      error: 'File type not supported',
-    });
-  }
-  return next(err);
-});
-
-// Centralized error handler (last middleware)
-app.use((err, req, res) => {
-  const status = err && Number.isInteger(err.statusCode) ? err.statusCode : 500;
-
-  const code = err && err.code ? String(err.code) : 'INTERNAL_ERROR';
-
-  // Log full details server-side; keep client response minimal in prod
-  console.error('Unhandled error:', {
-    status,
-    code,
-    path: req.originalUrl,
-    method: req.method,
-    message: err?.message,
-  });
-
-  return res.status(status).json({
-    success: false,
-    error: 'Request failed',
-    code,
-    ...(isProd ? {} : { message: err?.message }),
-  });
-});
+// NOTE: Error-handling middleware is registered near the end of the file (after all routes),
+// so that errors from any route can be handled consistently as JSON.
 
 // Payment Processing Endpoints
 app.post('/webhook', (request, response) => {
@@ -1931,336 +1887,134 @@ app.post('/orders/:orderID/capture', paymentRateLimiter, async (req, res) => {
 
 app.post('/deleteproductimage', fetchUser, requireAdmin, async (req, res) => {
   try {
-    const { productId, imageType, imageUrl } = req.body;
+    const { productId, imageType, imageUrl } = req.body || {};
+    const id = Number(productId);
 
-    console.log(`Deleting image: ${imageType} from product ${productId}`);
-    console.log(`Image URL: ${imageUrl}`);
+    if (!Number.isFinite(id)) {
+      return res.status(400).json({ success: false, message: 'Invalid productId' });
+    }
+    if (imageType !== 'main' && imageType !== 'small') {
+      return res.status(400).json({ success: false, message: 'Invalid imageType' });
+    }
 
-    // Helper function to extract filename from URL
-    const getFilename = url => {
-      if (!url) return '';
-      const parts = url.split('/');
-      return parts[parts.length - 1];
+    const product = await Product.findOne({ id });
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const extractFilename = url => {
+      if (!url || typeof url !== 'string') return '';
+      const rel = toRelativeApiPath(url);
+      return rel ? path.basename(rel) : '';
     };
 
-    // Get the filename from the URL
-    const targetFilename = getFilename(imageUrl);
-    console.log(`Target filename to delete: ${targetFilename}`);
+    const unlinkIfExists = async filePath => {
+      try {
+        await fs.promises.unlink(filePath);
+      } catch {
+        // ignore
+      }
+    };
 
     if (imageType === 'main') {
-      console.log('Deleting main image');
+      const candidates = [
+        product.image,
+        product.publicImage,
+        product.directImageUrl,
+        product.mainImage?.desktop,
+        product.mainImage?.mobile,
+        product.mainImage?.publicDesktop,
+        product.mainImage?.publicMobile,
+      ]
+        .map(extractFilename)
+        .filter(Boolean);
 
-      // For main image, we can directly update using MongoDB's update operators
-      await Product.updateOne(
-        { id: Number(productId) },
-        {
-          $set: {
-            image: null,
-            publicImage: null,
-            imageLocal: null,
-            'mainImage.desktop': null,
-            'mainImage.mobile': null,
-            'mainImage.publicDesktop': null,
-            'mainImage.publicMobile': null,
-            'mainImage.desktopLocal': null,
-            'mainImage.mobileLocal': null,
-          },
-        }
+      await Promise.all(
+        candidates.flatMap(fn => [
+          unlinkIfExists(path.join(uploadsDir, fn)),
+          unlinkIfExists(path.join(publicUploadsDir, fn)),
+        ])
       );
 
-      console.log('Main image deleted via direct update');
-      return res.json({
-        success: true,
-        message: 'Main image deleted successfully',
-      });
-    } else if (imageType === 'small') {
-      console.log('Deleting small image');
+      product.image = null;
+      product.publicImage = null;
+      product.directImageUrl = null;
+      product.imageLocal = null;
 
-      // Get the collection for direct manipulation
-      const collection = mongoose.connection.db.collection('products');
-
-      // Get the document
-      const product = await collection.findOne({ id: Number(productId) });
-
-      if (!product) {
-        console.error(`Product with ID ${productId} not found`);
-        return res.status(404).json({
-          success: false,
-          message: 'Product not found',
-        });
+      if (product.mainImage) {
+        product.mainImage.desktop = null;
+        product.mainImage.mobile = null;
+        product.mainImage.publicDesktop = null;
+        product.mainImage.publicMobile = null;
+        product.mainImage.desktopLocal = null;
+        product.mainImage.mobileLocal = null;
       }
 
-      console.log('Retrieved product document, checking images...');
-
-      // Track whether any updates were made
-      let updatedProduct = false;
-
-      // 1. Handle smallImagesLocal array first (simpler case)
-      if (product.smallImagesLocal && Array.isArray(product.smallImagesLocal)) {
-        console.log(
-          `Found ${product.smallImagesLocal.length} items in smallImagesLocal array`
-        );
-
-        // Log each URL for debugging
-        product.smallImagesLocal.forEach((url, i) => {
-          console.log(`smallImagesLocal[${i}]: ${url}`);
-        });
-
-        // Check if the exact requested URL exists
-        const exactUrlIndex = product.smallImagesLocal.findIndex(
-          url => url === imageUrl
-        );
-
-        if (exactUrlIndex !== -1) {
-          console.log(
-            `Found exact match for ${imageUrl} at index ${exactUrlIndex} in smallImagesLocal`
-          );
-
-          // Create a new array without this item
-          const updatedArray = [...product.smallImagesLocal];
-          updatedArray.splice(exactUrlIndex, 1);
-
-          // Update the document
-          await collection.updateOne(
-            { id: Number(productId) },
-            { $set: { smallImagesLocal: updatedArray } }
-          );
-
-          console.log(
-            `Removed item at index ${exactUrlIndex} from smallImagesLocal`
-          );
-          updatedProduct = true;
-        } else {
-          // Check if any URLs contain the target filename
-          const filenameIndex = product.smallImagesLocal.findIndex(
-            url =>
-              url && typeof url === 'string' && url.includes(targetFilename)
-          );
-
-          if (filenameIndex !== -1) {
-            console.log(
-              `Found filename match for ${targetFilename} at index ${filenameIndex} in smallImagesLocal`
-            );
-
-            // Create a new array without this item
-            const updatedArray = [...product.smallImagesLocal];
-            updatedArray.splice(filenameIndex, 1);
-
-            // Update the document
-            await collection.updateOne(
-              { id: Number(productId) },
-              { $set: { smallImagesLocal: updatedArray } }
-            );
-
-            console.log(
-              `Removed item at index ${filenameIndex} from smallImagesLocal`
-            );
-            updatedProduct = true;
-          } else {
-            console.log('No match found in smallImagesLocal array');
-          }
-        }
-      }
-
-      // 2. Handle smallImages array (more complex character-by-character objects)
-      if (product.smallImages && Array.isArray(product.smallImages)) {
-        console.log(
-          `Found ${product.smallImages.length} items in smallImages array`
-        );
-        let matched = false;
-
-        // IMPORTANT: For character-by-character objects, reconstruct each one and check for matches
-        for (let i = 0; i < product.smallImages.length; i++) {
-          const img = product.smallImages[i];
-
-          // Skip non-objects
-          if (!img || typeof img !== 'object') continue;
-
-          // Check if this is a character-by-character object
-          const numericKeys = Object.keys(img)
-            .filter(key => !isNaN(parseInt(key)) && key !== '_id')
-            .sort((a, b) => parseInt(a) - parseInt(b));
-
-          // Need enough keys to be a character-by-character object
-          if (numericKeys.length < 10) continue;
-
-          // Reconstruct URL from character-by-character object
-          let reconstructedUrl = '';
-          for (const key of numericKeys) {
-            if (img[key] && typeof img[key] === 'string') {
-              reconstructedUrl += img[key];
-            }
-          }
-
-          console.log(
-            `Reconstructed URL from smallImages[${i}]: ${reconstructedUrl}`
-          );
-
-          // Check for match by filename
-          if (reconstructedUrl.includes(targetFilename)) {
-            console.log(`Found match by filename in smallImages at index ${i}`);
-
-            // Create new array without this item
-            const updatedArray = [...product.smallImages];
-            updatedArray.splice(i, 1);
-
-            // Update document
-            await collection.updateOne(
-              { id: Number(productId) },
-              { $set: { smallImages: updatedArray } }
-            );
-
-            console.log(`Removed item at index ${i} from smallImages`);
-            updatedProduct = true;
-            matched = true;
-            break;
-          }
-
-          // Also check for URL patterns that match specific servers
-          if (
-            reconstructedUrl.includes('lobster-app-jipru.ondigitalocean.app') &&
-            reconstructedUrl.includes('smallImages') &&
-            reconstructedUrl.includes('.jpg')
-          ) {
-            // Extract the filename from reconstructed URL
-            const filename = getFilename(reconstructedUrl);
-            console.log(`Found digital ocean URL with filename: ${filename}`);
-
-            // If it's a related filename (timestamps might differ slightly), also remove
-            if (filename.startsWith('smallImages-')) {
-              console.log(
-                `Found similar timestamp-based filename: ${filename}`
-              );
-
-              // Create new array without this item
-              const updatedArray = [...product.smallImages];
-              updatedArray.splice(i, 1);
-
-              // Update document
-              await collection.updateOne(
-                { id: Number(productId) },
-                { $set: { smallImages: updatedArray } }
-              );
-
-              console.log(`Removed item at index ${i} from smallImages`);
-              updatedProduct = true;
-              matched = true;
-              break;
-            }
-          }
-        }
-
-        // If still no match, try a more aggressive approach with string search
-        if (!matched) {
-          console.log(
-            'No match found with URL reconstruction, trying string search in raw data'
-          );
-
-          // Convert document to string for searching
-          const docStr = JSON.stringify(product);
-
-          // Check if the raw string contains our target filename
-          if (docStr.includes(targetFilename)) {
-            console.log(
-              `String search found ${targetFilename} in the document`
-            );
-
-            // Just remove all smallImages as a last resort
-            await collection.updateOne(
-              { id: Number(productId) },
-              { $set: { smallImages: [] } }
-            );
-
-            console.log('Cleared all smallImages as last resort');
-            updatedProduct = true;
-          } else {
-            console.log(
-              `String search did not find ${targetFilename} in document`
-            );
-          }
-        }
-      }
-
-      if (updatedProduct) {
-        console.log('Successfully updated product to remove image(s)');
-      } else {
-        console.log('No matching images found or no changes made');
-
-        // Last resort: try to find a similar filename (with slight timestamp differences)
-        const baseFilename = targetFilename.split('-')[0]; // Get the part before the timestamp
-        const extension = targetFilename.split('.').pop(); // Get the file extension
-
-        console.log(
-          `Trying last resort with base filename: ${baseFilename} and extension: ${extension}`
-        );
-
-        // Update with a direct MongoDB query using pattern matching
-        const updateResult = await collection.updateOne(
-          { id: Number(productId) },
-          [
-            {
-              $set: {
-                smallImagesLocal: {
-                  $filter: {
-                    input: '$smallImagesLocal',
-                    cond: {
-                      $not: {
-                        $regexMatch: {
-                          input: '$$this',
-                          regex: `${baseFilename}.*\\.${extension}`,
-                        },
-                      },
-                    },
-                  },
-                },
-                // For direct smallImages array deletion (just remove everything if there are only a few)
-                smallImages: {
-                  $cond: [
-                    { $lte: [{ $size: '$smallImages' }, 2] }, // If 2 or fewer items
-                    [], // Remove all
-                    '$smallImages', // Keep as is
-                  ],
-                },
-              },
-            },
-          ]
-        );
-
-        console.log('Last resort query result:', updateResult);
-
-        if (updateResult.modifiedCount > 0) {
-          console.log('Last resort update was successful');
-          updatedProduct = true;
-        }
-      }
-
-      if (!updatedProduct) {
-        // Absolute last resort - if everything fails, try clearing both arrays
-        console.log(
-          'ABSOLUTE LAST RESORT: Clearing both smallImages and smallImagesLocal arrays'
-        );
-
-        await collection.updateOne(
-          { id: Number(productId) },
-          {
-            $set: {
-              smallImages: [],
-              smallImagesLocal: [],
-            },
-          }
-        );
-
-        console.log('Cleared both smallImages and smallImagesLocal arrays');
-      }
-
-      console.log('Image deletion completed');
-      res.json({ success: true });
+      await product.save();
+      return res.json({ success: true, message: 'Main image deleted successfully' });
     }
+
+    // small image deletion
+    const target = extractFilename(imageUrl);
+    if (!target) {
+      return res.status(400).json({ success: false, message: 'Missing imageUrl' });
+    }
+    const validation = validateImageFilename(target);
+    if (!validation.ok) {
+      return res.status(400).json({ success: false, message: 'Invalid imageUrl' });
+    }
+
+    const base = target.replace(/-(desktop|mobile)\.webp$/i, '');
+    const variantDesktop = `${base}-desktop.webp`;
+    const variantMobile = `${base}-mobile.webp`;
+
+    if (Array.isArray(product.smallImages)) {
+      product.smallImages = product.smallImages.filter(si => {
+        if (typeof si === 'string') {
+          const fn = extractFilename(si);
+          return fn !== target && fn !== variantDesktop && fn !== variantMobile;
+        }
+        if (si && typeof si === 'object') {
+          const fnD = extractFilename(si.desktop);
+          const fnM = extractFilename(si.mobile);
+          return (
+            fnD !== target &&
+            fnM !== target &&
+            fnD !== variantDesktop &&
+            fnM !== variantDesktop &&
+            fnD !== variantMobile &&
+            fnM !== variantMobile
+          );
+        }
+        return true;
+      });
+    }
+
+    if (Array.isArray(product.smallImagesLocal)) {
+      product.smallImagesLocal = product.smallImagesLocal.filter(u => {
+        const fn = extractFilename(u);
+        return fn !== target && fn !== variantDesktop && fn !== variantMobile;
+      });
+    }
+
+    await product.save();
+
+    await Promise.all([
+      unlinkIfExists(path.join(smallImagesDir, variantDesktop)),
+      unlinkIfExists(path.join(smallImagesDir, variantMobile)),
+      unlinkIfExists(path.join(publicSmallImagesDir, variantDesktop)),
+      unlinkIfExists(path.join(publicSmallImagesDir, variantMobile)),
+      unlinkIfExists(path.join(smallImagesDir, target)),
+      unlinkIfExists(path.join(publicSmallImagesDir, target)),
+    ]);
+
+    return res.json({ success: true, message: 'Small image deleted successfully' });
   } catch (error) {
     console.error('Error deleting image:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Failed to delete image',
+      ...(isProd ? {} : { details: error?.message }),
     });
   }
 });
@@ -2278,6 +2032,54 @@ app.get('/getproduct/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+});
+
+// =============================================
+// Error handling (must be after all routes)
+// =============================================
+// Multer error handler (keeps responses JSON and avoids default HTML errors)
+app.use((err, req, res, next) => {
+  if (err && err instanceof multer.MulterError) {
+    const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+    return res.status(status).json({
+      success: false,
+      error: 'Upload failed',
+      code: err.code,
+      ...(isProd ? {} : { message: err.message }),
+    });
+  }
+  if (
+    err &&
+    typeof err.message === 'string' &&
+    err.message.includes('File type not supported')
+  ) {
+    return res.status(415).json({
+      success: false,
+      error: 'File type not supported',
+    });
+  }
+  return next(err);
+});
+
+// Centralized error handler (final middleware)
+app.use((err, req, res) => {
+  const status = err && Number.isInteger(err.statusCode) ? err.statusCode : 500;
+  const code = err && err.code ? String(err.code) : 'INTERNAL_ERROR';
+
+  console.error('Unhandled error:', {
+    status,
+    code,
+    path: req.originalUrl,
+    method: req.method,
+    message: err?.message,
+  });
+
+  return res.status(status).json({
+    success: false,
+    error: 'Request failed',
+    code,
+    ...(isProd ? {} : { message: err?.message }),
+  });
 });
 
 // =============================================
