@@ -2130,9 +2130,16 @@ async function addProduct(e, data, form) {
   e.preventDefault();
 
   // Show loading spinner in button
-  const submitBtn = form.querySelector(".addproduct-btn");
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<span class="button-spinner"></span>';
+  const submitBtn =
+    form?.querySelector?.("#submit-add-product") ||
+    form?.querySelector?.('button[type="submit"]') ||
+    document.getElementById("submit-add-product") ||
+    document.querySelector("#uploadForm button[type='submit']");
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="button-spinner"></span>';
+  }
 
   try {
     // 1. Get form values
@@ -2164,7 +2171,7 @@ async function addProduct(e, data, form) {
       formData.append("smallImages", smallImages[i]);
     }
 
-    submitBtn.innerHTML = '<span class="button-spinner"></span>';
+    if (submitBtn) submitBtn.innerHTML = '<span class="button-spinner"></span>';
 
     // Submit image
     const imageResponse = await fetch(`${API_URL}/upload`, {
@@ -2184,7 +2191,7 @@ async function addProduct(e, data, form) {
       throw new Error(imageData.error || "Image upload failed");
     }
 
-    submitBtn.innerHTML = '<span class="button-spinner"></span>';
+    if (submitBtn) submitBtn.innerHTML = '<span class="button-spinner"></span>';
 
     // 3. Add product data with correct image structure
     const productData = {
@@ -2283,8 +2290,10 @@ async function addProduct(e, data, form) {
     console.error("Error:", error);
     alert(`Error: ${error.message}`);
   } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = "Submit";
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = "Add Product";
+    }
   }
 }
 
@@ -2506,6 +2515,7 @@ async function loadAddProductsPage() {
 
 function addProductHandler() {
   const form = document.getElementById("uploadForm");
+  if (!form) return;
 
   // Add event listeners for both USD price and security margin inputs
   const usdPriceInput = document.getElementById("old-price");
