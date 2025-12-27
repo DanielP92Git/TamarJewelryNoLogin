@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const sharp = require('sharp');
@@ -16,16 +17,45 @@ const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 const baseUrl =
   process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com';
 
-// Log PayPal configuration for debugging
-console.log('PayPal Configuration:');
-console.log('  API URL:', baseUrl);
-console.log('  Client ID exists:', !!PAYPAL_CLIENT_ID);
-console.log('  Client Secret exists:', !!PAYPAL_CLIENT_SECRET);
+// Log PayPal configuration for debugging (dev only; avoid leaking in prod)
+if (process.env.NODE_ENV !== 'production') {
+  console.log('PayPal Configuration:');
+  console.log('  API URL:', baseUrl);
+  console.log('  Client ID exists:', !!PAYPAL_CLIENT_ID);
+  console.log('  Client Secret exists:', !!PAYPAL_CLIENT_SECRET);
+}
 
 // =============================================
 // Initial Setup & Configuration
 // =============================================
 const app = express();
+
+// =============================================
+// Basic request hardening
+// =============================================
+app.set('trust proxy', 1); // required on DO / reverse proxies for correct client IP in rate limiting
+
+const authRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15m
+  limit: Number(process.env.RATE_LIMIT_AUTH_MAX || 20), // per IP
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too many requests, please try again later.',
+  },
+});
+
+const paymentRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15m
+  limit: Number(process.env.RATE_LIMIT_PAYMENT_MAX || 60),
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too many requests, please try again later.',
+  },
+});
 
 // Basic security headers (API-oriented)
 app.use(
@@ -272,7 +302,18 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
-app.use(express.json({ limit: '50mb' }));
+app.use(
+  express.json({
+    limit: '50mb',
+    verify: (req, res, buf) => {
+      // Stripe requires the exact raw bytes for webhook signature verification.
+      // Capture the raw body before JSON parsing mutates it.
+      if (req.originalUrl === '/webhook') {
+        req.rawBody = buf;
+      }
+    },
+  })
+);
 
 // =============================================
 // Database Models
@@ -452,30 +493,57 @@ const storage = multer.diskStorage({
   },
 });
 
-// Add file filter to accept CR2 files
+const UPLOAD_ALLOWED_IMAGE_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  // Some cameras/browsers may send non-standard types for RAW
+  'image/x-canon-cr2',
+  'image/x-sony-arw',
+]);
+
+const UPLOAD_ALLOWED_EXTENSIONS = new Set([
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.gif',
+  '.webp',
+  '.cr2',
+  '.arw',
+]);
+
+const UPLOAD_MAX_FILE_SIZE_BYTES =
+  Number(process.env.UPLOAD_MAX_FILE_SIZE_MB || 50) * 1024 * 1024; // default 50MB
+const UPLOAD_MAX_FILES = Number(process.env.UPLOAD_MAX_FILES || 11); // 1 main + up to 10 small
+
+// Tight file filter: allow only safe image types (+ RAW by extension)
 const fileFilter = (req, file, cb) => {
-  // Accept CR2 files and common image formats
-  const allowedTypes = [
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'image/webp',
-    'image/cr2',
-    'application/octet-stream',
-  ];
-  if (
-    allowedTypes.includes(file.mimetype) ||
-    file.originalname.toLowerCase().endsWith('.cr2')
-  ) {
-    cb(null, true);
-  } else {
-    cb(new Error('File type not supported'), false);
+  const original = (file.originalname || '').toLowerCase();
+  const ext = path.extname(original);
+
+  // Extension must be in allowlist
+  if (!UPLOAD_ALLOWED_EXTENSIONS.has(ext)) {
+    return cb(new Error('File type not supported'), false);
   }
+
+  // MIME must be a known safe image type, OR octet-stream for RAW extensions only
+  const mime = (file.mimetype || '').toLowerCase();
+  const isRawExt = ext === '.cr2' || ext === '.arw';
+
+  if (UPLOAD_ALLOWED_IMAGE_MIME_TYPES.has(mime)) return cb(null, true);
+  if (mime === 'application/octet-stream' && isRawExt) return cb(null, true);
+
+  return cb(new Error('File type not supported'), false);
 };
 
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
+  limits: {
+    fileSize: UPLOAD_MAX_FILE_SIZE_BYTES,
+    files: UPLOAD_MAX_FILES,
+  },
 });
 
 // =============================================
@@ -718,57 +786,75 @@ app.options('/direct-image/:filename', (req, res) => {
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 async function handleCheckoutSession(session) {
-  const productId = session.metadata.productId;
-  if (productId) {
-    const product = await Product.findOne({ id: productId });
-    if (product) {
-      product.quantity -= 1;
-      await product.save();
-      let newQuantity = product.quantity;
-      console.log(
-        `Product ${productId} quantity reduced. New quantity: ${newQuantity}`
-      );
-      if (newQuantity == 0) {
-        await Product.findOneAndDelete({ id: productId });
-        console.log(`Product with id: ${productId} deleted from database`);
-      }
-    }
-  } else {
-    console.error('Product not found');
+  const productIdRaw = session?.metadata?.productId;
+  const productId = Number(productIdRaw);
+  if (!Number.isFinite(productId)) {
+    console.error('Webhook missing/invalid productId:', productIdRaw);
+    return;
+  }
+
+  // Atomic decrement to prevent negative inventory and race conditions
+  const updated = await Product.findOneAndUpdate(
+    { id: productId, quantity: { $gt: 0 } },
+    { $inc: { quantity: -1 } },
+    { new: true }
+  );
+
+  if (!updated) {
+    console.warn(
+      `No inventory update applied for product ${productId} (missing or out of stock)`
+    );
+    return;
+  }
+
+  console.log(
+    `Product ${productId} quantity reduced. New quantity: ${updated.quantity}`
+  );
+
+  if (updated.quantity === 0) {
+    await Product.findOneAndDelete({ id: productId, quantity: 0 });
+    console.log(`Product with id: ${productId} deleted from database`);
   }
 }
 
 const generateAccessToken = async () => {
   try {
-    console.log('========= PAYPAL AUTH DEBUG =========');
-    console.log(
-      'Client ID length:',
-      PAYPAL_CLIENT_ID ? PAYPAL_CLIENT_ID.length : 'missing'
-    );
-    console.log(
-      'Client Secret length:',
-      PAYPAL_CLIENT_SECRET ? PAYPAL_CLIENT_SECRET.length : 'missing'
-    );
-    console.log('Base URL:', baseUrl);
+    if (!isProd) {
+      console.log('========= PAYPAL AUTH DEBUG =========');
+      console.log(
+        'Client ID length:',
+        PAYPAL_CLIENT_ID ? PAYPAL_CLIENT_ID.length : 'missing'
+      );
+      console.log(
+        'Client Secret length:',
+        PAYPAL_CLIENT_SECRET ? PAYPAL_CLIENT_SECRET.length : 'missing'
+      );
+      console.log('Base URL:', baseUrl);
+    }
 
     if (!PAYPAL_CLIENT_ID || !PAYPAL_CLIENT_SECRET) {
-      console.error('Missing PayPal credentials:', {
-        clientIdExists: !!PAYPAL_CLIENT_ID,
-        clientSecretExists: !!PAYPAL_CLIENT_SECRET,
-      });
-      throw new Error('MISSING_API_CREDENTIALS');
+      if (!isProd) {
+        console.error('Missing PayPal credentials:', {
+          clientIdExists: !!PAYPAL_CLIENT_ID,
+          clientSecretExists: !!PAYPAL_CLIENT_SECRET,
+        });
+      }
+      const err = new Error('PAYPAL_MISSING_CREDENTIALS');
+      err.code = 'PAYPAL_MISSING_CREDENTIALS';
+      err.statusCode = 500;
+      throw err;
     }
 
     // In Node.js, btoa is not available directly, so we use Buffer
     const auth = Buffer.from(
       `${PAYPAL_CLIENT_ID}:${PAYPAL_CLIENT_SECRET}`
     ).toString('base64');
-    console.log(
-      'Auth token generated successfully. Making API request to PayPal...'
-    );
+    if (!isProd) {
+      console.log('Auth token generated. Requesting PayPal access token...');
+    }
 
     const tokenUrl = `${baseUrl}/v1/oauth2/token`;
-    console.log('Token URL:', tokenUrl);
+    if (!isProd) console.log('Token URL:', tokenUrl);
 
     const response = await fetch(tokenUrl, {
       method: 'POST',
@@ -779,41 +865,57 @@ const generateAccessToken = async () => {
       body: 'grant_type=client_credentials',
     });
 
-    console.log('PayPal token response status:', response.status);
+    if (!isProd) console.log('PayPal token response status:', response.status);
 
-    const responseText = await response.text();
-    console.log('PayPal response body:', responseText);
+    const text = await response.text();
+    let data;
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = null;
+    }
 
     if (!response.ok) {
-      throw new Error(
-        `PayPal token request failed: ${response.status} ${responseText}`
-      );
-    }
-
-    try {
-      const data = JSON.parse(responseText);
-      if (!data.access_token) {
-        throw new Error('No access token received from PayPal');
+      // Don't leak response body to clients; keep details in dev logs only
+      if (!isProd) {
+        console.error(
+          'PayPal token request failed:',
+          response.status,
+          data || text
+        );
       }
-
-      console.log('PayPal access token obtained successfully');
-      return data.access_token;
-    } catch (jsonError) {
-      console.error('Error parsing JSON response:', jsonError);
-      throw new Error(`Failed to parse PayPal response: ${responseText}`);
+      const err = new Error('PAYPAL_TOKEN_REQUEST_FAILED');
+      err.code = 'PAYPAL_TOKEN_REQUEST_FAILED';
+      err.statusCode = 502;
+      err.httpStatusCode = response.status;
+      throw err;
     }
+
+    if (!data || !data.access_token) {
+      if (!isProd) console.error('No access_token received from PayPal:', data);
+      const err = new Error('PAYPAL_TOKEN_RESPONSE_INVALID');
+      err.code = 'PAYPAL_TOKEN_RESPONSE_INVALID';
+      err.statusCode = 502;
+      throw err;
+    }
+
+    if (!isProd) console.log('PayPal access token obtained successfully');
+    return data.access_token;
   } catch (error) {
-    console.error('Failed to generate Access Token:', error);
-    return null; // Return null instead of throwing to prevent crashing the entire request
+    // Throw so callers can return consistent responses; avoid leaking internals in prod.
+    if (!isProd) console.error('Failed to generate Access Token:', error);
+    throw error;
   }
 };
 
 const createOrder = async cart => {
   try {
-    console.log(
-      'shopping cart information passed from the frontend createOrder() callback:',
-      cart
-    );
+    if (!isProd) {
+      console.log(
+        'shopping cart information passed from the frontend createOrder() callback:',
+        cart
+      );
+    }
 
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
       throw new Error('Invalid cart data received');
@@ -827,17 +929,11 @@ const createOrder = async cart => {
       }, 0)
       .toFixed(2);
     const currencyData = cart[0].unit_amount.currency_code;
-    console.log('Attempting to get PayPal access token...');
     const accessToken = await generateAccessToken();
-
-    console.log('Access token received:', accessToken ? 'Success' : 'Failed');
-
-    if (!accessToken) {
-      throw new Error('Failed to generate PayPal access token');
-    }
+    if (!isProd) console.log('PayPal access token received: Success');
 
     const url = `${baseUrl}/v2/checkout/orders`;
-    console.log('PayPal API URL:', url);
+    if (!isProd) console.log('PayPal API URL:', url);
 
     const payload = {
       intent: 'CAPTURE',
@@ -871,7 +967,8 @@ const createOrder = async cart => {
       },
     };
 
-    console.log('PayPal order payload:', JSON.stringify(payload, null, 2));
+    if (!isProd)
+      console.log('PayPal order payload:', JSON.stringify(payload, null, 2));
 
     const response = await fetch(url, {
       headers: {
@@ -884,7 +981,7 @@ const createOrder = async cart => {
 
     return handleResponse(response);
   } catch (error) {
-    console.error('Error creating PayPal order:', error);
+    if (!isProd) console.error('Error creating PayPal order:', error);
     throw error;
   }
 };
@@ -903,17 +1000,29 @@ const captureOrder = async orderID => {
 };
 
 async function handleResponse(response) {
+  const text = await response.text();
+  let jsonResponse;
   try {
-    const jsonResponse = await response.json();
-    return {
-      jsonResponse,
-      httpStatusCode: response.status,
-    };
-  } catch (error) {
-    console.error(error);
-    const errorMessage = await response.text();
-    throw new Error(errorMessage);
+    jsonResponse = text ? JSON.parse(text) : null;
+  } catch {
+    jsonResponse = null;
   }
+
+  if (!response.ok) {
+    if (!isProd) {
+      console.error('PayPal API error:', response.status, jsonResponse || text);
+    }
+    const err = new Error('PAYPAL_API_ERROR');
+    err.code = 'PAYPAL_API_ERROR';
+    err.statusCode = 502;
+    err.httpStatusCode = response.status;
+    throw err;
+  }
+
+  return {
+    jsonResponse: jsonResponse ?? {},
+    httpStatusCode: response.status,
+  };
 }
 
 // =============================================
@@ -953,7 +1062,7 @@ app.post('/verify-token', async (req, res) => {
   }
 });
 
-app.post('/login', authUser, async (req, res) => {
+app.post('/login', authRateLimiter, authUser, async (req, res) => {
   try {
     const adminCheck = req.user.userType;
     const data = {
@@ -985,7 +1094,19 @@ app.post('/login', authUser, async (req, res) => {
   }
 });
 
-app.post('/signup', async (req, res) => {
+app.post('/signup', authRateLimiter, async (req, res) => {
+  // lightweight validation (keeps behavior predictable)
+  if (
+    !req.body ||
+    typeof req.body.email !== 'string' ||
+    typeof req.body.password !== 'string' ||
+    typeof req.body.username !== 'string'
+  ) {
+    return res
+      .status(400)
+      .json({ success: false, errors: 'Invalid signup payload' });
+  }
+
   let findUser = await Users.findOne({ email: req.body.email });
   if (findUser) {
     return res.status(400).json({
@@ -1305,6 +1426,11 @@ app.post('/updateproduct', fetchUser, requireAdmin, async (req, res) => {
     };
 
     let product = await Product.findOne({ id: id });
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Product not found' });
+    }
 
     product.name = updatedFields.name;
     product.usd_price = updatedFields.usd_price;
@@ -1329,12 +1455,25 @@ app.post('/updateproduct', fetchUser, requireAdmin, async (req, res) => {
 });
 
 app.post('/removeproduct', fetchUser, requireAdmin, async (req, res) => {
-  await Product.findOneAndDelete({ id: req.body.id });
+  const id = Number(req.body.id);
+  if (!Number.isFinite(id)) {
+    return res
+      .status(400)
+      .json({ success: false, message: 'Invalid product id' });
+  }
+
+  const deleted = await Product.findOneAndDelete({ id });
+  if (!deleted) {
+    return res
+      .status(404)
+      .json({ success: false, message: 'Product not found' });
+  }
+
   console.log('Removed');
   res.json({
     success: true,
-    id: req.body.id,
-    name: req.body.name,
+    id,
+    name: deleted.name,
   });
 });
 
@@ -1551,55 +1690,114 @@ app.post(
   }
 );
 
-// Payment Processing Endpoints
-app.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }),
-  (request, response) => {
-    const sig = request.headers['stripe-signature'];
-    const payload = request.body;
-    let event;
-
-    try {
-      event = stripe.webhooks.constructEvent(
-        payload,
-        sig,
-        `${process.env.WEBHOOK_SEC}`
-      );
-    } catch (err) {
-      console.log(`⚠️  Webhook signature verification failed.`, err.message);
-      return response.sendStatus(400);
-    }
-
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-      console.log('2. From webhook:', session.metadata.productId);
-      handleCheckoutSession(session);
-    }
-
-    response.json({ received: true });
+// Multer error handler (keeps responses JSON and avoids default HTML errors)
+app.use((err, req, res, next) => {
+  if (err && err instanceof multer.MulterError) {
+    const status = err.code === 'LIMIT_FILE_SIZE' ? 413 : 400;
+    return res.status(status).json({
+      success: false,
+      error: 'Upload failed',
+      code: err.code,
+      ...(isProd ? {} : { message: err.message }),
+    });
   }
-);
+  if (
+    err &&
+    typeof err.message === 'string' &&
+    err.message.includes('File type not supported')
+  ) {
+    return res.status(415).json({
+      success: false,
+      error: 'File type not supported',
+    });
+  }
+  return next(err);
+});
+
+// Centralized error handler (last middleware)
+app.use((err, req, res) => {
+  const status = err && Number.isInteger(err.statusCode) ? err.statusCode : 500;
+
+  const code = err && err.code ? String(err.code) : 'INTERNAL_ERROR';
+
+  // Log full details server-side; keep client response minimal in prod
+  console.error('Unhandled error:', {
+    status,
+    code,
+    path: req.originalUrl,
+    method: req.method,
+    message: err?.message,
+  });
+
+  return res.status(status).json({
+    success: false,
+    error: 'Request failed',
+    code,
+    ...(isProd ? {} : { message: err?.message }),
+  });
+});
+
+// Payment Processing Endpoints
+app.post('/webhook', (request, response) => {
+  const sig = request.headers['stripe-signature'];
+  const payload = request.rawBody;
+  let event;
+
+  try {
+    if (!sig || !payload) {
+      return response.status(400).send('Missing webhook signature or payload');
+    }
+    event = stripe.webhooks.constructEvent(
+      payload,
+      sig,
+      `${process.env.WEBHOOK_SEC}`
+    );
+  } catch (err) {
+    console.warn(
+      `⚠️ Stripe webhook signature verification failed: ${err?.message || err}`
+    );
+    return response.sendStatus(400);
+  }
+
+  if (event.type === 'checkout.session.completed') {
+    const session = event.data.object;
+    console.log('2. From webhook:', session.metadata.productId);
+    void handleCheckoutSession(session).catch(err => {
+      console.error('Error handling checkout.session.completed:', err);
+    });
+  }
+
+  response.json({ received: true });
+});
 
 app.post('/create-checkout-session', async (req, res) => {
   try {
-    const [getProductId] = req.body.items;
-    const product = await Product.find({ id: getProductId.id });
-    let [getProdQuant] = product;
-    let reqCurrency = req.body.currency;
+    const items = Array.isArray(req.body?.items) ? req.body.items : [];
+    if (items.length === 0) {
+      return res.status(400).json({ error: 'Missing items' });
+    }
 
+    const firstItem = items[0];
+    const requestedProductId = Number(firstItem?.id);
+    if (!Number.isFinite(requestedProductId)) {
+      return res.status(400).json({ error: 'Invalid product id' });
+    }
+
+    const product = await Product.findOne({ id: requestedProductId });
     if (!product) {
-      throw new Error('Product not found');
+      return res.status(404).json({ error: 'Product not found' });
     }
 
-    if (getProdQuant.quantity == 0) {
-      return res.status(400).send('Product is out of stock');
+    if (!product.quantity || product.quantity <= 0) {
+      return res.status(400).json({ error: 'Product is out of stock' });
     }
+
+    const reqCurrency = req.body.currency;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
-      line_items: req.body.items.map(item => {
+      line_items: items.map(item => {
         let inCents =
           reqCurrency == '$'
             ? item.price * 100
@@ -1672,18 +1870,18 @@ app.post('/create-checkout-session', async (req, res) => {
       success_url: `${process.env.HOST}/index.html`,
       cancel_url: `${process.env.HOST}/html/cart.html`,
       metadata: {
-        productId: getProductId.id.toString(),
+        productId: requestedProductId.toString(),
       },
     });
 
     res.json({ sessionId: session.id, url: session.url });
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ err });
+    console.error('Error creating checkout session:', err);
+    res.status(500).json({ error: 'Failed to create checkout session' });
   }
 });
 
-app.post('/orders', async (req, res) => {
+app.post('/orders', paymentRateLimiter, async (req, res) => {
   try {
     const { cart } = req.body;
     if (!cart || !Array.isArray(cart) || cart.length === 0) {
@@ -1692,31 +1890,35 @@ app.post('/orders', async (req, res) => {
         .json({ error: 'Invalid cart data. Cart must be a non-empty array.' });
     }
 
-    console.log(
-      'Creating PayPal order with cart:',
-      JSON.stringify(cart, null, 2)
-    );
-
-    const result = await createOrder(cart);
-    if (!result) {
-      return res.status(500).json({
-        error: 'Failed to create order. See server logs for details.',
-      });
+    if (!isProd) {
+      console.log(
+        'Creating PayPal order with cart:',
+        JSON.stringify(cart, null, 2)
+      );
     }
 
-    console.log('PayPal order creation successful:', result.httpStatusCode);
+    const result = await createOrder(cart);
+    if (!isProd)
+      console.log('PayPal order creation successful:', result.httpStatusCode);
     res.status(result.httpStatusCode).json(result.jsonResponse);
   } catch (error) {
-    console.error('Failed to create order:', error);
-    res.status(500).json({
+    console.error(
+      'Failed to create PayPal order:',
+      error?.code || error?.message || error
+    );
+    const status =
+      error?.statusCode && Number.isInteger(error.statusCode)
+        ? error.statusCode
+        : 500;
+    res.status(status).json({
       error: 'Failed to create order.',
-      message: error.message,
-      details: error.stack,
+      code: error?.code || 'ORDER_CREATE_FAILED',
+      ...(isProd ? {} : { message: error?.message }),
     });
   }
 });
 
-app.post('/orders/:orderID/capture', async (req, res) => {
+app.post('/orders/:orderID/capture', paymentRateLimiter, async (req, res) => {
   try {
     const { orderID } = req.params;
     const { jsonResponse, httpStatusCode } = await captureOrder(orderID);
@@ -2101,7 +2303,9 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
 
   try {
     const baseName = path.parse(filename).name;
-    const isRAW = filename.toLowerCase().endsWith('.cr2');
+    const lowerFilename = filename.toLowerCase();
+    const isRAW =
+      lowerFilename.endsWith('.cr2') || lowerFilename.endsWith('.arw');
 
     // Create WebP versions for both desktop and mobile
     const desktopFilename = `${baseName}-desktop.webp`;
@@ -2123,6 +2327,15 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
             density: 300, // Add DPI setting for better quality
           }
         : undefined,
+    };
+
+    const safeUnlink = async filePath => {
+      if (!filePath) return;
+      try {
+        await fs.promises.unlink(filePath);
+      } catch {
+        // ignore
+      }
     };
 
     // Function to process image with fallback
@@ -2179,12 +2392,7 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
               .toFile(outputPath);
 
             // Clean up temporary TIFF file
-            fs.unlink(tiffPath, err => {
-              if (err)
-                console.warn(
-                  `Failed to delete temporary TIFF file: ${err.message}`
-                );
-            });
+            await safeUnlink(tiffPath);
           } else {
             throw error; // Re-throw if not RAW file
           }
@@ -2220,8 +2428,31 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
       publicPath: publicMobilePath,
     };
 
+    // Best-effort cleanup of the original uploaded file to save disk
+    await safeUnlink(inputPath);
+
     return results;
   } catch (error) {
+    // Best-effort cleanup of partially created outputs
+    try {
+      const baseName = path.parse(filename).name;
+      const desktopFilename = `${baseName}-desktop.webp`;
+      const mobileFilename = `${baseName}-mobile.webp`;
+      await fs.promises
+        .unlink(path.join(outputDir, desktopFilename))
+        .catch(() => {});
+      await fs.promises
+        .unlink(path.join(outputDir, mobileFilename))
+        .catch(() => {});
+      await fs.promises
+        .unlink(path.join(publicDir, desktopFilename))
+        .catch(() => {});
+      await fs.promises
+        .unlink(path.join(publicDir, mobileFilename))
+        .catch(() => {});
+    } catch {
+      // ignore
+    }
     console.error(`Error processing image ${filename}:`, error);
     throw error;
   }
