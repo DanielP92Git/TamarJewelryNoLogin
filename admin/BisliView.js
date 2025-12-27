@@ -25,33 +25,139 @@ function setActiveNav(active) {
 }
 
 // API Configuration
+// TEMP: Force production API for testing (comment out for local dev)
+const FORCE_PRODUCTION_API = false; // Set to true to use production API from localhost
+
 const IS_PRODUCTION =
-  window.location.hostname !== "localhost" &&
-  !window.location.hostname.includes("127.0.0.1");
+  FORCE_PRODUCTION_API ||
+  (window.location.hostname !== "localhost" &&
+    !window.location.hostname.includes("127.0.0.1"));
 
-const API_URL = (() => {
-  // Check if we're in a production environment based on the URL
-  let url;
+function normalizeApiBase(url) {
+  if (!url || typeof url !== "string") return null;
+  const trimmed = url.trim().replace(/\/+$/, "");
+  if (!trimmed) return null;
+  return trimmed;
+}
 
-  if (IS_PRODUCTION) {
-    // In production, use the API endpoint on the same domain or a specified API domain
-    // Option a: API on same domain but different path (default)
-    url = `https://lobster-app-jipru.ondigitalocean.app/api`;
+function getDevApiCandidates() {
+  const candidates = [];
 
-    // Option b: API on a separate subdomain (uncomment if needed)
-    // url = `${window.location.protocol}//api.${window.location.hostname}`;
-
-    // Option c: Completely separate API domain (uncomment if needed)
-    // url = "https://api.yourdomain.com";
-  } else {
-    // In development, use localhost with the correct port
-    // Prefer matching loopback host to avoid odd browser/network edge cases
-    url = window.location.hostname.includes("127.0.0.1")
-      ? "http://127.0.0.1:4000"
-      : "http://localhost:4000";
+  // Allow manual overrides for debugging
+  try {
+    const fromLs = normalizeApiBase(localStorage.getItem("bisli_api_url"));
+    if (fromLs) candidates.push(fromLs);
+  } catch (e) {
+    void e;
   }
-  return url;
+
+  const fromGlobal = normalizeApiBase(window.__BISLI_API_URL__);
+  if (fromGlobal) candidates.push(fromGlobal);
+
+  // Prefer the same loopback host as the admin page, but always include localhost/127 variants
+  const proto = window.location.protocol || "http:";
+  const host = window.location.hostname || "localhost";
+  candidates.push(normalizeApiBase(`${proto}//${host}:4000`));
+  candidates.push("http://localhost:4000");
+  candidates.push("http://127.0.0.1:4000");
+
+  // De-dupe
+  return [...new Set(candidates.filter(Boolean))];
+}
+
+let API_URL = (() => {
+  // Production remains explicit; dev is auto-resolved at runtime to avoid host/port mismatches.
+  if (IS_PRODUCTION) {
+    return normalizeApiBase(`https://lobster-app-jipru.ondigitalocean.app/api`);
+  }
+  return normalizeApiBase(
+    window.location.hostname.includes("127.0.0.1")
+      ? "http://127.0.0.1:4000"
+      : "http://localhost:4000"
+  );
 })();
+
+let _apiUrlResolved = false;
+let _apiUrlResolvePromise = null;
+async function resolveApiUrl({ force = false } = {}) {
+  if (IS_PRODUCTION) return API_URL;
+  if (_apiUrlResolved && !force) return API_URL;
+  if (_apiUrlResolvePromise && !force) return _apiUrlResolvePromise;
+
+  _apiUrlResolvePromise = (async () => {
+    // If the admin is served over https but the API is http, browsers can block calls as mixed content.
+    if (
+      window.location.protocol === "https:" &&
+      String(API_URL).startsWith("http:")
+    ) {
+      console.warn(
+        "[Admin] Admin page is https but API_URL is http (mixed content will fail). Open admin over http:// in dev."
+      );
+    }
+
+    const candidates = getDevApiCandidates();
+    const timeoutMs = 4000;
+
+    for (const base of candidates) {
+      // Skip obvious mixed-content candidates if admin is https
+      if (window.location.protocol === "https:" && base.startsWith("http:"))
+        continue;
+
+      try {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), timeoutMs);
+        // Prefer a lightweight, unauthenticated health endpoint.
+        // If /health isn't present (older backend), fall back to /allproducts.
+        let res = await fetch(`${base}/health`, {
+          method: "GET",
+          cache: "no-store",
+          signal: controller.signal,
+        }).catch(() => null);
+
+        if (res && res.status === 404) {
+          res = await fetch(`${base}/allproducts`, {
+            method: "GET",
+            cache: "no-store",
+            signal: controller.signal,
+          }).catch(() => null);
+        }
+        clearTimeout(t);
+
+        if (res && res.ok) {
+          API_URL = base;
+          _apiUrlResolved = true;
+          console.log(`[Admin] Resolved API_URL to ${API_URL}`);
+          return API_URL;
+        }
+      } catch (e) {
+        void e;
+      }
+    }
+
+    // Keep the initial default if no candidate responded.
+    // IMPORTANT: do NOT permanently mark as resolved — allow later retries (backend may have been starting).
+    _apiUrlResolved = false;
+    console.warn(
+      `[Admin] Could not resolve a working API base via /health. Using default API_URL=${API_URL}. Candidates:`,
+      candidates
+    );
+    return API_URL;
+  })().finally(() => {
+    _apiUrlResolvePromise = null;
+  });
+
+  return _apiUrlResolvePromise;
+}
+
+// Ensure all API calls go through the resolved base in dev.
+async function apiFetch(pathOrUrl, options) {
+  await resolveApiUrl();
+  const url =
+    typeof pathOrUrl === "string" && /^https?:\/\//i.test(pathOrUrl)
+      ? pathOrUrl
+      : `${API_URL}${String(pathOrUrl || "")}`;
+  return fetch(url, options);
+}
 
 // Set a longer default timeout for all fetch operations
 const DEFAULT_TIMEOUT = 15000; // 15 seconds
@@ -203,6 +309,12 @@ function getCurrentScriptPath() {
 
 // Make sure the BisliView script initializes correctly based on page
 (function checkCorrectUsage() {
+  // Prevent multiple initializations
+  if (window._bisliViewInitialized) {
+    console.warn("[BisliView] Already initialized, skipping duplicate init");
+    return;
+  }
+
   // Get current page URL
   const currentUrl = window.location.href;
 
@@ -224,12 +336,24 @@ function getCurrentScriptPath() {
     return;
   }
 
+  // Mark as initialized
+  window._bisliViewInitialized = true;
+
   // Otherwise, proceed with normal initialization
   setTimeout(init, 0);
 })();
 
-// Update the init function to authenticate first and only fetch data after authentication
-function init() {
+// Update the init function to resolve API base first, then authenticate and load data
+async function init() {
+  try {
+    await resolveApiUrl();
+  } catch (e) {
+    console.warn(
+      "[Admin] API_URL resolution failed, continuing with default.",
+      e
+    );
+  }
+
   // First check authentication
   checkAuth()
     .then((isAuthenticated) => {
@@ -923,6 +1047,11 @@ function loadProducts(data) {
         }">
           <span style="font-weight:900;">✎</span>
         </button>
+        <button class="icon-action icon-action--primary duplicate-btn" title="Duplicate Product" data-product-id="${
+          item.id
+        }">
+          <span style="font-weight:900;">⧉</span>
+        </button>
         <button class="icon-action icon-action--danger delete-btn" title="Delete Product" data-product-id="${
           item.id
         }">
@@ -976,6 +1105,23 @@ function loadProducts(data) {
       if (product) {
         setActiveNav("edit-product");
         editProduct(product);
+      }
+    });
+  });
+
+  // Add event listeners for duplicate buttons
+  document.querySelectorAll(".duplicate-btn").forEach((dupBtn) => {
+    dupBtn.addEventListener("click", async function () {
+      const productId = this.dataset.productId;
+      try {
+        const fullProduct = await fetchProduct(productId);
+        await openDuplicateProduct(fullProduct);
+      } catch (err) {
+        console.error("Error duplicating product:", err);
+        alert(
+          "Error duplicating product: " +
+            (typeof err?.message === "string" ? err.message : "Unknown error")
+        );
       }
     });
   });
@@ -1695,6 +1841,90 @@ async function fetchProduct(productId) {
   }
 }
 
+function buildDuplicateDraftFromProduct(product) {
+  const usd =
+    product?.usd_price ??
+    product?.oldPrice ??
+    product?.old_price ??
+    product?.usdPrice ??
+    "";
+  const ils =
+    product?.ils_price ??
+    product?.newPrice ??
+    product?.new_price ??
+    product?.ilsPrice ??
+    "";
+  const securityMargin =
+    product?.security_margin ??
+    product?.securityMargin ??
+    product?.security ??
+    5;
+
+  return {
+    sourceId: product?.id ?? null,
+    name: product?.name ?? "",
+    description: product?.description ?? "",
+    category: product?.category ?? "necklaces",
+    quantity: Number(product?.quantity ?? 0),
+    usd_price: usd,
+    ils_price: ils,
+    security_margin: securityMargin,
+  };
+}
+
+function prefillAddProductFormFromDraft(draft) {
+  const nameEl = document.getElementById("name");
+  const descEl = document.getElementById("description");
+  const categoryEl = document.getElementById("category");
+  const qtyEl = document.getElementById("quantity");
+  const usdEl = document.getElementById("old-price");
+  const ilsEl = document.getElementById("new-price");
+  const marginEl = document.getElementById("security-margin");
+
+  if (nameEl) nameEl.value = String(draft?.name ?? "");
+  if (descEl) descEl.value = String(draft?.description ?? "");
+  if (categoryEl && draft?.category) categoryEl.value = String(draft.category);
+  if (qtyEl) qtyEl.value = String(Number(draft?.quantity ?? 0));
+  if (usdEl) usdEl.value = String(draft?.usd_price ?? "");
+  if (marginEl) marginEl.value = String(draft?.security_margin ?? 5);
+  if (ilsEl) ilsEl.value = String(draft?.ils_price ?? "");
+
+  // Clear any selected images; duplicates do NOT copy images
+  const mainInput = document.getElementById("mainImage");
+  const smallInput = document.getElementById("smallImages");
+  if (mainInput) mainInput.value = "";
+  if (smallInput) smallInput.value = "";
+
+  const mainThumbs = document.getElementById("mainImageThumbs");
+  const smallThumbs = document.getElementById("smallImageThumbs");
+  if (mainThumbs) mainThumbs.innerHTML = "";
+  if (smallThumbs) smallThumbs.innerHTML = "";
+
+  // Update any computed UI bits by triggering events
+  try {
+    categoryEl?.dispatchEvent(new Event("change"));
+    qtyEl?.dispatchEvent(new Event("change"));
+    usdEl?.dispatchEvent(new Event("input"));
+    marginEl?.dispatchEvent(new Event("input"));
+  } catch {
+    // ignore
+  }
+}
+
+async function openDuplicateProduct(product) {
+  const draft = buildDuplicateDraftFromProduct(product);
+
+  await loadAddProductsPage();
+
+  // Add a small cue that we're duplicating (no images)
+  const subtitleEl = document.querySelector("#uploadForm .page__subtitle");
+  if (subtitleEl && draft?.sourceId != null) {
+    subtitleEl.textContent = `Duplicating product #${draft.sourceId} — images are not copied. Upload new photos.`;
+  }
+
+  prefillAddProductFormFromDraft(draft);
+}
+
 async function updateProduct(e) {
   e.preventDefault();
 
@@ -1979,40 +2209,77 @@ async function updateProduct(e) {
 }
 
 // Improve the fetchWithRetry function to better handle network errors
-async function fetchWithRetry(url, options, maxRetries = state.maxRetries) {
+// timeoutMs: override default timeout for slow endpoints (e.g. /upload)
+async function fetchWithRetry(
+  url,
+  options,
+  maxRetries = state.maxRetries,
+  timeoutMs = DEFAULT_TIMEOUT
+) {
   let lastError;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      // Create a timeout promise
-      const fetchPromise = fetch(url, options);
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(
-          () =>
-            reject(new Error(`request_timed_out_after_${DEFAULT_TIMEOUT}ms`)),
-          DEFAULT_TIMEOUT
-        )
-      );
+      await resolveApiUrl();
 
-      // Race the fetch against the timeout
-      const response = await Promise.race([fetchPromise, timeoutPromise]);
+      // Use AbortController to actually abort the fetch on timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-      // Check if the response is ok
-      if (!response.ok) {
-        const errorText = await response
-          .text()
-          .catch(() => "No error text available");
-        console.error(`HTTP error ${response.status}: ${errorText}`);
+      // Merge abort signal with existing options
+      const fetchOptions = {
+        ...options,
+        signal: controller.signal,
+      };
 
-        // Special handling for 404 or 405 errors which may indicate wrong port
-        if (response.status === 404 || response.status === 405) {
-          throw new Error("wrong_server_port");
+      // Normalize URL to current API base (dev-safe)
+      const finalUrl =
+        typeof url === "string" && /^https?:\/\//i.test(url)
+          ? url
+          : `${API_URL}${String(url || "")}`;
+
+      // Create fetch promise
+      const fetchPromise = fetch(finalUrl, fetchOptions);
+
+      try {
+        // Wait for fetch to complete
+        const response = await fetchPromise;
+        clearTimeout(timeoutId);
+
+        // Check if the response is ok
+        if (!response.ok) {
+          const errorText = await response
+            .text()
+            .catch(() => "No error text available");
+          console.error(`HTTP error ${response.status}: ${errorText}`);
+
+          // Special handling for 404 or 405 errors which may indicate wrong port
+          if (response.status === 404 || response.status === 405) {
+            throw new Error("wrong_server_port");
+          }
+
+          throw new Error(`HTTP error ${response.status}`);
         }
 
-        throw new Error(`HTTP error ${response.status}`);
+        return response;
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        // If aborted, throw timeout error
+        if (fetchError.name === "AbortError") {
+          throw new Error(`request_timed_out_after_${timeoutMs}ms`);
+        }
+        // Normalize fetch network errors (browsers often surface these as TypeError: Failed to fetch)
+        if (
+          fetchError &&
+          (fetchError.name === "TypeError" ||
+            String(fetchError.message || "")
+              .toLowerCase()
+              .includes("failed to fetch"))
+        ) {
+          throw new Error("failed_to_fetch");
+        }
+        throw fetchError;
       }
-
-      return response;
     } catch (error) {
       lastError = error;
 
@@ -2020,14 +2287,19 @@ async function fetchWithRetry(url, options, maxRetries = state.maxRetries) {
       if (
         error.message.includes("timed_out") ||
         error.message.includes("NetworkError") ||
+        error.message === "failed_to_fetch" ||
         error.message === "wrong_server_port"
       ) {
         // If this is our last retry, modify the error message
         if (attempt === maxRetries) {
           if (error.message === "wrong_server_port") {
-            throw new Error("wrong_server_port");
+            const err = new Error("wrong_server_port");
+            err.cause = lastError;
+            throw err;
           } else {
-            throw new Error("network_error_after_retries");
+            const err = new Error("network_error_after_retries");
+            err.cause = lastError;
+            throw err;
           }
         }
       }
@@ -2043,7 +2315,9 @@ async function fetchWithRetry(url, options, maxRetries = state.maxRetries) {
     }
   }
 
-  throw new Error("network_error_after_retries");
+  const err = new Error("network_error_after_retries");
+  err.cause = lastError;
+  throw err;
 }
 
 // Add a function to optimize the image before upload
@@ -2120,6 +2394,19 @@ async function optimizeImage(
 // Update the addProduct function to be minimal and clean
 async function addProduct(e, data, form) {
   e.preventDefault();
+  console.log("[addProduct] Starting product creation process...");
+  console.log("[addProduct] Form data:", data);
+
+  // Define beforeunload handler at function scope so it's accessible in finally
+  // This prevents external forces (Live Server, extensions) from interrupting the upload
+  const beforeUnloadHandler = (e) => {
+    if (window._productUploadInProgress) {
+      console.warn("[addProduct] Navigation blocked - upload in progress!");
+      e.preventDefault();
+      e.returnValue = "";
+      return "";
+    }
+  };
 
   // Show loading spinner in button
   const submitBtn =
@@ -2134,6 +2421,7 @@ async function addProduct(e, data, form) {
   }
 
   try {
+    console.log("[addProduct] Step 1: Getting form values...");
     // 1. Get form values
     const name = document.getElementById("name").value;
     const description = document.getElementById("description").value || "";
@@ -2146,45 +2434,113 @@ async function addProduct(e, data, form) {
 
     // Validate required fields
     if (!name || !oldPrice) {
+      console.error("[addProduct] Validation failed: Missing required fields");
       throw new Error("Please fill in all required fields");
     }
 
+    console.log("[addProduct] Step 2: Preparing image upload...");
     // 2. Upload image
+    console.log("[addProduct] Creating FormData object...");
     const formData = new FormData();
-    const mainImage = document.querySelector("#mainImage").files[0];
-    const smallImages = document.querySelector("#smallImages").files;
+    console.log("[addProduct] FormData created");
+
+    console.log("[addProduct] Getting file inputs...");
+    const mainImageInput = document.querySelector("#mainImage");
+    const smallImagesInput = document.querySelector("#smallImages");
+    console.log("[addProduct] Main image input:", mainImageInput);
+    console.log("[addProduct] Small images input:", smallImagesInput);
+
+    const mainImage = mainImageInput?.files[0];
+    const smallImages = smallImagesInput?.files;
+    console.log("[addProduct] Main image file:", mainImage);
+    console.log(
+      "[addProduct] Small images files count:",
+      smallImages?.length || 0
+    );
 
     if (!mainImage) {
+      console.error("[addProduct] Validation failed: No main image selected");
       throw new Error("Please select a main image");
     }
 
+    console.log("[addProduct] Appending mainImage to FormData...");
     formData.append("mainImage", mainImage);
+    console.log("[addProduct] mainImage appended");
+
     for (let i = 0; i < smallImages.length; i++) {
+      console.log(`[addProduct] Appending small image ${i}...`);
       formData.append("smallImages", smallImages[i]);
     }
+    console.log("[addProduct] All images appended to FormData");
 
     if (submitBtn) submitBtn.innerHTML = '<span class="button-spinner"></span>';
 
-    // Submit image
-    const imageResponse = await fetch(`${API_URL}/upload`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
-      },
-      body: formData,
-    });
+    console.log("[addProduct] Step 3: Uploading images to /upload...");
+    console.log("[addProduct] FormData prepared, about to call fetchWithRetry");
+    console.log(
+      "[addProduct] IMPORTANT: About to start upload - page should NOT reload!"
+    );
+    console.log("[addProduct] Current URL:", window.location.href);
 
+    // CRITICAL: Store the state to prevent interruption
+    window._productUploadInProgress = true;
+
+    // CRITICAL: Protect against ANY navigation during the entire add product process
+    // This is necessary because something (Live Server, extension, or browser)
+    // is triggering page reloads during fetch operations
+    window.addEventListener("beforeunload", beforeUnloadHandler);
+
+    // CRITICAL: Add explicit try-catch around fetch to prevent navigation
+    let imageResponse;
+    try {
+      console.log("[addProduct] Calling fetchWithRetry NOW...");
+      // Submit image
+      imageResponse = await fetchWithRetry(
+        `/upload`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+          },
+          body: formData,
+        },
+        state.maxRetries,
+        60000 // uploads can take longer due to server-side image processing
+      );
+      console.log("[addProduct] fetchWithRetry completed successfully");
+    } catch (fetchError) {
+      console.error(
+        "[addProduct] FETCH ERROR during image upload:",
+        fetchError
+      );
+      console.error("[addProduct] Fetch error stack:", fetchError.stack);
+      // Keep protection on for now, will remove at end of entire process
+      throw new Error(`Image upload fetch failed: ${fetchError.message}`);
+    }
+    // Don't remove beforeunload handler yet - keep it for the product creation step
+
+    console.log(
+      "[addProduct] Image upload response status:",
+      imageResponse.status
+    );
     if (!imageResponse.ok) {
+      console.error(
+        "[addProduct] Image upload failed with status:",
+        imageResponse.status
+      );
       throw new Error(`Image upload failed: ${imageResponse.status}`);
     }
 
     const imageData = await imageResponse.json();
+    console.log("[addProduct] Image upload response:", imageData);
     if (!imageData.success) {
+      console.error("[addProduct] Image upload failed:", imageData.error);
       throw new Error(imageData.error || "Image upload failed");
     }
 
     if (submitBtn) submitBtn.innerHTML = '<span class="button-spinner"></span>';
 
+    console.log("[addProduct] Step 4: Creating product with image data...");
     // 3. Add product data with correct image structure
     const productData = {
       name,
@@ -2202,35 +2558,98 @@ async function addProduct(e, data, form) {
       imageLocal: imageData.mainImage?.desktopLocal || "",
       publicImage: imageData.mainImage?.publicDesktop || "",
     };
+    console.log("[addProduct] Product data to send:", productData);
+
+    console.log("[addProduct] Step 5: Sending product data to /addproduct...");
+    console.log("[addProduct] About to call fetchWithRetry for /addproduct...");
+    console.log("[addProduct] CHECKPOINT: Before /addproduct fetch");
 
     // Send product data to server
-    const productResponse = await fetch(`${API_URL}/addproduct`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+    const productResponse = await fetchWithRetry(
+      `/addproduct`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+        },
+        body: JSON.stringify(productData),
       },
-      body: JSON.stringify(productData),
-    });
+      state.maxRetries,
+      30000
+    );
 
+    console.log("[addProduct] CHECKPOINT: After /addproduct fetch");
+    console.log(
+      "[addProduct] /addproduct response received! Status:",
+      productResponse.status
+    );
     if (!productResponse.ok) {
       const errorText = await productResponse.text();
+      console.error("[addProduct] Product creation failed:", errorText);
       throw new Error(`Failed to create product: ${errorText}`);
     }
 
     const productResult = await productResponse.json();
+    console.log("[addProduct] Product creation result:", productResult);
+    console.log("[addProduct] Parsed JSON response successfully");
+
     if (!productResult.success) {
+      console.error(
+        "[addProduct] Product creation failed:",
+        productResult.error
+      );
       throw new Error(productResult.error || "Failed to create product");
     }
 
-    // Display success message
-    window.alert("Product was added successfully! 🎉");
+    console.log(
+      "[addProduct] SUCCESS! Product created with ID:",
+      productResult.id
+    );
+    console.log("[addProduct] About to show success UI...");
 
+    // Remove beforeunload protection NOW since we succeeded
+    window.removeEventListener("beforeunload", beforeUnloadHandler);
+    window._productUploadInProgress = false;
+
+    // Display success message (don't use alert - browser might block it)
+    console.log("✅ Product was added successfully! 🎉");
+
+    // Show a better success notification in the UI
+    const notification = document.createElement("div");
+    notification.style.cssText = `
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #4ade80;
+      color: white;
+      padding: 16px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease-out;
+    `;
+    notification.textContent = "✅ Product added successfully!";
+    document.body.appendChild(notification);
+
+    console.log("[addProduct] Notification added to DOM");
+
+    // Remove notification after 3 seconds
+    setTimeout(() => {
+      notification.style.opacity = "0";
+      notification.style.transition = "opacity 0.3s";
+      setTimeout(() => notification.remove(), 300);
+    }, 3000);
+
+    console.log("[addProduct] About to reset form...");
     // Reset form
     form.reset();
+    console.log("[addProduct] Form reset complete");
 
     // Remember the category we want to filter by
     const targetCategory = productData.category;
+    console.log("[addProduct] Target category:", targetCategory);
 
     // Store it in state
     state.selectedCategory = targetCategory;
@@ -2239,8 +2658,10 @@ async function addProduct(e, data, form) {
     submitBtn.disabled = false;
     submitBtn.innerHTML = "Submit";
 
+    console.log("[addProduct] About to clear content...");
     // Clear current content
     clear();
+    console.log("[addProduct] Content cleared");
 
     // Create success card
     const successCard = document.createElement("div");
@@ -2279,9 +2700,47 @@ async function addProduct(e, data, form) {
       loadAddProductsPage();
     });
   } catch (error) {
-    console.error("Error:", error);
-    alert(`Error: ${error.message}`);
+    console.error("[addProduct] ERROR occurred:", error);
+    console.error("[addProduct] Error stack:", error.stack);
+    // Provide actionable messages for common network/config issues
+    const msg = String(error?.message || "Unknown error");
+    const lower = msg.toLowerCase();
+
+    if (msg === "wrong_server_port") {
+      alert(
+        `Could not reach the API at ${API_URL} (wrong port / wrong server).\n\n` +
+          `Make sure the backend is running and that API_URL is correct.`
+      );
+    } else if (
+      msg === "network_error_after_retries" ||
+      msg === "failed_to_fetch" ||
+      lower.includes("failed to fetch")
+    ) {
+      alert(
+        `Network error while calling the API.\n\n` +
+          `API_URL: ${API_URL}\n` +
+          `You are on: ${window.location.origin}\n` +
+          `Online: ${navigator.onLine}\n\n` +
+          `Common causes:\n` +
+          `- Backend not running on port 4000\n` +
+          `- Admin page opened over https:// but API is http:// (mixed content)\n` +
+          `- Wrong origin/port (Live Server port changed)\n\n` +
+          `Tip: run window.diagnoseBisliServer() in the console to test endpoints.`
+      );
+    } else if (msg.startsWith("request_timed_out_after_")) {
+      alert(
+        `Request timed out while calling the API.\n\n` +
+          `API_URL: ${API_URL}\n` +
+          `This can happen if the server is busy (e.g. DB/processing) or unreachable.`
+      );
+    } else {
+      alert(`Error: ${msg}\n\nCheck browser console for details.`);
+    }
   } finally {
+    // Always remove beforeunload protection in finally block
+    window.removeEventListener("beforeunload", beforeUnloadHandler);
+    window._productUploadInProgress = false;
+
     if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.innerHTML = "Add Product";
@@ -2296,7 +2755,7 @@ async function loadAddProductsPage() {
   setActiveNav("add-product");
 
   const markup = `
-    <form id="uploadForm" class="page">
+    <form id="uploadForm" class="page" onsubmit="return false;">
       <div class="page__header">
         <div>
           <h2 class="page__title">Add New Product</h2>
@@ -2304,7 +2763,8 @@ async function loadAddProductsPage() {
         </div>
         <div class="page__actions">
           <button type="button" class="btn" id="cancel-add-product">Cancel</button>
-          <button type="submit" class="btn btn--primary" id="submit-add-product">Add Product</button>
+          <button type="button" class="btn" id="test-api-btn" title="Run a quick connectivity check to the backend API">Test API</button>
+          <button type="button" class="btn btn--primary" id="submit-add-product">Add Product</button>
         </div>
       </div>
 
@@ -2317,12 +2777,12 @@ async function loadAddProductsPage() {
             <div class="card__body" style="display:flex; flex-direction:column; gap:14px;">
               <div class="field">
                 <div class="label">Product Name</div>
-                <input class="input" type="text" name="name" id="name" placeholder="e.g. 18k Gold Diamond Eternity Ring" />
+                <input class="input" type="text" name="name" id="name" placeholder="e.g. 18k Gold Diamond Eternity Ring" value="Test Product" />
               </div>
 
               <div class="field">
                 <div class="label">Description</div>
-                <textarea class="textarea" name="description" id="description" placeholder="Describe the product details, materials, and craftsmanship..."></textarea>
+                <textarea class="textarea" name="description" id="description" placeholder="Describe the product details, materials, and craftsmanship...">Beautiful handcrafted jewelry piece with premium materials. Perfect for any occasion.</textarea>
               </div>
             </div>
           </div>
@@ -2336,12 +2796,12 @@ async function loadAddProductsPage() {
                 <div class="field">
                   <div class="label">Category</div>
                   <select class="select" name="category" id="category">
+                  <option id="unisex" value="unisex">Unisex</option>
                     <option id="necklaces" value="necklaces">Necklaces</option>
                     <option id="crochet-necklaces" value="crochet-necklaces">Crochet Necklaces</option>
                     <option id="bracelets" value="bracelets">Bracelets</option>
                     <option id="hoop-earrings" value="hoop-earrings">Hoop Earrings</option>
                     <option id="dangle-earrings" value="dangle-earrings">Dangle Earrings</option>
-                    <option id="unisex" value="unisex">Unisex</option>
                     <option id="shalom-club" value="shalom-club">Shalom Club</option>
                   </select>
                 </div>
@@ -2366,7 +2826,7 @@ async function loadAddProductsPage() {
               <div class="grid-2">
                 <div class="field">
                   <div class="label">Price in $</div>
-                  <input class="input" type="text" name="usd_price" id="old-price" placeholder="0.00" />
+                  <input class="input" type="text" name="usd_price" id="old-price" placeholder="0.00" value="99.99" />
                 </div>
                 <div class="field">
                   <div class="label">Security Margin (%)</div>
@@ -2396,8 +2856,8 @@ async function loadAddProductsPage() {
                   <div class="dropzone__sub">or drag and drop here</div>
                   <div class="thumbs" id="mainImageThumbs"></div>
                 </label>
-                <input type="file" name="mainImage" id="mainImage" accept="image/*" required style="display:none;" />
-                <div class="help">This will be the primary image shown for your product. Max size: 5MB</div>
+                <input type="file" name="mainImage" id="mainImage" accept="image/*" style="display:none;" />
+                <div class="help">This will be the primary image shown for your product. Max size: 5MB (Required for testing - select any image file)</div>
               </div>
 
               <div class="field">
@@ -2425,12 +2885,35 @@ async function loadAddProductsPage() {
               </div>
             </div>
           </div>
+
+          <button type="button" class="btn btn--primary" id="submit-add-product-inventory" style="width:100%;">Add Product</button>
         </div>
       </div>
     </form>
   `;
 
   pageContent.insertAdjacentHTML("afterbegin", markup);
+
+  // Hard stop against native form navigation (prevents page reload wiping Network logs).
+  // We still let our JS submit handler run; this only prevents the browser's default submit.
+  const uploadForm = document.getElementById("uploadForm");
+  if (uploadForm) {
+    uploadForm.noValidate = true;
+    uploadForm.addEventListener(
+      "submit",
+      (e) => {
+        console.log(
+          "[loadAddProductsPage] Form submit event captured - preventing default"
+        );
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      },
+      true // capture, to ensure this runs even if other handlers misbehave
+    );
+  }
+
   addProductHandler();
 
   // Cancel -> back to products list
@@ -2439,6 +2922,54 @@ async function loadAddProductsPage() {
     cancelBtn.addEventListener("click", () => {
       setActiveNav("products-list");
       fetchInfo();
+    });
+  }
+
+  // One-click API connectivity self-test (no DevTools required)
+  const testApiBtn = document.getElementById("test-api-btn");
+  if (testApiBtn) {
+    testApiBtn.addEventListener("click", async () => {
+      testApiBtn.disabled = true;
+      const prev = testApiBtn.textContent;
+      testApiBtn.textContent = "Testing...";
+      try {
+        await resolveApiUrl();
+        const results = await window.diagnoseBisliServer?.();
+
+        if (Array.isArray(results)) {
+          const failed = results.filter((r) => !r?.ok);
+          const lines = failed
+            .slice(0, 6)
+            .map((r) => {
+              const status = r.status == null ? "NO_RESPONSE" : r.status;
+              const err = r.error ? ` (${r.error})` : "";
+              return `- ${r.method || "?"} ${r.endpoint}: ${status}${err}`;
+            })
+            .join("\n");
+
+          alert(
+            `API test completed.\n\n` +
+              `API_URL: ${API_URL}\n` +
+              `Passed: ${results.length - failed.length}/${results.length}\n` +
+              (failed.length
+                ? `\nFailures:\n${lines}\n\nSee console for full details.`
+                : `\nAll endpoints responded successfully.`)
+          );
+        } else {
+          alert(
+            `API test completed. Check console for details.\n\nAPI_URL: ${API_URL}`
+          );
+        }
+      } catch (e) {
+        const msg = String(e?.message || e);
+        alert(
+          `API test failed.\n\nAPI_URL: ${API_URL}\nError: ${msg}\n\n` +
+            `Make sure backend is running and open admin over http:// in dev.`
+        );
+      } finally {
+        testApiBtn.disabled = false;
+        testApiBtn.textContent = prev || "Test API";
+      }
     });
   }
 
@@ -2501,37 +3032,129 @@ async function loadAddProductsPage() {
   }
   updateMediaCount();
 
+  // Drag and drop functionality
+  const setupDragAndDrop = (dropzone, fileInput, isMultiple = false) => {
+    if (!dropzone || !fileInput) return;
+
+    // Prevent default drag behaviors on the document
+    ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+
+    // Highlight dropzone when dragging over
+    dropzone.addEventListener("dragenter", () => {
+      dropzone.classList.add("drag-over");
+    });
+
+    dropzone.addEventListener("dragleave", (e) => {
+      // Only remove highlight if we're leaving the dropzone itself, not a child element
+      if (!dropzone.contains(e.relatedTarget)) {
+        dropzone.classList.remove("drag-over");
+      }
+    });
+
+    // Handle dropped files
+    dropzone.addEventListener("drop", (e) => {
+      dropzone.classList.remove("drag-over");
+
+      const files = Array.from(e.dataTransfer.files).filter((file) =>
+        file.type.startsWith("image/")
+      );
+
+      if (files.length === 0) {
+        return;
+      }
+
+      if (isMultiple) {
+        // For multiple files, append to existing files
+        const dataTransfer = new DataTransfer();
+        // Add existing files
+        if (fileInput.files) {
+          Array.from(fileInput.files).forEach((file) => {
+            dataTransfer.items.add(file);
+          });
+        }
+        // Add new dropped files
+        files.forEach((file) => {
+          dataTransfer.items.add(file);
+        });
+        fileInput.files = dataTransfer.files;
+      } else {
+        // For single file, replace existing
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(files[0]);
+        fileInput.files = dataTransfer.files;
+      }
+
+      // Trigger change event to update thumbnails
+      fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+    });
+  };
+
+  // Setup drag and drop for main image
+  const mainDropzone = document.querySelector(
+    'label.dropzone[for="mainImage"]'
+  );
+  setupDragAndDrop(mainDropzone, mainInput, false);
+
+  // Setup drag and drop for additional images
+  const smallDropzone = document.querySelector(
+    'label.dropzone[for="smallImages"]'
+  );
+  setupDragAndDrop(smallDropzone, smallInput, true);
+
   // Calculate initial price if values are present
   calculateILSPrice();
+
+  // Set default product name with timestamp for easier testing
+  const nameInput = document.getElementById("name");
+  if (nameInput && nameInput.value === "Test Product") {
+    const timestamp = new Date().toLocaleString();
+    nameInput.value = `Test Product - ${timestamp}`;
+  }
 }
 
 function addProductHandler() {
   const form = document.getElementById("uploadForm");
-  if (!form) return;
-
-  // Add event listeners for both USD price and security margin inputs
-  const usdPriceInput = document.getElementById("old-price");
-  const securityMarginInput = document.getElementById("security-margin");
-
-  if (usdPriceInput) {
-    usdPriceInput.addEventListener("input", calculateILSPrice);
+  if (!form) {
+    console.error("[addProductHandler] Form #uploadForm not found!");
+    return;
   }
+  console.log("[addProductHandler] Form found, attaching event listeners...");
 
-  if (securityMarginInput) {
-    securityMarginInput.addEventListener("input", calculateILSPrice);
-  }
-
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
+  const runSubmit = (e) => {
+    console.log("[runSubmit] Function called", e);
+    // CRITICAL: Prevent all default actions and propagation
+    if (e) {
+      try {
+        if (typeof e.preventDefault === "function") {
+          e.preventDefault();
+        }
+        if (typeof e.stopPropagation === "function") {
+          e.stopPropagation();
+        }
+        if (typeof e.stopImmediatePropagation === "function") {
+          e.stopImmediatePropagation();
+        }
+      } catch (err) {
+        console.error("[runSubmit] Error preventing default:", err);
+      }
+    }
 
     // Validate form data
     const prodName = document.getElementById("name").value.trim();
+    console.log("[runSubmit] prodName:", prodName);
     if (!prodName) {
+      console.error("[runSubmit] Validation failed: Product name is required");
       alert("Product name is required");
       return;
     }
 
     const prodOldPrice = document.getElementById("old-price").value.trim();
+    console.log("[runSubmit] prodOldPrice:", prodOldPrice);
     if (
       !prodOldPrice ||
       isNaN(parseFloat(prodOldPrice)) ||
@@ -2600,8 +3223,49 @@ function addProductHandler() {
     };
     console.log("Form data:", data);
 
-    addProduct(e, data, form);
-  });
+    addProduct(e || new Event("submit"), data, form);
+  };
+
+  // Add event listeners for both USD price and security margin inputs
+  const usdPriceInput = document.getElementById("old-price");
+  const securityMarginInput = document.getElementById("security-margin");
+
+  if (usdPriceInput) {
+    usdPriceInput.addEventListener("input", calculateILSPrice);
+  }
+
+  if (securityMarginInput) {
+    securityMarginInput.addEventListener("input", calculateILSPrice);
+  }
+
+  // Allow Enter-to-submit from inputs, but route to the same handler.
+  form.addEventListener("submit", runSubmit);
+
+  // Buttons are explicit type="button" so clicks never trigger native navigation.
+  const submitBtn1 = document.getElementById("submit-add-product");
+  const submitBtn2 = document.getElementById("submit-add-product-inventory");
+
+  if (submitBtn1) {
+    console.log(
+      "[addProductHandler] Attaching event listener to submit-add-product"
+    );
+    submitBtn1.addEventListener("click", runSubmit);
+  } else {
+    console.error("[addProductHandler] Button #submit-add-product not found!");
+  }
+
+  if (submitBtn2) {
+    console.log(
+      "[addProductHandler] Attaching event listener to submit-add-product-inventory"
+    );
+    submitBtn2.addEventListener("click", runSubmit);
+  } else {
+    console.error(
+      "[addProductHandler] Button #submit-add-product-inventory not found!"
+    );
+  }
+
+  console.log("[addProductHandler] Event listeners attached successfully");
 }
 
 // Create a single object with all exported functions
@@ -2637,6 +3301,7 @@ export default BisliView;
 
 // Also add a helpful diagnostic function that users can call from console
 window.diagnoseBisliServer = async function () {
+  await resolveApiUrl();
   console.log("Diagnosing server connection issues...");
   console.log(`API URL: ${API_URL}`);
   console.log(`Current hostname: ${window.location.hostname}`);
@@ -2645,13 +3310,14 @@ window.diagnoseBisliServer = async function () {
   console.log(`Has auth-token: ${!!token}`);
 
   const endpointsToTest = [
+    "/health",
     "/allproducts",
     "/verify-token",
-    "/login",
-    "/upload",
-    "/addproduct",
-    "/removeproduct",
+    // NOTE: Exclude endpoints that require a real payload (e.g. login credentials, product id/image data).
+    // Those returning 400/404 here is expected and confuses the connectivity check.
   ];
+
+  const results = [];
 
   for (const endpoint of endpointsToTest) {
     try {
@@ -2660,11 +3326,13 @@ window.diagnoseBisliServer = async function () {
       const timeoutId = setTimeout(() => controller.abort(), 3000);
 
       const method =
-        endpoint === "/verify-token" ||
-        endpoint === "/login" ||
-        endpoint === "/upload" ||
-        endpoint === "/addproduct" ||
-        endpoint === "/removeproduct"
+        endpoint === "/health"
+          ? "GET"
+          : endpoint === "/verify-token" ||
+            endpoint === "/login" ||
+            endpoint === "/upload" ||
+            endpoint === "/addproduct" ||
+            endpoint === "/removeproduct"
           ? "POST"
           : "GET";
 
@@ -2688,22 +3356,41 @@ window.diagnoseBisliServer = async function () {
       clearTimeout(timeoutId);
 
       console.log(`  Status: ${response.status}`);
+      const row = {
+        endpoint,
+        method,
+        // For connectivity diagnostics, any HTTP response means the server is reachable.
+        reachable: true,
+        ok: response.ok,
+        status: response.status,
+      };
       try {
         // Try to read the response body
         const text = await response.text();
+        row.responseSnippet = text.substring(0, 200);
         console.log(
           `  Response: ${text.substring(0, 100)}${
             text.length > 100 ? "..." : ""
           }`
         );
       } catch (e) {
+        row.responseSnippet = null;
         console.log(`  Could not read response body: ${e.message}`);
       }
+      results.push(row);
     } catch (error) {
       console.error(`  Error: ${error.message}`);
+      results.push({
+        endpoint,
+        method: "UNKNOWN",
+        reachable: false,
+        ok: false,
+        status: null,
+        error: String(error?.message || error),
+      });
     }
   }
 
   console.log("Diagnosis complete. Check the results above.");
-  return "Diagnosis complete. See console for results.";
+  return results;
 };

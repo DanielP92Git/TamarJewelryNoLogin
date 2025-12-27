@@ -12,6 +12,50 @@ const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const sharp = require('sharp');
 
+// #region agent log
+function agentLog(hypothesisId, location, message, data) {
+  try {
+    const payload = {
+      sessionId: 'debug-session',
+      runId: process.env.DEBUG_RUN_ID || 'pre-fix',
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+    };
+    const url =
+      'http://127.0.0.1:7243/ingest/eb432dfa-49d6-4ed3-b785-ea960658995f';
+    const body = JSON.stringify(payload);
+
+    // Prefer fetch when available (Node 18+)
+    if (typeof globalThis.fetch === 'function') {
+      globalThis
+        .fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body,
+        })
+        .catch(() => {});
+      return;
+    }
+
+    // Fallback for older Node versions without global fetch
+    const http = require('http');
+    const req = http.request(
+      url,
+      { method: 'POST', headers: { 'Content-Type': 'application/json' } },
+      () => {}
+    );
+    req.on('error', () => {});
+    req.write(body);
+    req.end();
+  } catch {
+    // ignore
+  }
+}
+// #endregion
+
 const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 const baseUrl =
@@ -29,6 +73,50 @@ if (process.env.NODE_ENV !== 'production') {
 // Initial Setup & Configuration
 // =============================================
 const app = express();
+
+// #region agent log
+// Request-level probe for upload/addproduct issues (CORS/network vs route failures)
+app.use((req, res, next) => {
+  try {
+    if (req.path === '/upload' || req.path === '/addproduct') {
+      agentLog('C', 'backend/index.js:probe', 'incoming', {
+        path: req.path,
+        method: req.method,
+        origin: req.headers.origin || null,
+        host: req.headers.host || null,
+        acrMethod: req.headers['access-control-request-method'] || null,
+        acrHeaders: req.headers['access-control-request-headers'] || null,
+        hasAuthHeader: typeof req.headers.authorization === 'string',
+        hasAuthTokenHeader: typeof req.headers['auth-token'] === 'string',
+      });
+      res.on('finish', () => {
+        agentLog('C', 'backend/index.js:probe:finish', 'outgoing', {
+          path: req.path,
+          method: req.method,
+          statusCode: res.statusCode,
+        });
+      });
+      res.on('close', () => {
+        agentLog('C', 'backend/index.js:probe:close', 'connection closed', {
+          path: req.path,
+          method: req.method,
+          statusCode: res.statusCode,
+          writableEnded: res.writableEnded,
+        });
+      });
+      req.on('aborted', () => {
+        agentLog('C', 'backend/index.js:probe:aborted', 'request aborted', {
+          path: req.path,
+          method: req.method,
+        });
+      });
+    }
+  } catch {
+    // ignore
+  }
+  next();
+});
+// #endregion
 
 // =============================================
 // Basic request hardening
@@ -144,6 +232,57 @@ function normalizeProductForClient(productDoc) {
       ? productDoc.toObject()
       : { ...(productDoc || {}) };
 
+  const fallbackNoImage = () => toAbsoluteApiUrl('/images/no-image.svg');
+
+  const localAssetExistsForUrl = urlValue => {
+    if (!urlValue || typeof urlValue !== 'string') return true;
+    // We can only validate local (relative-to-API) assets
+    const rel = toRelativeApiPath(urlValue);
+    if (!rel || typeof rel !== 'string' || !rel.startsWith('/')) return true;
+
+    // Check uploads/public uploads/smallImages/public smallImages
+    const filename = path.basename(rel);
+    if (!filename) return true;
+
+    if (rel.startsWith('/uploads/')) {
+      const fp = safeResolveUnder(uploadsDir, filename);
+      return fp ? fs.existsSync(fp) : false;
+    }
+    if (rel.startsWith('/public/uploads/')) {
+      const fp = safeResolveUnder(publicUploadsDir, filename);
+      return fp ? fs.existsSync(fp) : false;
+    }
+    if (rel.startsWith('/smallImages/')) {
+      const fp = safeResolveUnder(smallImagesDir, filename);
+      return fp ? fs.existsSync(fp) : false;
+    }
+    if (rel.startsWith('/public/smallImages/')) {
+      const fp = safeResolveUnder(publicSmallImagesDir, filename);
+      return fp ? fs.existsSync(fp) : false;
+    }
+
+    return true;
+  };
+
+  // #region agent log
+  agentLog(
+    'A',
+    'backend/index.js:normalizeProductForClient',
+    'normalize image urls',
+    {
+      hasApiUrl: !!process.env.API_URL,
+      apiUrlPrefix:
+        typeof process.env.API_URL === 'string'
+          ? process.env.API_URL.slice(0, 60)
+          : null,
+      imageIn: obj?.image,
+      publicImageIn: obj?.publicImage,
+      directImageUrlIn: obj?.directImageUrl,
+      mainImageDesktopIn: obj?.mainImage?.desktop,
+    }
+  );
+  // #endregion
+
   // Normalize core image fields
   obj.image = toAbsoluteApiUrl(obj.image);
   obj.publicImage = toAbsoluteApiUrl(obj.publicImage);
@@ -159,6 +298,23 @@ function normalizeProductForClient(productDoc) {
     // keep locals out of responses
     delete obj.mainImage.desktopLocal;
     delete obj.mainImage.mobileLocal;
+  }
+
+  // If the referenced local file isn't on disk, return a safe placeholder instead of a broken icon
+  try {
+    if (!localAssetExistsForUrl(obj.image)) obj.image = fallbackNoImage();
+    if (obj.mainImage && typeof obj.mainImage === 'object') {
+      if (!localAssetExistsForUrl(obj.mainImage.desktop))
+        obj.mainImage.desktop = fallbackNoImage();
+      if (!localAssetExistsForUrl(obj.mainImage.mobile))
+        obj.mainImage.mobile = fallbackNoImage();
+      if (!localAssetExistsForUrl(obj.mainImage.publicDesktop))
+        obj.mainImage.publicDesktop = fallbackNoImage();
+      if (!localAssetExistsForUrl(obj.mainImage.publicMobile))
+        obj.mainImage.publicMobile = fallbackNoImage();
+    }
+  } catch {
+    // ignore
   }
 
   // smallImages can be array of strings or objects
@@ -179,6 +335,21 @@ function normalizeProductForClient(productDoc) {
 
   // Remove local-only fields from responses
   omitLocalImageFields(obj);
+
+  // #region agent log
+  agentLog(
+    'A',
+    'backend/index.js:normalizeProductForClient:exit',
+    'normalized image urls',
+    {
+      imageOut: obj?.image,
+      publicImageOut: obj?.publicImage,
+      directImageUrlOut: obj?.directImageUrl,
+      mainImageDesktopOut: obj?.mainImage?.desktop,
+    }
+  );
+  // #endregion
+
   return obj;
 }
 
@@ -553,6 +724,7 @@ const uploadsDir = path.join(__dirname, 'uploads');
 const smallImagesDir = path.join(__dirname, 'smallImages');
 const publicUploadsDir = path.join(__dirname, '../public/uploads');
 const publicSmallImagesDir = path.join(__dirname, '../public/smallImages');
+const noImageSvgPath = path.join(__dirname, 'public/images/no-image.svg');
 
 // Ensure all directories exist
 if (!fs.existsSync(uploadsDir)) {
@@ -581,8 +753,12 @@ const staticOptions = {
     // Set long cache time for static assets
     res.setHeader('Cache-Control', 'public, max-age=31536000');
 
-    // Allow images to be embedded across same-site subdomains (e.g. admin.tamarkfir.com)
-    res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+    // Allow images to be embedded across same-site subdomains in prod,
+    // but in development we often mix localhost/127.0.0.1, which is cross-site.
+    res.setHeader(
+      'Cross-Origin-Resource-Policy',
+      isProd ? 'same-site' : 'cross-origin'
+    );
 
     // Set content type header based on file extension
     if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
@@ -629,6 +805,41 @@ function applyStaticCors(req, res, next) {
 // Configure static file serving for all directories with custom middleware
 app.use('/uploads', (req, res, next) => {
   console.log(`[Static] Accessing: ${req.path} from uploads dir`);
+  // #region agent log
+  try {
+    const raw = req.path || '';
+    const reqFile = raw.startsWith('/') ? raw.slice(1) : raw;
+    const ext = path.extname(reqFile).toLowerCase();
+    if (ext) {
+      const resolved = safeResolveUnder(uploadsDir, reqFile);
+      agentLog('B', 'backend/index.js:/uploads', 'static request', {
+        reqPath: raw,
+        ext,
+        resolvedOk: !!resolved,
+        exists: resolved ? fs.existsSync(resolved) : false,
+      });
+
+      // Serve a placeholder instead of 404 for missing images (prevents broken icons)
+      if (resolved && !fs.existsSync(resolved)) {
+        agentLog(
+          'B',
+          'backend/index.js:/uploads:fallback',
+          'missing upload file -> no-image',
+          {
+            reqPath: raw,
+          }
+        );
+        res.setHeader(
+          'Cross-Origin-Resource-Policy',
+          isProd ? 'same-site' : 'cross-origin'
+        );
+        return res.status(200).type('image/svg+xml').sendFile(noImageSvgPath);
+      }
+    }
+  } catch {
+    // ignore
+  }
+  // #endregion
   applyStaticCors(req, res, () =>
     express.static(uploadsDir, staticOptions)(req, res, next)
   );
@@ -636,6 +847,38 @@ app.use('/uploads', (req, res, next) => {
 
 app.use('/api/uploads', (req, res, next) => {
   console.log(`[Static] Accessing: ${req.path} from api/uploads`);
+  // #region agent log
+  try {
+    const raw = req.path || '';
+    const reqFile = raw.startsWith('/') ? raw.slice(1) : raw;
+    const ext = path.extname(reqFile).toLowerCase();
+    if (ext) {
+      const resolved = safeResolveUnder(uploadsDir, reqFile);
+      agentLog('B', 'backend/index.js:/api/uploads', 'static request', {
+        reqPath: raw,
+        ext,
+        resolvedOk: !!resolved,
+        exists: resolved ? fs.existsSync(resolved) : false,
+      });
+
+      if (resolved && !fs.existsSync(resolved)) {
+        agentLog(
+          'B',
+          'backend/index.js:/api/uploads:fallback',
+          'missing upload file -> no-image',
+          { reqPath: raw }
+        );
+        res.setHeader(
+          'Cross-Origin-Resource-Policy',
+          isProd ? 'same-site' : 'cross-origin'
+        );
+        return res.status(200).type('image/svg+xml').sendFile(noImageSvgPath);
+      }
+    }
+  } catch {
+    // ignore
+  }
+  // #endregion
   applyStaticCors(req, res, () =>
     express.static(uploadsDir, staticOptions)(req, res, next)
   );
@@ -677,6 +920,16 @@ app.use('/api/public/smallImages', (req, res, next) => {
 });
 
 // Also serve from root path
+// Prefer backend's bundled images directory first (contains no-image.png)
+app.use(
+  '/images',
+  express.static(path.join(__dirname, 'public/images'), staticOptions)
+);
+app.use(
+  '/api/images',
+  express.static(path.join(__dirname, 'public/images'), staticOptions)
+);
+
 app.use(
   '/images',
   express.static(path.join(__dirname, '../public/images'), staticOptions)
@@ -685,6 +938,30 @@ app.use(
   '/api/images',
   express.static(path.join(__dirname, '../public/images'), staticOptions)
 );
+
+// =============================================
+// Health & client config endpoints (dev-friendly)
+// =============================================
+// Used by the admin UI to auto-detect a working API base URL.
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    ok: true,
+    status: 'healthy',
+    env: process.env.NODE_ENV || 'development',
+    port: process.env.SERVER_PORT || 4000,
+    now: Date.now(),
+  });
+});
+
+// Provide minimal, safe config to clients (no secrets).
+app.get('/api/client-config', (req, res) => {
+  res.status(200).json({
+    ok: true,
+    apiUrl: process.env.API_URL || null,
+    host: process.env.HOST || null,
+    env: process.env.NODE_ENV || 'development',
+  });
+});
 
 // Direct file access route for debugging
 app.get('/check-file/:filename', (req, res) => {
@@ -741,8 +1018,12 @@ app.get('/direct-image/:filename', (req, res) => {
   // Apply allowlist-based CORS for cross-origin image access when needed
   applyStaticCors(req, res, () => {});
 
-  // Allow images to be embedded across same-site subdomains (e.g. admin.tamarkfir.com)
-  res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+  // Allow images to be embedded across same-site subdomains in prod;
+  // in dev, allow cross-origin for localhost/127.0.0.1 mixes.
+  res.setHeader(
+    'Cross-Origin-Resource-Policy',
+    isProd ? 'same-site' : 'cross-origin'
+  );
 
   // Check if file exists
   fs.access(filePath, fs.constants.F_OK, err => {
@@ -1151,8 +1432,45 @@ app.post('/signup', authRateLimiter, async (req, res) => {
 // Product Management Endpoints
 app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
   try {
+    // #region agent log
+    agentLog('A', 'backend/index.js:/addproduct:entry', 'addproduct entry', {
+      hasBody: !!req.body,
+      contentType: req.headers['content-type'] || null,
+      hasMainImage: !!req.body?.mainImage,
+      mainImageDesktop: req.body?.mainImage?.desktop || null,
+      smallImagesType: Array.isArray(req.body?.smallImages)
+        ? 'array'
+        : typeof req.body?.smallImages,
+      category: req.body?.category || null,
+      name: req.body?.name || null,
+    });
+    // #endregion
+
     console.log('\n=== Product Creation Request Details ===');
     console.log('Request body:', JSON.stringify(req.body, null, 2));
+
+    // Input guards (fail fast with actionable 400s)
+    if (!req.body || typeof req.body !== 'object') {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Missing JSON body' });
+    }
+    if (!req.body.name || typeof req.body.name !== 'string') {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Missing product name' });
+    }
+    if (!req.body.category || typeof req.body.category !== 'string') {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Missing product category' });
+    }
+    if (!req.body.mainImage || typeof req.body.mainImage !== 'object') {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing mainImage data from upload.',
+      });
+    }
 
     const products = await Product.find({}).sort({ id: -1 }).limit(1);
     const nextId = products.length > 0 ? Number(products[0].id) + 1 : 1;
@@ -1188,6 +1506,67 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
     console.log('\n=== Image Data Received ===');
     console.log('Main Image URLs:', JSON.stringify(mainImageUrls, null, 2));
     console.log('Small Image URLs:', JSON.stringify(smallImageUrls, null, 2));
+
+    // #region agent log
+    agentLog(
+      'A',
+      'backend/index.js:/addproduct',
+      'computed image fields for product',
+      {
+        hasApiUrl: !!process.env.API_URL,
+        mainImageInputDesktop: mainImageInput?.desktop,
+        mainImageUrlsDesktop: mainImageUrls?.desktop,
+        mainImageUrlsPublicDesktop: mainImageUrls?.publicDesktop,
+        smallImagesCount: Array.isArray(smallImageUrls)
+          ? smallImageUrls.length
+          : null,
+      }
+    );
+    // #endregion
+
+    // Guard: don't store a product that references non-existent upload files
+    try {
+      const mainDesktopFn = mainImageUrls?.desktop
+        ? path.basename(String(mainImageUrls.desktop))
+        : null;
+      if (mainDesktopFn) {
+        const fp = safeResolveUnder(uploadsDir, mainDesktopFn);
+        const exists = fp ? fs.existsSync(fp) : false;
+
+        // #region agent log
+        agentLog(
+          'A',
+          'backend/index.js:/addproduct:upload-file-check',
+          'checked upload file exists',
+          {
+            mainDesktopUrl: mainImageUrls?.desktop || null,
+            mainDesktopFilename: mainDesktopFn,
+            resolvedOk: !!fp,
+            exists,
+          }
+        );
+        // #endregion
+
+        if (!exists) {
+          return res.status(400).json({
+            success: false,
+            error:
+              'Uploaded main image file was not found on the server. Please retry the upload.',
+          });
+        }
+      } else {
+        return res.status(400).json({
+          success: false,
+          error: 'mainImage.desktop missing from upload response.',
+        });
+      }
+    } catch (e) {
+      console.error('[addproduct] upload file validation failed:', e);
+      return res.status(500).json({
+        success: false,
+        error: 'Server failed while validating uploaded image files.',
+      });
+    }
 
     // Create the product with new image structure
     const product = new Product({
@@ -1235,6 +1614,15 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
     console.log('\n=== Product Saved Successfully ===');
     console.log('Product ID:', nextId);
 
+    // #region agent log
+    agentLog('A', 'backend/index.js:/addproduct:save', 'product saved', {
+      productId: nextId,
+      imageStored: product?.image,
+      publicImageStored: product?.publicImage,
+      directImageUrlStored: product?.directImageUrl,
+    });
+    // #endregion
+
     res.json({
       success: true,
       id: nextId,
@@ -1243,6 +1631,12 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
   } catch (error) {
     console.error('\n=== Product Creation Error ===');
     console.error(error);
+    // #region agent log
+    agentLog('A', 'backend/index.js:/addproduct:catch', 'addproduct error', {
+      message: error?.message || null,
+      name: error?.name || null,
+    });
+    // #endregion
     res.status(500).json({
       success: false,
       error: error.message,
@@ -1597,6 +1991,22 @@ app.post(
   '/upload',
   fetchUser,
   requireAdmin,
+  (req, res, next) => {
+    // IMPORTANT:
+    // Do not send/flush headers before multer completes.
+    // If we commit a 200 early and later need to return 400/500, Node can throw
+    // "ERR_HTTP_HEADERS_SENT" and potentially crash the process, surfacing as
+    // "ERR_CONNECTION_RESET"/"ERR_CONNECTION_REFUSED" in the browser.
+    //
+    // Instead, extend timeouts for long uploads + server-side processing.
+    try {
+      req.setTimeout(120000);
+      res.setTimeout(120000);
+    } catch {
+      // ignore
+    }
+    next();
+  },
   upload.fields([
     { name: 'mainImage', maxCount: 1 },
     { name: 'smallImages', maxCount: 10 },
@@ -1605,6 +2015,19 @@ app.post(
     try {
       console.log('\n=== Upload Request Details ===');
       console.log('Files received:', JSON.stringify(req.files, null, 2));
+
+      // #region agent log
+      agentLog('B', 'backend/index.js:/upload:entry', 'upload received', {
+        hasFiles: !!req.files,
+        mainImageCount: Array.isArray(req.files?.mainImage)
+          ? req.files.mainImage.length
+          : 0,
+        smallImagesCount: Array.isArray(req.files?.smallImages)
+          ? req.files.smallImages.length
+          : 0,
+        mainImageFilename: req.files?.mainImage?.[0]?.filename || null,
+      });
+      // #endregion
 
       // Check if we received any files
       if (!req.files || Object.keys(req.files).length === 0) {
@@ -1679,7 +2102,61 @@ app.post(
       console.log('\n=== Final Response ===');
       console.log(JSON.stringify(response, null, 2));
 
-      res.json(response);
+      // #region agent log
+      agentLog('B', 'backend/index.js:/upload:exit', 'upload response urls', {
+        mainDesktopUrl: response?.mainImage?.desktop,
+        mainPublicDesktopUrl: response?.mainImage?.publicDesktop,
+        smallImagesCount: Array.isArray(response?.smallImages)
+          ? response.smallImages.length
+          : 0,
+      });
+      // #endregion
+
+      // #region agent log
+      agentLog(
+        'B',
+        'backend/index.js:/upload:before-send',
+        'calling res.json',
+        {
+          responseSize: JSON.stringify(response).length,
+          headersSent: res.headersSent,
+          writableEnded: res.writableEnded,
+        }
+      );
+      // #endregion
+
+      res.on('error', err => {
+        // #region agent log
+        agentLog(
+          'B',
+          'backend/index.js:/upload:res-error',
+          'response stream error',
+          {
+            error: err.message,
+            stack: err.stack,
+          }
+        );
+        // #endregion
+      });
+
+      // Send response body (headers already sent early to keep connection alive)
+      const responseBody = JSON.stringify(response);
+      if (res.headersSent) {
+        // Headers were sent early, send body directly
+        // Use write + end to ensure proper chunked encoding if needed
+        res.write(responseBody);
+        res.end();
+      } else {
+        // Headers weren't sent early (shouldn't happen), use normal res.json
+        res.json(response);
+      }
+
+      // #region agent log
+      agentLog('B', 'backend/index.js:/upload:after-send', 'res.end called', {
+        headersSent: res.headersSent,
+        writableEnded: res.writableEnded,
+      });
+      // #endregion
     } catch (error) {
       console.error('Upload error:', error);
       return res.status(500).json({
@@ -1891,15 +2368,21 @@ app.post('/deleteproductimage', fetchUser, requireAdmin, async (req, res) => {
     const id = Number(productId);
 
     if (!Number.isFinite(id)) {
-      return res.status(400).json({ success: false, message: 'Invalid productId' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid productId' });
     }
     if (imageType !== 'main' && imageType !== 'small') {
-      return res.status(400).json({ success: false, message: 'Invalid imageType' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid imageType' });
     }
 
     const product = await Product.findOne({ id });
     if (!product) {
-      return res.status(404).json({ success: false, message: 'Product not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: 'Product not found' });
     }
 
     const extractFilename = url => {
@@ -1951,17 +2434,24 @@ app.post('/deleteproductimage', fetchUser, requireAdmin, async (req, res) => {
       }
 
       await product.save();
-      return res.json({ success: true, message: 'Main image deleted successfully' });
+      return res.json({
+        success: true,
+        message: 'Main image deleted successfully',
+      });
     }
 
     // small image deletion
     const target = extractFilename(imageUrl);
     if (!target) {
-      return res.status(400).json({ success: false, message: 'Missing imageUrl' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Missing imageUrl' });
     }
     const validation = validateImageFilename(target);
     if (!validation.ok) {
-      return res.status(400).json({ success: false, message: 'Invalid imageUrl' });
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid imageUrl' });
     }
 
     const base = target.replace(/-(desktop|mobile)\.webp$/i, '');
@@ -2008,7 +2498,10 @@ app.post('/deleteproductimage', fetchUser, requireAdmin, async (req, res) => {
       unlinkIfExists(path.join(publicSmallImagesDir, target)),
     ]);
 
-    return res.json({ success: true, message: 'Small image deleted successfully' });
+    return res.json({
+      success: true,
+      message: 'Small image deleted successfully',
+    });
   } catch (error) {
     console.error('Error deleting image:', error);
     return res.status(500).json({
@@ -2062,7 +2555,9 @@ app.use((err, req, res, next) => {
 });
 
 // Centralized error handler (final middleware)
-app.use((err, req, res) => {
+// IMPORTANT: must have 4 args for Express to treat as an error-handling middleware
+app.use((err, req, res, _next) => {
+  void _next;
   const status = err && Number.isInteger(err.statusCode) ? err.statusCode : 500;
   const code = err && err.code ? String(err.code) : 'INTERNAL_ERROR';
 
@@ -2073,6 +2568,24 @@ app.use((err, req, res) => {
     method: req.method,
     message: err?.message,
   });
+
+  // Extra signal for the specific dev issue (client reports `Failed to fetch`)
+  try {
+    if (req?.originalUrl === '/addproduct' || req?.path === '/addproduct') {
+      agentLog(
+        'A',
+        'backend/index.js:error-handler',
+        'unhandled error while handling /addproduct',
+        {
+          status,
+          code,
+          message: err?.message || null,
+        }
+      );
+    }
+  } catch {
+    // ignore
+  }
 
   return res.status(status).json({
     success: false,
@@ -2092,6 +2605,18 @@ app.listen(process.env.SERVER_PORT || 4000, error => {
     console.log('  API_URL:', process.env.API_URL);
     console.log('  HOST:', process.env.HOST);
     console.log('  NODE_ENV:', process.env.NODE_ENV);
+
+    // #region agent log
+    agentLog('A', 'backend/index.js:app.listen', 'server started', {
+      port: process.env.SERVER_PORT || 4000,
+      hasApiUrl: !!process.env.API_URL,
+      apiUrlPrefix:
+        typeof process.env.API_URL === 'string'
+          ? process.env.API_URL.slice(0, 60)
+          : null,
+      nodeEnv: process.env.NODE_ENV || null,
+    });
+    // #endregion
   } else {
     console.log('Error : ' + error);
   }
@@ -2217,6 +2742,23 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
     // Copy to public directory if successful
     await fs.promises.copyFile(desktopPath, publicDesktopPath);
     await fs.promises.copyFile(mobilePath, publicMobilePath);
+
+    // #region agent log
+    agentLog(
+      'B',
+      'backend/index.js:processImage',
+      'processed & copied image variants',
+      {
+        isMainImage,
+        desktopFilename,
+        mobileFilename,
+        desktopExists: fs.existsSync(desktopPath),
+        mobileExists: fs.existsSync(mobilePath),
+        publicDesktopExists: fs.existsSync(publicDesktopPath),
+        publicMobileExists: fs.existsSync(publicMobilePath),
+      }
+    );
+    // #endregion
 
     // Return results
     results.desktop = {

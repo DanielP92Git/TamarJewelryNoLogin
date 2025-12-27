@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-label="No image available">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f3f4f6"/>
+      <stop offset="1" stop-color="#e5e7eb"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <rect x="48" y="48" width="704" height="504" rx="24" fill="#ffffff" opacity="0.65"/>
+  <g fill="none" stroke="#9ca3af" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity="0.9">
+    <path d="M240 360l72-84 70 72 78-98 100 130H240z"/>
+    <rect x="220" y="190" width="360" height="260" rx="22"/>
+    <path d="M520 190l48 0c26 0 48 22 48 48v164"/>
+    <circle cx="330" cy="270" r="22"/>
+    <path d="M260 500h280"/>
+  </g>
+  <g font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" text-anchor="middle">
+    <text x="400" y="520" font-size="28" fill="#374151">No image available</text>
+  </g>
+</svg>
+
+
+
