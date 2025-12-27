@@ -1560,7 +1560,11 @@ function editProduct(product) {
 
   // Add event listeners for delete image buttons
   document.querySelectorAll(".delete-image-btn").forEach((btn) => {
-    btn.addEventListener("click", async function () {
+    btn.addEventListener("click", async function (e) {
+      // Defensive: keep this action from triggering any other handlers
+      e.preventDefault();
+      e.stopPropagation();
+
       const imageType = this.dataset.imageType;
       const productId = this.dataset.productId;
       const imageUrl = decodeURIComponent(this.dataset.imageUrl);
@@ -1568,6 +1572,11 @@ function editProduct(product) {
       if (confirm(`Are you sure you want to delete this ${imageType} image?`)) {
         try {
           console.log(`Deleting ${imageType} image: ${imageUrl}`);
+
+          const clickedBtn = this;
+          const thumbEl = clickedBtn.closest(".thumb");
+          const thumbsContainer = thumbEl ? thumbEl.parentElement : null;
+          clickedBtn.disabled = true;
 
           const requestUrl = `${API_URL}/deleteproductimage`;
           const requestOptions = {
@@ -1613,56 +1622,33 @@ function editProduct(product) {
 
           const result = await response.json();
           if (result.success) {
-            alert("Image deleted successfully!");
+            // Update UI in-place: remove the thumbnail and keep the user on the edit page.
+            if (thumbEl) {
+              thumbEl.remove();
+            }
 
-            // For main image deletion, use the original product object to get the category
             if (imageType === "main") {
-              if (product && product.category) {
-                // 'product' is from the outer scope of editProduct
-                state.selectedCategory = product.category;
-                console.log(
-                  "[BisliView editProduct] Main image deleted. state.selectedCategory is NOW:",
-                  state.selectedCategory,
-                  "(from product object:",
-                  product.category,
-                  ")"
-                );
-              } else {
-                console.warn(
-                  "[BisliView editProduct] Main image deleted, but product details unavailable to set state.selectedCategory."
-                );
-                state.selectedCategory = "all"; // Fallback
+              // If we removed the only thumb, show the "No main image" helper
+              if (thumbsContainer && thumbsContainer.children.length === 0) {
+                thumbsContainer.innerHTML = `<span class="help">No main image</span>`;
               }
-              console.log(
-                "[BisliView editProduct] Attempting fetchInfo() for main image deletion redirect..."
-              );
-              try {
-                await fetchInfo(); // Reload the product list view, explicitly await
-                console.log(
-                  "[BisliView] fetchInfo() completed for main image deletion."
-                );
-              } catch (fetchInfoError) {
-                console.error(
-                  "[BisliView] Error occurred during fetchInfo() after main image deletion:",
-                  fetchInfoError
-                );
-                alert(
-                  "Error reloading product list after main image deletion. Please refresh manually."
-                );
-              }
-            } else {
-              // Existing behavior for small images: refresh the edit form
-              try {
-                const refreshedProduct = await fetchProduct(productId);
-                if (refreshedProduct) {
-                  editProduct(refreshedProduct);
-                } else {
-                  fetchInfo();
+            }
+
+            // Optionally keep the product object consistent (editProduct closure)
+            try {
+              if (imageType === "main" && product) {
+                product.image = null;
+                product.publicImage = null;
+                product.imageLocal = null;
+                if (product.mainImage) {
+                  product.mainImage.desktop = null;
+                  product.mainImage.mobile = null;
+                  product.mainImage.publicDesktop = null;
+                  product.mainImage.publicMobile = null;
                 }
-              } catch (fetchError) {
-                console.error("Error fetching updated product:", fetchError);
-                fetchInfo();
               }
+            } catch {
+              // ignore
             }
           } else {
             // Ensure result.message is a string before throwing
@@ -1680,6 +1666,12 @@ function editProduct(product) {
               ? error.message
               : "An unexpected error occurred.";
           alert("Error deleting image: " + alertMessage);
+        } finally {
+          try {
+            this.disabled = false;
+          } catch {
+            // ignore
+          }
         }
       }
     });
