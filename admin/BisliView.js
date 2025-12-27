@@ -7,15 +7,15 @@ const sideBar = document.querySelector(".sidebar");
 const pageContent = document.querySelector(".page-content");
 
 // API Configuration
+const IS_PRODUCTION =
+  window.location.hostname !== "localhost" &&
+  !window.location.hostname.includes("127.0.0.1");
+
 const API_URL = (() => {
   // Check if we're in a production environment based on the URL
-  const isProduction =
-    window.location.hostname !== "localhost" &&
-    !window.location.hostname.includes("127.0.0.1");
-
   let url;
 
-  if (isProduction) {
+  if (IS_PRODUCTION) {
     // In production, use the API endpoint on the same domain or a specified API domain
     // Option a: API on same domain but different path (default)
     url = `https://lobster-app-jipru.ondigitalocean.app/api`;
@@ -27,7 +27,10 @@ const API_URL = (() => {
     // url = "https://api.yourdomain.com";
   } else {
     // In development, use localhost with the correct port
-    url = "http://localhost:4000";
+    // Prefer matching loopback host to avoid odd browser/network edge cases
+    url = window.location.hostname.includes("127.0.0.1")
+      ? "http://127.0.0.1:4000"
+      : "http://localhost:4000";
   }
   return url;
 })();
@@ -38,7 +41,7 @@ const DEFAULT_TIMEOUT = 15000; // 15 seconds
 // State management
 const state = {
   selectedCategory: "all",
-  isProduction: window.location.hostname !== "localhost",
+  isProduction: IS_PRODUCTION,
   retryCount: 0,
   maxRetries: 3,
 };
@@ -2057,6 +2060,9 @@ async function addProduct(e, data, form) {
     // Submit image
     const imageResponse = await fetch(`${API_URL}/upload`, {
       method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+      },
       body: formData,
     });
 
@@ -2484,6 +2490,8 @@ window.diagnoseBisliServer = async function () {
   console.log(`API URL: ${API_URL}`);
   console.log(`Current hostname: ${window.location.hostname}`);
   console.log(`Current port: ${window.location.port}`);
+  const token = localStorage.getItem("auth-token");
+  console.log(`Has auth-token: ${!!token}`);
 
   const endpointsToTest = [
     "/allproducts",
@@ -2512,11 +2520,18 @@ window.diagnoseBisliServer = async function () {
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: method,
         signal: controller.signal,
-        headers:
-          method === "POST"
-            ? { "Content-Type": "application/json" }
+        headers: (() => {
+          const headers = {};
+          if (token) headers.Authorization = `Bearer ${token}`;
+          if (method === "POST" && endpoint !== "/upload") {
+            headers["Content-Type"] = "application/json";
+          }
+          return Object.keys(headers).length ? headers : undefined;
+        })(),
+        body:
+          method === "POST" && endpoint !== "/upload"
+            ? JSON.stringify({})
             : undefined,
-        body: method === "POST" ? JSON.stringify({}) : undefined,
       });
 
       clearTimeout(timeoutId);
