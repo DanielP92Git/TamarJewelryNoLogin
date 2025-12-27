@@ -19,6 +19,11 @@
       href="https://fonts.googleapis.com/css2?family=Montserrat&family=Raleway:wght@200;400;600&display=swap"
       rel="stylesheet"
     />
+    <!-- Contact page typography to match reference mock -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="../css/standard-reset.css" />
     <link rel="stylesheet" href="../css/desktop-menu.css" />
 
@@ -87,30 +92,36 @@
 
     <header>
       <div class="site-header" data-purpose="site-header">
-        <div class="icons-container">
-          <img
-            src="../imgs/svgs/bars-solid.svg"
-            alt=""
-            class="menubars-svg menubars-toggle close"
-          />
-        </div>
-        
-        <a class="site-brand" href="../index.html">Tamar Kfir Jewelry</a>
-
-        <div class="icons-container icons-container-right">
-          <div class="shoppingcart-container">
-            <a href="../html/cart.html">
-              <img
-                src="../imgs/svgs/shopping-bag-outline-black.svg"
-                alt=""
-                class="shoppingcart-mobile"
-              />
-            </a>
+        <div class="site-header__left">
+          <div class="icons-container">
+            <img
+              src="../imgs/svgs/bars-solid.svg"
+              alt=""
+              class="menubars-svg menubars-toggle close"
+            />
           </div>
-          <span class="cart-number-mobile cart-number-mobile-header">0</span>
+
+          <a class="site-brand" href="../index.html">Tamar Kfir Jewelry</a>
         </div>
 
-        <nav class="menu"></nav>
+        <div class="site-header__center">
+          <nav class="menu" aria-label="Primary"></nav>
+        </div>
+
+        <div class="site-header__right" data-purpose="header-utilities">
+          <div class="icons-container icons-container-right">
+            <div class="shoppingcart-container">
+              <a href="../html/cart.html">
+                <img
+                  src="../imgs/svgs/shopping-bag-outline-black.svg"
+                  alt=""
+                  class="shoppingcart-mobile"
+                />
+              </a>
+            </div>
+            <span class="cart-number-mobile cart-number-mobile-header">0</span>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -128,7 +139,7 @@
                 type="text"
                 id="name"
                 name="name"
-                placeholder=" "
+                placeholder="First Name"
                 required
               />
               <label for="name">First Name</label>
@@ -140,7 +151,7 @@
                 type="text"
                 id="lastname"
                 name="lastname"
-                placeholder=" "
+                placeholder="Last Name"
                 required
               />
               <label for="lastname">Last Name</label>
@@ -153,7 +164,7 @@
               type="email"
               id="contact-email"
               name="email"
-              placeholder=" "
+              placeholder="Email Address"
               required
             />
             <label for="contact-email">Email Address</label>
@@ -164,7 +175,7 @@
             <textarea
               id="message"
               name="message"
-              placeholder=" "
+              placeholder="Your Message"
               required
             ></textarea>
             <label for="message">Your Message</label>

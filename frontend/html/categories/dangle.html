@@ -58,30 +58,39 @@
   >
     <header>
       <div class="site-header" data-purpose="site-header">
-        <a class="site-brand" href="/index.html">Tamar Kfir Jewelry</a>
-        <div class="icons-container">
-          <img
-            src="../../imgs/svgs/bars-solid.svg"
-            alt=""
-            class="menubars-svg menubars-toggle close"
-          />
+        <div class="site-header__left">
+          <div class="icons-container">
+            <img
+              src="../../imgs/svgs/bars-solid.svg"
+              alt=""
+              class="menubars-svg menubars-toggle close"
+            />
+          </div>
+
+          <a class="site-brand" href="/index.html">Tamar Kfir Jewelry</a>
         </div>
 
-        <div class="icons-container icons-container-right">
-          <div class="shoppingcart-container">
-            <a href="../../html/cart.html">
-              <img
-                src="../../imgs/svgs/shopping-bag-outline-black.svg"
-                alt=""
-                class="shoppingcart-mobile"
-              />
-            </a>
-          </div>
-          <span class="cart-number cart-number-mobile cart-number-mobile-header"
-            >0</span
-          >
+        <div class="site-header__center">
+          <nav class="menu" aria-label="Primary"></nav>
         </div>
-        <nav class="menu"></nav>
+
+        <div class="site-header__right" data-purpose="header-utilities">
+          <div class="icons-container icons-container-right">
+            <div class="shoppingcart-container">
+              <a href="../../html/cart.html">
+                <img
+                  src="../../imgs/svgs/shopping-bag-outline-black.svg"
+                  alt=""
+                  class="shoppingcart-mobile"
+                />
+              </a>
+            </div>
+            <span
+              class="cart-number cart-number-mobile cart-number-mobile-header"
+              >0</span
+            >
+          </div>
+        </div>
       </div>
     </header>
     <main class="main">

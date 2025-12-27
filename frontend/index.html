@@ -96,34 +96,40 @@
     <header>
       <!-- Fixed header bar (layout + styling handled in desktop-menu.css / mobile-menu.css) -->
       <div class="site-header" data-purpose="site-header">
-        <!-- Left: mobile hamburger -->
-      <div class="icons-container">
-        <img
-          src="./imgs/svgs/bars-solid.svg"
-          alt=""
-          class="menubars-svg menubars-toggle close"
-        />
-        </div>
-
-        <!-- Center: brand -->
-        <a class="site-brand" href="/index.html">Tamar Kfir Jewelry</a>
-
-        <!-- Right: cart (desktop & mobile) -->
-        <div class="icons-container icons-container-right">
-        <div class="shoppingcart-container">
-          <a href="./html/cart.html">
+        <div class="site-header__left">
+          <!-- Mobile hamburger -->
+          <div class="icons-container">
             <img
-              src="./imgs/svgs/shopping-bag-outline-black.svg"
+              src="./imgs/svgs/bars-solid.svg"
               alt=""
-              class="shoppingcart-mobile"
+              class="menubars-svg menubars-toggle close"
             />
-          </a>
+          </div>
+
+          <!-- Brand -->
+          <a class="site-brand" href="/index.html">Tamar Kfir Jewelry</a>
         </div>
-        <span class="cart-number-mobile cart-number-mobile-header">0</span>
-      </div>
 
         <!-- Desktop navigation (tabs injected by View.js) -->
-      <nav class="menu"></nav>
+        <div class="site-header__center">
+          <nav class="menu" aria-label="Primary"></nav>
+        </div>
+
+        <!-- Utilities (desktop injected by View.js) + mobile cart -->
+        <div class="site-header__right" data-purpose="header-utilities">
+          <div class="icons-container icons-container-right">
+            <div class="shoppingcart-container">
+              <a href="./html/cart.html">
+                <img
+                  src="./imgs/svgs/shopping-bag-outline-black.svg"
+                  alt=""
+                  class="shoppingcart-mobile"
+                />
+              </a>
+            </div>
+            <span class="cart-number-mobile cart-number-mobile-header">0</span>
+          </div>
+        </div>
       </div>
 
       <!-- <img

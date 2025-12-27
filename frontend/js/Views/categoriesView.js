@@ -657,11 +657,8 @@ class CategoriesView extends View {
     // Process small images - ensure we get the actual URLs
     let smallImagesArray = [];
 
-    // Get the base API URL based on environment
-    const apiBaseUrl =
-      process.env.NODE_ENV === 'production'
-        ? 'https://lobster-app-jipru.ondigitalocean.app/api'
-        : 'http://localhost:4000';
+    // Get the base API URL from the same source used elsewhere in this view
+    const apiBaseUrl = this.apiUrl;
 
     // Handle old format (array of strings)
     if (Array.isArray(product?.smallImagesLocal)) {
@@ -1228,14 +1225,14 @@ class CategoriesView extends View {
 
     // Get desktop and mobile image URLs with proper fallbacks and ensure HTTPS
     const desktopImage = this.ensureHttps(
-      item.mainImage?.desktop ||
-        item.mainImage?.publicDesktop ||
+      item.mainImage?.publicDesktop ||
+        item.mainImage?.desktop ||
         item.publicImage ||
         item.image
     );
     const mobileImage = this.ensureHttps(
-      item.mainImage?.mobile ||
-        item.mainImage?.publicMobile ||
+      item.mainImage?.publicMobile ||
+        item.mainImage?.mobile ||
         item.mainImage?.desktop ||
         item.image
     );
