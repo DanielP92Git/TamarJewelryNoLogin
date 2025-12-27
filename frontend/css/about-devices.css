@@ -340,14 +340,21 @@ h1 {
 
 .go-to-top {
   position: relative;
-  border: 1px solid;
-  width: 15%;
-  background-color: rgba(255, 255, 255, 0.712);
-  padding: 5px;
+  display: inline-block;
+  border: none;
+  width: auto;
+  background: transparent;
+  padding: 0;
   margin: 30px;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(4, 255, 0); */
+}
+
+.arrow-up {
+  width: 2rem;
+  height: auto;
+  display: block;
 }
 
 .footer {

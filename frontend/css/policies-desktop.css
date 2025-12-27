@@ -319,22 +319,28 @@ h3 {
 .go-to-top {
   position: relative;
   top: 2rem;
-  width: 10%;
+  display: inline-block;
+  width: auto;
   border: none;
-  background-color: rgba(89, 107, 134, 0.377);
-  padding: 5px;
+  background: transparent;
+  padding: 0;
   margin-bottom: 60px;
   margin-top: 60px;
-  border-radius: 5px;
   font-style: italic;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(89, 0, 255); */
 }
 
+.arrow-up {
+  width: 2rem;
+  height: auto;
+  display: block;
+}
+
 .go-to-top:hover {
   cursor: pointer;
-  background-color: rgba(111, 134, 169, 0.377);
+  background: transparent;
 }
 
 .footer {

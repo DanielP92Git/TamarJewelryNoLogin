@@ -579,7 +579,7 @@ export default class View {
 
     // Cart markup as a normal navbar item using CSS classes instead of inline styles
     const cartMarkup = `
-      <li class="main-nav-tab">
+      <li class="main-nav-tab cart-tab">
         <a class="attrib-cart" href="/html/cart.html">
           <div class="cart-container">
             <svg class="shoppingcart-svg" viewBox="0 0 24 24" fill="#ffffff" stroke="#ffffff" xmlns="http://www.w3.org/2000/svg">

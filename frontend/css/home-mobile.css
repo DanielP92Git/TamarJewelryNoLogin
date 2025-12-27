@@ -687,10 +687,11 @@ main {
 
 .go-to-top {
   position: relative;
-  border: 1px solid;
-  width: 40%;
-  background-color: rgba(255, 255, 255, 0.712);
-  padding: 5px;
+  display: inline-block;
+  border: none;
+  width: auto;
+  background: transparent;
+  padding: 0;
   margin: 30px;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -699,30 +700,29 @@ main {
 
 .go-to-top {
   align-self: center;
-
-  width: 3rem;
-  height: 3rem;
+  display: inline-block;
+  width: auto;
+  height: auto;
   margin: 4rem;
-  font-size: 2rem;
   border: none;
-  border-radius: 50%;
-  /* background-image: linear-gradient(
-    rgba(255, 166, 0, 0.653),
-    rgba(255, 0, 0, 0.553)
-  ); */
-  background-color: black;
-  padding: 5px;
+  background: transparent;
+  padding: 0;
   color: rgb(62, 62, 62);
 
   /* ~~~~ FOR DEBUGGING~~~~ */
   /* border: 2px solid rgb(37, 155, 228); */
 }
 
+.arrow-up {
+  width: 2rem;
+  height: auto;
+  display: block;
+}
+
 .go-to-top:hover {
-  border: rgb(113, 101, 33), solid;
-  color: rgb(113, 101, 33);
+  border: none;
   cursor: pointer;
-  background-color: rgba(196, 106, 181, 0.377);
+  background: transparent;
 }
 
 .footer {
