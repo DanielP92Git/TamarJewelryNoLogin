@@ -26,7 +26,7 @@ function setActiveNav(active) {
 
 // API Configuration
 // TEMP: Force production API for testing (comment out for local dev)
-const FORCE_PRODUCTION_API = false; // Set to true to use production API from localhost
+const FORCE_PRODUCTION_API = true; // Set to true to use production API from localhost
 
 const IS_PRODUCTION =
   FORCE_PRODUCTION_API ||
@@ -170,6 +170,68 @@ const state = {
   maxRetries: 3,
 };
 
+// Drag and drop functionality for file inputs
+function setupDragAndDrop(dropzone, fileInput, isMultiple = false) {
+  if (!dropzone || !fileInput) return;
+
+  // Prevent default drag behaviors on the document
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+  });
+
+  // Highlight dropzone when dragging over
+  dropzone.addEventListener("dragenter", () => {
+    dropzone.classList.add("drag-over");
+  });
+
+  dropzone.addEventListener("dragleave", (e) => {
+    // Only remove highlight if we're leaving the dropzone itself, not a child element
+    if (!dropzone.contains(e.relatedTarget)) {
+      dropzone.classList.remove("drag-over");
+    }
+  });
+
+  // Handle dropped files
+  dropzone.addEventListener("drop", (e) => {
+    dropzone.classList.remove("drag-over");
+
+    const files = Array.from(e.dataTransfer.files).filter((file) =>
+      file.type.startsWith("image/")
+    );
+
+    if (files.length === 0) {
+      return;
+    }
+
+    if (isMultiple) {
+      // For multiple files, append to existing files
+      const dataTransfer = new DataTransfer();
+      // Add existing files
+      if (fileInput.files) {
+        Array.from(fileInput.files).forEach((file) => {
+          dataTransfer.items.add(file);
+        });
+      }
+      // Add new dropped files
+      files.forEach((file) => {
+        dataTransfer.items.add(file);
+      });
+      fileInput.files = dataTransfer.files;
+    } else {
+      // For single file, replace existing
+      const dataTransfer = new DataTransfer();
+      dataTransfer.items.add(files[0]);
+      fileInput.files = dataTransfer.files;
+    }
+
+    // Trigger change event to update thumbnails
+    fileInput.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+}
+
 // Function to calculate ILS price based on USD price and security margin
 function calculateILSPrice() {
   const usdPriceInput = document.getElementById("old-price");
@@ -228,6 +290,31 @@ function getImageUrl(image, imageLocal, publicImage, mainImage) {
     return url;
   };
 
+  // In development, avoid using production-hosted images directly.
+  // Many production servers set CORP to same-site, which browsers will block when the admin runs on localhost/127.
+  const ensureDevUrl = (url) => {
+    if (!url || typeof url !== "string") return "";
+    if (state.isProduction) return url;
+
+    const lower = url.toLowerCase();
+    // If it's already local, keep it.
+    if (lower.includes("localhost") || lower.includes("127.0.0.1")) return url;
+
+    // Only rewrite known asset paths
+    const filename = getFilename(url);
+    if (!filename) return url;
+
+    let pathPart = null;
+    if (lower.includes("/smallimages/")) pathPart = "smallImages";
+    else if (lower.includes("/uploads/")) pathPart = "uploads";
+    else if (lower.includes("/images/")) pathPart = "images";
+    else if (lower.includes("/direct-image/")) pathPart = "direct-image";
+    if (!pathPart) return url;
+
+    // Use current API_URL base (resolved in dev)
+    return `${API_URL}/${pathPart}/${filename}`;
+  };
+
   // Try mainImage structure
   if (mainImage) {
     let resolvedUrl;
@@ -236,7 +323,7 @@ function getImageUrl(image, imageLocal, publicImage, mainImage) {
         mainImage.publicDesktop || mainImage.desktop
       );
     } else {
-      resolvedUrl = mainImage.desktopLocal || mainImage.desktop;
+      resolvedUrl = ensureDevUrl(mainImage.desktopLocal || mainImage.desktop);
       if (!resolvedUrl) resolvedUrl = ""; // Convert null to empty string
     }
     if (
@@ -250,6 +337,7 @@ function getImageUrl(image, imageLocal, publicImage, mainImage) {
   // Fallback to legacy fields, processed by ensureProductionUrl
   let legacyUrl =
     ensureProductionUrl(image) || ensureProductionUrl(publicImage);
+  if (!state.isProduction) legacyUrl = ensureDevUrl(legacyUrl);
   if (legacyUrl && typeof legacyUrl === "string" && legacyUrl.trim() !== "")
     return legacyUrl;
 
@@ -1616,7 +1704,7 @@ function editProduct(product) {
                 <div class="label">Replace Main Image</div>
                 <label class="dropzone" for="mainImage">
                   <div class="dropzone__title">Click to upload image</div>
-                  <div class="dropzone__sub">Replaces the current main image</div>
+                  <div class="dropzone__sub">or drag and drop here - Replaces the current main image</div>
                   <div class="thumbs" id="editMainThumbs"></div>
                 </label>
                 <input type="file" name="mainImage" id="mainImage" accept="image/*" style="display:none;" />
@@ -1626,7 +1714,7 @@ function editProduct(product) {
                 <div class="label">Add Gallery Images</div>
                 <label class="dropzone" for="smallImages" style="min-height:140px;">
                   <div class="dropzone__title">Add more photos</div>
-                  <div class="dropzone__sub">Adds to existing gallery</div>
+                  <div class="dropzone__sub">or drag and drop here - Adds to existing gallery</div>
                   <div class="thumbs" id="editSmallThumbs"></div>
                 </label>
                 <input type="file" name="smallImages" id="smallImages" multiple accept="image/*" style="display:none;" />
@@ -1690,6 +1778,22 @@ function editProduct(product) {
   editSmallInput?.addEventListener("change", () => {
     renderThumbs(editSmallInput.files, editSmallThumbs, 5);
   });
+
+  // Setup drag and drop for main image in edit form
+  const editMainDropzone = document.querySelector(
+    '#editForm label.dropzone[for="mainImage"]'
+  );
+  if (editMainDropzone && editMainInput) {
+    setupDragAndDrop(editMainDropzone, editMainInput, false);
+  }
+
+  // Setup drag and drop for additional images in edit form
+  const editSmallDropzone = document.querySelector(
+    '#editForm label.dropzone[for="smallImages"]'
+  );
+  if (editSmallDropzone && editSmallInput) {
+    setupDragAndDrop(editSmallDropzone, editSmallInput, true);
+  }
 
   // Add event listeners
   const form = document.getElementById("editForm");
@@ -2777,12 +2881,12 @@ async function loadAddProductsPage() {
             <div class="card__body" style="display:flex; flex-direction:column; gap:14px;">
               <div class="field">
                 <div class="label">Product Name</div>
-                <input class="input" type="text" name="name" id="name" placeholder="e.g. 18k Gold Diamond Eternity Ring" value="Test Product" />
+                <input class="input" type="text" name="name" id="name" placeholder="e.g. 18k Gold Diamond Eternity Ring" />
               </div>
 
               <div class="field">
                 <div class="label">Description</div>
-                <textarea class="textarea" name="description" id="description" placeholder="Describe the product details, materials, and craftsmanship...">Beautiful handcrafted jewelry piece with premium materials. Perfect for any occasion.</textarea>
+                <textarea class="textarea" name="description" id="description" placeholder="Describe the product details, materials, and craftsmanship..."></textarea>
               </div>
             </div>
           </div>
@@ -2796,12 +2900,12 @@ async function loadAddProductsPage() {
                 <div class="field">
                   <div class="label">Category</div>
                   <select class="select" name="category" id="category">
-                  <option id="unisex" value="unisex">Unisex</option>
                     <option id="necklaces" value="necklaces">Necklaces</option>
                     <option id="crochet-necklaces" value="crochet-necklaces">Crochet Necklaces</option>
                     <option id="bracelets" value="bracelets">Bracelets</option>
                     <option id="hoop-earrings" value="hoop-earrings">Hoop Earrings</option>
                     <option id="dangle-earrings" value="dangle-earrings">Dangle Earrings</option>
+                    <option id="unisex" value="unisex">Unisex</option>
                     <option id="shalom-club" value="shalom-club">Shalom Club</option>
                   </select>
                 </div>
@@ -2826,7 +2930,7 @@ async function loadAddProductsPage() {
               <div class="grid-2">
                 <div class="field">
                   <div class="label">Price in $</div>
-                  <input class="input" type="text" name="usd_price" id="old-price" placeholder="0.00" value="99.99" />
+                  <input class="input" type="text" name="usd_price" id="old-price" placeholder="0.00" />
                 </div>
                 <div class="field">
                   <div class="label">Security Margin (%)</div>
@@ -3032,68 +3136,6 @@ async function loadAddProductsPage() {
   }
   updateMediaCount();
 
-  // Drag and drop functionality
-  const setupDragAndDrop = (dropzone, fileInput, isMultiple = false) => {
-    if (!dropzone || !fileInput) return;
-
-    // Prevent default drag behaviors on the document
-    ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
-      dropzone.addEventListener(eventName, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-      });
-    });
-
-    // Highlight dropzone when dragging over
-    dropzone.addEventListener("dragenter", () => {
-      dropzone.classList.add("drag-over");
-    });
-
-    dropzone.addEventListener("dragleave", (e) => {
-      // Only remove highlight if we're leaving the dropzone itself, not a child element
-      if (!dropzone.contains(e.relatedTarget)) {
-        dropzone.classList.remove("drag-over");
-      }
-    });
-
-    // Handle dropped files
-    dropzone.addEventListener("drop", (e) => {
-      dropzone.classList.remove("drag-over");
-
-      const files = Array.from(e.dataTransfer.files).filter((file) =>
-        file.type.startsWith("image/")
-      );
-
-      if (files.length === 0) {
-        return;
-      }
-
-      if (isMultiple) {
-        // For multiple files, append to existing files
-        const dataTransfer = new DataTransfer();
-        // Add existing files
-        if (fileInput.files) {
-          Array.from(fileInput.files).forEach((file) => {
-            dataTransfer.items.add(file);
-          });
-        }
-        // Add new dropped files
-        files.forEach((file) => {
-          dataTransfer.items.add(file);
-        });
-        fileInput.files = dataTransfer.files;
-      } else {
-        // For single file, replace existing
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(files[0]);
-        fileInput.files = dataTransfer.files;
-      }
-
-      // Trigger change event to update thumbnails
-      fileInput.dispatchEvent(new Event("change", { bubbles: true }));
-    });
-  };
-
   // Setup drag and drop for main image
   const mainDropzone = document.querySelector(
     'label.dropzone[for="mainImage"]'
@@ -3108,13 +3150,6 @@ async function loadAddProductsPage() {
 
   // Calculate initial price if values are present
   calculateILSPrice();
-
-  // Set default product name with timestamp for easier testing
-  const nameInput = document.getElementById("name");
-  if (nameInput && nameInput.value === "Test Product") {
-    const timestamp = new Date().toLocaleString();
-    nameInput.value = `Test Product - ${timestamp}`;
-  }
 }
 
 function addProductHandler() {

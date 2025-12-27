@@ -3,9 +3,10 @@
 .menu {
   display: flex;
   flex-flow: column;
-  width: 85%; /* Make menu wider */
-  max-width: 350px; /* Optional: Add max-width */
-  height: 100%; /* Full height */
+  width: 100%; /* Full-screen menu */
+  max-width: none;
+  height: 100dvh; /* Full dynamic viewport height (mobile Safari/Chrome) */
+  min-height: 100vh; /* Fallback */
   transition: transform 0.4s ease; /* Smoother transition on transform */
   position: fixed;
   top: 0;
@@ -14,12 +15,18 @@
   z-index: 1000; /* Ensure menu is on top */
   background-color: #fff; /* Solid background */
   box-shadow: 4px 0px 15px rgba(0, 0, 0, 0.1); /* Add shadow */
-  padding-top: 4rem; /* Add padding to clear potential header */
+  padding-top: calc(env(safe-area-inset-top, 0px) + 4rem);
   overflow-y: auto; /* Allow scrolling within menu if needed */
 }
 
 .menu.menu-open {
   transform: translateX(0%); /* Slide in */
+}
+
+/* Prevent background scroll when menu is open */
+body.menu-active {
+  overflow: hidden;
+  height: 100%;
 }
 
 .menu__ul {
@@ -163,14 +170,86 @@
 
 .languages-container {
   display: flex;
-  justify-content: center; /* Center the buttons */
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
   width: 100%;
-  border-top: 1px transparent;
-  padding: 1.5rem; /* Increase padding slightly */
-  margin-top: auto; /* Push to bottom */
-  margin-bottom: 2rem;
+  border-top: 1px solid #eee;
+  padding: 1.5rem;
+  margin-top: auto;
+  margin-bottom: 1rem;
   gap: 1rem;
+  background-color: #fff;
+}
+
+/* Mobile language selector in side menu */
+.menu .mobile-lang-selector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #eee;
+  margin-top: auto;
+  background-color: #fff;
+}
+
+.menu .mobile-lang-selector .flag-dropdown {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 0.4rem 0.6rem;
+  width: auto;
+}
+
+.menu .mobile-lang-selector .flag-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50% !important;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  padding: 0;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.menu .mobile-lang-selector .flag-icon.selected {
+  border: 2px solid #5c6ac4;
+  box-shadow: 0 2px 8px rgba(92, 106, 196, 0.2);
+  transform: scale(1.05);
+}
+
+.menu .mobile-lang-selector #currency,
+.menu .mobile-lang-selector .header-currency-selector {
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 80px;
+  outline: none;
+  width: auto;
+}
+
+.menu .mobile-lang-selector #currency:hover,
+.menu .mobile-lang-selector .header-currency-selector:hover {
+  border-color: #5c6ac4;
+  box-shadow: 0 2px 8px rgba(92, 106, 196, 0.2);
 }
 
 .languages-container button {
@@ -206,43 +285,84 @@
   cursor: default;
 }
 
-/* Overlay Styling */
+/* Overlay Styling (disabled): menu is full-screen on mobile */
 body::before {
+  display: none !important;
   content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
-  z-index: 999; /* Below the menu */
 }
 
 body.menu-active::before {
-  opacity: 1;
-  visibility: visible;
+  display: none !important;
 }
 
 /* Mobile Header Icons */
-.icons-container {
+body:not(#home) {
+  padding-top: var(--site-header-height, 56px);
+}
+
+.site-header {
   position: fixed;
-  top: 15px; /* Increased spacing from top */
-  right: 15px; /* Increased spacing from right */
-  width: auto;
-  z-index: 700; /* Above overlay and menu */
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--site-header-height, 56px);
+  background: #ffffff;
+  z-index: 900;
   display: flex;
   align-items: center;
-  background: white;
-  border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-  padding: 0.2rem 0.5rem;
+  justify-content: space-between;
+  padding: 0 16px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  min-height: 56px;
+  max-height: 56px;
+}
+
+.site-brand {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  font-family: 'Great Vibes', cursive;
+  font-size: 20px;
+  line-height: 1.1;
+  color: #111;
+  text-decoration: none;
+  text-transform: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.site-header .icons-container {
+  position: static;
+  width: auto;
+  z-index: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+.site-header .icons-container:first-of-type {
+  margin-right: auto;
+}
+
+.site-header .icons-container-right {
+  margin-left: auto;
+  gap: 6px;
 }
 
 /* Hide the original toggle icon when menu is open */
-body.menu-active .icons-container .menubars-svg {
+body.menu-active .site-header .icons-container .menubars-svg {
   visibility: hidden; /* Hide it */
   opacity: 0;
   transition: visibility 0s 0.2s, opacity 0.2s ease; /* Delay hiding slightly */
@@ -252,14 +372,20 @@ body.menu-active .icons-container .menubars-svg {
   display: block;
   background-color: transparent;
   border-radius: 5px;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   padding: 2px;
   cursor: pointer;
   color: #343a40;
-  margin-left: 0.8rem; /* Space between cart and menu icon */
-  object-fit: contain; /* Ensure SVG scales correctly within bounds */
-  transition: opacity 0.2s ease; /* Add transition for smoother hide */
+  margin-left: 0;
+  object-fit: contain;
+  transition: opacity 0.2s ease;
+}
+
+.site-header .menubars-svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
 }
 
 /* Styles for the NEW close icon inside the menu */
@@ -293,17 +419,28 @@ body.menu-active .icons-container .menubars-svg {
   position: relative;
 }
 
+.site-header .shoppingcart-container {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+}
+
 .attrib-cart {
   display: none;
 }
 
 .shoppingcart-mobile {
   fill: rgb(0, 0, 0);
-  width: 30px;
-  height: 30px;
-  padding: 3px;
+  width: 28px;
+  height: 28px;
+  padding: 2px;
   position: relative;
   border-radius: 5px;
+}
+
+.site-header .shoppingcart-mobile {
+  width: 24px;
+  height: 24px;
 }
 
 /* Style for mobile nav */
@@ -359,58 +496,111 @@ body.menu-active .icons-container .menubars-svg {
   position: relative;
 }
 
-/* Mobile menu specific cart styles */
-.menu-open .main-nav-tab .attrib-cart .cart-number-mobile {
-  position: absolute;
-  top: 10px;
-  right: 0;
-  transform: none;
-  background-color: white;
-  border: 1px solid black;
-  border-radius: 50%;
-  width: 12px;
-  height: 12px;
-  display: flex;
-  visibility: visible;
+/* Mobile menu & header cart number: inline text with parentheses */
+.main-nav-tab .attrib-cart .cart-number-mobile {
+  position: static;
+  width: auto;
+  height: auto;
+  margin-left: 4px;
+  background: transparent;
+  border: none;
+  display: inline-flex !important;
+  visibility: visible !important;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  font-weight: bold;
-  z-index: 100;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #111 !important;
+  text-shadow: none !important;
 }
 
 .cart-number-mobile-header {
-  position: absolute;
-  top: 8px;
-  left: 75px;
+  position: static;
+  margin-left: 4px;
+  background: transparent;
+  border: none;
+  width: auto;
+  height: auto;
+  display: inline-flex !important;
+  visibility: visible !important;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #111 !important;
+  text-shadow: none !important;
+}
+
+.main-nav-tab .attrib-cart .cart-number-mobile::before,
+.cart-number-mobile-header::before {
+  content: '(';
+}
+
+.main-nav-tab .attrib-cart .cart-number-mobile::after,
+.cart-number-mobile-header::after {
+  content: ')';
 }
 
 /* Mobile Language Selector */
-.mobile-lang-selector {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  z-index: 700;
+/* We no longer render selectors in the header; selectors live at the bottom of the side menu. */
+.site-header > .mobile-lang-selector {
+  display: none !important;
 }
 
-/* Custom flag dropdown for mobile language selector */
 .flag-dropdown {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   background: white;
   border-radius: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-  padding: 0.2rem 0.5rem;
+  padding: 0.25rem 0.4rem;
   width: auto;
+  min-width: 60px;
+}
+
+.mobile-lang-selector #currency,
+.mobile-lang-selector .header-currency-selector {
+  padding: 0.25rem 0.4rem;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
   min-width: 70px;
+  outline: none;
+}
+
+.mobile-lang-selector #currency:hover,
+.mobile-lang-selector .header-currency-selector:hover {
+  border-color: #5c6ac4;
+  box-shadow: 0 2px 8px rgba(92, 106, 196, 0.15);
+}
+
+.site-header .mobile-lang-selector .flag-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 50% !important;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  padding: 0;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .flag-icon {
-  width: 30px;
-  height: 30px;
+  width: 26px;
+  height: 26px;
   border-radius: 50% !important;
   border: 2px solid transparent;
   cursor: pointer;
@@ -445,20 +635,54 @@ body.menu-active .icons-container .menubars-svg {
 
 /* Media queries for small mobile screens */
 @media (max-width: 370px) {
-  .mobile-lang-selector {
+  .site-header {
+    padding: 0 10px;
+    height: 52px;
+    min-height: 52px;
+    max-height: 52px;
+  }
+
+  body:not(#home) {
+    padding-top: 52px;
+  }
+
+  .site-brand {
+    font-size: 16px;
+    margin-right: 4px;
+  }
+
+  /* Header selectors removed; side-menu selectors stay visible */
+
+  .site-header .icons-container {
+    gap: 5px;
+  }
+
+  .site-header .menubars-svg,
+  .site-header .shoppingcart-mobile {
+    width: 22px;
+    height: 22px;
+  }
+
+  .site-header .shoppingcart-container {
+    width: 26px;
+    height: 26px;
+  }
+
+  /* Legacy support for non-header mobile-lang-selector */
+  .mobile-lang-selector:not(.site-header .mobile-lang-selector) {
     top: 0.7rem;
     left: 0.7rem;
   }
 
-  .flag-dropdown {
+  .flag-dropdown:not(.site-header .mobile-lang-selector .flag-dropdown) {
     padding: 0.12rem 0.3rem;
     gap: 0.25rem;
-    min-width: 60px;
+    min-width: 55px;
   }
 
-  .flag-icon {
-    width: 25px;
-    height: 25px;
+  .flag-icon:not(.site-header .mobile-lang-selector .flag-icon) {
+    width: 22px;
+    height: 22px;
     border-width: 1.5px;
   }
 }

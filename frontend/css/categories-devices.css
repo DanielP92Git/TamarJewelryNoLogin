@@ -33,6 +33,7 @@ body#categories.hoop-earrings header {
 
 body#categories.unisex header {
   background-image: url('../imgs/Hero-imgs/IMG_0173.jpg');
+  background-position: center 30%;
 }
 
 body#categories.dangle-earrings header {
@@ -1083,7 +1084,7 @@ main {
   }
 }
 
-/* Styles for the magnifier effect */
+/* Product modal main image container (magnifier effect removed) */
 .magnifier-container {
   position: relative;
   width: 100%;
@@ -1093,6 +1094,7 @@ main {
   justify-content: center;
   align-items: center;
   transition: height 0.3s ease;
+  cursor: zoom-in; /* indicates click opens fullscreen gallery */
 }
 
 .magnifier-container.image-loaded {
@@ -1115,22 +1117,9 @@ main {
   opacity: 1;
 }
 
+/* Old magnifier lens element is no longer used */
 .magnifier-glass {
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background-repeat: no-repeat;
-  cursor: none;
-  border: 3px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
-  pointer-events: none;
-  z-index: 1000;
-  overflow: hidden;
-  background-color: white;
-  image-rendering: high-quality;
-  backface-visibility: hidden;
-  transform: translateZ(0);
+  display: none !important;
 }
 
 .tap-to-magnify {

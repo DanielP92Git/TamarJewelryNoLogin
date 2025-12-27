@@ -28,6 +28,11 @@
       href="https://fonts.googleapis.com/css2?family=Poiret+One&display=swap"
       rel="stylesheet"
     />
+    <!-- Reference design fonts (see frontend/code.html) -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
 
     <link rel="stylesheet" href="./css/standard-reset.css" />
     <link rel="stylesheet" href="./css/desktop-menu.css" />
@@ -50,11 +55,18 @@
     <script type="module" src="./js/controller.js" defer></script>
     <!-- Microsoft Clarity -->
     <script type="text/javascript">
-      (function(c,l,a,r,i,t,y){
-          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "urnhsmmp4u");
+      (function (c, l, a, r, i, t, y) {
+        c[a] =
+          c[a] ||
+          function () {
+            (c[a].q = c[a].q || []).push(arguments);
+          };
+        t = l.createElement(r);
+        t.async = 1;
+        t.src = 'https://www.clarity.ms/tag/' + i;
+        y = l.getElementsByTagName(r)[0];
+        y.parentNode.insertBefore(t, y);
+      })(window, document, 'clarity', 'script', 'urnhsmmp4u');
     </script>
   </head>
 
@@ -82,25 +94,37 @@
       <p>Your 10% coupon will wait for you in your E-mail</p>
     </section> -->
     <header>
-      <div class="icons-container">
-        <img
-          src="./imgs/svgs/bars-solid.svg"
-          alt=""
-          class="menubars-svg menubars-toggle close"
-        />
-        <div class="shoppingcart-container">
-          <a href="./html/cart.html">
-            <img
-              src="./imgs/svgs/shopping-bag-outline-black.svg"
-              alt=""
-              class="shoppingcart-mobile"
-            />
-          </a>
+      <!-- Fixed header bar (layout + styling handled in desktop-menu.css / mobile-menu.css) -->
+      <div class="site-header" data-purpose="site-header">
+        <!-- Left: mobile hamburger -->
+        <div class="icons-container">
+          <img
+            src="./imgs/svgs/bars-solid.svg"
+            alt=""
+            class="menubars-svg menubars-toggle close"
+          />
         </div>
-        <span class="cart-number-mobile cart-number-mobile-header">0</span>
-      </div>
 
-      <nav class="menu"></nav>
+        <!-- Center: brand -->
+        <a class="site-brand" href="/index.html">Tamar Kfir Jewelry</a>
+
+        <!-- Right: cart (desktop & mobile) -->
+        <div class="icons-container icons-container-right">
+          <div class="shoppingcart-container">
+            <a href="./html/cart.html">
+              <img
+                src="./imgs/svgs/shopping-bag-outline-black.svg"
+                alt=""
+                class="shoppingcart-mobile"
+              />
+            </a>
+          </div>
+          <span class="cart-number-mobile cart-number-mobile-header">0</span>
+        </div>
+
+        <!-- Desktop navigation (tabs injected by View.js) -->
+        <nav class="menu"></nav>
+      </div>
 
       <!-- <img
           src="./imgs/tamar-logo_conv.webp"
@@ -110,18 +134,12 @@
         /> -->
       <section class="hero-section">
         <img
-          src="./imgs/Hero-imgs/_MG_6329.jpg"
+          src="./imgs/Hero-imgs/hero-test.png"
           alt="main website image"
           class="hero-background"
           fetchpriority="high"
         />
         <div class="hero-overlay">
-          <img
-            src="./imgs/tamar-logo_conv.webp"
-            alt="logo"
-            class="hero-logo"
-            fetchpriority="high"
-          />
           <div class="hero-content">
             <h1 class="hero-title">INSPIRED BY TIMELESS ELEGANCE</h1>
             <p class="hero-subtitle">
@@ -137,47 +155,6 @@
         <a href="https://wa.me/972524484763" class="whatsapp-atr"
           ><img src="./imgs/svgs/whatsapp.svg" class="whatsapp-svg" alt=""
         /></a>
-      </div>
-      <div class="slider-container">
-        <div class="slider-wrapper">
-          <div class="img-list">
-            <img
-              class="slider-image-item"
-              alt=""
-              src="./imgs/IMG_9699_conv.webp"
-            />
-            <img
-              class="slider-image-item"
-              alt=""
-              src="./imgs/main-photo_conv.webp"
-            />
-            <img
-              class="slider-image-item"
-              alt=""
-              src="./imgs/Subscribe_conv.webp"
-            />
-            <img
-              class="slider-image-item"
-              src="./imgs/main-photo_conv.webp"
-              loading="lazy"
-              alt=""
-            />
-            <img
-              class="slider-image-item"
-              src="./imgs/IMG_9699_conv.webp"
-              loading="lazy"
-              alt=""
-            />
-            <img
-              class="slider-image-item"
-              src="./imgs/Subscribe_conv.webp"
-              loading="lazy"
-              alt=""
-            />
-          </div>
-          <button class="slider_btns slider-btn--right">›</button>
-          <button class="slider_btns slider-btn--left">‹</button>
-        </div>
       </div>
       <div class="categories-container" id="categories">
         <a href="./html/categories/necklaces.html" class="category-box">
