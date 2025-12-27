@@ -6,6 +6,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const sharp = require('sharp');
@@ -26,34 +27,183 @@ console.log('  Client Secret exists:', !!PAYPAL_CLIENT_SECRET);
 // =============================================
 const app = express();
 
-// CORS Configuration
-const allowedOrigins = [
-  `${process.env.HOST}`,
-  `${process.env.API_URL}`,
-  `${process.env.ADMIN_URL}`,
-  `${process.env.FULLHOST}`,
-  'http://127.0.0.1:5500',
-  'http://localhost:5500', // Added for local admin dashboard
-  'http://localhost:1234', // Added for local frontend
-];
+// Basic security headers (API-oriented)
+app.use(
+  helmet({
+    // This is an API + static assets server, not an HTML app
+    contentSecurityPolicy: false,
+    // We serve images to other origins (e.g. admin subdomain). We'll control CORP/CORS on those routes.
+    crossOriginResourcePolicy: false,
+    crossOriginEmbedderPolicy: false,
+  })
+);
 
-console.log('Allowed origins:', allowedOrigins);
+// =============================================
+// URL helpers (store relative paths in DB; return absolute URLs to clients)
+// =============================================
+function isAbsoluteHttpUrl(value) {
+  return typeof value === 'string' && /^https?:\/\//i.test(value);
+}
+
+function joinUrl(base, pathname) {
+  if (!base || typeof base !== 'string') return pathname;
+  if (!pathname || typeof pathname !== 'string') return pathname;
+  const b = base.replace(/\/+$/, '');
+  const p = pathname.startsWith('/') ? pathname : `/${pathname}`;
+  return `${b}${p}`;
+}
+
+function toAbsoluteApiUrl(value) {
+  if (!value || typeof value !== 'string') return value;
+  if (isAbsoluteHttpUrl(value)) return value;
+  // Only prefix relative paths
+  if (!value.startsWith('/')) return value;
+  return joinUrl(process.env.API_URL, value);
+}
+
+function toRelativeApiPath(value) {
+  if (!value || typeof value !== 'string') return value;
+  if (value.startsWith('/')) {
+    // Strip accidental /api prefix if present
+    return value.replace(/^\/api\//, '/');
+  }
+  if (!isAbsoluteHttpUrl(value)) return value;
+
+  try {
+    const url = new URL(value);
+    return url.pathname.replace(/^\/api\//, '/');
+  } catch {
+    // Fallback: try to find known asset path segments
+    const match = value.match(
+      /(\/api)?(\/uploads\/|\/smallImages\/|\/public\/uploads\/|\/public\/smallImages\/|\/direct-image\/).+$/i
+    );
+    if (match && match[0]) return match[0].replace(/^\/api\//, '/');
+    return value;
+  }
+}
+
+function omitLocalImageFields(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  // Top-level locals
+  delete obj.imageLocal;
+  delete obj.smallImagesLocal;
+
+  // mainImage locals
+  if (obj.mainImage && typeof obj.mainImage === 'object') {
+    delete obj.mainImage.desktopLocal;
+    delete obj.mainImage.mobileLocal;
+  }
+
+  // smallImages locals (new object shape)
+  if (Array.isArray(obj.smallImages)) {
+    obj.smallImages = obj.smallImages.map(si => {
+      if (!si || typeof si !== 'object' || Array.isArray(si)) return si;
+      const copy = { ...si };
+      delete copy.desktopLocal;
+      delete copy.mobileLocal;
+      return copy;
+    });
+  }
+
+  return obj;
+}
+
+function normalizeProductForClient(productDoc) {
+  const obj =
+    productDoc && typeof productDoc.toObject === 'function'
+      ? productDoc.toObject()
+      : { ...(productDoc || {}) };
+
+  // Normalize core image fields
+  obj.image = toAbsoluteApiUrl(obj.image);
+  obj.publicImage = toAbsoluteApiUrl(obj.publicImage);
+  obj.directImageUrl = toAbsoluteApiUrl(obj.directImageUrl);
+
+  // mainImage object
+  if (obj.mainImage && typeof obj.mainImage === 'object') {
+    obj.mainImage = { ...obj.mainImage };
+    obj.mainImage.desktop = toAbsoluteApiUrl(obj.mainImage.desktop);
+    obj.mainImage.mobile = toAbsoluteApiUrl(obj.mainImage.mobile);
+    obj.mainImage.publicDesktop = toAbsoluteApiUrl(obj.mainImage.publicDesktop);
+    obj.mainImage.publicMobile = toAbsoluteApiUrl(obj.mainImage.publicMobile);
+    // keep locals out of responses
+    delete obj.mainImage.desktopLocal;
+    delete obj.mainImage.mobileLocal;
+  }
+
+  // smallImages can be array of strings or objects
+  if (Array.isArray(obj.smallImages)) {
+    obj.smallImages = obj.smallImages.map(si => {
+      if (typeof si === 'string') return toAbsoluteApiUrl(si);
+      if (si && typeof si === 'object' && !Array.isArray(si)) {
+        const normalized = { ...si };
+        normalized.desktop = toAbsoluteApiUrl(normalized.desktop);
+        normalized.mobile = toAbsoluteApiUrl(normalized.mobile);
+        delete normalized.desktopLocal;
+        delete normalized.mobileLocal;
+        return normalized;
+      }
+      return si;
+    });
+  }
+
+  // Remove local-only fields from responses
+  omitLocalImageFields(obj);
+  return obj;
+}
+
+// =============================================
+// CORS (single source of truth)
+// =============================================
+function toOrigin(value) {
+  if (!value || typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    try {
+      return new URL(trimmed).origin;
+    } catch {
+      return null;
+    }
+  }
+  return trimmed; // already origin-like (e.g. http://localhost:1234)
+}
+
+const isProd = process.env.NODE_ENV === 'production';
+const allowedOriginList = [
+  toOrigin(process.env.HOST),
+  toOrigin(process.env.ADMIN_URL),
+  toOrigin(process.env.FULLHOST),
+  toOrigin(process.env.API_URL), // if API_URL includes /api, we still capture the origin
+  // Local/dev
+  'http://127.0.0.1:5500',
+  'http://localhost:5500',
+  'http://localhost:1234',
+].filter(Boolean);
+
+const allowedOriginsSet = new Set(allowedOriginList);
+
+if (!isProd) {
+  console.log('Allowed origins:', [...allowedOriginsSet]);
+}
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    console.log('Request origin:', origin);
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      console.warn('Origin not allowed by CORS:', origin);
-      // For development, allow all origins
-      // callback(null, true);
-      // In production, use this instead:
-      callback(new Error('Not allowed by CORS'));
+  origin(origin, callback) {
+    // Allow non-browser clients (no Origin header)
+    if (!origin) return callback(null, true);
+
+    const normalized = toOrigin(origin);
+    const allowed = normalized && allowedOriginsSet.has(normalized);
+
+    if (!allowed) {
+      if (!isProd) console.warn('Origin not allowed by CORS:', origin);
+      return callback(new Error('Not allowed by CORS'));
     }
+
+    return callback(null, true);
   },
   credentials: true,
-  optionsSuccessStatus: 200,
+  optionsSuccessStatus: 204,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
     'Content-Type',
@@ -67,38 +217,6 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '50mb' }));
-
-// CORS Headers Middleware - Enhanced for better cross-origin support
-function headers(req, res, next) {
-  // Allow requests from any origin during development
-  res.header('Access-Control-Allow-Origin', '*');
-
-  // Allow specific methods
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-
-  // Allow more headers
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization, auth-token'
-  );
-
-  // Allow credentials
-  res.header('Access-Control-Allow-Credentials', 'true');
-
-  // Preflight request handling
-  if (req.method === 'OPTIONS') {
-    console.log(
-      'Received OPTIONS request from:',
-      req.headers.origin || 'unknown'
-    );
-    return res.status(200).end();
-  }
-
-  next();
-}
-
-app.options('*', headers);
-app.use(headers);
 
 // =============================================
 // Database Models
@@ -288,22 +406,11 @@ if (!fs.existsSync(publicSmallImagesDir)) {
 // Enhanced static file serving options with better CORS support
 const staticOptions = {
   setHeaders: (res, path) => {
-    // Allow requests from any origin
-    res.setHeader('Access-Control-Allow-Origin', '*');
-
-    // Allow specific methods
-    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-
-    // Allow credentials
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-
     // Set long cache time for static assets
     res.setHeader('Cache-Control', 'public, max-age=31536000');
 
-    // Disable content security restrictions
-    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    res.setHeader('Cross-Origin-Embedder-Policy', 'credentialless');
-    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+    // Allow images to be embedded across same-site subdomains (e.g. admin.tamarkfir.com)
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
 
     // Set content type header based on file extension
     if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
@@ -317,60 +424,71 @@ const staticOptions = {
   maxAge: 31536000, // 1 year in seconds
 };
 
+// Static CORS: allow only known Origins (needed for <img crossorigin="anonymous">, canvas, etc.)
+function applyStaticCors(req, res, next) {
+  const origin = req.headers.origin;
+  if (!origin) return next();
+  const normalized = toOrigin(origin);
+  if (!normalized || !allowedOriginsSet.has(normalized)) return next();
+
+  res.setHeader('Access-Control-Allow-Origin', normalized);
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Origin, Range');
+
+  if (req.method === 'OPTIONS') return res.status(204).end();
+  return next();
+}
+
 // Configure static file serving for all directories with custom middleware
 app.use('/uploads', (req, res, next) => {
   console.log(`[Static] Accessing: ${req.path} from uploads dir`);
-  express.static(uploadsDir, staticOptions)(req, res, next);
+  applyStaticCors(req, res, () =>
+    express.static(uploadsDir, staticOptions)(req, res, next)
+  );
 });
 
 app.use('/api/uploads', (req, res, next) => {
   console.log(`[Static] Accessing: ${req.path} from api/uploads`);
-
-  // Add CORS headers for all responses
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  express.static(uploadsDir, staticOptions)(req, res, next);
+  applyStaticCors(req, res, () =>
+    express.static(uploadsDir, staticOptions)(req, res, next)
+  );
 });
 
-app.use('/smallImages', express.static(smallImagesDir, staticOptions));
 app.use('/api/smallImages', (req, res, next) => {
   console.log(`[Static] Accessing: ${req.path} from api/smallImages`);
+  applyStaticCors(req, res, () =>
+    express.static(smallImagesDir, staticOptions)(req, res, next)
+  );
+});
 
-  // Add CORS headers for all responses
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  express.static(smallImagesDir, staticOptions)(req, res, next);
+app.use('/smallImages', (req, res, next) => {
+  applyStaticCors(req, res, () =>
+    express.static(smallImagesDir, staticOptions)(req, res, next)
+  );
 });
 
 // Add public directory routes
-app.use('/public/uploads', express.static(publicUploadsDir, staticOptions));
-app.use('/api/public/uploads', express.static(publicUploadsDir, staticOptions));
-app.use(
-  '/public/smallImages',
-  express.static(publicSmallImagesDir, staticOptions)
-);
-app.use(
-  '/api/public/smallImages',
-  express.static(publicSmallImagesDir, staticOptions)
-);
+app.use('/public/uploads', (req, res, next) => {
+  applyStaticCors(req, res, () =>
+    express.static(publicUploadsDir, staticOptions)(req, res, next)
+  );
+});
+app.use('/api/public/uploads', (req, res, next) => {
+  applyStaticCors(req, res, () =>
+    express.static(publicUploadsDir, staticOptions)(req, res, next)
+  );
+});
+app.use('/public/smallImages', (req, res, next) => {
+  applyStaticCors(req, res, () =>
+    express.static(publicSmallImagesDir, staticOptions)(req, res, next)
+  );
+});
+app.use('/api/public/smallImages', (req, res, next) => {
+  applyStaticCors(req, res, () =>
+    express.static(publicSmallImagesDir, staticOptions)(req, res, next)
+  );
+});
 
 // Also serve from root path
 app.use(
@@ -796,9 +914,29 @@ app.post('/addproduct', async (req, res) => {
     const usdPrice = Number(req.body.oldPrice) || 0;
     const ilsPrice = Math.round(usdPrice * 3.7 * (1 + securityMargin / 100));
 
-    // Get image URLs from the upload response
-    const mainImageUrls = req.body.mainImage || {};
-    const smallImageUrls = req.body.smallImages || [];
+    // Get image URLs from the upload response (accept absolute or relative; store relative)
+    const mainImageInput = req.body.mainImage || {};
+    const smallImageInput = req.body.smallImages || [];
+
+    const mainImageUrls = {
+      desktop: toRelativeApiPath(mainImageInput.desktop),
+      mobile: toRelativeApiPath(mainImageInput.mobile),
+      publicDesktop: toRelativeApiPath(mainImageInput.publicDesktop),
+      publicMobile: toRelativeApiPath(mainImageInput.publicMobile),
+    };
+
+    const smallImageUrls = Array.isArray(smallImageInput)
+      ? smallImageInput.filter(Boolean).map(img => {
+          if (typeof img === 'string') return toRelativeApiPath(img);
+          if (img && typeof img === 'object' && !Array.isArray(img)) {
+            return {
+              desktop: toRelativeApiPath(img.desktop),
+              mobile: toRelativeApiPath(img.mobile),
+            };
+          }
+          return img;
+        })
+      : [];
 
     console.log('\n=== Image Data Received ===');
     console.log('Main Image URLs:', JSON.stringify(mainImageUrls, null, 2));
@@ -810,17 +948,14 @@ app.post('/addproduct', async (req, res) => {
       name: req.body.name,
       // Legacy image field (using desktop version as default)
       image: mainImageUrls.desktop || mainImageUrls.publicDesktop || '',
-      imageLocal: mainImageUrls.desktopLocal || '',
       publicImage: mainImageUrls.publicDesktop || '',
       // Store all image variations
       mainImage: mainImageUrls,
       // Store small images with all variations
       smallImages: smallImageUrls,
-      // Also store the direct image URL for better accessibility
+      // Store relative direct image URL for better accessibility (absolute is built at response time)
       directImageUrl: mainImageUrls.desktop
-        ? `${process.env.API_URL}/direct-image/${mainImageUrls.desktop
-            .split('/')
-            .pop()}`
+        ? `/direct-image/${String(mainImageUrls.desktop).split('/').pop()}`
         : null,
       // Product details
       category: req.body.category,
@@ -838,7 +973,6 @@ app.post('/addproduct', async (req, res) => {
           id: product.id,
           name: product.name,
           image: product.image,
-          imageLocal: product.imageLocal,
           publicImage: product.publicImage,
           mainImage: product.mainImage,
           smallImages: product.smallImages,
@@ -927,29 +1061,25 @@ app.post(
             true
           );
 
-          // Get the base URLs
-          const productionBaseUrl =
-            process.env.API_URL || 'https://tamarkfir.com/api';
-          const localBaseUrl = 'http://localhost:4000';
-          const baseUrl =
-            process.env.NODE_ENV === 'production'
-              ? productionBaseUrl
-              : localBaseUrl;
-
-          // Update main image URLs
+          // Update main image URLs (store relative paths only)
           product.mainImage = {
-            desktop: `${baseUrl}/uploads/${mainImageResults.desktop.filename}`,
-            mobile: `${baseUrl}/uploads/${mainImageResults.mobile.filename}`,
-            desktopLocal: `${localBaseUrl}/uploads/${mainImageResults.desktop.filename}`,
-            mobileLocal: `${localBaseUrl}/uploads/${mainImageResults.mobile.filename}`,
-            publicDesktop: `${baseUrl}/public/uploads/${mainImageResults.desktop.filename}`,
-            publicMobile: `${baseUrl}/public/uploads/${mainImageResults.mobile.filename}`,
+            desktop: `/uploads/${mainImageResults.desktop.filename}`,
+            mobile: `/uploads/${mainImageResults.mobile.filename}`,
+            publicDesktop: `/public/uploads/${mainImageResults.desktop.filename}`,
+            publicMobile: `/public/uploads/${mainImageResults.mobile.filename}`,
           };
 
           // Update legacy fields
           product.image = product.mainImage.desktop;
-          product.imageLocal = product.mainImage.desktopLocal;
           product.publicImage = product.mainImage.publicDesktop;
+          product.directImageUrl = `/direct-image/${mainImageResults.desktop.filename}`;
+
+          // Clear any old local-only fields that may exist in DB
+          product.imageLocal = undefined;
+          if (product.mainImage) {
+            product.mainImage.desktopLocal = undefined;
+            product.mainImage.mobileLocal = undefined;
+          }
 
           mainImageUpdated = true;
           console.log('Main image updated');
@@ -976,22 +1106,18 @@ app.post(
             })
           );
 
-          // Get the base URLs
-          const productionBaseUrl =
-            process.env.API_URL || 'https://tamarkfir.com/api';
-          const localBaseUrl = 'http://localhost:4000';
-          const baseUrl =
-            process.env.NODE_ENV === 'production'
-              ? productionBaseUrl
-              : localBaseUrl;
+          const existingIsString =
+            Array.isArray(product.smallImages) &&
+            typeof product.smallImages[0] === 'string';
 
-          // Create small image URL objects
-          const newSmallImages = smallImagesResults.map(result => ({
-            desktop: `${baseUrl}/smallImages/${result.desktop.filename}`,
-            mobile: `${baseUrl}/smallImages/${result.mobile.filename}`,
-            desktopLocal: `${localBaseUrl}/smallImages/${result.desktop.filename}`,
-            mobileLocal: `${localBaseUrl}/smallImages/${result.mobile.filename}`,
-          }));
+          const newSmallImages = existingIsString
+            ? smallImagesResults.map(
+                result => `/smallImages/${result.desktop.filename}`
+              )
+            : smallImagesResults.map(result => ({
+                desktop: `/smallImages/${result.desktop.filename}`,
+                mobile: `/smallImages/${result.mobile.filename}`,
+              }));
 
           // Append new small images to existing ones
           if (!product.smallImages) {
@@ -1087,7 +1213,7 @@ app.post('/removeproduct', async (req, res) => {
 app.get('/allproducts', async (req, res) => {
   let products = await Product.find({});
   console.log('All Products Fetched');
-  res.send(products);
+  res.send(products.map(normalizeProductForClient));
 });
 
 app.post('/productsByCategory', async (req, res) => {
@@ -1107,7 +1233,7 @@ app.post('/productsByCategory', async (req, res) => {
       return res.json([]);
     }
 
-    res.json(products);
+    res.json(products.map(normalizeProductForClient));
   } catch (err) {
     console.error('Error fetching products by category:', err);
     res.status(500).json({ error: 'Failed to fetch products' });
@@ -1123,7 +1249,7 @@ app.post('/chunkProducts', async (req, res) => {
     const products = await Product.find({ category: category })
       .skip(skip)
       .limit(limit);
-    res.json(products);
+    res.json(products.map(normalizeProductForClient));
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch products:', err });
   }
@@ -1147,7 +1273,7 @@ app.post('/getAllProductsByCategory', async (req, res) => {
     }
 
     res.json({
-      products,
+      products: products.map(normalizeProductForClient),
       total,
     });
   } catch (err) {
@@ -1249,32 +1375,18 @@ app.post(
       );
       console.log('Small images processing results:', smallImagesResults);
 
-      // Get the base URLs
-      const productionBaseUrl =
-        process.env.API_URL || 'https://tamarkfir.com/api';
-      const localBaseUrl = 'http://localhost:4000';
-      const baseUrl =
-        process.env.NODE_ENV === 'production'
-          ? productionBaseUrl
-          : localBaseUrl;
-      console.log('Using base URL:', baseUrl);
-
       // Construct URLs for main image
       const mainImageUrls = {
-        desktop: `${baseUrl}/uploads/${mainImageResults.desktop.filename}`,
-        mobile: `${baseUrl}/uploads/${mainImageResults.mobile.filename}`,
-        desktopLocal: `${localBaseUrl}/uploads/${mainImageResults.desktop.filename}`,
-        mobileLocal: `${localBaseUrl}/uploads/${mainImageResults.mobile.filename}`,
-        publicDesktop: `${baseUrl}/public/uploads/${mainImageResults.desktop.filename}`,
-        publicMobile: `${baseUrl}/public/uploads/${mainImageResults.mobile.filename}`,
+        desktop: `/uploads/${mainImageResults.desktop.filename}`,
+        mobile: `/uploads/${mainImageResults.mobile.filename}`,
+        publicDesktop: `/public/uploads/${mainImageResults.desktop.filename}`,
+        publicMobile: `/public/uploads/${mainImageResults.mobile.filename}`,
       };
 
       // Construct URLs for small images
       const smallImageUrlSets = smallImagesResults.map(result => ({
-        desktop: `${baseUrl}/smallImages/${result.desktop.filename}`,
-        mobile: `${baseUrl}/smallImages/${result.mobile.filename}`,
-        desktopLocal: `${localBaseUrl}/smallImages/${result.desktop.filename}`,
-        mobileLocal: `${localBaseUrl}/smallImages/${result.mobile.filename}`,
+        desktop: `/smallImages/${result.desktop.filename}`,
+        mobile: `/smallImages/${result.mobile.filename}`,
       }));
 
       console.log('\n=== Generated Image URLs ===');

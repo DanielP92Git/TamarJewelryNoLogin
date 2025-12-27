@@ -1649,7 +1649,6 @@ async function updateProduct(e) {
     const result = await response.json();
 
     if (result.success) {
-
       // Save the updated product's category
       const targetCategory = category;
       console.log("Target category for redirect:", targetCategory);
@@ -1853,12 +1852,14 @@ async function updateProduct(e) {
         // Fallback to original approach if our custom loading fails
         fetchInfo();
 
-
-      if (listReloadSucceeded) {
-        alert("Product updated successfully!");
-      } else {
-        alert("Product updated, but reloading the product list failed. Please refresh the page.");
-      }      }
+        if (listReloadSucceeded) {
+          alert("Product updated successfully!");
+        } else {
+          alert(
+            "Product updated, but reloading the product list failed. Please refresh the page."
+          );
+        }
+      }
     } else {
       throw new Error(result.message || "Failed to update product");
     }
