@@ -78,10 +78,10 @@ class HomePageView extends View {
     // Additional home-page specific fixes
     if (window.matchMedia('(min-width: 800px)').matches) {
       // Select cart elements
-      const cartIcon = document.querySelector('.shoppingcart-svg');
-      const cartTab = document.querySelector('.main-nav-tab.cart-tab');
-      const cartContainer = document.querySelector('.cart-container');
-      const cartNumber = document.querySelector('.cart-number');
+      const cartLink = document.querySelector('.header-cart');
+      const cartIcon = cartLink?.querySelector('.shoppingcart-svg');
+      const cartContainer = cartLink?.querySelector('.cart-container');
+      const cartNumber = cartLink?.querySelector('.cart-number-mobile');
 
       // Force visibility on SVG with !important inline styles
       if (cartIcon) {
@@ -98,12 +98,12 @@ class HomePageView extends View {
         );
       }
 
-      // Force visibility on cart tab
-      if (cartTab) {
-        cartTab.setAttribute(
+      // Force visibility on cart link
+      if (cartLink) {
+        cartLink.setAttribute(
           'style',
           `
-          display: flex !important;
+          display: inline-flex !important;
           visibility: visible !important;
         `
         );
@@ -125,7 +125,7 @@ class HomePageView extends View {
         cartNumber.setAttribute(
           'style',
           `
-          display: inline-block !important;
+          display: inline-flex !important;
           visibility: visible !important;
         `
         );

@@ -317,10 +317,26 @@ body:not(#home) {
   max-height: 56px;
 }
 
+.site-header__left,
+.site-header__right {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+/* The center wrapper exists in the new HTML, but the menu itself is `position: fixed`.
+   Make the wrapper not consume layout space on mobile so the title can center cleanly. */
+.site-header__center {
+  flex: 0 0 0;
+  width: 0;
+  min-width: 0;
+}
+
 .site-brand {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -335,6 +351,10 @@ body:not(#home) {
   white-space: nowrap;
   flex-shrink: 0;
   margin: 0;
+  /* Prevent overlap with left/right icons on narrow screens */
+  max-width: calc(100% - 140px);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .site-header .icons-container {

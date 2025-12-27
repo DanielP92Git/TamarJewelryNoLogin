@@ -574,86 +574,6 @@ export default class View {
   }
 
   handleMenuLanguage(lng) {
-    // Determine if we're on mobile or desktop
-    const isMobile = window.matchMedia('(max-width: 699.99px)').matches;
-
-    // Cart markup as a normal navbar item using CSS classes instead of inline styles
-    const cartMarkup = `
-      <li class="main-nav-tab cart-tab">
-        <a class="attrib-cart" href="/html/cart.html">
-          <div class="cart-container">
-            <svg class="shoppingcart-svg" viewBox="0 0 24 24" fill="#ffffff" stroke="#ffffff" xmlns="http://www.w3.org/2000/svg">
-              <path fill-rule="evenodd" clip-rule="evenodd" d="M16.5285 6C16.5098 5.9193 16.4904 5.83842 16.4701 5.75746C16.2061 4.70138 15.7904 3.55383 15.1125 2.65C14.4135 1.71802 13.3929 1 12 1C10.6071 1 9.58648 1.71802 8.88749 2.65C8.20962 3.55383 7.79387 4.70138 7.52985 5.75747C7.50961 5.83842 7.49016 5.9193 7.47145 6H5.8711C4.29171 6 2.98281 7.22455 2.87775 8.80044L2.14441 19.8004C2.02898 21.532 3.40238 23 5.13777 23H18.8622C20.5976 23 21.971 21.532 21.8556 19.8004L21.1222 8.80044C21.0172 7.22455 19.7083 6 18.1289 6H16.5285ZM8 11C8.57298 11 8.99806 10.5684 9.00001 9.99817C9.00016 9.97438 9.00044 9.9506 9.00084 9.92682C9.00172 9.87413 9.00351 9.79455 9.00718 9.69194C9.01451 9.48652 9.0293 9.18999 9.05905 8.83304C9.08015 8.57976 9.10858 8.29862 9.14674 8H14.8533C14.8914 8.29862 14.9198 8.57976 14.941 8.83305C14.9707 9.18999 14.9855 9.48652 14.9928 9.69194C14.9965 9.79455 14.9983 9.87413 14.9992 9.92682C14.9996 9.95134 14.9999 9.97587 15 10.0004C15 10.0004 15 11 16 11C17 11 17 9.99866 17 9.99866C16.9999 9.9636 16.9995 9.92854 16.9989 9.89349C16.9978 9.829 16.9957 9.7367 16.9915 9.62056C16.9833 9.38848 16.9668 9.06001 16.934 8.66695C16.917 8.46202 16.8953 8.23812 16.8679 8H18.1289C18.6554 8 19.0917 8.40818 19.1267 8.93348L19.86 19.9335C19.8985 20.5107 19.4407 21 18.8622 21H5.13777C4.55931 21 4.10151 20.5107 4.13998 19.9335L4.87332 8.93348C4.90834 8.40818 5.34464 8 5.8711 8H7.13208C7.10465 8.23812 7.08303 8.46202 7.06595 8.66696C7.0332 9.06001 7.01674 9.38848 7.00845 9.62056C7.0043 9.7367 7.00219 9.829 7.00112 9.89349C7.00054 9.92785 7.00011 9.96221 7 9.99658C6.99924 10.5672 7.42833 11 8 11ZM9.53352 6H14.4665C14.2353 5.15322 13.921 4.39466 13.5125 3.85C13.0865 3.28198 12.6071 3 12 3C11.3929 3 10.9135 3.28198 10.4875 3.85C10.079 4.39466 9.76472 5.15322 9.53352 6Z" fill="#0F0F0F"/>
-</svg>
-            <span class="cart-number-mobile">0</span>
-          </div>
-        </a>
-      </li>
-    `;
-
-    const ilFlag = `<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-il" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
-  <defs>
-    <clipPath id="il-a">
-      <path fill-opacity=".7" d="M0 0h512v512H0z"/>
-    </clipPath>
-  </defs>
-  <g fill-rule="evenodd" clip-path="url(#il-a)">
-    <path fill="#fff" d="M619.4 512H-112V0h731.4z"/>
-    <path fill="#0038b8" d="M619.4 115.2H-112V48h731.4zm0 350.5H-112v-67.2h731.4zm-483-275 110.1 191.6L359 191.6z"/>
-    <path fill="#fff" d="m225.8 317.8 20.9 35.5 21.4-35.3z"/>
-    <path fill="#0038b8" d="M136 320.6 246.2 129l112.4 190.8z"/>
-    <path fill="#fff" d="m225.8 191.6 20.9-35.5 21.4 35.4zM182 271.1l-21.7 36 41-.1-19.3-36zm-21.3-66.5 41.2.3-19.8 36.3zm151.2 67 20.9 35.5-41.7-.5zm20.5-67-41.2.3 19.8 36.3zm-114.3 0L189.7 256l28.8 50.3 52.8 1.2 32-51.5-29.6-52z"/>
-  </g>
-</svg>
-`;
-
-    const usFlag = `<svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-us" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
-  <path fill="#bd3d44" d="M0 0h512v512H0"/>
-  <path stroke="#fff" stroke-width="40" d="M0 58h512M0 137h512M0 216h512M0 295h512M0 374h512M0 453h512"/>
-  <path fill="#192f5d" d="M0 0h390v275H0z"/>
-  <marker id="us-a" markerHeight="30" markerWidth="30">
-    <path fill="#fff" d="m15 0 9.3 28.6L0 11h30L5.7 28.6"/>
-  </marker>
-  <path fill="none" marker-mid="url(#us-a)" d="m0 0 18 11h65 65 65 65 66L51 39h65 65 65 65L18 66h65 65 65 65 66L51 94h65 65 65 65L18 121h65 65 65 65 66L51 149h65 65 65 65L18 177h65 65 65 65 66L51 205h65 65 65 65L18 232h65 65 65 65 66z"/>
-</svg>
-`;
-
-    // Create the desktop flag selector HTML - for English version with the english-lng-selector class
-    const engDesktopFlagSelector = `
-    <li class="main-nav-tab desktop-lang-selector english-lng-selector">
-      <div class="flag-dropdown">
-        <div class="flag-icon flag-eng${
-          lng === 'eng' ? ' selected' : ''
-        }" data-lang="eng">
-          ${usFlag}
-        </div>
-        <div class="flag-icon flag-heb${
-          lng === 'heb' ? ' selected' : ''
-        }" data-lang="heb">
-          ${ilFlag}
-        </div>
-      </div>
-      ${this.getCurrencySelectorMarkup(lng)}
-    </li>`;
-
-    // Create the desktop flag selector HTML - for Hebrew version without the english-lng-selector class
-    const hebDesktopFlagSelector = `
-    <li class="main-nav-tab desktop-lang-selector">
-      <div class="flag-dropdown">
-        <div class="flag-icon flag-eng${
-          lng === 'eng' ? ' selected' : ''
-        }" data-lang="eng">
-          ${usFlag}
-        </div>
-        <div class="flag-icon flag-heb${
-          lng === 'heb' ? ' selected' : ''
-        }" data-lang="heb">
-          ${ilFlag}
-        </div>
-      </div>
-      ${this.getCurrencySelectorMarkup(lng)}
-    </li>`;
-
     if (lng === 'eng') {
       return `<ul class="menu__ul ul-eng">
           <li class="main-nav-tab">
@@ -701,8 +621,6 @@ export default class View {
           <li class="main-nav-tab contact">
             <a class="attrib" href="/html/contact-me.html">Contact Me</a>
           </li>
-          ${engDesktopFlagSelector}
-          ${cartMarkup}
         </ul>
         `;
     } else if (lng === 'heb') {
@@ -752,8 +670,6 @@ export default class View {
           <li class="main-nav-tab contact">
             <a class="attrib" href="/html/contact-me.html">צרו קשר</a>
           </li>
-          ${hebDesktopFlagSelector}
-          ${cartMarkup}
         </ul>
         `;
     }
@@ -801,6 +717,49 @@ export default class View {
 
     // Update menu content
     menu.innerHTML = this.handleMenuLanguage(lng);
+
+    // Render desktop utilities (language + currency + cart) into the header right container.
+    // Keep utilities OUT of the main nav list for correct centering and responsiveness.
+    const headerUtilitiesHost = document.querySelector(
+      '[data-purpose="header-utilities"]'
+    );
+    if (headerUtilitiesHost) {
+      let desktopUtilitiesEl =
+        headerUtilitiesHost.querySelector('.header-utilities');
+      if (!desktopUtilitiesEl) {
+        desktopUtilitiesEl = document.createElement('div');
+        desktopUtilitiesEl.className = 'header-utilities';
+        headerUtilitiesHost.prepend(desktopUtilitiesEl);
+      }
+
+      desktopUtilitiesEl.innerHTML = `
+        <div class="desktop-lang-selector${
+          lng === 'eng' ? ' english-lng-selector' : ''
+        }">
+          <div class="flag-dropdown">
+            <div class="flag-icon flag-eng${
+              lng === 'eng' ? ' selected' : ''
+            }" data-lang="eng">
+              ${usFlag}
+            </div>
+            <div class="flag-icon flag-heb${
+              lng === 'heb' ? ' selected' : ''
+            }" data-lang="heb">
+              ${ilFlag}
+            </div>
+          </div>
+          ${this.getCurrencySelectorMarkup(lng)}
+        </div>
+        <a class="header-cart attrib-cart" href="/html/cart.html" aria-label="Cart">
+          <div class="cart-container">
+            <svg class="shoppingcart-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M16.5285 6C16.5098 5.9193 16.4904 5.83842 16.4701 5.75746C16.2061 4.70138 15.7904 3.55383 15.1125 2.65C14.4135 1.71802 13.3929 1 12 1C10.6071 1 9.58648 1.71802 8.88749 2.65C8.20962 3.55383 7.79387 4.70138 7.52985 5.75747C7.50961 5.83842 7.49016 5.9193 7.47145 6H5.8711C4.29171 6 2.98281 7.22455 2.87775 8.80044L2.14441 19.8004C2.02898 21.532 3.40238 23 5.13777 23H18.8622C20.5976 23 21.971 21.532 21.8556 19.8004L21.1222 8.80044C21.0172 7.22455 19.7083 6 18.1289 6H16.5285ZM8 11C8.57298 11 8.99806 10.5684 9.00001 9.99817C9.00016 9.97438 9.00044 9.9506 9.00084 9.92682C9.00172 9.87413 9.00351 9.79455 9.00718 9.69194C9.01451 9.48652 9.0293 9.18999 9.05905 8.83304C9.08015 8.57976 9.10858 8.29862 9.14674 8H14.8533C14.8914 8.29862 14.9198 8.57976 14.941 8.83305C14.9707 9.18999 14.9855 9.48652 14.9928 9.69194C14.9965 9.79455 14.9983 9.87413 14.9992 9.92682C14.9996 9.95134 14.9999 9.97587 15 10.0004C15 10.0004 15 11 16 11C17 11 17 9.99866 17 9.99866C16.9999 9.9636 16.9995 9.92854 16.9989 9.89349C16.9978 9.829 16.9957 9.7367 16.9915 9.62056C16.9833 9.38848 16.9668 9.06001 16.934 8.66695C16.917 8.46202 16.8953 8.23812 16.8679 8H18.1289C18.6554 8 19.0917 8.40818 19.1267 8.93348L19.86 19.9335C19.8985 20.5107 19.4407 21 18.8622 21H5.13777C4.55931 21 4.10151 20.5107 4.13998 19.9335L4.87332 8.93348C4.90834 8.40818 5.34464 8 5.8711 8H7.13208C7.10465 8.23812 7.08303 8.46202 7.06595 8.66696C7.0332 9.06001 7.01674 9.38848 7.00845 9.62056C7.0043 9.7367 7.00219 9.829 7.00112 9.89349C7.00054 9.92785 7.00011 9.96221 7 9.99658C6.99924 10.5672 7.42833 11 8 11ZM9.53352 6H14.4665C14.2353 5.15322 13.921 4.39466 13.5125 3.85C13.0865 3.28198 12.6071 3 12 3C11.3929 3 10.9135 3.28198 10.4875 3.85C10.079 4.39466 9.76472 5.15322 9.53352 6Z" fill="#0F0F0F"/>
+            </svg>
+            <span class="cart-number-mobile">0</span>
+          </div>
+        </a>
+      `;
+    }
     
     // Add mobile language and currency selector to side menu (at bottom)
     let mobileLangSelector = menu.querySelector('.mobile-lang-selector');
@@ -854,10 +813,6 @@ export default class View {
       });
     });
 
-    // Update currency selector text based on language (there may be multiple selectors: mobile + desktop)
-    document.querySelectorAll('#currency').forEach((currencySelect) => {
-      this.updateCurrencySelectorText(currencySelect, lng);
-    });
     // Update currency selector text based on language (there may be multiple selectors: mobile + desktop)
     document.querySelectorAll('#currency').forEach((currencySelect) => {
       this.updateCurrencySelectorText(currencySelect, lng);

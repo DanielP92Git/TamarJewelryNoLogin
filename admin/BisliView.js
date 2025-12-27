@@ -1082,8 +1082,21 @@ function loadProducts(data) {
     productElement.className = "row listproduct-format";
 
     // Safely get image URLs for srcset, defaulting to empty string if null/undefined
-    const desktopSrc = item.mainImage?.desktop || item.image || "";
-    const mobileSrc = item.mainImage?.mobile || item.image || "";
+    // Prefer stable public variants first (served from public/uploads) to avoid relying on /uploads copies
+    const desktopSrc =
+      item.mainImage?.publicDesktop ||
+      item.mainImage?.desktop ||
+      item.publicImage ||
+      item.image ||
+      "";
+    const mobileSrc =
+      item.mainImage?.publicMobile ||
+      item.mainImage?.mobile ||
+      item.mainImage?.publicDesktop ||
+      item.mainImage?.desktop ||
+      item.publicImage ||
+      item.image ||
+      "";
     // The main img src will use the full getImageUrl logic
     const mainImgSrc = getImageUrl(
       item.image,

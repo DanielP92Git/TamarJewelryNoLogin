@@ -27,40 +27,36 @@ const controlHomePage = async function (lng) {
   homePageView._moveToTopHandler();
   homePageView.stickyMenuFn();
 
-  // Ensure cart icon is visible in desktop view
+  // Ensure cart icon is visible in desktop view (cart is now in header utilities, not inside nav list)
   setTimeout(() => {
-    // For desktop view shopping cart in nav menu
-    const cartTab = document.querySelector('.main-nav-tab.cart-tab');
-    const cartContainer = document.querySelector('.cart-container');
+    if (!window.matchMedia('(min-width: 800px)').matches) return;
 
-    if (window.matchMedia('(min-width: 800px)').matches) {
-      if (cartTab) {
-        cartTab.style.display = 'flex';
-        cartTab.style.visibility = 'visible';
-      }
+    const cartLink = document.querySelector('.header-cart');
+    const cartContainer = cartLink?.querySelector('.cart-container');
+    const cartIcon = cartLink?.querySelector('.shoppingcart-svg');
+    const cartNumber = cartLink?.querySelector('.cart-number-mobile');
 
-      if (cartContainer) {
-        cartContainer.style.display = 'flex';
-        cartContainer.style.visibility = 'visible';
-      }
-
-      // Ensure the SVG is properly visible
-      const cartIcon = document.querySelector('.shoppingcart-svg');
-      if (cartIcon) {
-        cartIcon.style.display = 'inline-block';
-        cartIcon.style.visibility = 'visible';
-        cartIcon.style.opacity = '1';
-        cartIcon.style.fill = '#000000';
-      }
-
-      // Also ensure cart number is visible
-      const cartNumber = document.querySelector('.cart-number');
-      if (cartNumber) {
-        cartNumber.style.display = 'inline-block';
-        cartNumber.style.visibility = 'visible';
-      }
+    if (cartLink) {
+      cartLink.style.display = 'inline-flex';
+      cartLink.style.visibility = 'visible';
     }
-  }, 500);
+
+    if (cartContainer) {
+      cartContainer.style.display = 'flex';
+      cartContainer.style.visibility = 'visible';
+    }
+
+    if (cartIcon) {
+      cartIcon.style.display = 'inline-block';
+      cartIcon.style.visibility = 'visible';
+      cartIcon.style.opacity = '1';
+    }
+
+    if (cartNumber) {
+      cartNumber.style.display = 'inline-flex';
+      cartNumber.style.visibility = 'visible';
+    }
+  }, 100);
 
   // await homePageView._addHandlerOpenModal();
   // homePageView._addHandlerCloseModal();

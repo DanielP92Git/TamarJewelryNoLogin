@@ -264,21 +264,25 @@ function normalizeProductForClient(productDoc) {
     const filename = path.basename(rel);
     if (!filename) return true;
 
-    if (rel.startsWith('/uploads/')) {
-      const fp = safeResolveUnder(uploadsDir, filename);
-      return fp ? fs.existsSync(fp) : false;
+    // NOTE: Newly uploaded images can exist in either the private dirs (backend/uploads, backend/smallImages)
+    // or the public dirs (public/uploads, public/smallImages). Treat the asset as existing if it exists in
+    // either location to avoid spurious fallbacks to no-image when only one copy is present.
+    if (rel.startsWith('/uploads/') || rel.startsWith('/public/uploads/')) {
+      const fpPrivate = safeResolveUnder(uploadsDir, filename);
+      const fpPublic = safeResolveUnder(publicUploadsDir, filename);
+      const existsPrivate = fpPrivate ? fs.existsSync(fpPrivate) : false;
+      const existsPublic = fpPublic ? fs.existsSync(fpPublic) : false;
+      return existsPrivate || existsPublic;
     }
-    if (rel.startsWith('/public/uploads/')) {
-      const fp = safeResolveUnder(publicUploadsDir, filename);
-      return fp ? fs.existsSync(fp) : false;
-    }
-    if (rel.startsWith('/smallImages/')) {
-      const fp = safeResolveUnder(smallImagesDir, filename);
-      return fp ? fs.existsSync(fp) : false;
-    }
-    if (rel.startsWith('/public/smallImages/')) {
-      const fp = safeResolveUnder(publicSmallImagesDir, filename);
-      return fp ? fs.existsSync(fp) : false;
+    if (
+      rel.startsWith('/smallImages/') ||
+      rel.startsWith('/public/smallImages/')
+    ) {
+      const fpPrivate = safeResolveUnder(smallImagesDir, filename);
+      const fpPublic = safeResolveUnder(publicSmallImagesDir, filename);
+      const existsPrivate = fpPrivate ? fs.existsSync(fpPrivate) : false;
+      const existsPublic = fpPublic ? fs.existsSync(fpPublic) : false;
+      return existsPrivate || existsPublic;
     }
 
     return true;
@@ -841,6 +845,22 @@ app.use('/uploads', (req, res, next) => {
 
       // Serve a placeholder instead of 404 for missing images (prevents broken icons)
       if (resolved && !fs.existsSync(resolved)) {
+        // If the file exists in the public uploads directory (but not private), serve it from there.
+        const fallbackResolved = safeResolveUnder(publicUploadsDir, reqFile);
+        if (fallbackResolved && fs.existsSync(fallbackResolved)) {
+          agentLog(
+            'B',
+            'backend/index.js:/uploads:fallback-public',
+            'missing in uploadsDir; serving from publicUploadsDir',
+            { reqPath: raw }
+          );
+          applyStaticCors(req, res, () => {});
+          res.setHeader(
+            'Cross-Origin-Resource-Policy',
+            isProd ? 'same-site' : 'cross-origin'
+          );
+          return res.status(200).sendFile(fallbackResolved);
+        }
         agentLog(
           'B',
           'backend/index.js:/uploads:fallback',
@@ -882,6 +902,21 @@ app.use('/api/uploads', (req, res, next) => {
       });
 
       if (resolved && !fs.existsSync(resolved)) {
+        const fallbackResolved = safeResolveUnder(publicUploadsDir, reqFile);
+        if (fallbackResolved && fs.existsSync(fallbackResolved)) {
+          agentLog(
+            'B',
+            'backend/index.js:/api/uploads:fallback-public',
+            'missing in uploadsDir; serving from publicUploadsDir',
+            { reqPath: raw }
+          );
+          applyStaticCors(req, res, () => {});
+          res.setHeader(
+            'Cross-Origin-Resource-Policy',
+            isProd ? 'same-site' : 'cross-origin'
+          );
+          return res.status(200).sendFile(fallbackResolved);
+        }
         agentLog(
           'B',
           'backend/index.js:/api/uploads:fallback',

@@ -41,11 +41,6 @@
   cursor: pointer;
 }
 
-/* Override flex-flow for language selector tab to keep items in row */
-.main-nav-tab.desktop-lang-selector {
-  flex-flow: row;
-  width: auto;
-}
 
 /* Navigation links */
 .attrib,
@@ -66,12 +61,6 @@ a {
 
 .attrib:hover {
   color: rgb(152, 152, 152);
-}
-
-/* Cart specific styles */
-.main-nav-tab.cart-tab {
-  display: flex !important;
-  visibility: visible !important;
 }
 
 .attrib-cart {
@@ -290,6 +279,11 @@ a {
   gap: 0.4rem;
 }
 
+/* Desktop-only utilities wrapper (injected into header right container) */
+.header-utilities {
+  display: none;
+}
+
 .desktop-lang-selector.english-lng-selector {
   display: flex;
   flex-direction: row-reverse;
@@ -410,7 +404,6 @@ a {
     --site-gold-accent: #c5a572;
     --site-header-height: 76px;
     --site-header-pad-x: 48px;
-    --site-utilities-space: 260px; /* flags + currency + cart */
   }
 
   /* Prevent fixed header overlap on non-home pages */
@@ -430,6 +423,33 @@ a {
     align-items: center;
     padding: 0 var(--site-header-pad-x);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+    gap: 32px;
+  }
+
+  /* Three-region header layout */
+  .site-header__left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+
+  .site-header__center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0 24px; /* breathing room between brand and utilities */
+  }
+
+  .site-header__right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
+    min-width: 0;
   }
 
   .site-brand {
@@ -439,13 +459,14 @@ a {
     width: auto;
     height: auto;
     font-family: 'Great Vibes', cursive;
-    font-size: clamp(20px, 2.5vw, 34px);
+    /* Keep brand from overpowering / colliding with nav on medium widths */
+    font-size: clamp(22px, 2.2vw, 32px);
     line-height: 1;
     color: #111;
     text-decoration: none;
     text-transform: none;
     white-space: nowrap;
-    margin-right: clamp(20px, 3vw, 40px);
+    margin-right: 0;
   }
 
   /* Hide mobile icons on desktop */
@@ -458,7 +479,7 @@ a {
     position: static;
     background: transparent;
     height: auto;
-    width: 100%;
+    width: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -475,7 +496,7 @@ a {
   }
 
   .site-header .menu__ul {
-    width: 100%;
+    width: auto;
     height: auto;
     display: flex;
     align-items: center;
@@ -484,12 +505,6 @@ a {
     position: relative;
     padding: 0;
     margin: 0;
-    padding-right: var(--site-utilities-space);
-    margin-left: clamp(
-      0px,
-      4vw,
-      60px
-    ); /* Shift menu to the right for better centering */
     box-sizing: border-box;
     flex-wrap: nowrap;
     min-width: 0;
@@ -500,12 +515,6 @@ a {
     margin: 0;
     padding: 0;
     gap: 0;
-  }
-
-  /* RTL: reserve space on the opposite side */
-  .site-header .menu__ul.ul-heb {
-    padding-right: 0;
-    padding-left: var(--site-utilities-space);
   }
 
   .site-header .main-nav-tab {
@@ -519,13 +528,13 @@ a {
     display: inline-flex;
     width: auto;
     font-family: 'Montserrat', sans-serif;
-    font-size: clamp(10px, 0.9vw, 12px);
+    font-size: clamp(10px, 0.85vw, 12px);
     font-weight: 500;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #111;
     height: auto;
-    padding: 10px 12px; /* Added horizontal padding to make entire tab clickable */
+    padding: 10px clamp(6px, 0.8vw, 12px); /* clickable but responsive */
     white-space: nowrap;
     box-sizing: border-box;
   }
@@ -545,7 +554,7 @@ a {
     justify-content: center;
     width: 100% !important; /* Override width: auto */
     min-width: 100%;
-    padding: 10px 12px;
+    padding: 10px clamp(6px, 0.8vw, 12px);
     box-sizing: border-box;
     position: relative;
     z-index: 1;
@@ -557,34 +566,19 @@ a {
     color: var(--site-gold-accent);
   }
 
-  /* Move flags + currency + cart to the right, keep nav centered */
-  .site-header .menu__ul > .desktop-lang-selector {
-    position: absolute;
-    right: 70px; /* Increased from 54px to add gap before cart icon */
-    top: 50%;
-    transform: translateY(-50%);
-    width: auto;
-    height: auto;
-  }
-
-  .site-header .menu__ul > li.cart-tab {
-    position: absolute;
-    right: -30px;
-    margin-right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: auto;
-    height: auto;
-  }
-
-  /* RTL: cart goes to the left edge */
-  .site-header .menu__ul.ul-heb > li.cart-tab {
-    right: auto;
-    left: 0;
-  }
-
   /* Utilities styling (flags + currency) */
+  .site-header .header-utilities {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+  }
+
+  /* (Responsive tuning lives in top-level media queries below.) */
+
   .site-header .desktop-lang-selector {
+    display: flex;
+    align-items: center;
     gap: 10px;
   }
 
@@ -659,190 +653,115 @@ a {
     content: ')';
   }
 
-  /* Responsive adjustments for medium-large screens */
-  @media (max-width: 1250px) {
-    :root {
-      --site-utilities-space: 270px;
-      --site-header-pad-x: 36px;
-    }
+  /* (Responsive fine-tuning lives below; keep this block focused on structure.) */
+}
 
-    .site-header .menu__ul {
-      gap: clamp(6px, 1vw, 12px);
-      margin-left: clamp(0px, 3vw, 50px);
-    }
+/* Desktop-only tuning (top-level; do not nest @media in plain CSS) */
+@media (min-width: 800px) and (max-width: 1100px) {
+  .site-header__center {
+    padding: 0 14px;
+  }
+}
 
-    .site-header .menu a.attrib,
-    .site-header .menu a.attrib-cart {
-      font-size: 11px;
-      padding: 10px 10px;
-    }
-
-    .site-header .main-nav-tab.categories-tab > .attrib {
-      padding: 10px 10px;
-    }
+@media (min-width: 800px) and (max-width: 950px) {
+  .site-header {
+    gap: 20px;
   }
 
-  @media (max-width: 1150px) {
-    :root {
-      --site-utilities-space: 280px;
-      --site-header-pad-x: 30px;
-    }
+  .site-header__center {
+    padding: 0 10px;
+  }
+}
 
-    .site-header .menu__ul {
-      gap: clamp(4px, 0.8vw, 8px);
-      margin-left: clamp(0px, 2.5vw, 40px);
-    }
-
-    .site-header .menu a.attrib,
-    .site-header .menu a.attrib-cart {
-      font-size: 10.5px;
-      padding: 10px 8px;
-    }
-
-    .site-header .main-nav-tab.categories-tab > .attrib {
-      padding: 10px 8px;
-    }
+/* Compact desktop: prevent nav/logo/utilities overlap on narrower desktop widths */
+@media (min-width: 800px) and (max-width: 1050px) {
+  :root {
+    --site-header-pad-x: 28px;
   }
 
-  @media (max-width: 1050px) {
-    :root {
-      --site-utilities-space: 290px;
-      --site-header-pad-x: 24px;
-    }
-
-    .site-header .menu__ul {
-      gap: clamp(3px, 0.7vw, 6px);
-      margin-left: clamp(0px, 2vw, 30px);
-    }
-
-    .site-header .menu a.attrib,
-    .site-header .menu a.attrib-cart {
-      font-size: 10px;
-      padding: 10px 7px;
-      letter-spacing: 0.12em;
-    }
-
-    .site-header .main-nav-tab.categories-tab > .attrib {
-      padding: 10px 7px;
-    }
-
-    .site-header .desktop-lang-selector {
-      gap: 8px;
-    }
-
-    .site-header .desktop-lang-selector #currency,
-    .site-header .desktop-lang-selector .header-currency-selector {
-      font-size: 11px;
-      padding: 5px 8px;
-      min-width: 78px;
-    }
+  .site-header {
+    gap: 20px;
   }
 
-  @media (max-width: 950px) {
-    :root {
-      --site-utilities-space: 300px;
-      --site-header-pad-x: 20px;
-    }
-
-    .site-header .menu__ul {
-      gap: 3px;
-      margin-left: clamp(0px, 1.5vw, 20px);
-    }
-
-    .site-header .menu a.attrib,
-    .site-header .menu a.attrib-cart {
-      font-size: 9.5px;
-      padding: 9px 6px;
-      letter-spacing: 0.11em;
-    }
-
-    .site-header .main-nav-tab.categories-tab > .attrib {
-      padding: 9px 6px;
-    }
-
-    .site-header .desktop-lang-selector {
-      gap: 7px;
-    }
-
-    .site-header .desktop-lang-selector .flag-dropdown {
-      padding: 2px 4px;
-    }
-
-    .site-header .desktop-lang-selector .flag-icon {
-      width: 17px;
-      height: 17px;
-    }
-
-    .site-header .desktop-lang-selector #currency,
-    .site-header .desktop-lang-selector .header-currency-selector {
-      font-size: 10px;
-      padding: 5px 7px;
-      min-width: 74px;
-    }
-
-    .site-header .menu__ul > .desktop-lang-selector {
-      right: 62px;
-    }
+  .site-header__center {
+    /* Make the center column more willing to shrink */
+    flex: 1 1 0;
   }
 
-  @media (max-width: 870px) {
-    :root {
-      --site-utilities-space: 310px;
-      --site-header-pad-x: 18px;
-    }
-
-    .site-header .menu__ul {
-      gap: 2px;
-      margin-left: clamp(0px, 1vw, 15px);
-    }
-
-    .site-header .menu a.attrib,
-    .site-header .menu a.attrib-cart {
-      font-size: 9px;
-      padding: 8px 5px;
-      letter-spacing: 0.1em;
-    }
-
-    .site-header .main-nav-tab.categories-tab > .attrib {
-      padding: 8px 5px;
-    }
-
-    .site-header .desktop-lang-selector {
-      gap: 6px;
-    }
-
-    .site-header .desktop-lang-selector .flag-icon {
-      width: 16px;
-      height: 16px;
-    }
-
-    .site-header .desktop-lang-selector #currency,
-    .site-header .desktop-lang-selector .header-currency-selector {
-      font-size: 9.5px;
-      padding: 4px 6px;
-      min-width: 70px;
-    }
-
-    .site-header .menu__ul > .desktop-lang-selector {
-      right: 58px;
-    }
+  .site-brand {
+    font-size: clamp(18px, 2vw, 28px);
   }
 
-  /* Final adjustments before mobile menu */
-  @media (max-width: 820px) {
-    .site-header .menu__ul {
-      margin-left: 0;
-    }
+  .site-header .menu__ul {
+    gap: clamp(2px, 0.8vw, 10px);
+  }
 
-    .site-header .menu a.attrib,
-    .site-header .menu a.attrib-cart {
-      font-size: 8.5px;
-      padding: 8px 4px;
-      letter-spacing: 0.08em;
-    }
+  .site-header .menu a.attrib {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 10px 6px;
+  }
 
-    .site-header .main-nav-tab.categories-tab > .attrib {
-      padding: 8px 4px;
-    }
+  .site-header .main-nav-tab.categories-tab > .attrib {
+    padding: 10px 6px;
+  }
+
+  .site-header .header-utilities {
+    gap: 10px;
+  }
+
+  .site-header .desktop-lang-selector {
+    gap: 8px;
+  }
+
+  .site-header .desktop-lang-selector #currency,
+  .site-header .desktop-lang-selector .header-currency-selector {
+    font-size: 11px;
+    padding: 5px 8px;
+    min-width: 72px;
+  }
+}
+
+@media (min-width: 800px) and (max-width: 900px) {
+  :root {
+    --site-header-pad-x: 20px;
+  }
+
+  .site-header {
+    gap: 16px;
+  }
+
+  .site-header__center {
+    padding: 0 8px;
+  }
+
+  .site-brand {
+    font-size: 18px;
+  }
+
+  .site-header .menu a.attrib {
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    padding: 9px 5px;
+  }
+
+  .site-header .main-nav-tab.categories-tab > .attrib {
+    padding: 9px 5px;
+  }
+
+  .site-header .header-utilities {
+    gap: 8px;
+  }
+
+  .site-header .desktop-lang-selector .flag-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .site-header .desktop-lang-selector #currency,
+  .site-header .desktop-lang-selector .header-currency-selector {
+    font-size: 10px;
+    padding: 4px 6px;
+    min-width: 66px;
   }
 }

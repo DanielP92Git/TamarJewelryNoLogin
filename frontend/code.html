@@ -3,116 +3,157 @@
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Tamar Afik Jewelry</title>
-<!-- Load Tailwind CSS v3 with plugins -->
+<title>Tamar Afik Jewelry - Contact</title>
+<!-- Tailwind CSS v3 with plugins -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Google Fonts: 'Great Vibes' for the logo, 'Montserrat' for navigation and hero text -->
+<!-- Google Fonts -->
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&amp;family=Montserrat:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&amp;family=Great+Vibes&amp;family=Lato:wght@300;400;700&amp;family=Playfair+Display:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet"/>
 <!-- Tailwind Configuration for Custom Colors and Fonts -->
 <script>
     tailwind.config = {
       theme: {
         extend: {
-          fontFamily: {
-            'cursive': ['"Great Vibes"', 'cursive'],
-            'sans': ['"Montserrat"', 'sans-serif'],
-          },
           colors: {
-            'gold-accent': '#C5A572', // Approximate gold/brown from requirement
+            brand: {
+              gold: '#a88b63',
+              bg: '#fcfbf9',
+              input: '#f2efe9',
+              text: '#333333',
+              btnBg: '#f4f0e6',
+              btnBorder: '#c4b398',
+              inputBorder: '#d4c5b0',
+            }
+          },
+          fontFamily: {
+            script: ['"Great Vibes"', 'cursive'],
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['Lato', 'sans-serif'],
           }
         }
       }
     }
   </script>
-<!-- Custom CSS for specific styling needs -->
-<style data-purpose="hero-layout">
-    /* Ensuring the hero section has a minimum height and covers the area correctly */
-    .hero-section {
-      min-height: 80vh; /* Takes up significant viewport height */
-      background-position: center;
-      background-size: cover;
-      background-repeat: no-repeat;
+<!-- Custom CSS for specific texture simulation and fine-tuning -->
+<style data-purpose="texture-and-layout">
+    /* Simulating the textured background seen in the mockup */
+    .textured-bg {
+      background-color: #fcfbf9;
+      background-image: radial-gradient(#e5ddd0 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    
+    /* Input custom styling to match the mockup's specific aesthetic */
+    .custom-input {
+      border: 1px solid #d4c5b0; /* Light brown/gold border */
+      border-radius: 4px; /* Less rounded, more classic boxy feel */
+      background-color: #f2efe9;
+      transition: box-shadow 0.2s;
+    }
+    
+    .custom-input:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(168, 139, 99, 0.2); /* Soft gold glow */
+      border-color: #a88b63;
+    }
+
+    /* Ensuring the footer decoration sits behind content */
+    .footer-decor {
+      z-index: 0;
+      pointer-events: none;
+    }
+    
+    .content-card {
+      z-index: 10;
     }
   </style>
 </head>
-<body class="font-sans antialiased text-gray-900">
+<body class="font-sans text-brand-text textured-bg min-h-screen flex flex-col">
 <!-- BEGIN: MainHeader -->
-<header class="bg-white sticky top-0 z-50 shadow-sm w-full px-6 py-4 md:px-12 flex flex-col md:flex-row justify-between items-center" data-purpose="site-header">
-<!-- Logo Section -->
-<div class="mb-4 md:mb-0" data-purpose="logo-container">
-<a class="font-cursive text-black tracking-wide text-[32px]" href="#">
-        Tamar Afik Jewelry
-      </a>
+<header class="bg-white w-full py-4 px-6 md:px-12 shadow-sm relative z-20">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+<!-- Brand Logo Area -->
+<div class="w-full md:w-1/4 flex justify-center md:justify-start">
+<a class="font-script text-black text-5xl md:text-6xl" href="#">
+          Tamar Afik Jewelry
+        </a>
 </div>
 <!-- Navigation Menu -->
-<nav class="mb-4 md:mb-0" data-purpose="main-navigation">
-<ul class="flex flex-wrap justify-center gap-8 text-sm font-medium uppercase tracking-wide text-black">
-<li><a class="hover:text-gold-accent transition-colors" href="#">Home</a></li>
+<nav class="w-full md:w-2/4">
+<ul class="flex flex-wrap justify-center gap-6 text-sm font-medium tracking-wide text-gray-800">
+<li><a class="hover:text-brand-gold transition-colors" href="#">HOME</a></li>
 <li class="relative group">
-<a class="flex items-center gap-1 hover:text-gold-accent transition-colors" href="#">
-            Shop
-            <!-- Simple SVG Chevron Down -->
-<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<a class="flex items-center gap-1 hover:text-brand-gold transition-colors" href="#">
+              SHOP 
+              <svg class="h-3 w-3" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 <path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
 </svg>
 </a>
 </li>
-<li><a class="hover:text-gold-accent transition-colors" href="#">Jewelry Workshop</a></li>
-<li><a class="hover:text-gold-accent transition-colors" href="#">About</a></li>
-<li><a class="hover:text-gold-accent transition-colors" href="#">Contact Me</a></li>
+<li><a class="hover:text-brand-gold transition-colors" href="#">JEWELRY WORKSHOP</a></li>
+<li><a class="hover:text-brand-gold transition-colors" href="#">ABOUT</a></li>
+<li><a class="text-brand-gold font-bold" href="#">CONTACT ME</a></li>
 </ul>
 </nav>
-<!-- Utility Icons (Language & Cart) -->
-<div class="flex items-center gap-4" data-purpose="header-utilities">
-<!-- Language Flags -->
-<div class="flex gap-2">
-<a aria-label="English" href="#">
-<img alt="US Flag" class="rounded-full w-6 h-6 object-cover border border-gray-200 hover:opacity-80 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6kQeb9iWqoAG4vQbYPB0lK6uAlPSTSRk5BQkYufKDuBJnzXRRV0b2gM6Zh0ZbCZ7DnkHSFwKu4QNG57dgbg7yWmKO0AzB_iibm87d4yVg3go8XHdBImlxgeUHTNjFDYptz7ApW00RkwHRN22v85xZJbaiBufqiRAtGY__x2HtR17dhmxgBZVyc7JQIo6o4-2GuxCbql-jt6v4SpSa5NueJ_eiES_mBK6hq-LkEuGW-MB-IOcsS6UfQW78xDHnu90l8qOff3t1nyGS"/>
-</a>
-<a aria-label="Hebrew" href="#">
-<img alt="Israel Flag" class="rounded-full w-6 h-6 object-cover border border-gray-200 hover:opacity-80 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhJsuJwAehhvsmB7TOs2TZ-sWkTpRw0p-cKJVZp2derzP17m38LucC1oXGlPQNJ6VAhhK_WI4ABzIy0XOjmCtwboyJ3pnxi3l4QT-VXnwkDzss0V500W5R3dJw-JsNScsFi6KEi2plXyApSUa7FtabJp9hNOGpTPexwU0VsE5XWo4gqC_ahgxw7LmUPdDy5SOSZIPaK0yNoCRnK4wAh2gYaT_ZIiPsrBSRFuwinI90_sv-Dv1yFVQcLxI1C4ehDuUtuCiDpGdfShXn"/>
+<!-- User Actions (Flags & Cart) -->
+<div class="w-full md:w-1/4 flex justify-center md:justify-end items-center gap-4">
+<!-- Flags using placeholders -->
+<div class="flex gap-2"><span class="text-xl cursor-pointer hover:opacity-80" title="English">🇺🇸</span><span class="text-xl cursor-pointer hover:opacity-80" title="Hebrew">🇮🇱</span></div>
+<!-- Cart Icon -->
+<a class="flex items-center gap-1 text-gray-800 hover:text-brand-gold" href="#">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="text-sm font-medium">(1)</span>
 </a>
 </div>
-<!-- Shopping Bag -->
-<a aria-label="Shopping Cart" class="flex items-center gap-1 hover:text-gold-accent transition-colors" href="#">
-<svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
-</svg>
-<span class="text-sm font-medium text-black">(1)</span>
-</a>
 </div>
 </header>
 <!-- END: MainHeader -->
 <!-- BEGIN: MainContent -->
-<main>
-<!-- BEGIN: HeroSection -->
-<!-- 
-      Using placeholder '{{DATA:IMAGE:IMAGE_1}}' as requested for the background.
-      Added a dark overlay (bg-black/30) to ensure text readability against the image.
-    -->
-<section class="hero-section relative flex items-center justify-center" data-purpose="hero-banner" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAifankw4P_E2IjuT-5ZEFjKIHo8yaUN9aPjerlPMt_feHaL4a9yQqQDpO596QGkfymcDSxyOsgLh0DYqe4TIifK9IaY_tiVs93r8qL0UCRUp0pt9pVhZGVvCEgZ_0435FlCYOmcKOfNSvuAJEAu8ePjxOzJHoArwDfuimV3PmcyTEwxRBwcRi-j16bl05NerOIS4RmPXXJnC4p-Dfpbev4SiLUd3zTtGWXgaI7L0s3XjZjiDBtP6nZtJODSx3KcS-sDY1VEZxaY-tk');">
-<!-- Overlay for better text contrast -->
-<div class="absolute inset-0 bg-black/20 z-0"></div>
-<!-- Hero Content -->
-<div class="relative z-10 text-center px-4 max-w-4xl mx-auto text-white">
-<!-- Headline -->
-<h1 class="text-4xl md:text-5xl lg:text-6xl font-light tracking-wider mb-4 uppercase drop-shadow-md">
-          Inspired by Timeless Elegance
-        </h1>
-<!-- Sub-headline -->
-<p class="text-lg md:text-xl font-light mb-10 tracking-wide drop-shadow-sm">
-          Handcrafted jewelry pieces that tell your unique story
-        </p>
-<!-- CTA Button -->
-<!-- Pill shape, white bg, gold/brown border and text -->
-<a class="inline-block bg-white text-gold-accent border border-gold-accent px-8 py-3 rounded-full uppercase tracking-widest text-sm hover:bg-stone-50 transition-all duration-300 shadow-md" href="#">
-          Discover The Collection
-        </a>
+<main class="flex-grow flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
+<!-- Contact Card Container -->
+<section class="content-card w-full max-w-4xl bg-white rounded-xl shadow-lg mb-16 mt-8 p-10 md:p-16">
+<!-- Card Header -->
+<div class="text-center mb-10">
+<h1 class="font-serif text-4xl md:text-5xl text-brand-gold mb-6">Get in Touch</h1>
+<p class="text-gray-600 text-lg">Have a question or want to collaborate? I'd love to hear from you.</p>
 </div>
+<!-- Contact Form -->
+<form action="#" class="space-y-6" method="POST">
+<!-- Row 1: Name Fields -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="flex flex-col">
+<label class="sr-only" for="firstName">First Name</label>
+<input class="custom-input w-full bg-brand-input px-4 py-4 text-gray-700 placeholder-gray-500" id="firstName" name="firstName" placeholder="First Name" type="text"/>
+</div>
+<div class="flex flex-col">
+<label class="sr-only" for="lastName">Last Name</label>
+<input class="custom-input w-full bg-brand-input px-4 py-4 text-gray-700 placeholder-gray-500" id="lastName" name="lastName" placeholder="Last Name" type="text"/>
+</div>
+</div>
+<!-- Row 2: Email Field -->
+<div>
+<label class="sr-only" for="email">Email Address</label>
+<input class="custom-input w-full bg-brand-input px-4 py-4 text-gray-700 placeholder-gray-500" id="email" name="email" placeholder="Email Address" type="email"/>
+</div>
+<!-- Row 3: Message Textarea -->
+<div>
+<label class="sr-only" for="message">Your Message</label>
+<textarea class="custom-input w-full bg-brand-input px-4 py-4 text-gray-700 placeholder-gray-500 resize-none" id="message" name="message" placeholder="Your Message" rows="5"></textarea>
+</div>
+<!-- Submit Button -->
+<div class="pt-4">
+<button class="w-full py-4 px-8 rounded-full border border-brand-btnBorder text-brand-gold bg-brand-btnBg hover:bg-brand-btnBorder hover:text-white transition-all duration-300 text-xl font-medium shadow-sm" type="submit">
+            Send Message
+          </button>
+</div>
+</form>
 </section>
-<!-- END: HeroSection -->
+<!-- Decorative Necklace Background -->
+<!-- This element is positioned absolutely to sit behind the card at the bottom -->
+<div class="footer-decor absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-12 md:-translate-y-24 w-64 md:w-96 opacity-40">
+<img alt="Decorative Necklace Sketch" class="w-full h-auto mix-blend-multiply" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_wXssmC1dhViBTd1lpUlF0TpPt_wH1Mti_RBfu8stPCKKtKoqCyhrJ8D79wVBw8ANLq9RFW7w46yPnJTJjkthHhAUmsRP9-VBSjgppranBzt0XmBaEDDwr0cx-0jxlwJpve-DOsoxiUQgjaROftwamGSGnIglz6lmPu3fw6JXleL7jL-N1FE2iVMDn6VqT0UuS8xVL2DtBzf92WAoUArSECTqnQyZpnfPEmG2Egtmi3K3xy_bF4brbOmfj2sUFd9OYJQq9zjYhd-k"/>
+</div>
 </main>
 <!-- END: MainContent -->
 </body></html>
