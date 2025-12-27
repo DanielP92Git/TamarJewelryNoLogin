@@ -153,6 +153,53 @@ function normalizeProductForClient(productDoc) {
 }
 
 // =============================================
+// Filesystem safety helpers
+// =============================================
+const ALLOWED_IMAGE_EXTENSIONS = new Set([
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.gif',
+  '.webp',
+]);
+
+function validateImageFilename(filename) {
+  if (!filename || typeof filename !== 'string') {
+    return { ok: false, error: 'Missing filename' };
+  }
+  if (filename.length > 200) {
+    return { ok: false, error: 'Filename too long' };
+  }
+  // Disallow traversal / separators / null bytes
+  if (
+    filename.includes('..') ||
+    filename.includes('/') ||
+    filename.includes('\\') ||
+    filename.includes('\0')
+  ) {
+    return { ok: false, error: 'Invalid filename' };
+  }
+  if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
+    return { ok: false, error: 'Invalid filename' };
+  }
+  const ext = path.extname(filename).toLowerCase();
+  if (!ALLOWED_IMAGE_EXTENSIONS.has(ext)) {
+    return { ok: false, error: 'Unsupported file extension' };
+  }
+  return { ok: true };
+}
+
+function safeResolveUnder(baseDir, filename) {
+  const resolvedBase = path.resolve(baseDir);
+  const resolvedPath = path.resolve(baseDir, filename);
+  const prefix = resolvedBase.endsWith(path.sep)
+    ? resolvedBase
+    : `${resolvedBase}${path.sep}`;
+  if (!resolvedPath.startsWith(prefix)) return null;
+  return resolvedPath;
+}
+
+// =============================================
 // CORS (single source of truth)
 // =============================================
 function toOrigin(value) {
@@ -193,6 +240,15 @@ const corsOptions = {
     if (!origin) return callback(null, true);
 
     const normalized = toOrigin(origin);
+    // In development, allow any localhost/127.0.0.1 port (Live Server ports vary)
+    if (
+      !isProd &&
+      typeof normalized === 'string' &&
+      /^http:\/\/(localhost|127\.0\.0\.1):\d+$/i.test(normalized)
+    ) {
+      return callback(null, true);
+    }
+
     const allowed = normalized && allowedOriginsSet.has(normalized);
 
     if (!allowed) {
@@ -279,6 +335,17 @@ const Product = mongoose.model('Product', {
 // =============================================
 // Authentication Middleware
 // =============================================
+function getTokenFromRequest(req) {
+  const direct = req.header('auth-token');
+  if (direct) return direct;
+  const auth = req.header('authorization');
+  if (auth && typeof auth === 'string') {
+    const parts = auth.split(' ');
+    if (parts.length === 2 && /^Bearer$/i.test(parts[0])) return parts[1];
+  }
+  return null;
+}
+
 const authUser = async function (req, res, next) {
   try {
     let user = await Users.findOne({ email: req.body.email });
@@ -312,21 +379,58 @@ const authUser = async function (req, res, next) {
 };
 
 const fetchUser = async (req, res, next) => {
-  const token = req.header('auth-token');
+  const token = getTokenFromRequest(req);
   if (!token) {
-    res.status(401).send({ errors: 'Please authenticate using valid token' });
+    return res.status(401).json({
+      success: false,
+      errors: 'Please authenticate using valid token',
+    });
   } else {
     try {
       const decoded = jwt.verify(token, process.env.JWT_KEY);
-      req.user = decoded.user;
-      next();
-    } catch (err) {
-      res
-        .status(401)
-        .send({ errors: 'Please authenticate using a valid token', err });
+      const userId = decoded?.user?.id;
+      if (!userId) {
+        return res
+          .status(401)
+          .json({ success: false, errors: 'Invalid token' });
+      }
+
+      const user = await Users.findById(userId);
+      if (!user) {
+        return res
+          .status(401)
+          .json({ success: false, errors: 'User not found' });
+      }
+
+      // Only allow known user types
+      if (user.userType !== 'user' && user.userType !== 'admin') {
+        return res.status(403).json({ success: false, errors: 'Forbidden' });
+      }
+
+      req.user = {
+        id: user._id.toString(),
+        email: user.email,
+        userType: user.userType,
+      };
+      req.userDoc = user;
+      return next();
+    } catch {
+      return res.status(401).json({
+        success: false,
+        errors: 'Please authenticate using a valid token',
+      });
     }
   }
 };
+
+function requireAdmin(req, res, next) {
+  if (!req.userDoc || req.userDoc.userType !== 'admin') {
+    return res
+      .status(403)
+      .json({ success: false, errors: 'Admin access required' });
+  }
+  return next();
+}
 
 // =============================================
 // File Upload Configuration
@@ -429,6 +533,20 @@ function applyStaticCors(req, res, next) {
   const origin = req.headers.origin;
   if (!origin) return next();
   const normalized = toOrigin(origin);
+  // In development, allow any localhost/127.0.0.1 port (Live Server ports vary)
+  if (
+    !isProd &&
+    typeof normalized === 'string' &&
+    /^http:\/\/(localhost|127\.0\.0\.1):\d+$/i.test(normalized)
+  ) {
+    res.setHeader('Access-Control-Allow-Origin', normalized);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, Range');
+    if (req.method === 'OPTIONS') return res.status(204).end();
+    return next();
+  }
+
   if (!normalized || !allowedOriginsSet.has(normalized)) return next();
 
   res.setHeader('Access-Control-Allow-Origin', normalized);
@@ -502,24 +620,38 @@ app.use(
 
 // Direct file access route for debugging
 app.get('/check-file/:filename', (req, res) => {
-  const filename = req.params.filename;
-  const filePath = path.join(uploadsDir, filename);
+  if (isProd) {
+    return res.status(404).send('Not Found');
+  }
 
-  fs.access(filePath, fs.constants.F_OK, err => {
-    if (err) {
+  const filename = req.params.filename;
+  const validation = validateImageFilename(filename);
+  if (!validation.ok) {
+    return res.status(400).send(validation.error);
+  }
+
+  const filePath = safeResolveUnder(uploadsDir, filename);
+  if (!filePath) {
+    return res.status(400).send('Invalid filename');
+  }
+
+  fs.access(filePath, fs.constants.F_OK, accessErr => {
+    if (accessErr) {
       console.log(`File ${filename} does not exist in uploads directory`);
       res.status(404).send({
         exists: false,
         message: `File ${filename} not found`,
-        searchPath: filePath,
       });
     } else {
       console.log(`File ${filename} exists in uploads directory`);
-      res.send({
-        exists: true,
-        path: filePath,
-        size: fs.statSync(filePath).size,
-        url: `${process.env.API_URL}/uploads/${filename}`,
+      fs.stat(filePath, (statErr, stats) => {
+        if (statErr)
+          return res.status(500).send({ exists: true, error: 'Stat failed' });
+        res.send({
+          exists: true,
+          size: stats.size,
+          url: toAbsoluteApiUrl(`/uploads/${filename}`),
+        });
       });
     }
   });
@@ -528,13 +660,21 @@ app.get('/check-file/:filename', (req, res) => {
 // Direct image serving endpoint that bypasses static middleware
 app.get('/direct-image/:filename', (req, res) => {
   const filename = req.params.filename;
-  const filePath = path.join(uploadsDir, filename);
+  const validation = validateImageFilename(filename);
+  if (!validation.ok) {
+    return res.status(400).send('Invalid filename');
+  }
 
-  // Set CORS headers
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  const filePath = safeResolveUnder(uploadsDir, filename);
+  if (!filePath) {
+    return res.status(400).send('Invalid filename');
+  }
+
+  // Apply allowlist-based CORS for cross-origin image access when needed
+  applyStaticCors(req, res, () => {});
+
+  // Allow images to be embedded across same-site subdomains (e.g. admin.tamarkfir.com)
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
 
   // Check if file exists
   fs.access(filePath, fs.constants.F_OK, err => {
@@ -548,15 +688,13 @@ app.get('/direct-image/:filename', (req, res) => {
     console.log(`Direct image access: Serving ${filename} from ${filePath}`);
 
     // Set content type based on file extension
-    if (filename.endsWith('.jpg') || filename.endsWith('.jpeg')) {
+    const ext = path.extname(filename).toLowerCase();
+    if (ext === '.jpg' || ext === '.jpeg')
       res.setHeader('Content-Type', 'image/jpeg');
-    } else if (filename.endsWith('.png')) {
-      res.setHeader('Content-Type', 'image/png');
-    } else if (filename.endsWith('.gif')) {
-      res.setHeader('Content-Type', 'image/gif');
-    } else {
-      res.setHeader('Content-Type', 'application/octet-stream');
-    }
+    else if (ext === '.png') res.setHeader('Content-Type', 'image/png');
+    else if (ext === '.gif') res.setHeader('Content-Type', 'image/gif');
+    else if (ext === '.webp') res.setHeader('Content-Type', 'image/webp');
+    else return res.status(415).send('Unsupported media type');
 
     // Stream the file
     const fileStream = fs.createReadStream(filePath);
@@ -571,11 +709,7 @@ app.get('/direct-image/:filename', (req, res) => {
 
 // Add options handler for the direct image endpoint
 app.options('/direct-image/:filename', (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.status(204).end();
+  return applyStaticCors(req, res, () => res.status(204).end());
 });
 
 // =============================================
@@ -595,18 +729,8 @@ async function handleCheckoutSession(session) {
         `Product ${productId} quantity reduced. New quantity: ${newQuantity}`
       );
       if (newQuantity == 0) {
-        const response = await fetch(`${process.env.API_URL}/removeproduct`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: productId,
-          }),
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          console.log(`Product with id: ${data.id} is deleted from database`);
-        }
+        await Product.findOneAndDelete({ id: productId });
+        console.log(`Product with id: ${productId} deleted from database`);
       }
     }
   } else {
@@ -839,7 +963,9 @@ app.post('/login', authUser, async (req, res) => {
         userType: req.user.userType,
       },
     };
-    const token = jwt.sign(data, process.env.JWT_KEY);
+    const token = jwt.sign(data, process.env.JWT_KEY, {
+      expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+    });
     if (token) {
       console.log('Token created for user:', req.user.email);
       res.json({
@@ -902,7 +1028,7 @@ app.post('/signup', async (req, res) => {
 });
 
 // Product Management Endpoints
-app.post('/addproduct', async (req, res) => {
+app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
   try {
     console.log('\n=== Product Creation Request Details ===');
     console.log('Request body:', JSON.stringify(req.body, null, 2));
@@ -1006,6 +1132,8 @@ app.post('/addproduct', async (req, res) => {
 // Update the old updateproduct endpoint to handle formdata and file uploads
 app.post(
   '/updateproduct/:id',
+  fetchUser,
+  requireAdmin,
   upload.fields([
     { name: 'mainImage', maxCount: 1 },
     { name: 'smallImages', maxCount: 10 },
@@ -1155,7 +1283,7 @@ app.post(
 );
 
 // Keep the old endpoint for backward compatibility
-app.post('/updateproduct', async (req, res) => {
+app.post('/updateproduct', fetchUser, requireAdmin, async (req, res) => {
   try {
     const id = req.body.id;
     const securityMargin = parseFloat(req.body.security_margin) || 5;
@@ -1200,7 +1328,7 @@ app.post('/updateproduct', async (req, res) => {
   }
 });
 
-app.post('/removeproduct', async (req, res) => {
+app.post('/removeproduct', fetchUser, requireAdmin, async (req, res) => {
   await Product.findOneAndDelete({ id: req.body.id });
   console.log('Removed');
   res.json({
@@ -1328,6 +1456,8 @@ app.post('/removeAll', fetchUser, async (req, res) => {
 // File Upload Endpoint
 app.post(
   '/upload',
+  fetchUser,
+  requireAdmin,
   upload.fields([
     { name: 'mainImage', maxCount: 1 },
     { name: 'smallImages', maxCount: 10 },
@@ -1597,7 +1727,7 @@ app.post('/orders/:orderID/capture', async (req, res) => {
   }
 });
 
-app.post('/deleteproductimage', async (req, res) => {
+app.post('/deleteproductimage', fetchUser, requireAdmin, async (req, res) => {
   try {
     const { productId, imageType, imageUrl } = req.body;
 
