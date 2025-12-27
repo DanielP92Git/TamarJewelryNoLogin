@@ -1047,6 +1047,12 @@ code {
   background: rgba(19, 19, 236, 0.1);
 }
 
+.dropzone.drag-over {
+  border-color: rgba(19, 19, 236, 0.8);
+  background: rgba(19, 19, 236, 0.2);
+  border-style: solid;
+}
+
 .dropzone__title {
   font-weight: 900;
   font-size: 13px;
