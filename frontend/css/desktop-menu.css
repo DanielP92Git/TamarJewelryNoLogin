@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500;600&display=swap');
+
 /* Desktop Menu Styles */
 
 /* Base menu container */
@@ -37,6 +39,12 @@
 
 .main-nav-tab:hover {
   cursor: pointer;
+}
+
+/* Override flex-flow for language selector tab to keep items in row */
+.main-nav-tab.desktop-lang-selector {
+  flex-flow: row;
+  width: auto;
 }
 
 /* Navigation links */
@@ -169,7 +177,7 @@ a {
 /* Sticky menu behavior */
 .menu.sticky {
   z-index: 15;
-  
+
   backdrop-filter: blur(15px);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   transition: all;
@@ -227,23 +235,35 @@ a {
   position: relative;
 }
 
-/* Cart number styling */
-.cart-number {
-  display: inline-block !important;
-  justify-content: center;
+/* Cart number styling (desktop header + shared) */
+.cart-number,
+.cart-number-mobile {
+  display: inline-flex !important;
   align-items: center;
+  justify-content: center;
+  position: static;
+  left: auto;
+  width: auto;
+  height: auto;
+  border: none !important;
+  border-radius: 0;
+  background-color: transparent !important;
+  color: #111 !important;
+  font-weight: 500;
   font-size: 0.8rem;
-  position: relative;
-  left: -9%;
-  width: 14px;
-  height: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.8) !important;
-  border-radius: 50%;
-  color: black !important;
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  font-weight: 600;
   text-shadow: none !important;
   visibility: visible !important;
+  margin-left: 4px;
+}
+
+.cart-number::before,
+.cart-number-mobile::before {
+  content: '(';
+}
+
+.cart-number::after,
+.cart-number-mobile::after {
+  content: ')';
 }
 
 /* Make sure the icon is sized properly */
@@ -257,38 +277,31 @@ a {
 }
 
 /* Style the cart counter - position it consistently relative to cart icon */
-.cart-number-mobile {
-  position: relative;
-  top: 0;
-  right: 0;
-  transform: translate(-30%, -30%);
-  background-color: white;
-  border: 1px solid black;
-  border-radius: 50%;
-  width: 12px;
-  height: 12px;
-  display: flex !important;
-  visibility: visible !important;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: bold;
-  z-index: 20;
-}
+/* (All visual styling handled in the shared .cart-number / .cart-number-mobile rule above) */
 
 /* Desktop language selector styles */
 .desktop-lang-selector {
   display: flex;
+  flex-direction: row;
   z-index: 10;
-  width: 100%;
+  width: auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
 }
 
 .desktop-lang-selector.english-lng-selector {
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
-  justify-content: unset;
-  gap: 0.5rem;
+  justify-content: flex-start;
+  gap: 0.4rem;
+}
+
+.desktop-lang-selector.english-lng-selector #currency,
+.desktop-lang-selector.english-lng-selector .header-currency-selector {
+  margin-left: 0;
+  margin-right: 0.4rem;
 }
 
 .desktop-lang-selector .flag-dropdown {
@@ -296,18 +309,20 @@ a {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  backdrop-filter: blur(10px);
+  gap: 0.4rem;
+  background-color: white;
+  border: 1px solid #ddd;
   border-radius: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  padding: 0.2rem 0.5rem;
-  width: 45%;
-  /* height: 25%; */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  padding: 0.1rem 0.2rem;
+  width: auto;
+  min-width: fit-content;
+  height: auto;
 }
 
 .desktop-lang-selector .flag-icon {
-  width: 70px;
-  /* height: 100px; */
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   border: 2px solid transparent;
   cursor: pointer;
@@ -319,6 +334,7 @@ a {
   background-color: white;
   padding: 0;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .desktop-lang-selector .flag-icon svg {
@@ -334,6 +350,28 @@ a {
 
 .desktop-lang-selector .flag-icon:hover {
   border: 2px solid #888;
+}
+
+/* Currency selector in desktop header */
+.desktop-lang-selector #currency,
+.desktop-lang-selector .header-currency-selector {
+  padding: 0.25rem 0.4rem;
+  border: 1px solid #ddd;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+  min-width: 70px;
+  outline: none;
+  margin: 0;
+}
+
+.desktop-lang-selector #currency:hover,
+.desktop-lang-selector .header-currency-selector:hover {
+  border-color: #5c6ac4;
+  box-shadow: 0 2px 8px rgba(92, 106, 196, 0.15);
 }
 
 @media (min-width: 799.99px) {
@@ -361,4 +399,251 @@ a {
 
 .attrib.attrib-eng:hover {
   color: #000000;
+}
+
+/* =========================================================
+   Shared Desktop Header (>= 800px)
+   Matches the design reference used on the Home page.
+   ========================================================= */
+@media (min-width: 800px) {
+  :root {
+    --site-gold-accent: #c5a572;
+    --site-header-height: 76px;
+    --site-header-pad-x: 48px;
+    --site-utilities-space: 260px; /* flags + currency + cart */
+  }
+
+  /* Prevent fixed header overlap on non-home pages */
+  body:not(#home) {
+    padding-top: var(--site-header-height);
+  }
+
+  .site-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--site-header-height);
+    background: #ffffff;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    padding: 0 var(--site-header-pad-x);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .site-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: auto;
+    height: auto;
+    font-family: 'Great Vibes', cursive;
+    font-size: 34px;
+    line-height: 1;
+    color: #111;
+    text-decoration: none;
+    text-transform: none;
+    white-space: nowrap;
+    margin-right: 34px;
+  }
+
+  /* Hide mobile icons on desktop */
+  .site-header .icons-container {
+    display: none;
+  }
+
+  /* Make the injected nav behave like a centered header nav */
+  .site-header .menu {
+    position: static;
+    background: transparent;
+    height: auto;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .site-header .menu.sticky,
+  .site-header .menu.hidden {
+    position: static;
+    opacity: 1;
+    transform: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .site-header .menu__ul {
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(4px, 1.2vw, 14px);
+    position: relative;
+    padding: 0;
+    margin: 0;
+    padding-right: var(--site-utilities-space);
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+    min-width: 0;
+  }
+
+  /* Ensure no gaps in categories tab that could create dead zones */
+  .site-header .main-nav-tab.categories-tab {
+    margin: 0;
+    padding: 0;
+    gap: 0;
+  }
+
+  /* RTL: reserve space on the opposite side */
+  .site-header .menu__ul.ul-heb {
+    padding-right: 0;
+    padding-left: var(--site-utilities-space);
+  }
+
+  .site-header .main-nav-tab {
+    width: auto;
+    height: auto;
+    position: relative;
+  }
+
+  .site-header .menu a.attrib,
+  .site-header .menu a.attrib-cart {
+    display: inline-flex;
+    width: auto;
+    font-family: 'Montserrat', sans-serif;
+    font-size: clamp(10px, 0.9vw, 12px);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #111;
+    height: auto;
+    padding: 10px 12px; /* Added horizontal padding to make entire tab clickable */
+    white-space: nowrap;
+    box-sizing: border-box;
+  }
+
+  /* Make categories tab fully clickable - must come after general .attrib rule */
+  .site-header .main-nav-tab.categories-tab {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    padding: 0;
+    margin: 0;
+  }
+
+  .site-header .main-nav-tab.categories-tab > .attrib {
+    display: flex !important; /* Override inline-flex */
+    align-items: center;
+    justify-content: center;
+    width: 100% !important; /* Override width: auto */
+    min-width: 100%;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+  }
+
+  .site-header .menu a.attrib:hover,
+  .site-header .menu a.attrib-cart:hover {
+    color: var(--site-gold-accent);
+  }
+
+  /* Move flags + currency + cart to the right, keep nav centered */
+  .site-header .menu__ul > .desktop-lang-selector {
+    position: absolute;
+    right: 70px; /* Increased from 54px to add gap before cart icon */
+    top: 50%;
+    transform: translateY(-50%);
+    width: auto;
+    height: auto;
+  }
+
+  .site-header .menu__ul > li:last-child {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: auto;
+    height: auto;
+  }
+
+  /* Utilities styling (flags + currency) */
+  .site-header .desktop-lang-selector {
+    gap: 10px;
+  }
+
+  .site-header .desktop-lang-selector .flag-dropdown {
+    border: 1px solid rgba(17, 17, 17, 0.14);
+    border-radius: 999px;
+    box-shadow: none;
+    padding: 2px 6px;
+  }
+
+  .site-header .desktop-lang-selector .flag-icon {
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    box-shadow: none;
+  }
+
+  .site-header .desktop-lang-selector .flag-icon.selected {
+    border: 2px solid var(--site-gold-accent);
+    box-shadow: none;
+  }
+
+  .site-header .desktop-lang-selector #currency,
+  .site-header .desktop-lang-selector .header-currency-selector {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(17, 17, 17, 0.14);
+    box-shadow: none;
+    padding: 6px 10px;
+    min-width: 84px;
+  }
+
+  /* Cart (icon + count in parentheses) */
+  .site-header .cart-container {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: auto;
+    height: auto;
+    position: static;
+  }
+
+  .site-header .shoppingcart-svg {
+    width: 24px !important;
+    height: 24px !important;
+    opacity: 1 !important;
+  }
+
+  .site-header .cart-number-mobile {
+    position: static;
+    transform: none;
+    width: auto;
+    height: auto;
+    background: transparent;
+    border: none;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Montserrat', sans-serif;
+    color: #111 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .site-header .cart-number-mobile::before {
+    content: '(';
+  }
+
+  .site-header .cart-number-mobile::after {
+    content: ')';
+  }
 }

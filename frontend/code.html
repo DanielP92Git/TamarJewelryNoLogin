@@ -1,454 +1,118 @@
 <!DOCTYPE html>
-<html class="dark" lang="en"><head>
+
+<html lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Luxe Admin - Product Inventory</title>
+<title>Tamar Afik Jewelry</title>
+<!-- Load Tailwind CSS v3 with plugins -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#1313ec",
-                        "background-light": "#f6f6f8",
-                        "background-dark": "#101022",
-                        "surface-dark": "#1e1e2d",
-                        "surface-highlight": "#282839",
-                        "text-secondary": "#9d9db9",
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
+<!-- Google Fonts: 'Great Vibes' for the logo, 'Montserrat' for navigation and hero text -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&amp;family=Montserrat:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Configuration for Custom Colors and Fonts -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'cursive': ['"Great Vibes"', 'cursive'],
+            'sans': ['"Montserrat"', 'sans-serif'],
+          },
+          colors: {
+            'gold-accent': '#C5A572', // Approximate gold/brown from requirement
+          }
         }
-    </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .material-symbols-outlined.filled {
-            font-variation-settings: 'FILL' 1;
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-    </style>
+      }
+    }
+  </script>
+<!-- Custom CSS for specific styling needs -->
+<style data-purpose="hero-layout">
+    /* Ensuring the hero section has a minimum height and covers the area correctly */
+    .hero-section {
+      min-height: 80vh; /* Takes up significant viewport height */
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+  </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white antialiased overflow-hidden">
-<div class="flex h-screen w-full overflow-hidden">
-<aside class="hidden lg:flex w-64 flex-col bg-surface-dark border-r border-gray-800/50 flex-shrink-0">
-<div class="flex h-full flex-col justify-between p-4">
-<div class="flex flex-col gap-6">
-<div class="flex items-center gap-3 px-2">
-<div class="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-purple-600 flex items-center justify-center">
-<span class="material-symbols-outlined text-white">diamond</span>
+<body class="font-sans antialiased text-gray-900">
+<!-- BEGIN: MainHeader -->
+<header class="bg-white sticky top-0 z-50 shadow-sm w-full px-6 py-4 md:px-12 flex flex-col md:flex-row justify-between items-center" data-purpose="site-header">
+<!-- Logo Section -->
+<div class="mb-4 md:mb-0" data-purpose="logo-container">
+<a class="font-cursive text-black tracking-wide text-[32px]" href="#">
+        Tamar Afik Jewelry
+      </a>
 </div>
-<h1 class="text-xl font-bold tracking-tight text-white">Luxe Admin</h1>
-</div>
-<nav class="flex flex-col gap-2">
-<a class="flex items-center gap-3 px-3 py-2.5 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="font-medium text-sm">Dashboard</span>
+<!-- Navigation Menu -->
+<nav class="mb-4 md:mb-0" data-purpose="main-navigation">
+<ul class="flex flex-wrap justify-center gap-8 text-sm font-medium uppercase tracking-wide text-black">
+<li><a class="hover:text-gold-accent transition-colors" href="#">Home</a></li>
+<li class="relative group">
+<a class="flex items-center gap-1 hover:text-gold-accent transition-colors" href="#">
+            Shop
+            <!-- Simple SVG Chevron Down -->
+<svg class="h-4 w-4" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
 </a>
-<a class="flex items-center gap-3 px-3 py-2.5 bg-primary text-white rounded-lg shadow-lg shadow-primary/20 transition-all" href="#">
-<span class="material-symbols-outlined filled">inventory_2</span>
-<span class="font-medium text-sm">Inventory</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2.5 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
-<span class="material-symbols-outlined">shopping_bag</span>
-<span class="font-medium text-sm">Orders</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2.5 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
-<span class="material-symbols-outlined">group</span>
-<span class="font-medium text-sm">Customers</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2.5 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
-<span class="material-symbols-outlined">bar_chart</span>
-<span class="font-medium text-sm">Analytics</span>
-</a>
+</li>
+<li><a class="hover:text-gold-accent transition-colors" href="#">Jewelry Workshop</a></li>
+<li><a class="hover:text-gold-accent transition-colors" href="#">About</a></li>
+<li><a class="hover:text-gold-accent transition-colors" href="#">Contact Me</a></li>
+</ul>
 </nav>
-</div>
-<div class="flex flex-col gap-2 border-t border-gray-800 pt-4">
-<a class="flex items-center gap-3 px-3 py-2 text-text-secondary hover:text-white hover:bg-white/5 rounded-lg transition-colors" href="#">
-<span class="material-symbols-outlined">settings</span>
-<span class="font-medium text-sm">Settings</span>
+<!-- Utility Icons (Language & Cart) -->
+<div class="flex items-center gap-4" data-purpose="header-utilities">
+<!-- Language Flags -->
+<div class="flex gap-2">
+<a aria-label="English" href="#">
+<img alt="US Flag" class="rounded-full w-6 h-6 object-cover border border-gray-200 hover:opacity-80 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6kQeb9iWqoAG4vQbYPB0lK6uAlPSTSRk5BQkYufKDuBJnzXRRV0b2gM6Zh0ZbCZ7DnkHSFwKu4QNG57dgbg7yWmKO0AzB_iibm87d4yVg3go8XHdBImlxgeUHTNjFDYptz7ApW00RkwHRN22v85xZJbaiBufqiRAtGY__x2HtR17dhmxgBZVyc7JQIo6o4-2GuxCbql-jt6v4SpSa5NueJ_eiES_mBK6hq-LkEuGW-MB-IOcsS6UfQW78xDHnu90l8qOff3t1nyGS"/>
 </a>
-<div class="flex items-center gap-3 px-3 py-2 mt-2">
-<div class="h-8 w-8 rounded-full bg-gray-700 bg-cover bg-center" data-alt="User avatar" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDJuI4jQ27fE_hctcmGQ9c-k8_cVNGDwonjOGVVYpyxh-v3KmZkzkW7tRYotmz3zkhi1Ys7FruWSskN8yEwAS8EEoTLFpC9lu1fnmlNwtNhaDvhS-jZc3jMZu7kP72V1ARCEjxbtemJYZPQGPcD0tI6VfMJyFq2SR9LhCGa_G7S523tHv6VIIjryksElUI7QFJ4QBck0leIgw1EIoLPfow0z4fa09i4GeDd7-OlSkkbkC6QgmvY5cVTiF9Lq6QcEo1NhFtE5QlkqEo');"></div>
-<div class="flex flex-col">
-<p class="text-sm font-medium text-white">Admin User</p>
-<p class="text-xs text-text-secondary">admin@luxe.com</p>
+<a aria-label="Hebrew" href="#">
+<img alt="Israel Flag" class="rounded-full w-6 h-6 object-cover border border-gray-200 hover:opacity-80 transition-opacity" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhJsuJwAehhvsmB7TOs2TZ-sWkTpRw0p-cKJVZp2derzP17m38LucC1oXGlPQNJ6VAhhK_WI4ABzIy0XOjmCtwboyJ3pnxi3l4QT-VXnwkDzss0V500W5R3dJw-JsNScsFi6KEi2plXyApSUa7FtabJp9hNOGpTPexwU0VsE5XWo4gqC_ahgxw7LmUPdDy5SOSZIPaK0yNoCRnK4wAh2gYaT_ZIiPsrBSRFuwinI90_sv-Dv1yFVQcLxI1C4ehDuUtuCiDpGdfShXn"/>
+</a>
 </div>
-</div>
-</div>
-</div>
-</aside>
-<main class="flex-1 flex flex-col h-full overflow-hidden relative">
-<header class="h-16 flex items-center justify-between px-6 border-b border-gray-800/50 bg-background-dark/95 backdrop-blur z-10 shrink-0">
-<div class="flex items-center gap-4">
-<button class="lg:hidden text-text-secondary hover:text-white">
-<span class="material-symbols-outlined">menu</span>
-</button>
-<nav class="flex items-center gap-2 text-sm font-medium">
-<a class="text-text-secondary hover:text-white transition-colors" href="#">Dashboard</a>
-<span class="text-gray-600">/</span>
-<span class="text-white">Inventory List</span>
-</nav>
-</div>
-<div class="flex items-center gap-4">
-<button class="text-text-secondary hover:text-white transition-colors relative">
-<span class="material-symbols-outlined">notifications</span>
-<span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
-</button>
+<!-- Shopping Bag -->
+<a aria-label="Shopping Cart" class="flex items-center gap-1 hover:text-gold-accent transition-colors" href="#">
+<svg class="h-6 w-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+</svg>
+<span class="text-sm font-medium text-black">(1)</span>
+</a>
 </div>
 </header>
-<div class="flex-1 overflow-y-auto p-6 md:p-8 lg:p-10 scrollbar-hide">
-<div class="mx-auto max-w-7xl flex flex-col gap-8">
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-<div>
-<h2 class="text-3xl font-bold tracking-tight text-white">Product Inventory List</h2>
-<p class="text-text-secondary mt-1">Monitor stock levels, track reorder points, and manage product availability.</p>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainContent -->
+<main>
+<!-- BEGIN: HeroSection -->
+<!-- 
+      Using placeholder '{{DATA:IMAGE:IMAGE_1}}' as requested for the background.
+      Added a dark overlay (bg-black/30) to ensure text readability against the image.
+    -->
+<section class="hero-section relative flex items-center justify-center" data-purpose="hero-banner" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAifankw4P_E2IjuT-5ZEFjKIHo8yaUN9aPjerlPMt_feHaL4a9yQqQDpO596QGkfymcDSxyOsgLh0DYqe4TIifK9IaY_tiVs93r8qL0UCRUp0pt9pVhZGVvCEgZ_0435FlCYOmcKOfNSvuAJEAu8ePjxOzJHoArwDfuimV3PmcyTEwxRBwcRi-j16bl05NerOIS4RmPXXJnC4p-Dfpbev4SiLUd3zTtGWXgaI7L0s3XjZjiDBtP6nZtJODSx3KcS-sDY1VEZxaY-tk');">
+<!-- Overlay for better text contrast -->
+<div class="absolute inset-0 bg-black/20 z-0"></div>
+<!-- Hero Content -->
+<div class="relative z-10 text-center px-4 max-w-4xl mx-auto text-white">
+<!-- Headline -->
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-light tracking-wider mb-4 uppercase drop-shadow-md">
+          Inspired by Timeless Elegance
+        </h1>
+<!-- Sub-headline -->
+<p class="text-lg md:text-xl font-light mb-10 tracking-wide drop-shadow-sm">
+          Handcrafted jewelry pieces that tell your unique story
+        </p>
+<!-- CTA Button -->
+<!-- Pill shape, white bg, gold/brown border and text -->
+<a class="inline-block bg-white text-gold-accent border border-gold-accent px-8 py-3 rounded-full uppercase tracking-widest text-sm hover:bg-stone-50 transition-all duration-300 shadow-md" href="#">
+          Discover The Collection
+        </a>
 </div>
-<div class="flex gap-3">
-<button class="bg-surface-highlight hover:bg-white/10 text-white px-5 py-2.5 rounded-lg text-sm font-semibold border border-white/10 flex items-center gap-2 transition-all">
-<span class="material-symbols-outlined text-[20px]">file_download</span>
-                            Export
-                        </button>
-<button class="bg-primary hover:bg-primary/90 text-white px-5 py-2.5 rounded-lg text-sm font-semibold shadow-lg shadow-primary/25 flex items-center gap-2 transition-all">
-<span class="material-symbols-outlined text-[20px]">add</span>
-                            Add Product
-                        </button>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-<div class="bg-surface-dark border border-white/5 rounded-xl p-6 relative overflow-hidden group hover:border-primary/30 transition-colors">
-<div class="flex justify-between items-start mb-4">
-<div class="bg-blue-500/10 p-2 rounded-lg text-blue-400">
-<span class="material-symbols-outlined">inventory</span>
-</div>
-<span class="text-xs font-medium text-green-400 bg-green-400/10 px-2 py-1 rounded-full">Healthy</span>
-</div>
-<p class="text-text-secondary text-sm font-medium">Total Inventory</p>
-<h3 class="text-2xl font-bold text-white mt-1">1,240 <span class="text-sm font-normal text-gray-500">items</span></h3>
-</div>
-<div class="bg-surface-dark border border-white/5 rounded-xl p-6 relative overflow-hidden group hover:border-yellow-500/30 transition-colors">
-<div class="flex justify-between items-start mb-4">
-<div class="bg-yellow-500/10 p-2 rounded-lg text-yellow-400">
-<span class="material-symbols-outlined">warning</span>
-</div>
-<span class="text-xs font-medium text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded-full">12 Items</span>
-</div>
-<p class="text-text-secondary text-sm font-medium">Low Stock Alerts</p>
-<h3 class="text-2xl font-bold text-white mt-1">Action Needed</h3>
-</div>
-<div class="bg-surface-dark border border-white/5 rounded-xl p-6 relative overflow-hidden group hover:border-red-500/30 transition-colors">
-<div class="flex justify-between items-start mb-4">
-<div class="bg-red-500/10 p-2 rounded-lg text-red-400">
-<span class="material-symbols-outlined">remove_shopping_cart</span>
-</div>
-<span class="text-xs font-medium text-red-400 bg-red-400/10 px-2 py-1 rounded-full">Critical</span>
-</div>
-<p class="text-text-secondary text-sm font-medium">Out of Stock</p>
-<h3 class="text-2xl font-bold text-white mt-1">4 <span class="text-sm font-normal text-gray-500">products</span></h3>
-</div>
-</div>
-<div class="flex flex-col md:flex-row gap-4 items-stretch md:items-center bg-surface-dark p-2 rounded-xl border border-white/5">
-<div class="relative flex-1">
-<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary">search</span>
-<input class="w-full bg-surface-highlight border-none rounded-lg py-2.5 pl-10 pr-4 text-white placeholder-text-secondary focus:ring-1 focus:ring-primary text-sm" placeholder="Search by product name, SKU..." type="text"/>
-</div>
-<div class="flex gap-2 flex-wrap">
-<div class="relative min-w-[140px] flex-1 md:flex-none">
-<select class="w-full appearance-none bg-surface-highlight border-none rounded-lg py-2.5 pl-4 pr-10 text-white text-sm focus:ring-1 focus:ring-primary cursor-pointer">
-<option value="">All Categories</option>
-<option value="rings">Rings</option>
-<option value="necklaces">Necklaces</option>
-<option value="earrings">Earrings</option>
-<option value="bracelets">Bracelets</option>
-</select>
-<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none text-lg">expand_more</span>
-</div>
-<div class="relative min-w-[140px] flex-1 md:flex-none">
-<select class="w-full appearance-none bg-surface-highlight border-none rounded-lg py-2.5 pl-4 pr-10 text-white text-sm focus:ring-1 focus:ring-primary cursor-pointer">
-<option value="">Stock Level: All</option>
-<option value="in_stock">In Stock</option>
-<option value="low_stock">Low Stock</option>
-<option value="out_of_stock">Out of Stock</option>
-</select>
-<span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary pointer-events-none text-lg">expand_more</span>
-</div>
-<button class="px-3 py-2 bg-surface-highlight hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors border border-transparent hover:border-white/10">
-<span class="material-symbols-outlined">filter_list</span>
-</button>
-</div>
-</div>
-<div class="bg-surface-dark rounded-xl border border-white/5 overflow-hidden">
-<div class="overflow-x-auto">
-<table class="w-full text-left border-collapse">
-<thead>
-<tr class="bg-surface-highlight/50 border-b border-white/5 text-xs uppercase text-text-secondary font-semibold tracking-wider">
-<th class="px-6 py-4">Product Name</th>
-<th class="px-6 py-4">SKU</th>
-<th class="px-6 py-4">Category</th>
-<th class="px-6 py-4">Stock Qty</th>
-<th class="px-6 py-4">Reorder Level</th>
-<th class="px-6 py-4">Status</th>
-<th class="px-6 py-4 text-right">Actions</th>
-</tr>
-</thead>
-<tbody class="divide-y divide-white/5 text-sm">
-<tr class="group hover:bg-white/[0.02] transition-colors">
-<td class="px-6 py-4">
-<div class="flex items-center gap-4">
-<div class="h-10 w-10 rounded-lg bg-gray-700 bg-cover bg-center shrink-0 border border-white/10" data-alt="Diamond solitaire ring" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBXeywQBMB-jHoZu4A2RDXvoPOtTrN-PN7OoXgcTih2pDMOwYRs-jtke5rZLWrXdNyY_WijJJoAXWQFG5M3A2vLIl5rVKM-eMPG-kHO6iwvgZdIE84uipoRWjRRy_wEuADwTnPgnXgOi9XBCKsAQhp741GDvBVwlHqxgpExcmRvFgQSfWGOTySY3JmC3c06zRM3yeu7DEgE-1LGJnj_JG7OJXcuYgQaAebB91DE6LkvBX5romWKLXQvjeOzAVkpFrSEs-7ta-e_Zp8');"></div>
-<div>
-<p class="font-medium text-white group-hover:text-primary transition-colors">Diamond Solitaire Ring</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-4 text-text-secondary font-mono">RNG-8211</td>
-<td class="px-6 py-4 text-text-secondary">Rings</td>
-<td class="px-6 py-4">
-<span class="font-semibold text-white">45</span>
-</td>
-<td class="px-6 py-4 text-text-secondary">
-                                    10 units
-                                </td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
-                                        In Stock
-                                    </span>
-</td>
-<td class="px-6 py-4 text-right">
-<div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="Adjust Stock">
-<span class="material-symbols-outlined text-[20px]">inventory</span>
-</button>
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="View Details">
-<span class="material-symbols-outlined text-[20px]">visibility</span>
-</button>
-<button class="p-2 hover:bg-primary/20 rounded-lg text-text-secondary hover:text-primary transition-colors" title="Edit Product">
-<span class="material-symbols-outlined text-[20px]">edit</span>
-</button>
-</div>
-</td>
-</tr>
-<tr class="group hover:bg-white/[0.02] transition-colors">
-<td class="px-6 py-4">
-<div class="flex items-center gap-4">
-<div class="h-10 w-10 rounded-lg bg-gray-700 bg-cover bg-center shrink-0 border border-white/10" data-alt="Gold pearl necklace" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAMfc5f2hxPSp6NiGR0EOgj0Kq1q0yvBvv312cIQK6SbNHD_A7zPb4ETcGr8cbdEvz3qlnV6YTAMbSfQHE5qNSLW-jt3vZ69dTWChmAPv8mO6ezYDleBRG67AYIKCxT02BtqfxYqj1Sy63DAe-bqu-ug9W7lAl-qqJGs_jUPDL87g7k-GwjtUKQ7Iy43J3qkfav01z8B509xsgQIN0pz4t1u2D0_Rlr7PPpdER-6B3TuveLRGOYXmYrmF8ZpjmB7B2zyD5YcKeRdIw');"></div>
-<div>
-<p class="font-medium text-white group-hover:text-primary transition-colors">Golden Pearl Necklace</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-4 text-text-secondary font-mono">NCK-4420</td>
-<td class="px-6 py-4 text-text-secondary">Necklaces</td>
-<td class="px-6 py-4">
-<div class="flex items-center gap-2">
-<span class="font-semibold text-yellow-400">3</span>
-<span class="material-symbols-outlined text-yellow-400 text-[16px]">warning</span>
-</div>
-</td>
-<td class="px-6 py-4 text-text-secondary">
-                                    5 units
-                                </td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">
-                                        Low Stock
-                                    </span>
-</td>
-<td class="px-6 py-4 text-right">
-<div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="Adjust Stock">
-<span class="material-symbols-outlined text-[20px]">inventory</span>
-</button>
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="View Details">
-<span class="material-symbols-outlined text-[20px]">visibility</span>
-</button>
-<button class="p-2 hover:bg-primary/20 rounded-lg text-text-secondary hover:text-primary transition-colors" title="Edit Product">
-<span class="material-symbols-outlined text-[20px]">edit</span>
-</button>
-</div>
-</td>
-</tr>
-<tr class="group hover:bg-white/[0.02] transition-colors">
-<td class="px-6 py-4">
-<div class="flex items-center gap-4">
-<div class="h-10 w-10 rounded-lg bg-gray-700 bg-cover bg-center shrink-0 border border-white/10" data-alt="Sapphire earrings" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDV_CFkyM4uVwSurAcrSe5REctH4TwajQCpSN95l_9w9RGjBm1TSu8IzC7WhjN24PQ9Fzo2uKGh5VUlwRNaV5_zawtRzCDaqXbRH_s2-pag5kI7kzK2ulW9XKcb3XhKJyNDEv3RTe43ZQ3wBqqkWQJ8Q9AuoI1NcgzFkvGG-hsxNvLsfeOWjNE_WkGUbG42ZSqa_We1w37cM_DwEtEbFFi-ITzVNwZQM9hPZtNVwge1ahBa9ZiWrpcpA1G1DTTQDL2TU8t43LB96pU');"></div>
-<div>
-<p class="font-medium text-white group-hover:text-primary transition-colors">Sapphire Drop Earrings</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-4 text-text-secondary font-mono">EAR-9932</td>
-<td class="px-6 py-4 text-text-secondary">Earrings</td>
-<td class="px-6 py-4">
-<span class="font-semibold text-white">12</span>
-</td>
-<td class="px-6 py-4 text-text-secondary">
-                                    5 units
-                                </td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
-                                        In Stock
-                                    </span>
-</td>
-<td class="px-6 py-4 text-right">
-<div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="Adjust Stock">
-<span class="material-symbols-outlined text-[20px]">inventory</span>
-</button>
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="View Details">
-<span class="material-symbols-outlined text-[20px]">visibility</span>
-</button>
-<button class="p-2 hover:bg-primary/20 rounded-lg text-text-secondary hover:text-primary transition-colors" title="Edit Product">
-<span class="material-symbols-outlined text-[20px]">edit</span>
-</button>
-</div>
-</td>
-</tr>
-<tr class="group hover:bg-white/[0.02] transition-colors">
-<td class="px-6 py-4">
-<div class="flex items-center gap-4">
-<div class="h-10 w-10 rounded-lg bg-gray-700 bg-cover bg-center shrink-0 border border-white/10" data-alt="Silver charm bracelet" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDBjHUqzMuaG3RbfAl44piQKAmWZCJE3PGtAY410Kw84vd8vW0vf9cgHaezjViLjgClDZ128DgT1EiEVFw8LmA63pWIj7gElZQ4eYr63hqNPQgXs9u24Iwn6M6LZexBldcSNRiRyY-bE5YVNtEkbFgqCXY_m2hbGVeinrvUWWMPGE7o2dliEBvQ979EyFbC95-mUOrXvo8FZH3vKeeH6mkrPlg4kjSaJcqK8P3lXfnngiZH4j1olW4qa8YTcIxpi_2RxQaiTLmeyAk');"></div>
-<div>
-<p class="font-medium text-white group-hover:text-primary transition-colors">Silver Charm Bracelet</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-4 text-text-secondary font-mono">BRC-2201</td>
-<td class="px-6 py-4 text-text-secondary">Bracelets</td>
-<td class="px-6 py-4">
-<span class="font-semibold text-white">128</span>
-</td>
-<td class="px-6 py-4 text-text-secondary">
-                                    20 units
-                                </td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
-                                        In Stock
-                                    </span>
-</td>
-<td class="px-6 py-4 text-right">
-<div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="Adjust Stock">
-<span class="material-symbols-outlined text-[20px]">inventory</span>
-</button>
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="View Details">
-<span class="material-symbols-outlined text-[20px]">visibility</span>
-</button>
-<button class="p-2 hover:bg-primary/20 rounded-lg text-text-secondary hover:text-primary transition-colors" title="Edit Product">
-<span class="material-symbols-outlined text-[20px]">edit</span>
-</button>
-</div>
-</td>
-</tr>
-<tr class="group hover:bg-white/[0.02] transition-colors">
-<td class="px-6 py-4">
-<div class="flex items-center gap-4">
-<div class="h-10 w-10 rounded-lg bg-gray-700 bg-cover bg-center shrink-0 border border-white/10" data-alt="Emerald cut diamond ring" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCAw7rXatNYpO4TgoRPTZRQE4Mc3TJh_kZOwfn956axTBU28_keMMi9Mvu-21pCMDZz6XqsFnB75UHh6IKCaoEyIxT7NWZkypdEhV4y3_mc0xQeaLXJJUngKSUkfpHSQPL3VGEe0doNo3ohTEK_lzlk4MajoCmmpyWoEQRKAvNrPAlQmxUvvFWynttlo2EjVsQxbgsKpBt19nsB2M2YTd5TyIEZmXyO680Q42F0gBYKBjxI-l73TPAkMvYiCJnwXgipRBIYZINuBvo');"></div>
-<div>
-<p class="font-medium text-white group-hover:text-primary transition-colors">Emerald Cut Ring</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-4 text-text-secondary font-mono">RNG-7734</td>
-<td class="px-6 py-4 text-text-secondary">Rings</td>
-<td class="px-6 py-4">
-<span class="font-semibold text-white">8</span>
-</td>
-<td class="px-6 py-4 text-text-secondary">
-                                    2 units
-                                </td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
-                                        In Stock
-                                    </span>
-</td>
-<td class="px-6 py-4 text-right">
-<div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="Adjust Stock">
-<span class="material-symbols-outlined text-[20px]">inventory</span>
-</button>
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="View Details">
-<span class="material-symbols-outlined text-[20px]">visibility</span>
-</button>
-<button class="p-2 hover:bg-primary/20 rounded-lg text-text-secondary hover:text-primary transition-colors" title="Edit Product">
-<span class="material-symbols-outlined text-[20px]">edit</span>
-</button>
-</div>
-</td>
-</tr>
-<tr class="group hover:bg-white/[0.02] transition-colors">
-<td class="px-6 py-4">
-<div class="flex items-center gap-4">
-<div class="h-10 w-10 rounded-lg bg-gray-700 bg-cover bg-center shrink-0 border border-white/10" data-alt="Rose gold pendant" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCt5V8VW9ipC1g4IxBBnRjWv22rmvIX0YOlFDxPTD4MMdbJJuC9AC7vPzyfSeSy5Tcj3iM8uqvpZcLkWKLPliix3BwkwLkStHh5-onVlEsRAC7knwty8I7qslHV2NlknQVgYSWJg11pD_jlyQ6SLg7mUvxJh7iBWMWjDvXeNKrJUdgd4V13nYUBos6_OMOuOLk29VE56lrE6kfAryiHnnHimOciT2KoUMlBrOjWX5acFu7ttsyOU7Aocd3zGa5Tgfrjj6gO_G8tnsM');"></div>
-<div>
-<p class="font-medium text-white group-hover:text-primary transition-colors">Rose Gold Heart Pendant</p>
-</div>
-</div>
-</td>
-<td class="px-6 py-4 text-text-secondary font-mono">NCK-3312</td>
-<td class="px-6 py-4 text-text-secondary">Necklaces</td>
-<td class="px-6 py-4">
-<div class="flex items-center gap-2">
-<span class="font-semibold text-red-400">0</span>
-<span class="material-symbols-outlined text-red-400 text-[16px]">error</span>
-</div>
-</td>
-<td class="px-6 py-4 text-text-secondary">
-                                    5 units
-                                </td>
-<td class="px-6 py-4">
-<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
-                                        Out of Stock
-                                    </span>
-</td>
-<td class="px-6 py-4 text-right">
-<div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="Adjust Stock">
-<span class="material-symbols-outlined text-[20px]">inventory</span>
-</button>
-<button class="p-2 hover:bg-white/10 rounded-lg text-text-secondary hover:text-white transition-colors" title="View Details">
-<span class="material-symbols-outlined text-[20px]">visibility</span>
-</button>
-<button class="p-2 hover:bg-primary/20 rounded-lg text-text-secondary hover:text-primary transition-colors" title="Edit Product">
-<span class="material-symbols-outlined text-[20px]">edit</span>
-</button>
-</div>
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="flex items-center justify-between px-6 py-4 border-t border-white/5 bg-surface-highlight/20">
-<p class="text-sm text-text-secondary">
-                            Showing <span class="font-medium text-white">1</span> to <span class="font-medium text-white">10</span> of <span class="font-medium text-white">450</span> results
-                        </p>
-<div class="flex gap-2">
-<button class="px-3 py-1.5 rounded-lg border border-white/10 text-text-secondary text-sm hover:bg-white/5 hover:text-white disabled:opacity-50 transition-colors">Previous</button>
-<button class="px-3 py-1.5 rounded-lg bg-primary text-white text-sm font-medium shadow-lg shadow-primary/20">1</button>
-<button class="px-3 py-1.5 rounded-lg border border-white/10 text-text-secondary text-sm hover:bg-white/5 hover:text-white transition-colors">2</button>
-<button class="px-3 py-1.5 rounded-lg border border-white/10 text-text-secondary text-sm hover:bg-white/5 hover:text-white transition-colors">3</button>
-<span class="px-2 text-text-secondary">...</span>
-<button class="px-3 py-1.5 rounded-lg border border-white/10 text-text-secondary text-sm hover:bg-white/5 hover:text-white transition-colors">45</button>
-<button class="px-3 py-1.5 rounded-lg border border-white/10 text-text-secondary text-sm hover:bg-white/5 hover:text-white transition-colors">Next</button>
-</div>
-</div>
-</div>
-</div>
-</div>
+</section>
+<!-- END: HeroSection -->
 </main>
-</div>
-
+<!-- END: MainContent -->
 </body></html>

@@ -14,7 +14,7 @@ class CategoriesView extends View {
     this.page = 1;
     this.limit = 6;
     this.isLoading = false;
-    this.selectedCurrency = 'usd';
+    this.selectedCurrency = localStorage.getItem('currency') || 'usd';
     this.sortedByPrice = '';
     this.products = [];
     this.totalProducts = 0;
@@ -173,7 +173,7 @@ class CategoriesView extends View {
     this.lang = lng;
     this.setHeaderLng(this.lang);
 
-    // Initialize currency and sort toggles
+    // Initialize sort toggle (currency is now in header)
     this.setCurSortLng(this.lang);
     this.setupCurrencyHandler();
     this.setupSortHandler();
@@ -233,6 +233,8 @@ class CategoriesView extends View {
     const currencySelect = document.getElementById('currency');
     const sortSelect = document.getElementById('sort');
 
+    // Currency selector is now in header, handled by View.js
+    // But we still update it here if it exists (for backward compatibility)
     if (currencySelect) {
       currencySelect.options[0].text = lng === 'eng' ? 'Currency' : 'מטבע';
       currencySelect.options[1].text = lng === 'eng' ? 'USD' : 'דולר';
@@ -265,6 +267,7 @@ class CategoriesView extends View {
 
   setCurSortLng(lng) {
     const curSortContainer = document.querySelector('.currency-sort-container');
+    if (!curSortContainer) return;
     curSortContainer.innerHTML = '';
     const markup = this.handleCurSortLng(lng);
     curSortContainer.insertAdjacentHTML('afterbegin', markup);
@@ -272,15 +275,11 @@ class CategoriesView extends View {
 
   handleCurSortLng(lng) {
     const curSortContainer = document.querySelector('.currency-sort-container');
+    if (!curSortContainer) return '';
     curSortContainer.style.direction = 'ltr';
 
     if (lng === 'eng') {
-      return `<select name="currency" id="currency">
-        <option value="default" class="currency-option">Currency</option>
-        <option value="usd" class="currency-option">USD</option>
-        <option value="ils" class="currency-option">ILS</option>
-      </select>
-      <select name="sort" id="sort">
+      return `<select name="sort" id="sort">
         <option value="default" class="sort-option">Sort by:</option>
         <option value="low-to-high" class="sort-option">
           Price (Low to High)
@@ -292,12 +291,7 @@ class CategoriesView extends View {
     } else if (lng === 'heb') {
       curSortContainer.style.direction = 'rtl';
 
-      return `<select name="currency" id="currency">
-        <option value="default" class="currency-option">מטבע</option>
-        <option value="usd" class="currency-option">דולר</option>
-        <option value="ils" class="currency-option">שקל</option>
-      </select>
-      <select name="sort" id="sort">
+      return `<select name="sort" id="sort">
         <option value="default" class="sort-option">מיין לפי:</option>
         <option value="low-to-high" class="sort-option">
           מחיר (מנמוך לגבוה)
@@ -307,6 +301,7 @@ class CategoriesView extends View {
         </option>
       </select>`;
     }
+    return '';
   }
 
   setHeaderLng(lng) {
@@ -728,7 +723,16 @@ class CategoriesView extends View {
       mainDesktopImage &&
       mainDesktopImage !== '' &&
       !mainDesktopImage.includes('undefined');
-    const hasSmallImages = smallImagesArray && smallImagesArray.length > 0;
+
+    // If we have additional images, include the main image as the FIRST thumbnail
+    // so users can always return to it after selecting other thumbnails.
+    if (hasValidImage && Array.isArray(smallImagesArray) && smallImagesArray.length > 0) {
+      // Avoid duplicates if the main image is already present in the small images list
+      const deduped = smallImagesArray.filter((url) => url !== mainDesktopImage);
+      smallImagesArray = [mainDesktopImage, ...deduped];
+    }
+
+    const hasSmallImages = Array.isArray(smallImagesArray) && smallImagesArray.length > 0;
 
     const modalContent = `
       <div class="item-overlay">
@@ -775,7 +779,6 @@ class CategoriesView extends View {
                     onerror="this.onerror=null; this.crossOrigin=''; this.src='${mainDesktopImage}';"
                   />
                   <div class="loading-indicator">Loading...</div>
-                  <div class="magnifier-glass"></div>
                 </div>`
                   : `<div class="error-image-container">
                   <div>
@@ -836,74 +839,37 @@ class CategoriesView extends View {
   }
 
   setupCurrencyHandler() {
-    const currencySelector = document.getElementById('currency');
+    // Sync initial currency from storage so this page renders with the right prices immediately.
+    this.selectedCurrency = localStorage.getItem('currency') || 'usd';
+    document.querySelectorAll('#currency').forEach(sel => {
+      if (!sel) return;
+      if (sel.value === 'default' || sel.value !== this.selectedCurrency) {
+        sel.value = this.selectedCurrency;
+      }
+    });
 
-    currencySelector.addEventListener('change', async () => {
+    // Listen once per view instance. Persistence + broadcasting is handled globally in View.js.
+    if (this._currencyListenerAdded) return;
+    this._currencyListenerAdded = true;
+
+    window.addEventListener('currency-changed', async e => {
+      if (!this.outerProductsContainer) return;
+      const next = e?.detail?.currency;
+      if (next !== 'usd' && next !== 'ils') return;
+
       const spinner = this.outerProductsContainer.querySelector('.loader');
-      spinner.classList.remove('spinner-hidden');
+      if (spinner) spinner.classList.remove('spinner-hidden');
 
       try {
-        this.selectedCurrency = currencySelector.value;
+        this.selectedCurrency = next;
 
-        // If we have a sort order active, fetch all products and sort them
-        if (this.sortedByPrice !== '') {
-          const apiUrl = `${process.env.API_URL}`;
-          const response = await fetch(`${apiUrl}/getAllProductsByCategory`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ category: this.category }),
-          });
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data = await response.json();
-
-          if (!data || !data.products) {
-            console.error(
-              '[CategoriesView] Invalid data format received:',
-              data
-            );
-            return;
-          }
-
-          // Store all products and sort them
-          this.products = data.products;
-          this.totalProducts = data.total;
-          this.allProductsFetched = true;
-
-          // Sort products by price
-          this.products.sort((a, b) => {
-            // Convert prices to the selected currency
-            const priceA =
-              this.selectedCurrency === 'usd'
-                ? a.ils_price / this.exchangeRate
-                : a.ils_price;
-            const priceB =
-              this.selectedCurrency === 'usd'
-                ? b.ils_price / this.exchangeRate
-                : b.ils_price;
-
-            // Sort based on the converted prices
-            return this.sortedByPrice === 'low-to-high'
-              ? priceA - priceB
-              : priceB - priceA;
-          });
-
-          // Display sorted products
-          this.displayProducts();
-        } else {
-          // If no sort order, just fetch paginated products
-          this.page = 1;
-          await this.fetchProductsByCategory();
-        }
+        // Currency conversion USD <-> ILS is linear, so price ordering doesn't change.
+        // We can just re-render the current products list with the new symbol/conversion.
+        this.displayProducts();
       } catch (err) {
-        console.error('[CategoriesView] Error in currency handler:', err);
+        console.error('[CategoriesView] Error handling currency change:', err);
       } finally {
-        if (spinner) {
-          spinner.classList.add('spinner-hidden');
-        }
+        if (spinner) spinner.classList.add('spinner-hidden');
       }
     });
   }
@@ -1378,10 +1344,7 @@ class CategoriesView extends View {
     const overlay = modal.querySelector('.item-overlay');
     const addToCartBtn = modal.querySelector('.add-to-cart-btn_modal');
     const magnifierContainer = modal.querySelector('.magnifier-container');
-    const magnifierGlass = modal.querySelector('.magnifier-glass');
     const bigImage = modal.querySelector('.big-image');
-    const tapToMagnify = modal.querySelector('.tap-to-magnify');
-    const magnifierIcon = modal.querySelector('.magnifier-icon');
     const loadingIndicator = modal.querySelector('.loading-indicator');
     const fullscreenGallery = modal.querySelector('.fullscreen-gallery');
     const galleryImage = modal.querySelector('.gallery-image');
@@ -1441,6 +1404,10 @@ class CategoriesView extends View {
     if (smallImagesInSidebar.length > 0) {
       smallImagesInSidebar.forEach(imgThumb => {
         imgThumb.addEventListener('click', () => {
+          // Keep the index in sync (used by fullscreen gallery navigation)
+          const idxAttr = imgThumb.getAttribute('data-index');
+          if (idxAttr !== null) currentImageIndex = Number(idxAttr) || 0;
+
           // Remove active class from all thumbnails
           smallImagesInSidebar.forEach(thumb =>
             thumb.classList.remove('active')
@@ -1611,17 +1578,7 @@ class CategoriesView extends View {
       });
     }
 
-    // Setup magnifier functionality
-    if (magnifierContainer && magnifierGlass && bigImage) {
-      this._setupMagnifier(
-        magnifierContainer,
-        magnifierGlass,
-        bigImage,
-        tapToMagnify,
-        magnifierIcon,
-        isMobile
-      );
-    }
+    // Magnifier effect removed: keep only click-to-open fullscreen gallery behavior
 
     // Show modal
     modal.classList.add('show');

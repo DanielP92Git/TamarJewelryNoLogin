@@ -3,6 +3,73 @@ import barsSvg from '../imgs/svgs/bars-solid.svg';
 import shoppingCartIcon from '../imgs/svgs/shopping-bag-outline.svg';
 import * as model from './model.js';
 
+// ------------------------------------------------------------
+// Currency preference persistence (USD/ILS) across pages
+// ------------------------------------------------------------
+const CURRENCY_STORAGE_KEY = 'currency';
+const CURRENCY_EVENT_NAME = 'currency-changed';
+
+function normalizeCurrency(value) {
+  const v = String(value || '').toLowerCase();
+  if (v === 'usd' || v === 'ils') return v;
+  return null;
+}
+
+function getSavedCurrency() {
+  return normalizeCurrency(localStorage.getItem(CURRENCY_STORAGE_KEY)) || 'usd';
+}
+
+function setSavedCurrency(currency) {
+  const c = normalizeCurrency(currency);
+  if (!c) return;
+  localStorage.setItem(CURRENCY_STORAGE_KEY, c);
+}
+
+function syncCurrencySelectors(currency) {
+  const c = normalizeCurrency(currency) || getSavedCurrency();
+  document.querySelectorAll('#currency').forEach((el) => {
+    try {
+      // Some pages may temporarily render a "default" option; force the saved value.
+      el.value = c;
+    } catch (e) {
+      void e;
+    }
+  });
+}
+
+function initCurrencyPersistence() {
+  if (window.__currencyPersistenceInitialized) return;
+  window.__currencyPersistenceInitialized = true;
+
+  // Ensure current selects reflect saved currency on initial render.
+  const applySaved = () => syncCurrencySelectors(getSavedCurrency());
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', applySaved, { once: true });
+  } else {
+    applySaved();
+  }
+
+  // Event delegation: works even if header/menu re-renders or elements are replaced.
+  document.addEventListener('change', (e) => {
+    const target = e.target;
+    if (!target || target.id !== 'currency') return;
+
+    const chosen = normalizeCurrency(target.value);
+    if (!chosen) return; // ignore "default"
+
+    setSavedCurrency(chosen);
+    syncCurrencySelectors(chosen);
+    window.dispatchEvent(
+      new CustomEvent(CURRENCY_EVENT_NAME, { detail: { currency: chosen } })
+    );
+  });
+}
+
+// Initialize once per page load (module is imported by all views).
+if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+  initCurrencyPersistence();
+}
+
 export default class View {
   _data;
   _goToTop = document.querySelector('.go-to-top');
@@ -566,6 +633,7 @@ export default class View {
           ${ilFlag}
         </div>
       </div>
+      ${this.getCurrencySelectorMarkup(lng)}
     </li>`;
 
     // Create the desktop flag selector HTML - for Hebrew version without the english-lng-selector class
@@ -583,6 +651,7 @@ export default class View {
           ${ilFlag}
         </div>
       </div>
+      ${this.getCurrencySelectorMarkup(lng)}
     </li>`;
 
     if (lng === 'eng') {
@@ -720,52 +789,7 @@ export default class View {
 </svg>
 `;
 
-    // Add mobile language selector if it doesn't exist
-    if (!document.querySelector('.mobile-lang-selector')) {
-      const mobileLangSelector = document.createElement('div');
-      mobileLangSelector.className = 'mobile-lang-selector';
-      mobileLangSelector.innerHTML = `
-        <div class="flag-dropdown">
-          <div class="flag-icon flag-eng${
-            lng === 'eng' ? ' selected' : ''
-          }" data-lang="eng">
-            ${usFlag}
-          </div>
-          <div class="flag-icon flag-heb${
-            lng === 'heb' ? ' selected' : ''
-          }" data-lang="heb">
-            ${ilFlag}
-          </div>
-        </div>
-      `;
-      const header = document.querySelector('header');
-      if (header) {
-        header.appendChild(mobileLangSelector);
-      } else {
-        document.body.appendChild(mobileLangSelector);
-      }
-
-      // Add event listeners for flag clicks
-      const flagIcons = mobileLangSelector.querySelectorAll('.flag-icon');
-      flagIcons.forEach(flag => {
-        flag.addEventListener('click', e => {
-          const newLang = flag.getAttribute('data-lang');
-          if (newLang === 'heb') {
-            this.changeToHeb();
-          } else {
-            this.changeToEng();
-          }
-        });
-      });
-    } else {
-      // Update the selected option if the selector already exists
-      const select = document.getElementById('mobile-lang-select');
-      if (select) {
-        select.value = lng;
-      }
-    }
-
-    // Update menu innerHTML
+    // Update menu innerHTML first
     const menu = document.querySelector('.menu');
     if (!menu) {
       console.error('[DEBUG] Menu element not found');
@@ -777,6 +801,43 @@ export default class View {
 
     // Update menu content
     menu.innerHTML = this.handleMenuLanguage(lng);
+    
+    // Add mobile language and currency selector to side menu (at bottom)
+    let mobileLangSelector = menu.querySelector('.mobile-lang-selector');
+    if (!mobileLangSelector) {
+      mobileLangSelector = document.createElement('div');
+      mobileLangSelector.className = 'mobile-lang-selector';
+      menu.appendChild(mobileLangSelector);
+    }
+    
+    mobileLangSelector.innerHTML = `
+      <div class="flag-dropdown">
+        <div class="flag-icon flag-eng${
+          lng === 'eng' ? ' selected' : ''
+        }" data-lang="eng">
+          ${usFlag}
+        </div>
+        <div class="flag-icon flag-heb${
+          lng === 'heb' ? ' selected' : ''
+        }" data-lang="heb">
+          ${ilFlag}
+        </div>
+      </div>
+      ${this.getCurrencySelectorMarkup(lng)}
+    `;
+
+    // Add event listeners for flag clicks
+    const flagIcons = mobileLangSelector.querySelectorAll('.flag-icon');
+    flagIcons.forEach(flag => {
+      flag.addEventListener('click', e => {
+        const newLang = flag.getAttribute('data-lang');
+        if (newLang === 'heb') {
+          this.changeToHeb();
+        } else {
+          this.changeToEng();
+        }
+      });
+    });
 
     // Add event listeners for desktop language flags
     const desktopFlagIcons = document.querySelectorAll(
@@ -791,6 +852,15 @@ export default class View {
           this.changeToEng();
         }
       });
+    });
+
+    // Update currency selector text based on language (there may be multiple selectors: mobile + desktop)
+    document.querySelectorAll('#currency').forEach((currencySelect) => {
+      this.updateCurrencySelectorText(currencySelect, lng);
+    });
+    // Update currency selector text based on language (there may be multiple selectors: mobile + desktop)
+    document.querySelectorAll('#currency').forEach((currencySelect) => {
+      this.updateCurrencySelectorText(currencySelect, lng);
     });
 
     // Ensure cart icon is visible after DOM update
@@ -900,6 +970,50 @@ export default class View {
     // Call page-specific language updates if the method exists
     if (typeof this.setPageSpecificLanguage === 'function') {
       await this.setPageSpecificLanguage(lng, cartNum);
+    }
+  }
+
+  getCurrencySelectorMarkup(lng) {
+    // Get saved currency preference or default to 'usd'
+    const savedCurrency = localStorage.getItem('currency') || 'usd';
+    
+    if (lng === 'eng') {
+      return `<select name="currency" id="currency" class="header-currency-selector">
+        <option value="default" class="currency-option">Currency</option>
+        <option value="usd" class="currency-option" ${savedCurrency === 'usd' ? 'selected' : ''}>USD</option>
+        <option value="ils" class="currency-option" ${savedCurrency === 'ils' ? 'selected' : ''}>ILS</option>
+      </select>`;
+    } else if (lng === 'heb') {
+      return `<select name="currency" id="currency" class="header-currency-selector" dir="rtl">
+        <option value="default" class="currency-option">מטבע</option>
+        <option value="usd" class="currency-option" ${savedCurrency === 'usd' ? 'selected' : ''}>דולר</option>
+        <option value="ils" class="currency-option" ${savedCurrency === 'ils' ? 'selected' : ''}>שקל</option>
+      </select>`;
+    }
+    return '';
+  }
+
+  updateCurrencySelectorText(currencySelect, lng) {
+    if (currencySelect && currencySelect.options.length >= 3) {
+      // Preserve the current selected value
+      const currentValue = currencySelect.value;
+      const savedCurrency = getSavedCurrency();
+      
+      if (lng === 'eng') {
+        currencySelect.options[0].text = 'Currency';
+        currencySelect.options[1].text = 'USD';
+        currencySelect.options[2].text = 'ILS';
+        currencySelect.removeAttribute('dir');
+      } else if (lng === 'heb') {
+        currencySelect.options[0].text = 'מטבע';
+        currencySelect.options[1].text = 'דולר';
+        currencySelect.options[2].text = 'שקל';
+        currencySelect.setAttribute('dir', 'rtl');
+      }
+      
+      // Restore the selected value; if it was "default", force the saved currency.
+      currencySelect.value =
+        currentValue && currentValue !== 'default' ? currentValue : savedCurrency;
     }
   }
 

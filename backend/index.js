@@ -173,7 +173,27 @@ function joinUrl(base, pathname) {
 
 function toAbsoluteApiUrl(value) {
   if (!value || typeof value !== 'string') return value;
-  if (isAbsoluteHttpUrl(value)) return value;
+  // In development, rewrite known asset URLs from any host to this API base.
+  // This prevents browsers from blocking cross-site images due to CORP (NotSameSite)
+  // when the admin UI runs on localhost/127.0.0.1 but the DB contains prod URLs.
+  if (isAbsoluteHttpUrl(value)) {
+    if (process.env.NODE_ENV !== 'production') {
+      const rel = toRelativeApiPath(value);
+      if (
+        typeof rel === 'string' &&
+        rel.startsWith('/') &&
+        (rel.startsWith('/uploads/') ||
+          rel.startsWith('/smallImages/') ||
+          rel.startsWith('/public/uploads/') ||
+          rel.startsWith('/public/smallImages/') ||
+          rel.startsWith('/direct-image/') ||
+          rel.startsWith('/images/'))
+      ) {
+        return joinUrl(process.env.API_URL, rel);
+      }
+    }
+    return value;
+  }
   // Only prefix relative paths
   if (!value.startsWith('/')) return value;
   return joinUrl(process.env.API_URL, value);

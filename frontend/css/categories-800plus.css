@@ -36,6 +36,7 @@ body#categories.hoop-earrings header {
 
 body#categories.unisex header {
   background-image: url('../imgs/Hero-imgs/IMG_0173.jpg');
+  background-position: center 30%;
 }
 
 body#categories.shalom-club header {
@@ -580,7 +581,7 @@ a {
 }
 
 .hero-image-unisex {
-  background-position: top;
+  background-position: center 30%;
 }
 
 .columns-container {
