@@ -89,64 +89,37 @@
           </div>
         </div>
       </div>
-      <section class="main-image">
-        <div class="logo"></div>
-      </section>
+      
     </header>
-    <main>
-      <div class="cart-items-container">
-        <div class="cart-title">Your Cart</div>
+    <main class="cart-page">
+      <div class="cart-shell">
+        <!-- Keep these hooks: .cart-title and .cart-empty are used by JS for language updates -->
+        <h1 class="cart-title cart-page-title">Your Cart</h1>
         <h2 class="cart-empty">Your cart is empty</h2>
-        <div class="added-items">
-          <!--div class="cart-item">
-          <img src="../imgs/IMG_9699.jpg" class="item-img" alt="" />
-          <div class="item-title">New Necklace Gold</div>
-          <div class="item-description">Crochet Necklace</div>
-          <div class="item-price">20$</div>
-          <div class="delete-item">X</div>
-        </div>
-        
-        <div class="cart-item">
-          <img src="../imgs/IMG_9699.jpg" class="item-img" alt="" />
-          <div class="item-description">Crochet Necklace</div>
-          <div class="item-price">20$</div>
-          <div class="delete-item">X</div>
 
+        <div class="cart-layout">
+          <section class="cart-items-container" aria-label="Cart items">
+            <div class="added-items" data-purpose="cart-items"></div>
+            <button class="delete-all" type="button">Delete All</button>
+          </section>
+
+          <aside class="summary-container summary" aria-label="Order summary">
+            <div class="summary-title">Order Summary</div>
+            <div class="summary-details"></div>
+            <div class="checkout-btns-container">
+              <p class="check-me-out">Check Me Out With:</p>
+              <img
+                src="../imgs/svgs/cc-stripe.svg"
+                class="stripe-svg"
+                alt="Pay with card (Stripe)"
+              />
+              <div id="paypal"></div>
+            </div>
+          </aside>
         </div>
 
-        <div class="cart-item">
-          <img src="../imgs/IMG_9699.jpg" class="item-img" alt="" />
-          <div class="item-description">Crochet Necklace</div>
-          <div class="item-price">20$</div>
-          <div class="delete-item">X</div>
-
-        </div> -->
-        </div>
-        <button class="delete-all">Delete All</button>
+        <div class="result-message"></div>
       </div>
-      <div class="summary-container">
-        <div class="summary-title">Order Summary</div>
-        <div class="summary-details">
-          <!-- <div class="total-container subtotal">
-            <span class="total-text">Subtotal:</span>
-            <span class="total-price">120$</span>
-          </div>
-          <div class="total-container shipping">
-            <span class="total-text">Shipping:</span>
-            <span class="total-price">20$</span>
-          </div>
-          <div class="total-container total">
-            <span class="total-text">Total:</span>
-            <span class="total-price">140$</span>
-          </div> -->
-        </div>
-        <div class="checkout-btns-container">
-          <p class="check-me-out">Check Me Out With:</p>
-          <img src="../imgs/svgs/cc-stripe.svg" class="stripe-svg" alt="" />
-          <div id="paypal"></div>
-        </div>
-      </div>
-      <div class="result-message"></div>
     </main>
     <footer class="footer">
       <div class="columns-container">

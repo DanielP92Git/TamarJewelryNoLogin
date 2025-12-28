@@ -254,80 +254,175 @@ a {
 }
 
 /* ~~~~~~~~~~~~ Shopping cart ~~~~~~~~~~~~~~ */
-main {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15rem;
+main.cart-page {
+  display: block;
+  margin-bottom: 6rem;
+}
 
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid rgb(0, 0, 0); */
+.cart-shell {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 0;
+}
+
+.cart-page-title {
+  font-family: 'Poiret One', 'Raleway', sans-serif;
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #000;
+  margin: 0 0 1rem;
+  padding-top: 0.25rem;
+}
+
+.cart-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 3.5rem;
+  align-items: start;
 }
 
 .cart-items-container {
-  display: flex;
-  flex-flow: column;
-  width: 65%;
-  border-radius: 1rem;
-  background-color: aliceblue;
-  margin-right: 1rem;
-  box-shadow: -5px 10px 30px -10px;
+  width: 100%;
+  background: #fff;
+  border-radius: 0;
+  box-shadow: none;
+  margin-right: 0;
+}
 
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(20, 101, 177); */
+.added-items {
+  width: 100%;
+  padding: 0;
 }
 
 .cart-item {
-  display: grid;
-  grid-template-columns: 1fr 2fr 2fr 1fr;
-  align-items: center;
-  border: 0.5px solid rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
-  padding: 15px;
-  margin-bottom: 10px;
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 0;
+  padding: 1.5rem 0;
+  margin: 0;
+}
+
+.cart-item__media {
+  width: 200px;
+  height: 130px;
+  flex: 0 0 auto;
+  background: #f3f3f3;
+  overflow: hidden;
 }
 
 .item-img {
-  border-radius: 3%;
   width: 100%;
-  right: 5%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.cart-item__content {
+  flex: 1 1 auto;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cart-item__title {
+  min-width: 0;
 }
 
 .item-title {
-  justify-self: center;
-  align-self: center;
-  font-size: 1rem;
+  font-family: 'Poiret One', 'Raleway', sans-serif;
+  font-size: 1.25rem;
+  color: #222;
+  margin: 0;
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+.cart-item__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
+  flex: 0 0 auto;
 }
 
 .item-price {
-  justify-self: center;
-  align-self: center;
-  margin-left: 10%;
-  margin-right: 20%;
-  font-size: 1rem;
+  font-family: Raleway, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111;
+  margin: 0;
+}
+
+.cart-qty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e5e7eb;
+  width: 110px;
+  height: 34px;
+}
+
+.cart-qty__btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+}
+
+.cart-qty__btn:hover {
+  background: #fafafa;
+}
+
+.cart-qty__btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cart-qty__input {
+  width: 42px;
+  border: none;
+  text-align: center;
+  font-size: 0.9rem;
+  background: transparent;
+}
+
+.cart-remove {
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.cart-remove:hover {
+  color: #000;
 }
 .mobile-lang-selector {
   display: none;
 }
+/* keep .delete-item for JS hooks; style it like the reference link */
 .delete-item {
-  justify-self: center;
-  align-self: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: #f44336;
-  color: white;
-  font-size: 14px;
-  cursor: pointer;
   border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
   padding: 0;
-  line-height: 1;
 }
 
 .delete-item:hover {
-  background-color: #d32f2f;
+  color: #000;
 }
 
 .item-description {
@@ -342,11 +437,9 @@ main {
   display: none;
 }
 
+/* cart title is now the page H1, styled by .cart-page-title */
 .cart-title {
-  text-align: center;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
+  text-align: left;
 }
 
 .added-items {
@@ -360,45 +453,42 @@ main {
 
 .delete-all {
   display: none;
-  border-radius: 5px;
-  /* position: absolute; */
-  /* top: 2rem; */
-  border: none;
-  width: 8rem;
-  height: 2rem;
-  background-color: rgb(255, 151, 151);
   margin-top: 1rem;
-  margin-bottom: 1rem;
-  align-self: center;
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.95rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  padding: 0;
 }
 
 .delete-all-active {
-  display: block;
+  display: inline-block;
 }
 
 .delete-all:hover {
-  background-color: rgb(255, 99, 99);
-  cursor: pointer;
+  color: #000;
 }
 
 .summary-container {
   display: flex;
   flex-flow: column;
-  width: 30%;
-  border-radius: 1rem;
-  background-color: rgba(173, 216, 230, 0.393);
-  padding: 10px;
-  box-shadow: -5px 10px 30px -10px;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(20, 177, 35); */
+  width: 100%;
+  border-radius: 0;
+  background: #fff;
+  padding: 0;
+  box-shadow: none;
+  border-left: none;
 }
 
 .summary-title {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
-  align-self: center;
+  font-family: 'Poiret One', 'Raleway', sans-serif;
+  font-size: 2rem;
+  margin: 0 0 1.25rem;
+  color: #000;
 }
 
 .summary-item {
@@ -419,48 +509,42 @@ main {
 .price-summary-container {
   display: flex;
   flex-flow: column;
-  justify-content: space-between;
-  align-items: center;
   width: 100%;
-  margin: 30px 10px 30px 0px;
-  /* align-self: flex-end; */
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(164, 20, 177); */
+  margin: 0 0 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .total-container {
   display: flex;
-  width: 60%;
+  width: 100%;
   justify-content: space-between;
-  margin-bottom: 10px;
-  /* margin-left: 20%; */
-
-  /* border: solid salmon; */
+  margin-bottom: 0.9rem;
+  font-size: 0.95rem;
 }
 
 .shipping-text {
-  font-size: 0.8rem;
-  text-align: center;
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.5;
 }
 
 .total-text {
-  font-weight: 600;
-  margin-right: auto;
+  font-weight: 500;
+  color: #111;
 }
 
 .total-price {
-  justify-self: right;
-  padding-right: 5px;
-  margin-right: 5%;
-  /* border: solid firebrick; */
+  font-weight: 500;
+  color: #111;
 }
 
-.total {
-  margin-top: 15px;
-  padding: 5px 0px 5px 5px;
-  border: solid;
-  border-radius: 5px;
+.total.total-container {
+  border: none;
+  padding-top: 1rem;
+  margin-top: 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
 }
 
 .checkout-btns-container {
@@ -485,9 +569,9 @@ main {
 }
 
 #paypal {
-  border-top: 1px solid black;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  border-top: 1px solid #f0f0f0;
+  padding: 1.5rem 0;
+  margin-bottom: 1.5rem;
 }
 
 /* ~~~~~~~~~~~~~~ Footer ~~~~~~~~~~~~~~~~~~~~ */

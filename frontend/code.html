@@ -3,157 +3,193 @@
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Tamar Afik Jewelry - Contact</title>
-<!-- Tailwind CSS v3 with plugins -->
+<title>Tamar Kfir Jewelry - Shopping Cart</title>
+<!-- Load Tailwind CSS -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<!-- Google Fonts -->
+<!-- Google Fonts: Playfair Display for headings/logo, Lato for body text -->
 <link href="https://fonts.googleapis.com" rel="preconnect"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&amp;family=Great+Vibes&amp;family=Lato:wght@300;400;700&amp;family=Playfair+Display:ital,wght@0,400;0,600;1,400&amp;display=swap" rel="stylesheet"/>
-<!-- Tailwind Configuration for Custom Colors and Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&amp;family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&amp;display=swap" rel="stylesheet"/>
+<!-- Configuration for Custom Colors and Fonts -->
 <script>
     tailwind.config = {
       theme: {
         extend: {
-          colors: {
-            brand: {
-              gold: '#a88b63',
-              bg: '#fcfbf9',
-              input: '#f2efe9',
-              text: '#333333',
-              btnBg: '#f4f0e6',
-              btnBorder: '#c4b398',
-              inputBorder: '#d4c5b0',
-            }
-          },
           fontFamily: {
-            script: ['"Great Vibes"', 'cursive'],
             serif: ['"Playfair Display"', 'serif'],
-            sans: ['Lato', 'sans-serif'],
+            sans: ['"Lato"', 'sans-serif'],
+            script: ['"Pinyon Script"', 'cursive'],
+          },
+          colors: {
+            'gold-accent': '#cfb577',
+            'gold-hover': '#bca366',
+            'gray-border': '#e5e7eb',
           }
         }
       }
     }
   </script>
-<!-- Custom CSS for specific texture simulation and fine-tuning -->
-<style data-purpose="texture-and-layout">
-    /* Simulating the textured background seen in the mockup */
-    .textured-bg {
-      background-color: #fcfbf9;
-      background-image: radial-gradient(#e5ddd0 1px, transparent 1px);
-      background-size: 24px 24px;
+<!-- Custom Styles for Specific Tweaks -->
+<style data-purpose="custom-utilities">
+    /* Custom utility for the logo font style mimicking the script look */
+    .logo-font {
+      font-family: 'Pinyon Script', cursive;
+      font-style: normal;
     }
     
-    /* Input custom styling to match the mockup's specific aesthetic */
-    .custom-input {
-      border: 1px solid #d4c5b0; /* Light brown/gold border */
-      border-radius: 4px; /* Less rounded, more classic boxy feel */
-      background-color: #f2efe9;
-      transition: box-shadow 0.2s;
-    }
-    
-    .custom-input:focus {
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(168, 139, 99, 0.2); /* Soft gold glow */
-      border-color: #a88b63;
-    }
-
-    /* Ensuring the footer decoration sits behind content */
-    .footer-decor {
-      z-index: 0;
-      pointer-events: none;
-    }
-    
-    .content-card {
-      z-index: 10;
+    /* Utility to remove number input spinner arrows */
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
     }
   </style>
-</head>
-<body class="font-sans text-brand-text textured-bg min-h-screen flex flex-col">
-<!-- BEGIN: MainHeader -->
-<header class="bg-white w-full py-4 px-6 md:px-12 shadow-sm relative z-20">
-<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-<!-- Brand Logo Area -->
-<div class="w-full md:w-1/4 flex justify-center md:justify-start">
-<a class="font-script text-black text-5xl md:text-6xl" href="#">
-          Tamar Afik Jewelry
-        </a>
+<link href="https://fonts.googleapis.com/css2?family=Pinyon+Script&amp;display=swap" rel="stylesheet"/></head>
+<body class="bg-white text-gray-900 font-sans antialiased">
+<!-- BEGIN: Header -->
+<header class="w-full border-b border-gray-100 sticky top-0 bg-white z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+<!-- Logo Section -->
+<div class="flex-shrink-0" data-purpose="logo-container">
+<a class="text-5xl logo-font text-black no-underline" href="#" style="font-size: 3rem;">Tamar Kfir Jewelry</a>
 </div>
-<!-- Navigation Menu -->
-<nav class="w-full md:w-2/4">
-<ul class="flex flex-wrap justify-center gap-6 text-sm font-medium tracking-wide text-gray-800">
-<li><a class="hover:text-brand-gold transition-colors" href="#">HOME</a></li>
-<li class="relative group">
-<a class="flex items-center gap-1 hover:text-brand-gold transition-colors" href="#">
-              SHOP 
-              <svg class="h-3 w-3" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
+<!-- Navigation Links (Hidden on mobile, visible on lg screens) -->
+<nav class="hidden lg:flex space-x-8" data-purpose="main-navigation">
+<a class="text-xs uppercase tracking-widest text-gray-600 hover:text-black transition" href="#">Home</a>
+<div class="relative group">
+<a class="text-xs uppercase tracking-widest text-gray-600 hover:text-black transition flex items-center gap-1" href="#">
+            Shop
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
 </a>
-</li>
-<li><a class="hover:text-brand-gold transition-colors" href="#">JEWELRY WORKSHOP</a></li>
-<li><a class="hover:text-brand-gold transition-colors" href="#">ABOUT</a></li>
-<li><a class="text-brand-gold font-bold" href="#">CONTACT ME</a></li>
-</ul>
+</div>
+<a class="text-xs uppercase tracking-widest text-gray-600 hover:text-black transition" href="#">Jewelry Workshop</a>
+<a class="text-xs uppercase tracking-widest text-gray-600 hover:text-black transition" href="#">About</a>
+<a class="text-xs uppercase tracking-widest text-gray-600 hover:text-black transition" href="#">Contact Me</a>
 </nav>
-<!-- User Actions (Flags & Cart) -->
-<div class="w-full md:w-1/4 flex justify-center md:justify-end items-center gap-4">
-<!-- Flags using placeholders -->
-<div class="flex gap-2"><span class="text-xl cursor-pointer hover:opacity-80" title="English">🇺🇸</span><span class="text-xl cursor-pointer hover:opacity-80" title="Hebrew">🇮🇱</span></div>
+<!-- Utility Icons (Currency, Flags, Cart) -->
+<div class="flex items-center space-x-4 lg:space-x-6" data-purpose="header-utilities">
+<!-- Currency Selector (Minimalist) -->
+<div class="relative hidden sm:block">
+<button class="text-xs uppercase tracking-wide text-gray-500 hover:text-black flex items-center gap-1 py-1">
+            ILS
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+</div>
+<!-- Flags (Emojis) -->
+<div class="hidden sm:block text-lg tracking-widest">
+           🇺🇸 🇮🇱
+        </div>
 <!-- Cart Icon -->
-<a class="flex items-center gap-1 text-gray-800 hover:text-brand-gold" href="#">
-<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-<span class="text-sm font-medium">(1)</span>
+<a class="relative text-gray-800 hover:text-black" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+</svg>
+<span class="ml-1 text-sm font-medium">(2)</span>
 </a>
 </div>
 </div>
 </header>
-<!-- END: MainHeader -->
-<!-- BEGIN: MainContent -->
-<main class="flex-grow flex flex-col items-center justify-center p-4 md:p-8 relative overflow-hidden">
-<!-- Contact Card Container -->
-<section class="content-card w-full max-w-4xl bg-white rounded-xl shadow-lg mb-16 mt-8 p-10 md:p-16">
-<!-- Card Header -->
-<div class="text-center mb-10">
-<h1 class="font-serif text-4xl md:text-5xl text-brand-gold mb-6">Get in Touch</h1>
-<p class="text-gray-600 text-lg">Have a question or want to collaborate? I'd love to hear from you.</p>
+<!-- END: Header -->
+<!-- BEGIN: Main Content -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+<!-- Page Title -->
+<h1 class="text-4xl md:text-5xl font-serif text-black mb-12 pt-8">Shopping Cart</h1>
+<div class="flex flex-col lg:flex-row gap-12 lg:gap-20">
+<!-- BEGIN: Left Column (Cart Items) -->
+<section class="flex-1" data-purpose="cart-items-list">
+<!-- Cart Item 1 -->
+<div class="flex flex-col sm:flex-row gap-6 border-b border-gray-100 pb-8 mb-8" data-purpose="cart-item">
+<!-- Product Image -->
+<div class="flex-shrink-0 bg-gray-100 overflow-hidden w-[200px] h-[130px]">
+<img alt="Swarovski Blue Necklace" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNPbg6xq73_EB2dUIz_JgeZaKJIYuyByR8Zp0awQA7m7ZaaWJHvAJIu9CdBaRPE5CTazpP75cOux-uYqLlFufZ4KgwNwAyYeDFB9nDqpyzRj76fUzv2evwxuJJLRc_eh4bOtKL6dXlN2WJYLNUjJPRiU6FQEq-lxHD6wpXSvhpTxcEvPIyoXcxeeJDLsFaMdf9gzsRCLF0dQhKwMzJdkGClBl06ueszmOwRZQCPXdvjvqTlcMSBScOARjP0CpW15mXwIZjD_zQzahd" style="width: 200px; height: 130px;"/>
 </div>
-<!-- Contact Form -->
-<form action="#" class="space-y-6" method="POST">
-<!-- Row 1: Name Fields -->
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-<div class="flex flex-col">
-<label class="sr-only" for="firstName">First Name</label>
-<input class="custom-input w-full bg-brand-input px-4 py-4 text-gray-700 placeholder-gray-500" id="firstName" name="firstName" placeholder="First Name" type="text"/>
-</div>
-<div class="flex flex-col">
-<label class="sr-only" for="lastName">Last Name</label>
-<input class="custom-input w-full bg-brand-input px-4 py-4 text-gray-700 placeholder-gray-500" id="lastName" name="lastName" placeholder="Last Name" type="text"/>
-</div>
-</div>
-<!-- Row 2: Email Field -->
+<!-- Product Details -->
+<div class="flex-1 flex justify-between items-start">
+<!-- Title -->
 <div>
-<label class="sr-only" for="email">Email Address</label>
-<input class="custom-input w-full bg-brand-input px-4 py-4 text-gray-700 placeholder-gray-500" id="email" name="email" placeholder="Email Address" type="email"/>
+<h2 class="text-xl text-gray-800 font-serif">Swarovski Blue Necklace</h2>
 </div>
-<!-- Row 3: Message Textarea -->
+<!-- Right Stack: Price, Qty, Remove -->
+<div class="flex flex-col items-end gap-3">
+<!-- Price -->
+<span class="text-lg font-bold">₪120</span>
+<!-- Quantity Box -->
+<div class="flex items-center justify-between border border-gray-200 w-[100px]"><button class="px-3 py-1 text-gray-500 hover:bg-gray-50 cursor-pointer">-</button><input class="w-full text-center border-none p-1 text-sm focus:ring-0" readonly="" type="number" value="1"/><button class="px-3 py-1 text-gray-500 hover:bg-gray-50 cursor-pointer">+</button></div>
+<!-- Remove Link -->
+<a class="text-xs text-gray-500 underline decoration-gray-400 hover:text-black" href="#">Remove</a>
+</div>
+</div>
+</div>
+<!-- Cart Item 2 -->
+<div class="flex flex-col sm:flex-row gap-6 border-b border-gray-100 pb-8 mb-8" data-purpose="cart-item">
+<!-- Product Image -->
+<div class="flex-shrink-0 bg-gray-100 overflow-hidden w-[200px] h-[130px]">
+<img alt="Green Boulevard Necklace" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5-JSvQsZdGRPDHCM01sH4EDQISMqwUEtRrwuUYcbvta4lSqSu5RlfKok1IIu43-mTvwT9AggR2Uw49JsLCDdkVKzmIhp2mpn6dDXCFalkJVj_btJ94G4_BlErEiU8QHNhu1LdJkKou0AdpID8W2hgZxcelDMhnHPDA3gFILC74mGdrCy0Kb64P0H33ZAiFjgP_gwClmthGg6KP_UqlQiXRZnOnsK8ttZSjSZgrgs6UmuVXL9IwD3aB1ewJ-5VattNIcSUW0CvfIng" style="width: 200px; height: 130px;"/>
+</div>
+<!-- Product Details -->
+<div class="flex-1 flex justify-between items-start">
+<!-- Title -->
 <div>
-<label class="sr-only" for="message">Your Message</label>
-<textarea class="custom-input w-full bg-brand-input px-4 py-4 text-gray-700 placeholder-gray-500 resize-none" id="message" name="message" placeholder="Your Message" rows="5"></textarea>
+<h2 class="text-xl text-gray-800 font-serif">Green Boulevard Necklace</h2>
 </div>
-<!-- Submit Button -->
-<div class="pt-4">
-<button class="w-full py-4 px-8 rounded-full border border-brand-btnBorder text-brand-gold bg-brand-btnBg hover:bg-brand-btnBorder hover:text-white transition-all duration-300 text-xl font-medium shadow-sm" type="submit">
-            Send Message
-          </button>
+<!-- Right Stack: Price, Qty, Remove -->
+<div class="flex flex-col items-end gap-3">
+<!-- Price -->
+<span class="text-lg font-bold">₪120</span>
+<!-- Quantity Box -->
+<div class="flex items-center justify-between border border-gray-200 w-[100px]"><button class="px-3 py-1 text-gray-500 hover:bg-gray-50 cursor-pointer">-</button><input class="w-full text-center border-none p-1 text-sm focus:ring-0" readonly="" type="number" value="1"/><button class="px-3 py-1 text-gray-500 hover:bg-gray-50 cursor-pointer">+</button></div>
+<!-- Remove Link -->
+<a class="text-xs text-gray-500 underline decoration-gray-400 hover:text-black" href="#">Remove</a>
 </div>
-</form>
+</div>
+</div>
+<!-- Clear Cart Action -->
+<div class="flex justify-end mt-4">
+<a class="text-sm text-gray-600 underline decoration-gray-400 hover:text-black" href="#">Clear Cart</a>
+</div>
 </section>
-<!-- Decorative Necklace Background -->
-<!-- This element is positioned absolutely to sit behind the card at the bottom -->
-<div class="footer-decor absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-12 md:-translate-y-24 w-64 md:w-96 opacity-40">
-<img alt="Decorative Necklace Sketch" class="w-full h-auto mix-blend-multiply" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_wXssmC1dhViBTd1lpUlF0TpPt_wH1Mti_RBfu8stPCKKtKoqCyhrJ8D79wVBw8ANLq9RFW7w46yPnJTJjkthHhAUmsRP9-VBSjgppranBzt0XmBaEDDwr0cx-0jxlwJpve-DOsoxiUQgjaROftwamGSGnIglz6lmPu3fw6JXleL7jL-N1FE2iVMDn6VqT0UuS8xVL2DtBzf92WAoUArSECTqnQyZpnfPEmG2Egtmi3K3xy_bF4brbOmfj2sUFd9OYJQq9zjYhd-k"/>
+<!-- END: Left Column -->
+<!-- BEGIN: Right Column (Summary) -->
+<aside class="w-full lg:w-1/3" data-purpose="cart-summary">
+<div class="bg-white p-2"> <!-- Container for sticky positioning if needed later -->
+<h2 class="text-3xl font-serif text-black mb-6">Summary</h2>
+<div class="space-y-4 text-sm mb-8 border-b border-gray-100 pb-8">
+<div class="flex justify-between items-center text-gray-800">
+<span>Subtotal:</span>
+<span>₪240</span>
+</div>
+<div class="flex justify-between items-center text-gray-800">
+<span>Shipping:</span>
+<span>Calculated at checkout</span>
+</div>
+</div>
+<div class="flex justify-between items-center text-xl font-bold text-black mb-4">
+<span>Total:</span>
+<span>₪240</span>
+</div>
+<p class="text-sm text-gray-600 mb-8 leading-relaxed">
+            (Shipping costs may apply. Please proceed to checkout for options)
+          </p>
+<!-- Checkout Button -->
+<button class="w-full bg-gold-accent hover:bg-gold-hover text-black text-sm font-bold tracking-[1px] uppercase py-4 px-6 transition duration-300 mb-8">
+            Proceed to Checkout
+          </button>
+<!-- Payment Methods -->
+<div class="text-center" data-purpose="payment-methods">
+<p class="text-sm text-gray-600 mb-3">Payment methods:</p>
+<div class="flex justify-center gap-2">
+<img alt="Payment Methods" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDx_23HbDqq5KE1L7MBxjwH0keWN50qSCG4_T1Gd8eZSORu9pk2JG9g6AF2lW8nytugAbdsXC8TioTpSx8HoYz6XFd_wwJRSU-i2JZLOguoTN708lEHZX2_YEVSBepdBroABqpPv5_2V8Aya1WpFZ9Fim2L62MHZAjpzGCrDkQi1jt9eOdlMppqchnRwKlf3ryDgzG3gvtimPsVGSVdMyqrCh86f-As48mKcjamYvxbu71x8l8QKAv5K4lvUnsqF-859QChp33MRmdx" style="height: 40px; width: auto;"/>
+</div>
+</div>
+</div>
+</aside>
+<!-- END: Right Column -->
 </div>
 </main>
-<!-- END: MainContent -->
+<!-- END: Main Content -->
+<!-- BEGIN: Footer Placeholder (Simple for context) -->
+<footer class="mt-20 py-10 text-center text-gray-400 text-xs">
+<p>© 2023 Tamar Kfir Jewelry. All rights reserved.</p>
+</footer>
+<!-- END: Footer -->
 </body></html>

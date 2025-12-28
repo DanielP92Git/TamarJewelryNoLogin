@@ -232,30 +232,40 @@ header {
 /*  */
 
 /* ~~~~~~~~~~~~ Shopping cart ~~~~~~~~~~~~~~ */
-main {
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
+main.cart-page {
+  display: block;
   margin-bottom: 4rem;
+}
 
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid rgb(0, 0, 0); */
+.cart-shell {
+  padding: 0.75rem 1.25rem 0;
+}
+
+.cart-page-title {
+  font-family: 'Poiret One', 'Raleway', sans-serif;
+  font-size: clamp(2rem, 8vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  margin: 0 0 0.9rem;
+  padding-top: 0.25rem;
+  color: #000;
+}
+
+.cart-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
 }
 
 .cart-items-container {
   display: flex;
   flex-flow: column;
-  align-items: center;
-  border-radius: 1rem;
-  background-color: aliceblue;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  box-shadow: -5px 10px 30px -10px;
-
-  /* justify-content: space-evenly; */
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(20, 177, 35); */
+  align-items: stretch;
+  border-radius: 0;
+  background: #fff;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  box-shadow: none;
 }
 
 .cart-empty {
@@ -268,35 +278,38 @@ main {
 
 .cart-item {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border: 0.5px solid rgba(0, 0, 0, 0.5);
-  border-radius: 5px;
-  padding: 0 10px;
-  margin-bottom: 10px;
-  width: 95%;
+  flex-direction: column;
+  gap: 1rem;
+  border: none;
+  border-bottom: 1px solid #f0f0f0;
+  border-radius: 0;
+  padding: 1.25rem 0;
+  margin-bottom: 0;
+  width: 100%;
 }
 
 .cart-title {
-  text-align: center;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
+  text-align: left;
 }
 
 .added-items {
-  /* display: flex; */
-  /* justify-content: space-evenly; */
-  width: 85%;
-  border-radius: 1rem;
-  /* padding: 15px; */
+  width: 100%;
+  border-radius: 0;
+}
+
+.cart-item__media {
+  width: 100%;
+  height: 180px;
+  background: #f3f3f3;
+  overflow: hidden;
 }
 
 .item-img {
-  border-radius: 3%;
-  width: 60px;
-  height: auto;
-  padding: 0.2rem;
+  border-radius: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  padding: 0;
 }
 
 .item-description {
@@ -309,58 +322,93 @@ main {
   /* border: 2px solid rgb(89, 193, 196); */
 }
 
+.cart-item__content {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
 .item-title {
-  font-size: 0.7rem;
-  width: 30%;
-  text-align: center;
+  font-family: 'Poiret One', 'Raleway', sans-serif;
+  font-size: 1.2rem;
+  width: auto;
+  text-align: left;
+  margin: 0;
+  text-transform: none;
+}
+
+.cart-item__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.6rem;
 }
 
 .item-price {
-  font-size: 0.8rem;
-  width: 15%;
+  font-size: 1.05rem;
+  font-weight: 700;
+  width: auto;
+  text-align: right;
+}
+
+.cart-qty {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #e5e7eb;
+  width: 110px;
+  height: 34px;
+}
+
+.cart-qty__btn {
+  width: 34px;
+  height: 34px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+}
+
+.cart-qty__btn:disabled {
+  opacity: 0.4;
+}
+
+.cart-qty__input {
+  width: 42px;
+  border: none;
   text-align: center;
+  background: transparent;
 }
 
 .delete-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background-color: #f44336;
-  color: white;
-  font-size: 12px;
-  cursor: pointer;
   border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 2px;
   padding: 0;
-  line-height: 1;
-  margin-left: 5px;
 }
 
 .delete-item:hover {
-  background-color: #d32f2f;
+  color: #000;
 }
 
 .summary-container {
   display: flex;
   flex-flow: column;
-  /* width: 30%; */
-  border-radius: 1rem;
-  background-color: rgba(173, 216, 230, 0.393);
-  padding: 10px;
-  box-shadow: -5px 10px 30px -10px;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(20, 177, 35); */
+  width: 100%;
+  border-radius: 0;
+  background: #fff;
+  padding: 0;
+  box-shadow: none;
 }
 
 .summary-title {
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  text-align: center;
-  align-self: center;
+  font-family: 'Poiret One', 'Raleway', sans-serif;
+  font-size: 1.9rem;
+  margin: 0 0 1.25rem;
+  text-align: left;
+  align-self: flex-start;
 }
 
 .summary-item {
@@ -379,34 +427,30 @@ main {
 }
 
 .price-summary-container {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  width: 60%;
-  margin-bottom: 1rem;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(164, 20, 177); */
+  width: 100%;
+  margin: 0 0 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid #f0f0f0;
 }
 
 .shipping-text {
-  font-size: 0.8rem;
-  text-align: center;
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.5;
+  text-align: left;
 }
 
 .summary-details {
-  display: flex;
-  justify-content: center;
+  display: block;
   width: 100%;
-  /* border: 2px solid rgb(164, 20, 177); */
 }
 .total-container {
   display: flex;
   width: 100%;
   justify-content: space-between;
-  margin-bottom: 10px;
-  margin-left: 20%;
-  margin-right: 20%;
+  margin-bottom: 0.9rem;
+  margin-left: 0;
+  margin-right: 0;
 
   /* border: solid salmon; */
 }
@@ -428,11 +472,12 @@ main {
   width: 110px;
 }
 
-.total {
-  width: 100px;
-  margin-top: 15px;
-  border: solid;
-  border-radius: 5px;
+.total.total-container {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border: none;
 }
 
 .checkout-btn {
@@ -456,25 +501,22 @@ main {
 
 .delete-all {
   display: none;
-  border-radius: 5px;
-  /* position: absolute; */
-  /* top: 2rem; */
   border: none;
-  width: 8rem;
-  height: 2rem;
-  background-color: rgb(255, 151, 151);
   margin-top: 1rem;
-  margin-bottom: 1rem;
-  align-self: center;
+  margin-left: auto;
+  background: transparent;
+  color: #6b7280;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  padding: 0;
 }
 
 .delete-all-active {
-  display: block;
+  display: inline-block;
 }
 
-.delete-all:focus {
-  background-color: rgb(245, 0, 0);
-  cursor: pointer;
+.delete-all:hover {
+  color: #000;
 }
 
 .checkout-btns-container {
@@ -501,11 +543,10 @@ main {
 }
 
 #paypal {
-  border-top: 1px solid black;
-  padding: 2rem;
-  margin-bottom: 2rem;
-
-  width: 90%;
+  border-top: 1px solid #f0f0f0;
+  padding: 1.25rem 0;
+  margin-bottom: 1.25rem;
+  width: 100%;
 }
 
 /* ~~~~~~~~~~~~~~ Footer ~~~~~~~~~~~~~~~~~~~~ */
