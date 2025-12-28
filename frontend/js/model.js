@@ -109,7 +109,7 @@ export const handleLoadStorage = async function () {
 //           description: product.description,
 //           image: product.image,
 //           price: product.ils_price,
-//           qauntity: product.qauntity,
+//           quantity: product.quantity,
 //           id: product.id,
 //           amount: 1,
 //         });
@@ -133,7 +133,7 @@ export const setPreviewItem = async function (data) {
           description: product.description,
           image: product.image,
           price: product.ils_price,
-          quantity: product.qauntity,
+          quantity: product.quantity,
           id: product.id,
           amount: 1,
         });
