@@ -552,26 +552,95 @@ main.cart-page {
   flex-flow: column;
   align-items: center;
   justify-content: space-between;
-
-  /* border: 2px solid red; */
 }
 .check-me-out {
   font-family: Raleway, sans-serif;
 }
-.stripe-svg {
-  margin-top: 1rem;
-  margin-bottom: 2rem;
-  align-self: center;
+
+.stripe-trust-copy {
+  text-align: center;
 }
 
-.stripe-svg:hover {
+.stripe-checkout-btn {
+  margin-top: 1rem;
+  margin-bottom: 0.75rem;
+  align-self: center;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  width: 100%;
+  border: none;
+  background: linear-gradient(135deg, #635bff, #4b47e0);
+  color: #fff;
+  font-family: Raleway, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 10px 22px rgba(20, 20, 60, 0.35);
   cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease,
+    background-color 150ms ease, background 150ms ease;
+}
+
+.stripe-checkout-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(20, 20, 60, 0.4);
+  background: linear-gradient(135deg, #4b47e0, #3430c4);
+}
+
+.stripe-checkout-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 7px 16px rgba(20, 20, 60, 0.3);
+}
+
+.stripe-checkout-btn:focus-visible {
+  outline: 3px solid #99a2ff;
+  outline-offset: 3px;
+}
+
+.stripe-checkout-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.stripe-powered-by {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  opacity: 0.95;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.stripe-powered-by-label {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stripe-logo-text {
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 #paypal {
   border-top: 1px solid #f0f0f0;
   padding: 1.5rem 0;
   margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 320px;
+  align-self: stretch;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ~~~~~~~~~~~~~~ Footer ~~~~~~~~~~~~~~~~~~~~ */

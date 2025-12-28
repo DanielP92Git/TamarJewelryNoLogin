@@ -87,12 +87,12 @@ class CategoriesView extends View {
 
     if (cur === 'usd') {
       if (Number.isFinite(usd) && usd > 0) return usd;
-      if (Number.isFinite(ils)) return Number((ils / this.exchangeRate).toFixed(0));
+      if (Number.isFinite(ils)) return Math.trunc(ils / this.exchangeRate);
       return 0;
     }
 
-    if (Number.isFinite(ils) && ils > 0) return ils;
-    if (Number.isFinite(usd)) return Number((usd * this.exchangeRate).toFixed(0));
+    if (Number.isFinite(ils) && ils > 0) return Math.trunc(ils);
+    if (Number.isFinite(usd)) return Math.trunc(usd * this.exchangeRate);
     return 0;
   }
 

@@ -10,7 +10,7 @@ class CartView extends View {
   _summaryTitle = document.querySelector('.summary-title');
   _itemsBox = document.querySelector('.added-items');
   _summaryDetails = document.querySelector('.summary-details');
-  _checkoutBtn = document.querySelector('.stripe-svg');
+  _checkoutBtn = document.querySelector('#stripe-checkout-btn');
   _deleteAllBtn = document.querySelector('.delete-all');
   _checkMeOut = document.querySelector('.check-me-out');
   _orderSummaryContainer = document.querySelector('.summary');
@@ -130,7 +130,9 @@ class CartView extends View {
               `     
           <div class="cart-item" id="${item.id}">
             <div class="cart-item__media">
-              <img src='${item.image}' class="item-img" alt="${item.title || ''}" />
+              <img src='${item.image}' class="item-img" alt="${
+                item.title || ''
+              }" />
             </div>
             <div class="cart-item__content">
               <div class="cart-item__title">
@@ -140,17 +142,21 @@ class CartView extends View {
                 <span class="item-price">${
                   item.currency == '$'
                     ? `$${item.price}`
-                    : `$${Number((item.price / this._rate).toFixed(0))}`
+                    : `$${Math.trunc(item.price / this._rate)}`
                 }</span>
                 ${
                   Number(item.quantity) > 1
                     ? `<div class="cart-qty" aria-label="Quantity">
                         <button class="cart-qty__btn cart-qty__btn--minus" type="button" disabled>-</button>
-                        <input class="cart-qty__input" type="number" readonly value="${Number(item.amount) || 1}" />
+                        <input class="cart-qty__input" type="number" readonly value="${
+                          Number(item.amount) || 1
+                        }" />
                         <button class="cart-qty__btn cart-qty__btn--plus" type="button" disabled>+</button>
                       </div>`
                     : `<div class="cart-qty cart-qty--static" aria-label="Quantity">
-                        <input class="cart-qty__input" type="number" readonly value="${Number(item.amount) || 1}" />
+                        <input class="cart-qty__input" type="number" readonly value="${
+                          Number(item.amount) || 1
+                        }" />
                       </div>`
                 }
                 <button class="delete-item cart-remove" type="button" aria-label="Remove item">Remove</button>
@@ -166,7 +172,9 @@ class CartView extends View {
               `     
         <div class="cart-item" id="${item.id}">
           <div class="cart-item__media">
-            <img src='${item.image}' class="item-img" alt="${item.title || ''}" />
+            <img src='${item.image}' class="item-img" alt="${
+                item.title || ''
+              }" />
           </div>
           <div class="cart-item__content">
             <div class="cart-item__title">
@@ -175,18 +183,22 @@ class CartView extends View {
             <div class="cart-item__right">
               <span class="item-price">${
                 item.currency == '$'
-                  ? `₪${Number((item.price * this._rate).toFixed(0))}`
+                  ? `₪${Math.trunc(item.price * this._rate)}`
                   : `₪${item.price}`
               }</span>
               ${
                 Number(item.quantity) > 1
                   ? `<div class="cart-qty" aria-label="Quantity">
                       <button class="cart-qty__btn cart-qty__btn--minus" type="button" disabled>-</button>
-                      <input class="cart-qty__input" type="number" readonly value="${Number(item.amount) || 1}" />
+                      <input class="cart-qty__input" type="number" readonly value="${
+                        Number(item.amount) || 1
+                      }" />
                       <button class="cart-qty__btn cart-qty__btn--plus" type="button" disabled>+</button>
                     </div>`
                   : `<div class="cart-qty cart-qty--static" aria-label="Quantity">
-                      <input class="cart-qty__input" type="number" readonly value="${Number(item.amount) || 1}" />
+                      <input class="cart-qty__input" type="number" readonly value="${
+                        Number(item.amount) || 1
+                      }" />
                     </div>`
               }
               <button class="delete-item cart-remove" type="button" aria-label="Remove item">Remove</button>
@@ -334,7 +346,7 @@ class CartView extends View {
         })
         .reduce((x, y) => x + y, 0);
 
-      return Number(convertPrice.toFixed(0));
+      return Math.trunc(convertPrice);
     }
     if (checkCurrency == '$') {
       const convertPrice = model.cart
@@ -346,7 +358,7 @@ class CartView extends View {
         })
         .reduce((x, y) => x + y, 0);
 
-      return Number(convertPrice.toFixed(0));
+      return Math.trunc(convertPrice);
     }
   }
 
@@ -522,7 +534,9 @@ class CartView extends View {
               if (!response.ok) {
                 const statusInfo = `HTTP ${response.status}`;
                 const structuredMessage =
-                  responseData?.message || responseData?.error || responseData?.code;
+                  responseData?.message ||
+                  responseData?.error ||
+                  responseData?.code;
 
                 // If we got an HTML error page (e.g. 504 from a gateway), avoid showing it to users.
                 if (!structuredMessage && text && text.trim().startsWith('<')) {
@@ -538,7 +552,9 @@ class CartView extends View {
                     ? text.trim().slice(0, 300)
                     : 'Unknown error';
                 const errorMessage = structuredMessage || fallbackText;
-                throw new Error(`Failed to create order: ${errorMessage} (${statusInfo})`);
+                throw new Error(
+                  `Failed to create order: ${errorMessage} (${statusInfo})`
+                );
               }
 
               if (responseData.jsonResponse && responseData.jsonResponse.id) {

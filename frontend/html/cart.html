@@ -46,11 +46,18 @@
     <script type="module" defer src="../js/controller.js"></script>
     <!-- Microsoft Clarity -->
     <script type="text/javascript">
-      (function(c,l,a,r,i,t,y){
-          c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-          t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-          y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-      })(window, document, "clarity", "script", "urnhsmmp4u");
+      (function (c, l, a, r, i, t, y) {
+        c[a] =
+          c[a] ||
+          function () {
+            (c[a].q = c[a].q || []).push(arguments);
+          };
+        t = l.createElement(r);
+        t.async = 1;
+        t.src = 'https://www.clarity.ms/tag/' + i;
+        y = l.getElementsByTagName(r)[0];
+        y.parentNode.insertBefore(t, y);
+      })(window, document, 'clarity', 'script', 'urnhsmmp4u');
     </script>
   </head>
   <body id="cart">
@@ -83,13 +90,13 @@
                 />
               </a>
             </div>
-            <span class="cart-number cart-number-mobile cart-number-mobile-header"
+            <span
+              class="cart-number cart-number-mobile cart-number-mobile-header"
               >0</span
             >
           </div>
         </div>
       </div>
-      
     </header>
     <main class="cart-page">
       <div class="cart-shell">
@@ -108,11 +115,26 @@
             <div class="summary-details"></div>
             <div class="checkout-btns-container">
               <p class="check-me-out">Check Me Out With:</p>
-              <img
-                src="../imgs/svgs/cc-stripe.svg"
-                class="stripe-svg"
-                alt="Pay with card (Stripe)"
-              />
+              <button
+                type="button"
+                class="stripe-checkout-btn"
+                id="stripe-checkout-btn"
+              >
+                <span class="stripe-checkout-main">
+                  <span class="stripe-checkout-text"
+                    >Pay securely with card</span
+                  >
+                </span>
+                <span class="stripe-powered-by" dir="ltr">
+                  <span class="stripe-powered-by-label">Powered by</span>
+                  <span class="stripe-logo-text" aria-label="Stripe"
+                    >Stripe</span
+                  >
+                </span>
+              </button>
+              <p class="stripe-trust-copy">
+                Card payments are processed securely by Stripe.
+              </p>
               <div id="paypal"></div>
             </div>
           </aside>
