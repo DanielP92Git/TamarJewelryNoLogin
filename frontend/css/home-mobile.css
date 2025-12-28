@@ -318,7 +318,6 @@ p {
 .menu__ul {
   display: flex;
   flex-flow: column;
-  justify-content: space-around;
   align-items: center;
   max-width: 115%;
   width: 160px;

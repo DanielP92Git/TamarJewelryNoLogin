@@ -7,6 +7,7 @@
   max-width: none;
   height: 100dvh; /* Full dynamic viewport height (mobile Safari/Chrome) */
   min-height: 100vh; /* Fallback */
+  max-height: 100dvh; /* Prevent overflow */
   transition: transform 0.4s ease; /* Smoother transition on transform */
   position: fixed;
   top: 0;
@@ -16,7 +17,9 @@
   background-color: #fff; /* Solid background */
   box-shadow: 4px 0px 15px rgba(0, 0, 0, 0.1); /* Add shadow */
   padding-top: calc(env(safe-area-inset-top, 0px) + 4rem);
-  overflow-y: auto; /* Allow scrolling within menu if needed */
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem); /* Add bottom padding for safe area */
+  overflow: hidden; /* Prevent menu itself from scrolling */
+  direction: ltr; /* Force LTR layout for menu structure, regardless of document direction */
 }
 
 .menu.menu-open {
@@ -31,31 +34,62 @@ body.menu-active {
 
 .menu__ul {
   display: flex;
-  flex-flow: column;
-  align-items: stretch; /* Stretch items */
+  flex-flow: column !important; /* Force column layout on mobile */
+  flex-direction: column !important; /* Override any row/reverse styles */
+  align-items: center; /* Center items horizontally */
   width: 100%; /* Full width of menu */
   position: relative;
+  direction: ltr; /* Maintain LTR for layout structure */
+  flex: 1; /* Allow menu list to grow and fill available space */
+  overflow-y: auto; /* Make menu list scrollable */
+  overflow-x: hidden;
+  min-height: 0; /* Important for flex scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  gap: 0; /* Remove gap between items */
+}
+
+/* Override desktop row styles for mobile menu - ensure column layout */
+.menu .menu__ul,
+.menu .menu__ul.ul-heb,
+.menu .menu__ul.ul-eng {
+  flex-direction: column !important;
+  flex-flow: column !important;
 }
 
 /* Base styles for all menu tabs */
 .main-nav-tab {
   display: flex;
   align-items: center;
+  justify-content: center; /* Center items horizontally */
   width: 100%;
   padding: 0; /* Remove padding from the LI itself */
   background-color: transparent; /* Remove background */
-  text-align: left;
+  text-align: center; /* Center text */
   border-bottom: none; /* Remove default border */
+  direction: ltr; /* Maintain LTR for layout */
 }
 
 /* Style for all tab links */
 .main-nav-tab > .attrib {
-  padding: 1rem 1.5rem; /* Apply padding to the link instead */
+  padding: 0.6rem 1.5rem; /* Further reduced vertical padding for tighter spacing */
   border-bottom: 1px solid #eee; /* Add border to the link */
   width: 100%;
-  display: block; /* Ensure block display */
+  display: flex; /* Use flex for centering */
+  align-items: center;
+  justify-content: center; /* Center text horizontally */
+  text-align: center; /* Center text */
   text-decoration: none;
   color: #343a40;
+  direction: ltr; /* Maintain LTR for layout */
+}
+
+/* RTL text alignment for Hebrew menu items - keep centered */
+html[dir='rtl'] .main-nav-tab > .attrib,
+.ul-heb .main-nav-tab > .attrib {
+  text-align: center !important; /* Force center alignment for RTL */
+  direction: rtl; /* Allow RTL text flow */
+  justify-content: center !important; /* Force center horizontally */
+  align-items: center;
 }
 
 /* Specific styling for categories tab */
@@ -77,9 +111,11 @@ body.menu-active {
 .main-nav-tab.categories-tab > .attrib {
   border-bottom: 1px solid #eee;
   display: flex;
-  justify-content: center;
+  justify-content: center; /* Center the shop text */
+  align-items: center;
   position: relative;
   background-color: transparent;
+  text-align: center; /* Center text */
 }
 
 /* Change background when submenu is active */
@@ -110,12 +146,14 @@ body.menu-active {
   display: flex;
   flex-flow: row;
   align-items: center;
+  justify-content: center; /* Center content horizontally */
   width: 100%;
   color: #343a40; /* Darker text */
   font-family: Raleway, sans-serif;
   font-size: 0.9rem; /* Adjust font size */
   text-decoration: none;
-  padding: 0.5rem 0; /* Adjust padding */
+  padding: 0.4rem 0; /* Further reduced padding for tighter spacing */
+  text-align: center; /* Center text */
 }
 
 /* Larger font size for Hebrew menu items on mobile */
@@ -163,6 +201,16 @@ html[dir='rtl'] .attrib,
   background-color: #f8f9fa;
   text-decoration: none;
   border: none;
+  direction: ltr; /* Maintain LTR for layout */
+}
+
+/* RTL text alignment for Hebrew category items */
+html[dir='rtl'] .category-item .attrib,
+.ul-heb .category-item .attrib {
+  padding: 0.8rem 2.5rem 0.8rem 1.5rem; /* Reverse padding for RTL */
+  text-align: center; /* Center category items too */
+  direction: rtl; /* Allow RTL text flow */
+  justify-content: center; /* Center horizontally */
 }
 
 .category-item .attrib:hover {
@@ -196,9 +244,14 @@ html[dir='rtl'] .attrib,
   gap: 1rem;
   width: 100%;
   padding: 1rem 1.5rem;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); /* Add safe area padding for devices with notches */
   border-top: 1px solid #eee;
-  margin-top: auto;
+  margin-top: 0; /* Remove auto margin, use flex positioning instead */
   background-color: #fff;
+  direction: ltr; /* Maintain LTR for layout */
+  flex-shrink: 0; /* Prevent selector from shrinking - keeps it always visible */
+  z-index: 10; /* Ensure it stays above menu content */
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow to separate from content */
 }
 
 .menu .mobile-lang-selector .flag-dropdown {
@@ -421,6 +474,13 @@ body.menu-active .site-header .icons-container .menubars-svg {
   height: 25px;
   cursor: pointer;
   z-index: 1010;
+  direction: ltr; /* Force LTR for close icon positioning */
+}
+
+/* Ensure close icon stays in correct position regardless of document direction */
+html[dir='rtl'] .menu .menu-close-container {
+  right: 15px;
+  left: auto;
 }
 
 .menu-close-icon {
@@ -469,10 +529,16 @@ body.menu-active .site-header .icons-container .menubars-svg {
 
 /* Style for mobile nav */
 @media (max-width: 699.99px) {
-  /* Fix mobile menu structure */
-  .menu-open .menu__ul {
-    display: flex;
-    flex-direction: column;
+  /* Fix mobile menu structure - force column layout on mobile */
+  .menu .menu__ul,
+  .menu .menu__ul.ul-heb,
+  .menu .menu__ul.ul-eng,
+  .menu-open .menu__ul,
+  .menu-open .menu__ul.ul-heb,
+  .menu-open .menu__ul.ul-eng {
+    display: flex !important;
+    flex-direction: column !important;
+    flex-flow: column !important;
     height: auto;
   }
 
@@ -688,6 +754,29 @@ body.menu-active .site-header .icons-container .menubars-svg {
   .site-header .shoppingcart-container {
     width: 26px;
     height: 26px;
+  }
+
+  /* Ensure language selector is accessible on small screens */
+  .menu .mobile-lang-selector {
+    padding: 0.75rem 1rem;
+    padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    gap: 0.75rem;
+  }
+
+  .menu .mobile-lang-selector .flag-dropdown {
+    padding: 0.3rem 0.5rem;
+    gap: 0.4rem;
+  }
+
+  .menu .mobile-lang-selector .flag-icon {
+    width: 24px;
+    height: 24px;
+  }
+
+  .menu .mobile-lang-selector .header-currency-selector {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+    min-width: 70px;
   }
 
   /* Legacy support for non-header mobile-lang-selector */
