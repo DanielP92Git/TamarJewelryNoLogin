@@ -129,15 +129,34 @@ class CartView extends View {
             item =>
               `     
           <div class="cart-item" id="${item.id}">
-            <img src='${item.image}' class="item-img" alt="" />
-            <div class="item-title">${item.title}</div>
-            <div class="item-price">${
-              item.currency == '$'
-                ? `$${item.price}`
-                : `$${Number((item.price / this._rate).toFixed(0))}`
-            }</div>
-            <button class="delete-item" aria-label="Remove item">✕</button>
-            </div>`
+            <div class="cart-item__media">
+              <img src='${item.image}' class="item-img" alt="${item.title || ''}" />
+            </div>
+            <div class="cart-item__content">
+              <div class="cart-item__title">
+                <h2 class="item-title">${item.title}</h2>
+              </div>
+              <div class="cart-item__right">
+                <span class="item-price">${
+                  item.currency == '$'
+                    ? `$${item.price}`
+                    : `$${Number((item.price / this._rate).toFixed(0))}`
+                }</span>
+                ${
+                  Number(item.quantity) > 1
+                    ? `<div class="cart-qty" aria-label="Quantity">
+                        <button class="cart-qty__btn cart-qty__btn--minus" type="button" disabled>-</button>
+                        <input class="cart-qty__input" type="number" readonly value="${Number(item.amount) || 1}" />
+                        <button class="cart-qty__btn cart-qty__btn--plus" type="button" disabled>+</button>
+                      </div>`
+                    : `<div class="cart-qty cart-qty--static" aria-label="Quantity">
+                        <input class="cart-qty__input" type="number" readonly value="${Number(item.amount) || 1}" />
+                      </div>`
+                }
+                <button class="delete-item cart-remove" type="button" aria-label="Remove item">Remove</button>
+              </div>
+            </div>
+          </div>`
           )
           .join('');
       } else {
@@ -146,15 +165,34 @@ class CartView extends View {
             item =>
               `     
         <div class="cart-item" id="${item.id}">
-          <img src='${item.image}' class="item-img" alt="" />
-          <div class="item-title">${item.title}</div>
-          <div class="item-price">${
-            item.currency == '$'
-              ? `₪${Number((item.price * this._rate).toFixed(0))}`
-              : `₪${item.price}`
-          }</div>
-          <button class="delete-item" aria-label="Remove item">✕</button>
-          </div>`
+          <div class="cart-item__media">
+            <img src='${item.image}' class="item-img" alt="${item.title || ''}" />
+          </div>
+          <div class="cart-item__content">
+            <div class="cart-item__title">
+              <h2 class="item-title">${item.title}</h2>
+            </div>
+            <div class="cart-item__right">
+              <span class="item-price">${
+                item.currency == '$'
+                  ? `₪${Number((item.price * this._rate).toFixed(0))}`
+                  : `₪${item.price}`
+              }</span>
+              ${
+                Number(item.quantity) > 1
+                  ? `<div class="cart-qty" aria-label="Quantity">
+                      <button class="cart-qty__btn cart-qty__btn--minus" type="button" disabled>-</button>
+                      <input class="cart-qty__input" type="number" readonly value="${Number(item.amount) || 1}" />
+                      <button class="cart-qty__btn cart-qty__btn--plus" type="button" disabled>+</button>
+                    </div>`
+                  : `<div class="cart-qty cart-qty--static" aria-label="Quantity">
+                      <input class="cart-qty__input" type="number" readonly value="${Number(item.amount) || 1}" />
+                    </div>`
+              }
+              <button class="delete-item cart-remove" type="button" aria-label="Remove item">Remove</button>
+            </div>
+          </div>
+        </div>`
           )
           .join('');
       }
@@ -173,42 +211,43 @@ class CartView extends View {
     let isInUsd = checkCurrency == '$';
     let currency = isInUsd ? '$' : '₪';
 
-    // Determine total label and styling based on language
-    const totalLabel = lng === 'eng' ? 'Total:' : 'סה"כ:';
-    const totalContainerStyle =
-      lng === 'heb' ? 'style="direction: rtl; padding-right: 5px;"' : '';
-    const totalTextStyle = lng === 'heb' ? 'style="margin-right: 0;"' : '';
+    // Determine labels and styling based on language
+    const labels =
+      lng === 'heb'
+        ? {
+            subtotal: 'סכום ביניים:',
+            shipping: 'משלוח:',
+            shippingValue: 'מחושב בקופה',
+            total: 'סה"כ:',
+            shippingNote:
+              '(ייתכנו עלויות משלוח. אנא התקדמו לתשלום לבחירת אפשרות המשלוח)',
+          }
+        : {
+            subtotal: 'Subtotal:',
+            shipping: 'Shipping:',
+            shippingValue: 'Calculated at checkout',
+            total: 'Total:',
+            shippingNote:
+              '(Shipping costs may apply. Please proceed to checkout for options)',
+          };
+
+    const rtlWrap = lng === 'heb' ? 'style="direction: rtl;"' : '';
 
     return `
     <div class="price-summary-container">
-          <!--<div class="total-container subtotal">
-            <span class="total-text">Subtotal:</span>
-            <span class="total-price">₪${price}</span>
-          </div>-->
-          <!--<div class="total-container shipping">
-            <span class="total-text">Shipping:</span>
-            <span class="total-price">₪${ship}</span>
-          </div>-->
-          
-          <!-- Correctly generate total line using variables -->
-          <div class="total-container total" ${totalContainerStyle}>
-            <span class="total-text" ${totalTextStyle}>${totalLabel}</span>
+          <div class="total-container subtotal" ${rtlWrap}>
+            <span class="total-text">${labels.subtotal}</span>
             <span class="total-price">${currency}${price}</span>
           </div>
-
-          <!-- Remove the potentially problematic commented-out block -->
-          <!-- 
-          <div class="total-container total">
-            <span class="total-text">Total:</span>
+          <div class="total-container shipping" ${rtlWrap}>
+            <span class="total-text">${labels.shipping}</span>
+            <span class="total-price">${labels.shippingValue}</span>
+          </div>
+          <div class="total-container total" ${rtlWrap}>
+            <span class="total-text">${labels.total}</span>
             <span class="total-price">${currency}${price}</span>
           </div>
-          -->
-
-          ${
-            lng === 'eng'
-              ? '<span class="shipping-text">(Shipping costs may apply. Please proceed to checkout for options)</span>'
-              : '<span class="shipping-text">(ייתכנו עלויות משלוח. אנא התקדמו לתשלום לבחירת אפשרות המשלוח)</span>'
-          }
+          <span class="shipping-text">${labels.shippingNote}</span>
         </div>`;
   }
 
