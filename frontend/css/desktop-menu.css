@@ -21,16 +21,18 @@
   height: 100%;
 }
 
-/* RTL support for Hebrew */
-.ul-heb {
-  display: flex !important;
-  flex-direction: row-reverse !important;
-}
+/* RTL support for Hebrew - Desktop only (mobile keeps same order) */
+@media (min-width: 800px) {
+  .ul-heb {
+    display: flex !important;
+    flex-direction: row-reverse !important;
+  }
 
-/* Ensure menu is reversed in RTL mode */
-html[dir='rtl'] .menu__ul,
-.menu__ul.ul-heb {
-  flex-direction: row-reverse !important;
+  /* Ensure menu is reversed in RTL mode on desktop */
+  html[dir='rtl'] .menu__ul,
+  .menu__ul.ul-heb {
+    flex-direction: row-reverse !important;
+  }
 }
 
 /* Main navigation tabs */
@@ -39,7 +41,6 @@ html[dir='rtl'] .menu__ul,
   flex-flow: column;
   justify-content: center;
   width: 100%;
-  height: 100%;
   list-style: none;
 }
 
