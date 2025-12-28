@@ -20,6 +20,7 @@ const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const sharp = require('sharp');
 const AWS = require('aws-sdk');
+const { resolveRequestLocale } = require('./config/locale');
 
 // #region agent log
 function agentLog(hypothesisId, location, message, data) {
@@ -952,6 +953,30 @@ app.get('/api/client-config', (req, res) => {
     host: process.env.HOST || null,
     env: process.env.NODE_ENV || 'development',
   });
+});
+
+// =============================================
+// Locale auto-detection (Israel => Hebrew/ILS, else English/USD)
+// =============================================
+function setLocalePrefCookie(res, locale) {
+  try {
+    // Persist only the minimum needed to avoid cookie bloat.
+    const payload = JSON.stringify({ country: locale?.country || null });
+    res.cookie('locale_pref', payload, {
+      httpOnly: false, // readable by frontend if desired
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+  } catch {
+    // ignore
+  }
+}
+
+app.get(['/api/locale', '/locale'], (req, res) => {
+  const locale = resolveRequestLocale(req);
+  setLocalePrefCookie(res, locale);
+  res.status(200).json({ ok: true, ...locale });
 });
 
 // Direct file access route for debugging

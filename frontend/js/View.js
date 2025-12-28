@@ -546,6 +546,12 @@ export default class View {
     try {
       // console.log('[View.js] changeToHeb: Setting localStorage');
       localStorage.setItem('language', 'heb');
+      try {
+        document.documentElement.lang = 'he';
+        document.documentElement.dir = 'rtl';
+      } catch {
+        // ignore
+      }
 
       // console.log('[View.js] changeToHeb: About to call setLanguage');
       this.setLanguage('heb', 0);
@@ -563,6 +569,12 @@ export default class View {
     try {
       // console.log('[View.js] changeToEng: Setting localStorage');
       localStorage.setItem('language', 'eng');
+      try {
+        document.documentElement.lang = 'en';
+        document.documentElement.dir = 'ltr';
+      } catch {
+        // ignore
+      }
 
       // console.log('[View.js] changeToEng: About to call setLanguage');
       this.setLanguage('eng', 0);
