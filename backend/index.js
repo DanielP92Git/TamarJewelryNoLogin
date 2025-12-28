@@ -1205,6 +1205,25 @@ const createOrder = async cart => {
       }, 0)
       .toFixed(2);
     const currencyData = cart[0].unit_amount.currency_code;
+
+    // Guardrail: PayPal orders must use a single currency.
+    const currencies = new Set(
+      cart.map(item => item?.unit_amount?.currency_code).filter(Boolean)
+    );
+    if (currencies.size > 1) {
+      const err = new Error('Mixed currencies in cart are not supported');
+      err.code = 'MIXED_CURRENCY_CART';
+      err.statusCode = 400;
+      throw err;
+    }
+    if (currencies.size === 1 && !currencies.has(currencyData)) {
+      // Shouldn't happen, but keep the intent explicit
+      const err = new Error('Invalid cart currency');
+      err.code = 'INVALID_CART_CURRENCY';
+      err.statusCode = 400;
+      throw err;
+    }
+
     const accessToken = await generateAccessToken();
     if (!isProd) console.log('PayPal access token received: Success');
 
@@ -1246,33 +1265,57 @@ const createOrder = async cart => {
     if (!isProd)
       console.log('PayPal order payload:', JSON.stringify(payload, null, 2));
 
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(
+      url,
+      {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${accessToken}`,
       },
       method: 'POST',
       body: JSON.stringify(payload),
-    });
+      },
+      20000
+    );
 
     return handleResponse(response);
   } catch (error) {
+    if (error?.name === 'AbortError') {
+      const err = new Error('PayPal request timed out');
+      err.code = 'PAYPAL_TIMEOUT';
+      err.statusCode = 504;
+      throw err;
+    }
     if (!isProd) console.error('Error creating PayPal order:', error);
     throw error;
   }
 };
 
 const captureOrder = async orderID => {
-  const accessToken = await generateAccessToken();
-  const url = `${baseUrl}/v2/checkout/orders/${orderID}/capture`;
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  return handleResponse(response);
+  try {
+    const accessToken = await generateAccessToken();
+    const url = `${baseUrl}/v2/checkout/orders/${orderID}/capture`;
+    const response = await fetchWithTimeout(
+      url,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+      20000
+    );
+    return handleResponse(response);
+  } catch (error) {
+    if (error?.name === 'AbortError') {
+      const err = new Error('PayPal request timed out');
+      err.code = 'PAYPAL_TIMEOUT';
+      err.statusCode = 504;
+      throw err;
+    }
+    throw error;
+  }
 };
 
 async function handleResponse(response) {
@@ -1299,6 +1342,16 @@ async function handleResponse(response) {
     jsonResponse: jsonResponse ?? {},
     httpStatusCode: response.status,
   };
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 // =============================================
