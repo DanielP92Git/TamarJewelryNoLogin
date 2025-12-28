@@ -2,23 +2,8 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URL);
-
-const Users = mongoose.model('Users', {
-  name: { type: String },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    match:
-      /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/,
-  },
-  password: { type: String, required: true },
-  cartData: { type: Object },
-  Date: { type: Date, default: Date.now },
-  userType: { type: String, default: 'user' },
-});
+const { connectDb } = require('./config/db');
+const { Users } = require('./models');
 
 async function listAdminUsers() {
   try {
@@ -86,6 +71,7 @@ async function resetPassword(adminEmail, newPassword) {
 
 // Main execution
 async function main() {
+  await connectDb();
   const args = process.argv.slice(2);
 
   if (args.length === 0) {
