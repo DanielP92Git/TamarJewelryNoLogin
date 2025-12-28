@@ -28,7 +28,7 @@ header {
   align-items: center;
   width: 100%;
   height: 15%;
-  z-index: 7;
+  z-index: 10050;
   position: fixed;
   background-color: rgba(255, 255, 255, 0.8);
 
@@ -152,7 +152,7 @@ a {
   justify-content: center;
   align-items: center;
   height: 50px;
-  z-index: 15;
+  z-index: 10050;
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.95) 0%,
@@ -256,6 +256,7 @@ a {
 /* ~~~~~~~~~~~~ Shopping cart ~~~~~~~~~~~~~~ */
 main.cart-page {
   display: block;
+  padding-top: 5.5rem;
   margin-bottom: 6rem;
 }
 
@@ -641,6 +642,8 @@ main.cart-page {
   align-self: stretch;
   margin-left: auto;
   margin-right: auto;
+  position: relative;
+  z-index: 0;
 }
 
 /* ~~~~~~~~~~~~~~ Footer ~~~~~~~~~~~~~~~~~~~~ */
