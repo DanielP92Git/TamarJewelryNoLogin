@@ -78,6 +78,24 @@ class CategoriesView extends View {
     }, 1000);
   }
 
+  // Prefer stored USD/ILS prices from the backend when available.
+  // Fallback to exchange-rate conversion to avoid breaking legacy data.
+  getDisplayPrice(product) {
+    const cur = this.selectedCurrency === 'usd' ? 'usd' : 'ils';
+    const ils = Number(product?.ils_price);
+    const usd = Number(product?.usd_price);
+
+    if (cur === 'usd') {
+      if (Number.isFinite(usd) && usd > 0) return usd;
+      if (Number.isFinite(ils)) return Number((ils / this.exchangeRate).toFixed(0));
+      return 0;
+    }
+
+    if (Number.isFinite(ils) && ils > 0) return ils;
+    if (Number.isFinite(usd)) return Number((usd * this.exchangeRate).toFixed(0));
+    return 0;
+  }
+
   // Direct initialization method that bypasses checks
   directInitialize(category, categoryNameHebrew) {
     if (!category) {
@@ -946,12 +964,12 @@ class CategoriesView extends View {
             // Convert prices to the selected currency
             const priceA =
               this.selectedCurrency === 'usd'
-                ? a.ils_price / this.exchangeRate
-                : a.ils_price;
+                ? this.getDisplayPrice(a)
+                : this.getDisplayPrice(a);
             const priceB =
               this.selectedCurrency === 'usd'
-                ? b.ils_price / this.exchangeRate
-                : b.ils_price;
+                ? this.getDisplayPrice(b)
+                : this.getDisplayPrice(b);
 
             // Sort based on the converted prices
             return this.sortedByPrice === 'low-to-high'
@@ -1235,12 +1253,9 @@ class CategoriesView extends View {
   }
 
   getProductMarkup(item) {
-    const { id, quantity, image, name, description, ils_price } = item;
+    const { id, quantity, image, name, description } = item;
     const curSign = this.selectedCurrency === 'usd' ? '$' : '₪';
-    const price =
-      this.selectedCurrency === 'usd'
-        ? Number((ils_price / this.exchangeRate).toFixed(0))
-        : ils_price;
+    const price = this.getDisplayPrice(item);
 
     // Format description with ellipsis for list view
     const maxDescriptionLength = 150;
@@ -1296,7 +1311,7 @@ class CategoriesView extends View {
         </div>
         <div class="item-title">${name}</div>
         <div class="item-description">${formattedDescription}</div>
-        <div class="item-price">${curSign}${price}</div>
+              <div class="item-price">${curSign}${price}</div>
         <button class="add-to-cart-btn">${
           this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל'
         }</button>

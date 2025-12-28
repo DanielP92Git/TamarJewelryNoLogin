@@ -1,5 +1,6 @@
 import 'core-js/actual';
 import 'regenerator-runtime/runtime.js';
+import { bootstrapLocaleSync, hydrateLocaleFromBackend } from './locale.js';
 import * as model from './model.js';
 // import { loadMenu } from './menuLoader.js'; // Removed
 import homePageView from './Views/homePageView.js';
@@ -11,6 +12,9 @@ import CartView from './Views/cartView.js';
 // User login functionality has been removed
 
 //----------------------------------------------------
+
+// Set best-effort locale defaults ASAP (before view modules read localStorage).
+bootstrapLocaleSync();
 
 const controlHomePage = async function (lng) {
   await model.handleLoadStorage();
@@ -204,6 +208,10 @@ const controlBambaPage = function () {
 };
 
 const init = async function () {
+  // Hydrate locale from backend geo detection without blocking initial UI.
+  // This will only override language/currency if they were missing at page start.
+  hydrateLocaleFromBackend();
+
   // Load menu for all pages // Removed
   // await loadMenu(); // Removed
 
