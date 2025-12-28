@@ -11,6 +11,7 @@ const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
 const fs = require('fs');
 const sharp = require('sharp');
+const AWS = require('aws-sdk');
 
 // #region agent log
 function agentLog(hypothesisId, location, message, data) {
@@ -60,6 +61,75 @@ const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
 const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
 const baseUrl =
   process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com';
+
+// =============================================
+// DigitalOcean Spaces (S3-compatible) client
+// =============================================
+const isProdEnv = process.env.NODE_ENV === 'production';
+const SPACES_BUCKET = process.env.SPACES_BUCKET || null;
+const SPACES_REGION = process.env.SPACES_REGION || null;
+const SPACES_ENDPOINT = process.env.SPACES_ENDPOINT || null; // e.g. https://fra1.digitaloceanspaces.com
+const SPACES_CDN_BASE_URL = process.env.SPACES_CDN_BASE_URL || null; // optional
+
+function normalizeBaseUrl(value) {
+  if (!value || typeof value !== 'string') return null;
+  const trimmed = value.trim().replace(/\/+$/, '');
+  return trimmed || null;
+}
+
+function getSpacesPublicBaseUrl() {
+  // Prefer CDN base if provided; otherwise use the standard Spaces virtual-host URL
+  const cdn = normalizeBaseUrl(SPACES_CDN_BASE_URL);
+  if (cdn) return cdn;
+
+  if (SPACES_BUCKET && SPACES_REGION) {
+    // https://<bucket>.<region>.digitaloceanspaces.com
+    return `https://${SPACES_BUCKET}.${SPACES_REGION}.digitaloceanspaces.com`;
+  }
+
+  // Fallback to endpoint + bucket (path-style). Works but CDN/virtual-host is preferred.
+  const ep = normalizeBaseUrl(SPACES_ENDPOINT);
+  if (ep && SPACES_BUCKET) return `${ep}/${SPACES_BUCKET}`;
+  return null;
+}
+
+const spacesPublicBaseUrl = getSpacesPublicBaseUrl();
+
+const s3 =
+  SPACES_ENDPOINT && process.env.SPACES_KEY && process.env.SPACES_SECRET
+    ? new AWS.S3({
+        endpoint: new AWS.Endpoint(SPACES_ENDPOINT),
+        accessKeyId: process.env.SPACES_KEY,
+        secretAccessKey: process.env.SPACES_SECRET,
+        region: SPACES_REGION || undefined,
+      })
+    : null;
+
+async function uploadFileToSpaces(key, filePath, contentType) {
+  // In dev/local, allow running without Spaces configured.
+  // In production, Spaces must be configured (App Platform filesystem is ephemeral).
+  if (!s3 || !SPACES_BUCKET || !spacesPublicBaseUrl) {
+    if (!isProdEnv) return null;
+    const err = new Error('SPACES_NOT_CONFIGURED');
+    err.code = 'SPACES_NOT_CONFIGURED';
+    err.statusCode = 500;
+    throw err;
+  }
+
+  const body = fs.createReadStream(filePath);
+
+  await s3
+    .upload({
+      Bucket: SPACES_BUCKET,
+      Key: key,
+      Body: body,
+      ACL: 'public-read',
+      ContentType: contentType || 'application/octet-stream',
+    })
+    .promise();
+
+  return `${spacesPublicBaseUrl}/${key}`;
+}
 
 // Log PayPal configuration for debugging (dev only; avoid leaking in prod)
 if (process.env.NODE_ENV !== 'production') {
@@ -1534,24 +1604,29 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
     const usdPrice = Number(req.body.oldPrice) || 0;
     const ilsPrice = Math.round(usdPrice * 3.7 * (1 + securityMargin / 100));
 
-    // Get image URLs from the upload response (accept absolute or relative; store relative)
+    // Get image URLs from the upload response.
+    // - Absolute (Spaces/CDN) URLs should be stored as-is.
+    // - Legacy local URLs (/uploads/...) are stored as relative paths.
     const mainImageInput = req.body.mainImage || {};
     const smallImageInput = req.body.smallImages || [];
 
+    const maybeRelative = value =>
+      isAbsoluteHttpUrl(value) ? value : toRelativeApiPath(value);
+
     const mainImageUrls = {
-      desktop: toRelativeApiPath(mainImageInput.desktop),
-      mobile: toRelativeApiPath(mainImageInput.mobile),
-      publicDesktop: toRelativeApiPath(mainImageInput.publicDesktop),
-      publicMobile: toRelativeApiPath(mainImageInput.publicMobile),
+      desktop: maybeRelative(mainImageInput.desktop),
+      mobile: maybeRelative(mainImageInput.mobile),
+      publicDesktop: maybeRelative(mainImageInput.publicDesktop),
+      publicMobile: maybeRelative(mainImageInput.publicMobile),
     };
 
     const smallImageUrls = Array.isArray(smallImageInput)
       ? smallImageInput.filter(Boolean).map(img => {
-          if (typeof img === 'string') return toRelativeApiPath(img);
+          if (typeof img === 'string') return maybeRelative(img);
           if (img && typeof img === 'object' && !Array.isArray(img)) {
             return {
-              desktop: toRelativeApiPath(img.desktop),
-              mobile: toRelativeApiPath(img.mobile),
+              desktop: maybeRelative(img.desktop),
+              mobile: maybeRelative(img.mobile),
             };
           }
           return img;
@@ -1579,14 +1654,25 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
     );
     // #endregion
 
-    // Guard: don't store a product that references non-existent upload files
+    // Guard: don't store a product that references non-existent LOCAL upload files.
+    // If using Spaces/CDN (absolute URLs), skip this local filesystem guard.
     try {
-      const mainDesktopFn = mainImageUrls?.desktop
-        ? path.basename(String(mainImageUrls.desktop))
-        : null;
-      if (mainDesktopFn) {
+      const desktopUrl = mainImageUrls?.desktop || null;
+      const shouldValidateLocal =
+        typeof desktopUrl === 'string' &&
+        desktopUrl.startsWith('/') &&
+        (desktopUrl.startsWith('/uploads/') ||
+          desktopUrl.startsWith('/public/uploads/'));
+
+      if (shouldValidateLocal) {
+        const mainDesktopFn = path.basename(String(desktopUrl));
         const fp = safeResolveUnder(uploadsDir, mainDesktopFn);
-        const exists = fp ? fs.existsSync(fp) : false;
+        const exists =
+          (fp ? fs.existsSync(fp) : false) ||
+          (() => {
+            const fpPublic = safeResolveUnder(publicUploadsDir, mainDesktopFn);
+            return fpPublic ? fs.existsSync(fpPublic) : false;
+          })();
 
         // #region agent log
         agentLog(
@@ -1594,7 +1680,7 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
           'backend/index.js:/addproduct:upload-file-check',
           'checked upload file exists',
           {
-            mainDesktopUrl: mainImageUrls?.desktop || null,
+            mainDesktopUrl: desktopUrl,
             mainDesktopFilename: mainDesktopFn,
             resolvedOk: !!fp,
             exists,
@@ -1609,7 +1695,7 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
               'Uploaded main image file was not found on the server. Please retry the upload.',
           });
         }
-      } else {
+      } else if (!desktopUrl) {
         return res.status(400).json({
           success: false,
           error: 'mainImage.desktop missing from upload response.',
@@ -1624,6 +1710,8 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
     }
 
     // Create the product with new image structure
+    const isSpacesDesktop = isAbsoluteHttpUrl(mainImageUrls.desktop);
+
     const product = new Product({
       id: nextId,
       name: req.body.name,
@@ -1636,7 +1724,9 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
       smallImages: smallImageUrls,
       // Store relative direct image URL for better accessibility (absolute is built at response time)
       directImageUrl: mainImageUrls.desktop
-        ? `/direct-image/${String(mainImageUrls.desktop).split('/').pop()}`
+        ? isSpacesDesktop
+          ? mainImageUrls.desktop
+          : `/direct-image/${String(mainImageUrls.desktop).split('/').pop()}`
         : null,
       // Product details
       category: req.body.category,
@@ -2124,16 +2214,28 @@ app.post(
 
       // Construct URLs for main image
       const mainImageUrls = {
-        desktop: `/uploads/${mainImageResults.desktop.filename}`,
-        mobile: `/uploads/${mainImageResults.mobile.filename}`,
-        publicDesktop: `/public/uploads/${mainImageResults.desktop.filename}`,
-        publicMobile: `/public/uploads/${mainImageResults.mobile.filename}`,
+        desktop:
+          mainImageResults?.desktop?.spacesUrl ||
+          `/uploads/${mainImageResults.desktop.filename}`,
+        mobile:
+          mainImageResults?.mobile?.spacesUrl ||
+          `/uploads/${mainImageResults.mobile.filename}`,
+        // Treat Spaces/CDN URLs as public variants
+        publicDesktop:
+          mainImageResults?.desktop?.spacesUrl ||
+          `/public/uploads/${mainImageResults.desktop.filename}`,
+        publicMobile:
+          mainImageResults?.mobile?.spacesUrl ||
+          `/public/uploads/${mainImageResults.mobile.filename}`,
       };
 
       // Construct URLs for small images
       const smallImageUrlSets = smallImagesResults.map(result => ({
-        desktop: `/smallImages/${result.desktop.filename}`,
-        mobile: `/smallImages/${result.mobile.filename}`,
+        desktop:
+          result?.desktop?.spacesUrl ||
+          `/smallImages/${result.desktop.filename}`,
+        mobile:
+          result?.mobile?.spacesUrl || `/smallImages/${result.mobile.filename}`,
       }));
 
       console.log('\n=== Generated Image URLs ===');
@@ -2798,6 +2900,23 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
     await fs.promises.copyFile(desktopPath, publicDesktopPath);
     await fs.promises.copyFile(mobilePath, publicMobilePath);
 
+    // Upload variants to Spaces (durable storage for App Platform)
+    const keyPrefix = isMainImage ? 'products/main' : 'products/small';
+    const keyStamp = Date.now();
+    const desktopKey = `${keyPrefix}/${keyStamp}-${desktopFilename}`;
+    const mobileKey = `${keyPrefix}/${keyStamp}-${mobileFilename}`;
+
+    const desktopSpacesUrl = await uploadFileToSpaces(
+      desktopKey,
+      desktopPath,
+      'image/webp'
+    );
+    const mobileSpacesUrl = await uploadFileToSpaces(
+      mobileKey,
+      mobilePath,
+      'image/webp'
+    );
+
     // #region agent log
     agentLog(
       'B',
@@ -2811,6 +2930,7 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
         mobileExists: fs.existsSync(mobilePath),
         publicDesktopExists: fs.existsSync(publicDesktopPath),
         publicMobileExists: fs.existsSync(publicMobilePath),
+        spacesEnabled: !!desktopSpacesUrl && !!mobileSpacesUrl,
       }
     );
     // #endregion
@@ -2820,11 +2940,15 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
       filename: desktopFilename,
       path: desktopPath,
       publicPath: publicDesktopPath,
+      spacesKey: desktopKey,
+      spacesUrl: desktopSpacesUrl,
     };
     results.mobile = {
       filename: mobileFilename,
       path: mobilePath,
       publicPath: publicMobilePath,
+      spacesKey: mobileKey,
+      spacesUrl: mobileSpacesUrl,
     };
 
     // Best-effort cleanup of the original uploaded file to save disk
