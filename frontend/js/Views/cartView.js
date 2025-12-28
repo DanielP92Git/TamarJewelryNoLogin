@@ -463,9 +463,13 @@ class CartView extends View {
                 }),
               });
 
-              // IMPORTANT: Fetch responses can only be read once.
-              // Read as text, then parse JSON manually (mirrors backend handleResponse()).
-              const text = await response.text();
+              // IMPORTANT:
+              // Some browser tooling/extensions will try to read the same Response body
+              // for debugging/inspection. To avoid "body stream already read" errors,
+              // always consume a CLONED response body here and leave the original
+              // response object untouched for any other listeners.
+              const clonedResponse = response.clone();
+              const text = await clonedResponse.text();
               let responseData = null;
               try {
                 responseData = text ? JSON.parse(text) : null;
