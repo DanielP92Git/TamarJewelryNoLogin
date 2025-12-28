@@ -1217,9 +1217,13 @@ async function handleCheckoutSession(session) {
     `Product ${productId} quantity reduced. New quantity: ${updated.quantity}`
   );
 
+  // IMPORTANT:
+  // Do not delete products when inventory reaches 0.
+  // Out-of-stock items should be temporarily hidden from the storefront but remain editable/restockable in admin.
   if (updated.quantity === 0) {
-    await Product.findOneAndDelete({ id: productId, quantity: 0 });
-    console.log(`Product with id: ${productId} deleted from database`);
+    console.log(
+      `Product ${productId} is now out of stock (quantity=0). It will be hidden from storefront listings.`
+    );
   }
 }
 
@@ -2031,7 +2035,12 @@ app.post('/productsByCategory', async (req, res) => {
     console.log('Fetching products for category:', category);
     const skip = (page - 1) * limit;
 
-    let products = await Product.find({ category: category })
+    // Storefront listing: hide out-of-stock and unavailable items
+    let products = await Product.find({
+      category: category,
+      quantity: { $gt: 0 },
+      available: { $ne: false },
+    })
       .skip(skip)
       .limit(limit);
 
@@ -2052,7 +2061,12 @@ app.post('/chunkProducts', async (req, res) => {
   const skip = (page - 1) * limit;
   let category = req.body.checkCategory;
   try {
-    const products = await Product.find({ category: category })
+    // Storefront listing: hide out-of-stock and unavailable items
+    const products = await Product.find({
+      category: category,
+      quantity: { $gt: 0 },
+      available: { $ne: false },
+    })
       .skip(skip)
       .limit(limit);
     res.json(products.map(normalizeProductForClient));
@@ -2068,7 +2082,12 @@ app.post('/getAllProductsByCategory', async (req, res) => {
     console.log('Fetching all products for category:', category);
 
     // Get all products for the category without pagination
-    const products = await Product.find({ category: category });
+    // Storefront listing: hide out-of-stock and unavailable items
+    const products = await Product.find({
+      category: category,
+      quantity: { $gt: 0 },
+      available: { $ne: false },
+    });
     const total = products.length;
 
     if (!products || products.length === 0) {

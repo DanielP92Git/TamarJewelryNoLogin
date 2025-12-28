@@ -914,8 +914,8 @@ class CategoriesView extends View {
           }
 
           // Store all products and sort them
-          this.products = data.products;
-          this.totalProducts = data.total;
+          this.products = (data.products || []).filter(p => Number(p?.quantity) > 0);
+          this.totalProducts = this.products.length;
           this.allProductsFetched = true;
 
           // Sort products by price
@@ -1009,12 +1009,14 @@ class CategoriesView extends View {
         // Handle both old and new response formats
         if (Array.isArray(data)) {
           // Old format - direct array of products
-          this.products = data;
-          this.totalProducts = data.length;
+          this.products = data.filter(p => Number(p?.quantity) > 0);
+          this.totalProducts = this.products.length;
         } else {
           // New format - object with products array and metadata
-          this.products = Array.isArray(data.products) ? data.products : [];
-          this.totalProducts = data.total || 0;
+          this.products = (Array.isArray(data.products) ? data.products : []).filter(
+            p => Number(p?.quantity) > 0
+          );
+          this.totalProducts = this.products.length;
 
           // Check if we've reached the end
           if (data.hasMore === false) {
@@ -1066,8 +1068,10 @@ class CategoriesView extends View {
           }
 
           // Store the products array
-          this.products = Array.isArray(data.products) ? data.products : [];
-          this.totalProducts = data.total || 0;
+          this.products = (Array.isArray(data.products) ? data.products : []).filter(
+            p => Number(p?.quantity) > 0
+          );
+          this.totalProducts = this.products.length;
 
           // Only display if we have products
           if (this.products.length > 0) {
@@ -1128,7 +1132,9 @@ class CategoriesView extends View {
         return;
       }
 
-      const newProducts = Array.isArray(data) ? data : [];
+      const newProducts = (Array.isArray(data) ? data : []).filter(
+        p => Number(p?.quantity) > 0
+      );
 
       if (newProducts.length === 0) {
         this.allProductsFetched = true;
