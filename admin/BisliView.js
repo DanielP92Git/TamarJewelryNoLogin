@@ -1559,9 +1559,9 @@ function editProduct(product) {
           <h2 class="page__title">Edit Product</h2>
           <p class="page__subtitle">${product.name}</p>
         </div>
-        <div class="page__actions">
+        <div class="page__actions" style="display: flex; align-items: center; gap: 10px;">
           <button type="button" class="btn" id="cancel-edit-product">Cancel</button>
-          <button type="submit" class="btn btn--primary addproduct-btn">Save Changes</button>
+          <button type="submit" class="btn btn--primary" id="save-edit-product">Save Changes</button>
         </div>
       </div>
 
@@ -2083,7 +2083,9 @@ async function updateProduct(e) {
   }
 
   // Show spinner in button
-  const submitBtn = document.querySelector("#editForm .addproduct-btn");
+  const submitBtn =
+    document.querySelector("#editForm #save-edit-product") ||
+    document.querySelector("#editForm .addproduct-btn");
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '<span class="button-spinner"></span>';
@@ -2880,7 +2882,6 @@ async function loadAddProductsPage() {
         </div>
         <div class="page__actions">
           <button type="button" class="btn" id="cancel-add-product">Cancel</button>
-          <button type="button" class="btn" id="test-api-btn" title="Run a quick connectivity check to the backend API">Test API</button>
           <button type="button" class="btn btn--primary" id="submit-add-product">Add Product</button>
         </div>
       </div>
@@ -3039,54 +3040,6 @@ async function loadAddProductsPage() {
     cancelBtn.addEventListener("click", () => {
       setActiveNav("products-list");
       fetchInfo();
-    });
-  }
-
-  // One-click API connectivity self-test (no DevTools required)
-  const testApiBtn = document.getElementById("test-api-btn");
-  if (testApiBtn) {
-    testApiBtn.addEventListener("click", async () => {
-      testApiBtn.disabled = true;
-      const prev = testApiBtn.textContent;
-      testApiBtn.textContent = "Testing...";
-      try {
-        await resolveApiUrl();
-        const results = await window.diagnoseBisliServer?.();
-
-        if (Array.isArray(results)) {
-          const failed = results.filter((r) => !r?.ok);
-          const lines = failed
-            .slice(0, 6)
-            .map((r) => {
-              const status = r.status == null ? "NO_RESPONSE" : r.status;
-              const err = r.error ? ` (${r.error})` : "";
-              return `- ${r.method || "?"} ${r.endpoint}: ${status}${err}`;
-            })
-            .join("\n");
-
-          alert(
-            `API test completed.\n\n` +
-              `API_URL: ${API_URL}\n` +
-              `Passed: ${results.length - failed.length}/${results.length}\n` +
-              (failed.length
-                ? `\nFailures:\n${lines}\n\nSee console for full details.`
-                : `\nAll endpoints responded successfully.`)
-          );
-        } else {
-          alert(
-            `API test completed. Check console for details.\n\nAPI_URL: ${API_URL}`
-          );
-        }
-      } catch (e) {
-        const msg = String(e?.message || e);
-        alert(
-          `API test failed.\n\nAPI_URL: ${API_URL}\nError: ${msg}\n\n` +
-            `Make sure backend is running and open admin over http:// in dev.`
-        );
-      } finally {
-        testApiBtn.disabled = false;
-        testApiBtn.textContent = prev || "Test API";
-      }
     });
   }
 
