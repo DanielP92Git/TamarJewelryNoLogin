@@ -292,7 +292,6 @@ a {
   gap: 0.4rem;
 }
 
-.desktop-lang-selector.english-lng-selector #currency,
 .desktop-lang-selector.english-lng-selector .header-currency-selector {
   margin-left: 0;
   margin-right: 0.4rem;
@@ -347,7 +346,6 @@ a {
 }
 
 /* Currency selector in desktop header */
-.desktop-lang-selector #currency,
 .desktop-lang-selector .header-currency-selector {
   padding: 0.25rem 0.4rem;
   border: 1px solid #ddd;
@@ -362,7 +360,6 @@ a {
   margin: 0;
 }
 
-.desktop-lang-selector #currency:hover,
 .desktop-lang-selector .header-currency-selector:hover {
   border-color: #5c6ac4;
   box-shadow: 0 2px 8px rgba(92, 106, 196, 0.15);
@@ -601,7 +598,6 @@ a {
     box-shadow: none;
   }
 
-  .site-header .desktop-lang-selector #currency,
   .site-header .desktop-lang-selector .header-currency-selector {
     font-family: 'Montserrat', sans-serif;
     font-size: 12px;
@@ -714,7 +710,6 @@ a {
     gap: 8px;
   }
 
-  .site-header .desktop-lang-selector #currency,
   .site-header .desktop-lang-selector .header-currency-selector {
     font-size: 11px;
     padding: 5px 8px;
@@ -758,7 +753,6 @@ a {
     height: 16px;
   }
 
-  .site-header .desktop-lang-selector #currency,
   .site-header .desktop-lang-selector .header-currency-selector {
     font-size: 10px;
     padding: 4px 6px;

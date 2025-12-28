@@ -27,14 +27,16 @@ function setSavedCurrency(currency) {
 
 function syncCurrencySelectors(currency) {
   const c = normalizeCurrency(currency) || getSavedCurrency();
-  document.querySelectorAll('#currency').forEach((el) => {
-    try {
-      // Some pages may temporarily render a "default" option; force the saved value.
-      el.value = c;
-    } catch (e) {
-      void e;
-    }
-  });
+  document
+    .querySelectorAll('select.header-currency-selector[name="currency"]')
+    .forEach(el => {
+      try {
+        // Some pages may temporarily render a "default" option; force the saved value.
+        el.value = c;
+      } catch (e) {
+        void e;
+      }
+    });
 }
 
 function initCurrencyPersistence() {
@@ -50,9 +52,14 @@ function initCurrencyPersistence() {
   }
 
   // Event delegation: works even if header/menu re-renders or elements are replaced.
-  document.addEventListener('change', (e) => {
+  document.addEventListener('change', e => {
     const target = e.target;
-    if (!target || target.id !== 'currency') return;
+    if (
+      !target ||
+      !target.matches ||
+      !target.matches('select.header-currency-selector[name="currency"]')
+    )
+      return;
 
     const chosen = normalizeCurrency(target.value);
     if (!chosen) return; // ignore "default"
@@ -748,7 +755,7 @@ export default class View {
               ${ilFlag}
             </div>
           </div>
-          ${this.getCurrencySelectorMarkup(lng)}
+          ${this.getCurrencySelectorMarkup(lng, 'currency-desktop')}
         </div>
         <a class="header-cart attrib-cart" href="/html/cart.html" aria-label="Cart">
           <div class="cart-container">
@@ -760,7 +767,7 @@ export default class View {
         </a>
       `;
     }
-    
+
     // Add mobile language and currency selector to side menu (at bottom)
     let mobileLangSelector = menu.querySelector('.mobile-lang-selector');
     if (!mobileLangSelector) {
@@ -768,7 +775,7 @@ export default class View {
       mobileLangSelector.className = 'mobile-lang-selector';
       menu.appendChild(mobileLangSelector);
     }
-    
+
     mobileLangSelector.innerHTML = `
       <div class="flag-dropdown">
         <div class="flag-icon flag-eng${
@@ -782,7 +789,7 @@ export default class View {
           ${ilFlag}
         </div>
       </div>
-      ${this.getCurrencySelectorMarkup(lng)}
+      ${this.getCurrencySelectorMarkup(lng, 'currency-mobile')}
     `;
 
     // Add event listeners for flag clicks
@@ -814,9 +821,11 @@ export default class View {
     });
 
     // Update currency selector text based on language (there may be multiple selectors: mobile + desktop)
-    document.querySelectorAll('#currency').forEach((currencySelect) => {
-      this.updateCurrencySelectorText(currencySelect, lng);
-    });
+    document
+      .querySelectorAll('select.header-currency-selector[name="currency"]')
+      .forEach(currencySelect => {
+        this.updateCurrencySelectorText(currencySelect, lng);
+      });
 
     // Ensure cart icon is visible after DOM update
     // this.ensureCartIconVisibility();
@@ -928,21 +937,30 @@ export default class View {
     }
   }
 
-  getCurrencySelectorMarkup(lng) {
+  getCurrencySelectorMarkup(lng, id) {
     // Get saved currency preference or default to 'usd'
     const savedCurrency = localStorage.getItem('currency') || 'usd';
-    
+    const safeId = id || 'currency';
+
     if (lng === 'eng') {
-      return `<select name="currency" id="currency" class="header-currency-selector">
+      return `<select name="currency" id="${safeId}" class="header-currency-selector">
         <option value="default" class="currency-option">Currency</option>
-        <option value="usd" class="currency-option" ${savedCurrency === 'usd' ? 'selected' : ''}>USD</option>
-        <option value="ils" class="currency-option" ${savedCurrency === 'ils' ? 'selected' : ''}>ILS</option>
+        <option value="usd" class="currency-option" ${
+          savedCurrency === 'usd' ? 'selected' : ''
+        }>USD</option>
+        <option value="ils" class="currency-option" ${
+          savedCurrency === 'ils' ? 'selected' : ''
+        }>ILS</option>
       </select>`;
     } else if (lng === 'heb') {
-      return `<select name="currency" id="currency" class="header-currency-selector" dir="rtl">
+      return `<select name="currency" id="${safeId}" class="header-currency-selector" dir="rtl">
         <option value="default" class="currency-option">מטבע</option>
-        <option value="usd" class="currency-option" ${savedCurrency === 'usd' ? 'selected' : ''}>דולר</option>
-        <option value="ils" class="currency-option" ${savedCurrency === 'ils' ? 'selected' : ''}>שקל</option>
+        <option value="usd" class="currency-option" ${
+          savedCurrency === 'usd' ? 'selected' : ''
+        }>דולר</option>
+        <option value="ils" class="currency-option" ${
+          savedCurrency === 'ils' ? 'selected' : ''
+        }>שקל</option>
       </select>`;
     }
     return '';
@@ -953,7 +971,7 @@ export default class View {
       // Preserve the current selected value
       const currentValue = currencySelect.value;
       const savedCurrency = getSavedCurrency();
-      
+
       if (lng === 'eng') {
         currencySelect.options[0].text = 'Currency';
         currencySelect.options[1].text = 'USD';
@@ -965,10 +983,12 @@ export default class View {
         currencySelect.options[2].text = 'שקל';
         currencySelect.setAttribute('dir', 'rtl');
       }
-      
+
       // Restore the selected value; if it was "default", force the saved currency.
       currencySelect.value =
-        currentValue && currentValue !== 'default' ? currentValue : savedCurrency;
+        currentValue && currentValue !== 'default'
+          ? currentValue
+          : savedCurrency;
     }
   }
 

@@ -231,7 +231,6 @@ body.menu-active {
   transform: scale(1.05);
 }
 
-.menu .mobile-lang-selector #currency,
 .menu .mobile-lang-selector .header-currency-selector {
   padding: 0.4rem 0.6rem;
   border: 1px solid #ddd;
@@ -246,7 +245,6 @@ body.menu-active {
   width: auto;
 }
 
-.menu .mobile-lang-selector #currency:hover,
 .menu .mobile-lang-selector .header-currency-selector:hover {
   border-color: #5c6ac4;
   box-shadow: 0 2px 8px rgba(92, 106, 196, 0.2);
@@ -581,7 +579,6 @@ body.menu-active .site-header .icons-container .menubars-svg {
   min-width: 60px;
 }
 
-.mobile-lang-selector #currency,
 .mobile-lang-selector .header-currency-selector {
   padding: 0.25rem 0.4rem;
   border: 1px solid #ddd;
@@ -595,7 +592,6 @@ body.menu-active .site-header .icons-container .menubars-svg {
   outline: none;
 }
 
-.mobile-lang-selector #currency:hover,
 .mobile-lang-selector .header-currency-selector:hover {
   border-color: #5c6ac4;
   box-shadow: 0 2px 8px rgba(92, 106, 196, 0.15);
