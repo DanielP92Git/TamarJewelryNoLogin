@@ -230,16 +230,19 @@ class CategoriesView extends View {
 
   // New helper method to update only the text of dropdown options
   updateCurSortOptionText(lng) {
-    const currencySelect = document.getElementById('currency');
+    const currencySelects = document.querySelectorAll(
+      'select.header-currency-selector[name="currency"]'
+    );
     const sortSelect = document.getElementById('sort');
 
     // Currency selector is now in header, handled by View.js
     // But we still update it here if it exists (for backward compatibility)
-    if (currencySelect) {
+    currencySelects.forEach(currencySelect => {
+      if (!currencySelect || currencySelect.options.length < 3) return;
       currencySelect.options[0].text = lng === 'eng' ? 'Currency' : 'מטבע';
       currencySelect.options[1].text = lng === 'eng' ? 'USD' : 'דולר';
       currencySelect.options[2].text = lng === 'eng' ? 'ILS' : 'שקל';
-    }
+    });
     if (sortSelect) {
       sortSelect.options[0].text = lng === 'eng' ? 'Sort by:' : 'מיין לפי:';
       sortSelect.options[1].text =
@@ -679,7 +682,7 @@ class CategoriesView extends View {
         })
         .filter(url => url !== ''); // Remove any empty strings
     }
-    // Handle old format (array of URLs)
+    // Handle old/new format from API (array of URLs or image descriptor objects)
     else if (Array.isArray(product?.smallImages)) {
       smallImagesArray = product.smallImages
         .filter(img => img) // Filter out null/undefined entries
@@ -692,6 +695,7 @@ class CategoriesView extends View {
               // If it's a relative path, construct the full URL
               return `${apiBaseUrl}${img.startsWith('/') ? '' : '/'}${img}`;
             }
+            // New structured format { desktop, mobile, publicDesktop, ... }
             return getImageUrl(img, true) || getImageUrl(img, false) || '';
           } catch (error) {
             console.error('Error processing small image:', error);
@@ -721,15 +725,30 @@ class CategoriesView extends View {
       mainDesktopImage !== '' &&
       !mainDesktopImage.includes('undefined');
 
+    // If there are no small images from the API but we do have a valid main
+    // image, use the main image as a single-entry gallery so the UI is
+    // consistent and the gallery row is always visible.
+    if (
+      hasValidImage &&
+      (!Array.isArray(smallImagesArray) || smallImagesArray.length === 0)
+    ) {
+      smallImagesArray = [mainDesktopImage];
+    }
+
     // If we have additional images, include the main image as the FIRST thumbnail
     // so users can always return to it after selecting other thumbnails.
-    if (hasValidImage && Array.isArray(smallImagesArray) && smallImagesArray.length > 0) {
+    if (
+      hasValidImage &&
+      Array.isArray(smallImagesArray) &&
+      smallImagesArray.length > 0
+    ) {
       // Avoid duplicates if the main image is already present in the small images list
-      const deduped = smallImagesArray.filter((url) => url !== mainDesktopImage);
+      const deduped = smallImagesArray.filter(url => url !== mainDesktopImage);
       smallImagesArray = [mainDesktopImage, ...deduped];
     }
 
-    const hasSmallImages = Array.isArray(smallImagesArray) && smallImagesArray.length > 0;
+    const hasSmallImages =
+      Array.isArray(smallImagesArray) && smallImagesArray.length > 0;
 
     const modalContent = `
       <div class="item-overlay">
@@ -838,12 +857,14 @@ class CategoriesView extends View {
   setupCurrencyHandler() {
     // Sync initial currency from storage so this page renders with the right prices immediately.
     this.selectedCurrency = localStorage.getItem('currency') || 'usd';
-    document.querySelectorAll('#currency').forEach(sel => {
-      if (!sel) return;
-      if (sel.value === 'default' || sel.value !== this.selectedCurrency) {
-        sel.value = this.selectedCurrency;
-      }
-    });
+    document
+      .querySelectorAll('select.header-currency-selector[name="currency"]')
+      .forEach(sel => {
+        if (!sel) return;
+        if (sel.value === 'default' || sel.value !== this.selectedCurrency) {
+          sel.value = this.selectedCurrency;
+        }
+      });
 
     // Listen once per view instance. Persistence + broadcasting is handled globally in View.js.
     if (this._currencyListenerAdded) return;
@@ -914,7 +935,9 @@ class CategoriesView extends View {
           }
 
           // Store all products and sort them
-          this.products = (data.products || []).filter(p => Number(p?.quantity) > 0);
+          this.products = (data.products || []).filter(
+            p => Number(p?.quantity) > 0
+          );
           this.totalProducts = this.products.length;
           this.allProductsFetched = true;
 
@@ -1013,9 +1036,9 @@ class CategoriesView extends View {
           this.totalProducts = this.products.length;
         } else {
           // New format - object with products array and metadata
-          this.products = (Array.isArray(data.products) ? data.products : []).filter(
-            p => Number(p?.quantity) > 0
-          );
+          this.products = (
+            Array.isArray(data.products) ? data.products : []
+          ).filter(p => Number(p?.quantity) > 0);
           this.totalProducts = this.products.length;
 
           // Check if we've reached the end
@@ -1068,9 +1091,9 @@ class CategoriesView extends View {
           }
 
           // Store the products array
-          this.products = (Array.isArray(data.products) ? data.products : []).filter(
-            p => Number(p?.quantity) > 0
-          );
+          this.products = (
+            Array.isArray(data.products) ? data.products : []
+          ).filter(p => Number(p?.quantity) > 0);
           this.totalProducts = this.products.length;
 
           // Only display if we have products

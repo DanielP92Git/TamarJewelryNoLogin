@@ -718,12 +718,11 @@ const staticOptions = {
     // Set long cache time for static assets
     res.setHeader('Cache-Control', 'public, max-age=31536000');
 
-    // Allow images to be embedded across same-site subdomains in prod,
-    // but in development we often mix localhost/127.0.0.1, which is cross-site.
-    res.setHeader(
-      'Cross-Origin-Resource-Policy',
-      isProd ? 'same-site' : 'cross-origin'
-    );
+    // Allow images to be embedded from other origins (e.g. frontend domain
+    // consuming images from the API domain). CORS still controls who can
+    // request these, but CORP is relaxed so browsers don't block them as
+    // NotSameSite.
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
 
     // Set content type header based on file extension
     if (path.endsWith('.jpg') || path.endsWith('.jpeg')) {
@@ -796,10 +795,7 @@ app.use('/uploads', (req, res, next) => {
             { reqPath: raw }
           );
           applyStaticCors(req, res, () => {});
-          res.setHeader(
-            'Cross-Origin-Resource-Policy',
-            isProd ? 'same-site' : 'cross-origin'
-          );
+          res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
           return res.status(200).sendFile(fallbackResolved);
         }
         agentLog(
@@ -810,10 +806,7 @@ app.use('/uploads', (req, res, next) => {
             reqPath: raw,
           }
         );
-        res.setHeader(
-          'Cross-Origin-Resource-Policy',
-          isProd ? 'same-site' : 'cross-origin'
-        );
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
         return res.status(200).type('image/svg+xml').sendFile(noImageSvgPath);
       }
     }
@@ -1020,7 +1013,7 @@ app.get('/direct-image/:filename', (req, res) => {
   // in dev, allow cross-origin for localhost/127.0.0.1 mixes.
   res.setHeader(
     'Cross-Origin-Resource-Policy',
-    isProd ? 'same-site' : 'cross-origin'
+    'cross-origin'
   );
 
   // Check if file exists
