@@ -320,7 +320,21 @@ class CartView extends View {
     //   'items'
     // );
 
+    // PayPal orders must use a single currency across the entire order.
     const currencyVariable = cartData[0].currency == '$' ? 'USD' : 'ILS';
+    const distinctCurrencies = new Set(
+      cartData.map(item => (item.currency == '$' ? 'USD' : 'ILS'))
+    );
+    if (distinctCurrencies.size > 1) {
+      console.error(
+        'Mixed currencies detected in cart. Cannot initiate PayPal checkout.',
+        Array.from(distinctCurrencies)
+      );
+      alert(
+        'Your cart contains items in multiple currencies. Please change them to a single currency before checkout.'
+      );
+      return;
+    }
     console.log('PayPal currency:', currencyVariable);
 
     // Remove any existing PayPal script to avoid conflicts
@@ -417,6 +431,16 @@ class CartView extends View {
                 return data;
               });
 
+              // Extra safety: PayPal orders must use a single currency.
+              const distinctCurrencies = new Set(
+                cartDetails.map(itm => itm.unit_amount.currency_code)
+              );
+              if (distinctCurrencies.size > 1) {
+                throw new Error(
+                  'Your cart contains items in multiple currencies. Please change them to a single currency before checkout.'
+                );
+              }
+
               console.log(
                 'Sending cart to PayPal API:',
                 JSON.stringify(cartDetails, null, 2)
@@ -439,21 +463,39 @@ class CartView extends View {
                 }),
               });
 
-              let responseData;
+              // IMPORTANT: Fetch responses can only be read once.
+              // Read as text, then parse JSON manually (mirrors backend handleResponse()).
+              const text = await response.text();
+              let responseData = null;
               try {
-                responseData = await response.json();
+                responseData = text ? JSON.parse(text) : null;
               } catch (parseError) {
-                console.error('Error parsing response:', parseError);
-                const errorText = await response.text();
-                throw new Error(`Invalid response from server: ${errorText}`);
+                console.error('Error parsing response as JSON:', parseError);
+                responseData = null;
               }
 
               console.log('PayPal order API response:', responseData);
 
               if (!response.ok) {
-                const errorMessage =
-                  responseData.message || responseData.error || 'Unknown error';
-                throw new Error(`Failed to create order: ${errorMessage}`);
+                const statusInfo = `HTTP ${response.status}`;
+                const structuredMessage =
+                  responseData?.message || responseData?.error || responseData?.code;
+
+                // If we got an HTML error page (e.g. 504 from a gateway), avoid showing it to users.
+                if (!structuredMessage && text && text.trim().startsWith('<')) {
+                  const friendly =
+                    response.status === 504 || response.status === 502
+                      ? 'The payment service is temporarily unavailable. Please try again in a few minutes.'
+                      : 'The server returned an invalid response. Please try again later.';
+                  throw new Error(`${friendly} (${statusInfo})`);
+                }
+
+                const fallbackText =
+                  text && text.trim()
+                    ? text.trim().slice(0, 300)
+                    : 'Unknown error';
+                const errorMessage = structuredMessage || fallbackText;
+                throw new Error(`Failed to create order: ${errorMessage} (${statusInfo})`);
               }
 
               if (responseData.jsonResponse && responseData.jsonResponse.id) {
