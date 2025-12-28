@@ -5,6 +5,14 @@ const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
+const { connectDb } = require('./config/db');
+const { Users, Product } = require('./models');
+const {
+  getTokenFromRequest,
+  authUser,
+  fetchUser,
+  requireAdmin,
+} = require('./middleware/auth');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
@@ -207,6 +215,18 @@ const authRateLimiter = rateLimit({
 const paymentRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15m
   limit: Number(process.env.RATE_LIMIT_PAYMENT_MAX || 60),
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: 'Too many requests, please try again later.',
+  },
+});
+
+// Admin-heavy endpoints (uploads/product management)
+const adminRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15m
+  limit: Number(process.env.RATE_LIMIT_ADMIN_MAX || 120),
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: {
@@ -573,7 +593,9 @@ app.use(
     verify: (req, res, buf) => {
       // Stripe requires the exact raw bytes for webhook signature verification.
       // Capture the raw body before JSON parsing mutates it.
-      if (req.originalUrl === '/webhook') {
+      const url = typeof req.originalUrl === 'string' ? req.originalUrl : '';
+      const pathname = url.split('?')[0];
+      if (pathname === '/webhook') {
         req.rawBody = buf;
       }
     },
@@ -583,160 +605,9 @@ app.use(
 // =============================================
 // Database Models
 // =============================================
-mongoose.connect(`${process.env.MONGO_URL}`);
-
-const Users = mongoose.model('Users', {
-  name: { type: String },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    match:
-      /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/,
-  },
-  password: { type: String, required: true },
-  cartData: { type: Object },
-  Date: { type: Date, default: Date.now },
-  userType: { type: String, default: 'user' },
+connectDb().catch(err => {
+  console.error('MongoDB connection failed:', err?.message || err);
 });
-
-const Product = mongoose.model('Product', {
-  id: { type: Number, required: true },
-  name: { type: String, required: true },
-  // Legacy image field
-  image: { type: String },
-  // Main image with responsive versions
-  mainImage: {
-    desktop: { type: String },
-    mobile: { type: String },
-    desktopLocal: { type: String },
-    mobileLocal: { type: String },
-    publicDesktop: { type: String },
-    publicMobile: { type: String },
-  },
-  // Small images array with responsive versions
-  smallImages: [
-    {
-      desktop: { type: String },
-      mobile: { type: String },
-      desktopLocal: { type: String },
-      mobileLocal: { type: String },
-    },
-  ],
-  // Additional image URLs for better accessibility
-  imageLocal: { type: String },
-  publicImage: { type: String },
-  directImageUrl: { type: String },
-  // Product details
-  category: { type: String, required: true },
-  description: { type: String },
-  quantity: { type: Number, default: 0 },
-  ils_price: { type: Number },
-  usd_price: { type: Number },
-  date: { type: Date, default: Date.now },
-  available: { type: Boolean, default: true },
-  security_margin: { type: Number },
-});
-
-// =============================================
-// Authentication Middleware
-// =============================================
-function getTokenFromRequest(req) {
-  const direct = req.header('auth-token');
-  if (direct) return direct;
-  const auth = req.header('authorization');
-  if (auth && typeof auth === 'string') {
-    const parts = auth.split(' ');
-    if (parts.length === 2 && /^Bearer$/i.test(parts[0])) return parts[1];
-  }
-  return null;
-}
-
-const authUser = async function (req, res, next) {
-  try {
-    let user = await Users.findOne({ email: req.body.email });
-    if (user) {
-      const userTypeCheck =
-        user.userType === 'user' || user.userType === 'admin';
-      if (userTypeCheck) {
-        bcrypt.compare(req.body.password, user.password, (err, result) => {
-          if (err || !result) {
-            return res
-              .status(401)
-              .json({ success: false, errors: 'Auth Failed' });
-          }
-          console.log('Authenticated successfully');
-          req.user = user;
-          next();
-        });
-      } else {
-        throw new Error('No access');
-      }
-    } else {
-      res.status(404).json({
-        errors:
-          'No user found. Please check your email or password and try again',
-      });
-    }
-  } catch (err) {
-    console.error('Auth error:', err);
-    res.status(500).json({ errors: 'Auth User - Internal Server Error' });
-  }
-};
-
-const fetchUser = async (req, res, next) => {
-  const token = getTokenFromRequest(req);
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      errors: 'Please authenticate using valid token',
-    });
-  } else {
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_KEY);
-      const userId = decoded?.user?.id;
-      if (!userId) {
-        return res
-          .status(401)
-          .json({ success: false, errors: 'Invalid token' });
-      }
-
-      const user = await Users.findById(userId);
-      if (!user) {
-        return res
-          .status(401)
-          .json({ success: false, errors: 'User not found' });
-      }
-
-      // Only allow known user types
-      if (user.userType !== 'user' && user.userType !== 'admin') {
-        return res.status(403).json({ success: false, errors: 'Forbidden' });
-      }
-
-      req.user = {
-        id: user._id.toString(),
-        email: user.email,
-        userType: user.userType,
-      };
-      req.userDoc = user;
-      return next();
-    } catch {
-      return res.status(401).json({
-        success: false,
-        errors: 'Please authenticate using a valid token',
-      });
-    }
-  }
-};
-
-function requireAdmin(req, res, next) {
-  if (!req.userDoc || req.userDoc.userType !== 'admin') {
-    return res
-      .status(403)
-      .json({ success: false, errors: 'Admin access required' });
-  }
-  return next();
-}
 
 // =============================================
 // File Upload Configuration
@@ -898,7 +769,7 @@ function applyStaticCors(req, res, next) {
 
 // Configure static file serving for all directories with custom middleware
 app.use('/uploads', (req, res, next) => {
-  console.log(`[Static] Accessing: ${req.path} from uploads dir`);
+  if (!isProd) console.log(`[Static] Accessing: ${req.path} from uploads dir`);
   // #region agent log
   try {
     const raw = req.path || '';
@@ -956,7 +827,7 @@ app.use('/uploads', (req, res, next) => {
 });
 
 app.use('/api/uploads', (req, res, next) => {
-  console.log(`[Static] Accessing: ${req.path} from api/uploads`);
+  if (!isProd) console.log(`[Static] Accessing: ${req.path} from api/uploads`);
   // #region agent log
   try {
     const raw = req.path || '';
@@ -1010,7 +881,8 @@ app.use('/api/uploads', (req, res, next) => {
 });
 
 app.use('/api/smallImages', (req, res, next) => {
-  console.log(`[Static] Accessing: ${req.path} from api/smallImages`);
+  if (!isProd)
+    console.log(`[Static] Accessing: ${req.path} from api/smallImages`);
   applyStaticCors(req, res, () =>
     express.static(smallImagesDir, staticOptions)(req, res, next)
   );
@@ -1107,13 +979,14 @@ app.get('/check-file/:filename', (req, res) => {
 
   fs.access(filePath, fs.constants.F_OK, accessErr => {
     if (accessErr) {
-      console.log(`File ${filename} does not exist in uploads directory`);
+      if (!isProd)
+        console.log(`File ${filename} does not exist in uploads directory`);
       res.status(404).send({
         exists: false,
         message: `File ${filename} not found`,
       });
     } else {
-      console.log(`File ${filename} exists in uploads directory`);
+      if (!isProd) console.log(`File ${filename} exists in uploads directory`);
       fs.stat(filePath, (statErr, stats) => {
         if (statErr)
           return res.status(500).send({ exists: true, error: 'Stat failed' });
@@ -1153,13 +1026,13 @@ app.get('/direct-image/:filename', (req, res) => {
   // Check if file exists
   fs.access(filePath, fs.constants.F_OK, err => {
     if (err) {
-      console.log(
-        `Direct image access: File ${filename} not found at ${filePath}`
-      );
+      if (!isProd) {
+        console.log(`Direct image access: File ${filename} not found`);
+      }
       return res.status(404).send('Image not found');
     }
 
-    console.log(`Direct image access: Serving ${filename} from ${filePath}`);
+    if (!isProd) console.log(`Direct image access: Serving ${filename}`);
 
     // Set content type based on file extension
     const ext = path.extname(filename).toLowerCase();
@@ -1442,7 +1315,7 @@ async function handleResponse(response) {
 // Authentication Endpoints
 app.post('/verify-token', async (req, res) => {
   try {
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = getTokenFromRequest(req);
     if (!token) {
       return res
         .status(401)
@@ -1450,7 +1323,12 @@ app.post('/verify-token', async (req, res) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_KEY);
-    const user = await Users.findById(decoded.user.id);
+    const userId = decoded?.user?.id;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'Invalid token' });
+    }
+
+    const user = await Users.findById(userId);
 
     if (!user) {
       return res
@@ -1472,7 +1350,23 @@ app.post('/verify-token', async (req, res) => {
   }
 });
 
-app.post('/login', authRateLimiter, authUser, async (req, res) => {
+app.post(
+  '/login',
+  authRateLimiter,
+  (req, res, next) => {
+    if (
+      !req.body ||
+      typeof req.body.email !== 'string' ||
+      typeof req.body.password !== 'string'
+    ) {
+      return res
+        .status(400)
+        .json({ success: false, errors: 'Invalid login payload' });
+    }
+    return next();
+  },
+  authUser,
+  async (req, res) => {
   try {
     const adminCheck = req.user.userType;
     const data = {
@@ -1486,7 +1380,9 @@ app.post('/login', authRateLimiter, authUser, async (req, res) => {
       expiresIn: process.env.JWT_EXPIRES_IN || '1h',
     });
     if (token) {
-      console.log('Token created for user:', req.user.email);
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Token created for user:', req.user.email);
+      }
       res.json({
         success: true,
         token,
@@ -1502,7 +1398,8 @@ app.post('/login', authRateLimiter, authUser, async (req, res) => {
       message: err.message,
     });
   }
-});
+  }
+);
 
 app.post('/signup', authRateLimiter, async (req, res) => {
   // lightweight validation (keeps behavior predictable)
@@ -1559,7 +1456,7 @@ app.post('/signup', authRateLimiter, async (req, res) => {
 });
 
 // Product Management Endpoints
-app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
+app.post('/addproduct', adminRateLimiter, fetchUser, requireAdmin, async (req, res) => {
   try {
     // #region agent log
     agentLog('A', 'backend/index.js:/addproduct:entry', 'addproduct entry', {
@@ -1734,34 +1631,38 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
         : null,
       // Product details
       category: req.body.category,
-      quantity: Number(req.body.quantity) || 0,
+      quantity: Math.max(0, Number(req.body.quantity) || 0),
       description: req.body.description || '',
       ils_price: ilsPrice,
       usd_price: usdPrice,
       security_margin: securityMargin,
     });
 
-    console.log('\n=== Product Data Before Save ===');
-    console.log(
-      JSON.stringify(
-        {
-          id: product.id,
-          name: product.name,
-          image: product.image,
-          publicImage: product.publicImage,
-          mainImage: product.mainImage,
-          smallImages: product.smallImages,
-          directImageUrl: product.directImageUrl,
-          category: product.category,
-        },
-        null,
-        2
-      )
-    );
+    if (!isProd) {
+      console.log('\n=== Product Data Before Save ===');
+      console.log(
+        JSON.stringify(
+          {
+            id: product.id,
+            name: product.name,
+            image: product.image,
+            publicImage: product.publicImage,
+            mainImage: product.mainImage,
+            smallImages: product.smallImages,
+            directImageUrl: product.directImageUrl,
+            category: product.category,
+          },
+          null,
+          2
+        )
+      );
+    }
 
     await product.save();
-    console.log('\n=== Product Saved Successfully ===');
-    console.log('Product ID:', nextId);
+    if (!isProd) {
+      console.log('\n=== Product Saved Successfully ===');
+      console.log('Product ID:', nextId);
+    }
 
     // #region agent log
     agentLog('A', 'backend/index.js:/addproduct:save', 'product saved', {
@@ -1778,8 +1679,15 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
       name: req.body.name,
     });
   } catch (error) {
-    console.error('\n=== Product Creation Error ===');
-    console.error(error);
+    if (!isProd) {
+      console.error('\n=== Product Creation Error ===');
+      console.error(error);
+    } else {
+      console.error('Product creation failed:', {
+        message: error?.message || null,
+        code: error?.code || null,
+      });
+    }
     // #region agent log
     agentLog('A', 'backend/index.js:/addproduct:catch', 'addproduct error', {
       message: error?.message || null,
@@ -1788,7 +1696,8 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
     // #endregion
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Failed to create product',
+      ...(isProd ? {} : { message: error?.message }),
     });
   }
 });
@@ -1796,6 +1705,7 @@ app.post('/addproduct', fetchUser, requireAdmin, async (req, res) => {
 // Update the old updateproduct endpoint to handle formdata and file uploads
 app.post(
   '/updateproduct/:id',
+  adminRateLimiter,
   fetchUser,
   requireAdmin,
   upload.fields([
@@ -1805,8 +1715,10 @@ app.post(
   async (req, res) => {
     try {
       const productId = req.params.id;
-      console.log(`Updating product ${productId}`);
-      console.log('Form data:', req.body);
+      if (!isProd) {
+        console.log(`Updating product ${productId}`);
+        console.log('Form data:', req.body);
+      }
 
       // Find the product
       const product = await Product.findOne({ id: Number(productId) });
@@ -1834,8 +1746,8 @@ app.post(
       product.ils_price = Number(ils_price) || 0;
       product.description = description || '';
       product.category = category;
-      product.quantity = Number(quantity) || 0;
-      product.security_margin = Number(security_margin) || 5;
+      product.quantity = Math.max(0, Number(quantity) || 0);
+      product.security_margin = Math.max(0, Number(security_margin) || 5);
 
       // Handle file uploads if present
       let mainImageUpdated = false;
@@ -1970,9 +1882,14 @@ app.post(
 );
 
 // Keep the old endpoint for backward compatibility
-app.post('/updateproduct', fetchUser, requireAdmin, async (req, res) => {
+app.post('/updateproduct', adminRateLimiter, fetchUser, requireAdmin, async (req, res) => {
   try {
-    const id = req.body.id;
+    const id = Number(req.body.id);
+    if (!Number.isFinite(id)) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid product id' });
+    }
     const securityMargin = parseFloat(req.body.security_margin) || 5;
     const exchangeRate = 3.7;
 
@@ -1987,11 +1904,11 @@ app.post('/updateproduct', fetchUser, requireAdmin, async (req, res) => {
       usd_price: usdPrice,
       security_margin: securityMargin,
       description: req.body.description,
-      quantity: req.body.quantity,
+      quantity: Math.max(0, Number(req.body.quantity) || 0),
       category: req.body.category,
     };
 
-    let product = await Product.findOne({ id: id });
+    let product = await Product.findOne({ id });
     if (!product) {
       return res
         .status(404)
@@ -2020,7 +1937,7 @@ app.post('/updateproduct', fetchUser, requireAdmin, async (req, res) => {
   }
 });
 
-app.post('/removeproduct', fetchUser, requireAdmin, async (req, res) => {
+app.post('/removeproduct', adminRateLimiter, fetchUser, requireAdmin, async (req, res) => {
   const id = Number(req.body.id);
   if (!Number.isFinite(id)) {
     return res
@@ -2035,7 +1952,7 @@ app.post('/removeproduct', fetchUser, requireAdmin, async (req, res) => {
       .json({ success: false, message: 'Product not found' });
   }
 
-  console.log('Removed');
+  if (!isProd) console.log('Removed');
   res.json({
     success: true,
     id,
@@ -2044,8 +1961,8 @@ app.post('/removeproduct', fetchUser, requireAdmin, async (req, res) => {
 });
 
 app.get('/allproducts', async (req, res) => {
-  let products = await Product.find({});
-  console.log('All Products Fetched');
+  let products = await Product.find({}).lean();
+  if (!isProd) console.log('All Products Fetched');
   res.send(products.map(normalizeProductForClient));
 });
 
@@ -2055,7 +1972,7 @@ app.post('/productsByCategory', async (req, res) => {
   const limit = 6;
 
   try {
-    console.log('Fetching products for category:', category);
+    if (!isProd) console.log('Fetching products for category:', category);
     const skip = (page - 1) * limit;
 
     // Storefront listing: hide out-of-stock and unavailable items
@@ -2064,6 +1981,7 @@ app.post('/productsByCategory', async (req, res) => {
       quantity: { $gt: 0 },
       available: { $ne: false },
     })
+      .lean()
       .skip(skip)
       .limit(limit);
 
@@ -2073,7 +1991,7 @@ app.post('/productsByCategory', async (req, res) => {
 
     res.json(products.map(normalizeProductForClient));
   } catch (err) {
-    console.error('Error fetching products by category:', err);
+    if (!isProd) console.error('Error fetching products by category:', err);
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
@@ -2090,11 +2008,16 @@ app.post('/chunkProducts', async (req, res) => {
       quantity: { $gt: 0 },
       available: { $ne: false },
     })
+      .lean()
       .skip(skip)
       .limit(limit);
     res.json(products.map(normalizeProductForClient));
   } catch (err) {
-    res.status(500).json({ error: 'Failed to fetch products:', err });
+    if (!isProd) console.error('Error fetching chunkProducts:', err);
+    res.status(500).json({
+      error: 'Failed to fetch products',
+      ...(isProd ? {} : { message: err?.message }),
+    });
   }
 });
 
@@ -2102,7 +2025,7 @@ app.post('/getAllProductsByCategory', async (req, res) => {
   const category = req.body.category;
 
   try {
-    console.log('Fetching all products for category:', category);
+    if (!isProd) console.log('Fetching all products for category:', category);
 
     // Get all products for the category without pagination
     // Storefront listing: hide out-of-stock and unavailable items
@@ -2110,7 +2033,7 @@ app.post('/getAllProductsByCategory', async (req, res) => {
       category: category,
       quantity: { $gt: 0 },
       available: { $ne: false },
-    });
+    }).lean();
     const total = products.length;
 
     if (!products || products.length === 0) {
@@ -2125,7 +2048,8 @@ app.post('/getAllProductsByCategory', async (req, res) => {
       total,
     });
   } catch (err) {
-    console.error('Error fetching all products by category:', err);
+    if (!isProd)
+      console.error('Error fetching all products by category:', err);
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
@@ -2176,6 +2100,7 @@ app.post('/removeAll', fetchUser, async (req, res) => {
 // File Upload Endpoint
 app.post(
   '/upload',
+  adminRateLimiter,
   fetchUser,
   requireAdmin,
   (req, res, next) => {
@@ -2200,8 +2125,10 @@ app.post(
   ]),
   async (req, res) => {
     try {
-      console.log('\n=== Upload Request Details ===');
-      console.log('Files received:', JSON.stringify(req.files, null, 2));
+      if (!isProd) {
+        console.log('\n=== Upload Request Details ===');
+        console.log('Files received:', JSON.stringify(req.files, null, 2));
+      }
 
       // #region agent log
       agentLog('B', 'backend/index.js:/upload:entry', 'upload received', {
@@ -2236,7 +2163,7 @@ app.post(
         });
       }
 
-      console.log('Processing main image:', mainImage.path);
+      if (!isProd) console.log('Processing main image:', mainImage.path);
 
       // Process main image
       const mainImageResults = await processImage(
@@ -2244,7 +2171,7 @@ app.post(
         mainImage.filename,
         true
       );
-      console.log('Main image processing results:', mainImageResults);
+      if (!isProd) console.log('Main image processing results:', mainImageResults);
 
       // Process small images
       const smallImagesResults = await Promise.all(
@@ -2252,7 +2179,8 @@ app.post(
           return await processImage(image.path, image.filename, false);
         })
       );
-      console.log('Small images processing results:', smallImagesResults);
+      if (!isProd)
+        console.log('Small images processing results:', smallImagesResults);
 
       // Construct URLs for main image
       const mainImageUrls = {
@@ -2357,10 +2285,19 @@ app.post(
       });
       // #endregion
     } catch (error) {
-      console.error('Upload error:', error);
+      if (!isProd) console.error('Upload error:', error);
+      else {
+        console.error('Upload error:', {
+          message: error?.message || null,
+          code: error?.code || null,
+        });
+      }
       return res.status(500).json({
-        error: 'Server error during upload: ' + error.message,
+        error: isProd
+          ? 'Server error during upload'
+          : 'Server error during upload: ' + error.message,
         success: false,
+        ...(isProd ? {} : { message: error?.message }),
       });
     }
   }
@@ -2393,7 +2330,9 @@ app.post('/webhook', (request, response) => {
 
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
-    console.log('2. From webhook:', session.metadata.productId);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('2. From webhook:', session.metadata.productId);
+    }
     void handleCheckoutSession(session).catch(err => {
       console.error('Error handling checkout.session.completed:', err);
     });
@@ -2534,10 +2473,18 @@ app.post('/orders', paymentRateLimiter, async (req, res) => {
       console.log('PayPal order creation successful:', result.httpStatusCode);
     res.status(result.httpStatusCode).json(result.jsonResponse);
   } catch (error) {
-    console.error(
-      'Failed to create PayPal order:',
-      error?.code || error?.message || error
-    );
+    if (!isProd) {
+      console.error(
+        'Failed to create PayPal order:',
+        error?.code || error?.message || error
+      );
+    } else {
+      console.error('Failed to create PayPal order:', {
+        code: error?.code || null,
+        statusCode: error?.statusCode || null,
+        httpStatusCode: error?.httpStatusCode || null,
+      });
+    }
     const status =
       error?.statusCode && Number.isInteger(error.statusCode)
         ? error.statusCode
@@ -2556,12 +2503,33 @@ app.post('/orders/:orderID/capture', paymentRateLimiter, async (req, res) => {
     const { jsonResponse, httpStatusCode } = await captureOrder(orderID);
     res.status(httpStatusCode).json(jsonResponse);
   } catch (error) {
-    console.error('Failed to create order:', error);
-    res.status(500).json({ error: 'Failed to capture order.' });
+    if (!isProd) {
+      console.error('Failed to capture PayPal order:', error);
+    } else {
+      console.error('Failed to capture PayPal order:', {
+        code: error?.code || null,
+        statusCode: error?.statusCode || null,
+        httpStatusCode: error?.httpStatusCode || null,
+      });
+    }
+    const status =
+      error?.statusCode && Number.isInteger(error.statusCode)
+        ? error.statusCode
+        : 500;
+    res.status(status).json({
+      error: 'Failed to capture order.',
+      code: error?.code || 'ORDER_CAPTURE_FAILED',
+      ...(isProd ? {} : { message: error?.message }),
+    });
   }
 });
 
-app.post('/deleteproductimage', fetchUser, requireAdmin, async (req, res) => {
+app.post(
+  '/deleteproductimage',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
   try {
     const { productId, imageType, imageUrl } = req.body || {};
     const id = Number(productId);
@@ -2709,7 +2677,8 @@ app.post('/deleteproductimage', fetchUser, requireAdmin, async (req, res) => {
       ...(isProd ? {} : { details: error?.message }),
     });
   }
-});
+  }
+);
 
 // Fetch a single product by id
 app.get('/getproduct/:id', async (req, res) => {
@@ -2800,10 +2769,12 @@ app.use((err, req, res, _next) => {
 app.listen(process.env.SERVER_PORT || 4000, error => {
   if (!error) {
     console.log('Server Running on Port ' + (process.env.SERVER_PORT || 4000));
-    console.log('Environment Variables:');
-    console.log('  API_URL:', process.env.API_URL);
-    console.log('  HOST:', process.env.HOST);
-    console.log('  NODE_ENV:', process.env.NODE_ENV);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Environment Variables (dev):');
+      console.log('  API_URL:', process.env.API_URL);
+      console.log('  HOST:', process.env.HOST);
+      console.log('  NODE_ENV:', process.env.NODE_ENV);
+    }
 
     // #region agent log
     agentLog('A', 'backend/index.js:app.listen', 'server started', {
@@ -3018,7 +2989,14 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
     } catch {
       // ignore
     }
-    console.error(`Error processing image ${filename}:`, error);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(`Error processing image ${filename}:`, error);
+    } else {
+      console.error('Error processing image:', {
+        filename,
+        message: error?.message || null,
+      });
+    }
     throw error;
   }
 };
