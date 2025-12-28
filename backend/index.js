@@ -65,10 +65,11 @@ function agentLog(hypothesisId, location, message, data) {
 }
 // #endregion
 
-const PAYPAL_CLIENT_ID = process.env.PAYPAL_CLIENT_ID;
-const PAYPAL_CLIENT_SECRET = process.env.PAYPAL_CLIENT_SECRET;
-const baseUrl =
-  process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com';
+const PAYPAL_CLIENT_ID = (process.env.PAYPAL_CLIENT_ID || '').trim();
+const PAYPAL_CLIENT_SECRET = (process.env.PAYPAL_CLIENT_SECRET || '').trim();
+const baseUrl = (process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com')
+  .trim()
+  .replace(/\/+$/, '');
 
 // =============================================
 // DigitalOcean Spaces (S3-compatible) client
@@ -1197,13 +1198,23 @@ const createOrder = async cart => {
       throw new Error('Invalid cart data received');
     }
 
-    let totalAmount = cart
-      .reduce((total, item) => {
-        let itemTotal =
-          parseFloat(item.unit_amount.value) * parseInt(item.quantity);
-        return total + itemTotal;
-      }, 0)
-      .toFixed(2);
+    const toTwoDecimalString = value => {
+      const num = Number(value);
+      if (!Number.isFinite(num)) return null;
+      return num.toFixed(2);
+    };
+
+    // Use integer cents to avoid floating point mismatches between item totals and order total.
+    const totalCents = cart.reduce((total, item) => {
+      const unit = Number(item?.unit_amount?.value);
+      const qty = Number.parseInt(item?.quantity, 10);
+      if (!Number.isFinite(unit) || !Number.isFinite(qty) || qty <= 0) {
+        throw new Error('Invalid item amount or quantity');
+      }
+      const cents = Math.round(unit * 100);
+      return total + cents * qty;
+    }, 0);
+    const totalAmount = (totalCents / 100).toFixed(2);
     const currencyData = cart[0].unit_amount.currency_code;
 
     // Guardrail: PayPal orders must use a single currency.
@@ -1236,11 +1247,11 @@ const createOrder = async cart => {
         {
           amount: {
             currency_code: currencyData,
-            value: +totalAmount,
+            value: totalAmount,
             breakdown: {
               item_total: {
                 currency_code: currencyData,
-                value: +totalAmount,
+                value: totalAmount,
               },
             },
           },
@@ -1248,9 +1259,9 @@ const createOrder = async cart => {
             name: item.name,
             unit_amount: {
               currency_code: item.unit_amount.currency_code,
-              value: item.unit_amount.value,
+              value: toTwoDecimalString(item.unit_amount.value),
             },
-            quantity: item.quantity,
+            quantity: String(Number.parseInt(item.quantity, 10)),
           })),
         },
       ],
@@ -1328,13 +1339,31 @@ async function handleResponse(response) {
   }
 
   if (!response.ok) {
+    const debugId = jsonResponse?.debug_id || null;
+    const details = Array.isArray(jsonResponse?.details)
+      ? jsonResponse.details.map(d => ({
+          issue: d?.issue || null,
+          description: d?.description || null,
+        }))
+      : null;
+
+    // Log a compact, safe summary even in prod so we can diagnose 4xx like 422.
+    console.error('PayPal API error:', {
+      httpStatusCode: response.status,
+      debugId,
+      firstIssue: details?.[0]?.issue || null,
+    });
+
     if (!isProd) {
-      console.error('PayPal API error:', response.status, jsonResponse || text);
+      console.error('PayPal API error full body:', response.status, jsonResponse || text);
     }
     const err = new Error('PAYPAL_API_ERROR');
     err.code = 'PAYPAL_API_ERROR';
-    err.statusCode = 502;
+    // Map PayPal 4xx to client errors; PayPal 5xx to a 502.
+    err.statusCode = response.status >= 500 ? 502 : response.status;
     err.httpStatusCode = response.status;
+    err.paypalDebugId = debugId;
+    err.paypalDetails = details;
     throw err;
   }
 
@@ -2538,7 +2567,9 @@ app.post('/orders', paymentRateLimiter, async (req, res) => {
     res.status(status).json({
       error: 'Failed to create order.',
       code: error?.code || 'ORDER_CREATE_FAILED',
-      ...(isProd ? {} : { message: error?.message }),
+      // Include PayPal debug_id in all environments so production issues can be diagnosed.
+      ...(error?.paypalDebugId ? { paypalDebugId: error.paypalDebugId } : {}),
+      ...(isProd ? {} : { message: error?.message, paypalDetails: error?.paypalDetails }),
     });
   }
 });
