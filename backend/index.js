@@ -1853,18 +1853,35 @@ app.post(
             true
           );
 
-          // Update main image URLs (store relative paths only)
+          const desktopUrl =
+            mainImageResults?.desktop?.spacesUrl ||
+            `/uploads/${mainImageResults.desktop.filename}`;
+          const mobileUrl =
+            mainImageResults?.mobile?.spacesUrl ||
+            `/uploads/${mainImageResults.mobile.filename}`;
+
+          // Update main image URLs
+          // - Prefer Spaces/CDN absolute URLs when available (durable on App Platform)
+          // - Fall back to local relative paths in dev
           product.mainImage = {
-            desktop: `/uploads/${mainImageResults.desktop.filename}`,
-            mobile: `/uploads/${mainImageResults.mobile.filename}`,
-            publicDesktop: `/public/uploads/${mainImageResults.desktop.filename}`,
-            publicMobile: `/public/uploads/${mainImageResults.mobile.filename}`,
+            desktop: desktopUrl,
+            mobile: mobileUrl,
+            publicDesktop:
+              mainImageResults?.desktop?.spacesUrl ||
+              `/public/uploads/${mainImageResults.desktop.filename}`,
+            publicMobile:
+              mainImageResults?.mobile?.spacesUrl ||
+              `/public/uploads/${mainImageResults.mobile.filename}`,
           };
 
           // Update legacy fields
-          product.image = product.mainImage.desktop;
-          product.publicImage = product.mainImage.publicDesktop;
-          product.directImageUrl = `/direct-image/${mainImageResults.desktop.filename}`;
+          product.image = desktopUrl;
+          product.publicImage = product.mainImage.publicDesktop || desktopUrl;
+
+          // directImageUrl: only use /direct-image for local files
+          product.directImageUrl = isAbsoluteHttpUrl(desktopUrl)
+            ? desktopUrl
+            : `/direct-image/${mainImageResults.desktop.filename}`;
 
           // Clear any old local-only fields that may exist in DB
           product.imageLocal = undefined;
@@ -1904,11 +1921,17 @@ app.post(
 
           const newSmallImages = existingIsString
             ? smallImagesResults.map(
-                result => `/smallImages/${result.desktop.filename}`
+                result =>
+                  result?.desktop?.spacesUrl ||
+                  `/smallImages/${result.desktop.filename}`
               )
             : smallImagesResults.map(result => ({
-                desktop: `/smallImages/${result.desktop.filename}`,
-                mobile: `/smallImages/${result.mobile.filename}`,
+                desktop:
+                  result?.desktop?.spacesUrl ||
+                  `/smallImages/${result.desktop.filename}`,
+                mobile:
+                  result?.mobile?.spacesUrl ||
+                  `/smallImages/${result.mobile.filename}`,
               }));
 
           // Append new small images to existing ones
