@@ -153,6 +153,12 @@ a {
   color: rgb(152, 152, 152);
 }
 
+/* Hebrew menu items font size */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
+}
+
 .menu.sticky .attrib,
 .menu.sticky a {
   color: rgb(78, 78, 78);

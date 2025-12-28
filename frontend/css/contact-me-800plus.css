@@ -322,6 +322,17 @@ body#contact-me .site-header .menu {
   transform: translateX(6px);
 }
 
+/* Flip arrow to point left in Hebrew/RTL */
+html[dir='rtl'] .button-arrow,
+.submit-heb .button-arrow {
+  transform: scaleX(-1);
+}
+
+html[dir='rtl'] .submit-button:hover .button-arrow,
+.submit-heb:hover .button-arrow {
+  transform: scaleX(-1) translateX(-6px);
+}
+
 /* Modern loading state */
 .submit-button.loading {
   background: rgba(51, 51, 51, 0.65);
@@ -331,6 +342,12 @@ body#contact-me .site-header .menu {
 
 .submit-button.loading .button-arrow {
   animation: spin 1s linear infinite;
+}
+
+html[dir='rtl'] .submit-button.loading .button-arrow,
+.submit-heb.loading .button-arrow {
+  animation: spin 1s linear infinite;
+  transform: scaleX(-1);
 }
 
 @keyframes spin {

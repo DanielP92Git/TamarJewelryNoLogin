@@ -118,6 +118,12 @@ body.menu-active {
   padding: 0.5rem 0; /* Adjust padding */
 }
 
+/* Larger font size for Hebrew menu items on mobile */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
+}
+
 /* Categories list - basic styles for mobile */
 .categories-list {
   list-style: none;

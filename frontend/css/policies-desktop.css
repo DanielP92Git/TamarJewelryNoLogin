@@ -116,6 +116,12 @@ a {
   color: rgb(152, 152, 152);
 }
 
+/* Hebrew menu items font size */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
+}
+
 .attrib-cart {
   display: flex;
   flex-flow: row;

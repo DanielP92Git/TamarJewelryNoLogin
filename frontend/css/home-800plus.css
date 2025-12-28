@@ -235,6 +235,12 @@ a {
   color: rgb(152, 152, 152);
 }
 
+/* Hebrew menu items font size */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
+}
+
 .main-nav-tab.cart-tab {
   display: flex !important;
   width: auto;

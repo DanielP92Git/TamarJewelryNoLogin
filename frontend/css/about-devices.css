@@ -109,10 +109,17 @@ header {
   color: black;
   font-family: Raleway, sans-serif;
   text-decoration: none;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(40, 228, 37); */
 }
+
+/* Hebrew menu items font size */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
+}
+
+/* ~~~~ FOR DEBUGGING~~~~*/
+/* border: 5px solid rgb(40, 228, 37); */
+
 .attrib-heb {
   font-size: 1.4rem;
   font-family: 'Amatic SC', sans-serif;

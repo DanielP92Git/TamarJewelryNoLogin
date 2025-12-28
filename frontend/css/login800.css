@@ -112,6 +112,13 @@ a:hover {
   color: rgb(152, 152, 152);
 }
 
+/* Hebrew menu items font size */
+html[dir='rtl'] .attrib,
+html[dir='rtl'] a,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
+}
+
 .categories-list {
   display: flex;
   flex-flow: column;
