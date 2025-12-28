@@ -644,8 +644,14 @@ export default class View {
         `;
     } else if (lng === 'heb') {
       return `<ul class="menu__ul ul-heb" >
+          <li class="main-nav-tab contact">
+            <a class="attrib" href="/html/contact-me.html">צרו קשר</a>
+          </li>
           <li class="main-nav-tab">
-            <a class="attrib" href="/index.html">בית </a>
+            <a class="attrib" href="/html/about.html">אודות</a>
+          </li>
+          <li class="main-nav-tab">
+            <a class="attrib" href="/html/jewelry-workshop.html">סדנאת תכשיטים</a>
           </li>
           <li class="main-nav-tab categories-tab">
             <a class="attrib shop-link" href="#">חנות <span class="arrow-indicator">▼</span></a>
@@ -681,13 +687,7 @@ export default class View {
             </ul>
           </li>
           <li class="main-nav-tab">
-            <a class="attrib" href="/html/jewelry-workshop.html">סדנאת תכשיטים</a>
-          </li>
-          <li class="main-nav-tab">
-            <a class="attrib" href="/html/about.html">אודות</a>
-          </li>
-          <li class="main-nav-tab contact">
-            <a class="attrib" href="/html/contact-me.html">צרו קשר</a>
+            <a class="attrib" href="/index.html">בית </a>
           </li>
         </ul>
         `;

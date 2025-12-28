@@ -62,6 +62,7 @@ class ContactMeView extends View {
     this.setFormLng(`heb`);
     this.setLanguage('heb');
     this.setFooterLng('heb');
+    this.setContactTitleLng('heb');
   };
 
   changeToEng = function () {
@@ -69,6 +70,7 @@ class ContactMeView extends View {
     this.setFormLng('eng');
     this.setLanguage('eng');
     this.setFooterLng('eng');
+    this.setContactTitleLng('eng');
   };
 
   generateFormLanguage(lng) {
@@ -82,7 +84,7 @@ class ContactMeView extends View {
               type="text"
               id="name"
               name="name"
-              placeholder=" "
+              placeholder="First Name"
               required
               autofocus
             />
@@ -95,7 +97,7 @@ class ContactMeView extends View {
               type="text"
               id="lastname"
               name="lastname"
-              placeholder=" "
+              placeholder="Last Name"
               required
             />
             <label for="lastname">Last Name</label>
@@ -108,7 +110,7 @@ class ContactMeView extends View {
             type="email"
             id="contact-email"
             name="email"
-            placeholder=" "
+            placeholder="Email Address"
             required
           />
           <label for="contact-email">Email Address</label>
@@ -119,7 +121,7 @@ class ContactMeView extends View {
           <textarea
             id="message"
             name="message"
-            placeholder=" "
+            placeholder="Your Message"
             required
           ></textarea>
           <label for="message">Your Message</label>
@@ -145,7 +147,7 @@ class ContactMeView extends View {
               type="text"
               id="name"
               name="name"
-              placeholder=" "
+              placeholder="שם פרטי"
               required
               autofocus
             />
@@ -158,7 +160,7 @@ class ContactMeView extends View {
               type="text"
               id="lastname"
               name="lastname"
-              placeholder=" "
+              placeholder="שם משפחה"
               required
             />
             <label for="lastname">שם משפחה</label>
@@ -171,7 +173,7 @@ class ContactMeView extends View {
             type="email"
             id="contact-email"
             name="email"
-            placeholder=" "
+            placeholder="כתובת דואר אלקטרוני"
             required
           />
           <label for="contact-email">כתובת דואר אלקטרוני</label>
@@ -182,7 +184,7 @@ class ContactMeView extends View {
           <textarea
             id="message"
             name="message"
-            placeholder=" "
+            placeholder="הודעתך"
             required
           ></textarea>
           <label for="message">הודעתך</label>
@@ -209,6 +211,22 @@ class ContactMeView extends View {
 
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
+  }
+
+  setContactTitleLng(lng) {
+    const contactTitle = document.querySelector('.contact-title');
+    const contactSubtitle = document.querySelector('.contact-subtitle');
+
+    if (contactTitle) {
+      contactTitle.textContent = lng === 'heb' ? 'צרו קשר' : 'Get in Touch';
+    }
+
+    if (contactSubtitle) {
+      contactSubtitle.textContent =
+        lng === 'heb'
+          ? 'יש לך שאלה או רוצה לשתף פעולה? אשמח לשמוע ממך.'
+          : "Have a question or want to collaborate? I'd love to hear from you.";
+    }
   }
 }
 

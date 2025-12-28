@@ -73,6 +73,12 @@ header {
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 5px solid rgb(40, 228, 37); */
 }
+
+/* Larger font size for Hebrew menu items */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
+}
 .attrib-heb {
   font-size: 1.4rem;
   font-family: 'Amatic SC', sans-serif;
@@ -234,22 +240,26 @@ header {
 /* ~~~~~~~~~~~~ Shopping cart ~~~~~~~~~~~~~~ */
 main.cart-page {
   display: block;
-  padding-top: 5rem;
+  padding-top: 2.5rem;
   margin-bottom: 4rem;
 }
 
 .cart-shell {
-  padding: 0.75rem 1.25rem 0;
+  padding: 0.5rem 1.25rem 0;
 }
 
 .cart-page-title {
   font-family: 'Poiret One', 'Raleway', sans-serif;
   font-size: clamp(2rem, 8vw, 2.8rem);
-  font-weight: 400;
+  font-weight: 300;
   letter-spacing: 0.02em;
   margin: 0 0 0.9rem;
   padding-top: 0.25rem;
   color: #000;
+}
+
+html[dir='rtl'] .cart-page-title {
+  text-align: right;
 }
 
 .cart-layout {

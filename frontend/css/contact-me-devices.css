@@ -200,6 +200,17 @@ main {
   transform: translateX(6px);
 }
 
+/* Flip arrow to point left in Hebrew/RTL */
+html[dir='rtl'] .button-arrow,
+.submit-heb .button-arrow {
+  transform: scaleX(-1);
+}
+
+html[dir='rtl'] .submit-button:hover .button-arrow,
+.submit-heb:hover .button-arrow {
+  transform: scaleX(-1) translateX(-6px);
+}
+
 /* Modern error states */
 .input-group input:invalid:not(:placeholder-shown),
 .input-group textarea:invalid:not(:placeholder-shown) {
@@ -218,6 +229,12 @@ main {
 
 .submit-button.loading .button-arrow {
   animation: spin 1s linear infinite;
+}
+
+html[dir='rtl'] .submit-button.loading .button-arrow,
+.submit-heb.loading .button-arrow {
+  animation: spin 1s linear infinite;
+  transform: scaleX(-1);
 }
 
 @keyframes spin {
@@ -379,6 +396,12 @@ main {
 .category-item .attrib {
   padding: 0.8rem 1.5rem 0.8rem 2.5rem; /* Add left padding for indentation */
   font-size: 0.9rem;
+}
+
+/* Hebrew menu items font size */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
 }
 
 .category-item:last-child {

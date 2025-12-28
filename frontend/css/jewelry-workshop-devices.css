@@ -76,6 +76,12 @@ body {
   font-family: 'Amatic SC', sans-serif;
 }
 
+/* Hebrew menu items font size */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
+}
+
 .shoppingcart-container {
   display: flex;
   align-items: center;

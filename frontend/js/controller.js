@@ -101,6 +101,7 @@ const controlContactMePage = async function (lng) {
 
   ContactMeView.setLanguage(lng, cartNum);
   ContactMeView.setFormLng(lng);
+  ContactMeView.setContactTitleLng(lng);
   ContactMeView.stickyMenuFn();
 };
 

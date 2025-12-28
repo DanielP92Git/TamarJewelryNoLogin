@@ -110,6 +110,13 @@ header {
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
+}
+
+/* Hebrew menu items font size */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
+}
   /* border: 5px solid rgb(40, 228, 37); */
 }
 

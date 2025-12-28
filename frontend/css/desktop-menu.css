@@ -23,8 +23,14 @@
 
 /* RTL support for Hebrew */
 .ul-heb {
-  display: flex;
-  flex-flow: row-reverse;
+  display: flex !important;
+  flex-direction: row-reverse !important;
+}
+
+/* Ensure menu is reversed in RTL mode */
+html[dir='rtl'] .menu__ul,
+.menu__ul.ul-heb {
+  flex-direction: row-reverse !important;
 }
 
 /* Main navigation tabs */
@@ -40,7 +46,6 @@
 .main-nav-tab:hover {
   cursor: pointer;
 }
-
 
 /* Navigation links */
 .attrib,
@@ -61,6 +66,12 @@ a {
 
 .attrib:hover {
   color: rgb(152, 152, 152);
+}
+
+/* Larger font size for Hebrew menu items */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
 }
 
 .attrib-cart {

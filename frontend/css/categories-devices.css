@@ -154,6 +154,12 @@ body#categories.shalom-club header {
   font-size: 1.4rem;
   font-family: 'Amatic SC', sans-serif;
 }
+
+/* Hebrew menu items font size */
+html[dir='rtl'] .attrib,
+.ul-heb .attrib {
+  font-size: 0.8rem !important;
+}
 #show-menu-button {
   display: none;
 }
