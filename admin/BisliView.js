@@ -1045,13 +1045,21 @@ async function loadProductsPage(data) {
     batchUpdateBtn.addEventListener("click", async () => {
       const discountInput = document.getElementById("discount-input");
       const discountPercentage = parseFloat(discountInput?.value);
-      
-      if (isNaN(discountPercentage) || discountPercentage < 0 || discountPercentage > 100) {
+
+      if (
+        isNaN(discountPercentage) ||
+        discountPercentage < 0 ||
+        discountPercentage > 100
+      ) {
         alert("Please enter a valid discount percentage between 0 and 100");
         return;
       }
 
-      if (!confirm(`Are you sure you want to apply ${discountPercentage}% discount to all products? This will update prices for all items.`)) {
+      if (
+        !confirm(
+          `Are you sure you want to apply ${discountPercentage}% discount to all products? This will update prices for all items.`
+        )
+      ) {
         return;
       }
 
@@ -1076,7 +1084,9 @@ async function loadProductsPage(data) {
         const result = await response.json();
 
         if (result.success) {
-          alert(`Successfully updated ${result.updatedCount} products with ${discountPercentage}% discount`);
+          alert(
+            `Successfully updated ${result.updatedCount} products with ${discountPercentage}% discount`
+          );
           loadDiscountSettings();
           loadProducts(data); // Refresh products list
         } else {
@@ -1096,7 +1106,11 @@ async function loadProductsPage(data) {
   const removeDiscountBtn = document.getElementById("remove-discount-btn");
   if (removeDiscountBtn) {
     removeDiscountBtn.addEventListener("click", async () => {
-      if (!confirm("Are you sure you want to remove the discount from all products? Prices will revert to original values.")) {
+      if (
+        !confirm(
+          "Are you sure you want to remove the discount from all products? Prices will revert to original values."
+        )
+      ) {
         return;
       }
 
@@ -1120,7 +1134,9 @@ async function loadProductsPage(data) {
         const result = await response.json();
 
         if (result.success) {
-          alert(`Successfully removed discount from ${result.updatedCount} products`);
+          alert(
+            `Successfully removed discount from ${result.updatedCount} products`
+          );
           document.getElementById("discount-input").value = "";
           loadDiscountSettings();
           loadProducts(data); // Refresh products list
@@ -1152,7 +1168,7 @@ async function loadDiscountSettings() {
       if (result.success) {
         const statusBadge = document.getElementById("discount-status");
         const discountInput = document.getElementById("discount-input");
-        
+
         if (result.discount_active && result.global_discount_percentage > 0) {
           if (statusBadge) {
             statusBadge.textContent = `Active: ${result.global_discount_percentage}%`;

@@ -148,7 +148,7 @@ class HomePageView extends View {
     if (lng === 'heb') {
       if (promoTopText) promoTopText.textContent = 'מבצע סוף שנה!';
       if (promoDiscountText) promoDiscountText.textContent = 'הנחה';
-      if (promoBottomText) promoBottomText.textContent = 'על כל האתר עד סוף 2025!';
+      if (promoBottomText) promoBottomText.textContent = 'על כל האתר לכבוד סוף השנה!';
     } else {
       if (promoTopText) promoTopText.textContent = 'End of Year Sale!';
       if (promoDiscountText) promoDiscountText.textContent = 'OFF';
