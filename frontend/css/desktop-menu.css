@@ -72,7 +72,7 @@ a {
 /* Larger font size for Hebrew menu items */
 html[dir='rtl'] .attrib,
 .ul-heb .attrib {
-  font-size: 0.8rem !important;
+  font-size: 1.2rem !important;
   font-family: 'Amatic SC', sans-serif !important;
   font-weight: 700 !important;
 }
@@ -164,6 +164,7 @@ html[dir='rtl'] .attrib,
 .site-header .ul-heb .category-item .attrib,
 .site-header .category-item .attrib-heb,
 html[dir='rtl'] .site-header .category-item .attrib {
+  font-size: 1.2rem !important;
   font-family: 'Amatic SC', sans-serif !important;
   font-weight: 700 !important;
 }
@@ -569,6 +570,7 @@ html[dir='rtl'] .site-header .category-item .attrib {
   html[dir='rtl'] .site-header .menu a.attrib,
   .site-header .menu__ul.ul-heb a.attrib,
   .site-header .menu .menu__ul.ul-heb a.attrib {
+    font-size: 1.2rem !important;
     font-family: 'Amatic SC', sans-serif !important;
     font-weight: 700 !important;
   }

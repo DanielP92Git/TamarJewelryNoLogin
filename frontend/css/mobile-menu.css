@@ -17,7 +17,9 @@
   background-color: #fff; /* Solid background */
   box-shadow: 4px 0px 15px rgba(0, 0, 0, 0.1); /* Add shadow */
   padding-top: calc(env(safe-area-inset-top, 0px) + 4rem);
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem); /* Add bottom padding for safe area */
+  padding-bottom: calc(
+    env(safe-area-inset-bottom, 0px) + 1rem
+  ); /* Add bottom padding for safe area */
   overflow: hidden; /* Prevent menu itself from scrolling */
   direction: ltr; /* Force LTR layout for menu structure, regardless of document direction */
 }
@@ -159,7 +161,7 @@ html[dir='rtl'] .main-nav-tab > .attrib,
 /* Larger font size for Hebrew menu items on mobile */
 html[dir='rtl'] .attrib,
 .ul-heb .attrib {
-  font-size: 0.8rem !important;
+  font-size: 1.2rem !important;
   font-family: 'Amatic SC', sans-serif !important;
   font-weight: 700 !important;
 }
@@ -248,7 +250,9 @@ html[dir='rtl'] .category-item .attrib,
   gap: 1rem;
   width: 100%;
   padding: 1rem 1.5rem;
-  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); /* Add safe area padding for devices with notches */
+  padding-bottom: calc(
+    1rem + env(safe-area-inset-bottom, 0px)
+  ); /* Add safe area padding for devices with notches */
   border-top: 1px solid #eee;
   margin-top: 0; /* Remove auto margin, use flex positioning instead */
   background-color: #fff;
