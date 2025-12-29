@@ -26,7 +26,7 @@ function setActiveNav(active) {
 
 // API Configuration
 // TEMP: Force production API for testing (comment out for local dev)
-const FORCE_PRODUCTION_API = true; // Set to true to use production API from localhost
+const FORCE_PRODUCTION_API = false; // Set to true to use production API from localhost
 
 const IS_PRODUCTION =
   FORCE_PRODUCTION_API ||
@@ -951,6 +951,14 @@ async function loadProductsPage(data) {
         </div>
       </div>
 
+      <div class="discount-controls" style="display:flex; gap:12px; align-items:center; padding:16px; background:var(--card-bg, rgba(40, 40, 57, 0.35)); border-radius:8px; margin-bottom:16px; border: 1px solid var(--border, rgba(255, 255, 255, 0.1));">
+        <label style="font-weight: 600; color: var(--text, rgba(255, 255, 255, 0.92));">Global Discount (%):</label>
+        <input type="number" id="discount-input" min="0" max="100" step="0.1" placeholder="10" style="width:100px; padding: 8px 12px; border: 1px solid var(--border, rgba(255, 255, 255, 0.1)); border-radius: 6px; background: var(--input-bg, rgba(255, 255, 255, 0.05)); color: var(--text, rgba(255, 255, 255, 0.92));" />
+        <button id="batch-update-discount-btn" class="btn btn--primary" style="height: auto; padding: 8px 16px;">Batch Update</button>
+        <button id="remove-discount-btn" class="btn" style="height: auto; padding: 8px 16px;">Remove Discount</button>
+        <span id="discount-status" class="badge" style="margin-left: auto;"></span>
+      </div>
+
       <div class="card">
         <div class="card__header">
           <div class="card__meta">
@@ -1026,6 +1034,147 @@ async function loadProductsPage(data) {
       setupBulkActions();
     });
     search.dataset.bound = "true";
+  }
+
+  // Load current discount settings
+  loadDiscountSettings();
+
+  // Batch update discount handler
+  const batchUpdateBtn = document.getElementById("batch-update-discount-btn");
+  if (batchUpdateBtn) {
+    batchUpdateBtn.addEventListener("click", async () => {
+      const discountInput = document.getElementById("discount-input");
+      const discountPercentage = parseFloat(discountInput?.value);
+      
+      if (isNaN(discountPercentage) || discountPercentage < 0 || discountPercentage > 100) {
+        alert("Please enter a valid discount percentage between 0 and 100");
+        return;
+      }
+
+      if (!confirm(`Are you sure you want to apply ${discountPercentage}% discount to all products? This will update prices for all items.`)) {
+        return;
+      }
+
+      batchUpdateBtn.disabled = true;
+      batchUpdateBtn.textContent = "Updating...";
+      const statusBadge = document.getElementById("discount-status");
+      if (statusBadge) {
+        statusBadge.textContent = "Processing...";
+        statusBadge.style.display = "inline-block";
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/batch-update-discount`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": localStorage.getItem("auth-token") || "",
+          },
+          body: JSON.stringify({ discountPercentage }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert(`Successfully updated ${result.updatedCount} products with ${discountPercentage}% discount`);
+          loadDiscountSettings();
+          loadProducts(data); // Refresh products list
+        } else {
+          alert(`Error: ${result.message || "Failed to update discount"}`);
+        }
+      } catch (error) {
+        console.error("Error updating discount:", error);
+        alert("Failed to update discount. Please try again.");
+      } finally {
+        batchUpdateBtn.disabled = false;
+        batchUpdateBtn.textContent = "Batch Update";
+      }
+    });
+  }
+
+  // Remove discount handler
+  const removeDiscountBtn = document.getElementById("remove-discount-btn");
+  if (removeDiscountBtn) {
+    removeDiscountBtn.addEventListener("click", async () => {
+      if (!confirm("Are you sure you want to remove the discount from all products? Prices will revert to original values.")) {
+        return;
+      }
+
+      removeDiscountBtn.disabled = true;
+      removeDiscountBtn.textContent = "Removing...";
+      const statusBadge = document.getElementById("discount-status");
+      if (statusBadge) {
+        statusBadge.textContent = "Processing...";
+        statusBadge.style.display = "inline-block";
+      }
+
+      try {
+        const response = await fetch(`${API_URL}/remove-discount`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token": localStorage.getItem("auth-token") || "",
+          },
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          alert(`Successfully removed discount from ${result.updatedCount} products`);
+          document.getElementById("discount-input").value = "";
+          loadDiscountSettings();
+          loadProducts(data); // Refresh products list
+        } else {
+          alert(`Error: ${result.message || "Failed to remove discount"}`);
+        }
+      } catch (error) {
+        console.error("Error removing discount:", error);
+        alert("Failed to remove discount. Please try again.");
+      } finally {
+        removeDiscountBtn.disabled = false;
+        removeDiscountBtn.textContent = "Remove Discount";
+      }
+    });
+  }
+}
+
+// Load and display current discount settings
+async function loadDiscountSettings() {
+  try {
+    const response = await fetch(`${API_URL}/discount-settings`, {
+      headers: {
+        "auth-token": localStorage.getItem("auth-token") || "",
+      },
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      if (result.success) {
+        const statusBadge = document.getElementById("discount-status");
+        const discountInput = document.getElementById("discount-input");
+        
+        if (result.discount_active && result.global_discount_percentage > 0) {
+          if (statusBadge) {
+            statusBadge.textContent = `Active: ${result.global_discount_percentage}%`;
+            statusBadge.style.display = "inline-block";
+            statusBadge.style.background = "rgba(76, 175, 80, 0.2)";
+            statusBadge.style.color = "#4caf50";
+          }
+          if (discountInput) {
+            discountInput.value = result.global_discount_percentage;
+          }
+        } else {
+          if (statusBadge) {
+            statusBadge.textContent = "No active discount";
+            statusBadge.style.display = "inline-block";
+            statusBadge.style.background = "rgba(157, 157, 185, 0.2)";
+            statusBadge.style.color = "rgba(157, 157, 185, 0.85)";
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error loading discount settings:", error);
   }
 }
 

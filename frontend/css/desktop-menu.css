@@ -73,6 +73,8 @@ a {
 html[dir='rtl'] .attrib,
 .ul-heb .attrib {
   font-size: 0.8rem !important;
+  font-family: 'Amatic SC', sans-serif !important;
+  font-weight: 700 !important;
 }
 
 .attrib-cart {
@@ -149,6 +151,21 @@ html[dir='rtl'] .attrib,
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
+}
+
+/* Apply Amatic SC font to Hebrew category items */
+.category-item .attrib-heb,
+.ul-heb .category-item .attrib {
+  font-family: 'Amatic SC', sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* Hebrew category items in site-header dropdown */
+.site-header .ul-heb .category-item .attrib,
+.site-header .category-item .attrib-heb,
+html[dir='rtl'] .site-header .category-item .attrib {
+  font-family: 'Amatic SC', sans-serif !important;
+  font-weight: 700 !important;
 }
 
 .category-item:hover {
@@ -546,6 +563,14 @@ html[dir='rtl'] .attrib,
     padding: 10px clamp(6px, 0.8vw, 12px); /* clickable but responsive */
     white-space: nowrap;
     box-sizing: border-box;
+  }
+
+  /* Hebrew menu items in site-header - override with Amatic SC and bold weight */
+  html[dir='rtl'] .site-header .menu a.attrib,
+  .site-header .menu__ul.ul-heb a.attrib,
+  .site-header .menu .menu__ul.ul-heb a.attrib {
+    font-family: 'Amatic SC', sans-serif !important;
+    font-weight: 700 !important;
   }
 
   /* Make categories tab fully clickable - must come after general .attrib rule */

@@ -157,7 +157,7 @@ const controlCartPage = async function (lng) {
     CartView.setLanguage(lng, cartNum);
 
     CartView.render(cartNum);
-    CartView._renderSummary(cartNum, lng);
+    await CartView._renderSummary(cartNum, lng);
 
     const cartData = model.cart;
     CartView._addHandlerCheckout(cartData);
@@ -168,7 +168,7 @@ const controlCartPage = async function (lng) {
     CartView.handleCartLanguage();
     CartView.stickyMenuFn();
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 
@@ -184,7 +184,7 @@ const controlDeleteFromCart = async function (id) {
   CartView._removeItem(cartNum);
 
   // 4) Update new summary
-  CartView._renderSummary(cartNum);
+  await CartView._renderSummary(cartNum);
 };
 
 const controlDeleteAll = async function () {
@@ -199,13 +199,12 @@ const controlDeleteAll = async function () {
   CartView._removeAll(cartNum);
 
   // 4) Update new summary
-  CartView._renderSummary(cartNum);
+  await CartView._renderSummary(cartNum);
 };
 
 const controlBambaPage = function () {
   // Don't use BisliView directly in the frontend controller
   // The bamba page should be handled by the admin controller
-  console.log('Bamba page should be handled by admin controller');
 };
 
 const init = async function () {

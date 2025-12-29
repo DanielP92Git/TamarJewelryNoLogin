@@ -139,11 +139,25 @@ class CartView extends View {
                 <h2 class="item-title">${item.title}</h2>
               </div>
               <div class="cart-item__right">
-                <span class="item-price">${
-                  item.currency == '$'
-                    ? `$${item.price}`
-                    : `$${Math.trunc(item.price / this._rate)}`
-                }</span>
+                ${item.originalPrice && parseFloat(item.originalPrice) > parseFloat(item.price)
+                  ? `<div class="cart-item-price-container">
+                      <span class="item-price-original">${
+                        item.currency == '$'
+                          ? `$${item.originalPrice}`
+                          : `$${Math.trunc(item.originalPrice / this._rate)}`
+                      }</span>
+                      <span class="item-price-discounted">${
+                        item.currency == '$'
+                          ? `$${item.price}`
+                          : `$${Math.trunc(item.price / this._rate)}`
+                      }</span>
+                    </div>`
+                  : `<span class="item-price">${
+                      item.currency == '$'
+                        ? `$${item.price}`
+                        : `$${Math.trunc(item.price / this._rate)}`
+                    }</span>`
+                }
                 ${
                   Number(item.quantity) > 1
                     ? `<div class="cart-qty" aria-label="Quantity">
@@ -181,11 +195,25 @@ class CartView extends View {
               <h2 class="item-title">${item.title}</h2>
             </div>
             <div class="cart-item__right">
-              <span class="item-price">${
-                item.currency == '$'
-                  ? `₪${Math.trunc(item.price * this._rate)}`
-                  : `₪${item.price}`
-              }</span>
+              ${item.originalPrice && parseFloat(item.originalPrice) > parseFloat(item.price)
+                ? `<div class="cart-item-price-container">
+                    <span class="item-price-original">${
+                      item.currency == '$'
+                        ? `₪${Math.trunc(item.originalPrice * this._rate)}`
+                        : `₪${item.originalPrice}`
+                    }</span>
+                    <span class="item-price-discounted">${
+                      item.currency == '$'
+                        ? `₪${Math.trunc(item.price * this._rate)}`
+                        : `₪${item.price}`
+                    }</span>
+                  </div>`
+                : `<span class="item-price">${
+                    item.currency == '$'
+                      ? `₪${Math.trunc(item.price * this._rate)}`
+                      : `₪${item.price}`
+                  }</span>`
+              }
               ${
                 Number(item.quantity) > 1
                   ? `<div class="cart-qty" aria-label="Quantity">
@@ -211,8 +239,8 @@ class CartView extends View {
     }
   }
 
-  _generateSummaryMarkup(cartNum, price, ship = 30, lng) {
-    if (cartNum === 0) return;
+  async _generateSummaryMarkup(cartNum, price, ship = 30, lng) {
+    if (cartNum === 0) return '';
 
     // Check if cart is empty before accessing currency
     if (!model.cart || model.cart.length === 0) {
@@ -223,11 +251,21 @@ class CartView extends View {
     let isInUsd = checkCurrency == '$';
     let currency = isInUsd ? '$' : '₪';
 
+    // Calculate totals
+    const originalTotal = this._calculateOriginalTotal();
+    const discountedTotal = this._calculateTotal();
+    const discountAmount = originalTotal - discountedTotal;
+    
+    // Get global discount settings
+    const discountSettings = await model.getGlobalDiscount();
+    const hasDiscount = discountSettings.active && discountAmount > 0;
+
     // Determine labels and styling based on language
     const labels =
       lng === 'heb'
         ? {
             subtotal: 'סכום ביניים:',
+            discount: 'הנחת סוף שנה:',
             shipping: 'משלוח:',
             shippingValue: 'מחושב בקופה',
             total: 'סה"כ:',
@@ -236,6 +274,7 @@ class CartView extends View {
           }
         : {
             subtotal: 'Subtotal:',
+            discount: 'End of Year Discount:',
             shipping: 'Shipping:',
             shippingValue: 'Calculated at checkout',
             total: 'Total:',
@@ -247,17 +286,28 @@ class CartView extends View {
 
     return `
     <div class="price-summary-container">
+          ${hasDiscount ? `
           <div class="total-container subtotal" ${rtlWrap}>
             <span class="total-text">${labels.subtotal}</span>
-            <span class="total-price">${currency}${price}</span>
+            <span class="total-price">${currency}${originalTotal}</span>
           </div>
+          <div class="total-container discount-line" ${rtlWrap}>
+            <span class="total-text">${labels.discount} -${discountSettings.percentage}%</span>
+            <span class="total-price discount-amount">-${currency}${discountAmount}</span>
+          </div>
+          <div class="total-container after-discount" ${rtlWrap}>
+            <span class="total-text">${labels.total}</span>
+            <span class="total-price discounted-price">${currency}${discountedTotal}</span>
+          </div>
+          ` : `
+          <div class="total-container subtotal" ${rtlWrap}>
+            <span class="total-text">${labels.subtotal}</span>
+            <span class="total-price">${currency}${discountedTotal}</span>
+          </div>
+          `}
           <div class="total-container shipping" ${rtlWrap}>
             <span class="total-text">${labels.shipping}</span>
             <span class="total-price">${labels.shippingValue}</span>
-          </div>
-          <div class="total-container total" ${rtlWrap}>
-            <span class="total-text">${labels.total}</span>
-            <span class="total-price">${currency}${price}</span>
           </div>
           <span class="shipping-text">${labels.shippingNote}</span>
         </div>`;
@@ -281,11 +331,11 @@ class CartView extends View {
     }
   }
 
-  _renderSummary(cartNum, lng) {
+  async _renderSummary(cartNum, lng) {
     if (cartNum !== 0) {
       this._summaryDetails.innerHTML = '';
       const num = this._calculateTotal();
-      const markup = this._generateSummaryMarkup(cartNum, num, undefined, lng);
+      const markup = await this._generateSummaryMarkup(cartNum, num, undefined, lng);
       this._summaryDetails.insertAdjacentHTML('afterbegin', markup);
       if (this._orderSummaryContainer)
         this._orderSummaryContainer.classList.remove('remove');
@@ -339,10 +389,12 @@ class CartView extends View {
     if (checkCurrency == '₪') {
       const convertPrice = model.cart
         .map(itm => {
+          // Use discounted price if available, otherwise use regular price
+          const price = itm.discountedPrice || itm.price;
           if (itm.currency == '$') {
-            return itm.price * this._rate;
+            return price * this._rate;
           }
-          return +itm.price;
+          return +price;
         })
         .reduce((x, y) => x + y, 0);
 
@@ -351,10 +403,52 @@ class CartView extends View {
     if (checkCurrency == '$') {
       const convertPrice = model.cart
         .map(itm => {
+          // Use discounted price if available, otherwise use regular price
+          const price = itm.discountedPrice || itm.price;
           if (itm.currency == '₪') {
-            return itm.price / this._rate;
+            return price / this._rate;
           }
-          return +itm.price;
+          return +price;
+        })
+        .reduce((x, y) => x + y, 0);
+
+      return Math.trunc(convertPrice);
+    }
+  }
+
+  _calculateOriginalTotal() {
+    if (model.checkCartNumber() === 0) return 0;
+
+    // Check if cart is empty before accessing currency
+    if (!model.cart || model.cart.length === 0) {
+      return 0;
+    }
+
+    let checkCurrency = model.cart[0].currency;
+
+    if (checkCurrency == '₪') {
+      const convertPrice = model.cart
+        .map(itm => {
+          // Use original price if available, otherwise use regular price
+          const price = itm.originalPrice || itm.price;
+          if (itm.currency == '$') {
+            return price * this._rate;
+          }
+          return +price;
+        })
+        .reduce((x, y) => x + y, 0);
+
+      return Math.trunc(convertPrice);
+    }
+    if (checkCurrency == '$') {
+      const convertPrice = model.cart
+        .map(itm => {
+          // Use original price if available, otherwise use regular price
+          const price = itm.originalPrice || itm.price;
+          if (itm.currency == '₪') {
+            return price / this._rate;
+          }
+          return +price;
         })
         .reduce((x, y) => x + y, 0);
 
@@ -386,7 +480,6 @@ class CartView extends View {
       );
       return;
     }
-    console.log('PayPal currency:', currencyVariable);
 
     // Remove any existing PayPal script to avoid conflicts
     const existingScript = document.querySelector(
@@ -436,7 +529,6 @@ class CartView extends View {
 
     // Add load and error event handlers
     paypalScript.addEventListener('load', () => {
-      console.log('PayPal SDK loaded successfully');
       this._initializePayPalButtons(cartData);
     });
 
@@ -492,11 +584,6 @@ class CartView extends View {
                 );
               }
 
-              console.log(
-                'Sending cart to PayPal API:',
-                JSON.stringify(cartDetails, null, 2)
-              );
-
               // Check if cart is valid
               if (!cartDetails || cartDetails.length === 0) {
                 throw new Error(
@@ -529,8 +616,6 @@ class CartView extends View {
                 responseData = null;
               }
 
-              console.log('PayPal order API response:', responseData);
-
               if (!response.ok) {
                 const statusInfo = `HTTP ${response.status}`;
                 const structuredMessage =
@@ -558,10 +643,8 @@ class CartView extends View {
               }
 
               if (responseData.jsonResponse && responseData.jsonResponse.id) {
-                console.log('Order ID received:', responseData.jsonResponse.id);
                 return responseData.jsonResponse.id;
               } else if (responseData.id) {
-                console.log('Direct order ID received:', responseData.id);
                 return responseData.id;
               } else {
                 console.error('No order ID in response:', responseData);
@@ -584,8 +667,6 @@ class CartView extends View {
 
           onApprove: async (data, actions) => {
             try {
-              console.log('Payment approved, capturing order:', data.orderID);
-
               const response = await fetch(
                 `${process.env.API_URL}/orders/${data.orderID}/capture`,
                 {
@@ -602,7 +683,6 @@ class CartView extends View {
               }
 
               const orderData = await response.json();
-              console.log('Order capture response:', orderData);
 
               // Get the actual order data from the response
               const actualOrderData = orderData.jsonResponse || orderData;
@@ -634,10 +714,6 @@ class CartView extends View {
                   actualOrderData?.purchase_units?.[0]?.payments
                     ?.authorizations?.[0];
 
-                console.log(
-                  `Transaction ${transaction.status}: ${transaction.id}`
-                );
-
                 // Redirect to success page or show confirmation
                 window.location = `${process.env.HOST}/index.html?success=true`;
               }
@@ -657,8 +733,6 @@ class CartView extends View {
           },
         })
         .render('#paypal');
-
-      console.log('PayPal buttons rendered successfully');
     } catch (error) {
       console.error('Error setting up PayPal buttons:', error);
       alert('Failed to initialize PayPal checkout. Please try again later.');

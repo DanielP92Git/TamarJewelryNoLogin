@@ -96,6 +96,22 @@ class CategoriesView extends View {
     return 0;
   }
 
+  getOriginalPrice(product) {
+    const cur = this.selectedCurrency === 'usd' ? 'usd' : 'ils';
+    const originalIls = Number(product?.original_ils_price);
+    const originalUsd = Number(product?.original_usd_price);
+
+    if (cur === 'usd') {
+      if (Number.isFinite(originalUsd) && originalUsd > 0) return originalUsd;
+      if (Number.isFinite(originalIls)) return Math.trunc(originalIls / this.exchangeRate);
+      return 0;
+    }
+
+    if (Number.isFinite(originalIls) && originalIls > 0) return Math.trunc(originalIls);
+    if (Number.isFinite(originalUsd)) return Math.trunc(originalUsd * this.exchangeRate);
+    return 0;
+  }
+
   // Direct initialization method that bypasses checks
   directInitialize(category, categoryNameHebrew) {
     if (!category) {
@@ -431,7 +447,7 @@ class CategoriesView extends View {
 
     setTimeout(() => {
       btn.textContent = this.lang === 'eng' ? 'Added to Cart' : 'הוסף לסל';
-      btn.style.backgroundColor = '#e8a58a8f';
+      btn.style.backgroundColor = '#1f2937';
     }, 2000);
 
     model.handleAddToCart(item);
@@ -527,11 +543,11 @@ class CategoriesView extends View {
       const originalText = addToCartBtn.textContent;
       addToCartBtn.textContent =
         this.lang === 'eng' ? 'Added to Cart!' : 'נוסף לסל!';
-      addToCartBtn.style.backgroundColor = '#4caf50'; // Change to success color
+      addToCartBtn.style.backgroundColor = '#1f2937'; // Keep dark gray color
 
       setTimeout(() => {
         addToCartBtn.textContent = originalText;
-        addToCartBtn.style.backgroundColor = '#4a90e2'; // Restore original color
+        addToCartBtn.style.backgroundColor = '#1f2937'; // Restore dark gray color
       }, 2000);
     }
   }
@@ -1256,6 +1272,8 @@ class CategoriesView extends View {
     const { id, quantity, image, name, description } = item;
     const curSign = this.selectedCurrency === 'usd' ? '$' : '₪';
     const price = this.getDisplayPrice(item);
+    const originalPrice = this.getOriginalPrice(item);
+    const hasDiscount = item.discount_percentage > 0 && originalPrice > 0 && originalPrice > price;
 
     // Format description with ellipsis for list view
     const maxDescriptionLength = 150;
@@ -1280,6 +1298,16 @@ class CategoriesView extends View {
         item.mainImage?.desktop ||
         item.image
     );
+
+    // Price markup with discount support
+    const priceMarkup = hasDiscount
+      ? `
+        <div class="item-price-container">
+          <div class="item-price-original">${curSign}${originalPrice}</div>
+          <div class="item-price-discounted">${curSign}${price}</div>
+        </div>
+      `
+      : `<div class="item-price">${curSign}${price}</div>`;
 
     return `
       <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}">
@@ -1311,7 +1339,7 @@ class CategoriesView extends View {
         </div>
         <div class="item-title">${name}</div>
         <div class="item-description">${formattedDescription}</div>
-              <div class="item-price">${curSign}${price}</div>
+        ${priceMarkup}
         <button class="add-to-cart-btn">${
           this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל'
         }</button>
@@ -1397,7 +1425,7 @@ class CategoriesView extends View {
 
     // Make sure all required elements exist before proceeding
     if (!closeBtn || !overlay) {
-      console.warn('Modal setup: Some required elements are missing');
+      console.error('Modal setup: Some required elements are missing');
       return;
     }
 

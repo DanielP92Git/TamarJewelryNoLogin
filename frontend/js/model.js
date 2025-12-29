@@ -207,11 +207,22 @@ export const addToLocalStorage = async function (data) {
   // Get currency from dataset
   const currencyCheck = data.dataset.currency || 'ils';
 
-  // Safely get the price element
+  // Safely get the price element - check for discounted price first
+  const discountedPriceEl = data.querySelector('.item-price-discounted');
+  const originalPriceEl = data.querySelector('.item-price-original');
   const priceEl = data.querySelector('.item-price');
+  
   let itemPrice = '';
+  let originalPrice = null;
 
-  if (priceEl && priceEl.textContent) {
+  if (discountedPriceEl && discountedPriceEl.textContent) {
+    // Has discount - get discounted price
+    itemPrice = discountedPriceEl.textContent.replace(/[$₪]/g, '');
+    if (originalPriceEl && originalPriceEl.textContent) {
+      originalPrice = originalPriceEl.textContent.replace(/[$₪]/g, '');
+    }
+  } else if (priceEl && priceEl.textContent) {
+    // No discount - use regular price
     itemPrice = priceEl.textContent.replace(/[$₪]/g, '');
   } else {
     console.error('Price element not found or has no text content');
@@ -223,6 +234,8 @@ export const addToLocalStorage = async function (data) {
     title: itemTitle,
     image: itemImage,
     price: itemPrice,
+    originalPrice: originalPrice,
+    discountedPrice: discountedPriceEl ? itemPrice : null,
     currency: currencyCheck,
     quantity: prodQuantity,
     id: +itemId,
@@ -236,6 +249,8 @@ const addToLocalCart = function (data) {
     title: data.title,
     image: data.image,
     price: data.price,
+    originalPrice: data.originalPrice || null,
+    discountedPrice: data.discountedPrice || null,
     currency: data.currency,
     id: +data.id,
     quantity: data.quantity,
@@ -299,4 +314,49 @@ export const deleteAll = async function () {
       body: '',
     });
   }
+};
+
+// Discount helper methods
+let globalDiscountCache = null;
+let discountCacheTimestamp = null;
+const DISCOUNT_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+export const getGlobalDiscount = async function () {
+  // Return cached value if still valid
+  if (globalDiscountCache && discountCacheTimestamp) {
+    const now = Date.now();
+    if (now - discountCacheTimestamp < DISCOUNT_CACHE_DURATION) {
+      return globalDiscountCache;
+    }
+  }
+
+  try {
+    const response = await fetch(`${host}/discount-settings`);
+    if (response.ok) {
+      const result = await response.json();
+      if (result.success) {
+        globalDiscountCache = {
+          percentage: result.global_discount_percentage || 0,
+          active: result.discount_active || false,
+          label: result.discount_label || 'End of Year Discount',
+        };
+        discountCacheTimestamp = Date.now();
+        return globalDiscountCache;
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching discount settings:', error);
+  }
+
+  // Return default if fetch fails
+  return {
+    percentage: 0,
+    active: false,
+    label: 'End of Year Discount',
+  };
+};
+
+export const calculateDiscountedPrice = function (originalPrice, discountPercent) {
+  if (!discountPercent || discountPercent <= 0) return originalPrice;
+  return Math.round(originalPrice * (1 - discountPercent / 100));
 };

@@ -35,11 +35,11 @@ class ContactMeView extends View {
         alert('Message Sent Successfully!');
     } catch (err) {
       if (err instanceof EmailJSResponseStatus) {
-        console.log('EMAILJS FAILED...', err);
+        console.error('EMAILJS FAILED...', err);
         return;
       }
 
-      console.log('ERROR', err);
+      console.error('ERROR', err);
     }
   }
 

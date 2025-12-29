@@ -142,7 +142,6 @@ class WorkshopView extends View {
   }
 
   async changeToHeb() {
-    console.log('[WorkshopView] changeToHeb called');
     try {
       // First store the language preference
       localStorage.setItem('language', 'heb');
@@ -154,15 +153,12 @@ class WorkshopView extends View {
 
       // Call the base View's setLanguage method to update the menu
       await this.setLanguage('heb', 0);
-
-      console.log('[WorkshopView] Hebrew language change completed');
     } catch (error) {
       console.error('[WorkshopView] Error in changeToHeb:', error);
     }
   }
 
   async changeToEng() {
-    console.log('[WorkshopView] changeToEng called');
     try {
       // First store the language preference
       localStorage.setItem('language', 'eng');
@@ -174,8 +170,6 @@ class WorkshopView extends View {
 
       // Call the base View's setLanguage method to update the menu
       await this.setLanguage('eng', 0);
-
-      console.log('[WorkshopView] English language change completed');
     } catch (error) {
       console.error('[WorkshopView] Error in changeToEng:', error);
     }
