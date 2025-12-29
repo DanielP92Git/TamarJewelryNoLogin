@@ -4,9 +4,8 @@ const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
-const mongoose = require('mongoose');
 const { connectDb } = require('./config/db');
-const { Users, Product } = require('./models');
+const { Users, Product, Settings } = require('./models');
 const {
   getTokenFromRequest,
   authUser,
@@ -68,7 +67,9 @@ function agentLog(hypothesisId, location, message, data) {
 
 const PAYPAL_CLIENT_ID = (process.env.PAYPAL_CLIENT_ID || '').trim();
 const PAYPAL_CLIENT_SECRET = (process.env.PAYPAL_CLIENT_SECRET || '').trim();
-const baseUrl = (process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com')
+const baseUrl = (
+  process.env.PAYPAL_BASE_URL || 'https://api-m.sandbox.paypal.com'
+)
   .trim()
   .replace(/\/+$/, '');
 
@@ -1037,10 +1038,7 @@ app.get('/direct-image/:filename', (req, res) => {
 
   // Allow images to be embedded across same-site subdomains in prod;
   // in dev, allow cross-origin for localhost/127.0.0.1 mixes.
-  res.setHeader(
-    'Cross-Origin-Resource-Policy',
-    'cross-origin'
-  );
+  res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
 
   // Check if file exists
   fs.access(filePath, fs.constants.F_OK, err => {
@@ -1304,12 +1302,12 @@ const createOrder = async cart => {
     const response = await fetchWithTimeout(
       url,
       {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${accessToken}`,
-      },
-      method: 'POST',
-      body: JSON.stringify(payload),
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        method: 'POST',
+        body: JSON.stringify(payload),
       },
       20000
     );
@@ -1380,7 +1378,11 @@ async function handleResponse(response) {
     });
 
     if (!isProd) {
-      console.error('PayPal API error full body:', response.status, jsonResponse || text);
+      console.error(
+        'PayPal API error full body:',
+        response.status,
+        jsonResponse || text
+      );
     }
     const err = new Error('PAYPAL_API_ERROR');
     err.code = 'PAYPAL_API_ERROR';
@@ -1467,37 +1469,37 @@ app.post(
   },
   authUser,
   async (req, res) => {
-  try {
-    const adminCheck = req.user.userType;
-    const data = {
-      user: {
-        id: req.user._id.toString(),
-        email: req.user.email,
-        userType: req.user.userType,
-      },
-    };
-    const token = jwt.sign(data, process.env.JWT_KEY, {
-      expiresIn: process.env.JWT_EXPIRES_IN || '1h',
-    });
-    if (token) {
-      if (process.env.NODE_ENV !== 'production') {
-        console.log('Token created for user:', req.user.email);
+    try {
+      const adminCheck = req.user.userType;
+      const data = {
+        user: {
+          id: req.user._id.toString(),
+          email: req.user.email,
+          userType: req.user.userType,
+        },
+      };
+      const token = jwt.sign(data, process.env.JWT_KEY, {
+        expiresIn: process.env.JWT_EXPIRES_IN || '1h',
+      });
+      if (token) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.log('Token created for user:', req.user.email);
+        }
+        res.json({
+          success: true,
+          token,
+          adminCheck,
+          message: 'Login successful',
+        });
       }
-      res.json({
-        success: true,
-        token,
-        adminCheck,
-        message: 'Login successful',
+    } catch (err) {
+      console.error('Login Error🔥 :', err);
+      res.status(500).json({
+        success: false,
+        errors: 'Login - Internal Server Error',
+        message: err.message,
       });
     }
-  } catch (err) {
-    console.error('Login Error🔥 :', err);
-    res.status(500).json({
-      success: false,
-      errors: 'Login - Internal Server Error',
-      message: err.message,
-    });
-  }
   }
 );
 
@@ -1556,251 +1558,263 @@ app.post('/signup', authRateLimiter, async (req, res) => {
 });
 
 // Product Management Endpoints
-app.post('/addproduct', adminRateLimiter, fetchUser, requireAdmin, async (req, res) => {
-  try {
-    // #region agent log
-    agentLog('A', 'backend/index.js:/addproduct:entry', 'addproduct entry', {
-      hasBody: !!req.body,
-      contentType: req.headers['content-type'] || null,
-      hasMainImage: !!req.body?.mainImage,
-      mainImageDesktop: req.body?.mainImage?.desktop || null,
-      smallImagesType: Array.isArray(req.body?.smallImages)
-        ? 'array'
-        : typeof req.body?.smallImages,
-      category: req.body?.category || null,
-      name: req.body?.name || null,
-    });
-    // #endregion
-
-    console.log('\n=== Product Creation Request Details ===');
-    console.log('Request body:', JSON.stringify(req.body, null, 2));
-
-    // Input guards (fail fast with actionable 400s)
-    if (!req.body || typeof req.body !== 'object') {
-      return res
-        .status(400)
-        .json({ success: false, error: 'Missing JSON body' });
-    }
-    if (!req.body.name || typeof req.body.name !== 'string') {
-      return res
-        .status(400)
-        .json({ success: false, error: 'Missing product name' });
-    }
-    if (!req.body.category || typeof req.body.category !== 'string') {
-      return res
-        .status(400)
-        .json({ success: false, error: 'Missing product category' });
-    }
-    if (!req.body.mainImage || typeof req.body.mainImage !== 'object') {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing mainImage data from upload.',
-      });
-    }
-
-    const products = await Product.find({}).sort({ id: -1 }).limit(1);
-    const nextId = products.length > 0 ? Number(products[0].id) + 1 : 1;
-
-    const securityMargin = parseFloat(req.body.security_margin) || 5;
-    const usdPrice = Number(req.body.oldPrice) || 0;
-    const ilsPrice = Math.round(usdPrice * 3.7 * (1 + securityMargin / 100));
-
-    // Get image URLs from the upload response.
-    // - Absolute (Spaces/CDN) URLs should be stored as-is.
-    // - Legacy local URLs (/uploads/...) are stored as relative paths.
-    const mainImageInput = req.body.mainImage || {};
-    const smallImageInput = req.body.smallImages || [];
-
-    const maybeRelative = value =>
-      isAbsoluteHttpUrl(value) ? value : toRelativeApiPath(value);
-
-    const mainImageUrls = {
-      desktop: maybeRelative(mainImageInput.desktop),
-      mobile: maybeRelative(mainImageInput.mobile),
-      publicDesktop: maybeRelative(mainImageInput.publicDesktop),
-      publicMobile: maybeRelative(mainImageInput.publicMobile),
-    };
-
-    const smallImageUrls = Array.isArray(smallImageInput)
-      ? smallImageInput.filter(Boolean).map(img => {
-          if (typeof img === 'string') return maybeRelative(img);
-          if (img && typeof img === 'object' && !Array.isArray(img)) {
-            return {
-              desktop: maybeRelative(img.desktop),
-              mobile: maybeRelative(img.mobile),
-            };
-          }
-          return img;
-        })
-      : [];
-
-    console.log('\n=== Image Data Received ===');
-    console.log('Main Image URLs:', JSON.stringify(mainImageUrls, null, 2));
-    console.log('Small Image URLs:', JSON.stringify(smallImageUrls, null, 2));
-
-    // #region agent log
-    agentLog(
-      'A',
-      'backend/index.js:/addproduct',
-      'computed image fields for product',
-      {
-        hasApiUrl: !!process.env.API_URL,
-        mainImageInputDesktop: mainImageInput?.desktop,
-        mainImageUrlsDesktop: mainImageUrls?.desktop,
-        mainImageUrlsPublicDesktop: mainImageUrls?.publicDesktop,
-        smallImagesCount: Array.isArray(smallImageUrls)
-          ? smallImageUrls.length
-          : null,
-      }
-    );
-    // #endregion
-
-    // Guard: don't store a product that references non-existent LOCAL upload files.
-    // If using Spaces/CDN (absolute URLs), skip this local filesystem guard.
+app.post(
+  '/addproduct',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
     try {
-      const desktopUrl = mainImageUrls?.desktop || null;
-      const shouldValidateLocal =
-        typeof desktopUrl === 'string' &&
-        desktopUrl.startsWith('/') &&
-        (desktopUrl.startsWith('/uploads/') ||
-          desktopUrl.startsWith('/public/uploads/'));
+      // #region agent log
+      agentLog('A', 'backend/index.js:/addproduct:entry', 'addproduct entry', {
+        hasBody: !!req.body,
+        contentType: req.headers['content-type'] || null,
+        hasMainImage: !!req.body?.mainImage,
+        mainImageDesktop: req.body?.mainImage?.desktop || null,
+        smallImagesType: Array.isArray(req.body?.smallImages)
+          ? 'array'
+          : typeof req.body?.smallImages,
+        category: req.body?.category || null,
+        name: req.body?.name || null,
+      });
+      // #endregion
 
-      if (shouldValidateLocal) {
-        const mainDesktopFn = path.basename(String(desktopUrl));
-        const fp = safeResolveUnder(uploadsDir, mainDesktopFn);
-        const exists =
-          (fp ? fs.existsSync(fp) : false) ||
-          (() => {
-            const fpPublic = safeResolveUnder(publicUploadsDir, mainDesktopFn);
-            return fpPublic ? fs.existsSync(fpPublic) : false;
-          })();
+      console.log('\n=== Product Creation Request Details ===');
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
 
-        // #region agent log
-        agentLog(
-          'A',
-          'backend/index.js:/addproduct:upload-file-check',
-          'checked upload file exists',
-          {
-            mainDesktopUrl: desktopUrl,
-            mainDesktopFilename: mainDesktopFn,
-            resolvedOk: !!fp,
-            exists,
-          }
-        );
-        // #endregion
-
-        if (!exists) {
-          return res.status(400).json({
-            success: false,
-            error:
-              'Uploaded main image file was not found on the server. Please retry the upload.',
-          });
-        }
-      } else if (!desktopUrl) {
+      // Input guards (fail fast with actionable 400s)
+      if (!req.body || typeof req.body !== 'object') {
+        return res
+          .status(400)
+          .json({ success: false, error: 'Missing JSON body' });
+      }
+      if (!req.body.name || typeof req.body.name !== 'string') {
+        return res
+          .status(400)
+          .json({ success: false, error: 'Missing product name' });
+      }
+      if (!req.body.category || typeof req.body.category !== 'string') {
+        return res
+          .status(400)
+          .json({ success: false, error: 'Missing product category' });
+      }
+      if (!req.body.mainImage || typeof req.body.mainImage !== 'object') {
         return res.status(400).json({
           success: false,
-          error: 'mainImage.desktop missing from upload response.',
+          error: 'Missing mainImage data from upload.',
         });
       }
-    } catch (e) {
-      console.error('[addproduct] upload file validation failed:', e);
-      return res.status(500).json({
-        success: false,
-        error: 'Server failed while validating uploaded image files.',
-      });
-    }
 
-    // Create the product with new image structure
-    const isSpacesDesktop = isAbsoluteHttpUrl(mainImageUrls.desktop);
+      const products = await Product.find({}).sort({ id: -1 }).limit(1);
+      const nextId = products.length > 0 ? Number(products[0].id) + 1 : 1;
 
-    const product = new Product({
-      id: nextId,
-      name: req.body.name,
-      // Legacy image field (using desktop version as default)
-      image: mainImageUrls.desktop || mainImageUrls.publicDesktop || '',
-      publicImage: mainImageUrls.publicDesktop || '',
-      // Store all image variations
-      mainImage: mainImageUrls,
-      // Store small images with all variations
-      smallImages: smallImageUrls,
-      // Store relative direct image URL for better accessibility (absolute is built at response time)
-      directImageUrl: mainImageUrls.desktop
-        ? isSpacesDesktop
-          ? mainImageUrls.desktop
-          : `/direct-image/${String(mainImageUrls.desktop).split('/').pop()}`
-        : null,
-      // Product details
-      category: req.body.category,
-      quantity: Math.max(0, Number(req.body.quantity) || 0),
-      description: req.body.description || '',
-      ils_price: ilsPrice,
-      usd_price: usdPrice,
-      security_margin: securityMargin,
-    });
+      const securityMargin = parseFloat(req.body.security_margin) || 5;
+      const usdPrice = Number(req.body.oldPrice) || 0;
+      const ilsPrice = Math.round(usdPrice * 3.7 * (1 + securityMargin / 100));
 
-    if (!isProd) {
-      console.log('\n=== Product Data Before Save ===');
-      console.log(
-        JSON.stringify(
-          {
-            id: product.id,
-            name: product.name,
-            image: product.image,
-            publicImage: product.publicImage,
-            mainImage: product.mainImage,
-            smallImages: product.smallImages,
-            directImageUrl: product.directImageUrl,
-            category: product.category,
-          },
-          null,
-          2
-        )
+      // Get image URLs from the upload response.
+      // - Absolute (Spaces/CDN) URLs should be stored as-is.
+      // - Legacy local URLs (/uploads/...) are stored as relative paths.
+      const mainImageInput = req.body.mainImage || {};
+      const smallImageInput = req.body.smallImages || [];
+
+      const maybeRelative = value =>
+        isAbsoluteHttpUrl(value) ? value : toRelativeApiPath(value);
+
+      const mainImageUrls = {
+        desktop: maybeRelative(mainImageInput.desktop),
+        mobile: maybeRelative(mainImageInput.mobile),
+        publicDesktop: maybeRelative(mainImageInput.publicDesktop),
+        publicMobile: maybeRelative(mainImageInput.publicMobile),
+      };
+
+      const smallImageUrls = Array.isArray(smallImageInput)
+        ? smallImageInput.filter(Boolean).map(img => {
+            if (typeof img === 'string') return maybeRelative(img);
+            if (img && typeof img === 'object' && !Array.isArray(img)) {
+              return {
+                desktop: maybeRelative(img.desktop),
+                mobile: maybeRelative(img.mobile),
+              };
+            }
+            return img;
+          })
+        : [];
+
+      console.log('\n=== Image Data Received ===');
+      console.log('Main Image URLs:', JSON.stringify(mainImageUrls, null, 2));
+      console.log('Small Image URLs:', JSON.stringify(smallImageUrls, null, 2));
+
+      // #region agent log
+      agentLog(
+        'A',
+        'backend/index.js:/addproduct',
+        'computed image fields for product',
+        {
+          hasApiUrl: !!process.env.API_URL,
+          mainImageInputDesktop: mainImageInput?.desktop,
+          mainImageUrlsDesktop: mainImageUrls?.desktop,
+          mainImageUrlsPublicDesktop: mainImageUrls?.publicDesktop,
+          smallImagesCount: Array.isArray(smallImageUrls)
+            ? smallImageUrls.length
+            : null,
+        }
       );
-    }
+      // #endregion
 
-    await product.save();
-    if (!isProd) {
-      console.log('\n=== Product Saved Successfully ===');
-      console.log('Product ID:', nextId);
-    }
+      // Guard: don't store a product that references non-existent LOCAL upload files.
+      // If using Spaces/CDN (absolute URLs), skip this local filesystem guard.
+      try {
+        const desktopUrl = mainImageUrls?.desktop || null;
+        const shouldValidateLocal =
+          typeof desktopUrl === 'string' &&
+          desktopUrl.startsWith('/') &&
+          (desktopUrl.startsWith('/uploads/') ||
+            desktopUrl.startsWith('/public/uploads/'));
 
-    // #region agent log
-    agentLog('A', 'backend/index.js:/addproduct:save', 'product saved', {
-      productId: nextId,
-      imageStored: product?.image,
-      publicImageStored: product?.publicImage,
-      directImageUrlStored: product?.directImageUrl,
-    });
-    // #endregion
+        if (shouldValidateLocal) {
+          const mainDesktopFn = path.basename(String(desktopUrl));
+          const fp = safeResolveUnder(uploadsDir, mainDesktopFn);
+          const exists =
+            (fp ? fs.existsSync(fp) : false) ||
+            (() => {
+              const fpPublic = safeResolveUnder(
+                publicUploadsDir,
+                mainDesktopFn
+              );
+              return fpPublic ? fs.existsSync(fpPublic) : false;
+            })();
 
-    res.json({
-      success: true,
-      id: nextId,
-      name: req.body.name,
-    });
-  } catch (error) {
-    if (!isProd) {
-      console.error('\n=== Product Creation Error ===');
-      console.error(error);
-    } else {
-      console.error('Product creation failed:', {
+          // #region agent log
+          agentLog(
+            'A',
+            'backend/index.js:/addproduct:upload-file-check',
+            'checked upload file exists',
+            {
+              mainDesktopUrl: desktopUrl,
+              mainDesktopFilename: mainDesktopFn,
+              resolvedOk: !!fp,
+              exists,
+            }
+          );
+          // #endregion
+
+          if (!exists) {
+            return res.status(400).json({
+              success: false,
+              error:
+                'Uploaded main image file was not found on the server. Please retry the upload.',
+            });
+          }
+        } else if (!desktopUrl) {
+          return res.status(400).json({
+            success: false,
+            error: 'mainImage.desktop missing from upload response.',
+          });
+        }
+      } catch (e) {
+        console.error('[addproduct] upload file validation failed:', e);
+        return res.status(500).json({
+          success: false,
+          error: 'Server failed while validating uploaded image files.',
+        });
+      }
+
+      // Create the product with new image structure
+      const isSpacesDesktop = isAbsoluteHttpUrl(mainImageUrls.desktop);
+
+      const product = new Product({
+        id: nextId,
+        name: req.body.name,
+        // Legacy image field (using desktop version as default)
+        image: mainImageUrls.desktop || mainImageUrls.publicDesktop || '',
+        publicImage: mainImageUrls.publicDesktop || '',
+        // Store all image variations
+        mainImage: mainImageUrls,
+        // Store small images with all variations
+        smallImages: smallImageUrls,
+        // Store relative direct image URL for better accessibility (absolute is built at response time)
+        directImageUrl: mainImageUrls.desktop
+          ? isSpacesDesktop
+            ? mainImageUrls.desktop
+            : `/direct-image/${String(mainImageUrls.desktop).split('/').pop()}`
+          : null,
+        // Product details
+        category: req.body.category,
+        quantity: Math.max(0, Number(req.body.quantity) || 0),
+        description: req.body.description || '',
+        ils_price: ilsPrice,
+        usd_price: usdPrice,
+        original_ils_price: ilsPrice,
+        original_usd_price: usdPrice,
+        discount_percentage: 0,
+        security_margin: securityMargin,
+      });
+
+      if (!isProd) {
+        console.log('\n=== Product Data Before Save ===');
+        console.log(
+          JSON.stringify(
+            {
+              id: product.id,
+              name: product.name,
+              image: product.image,
+              publicImage: product.publicImage,
+              mainImage: product.mainImage,
+              smallImages: product.smallImages,
+              directImageUrl: product.directImageUrl,
+              category: product.category,
+            },
+            null,
+            2
+          )
+        );
+      }
+
+      await product.save();
+      if (!isProd) {
+        console.log('\n=== Product Saved Successfully ===');
+        console.log('Product ID:', nextId);
+      }
+
+      // #region agent log
+      agentLog('A', 'backend/index.js:/addproduct:save', 'product saved', {
+        productId: nextId,
+        imageStored: product?.image,
+        publicImageStored: product?.publicImage,
+        directImageUrlStored: product?.directImageUrl,
+      });
+      // #endregion
+
+      res.json({
+        success: true,
+        id: nextId,
+        name: req.body.name,
+      });
+    } catch (error) {
+      if (!isProd) {
+        console.error('\n=== Product Creation Error ===');
+        console.error(error);
+      } else {
+        console.error('Product creation failed:', {
+          message: error?.message || null,
+          code: error?.code || null,
+        });
+      }
+      // #region agent log
+      agentLog('A', 'backend/index.js:/addproduct:catch', 'addproduct error', {
         message: error?.message || null,
-        code: error?.code || null,
+        name: error?.name || null,
+      });
+      // #endregion
+      res.status(500).json({
+        success: false,
+        error: 'Failed to create product',
+        ...(isProd ? {} : { message: error?.message }),
       });
     }
-    // #region agent log
-    agentLog('A', 'backend/index.js:/addproduct:catch', 'addproduct error', {
-      message: error?.message || null,
-      name: error?.name || null,
-    });
-    // #endregion
-    res.status(500).json({
-      success: false,
-      error: 'Failed to create product',
-      ...(isProd ? {} : { message: error?.message }),
-    });
   }
-});
+);
 
 // Update the old updateproduct endpoint to handle formdata and file uploads
 app.post(
@@ -1842,8 +1856,20 @@ app.post(
 
       // Update basic product information
       product.name = name;
-      product.usd_price = Number(usd_price) || 0;
-      product.ils_price = Number(ils_price) || 0;
+      const newUsdPrice = Number(usd_price) || 0;
+      const newIlsPrice = Number(ils_price) || 0;
+
+      // Preserve original prices if they don't exist or if discount is not active
+      // Only update original prices if discount is 0 (no active discount)
+      if (!product.original_usd_price || product.discount_percentage === 0) {
+        product.original_usd_price = newUsdPrice;
+      }
+      if (!product.original_ils_price || product.discount_percentage === 0) {
+        product.original_ils_price = newIlsPrice;
+      }
+
+      product.usd_price = newUsdPrice;
+      product.ils_price = newIlsPrice;
       product.description = description || '';
       product.category = category;
       product.quantity = Math.max(0, Number(quantity) || 0);
@@ -1982,83 +2008,259 @@ app.post(
 );
 
 // Keep the old endpoint for backward compatibility
-app.post('/updateproduct', adminRateLimiter, fetchUser, requireAdmin, async (req, res) => {
-  try {
+app.post(
+  '/updateproduct',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const id = Number(req.body.id);
+      if (!Number.isFinite(id)) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Invalid product id' });
+      }
+      const securityMargin = parseFloat(req.body.security_margin) || 5;
+      const exchangeRate = 3.7;
+
+      const usdPrice = Number(req.body.oldPrice) || 0;
+      const ilsPrice = Math.round(
+        usdPrice * exchangeRate * (1 + securityMargin / 100)
+      );
+
+      const updatedFields = {
+        name: req.body.name,
+        ils_price: ilsPrice,
+        usd_price: usdPrice,
+        security_margin: securityMargin,
+        description: req.body.description,
+        quantity: Math.max(0, Number(req.body.quantity) || 0),
+        category: req.body.category,
+      };
+
+      let product = await Product.findOne({ id });
+      if (!product) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Product not found' });
+      }
+
+      product.name = updatedFields.name;
+
+      // Preserve original prices if they don't exist or if discount is not active
+      if (!product.original_usd_price || product.discount_percentage === 0) {
+        product.original_usd_price = updatedFields.usd_price;
+      }
+      if (!product.original_ils_price || product.discount_percentage === 0) {
+        product.original_ils_price = updatedFields.ils_price;
+      }
+
+      product.usd_price = updatedFields.usd_price;
+      product.ils_price = updatedFields.ils_price;
+      product.security_margin = updatedFields.security_margin;
+      product.description = updatedFields.description;
+      product.quantity = updatedFields.quantity;
+      product.category = updatedFields.category;
+
+      await product.save();
+
+      res.json({
+        success: true,
+      });
+    } catch (error) {
+      console.error('Error in legacy updateproduct:', error);
+      res.status(500).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+);
+
+app.post(
+  '/removeproduct',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
     const id = Number(req.body.id);
     if (!Number.isFinite(id)) {
       return res
         .status(400)
         .json({ success: false, message: 'Invalid product id' });
     }
-    const securityMargin = parseFloat(req.body.security_margin) || 5;
-    const exchangeRate = 3.7;
 
-    const usdPrice = Number(req.body.oldPrice) || 0;
-    const ilsPrice = Math.round(
-      usdPrice * exchangeRate * (1 + securityMargin / 100)
-    );
-
-    const updatedFields = {
-      name: req.body.name,
-      ils_price: ilsPrice,
-      usd_price: usdPrice,
-      security_margin: securityMargin,
-      description: req.body.description,
-      quantity: Math.max(0, Number(req.body.quantity) || 0),
-      category: req.body.category,
-    };
-
-    let product = await Product.findOne({ id });
-    if (!product) {
+    const deleted = await Product.findOneAndDelete({ id });
+    if (!deleted) {
       return res
         .status(404)
         .json({ success: false, message: 'Product not found' });
     }
 
-    product.name = updatedFields.name;
-    product.usd_price = updatedFields.usd_price;
-    product.ils_price = updatedFields.ils_price;
-    product.security_margin = updatedFields.security_margin;
-    product.description = updatedFields.description;
-    product.quantity = updatedFields.quantity;
-    product.category = updatedFields.category;
-
-    await product.save();
-
+    if (!isProd) console.log('Removed');
     res.json({
       success: true,
+      id,
+      name: deleted.name,
+    });
+  }
+);
+
+// Discount Management Endpoints
+// Public endpoint for frontend to fetch discount settings
+app.get('/discount-settings', async (req, res) => {
+  try {
+    const settings = await Settings.getSettings();
+    res.json({
+      success: true,
+      global_discount_percentage: settings.global_discount_percentage,
+      discount_active: settings.discount_active,
+      discount_label: settings.discount_label,
     });
   } catch (error) {
-    console.error('Error in legacy updateproduct:', error);
+    console.error('Error fetching discount settings:', error);
     res.status(500).json({
       success: false,
-      message: error.message,
+      message: 'Failed to fetch discount settings',
     });
   }
 });
 
-app.post('/removeproduct', adminRateLimiter, fetchUser, requireAdmin, async (req, res) => {
-  const id = Number(req.body.id);
-  if (!Number.isFinite(id)) {
-    return res
-      .status(400)
-      .json({ success: false, message: 'Invalid product id' });
-  }
+app.post(
+  '/batch-update-discount',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const discountPercentage = parseFloat(req.body.discountPercentage);
 
-  const deleted = await Product.findOneAndDelete({ id });
-  if (!deleted) {
-    return res
-      .status(404)
-      .json({ success: false, message: 'Product not found' });
-  }
+      if (
+        isNaN(discountPercentage) ||
+        discountPercentage < 0 ||
+        discountPercentage > 100
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: 'Invalid discount percentage. Must be between 0 and 100',
+        });
+      }
 
-  if (!isProd) console.log('Removed');
-  res.json({
-    success: true,
-    id,
-    name: deleted.name,
-  });
-});
+      // Get or create settings
+      const settings = await Settings.getSettings();
+      settings.global_discount_percentage = discountPercentage;
+      settings.discount_active = discountPercentage > 0;
+      settings.updatedAt = new Date();
+      await settings.save();
+
+      // Fetch all products
+      const products = await Product.find({});
+      let updatedCount = 0;
+
+      // Update each product
+      for (const product of products) {
+        // If original prices don't exist, save current prices as original
+        if (!product.original_ils_price && product.ils_price) {
+          product.original_ils_price = product.ils_price;
+        }
+        if (!product.original_usd_price && product.usd_price) {
+          product.original_usd_price = product.usd_price;
+        }
+
+        // Calculate discounted prices
+        if (product.original_ils_price) {
+          product.ils_price = Math.round(
+            product.original_ils_price * (1 - discountPercentage / 100)
+          );
+        }
+        if (product.original_usd_price) {
+          product.usd_price =
+            Math.round(
+              product.original_usd_price * (1 - discountPercentage / 100) * 100
+            ) / 100; // Round to 2 decimal places for USD
+        }
+
+        product.discount_percentage = discountPercentage;
+        await product.save();
+        updatedCount++;
+      }
+
+      if (!isProd) {
+        console.log(
+          `Batch update completed: ${updatedCount} products updated with ${discountPercentage}% discount`
+        );
+      }
+
+      res.json({
+        success: true,
+        message: `Successfully updated ${updatedCount} products with ${discountPercentage}% discount`,
+        updatedCount,
+        discountPercentage,
+      });
+    } catch (error) {
+      console.error('Error in batch update discount:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to batch update discount',
+        error: isProd ? undefined : error.message,
+      });
+    }
+  }
+);
+
+app.post(
+  '/remove-discount',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      // Update settings
+      const settings = await Settings.getSettings();
+      settings.global_discount_percentage = 0;
+      settings.discount_active = false;
+      settings.updatedAt = new Date();
+      await settings.save();
+
+      // Fetch all products
+      const products = await Product.find({});
+      let updatedCount = 0;
+
+      // Revert prices to original
+      for (const product of products) {
+        if (product.original_ils_price) {
+          product.ils_price = product.original_ils_price;
+        }
+        if (product.original_usd_price) {
+          product.usd_price = product.original_usd_price;
+        }
+        product.discount_percentage = 0;
+        await product.save();
+        updatedCount++;
+      }
+
+      if (!isProd) {
+        console.log(
+          `Discount removal completed: ${updatedCount} products reverted to original prices`
+        );
+      }
+
+      res.json({
+        success: true,
+        message: `Successfully removed discount from ${updatedCount} products`,
+        updatedCount,
+      });
+    } catch (error) {
+      console.error('Error removing discount:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to remove discount',
+        error: isProd ? undefined : error.message,
+      });
+    }
+  }
+);
 
 app.get('/allproducts', async (req, res) => {
   let products = await Product.find({}).lean();
@@ -2148,8 +2350,7 @@ app.post('/getAllProductsByCategory', async (req, res) => {
       total,
     });
   } catch (err) {
-    if (!isProd)
-      console.error('Error fetching all products by category:', err);
+    if (!isProd) console.error('Error fetching all products by category:', err);
     res.status(500).json({ error: 'Failed to fetch products' });
   }
 });
@@ -2271,7 +2472,8 @@ app.post(
         mainImage.filename,
         true
       );
-      if (!isProd) console.log('Main image processing results:', mainImageResults);
+      if (!isProd)
+        console.log('Main image processing results:', mainImageResults);
 
       // Process small images
       const smallImagesResults = await Promise.all(
@@ -2594,7 +2796,9 @@ app.post('/orders', paymentRateLimiter, async (req, res) => {
       code: error?.code || 'ORDER_CREATE_FAILED',
       // Include PayPal debug_id in all environments so production issues can be diagnosed.
       ...(error?.paypalDebugId ? { paypalDebugId: error.paypalDebugId } : {}),
-      ...(isProd ? {} : { message: error?.message, paypalDetails: error?.paypalDetails }),
+      ...(isProd
+        ? {}
+        : { message: error?.message, paypalDetails: error?.paypalDetails }),
     });
   }
 });
@@ -2632,153 +2836,155 @@ app.post(
   fetchUser,
   requireAdmin,
   async (req, res) => {
-  try {
-    const { productId, imageType, imageUrl } = req.body || {};
-    const id = Number(productId);
+    try {
+      const { productId, imageType, imageUrl } = req.body || {};
+      const id = Number(productId);
 
-    if (!Number.isFinite(id)) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid productId' });
-    }
-    if (imageType !== 'main' && imageType !== 'small') {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid imageType' });
-    }
-
-    const product = await Product.findOne({ id });
-    if (!product) {
-      return res
-        .status(404)
-        .json({ success: false, message: 'Product not found' });
-    }
-
-    const extractFilename = url => {
-      if (!url || typeof url !== 'string') return '';
-      const rel = toRelativeApiPath(url);
-      return rel ? path.basename(rel) : '';
-    };
-
-    const unlinkIfExists = async filePath => {
-      try {
-        await fs.promises.unlink(filePath);
-      } catch {
-        // ignore
+      if (!Number.isFinite(id)) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Invalid productId' });
       }
-    };
+      if (imageType !== 'main' && imageType !== 'small') {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Invalid imageType' });
+      }
 
-    if (imageType === 'main') {
-      const candidates = [
-        product.image,
-        product.publicImage,
-        product.directImageUrl,
-        product.mainImage?.desktop,
-        product.mainImage?.mobile,
-        product.mainImage?.publicDesktop,
-        product.mainImage?.publicMobile,
-      ]
-        .map(extractFilename)
-        .filter(Boolean);
+      const product = await Product.findOne({ id });
+      if (!product) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Product not found' });
+      }
 
-      await Promise.all(
-        candidates.flatMap(fn => [
-          unlinkIfExists(path.join(uploadsDir, fn)),
-          unlinkIfExists(path.join(publicUploadsDir, fn)),
-        ])
-      );
+      const extractFilename = url => {
+        if (!url || typeof url !== 'string') return '';
+        const rel = toRelativeApiPath(url);
+        return rel ? path.basename(rel) : '';
+      };
 
-      product.image = null;
-      product.publicImage = null;
-      product.directImageUrl = null;
-      product.imageLocal = null;
+      const unlinkIfExists = async filePath => {
+        try {
+          await fs.promises.unlink(filePath);
+        } catch {
+          // ignore
+        }
+      };
 
-      if (product.mainImage) {
-        product.mainImage.desktop = null;
-        product.mainImage.mobile = null;
-        product.mainImage.publicDesktop = null;
-        product.mainImage.publicMobile = null;
-        product.mainImage.desktopLocal = null;
-        product.mainImage.mobileLocal = null;
+      if (imageType === 'main') {
+        const candidates = [
+          product.image,
+          product.publicImage,
+          product.directImageUrl,
+          product.mainImage?.desktop,
+          product.mainImage?.mobile,
+          product.mainImage?.publicDesktop,
+          product.mainImage?.publicMobile,
+        ]
+          .map(extractFilename)
+          .filter(Boolean);
+
+        await Promise.all(
+          candidates.flatMap(fn => [
+            unlinkIfExists(path.join(uploadsDir, fn)),
+            unlinkIfExists(path.join(publicUploadsDir, fn)),
+          ])
+        );
+
+        product.image = null;
+        product.publicImage = null;
+        product.directImageUrl = null;
+        product.imageLocal = null;
+
+        if (product.mainImage) {
+          product.mainImage.desktop = null;
+          product.mainImage.mobile = null;
+          product.mainImage.publicDesktop = null;
+          product.mainImage.publicMobile = null;
+          product.mainImage.desktopLocal = null;
+          product.mainImage.mobileLocal = null;
+        }
+
+        await product.save();
+        return res.json({
+          success: true,
+          message: 'Main image deleted successfully',
+        });
+      }
+
+      // small image deletion
+      const target = extractFilename(imageUrl);
+      if (!target) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Missing imageUrl' });
+      }
+      const validation = validateImageFilename(target);
+      if (!validation.ok) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Invalid imageUrl' });
+      }
+
+      const base = target.replace(/-(desktop|mobile)\.webp$/i, '');
+      const variantDesktop = `${base}-desktop.webp`;
+      const variantMobile = `${base}-mobile.webp`;
+
+      if (Array.isArray(product.smallImages)) {
+        product.smallImages = product.smallImages.filter(si => {
+          if (typeof si === 'string') {
+            const fn = extractFilename(si);
+            return (
+              fn !== target && fn !== variantDesktop && fn !== variantMobile
+            );
+          }
+          if (si && typeof si === 'object') {
+            const fnD = extractFilename(si.desktop);
+            const fnM = extractFilename(si.mobile);
+            return (
+              fnD !== target &&
+              fnM !== target &&
+              fnD !== variantDesktop &&
+              fnM !== variantDesktop &&
+              fnD !== variantMobile &&
+              fnM !== variantMobile
+            );
+          }
+          return true;
+        });
+      }
+
+      if (Array.isArray(product.smallImagesLocal)) {
+        product.smallImagesLocal = product.smallImagesLocal.filter(u => {
+          const fn = extractFilename(u);
+          return fn !== target && fn !== variantDesktop && fn !== variantMobile;
+        });
       }
 
       await product.save();
+
+      await Promise.all([
+        unlinkIfExists(path.join(smallImagesDir, variantDesktop)),
+        unlinkIfExists(path.join(smallImagesDir, variantMobile)),
+        unlinkIfExists(path.join(publicSmallImagesDir, variantDesktop)),
+        unlinkIfExists(path.join(publicSmallImagesDir, variantMobile)),
+        unlinkIfExists(path.join(smallImagesDir, target)),
+        unlinkIfExists(path.join(publicSmallImagesDir, target)),
+      ]);
+
       return res.json({
         success: true,
-        message: 'Main image deleted successfully',
+        message: 'Small image deleted successfully',
+      });
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to delete image',
+        ...(isProd ? {} : { details: error?.message }),
       });
     }
-
-    // small image deletion
-    const target = extractFilename(imageUrl);
-    if (!target) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Missing imageUrl' });
-    }
-    const validation = validateImageFilename(target);
-    if (!validation.ok) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Invalid imageUrl' });
-    }
-
-    const base = target.replace(/-(desktop|mobile)\.webp$/i, '');
-    const variantDesktop = `${base}-desktop.webp`;
-    const variantMobile = `${base}-mobile.webp`;
-
-    if (Array.isArray(product.smallImages)) {
-      product.smallImages = product.smallImages.filter(si => {
-        if (typeof si === 'string') {
-          const fn = extractFilename(si);
-          return fn !== target && fn !== variantDesktop && fn !== variantMobile;
-        }
-        if (si && typeof si === 'object') {
-          const fnD = extractFilename(si.desktop);
-          const fnM = extractFilename(si.mobile);
-          return (
-            fnD !== target &&
-            fnM !== target &&
-            fnD !== variantDesktop &&
-            fnM !== variantDesktop &&
-            fnD !== variantMobile &&
-            fnM !== variantMobile
-          );
-        }
-        return true;
-      });
-    }
-
-    if (Array.isArray(product.smallImagesLocal)) {
-      product.smallImagesLocal = product.smallImagesLocal.filter(u => {
-        const fn = extractFilename(u);
-        return fn !== target && fn !== variantDesktop && fn !== variantMobile;
-      });
-    }
-
-    await product.save();
-
-    await Promise.all([
-      unlinkIfExists(path.join(smallImagesDir, variantDesktop)),
-      unlinkIfExists(path.join(smallImagesDir, variantMobile)),
-      unlinkIfExists(path.join(publicSmallImagesDir, variantDesktop)),
-      unlinkIfExists(path.join(publicSmallImagesDir, variantMobile)),
-      unlinkIfExists(path.join(smallImagesDir, target)),
-      unlinkIfExists(path.join(publicSmallImagesDir, target)),
-    ]);
-
-    return res.json({
-      success: true,
-      message: 'Small image deleted successfully',
-    });
-  } catch (error) {
-    console.error('Error deleting image:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'Failed to delete image',
-      ...(isProd ? {} : { details: error?.message }),
-    });
-  }
   }
 );
 

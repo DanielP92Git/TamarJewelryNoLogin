@@ -1,0 +1,26 @@
+# DigitalOcean App Platform Configuration
+# This file configures your static site deployment on DigitalOcean
+
+name: tamar-kfir-jewelry-frontend
+region: nyc  # Change to your preferred region
+
+# Static site configuration
+static_sites:
+  - name: frontend
+    source_dir: /
+    build_command: npm run build  # If you have a build step
+    output_dir: dist  # Or the directory where built files are
+    github:
+      repo: your-username/your-repo  # Update with your repo
+      branch: main
+      deploy_on_push: true
+
+# Environment variables (if needed)
+envs:
+  - key: NODE_ENV
+    value: production
+
+# Routes configuration for clean URLs
+# DigitalOcean App Platform will handle this automatically if you configure it
+# in the dashboard under "Settings" > "Routes"
+

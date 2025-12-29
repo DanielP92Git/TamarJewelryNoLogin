@@ -137,6 +137,23 @@ class HomePageView extends View {
     // Page-specific language setup
     this.setCategoriesLng(lng);
     this.handleFooterMarkup(lng);
+    this.setPromoBannerLng(lng);
+  }
+
+  setPromoBannerLng(lng) {
+    const promoTopText = document.querySelector('.hero-promo-banner .promo-top-text');
+    const promoDiscountText = document.querySelector('.hero-promo-banner .promo-discount-text');
+    const promoBottomText = document.querySelector('.hero-promo-banner .promo-bottom-text');
+    
+    if (lng === 'heb') {
+      if (promoTopText) promoTopText.textContent = 'מבצע סוף שנה!';
+      if (promoDiscountText) promoDiscountText.textContent = 'הנחה';
+      if (promoBottomText) promoBottomText.textContent = 'על כל האתר עד סוף 2025!';
+    } else {
+      if (promoTopText) promoTopText.textContent = 'End of Year Sale!';
+      if (promoDiscountText) promoDiscountText.textContent = 'OFF';
+      if (promoBottomText) promoBottomText.textContent = 'on whole website for the end of 2025!';
+    }
   }
 
   setCategoriesLng(lng) {

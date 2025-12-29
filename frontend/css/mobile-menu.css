@@ -160,6 +160,8 @@ html[dir='rtl'] .main-nav-tab > .attrib,
 html[dir='rtl'] .attrib,
 .ul-heb .attrib {
   font-size: 0.8rem !important;
+  font-family: 'Amatic SC', sans-serif !important;
+  font-weight: 700 !important;
 }
 
 /* Categories list - basic styles for mobile */
@@ -211,6 +213,8 @@ html[dir='rtl'] .category-item .attrib,
   text-align: center; /* Center category items too */
   direction: rtl; /* Allow RTL text flow */
   justify-content: center; /* Center horizontally */
+  font-family: 'Amatic SC', sans-serif !important;
+  font-weight: 700 !important;
 }
 
 .category-item .attrib:hover {
