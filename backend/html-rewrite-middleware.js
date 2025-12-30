@@ -60,3 +60,4 @@ function htmlRewriteMiddleware(frontendPath) {
 
 module.exports = htmlRewriteMiddleware;
 
+
