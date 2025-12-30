@@ -42,7 +42,6 @@ body.menu-active {
   width: 100%; /* Full width of menu */
   position: relative;
   direction: ltr; /* Maintain LTR for layout structure */
-  flex: 1; /* Allow menu list to grow and fill available space */
   overflow-y: auto; /* Make menu list scrollable */
   overflow-x: hidden;
   min-height: 0; /* Important for flex scrolling */
@@ -193,11 +192,12 @@ html[dir='rtl'] .attrib,
   width: 100%;
   background-color: #f8f9fa;
   border: none;
+  margin: 0;
 }
 
 /* Category links */
 .category-item .attrib {
-  padding: 0.8rem 1.5rem 0.8rem 2.5rem; /* Increased indentation */
+  padding: 0.8rem 1rem 0.8rem 1rem; /* Increased indentation */
   font-size: 0.85rem;
   display: block;
   width: 100%;
