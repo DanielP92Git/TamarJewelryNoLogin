@@ -619,7 +619,10 @@ class CategoriesView extends View {
       .replace(/\r\n/g, '\n') // Normalize line endings
       .replace(/\n{3,}/g, '\n\n') // Replace multiple line breaks with double line breaks
       .trim(); // Remove extra whitespace
-    const price = data.querySelector('.item-price').textContent;
+    // Handle both discount and non-discount price markup
+    const priceElement = data.querySelector('.item-price') || 
+                         data.querySelector('.item-price-discounted');
+    const price = priceElement ? priceElement.textContent : '';
     const currency = data.dataset.currency;
 
     // Get the image URL directly from the clicked item and ensure HTTPS
