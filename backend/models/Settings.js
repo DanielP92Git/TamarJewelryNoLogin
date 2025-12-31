@@ -5,6 +5,10 @@ const SettingsSchema = new mongoose.Schema({
   discount_active: { type: Boolean, default: false },
   discount_label: { type: String, default: 'End of Year Discount' },
   updatedAt: { type: Date, default: Date.now },
+  // Exchange rate fields
+  usd_ils_rate: { type: Number, default: null },
+  exchange_rate_last_updated: { type: Date, default: null },
+  exchange_rate_source: { type: String, default: null },
 });
 
 // Ensure only one settings document exists

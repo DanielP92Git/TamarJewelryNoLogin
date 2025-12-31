@@ -134,10 +134,15 @@ body {
   /* border: 1px solid; */
   margin-left: 0;
   width: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .whatsapp-svg {
   width: 40px;
+  height: 40px;
+  display: block;
 }
 
 .attrib,
@@ -296,9 +301,19 @@ header {
 
 .slide-image {
   object-fit: contain;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   bottom: 18rem;
   width: 100vw;
+  flex-shrink: 0;
+  transition: transform 3s ease-in-out;
+  /* Hide all images except first one initially */
+  transform: translateX(100%);
+}
+
+.slide-image:first-child {
+  transform: translateX(0%);
 }
 
 .slide-image-img {
@@ -628,6 +643,8 @@ h1 {
   padding: 0;
   margin: 0;
   vertical-align: middle;
+  direction: ltr; /* Force LTR direction for buttons */
+  unicode-bidi: bidi-override; /* Prevent RTL from affecting content */
 }
 
 .slider-btn:hover {
@@ -635,12 +652,14 @@ h1 {
 }
 
 .slider-btn--left {
-  left: 25px; /* Further from the left edge */
+  left: 25px !important; /* Further from the left edge - force left position */
+  right: auto !important; /* Prevent RTL from flipping to right */
   padding-bottom: 5px; /* Slightly more adjustment for larger desktop button */
 }
 
 .slider-btn--right {
-  right: 25px; /* Further from the right edge */
+  right: 25px !important; /* Further from the right edge - force right position */
+  left: auto !important; /* Prevent RTL from flipping to left */
   padding-bottom: 5px; /* Slightly more adjustment for larger desktop button */
 }
 

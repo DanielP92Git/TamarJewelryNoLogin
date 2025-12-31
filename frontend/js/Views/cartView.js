@@ -17,6 +17,43 @@ class CartView extends View {
   _host = process.env.API_URL;
   _rate = process.env.USD_ILS_RATE || 3.7;
 
+  // Get current selected currency
+  _getCurrentCurrency() {
+    const saved = localStorage.getItem('currency') || 'usd';
+    return saved === 'ils' ? 'ils' : 'usd';
+  }
+
+  // Get price for cart item based on current currency (uses stored prices)
+  _getItemPrice(item, useOriginal = false) {
+    const currency = this._getCurrentCurrency();
+    if (currency === 'usd') {
+      return useOriginal
+        ? Math.round(
+            item.originalUsdPrice ||
+              item.originalPrice ||
+              item.usdPrice ||
+              item.price ||
+              0
+          )
+        : Math.round(item.usdPrice || item.price || 0);
+    } else {
+      return useOriginal
+        ? Math.round(
+            item.originalIlsPrice ||
+              item.originalPrice ||
+              item.ilsPrice ||
+              item.price ||
+              0
+          )
+        : Math.round(item.ilsPrice || item.price || 0);
+    }
+  }
+
+  // Get currency symbol based on current selection
+  _getCurrencySymbol() {
+    return this._getCurrentCurrency() === 'usd' ? '$' : '₪';
+  }
+
   addCartViewHandler(handler) {
     window.addEventListener('load', () => {
       let lng = localStorage.getItem('language');
@@ -27,6 +64,25 @@ class CartView extends View {
 
       handler(lng);
     });
+
+    // Listen for currency changes and re-render cart
+    if (!this._currencyListenerAdded) {
+      this._currencyListenerAdded = true;
+      window.addEventListener('currency-changed', async e => {
+        const next = e?.detail?.currency;
+        if (next !== 'usd' && next !== 'ils') return;
+
+        try {
+          // Re-render cart with new currency
+          const cartNum = await model.checkCartNumber();
+          const lng = localStorage.getItem('language') || 'eng';
+          await this._render(cartNum, lng);
+          await this._renderSummary(cartNum, lng);
+        } catch (err) {
+          console.error('[CartView] Error handling currency change:', err);
+        }
+      });
+    }
   }
 
   handleCartLanguage() {
@@ -80,15 +136,40 @@ class CartView extends View {
   _addHandlerCheckout(data) {
     this._checkoutBtn.addEventListener('click', async e => {
       e.preventDefault();
-      let currency = data[0].currency; // data is model.cart
+
+      // Prepare items for checkout - always use USD prices for Stripe
+      // Map cart items to include USD prices (from stored usdPrice or calculated)
+      const checkoutItems = data.map(item => {
+        // Use stored USD price if available, otherwise use current price if already USD
+        const usdPrice =
+          item.usdPrice || (item.currency === '$' ? item.price : null);
+        const usdOriginalPrice =
+          item.originalUsdPrice ||
+          (item.currency === '$' ? item.originalPrice : null);
+        const usdDiscountedPrice =
+          item.discountedPrice && item.currency === '$'
+            ? item.discountedPrice
+            : item.discountedPrice
+            ? null
+            : null; // If discounted but not USD, we'll use usdPrice
+
+        return {
+          ...item,
+          price: usdPrice || item.price, // Fallback to current price if no USD price stored
+          originalPrice: usdOriginalPrice || item.originalPrice,
+          discountedPrice: usdDiscountedPrice,
+          currency: '$', // Always send as USD for Stripe
+        };
+      });
+
       await fetch(`${this._host}/create-checkout-session`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          items: [...data],
-          currency: currency,
+          items: checkoutItems,
+          currency: '$', // Stripe always uses USD
         }),
       })
         .then(async res => {
@@ -122,41 +203,36 @@ class CartView extends View {
         return ''; // Return empty string if no items in cart
       }
 
-      let checkCurrency = model.cart[0].currency;
-      if (checkCurrency == '$') {
-        return model.cart
-          .map(
-            item =>
-              `     
+      // Use current selected currency, not the stored currency in cart items
+      const currencySymbol = this._getCurrencySymbol();
+      const currentCurrency = this._getCurrentCurrency();
+
+      return model.cart
+        .map(item => {
+          // Get prices based on current currency selection (use stored USD/ILS prices)
+          const itemPrice = this._getItemPrice(item, false);
+          const itemOriginalPrice = this._getItemPrice(item, true);
+          const hasDiscount = itemOriginalPrice > itemPrice;
+
+          return `     
           <div class="cart-item" id="${item.id}">
             <div class="cart-item__media">
               <img src='${item.image}' class="item-img" alt="${
-                item.title || ''
-              }" />
+            item.title || ''
+          }" />
             </div>
             <div class="cart-item__content">
               <div class="cart-item__title">
                 <h2 class="item-title">${item.title}</h2>
               </div>
               <div class="cart-item__right">
-                ${item.originalPrice && parseFloat(item.originalPrice) > parseFloat(item.price)
-                  ? `<div class="cart-item-price-container">
-                      <span class="item-price-original">${
-                        item.currency == '$'
-                          ? `$${item.originalPrice}`
-                          : `$${Math.trunc(item.originalPrice / this._rate)}`
-                      }</span>
-                      <span class="item-price-discounted">${
-                        item.currency == '$'
-                          ? `$${item.price}`
-                          : `$${Math.trunc(item.price / this._rate)}`
-                      }</span>
+                ${
+                  hasDiscount
+                    ? `<div class="cart-item-price-container">
+                      <span class="item-price-original">${currencySymbol}${itemOriginalPrice}</span>
+                      <span class="item-price-discounted">${currencySymbol}${itemPrice}</span>
                     </div>`
-                  : `<span class="item-price">${
-                      item.currency == '$'
-                        ? `$${item.price}`
-                        : `$${Math.trunc(item.price / this._rate)}`
-                    }</span>`
+                    : `<span class="item-price">${currencySymbol}${itemPrice}</span>`
                 }
                 ${
                   Number(item.quantity) > 1
@@ -176,66 +252,9 @@ class CartView extends View {
                 <button class="delete-item cart-remove" type="button" aria-label="Remove item">Remove</button>
               </div>
             </div>
-          </div>`
-          )
-          .join('');
-      } else {
-        return model.cart
-          .map(
-            item =>
-              `     
-        <div class="cart-item" id="${item.id}">
-          <div class="cart-item__media">
-            <img src='${item.image}' class="item-img" alt="${
-                item.title || ''
-              }" />
-          </div>
-          <div class="cart-item__content">
-            <div class="cart-item__title">
-              <h2 class="item-title">${item.title}</h2>
-            </div>
-            <div class="cart-item__right">
-              ${item.originalPrice && parseFloat(item.originalPrice) > parseFloat(item.price)
-                ? `<div class="cart-item-price-container">
-                    <span class="item-price-original">${
-                      item.currency == '$'
-                        ? `₪${Math.trunc(item.originalPrice * this._rate)}`
-                        : `₪${item.originalPrice}`
-                    }</span>
-                    <span class="item-price-discounted">${
-                      item.currency == '$'
-                        ? `₪${Math.trunc(item.price * this._rate)}`
-                        : `₪${item.price}`
-                    }</span>
-                  </div>`
-                : `<span class="item-price">${
-                    item.currency == '$'
-                      ? `₪${Math.trunc(item.price * this._rate)}`
-                      : `₪${item.price}`
-                  }</span>`
-              }
-              ${
-                Number(item.quantity) > 1
-                  ? `<div class="cart-qty" aria-label="Quantity">
-                      <button class="cart-qty__btn cart-qty__btn--minus" type="button" disabled>-</button>
-                      <input class="cart-qty__input" type="number" readonly value="${
-                        Number(item.amount) || 1
-                      }" />
-                      <button class="cart-qty__btn cart-qty__btn--plus" type="button" disabled>+</button>
-                    </div>`
-                  : `<div class="cart-qty cart-qty--static" aria-label="Quantity">
-                      <input class="cart-qty__input" type="number" readonly value="${
-                        Number(item.amount) || 1
-                      }" />
-                    </div>`
-              }
-              <button class="delete-item cart-remove" type="button" aria-label="Remove item">Remove</button>
-            </div>
-          </div>
-        </div>`
-          )
-          .join('');
-      }
+          </div>`;
+        })
+        .join('');
     }
   }
 
@@ -247,15 +266,15 @@ class CartView extends View {
       return '';
     }
 
-    let checkCurrency = model.cart[0].currency;
-    let isInUsd = checkCurrency == '$';
-    let currency = isInUsd ? '$' : '₪';
+    // Use current selected currency, not the stored currency in cart items
+    const currentCurrency = this._getCurrentCurrency();
+    const currency = this._getCurrencySymbol();
 
     // Calculate totals
     const originalTotal = this._calculateOriginalTotal();
     const discountedTotal = this._calculateTotal();
     const discountAmount = originalTotal - discountedTotal;
-    
+
     // Get global discount settings
     const discountSettings = await model.getGlobalDiscount();
     const hasDiscount = discountSettings.active && discountAmount > 0;
@@ -286,7 +305,9 @@ class CartView extends View {
 
     return `
     <div class="price-summary-container">
-          ${hasDiscount ? `
+          ${
+            hasDiscount
+              ? `
           <div class="total-container subtotal" ${rtlWrap}>
             <span class="total-text">${labels.subtotal}</span>
             <span class="total-price">${currency}${originalTotal}</span>
@@ -299,12 +320,14 @@ class CartView extends View {
             <span class="total-text">${labels.total}</span>
             <span class="total-price discounted-price">${currency}${discountedTotal}</span>
           </div>
-          ` : `
+          `
+              : `
           <div class="total-container subtotal" ${rtlWrap}>
             <span class="total-text">${labels.subtotal}</span>
             <span class="total-price">${currency}${discountedTotal}</span>
           </div>
-          `}
+          `
+          }
           <div class="total-container shipping" ${rtlWrap}>
             <span class="total-text">${labels.shipping}</span>
             <span class="total-price">${labels.shippingValue}</span>
@@ -335,7 +358,12 @@ class CartView extends View {
     if (cartNum !== 0) {
       this._summaryDetails.innerHTML = '';
       const num = this._calculateTotal();
-      const markup = await this._generateSummaryMarkup(cartNum, num, undefined, lng);
+      const markup = await this._generateSummaryMarkup(
+        cartNum,
+        num,
+        undefined,
+        lng
+      );
       this._summaryDetails.insertAdjacentHTML('afterbegin', markup);
       if (this._orderSummaryContainer)
         this._orderSummaryContainer.classList.remove('remove');
@@ -386,34 +414,17 @@ class CartView extends View {
 
     let checkCurrency = model.cart[0].currency;
 
-    if (checkCurrency == '₪') {
-      const convertPrice = model.cart
-        .map(itm => {
-          // Use discounted price if available, otherwise use regular price
-          const price = itm.discountedPrice || itm.price;
-          if (itm.currency == '$') {
-            return price * this._rate;
-          }
-          return +price;
-        })
-        .reduce((x, y) => x + y, 0);
+    // Calculate total using stored prices (already in correct currency)
+    // Prices are stored as whole numbers from the database
+    const total = model.cart
+      .map(itm => {
+        // Use discounted price if available, otherwise use regular price
+        const price = itm.discountedPrice || itm.price;
+        return Math.round(Number(price) || 0);
+      })
+      .reduce((x, y) => x + y, 0);
 
-      return Math.trunc(convertPrice);
-    }
-    if (checkCurrency == '$') {
-      const convertPrice = model.cart
-        .map(itm => {
-          // Use discounted price if available, otherwise use regular price
-          const price = itm.discountedPrice || itm.price;
-          if (itm.currency == '₪') {
-            return price / this._rate;
-          }
-          return +price;
-        })
-        .reduce((x, y) => x + y, 0);
-
-      return Math.trunc(convertPrice);
-    }
+    return Math.round(total);
   }
 
   _calculateOriginalTotal() {
@@ -424,36 +435,15 @@ class CartView extends View {
       return 0;
     }
 
-    let checkCurrency = model.cart[0].currency;
+    // Calculate original total using stored prices based on current currency
+    const total = model.cart
+      .map(itm => {
+        // Use stored original price for current currency
+        return this._getItemPrice(itm, true);
+      })
+      .reduce((x, y) => x + y, 0);
 
-    if (checkCurrency == '₪') {
-      const convertPrice = model.cart
-        .map(itm => {
-          // Use original price if available, otherwise use regular price
-          const price = itm.originalPrice || itm.price;
-          if (itm.currency == '$') {
-            return price * this._rate;
-          }
-          return +price;
-        })
-        .reduce((x, y) => x + y, 0);
-
-      return Math.trunc(convertPrice);
-    }
-    if (checkCurrency == '$') {
-      const convertPrice = model.cart
-        .map(itm => {
-          // Use original price if available, otherwise use regular price
-          const price = itm.originalPrice || itm.price;
-          if (itm.currency == '₪') {
-            return price / this._rate;
-          }
-          return +price;
-        })
-        .reduce((x, y) => x + y, 0);
-
-      return Math.trunc(convertPrice);
-    }
+    return Math.round(total);
   }
 
   paypalCheckout(cartData) {
