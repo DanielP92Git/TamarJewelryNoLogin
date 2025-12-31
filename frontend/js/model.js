@@ -207,35 +207,31 @@ export const addToLocalStorage = async function (data) {
   // Get currency from dataset
   const currencyCheck = data.dataset.currency || 'ils';
 
-  // Safely get the price element - check for discounted price first
+  // Get both USD and ILS prices from data attributes (stored from product data)
+  const usdPrice = Math.round(Number(data.dataset.usdPrice) || 0);
+  const ilsPrice = Math.round(Number(data.dataset.ilsPrice) || 0);
+  const originalUsdPrice = Math.round(Number(data.dataset.originalUsdPrice) || usdPrice);
+  const originalIlsPrice = Math.round(Number(data.dataset.originalIlsPrice) || ilsPrice);
+
+  // Safely get the price element to check if there's a discount
   const discountedPriceEl = data.querySelector('.item-price-discounted');
-  const originalPriceEl = data.querySelector('.item-price-original');
-  const priceEl = data.querySelector('.item-price');
+  const hasDiscount = !!discountedPriceEl;
+
+  // Determine current price and original price based on selected currency
+  const currentPrice = currencyCheck === '$' ? usdPrice : ilsPrice;
+  const currentOriginalPrice = currencyCheck === '$' ? originalUsdPrice : originalIlsPrice;
   
-  let itemPrice = '';
-  let originalPrice = null;
-
-  if (discountedPriceEl && discountedPriceEl.textContent) {
-    // Has discount - get discounted price
-    itemPrice = discountedPriceEl.textContent.replace(/[$₪]/g, '');
-    if (originalPriceEl && originalPriceEl.textContent) {
-      originalPrice = originalPriceEl.textContent.replace(/[$₪]/g, '');
-    }
-  } else if (priceEl && priceEl.textContent) {
-    // No discount - use regular price
-    itemPrice = priceEl.textContent.replace(/[$₪]/g, '');
-  } else {
-    console.error('Price element not found or has no text content');
-    itemPrice = '0'; // Default to zero
-  }
-
-  // 1) Generate data:
   const itemData = {
     title: itemTitle,
     image: itemImage,
-    price: itemPrice,
-    originalPrice: originalPrice,
-    discountedPrice: discountedPriceEl ? itemPrice : null,
+    price: currentPrice,
+    originalPrice: currentOriginalPrice,
+    discountedPrice: hasDiscount ? currentPrice : null,
+    // Store both currencies for currency switching
+    usdPrice: usdPrice,
+    ilsPrice: ilsPrice,
+    originalUsdPrice: originalUsdPrice,
+    originalIlsPrice: originalIlsPrice,
     currency: currencyCheck,
     quantity: prodQuantity,
     id: +itemId,
@@ -251,6 +247,11 @@ const addToLocalCart = function (data) {
     price: data.price,
     originalPrice: data.originalPrice || null,
     discountedPrice: data.discountedPrice || null,
+    // Store both currencies for currency switching
+    usdPrice: data.usdPrice || null,
+    ilsPrice: data.ilsPrice || null,
+    originalUsdPrice: data.originalUsdPrice || null,
+    originalIlsPrice: data.originalIlsPrice || null,
     currency: data.currency,
     id: +data.id,
     quantity: data.quantity,

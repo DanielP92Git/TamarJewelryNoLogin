@@ -232,29 +232,7 @@ function setupDragAndDrop(dropzone, fileInput, isMultiple = false) {
   });
 }
 
-// Function to calculate ILS price based on USD price and security margin
-function calculateILSPrice() {
-  const usdPriceInput = document.getElementById("old-price");
-  const securityMarginInput = document.getElementById("security-margin");
-  const ilsPriceInput = document.getElementById("new-price");
-
-  if (usdPriceInput && ilsPriceInput) {
-    const usdPrice = parseFloat(usdPriceInput.value) || 0;
-    // Default to 5% if no security margin is provided
-    const securityMargin = securityMarginInput
-      ? parseFloat(securityMarginInput.value) || 5
-      : 5;
-
-    // Current conversion rate (update as needed)
-    const usdToIlsRate = 3.75;
-
-    // Calculate ILS price with security margin
-    const ilsPrice = usdPrice * usdToIlsRate * (1 + securityMargin / 100);
-
-    // Round to 2 decimal places
-    ilsPriceInput.value = ilsPrice.toFixed(2);
-  }
-}
+// Function removed - ILS price is now entered directly, USD is calculated on backend
 
 function getImageUrl(image, imageLocal, publicImage, mainImage) {
   // Extract the filename from the image URL
@@ -976,7 +954,6 @@ async function loadProductsPage(data) {
             <p>Product</p>
             <p class="hide-sm">Category</p>
             <p>Stock Qty</p>
-            <p class="hide-sm">USD</p>
             <p class="hide-sm">ILS</p>
             <p>Status</p>
             <p style="text-align:right;">Actions</p>
@@ -1076,7 +1053,7 @@ async function loadProductsPage(data) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "auth-token": localStorage.getItem("auth-token") || "",
+            Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
           },
           body: JSON.stringify({ discountPercentage }),
         });
@@ -1127,7 +1104,7 @@ async function loadProductsPage(data) {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "auth-token": localStorage.getItem("auth-token") || "",
+            Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
           },
         });
 
@@ -1302,7 +1279,6 @@ function loadProducts(data) {
       </div>
       <div class="mono hide-sm">${item.category ?? ""}</div>
       <div class="mono">${qty}</div>
-      <div class="mono hide-sm">$${item.usd_price ?? ""}</div>
       <div class="mono hide-sm">₪${item.ils_price ?? ""}</div>
       <div>
         <span class="badge ${statusClass}">${statusText}</span>
@@ -1485,15 +1461,12 @@ function exportProductsCSV(data) {
   try {
     if (!Array.isArray(data)) return;
     const rows = [
-      ["id", "name", "category", "usd_price", "ils_price", "quantity"].join(
-        ","
-      ),
+      ["id", "name", "category", "ils_price", "quantity"].join(","),
       ...data.map((p) =>
         [
           JSON.stringify(p.id ?? ""),
           JSON.stringify(p.name ?? ""),
           JSON.stringify(p.category ?? ""),
-          JSON.stringify(p.usd_price ?? ""),
           JSON.stringify(p.ils_price ?? ""),
           JSON.stringify(p.quantity ?? 0),
         ].join(",")
@@ -1805,25 +1778,18 @@ function editProduct(product) {
               <h3 class="card__title">Pricing</h3>
             </div>
             <div class="card__body">
-              <div class="grid-2">
-                <div class="field">
-                  <div class="label">Price in $</div>
-                  <input class="input" type="text" name="usd_price" id="old-price" value="${
-                    product.usd_price
-                  }" />
-                </div>
-                <div class="field">
-                  <div class="label">Security Margin (%)</div>
-                  <input class="input" type="number" name="security_margin" id="security-margin" value="${
-                    product.security_margin || 5
-                  }" min="0" max="100" />
-                </div>
+              <div class="field">
+                <div class="label">Price in ₪</div>
+                <input class="input" type="number" name="ils_price" id="new-price" value="${
+                  product.ils_price
+                }" min="0" step="1" required />
+                <div class="help">USD price will be calculated automatically based on current exchange rate.</div>
               </div>
               <div class="field" style="margin-top:12px;">
-                <div class="label">Price in ₪ (Auto-calculated)</div>
-                <input class="input" type="text" name="ils_price" id="new-price" value="${
-                  product.ils_price
-                }" readonly />
+                <div class="label">Security Margin (%)</div>
+                <input class="input" type="number" name="security_margin" id="security-margin" value="${
+                  product.security_margin || 5
+                }" min="0" max="100" />
               </div>
             </div>
           </div>
@@ -1975,16 +1941,6 @@ function editProduct(product) {
 
   // Add event listeners
   const form = document.getElementById("editForm");
-  const usdPriceInput = document.getElementById("old-price");
-  const securityMarginInput = document.getElementById("security-margin");
-
-  if (usdPriceInput) {
-    usdPriceInput.addEventListener("input", calculateILSPrice);
-  }
-
-  if (securityMarginInput) {
-    securityMarginInput.addEventListener("input", calculateILSPrice);
-  }
 
   // Add event listeners for delete image buttons
   document.querySelectorAll(".delete-image-btn").forEach((btn) => {
@@ -2159,7 +2115,6 @@ function prefillAddProductFormFromDraft(draft) {
   const descEl = document.getElementById("description");
   const categoryEl = document.getElementById("category");
   const qtyEl = document.getElementById("quantity");
-  const usdEl = document.getElementById("old-price");
   const ilsEl = document.getElementById("new-price");
   const marginEl = document.getElementById("security-margin");
 
@@ -2167,7 +2122,6 @@ function prefillAddProductFormFromDraft(draft) {
   if (descEl) descEl.value = String(draft?.description ?? "");
   if (categoryEl && draft?.category) categoryEl.value = String(draft.category);
   if (qtyEl) qtyEl.value = String(Number(draft?.quantity ?? 0));
-  if (usdEl) usdEl.value = String(draft?.usd_price ?? "");
   if (marginEl) marginEl.value = String(draft?.security_margin ?? 5);
   if (ilsEl) ilsEl.value = String(draft?.ils_price ?? "");
 
@@ -2186,7 +2140,6 @@ function prefillAddProductFormFromDraft(draft) {
   try {
     categoryEl?.dispatchEvent(new Event("change"));
     qtyEl?.dispatchEvent(new Event("change"));
-    usdEl?.dispatchEvent(new Event("input"));
     marginEl?.dispatchEvent(new Event("input"));
   } catch {
     // ignore
@@ -2212,7 +2165,6 @@ async function updateProduct(e) {
 
   const productId = document.getElementById("product-id").value;
   const name = document.getElementById("name").value;
-  const usdPrice = document.getElementById("old-price").value;
   const ilsPrice = document.getElementById("new-price").value;
   const description = document.getElementById("description").value;
   const category = document.getElementById("category").value;
@@ -2226,7 +2178,6 @@ async function updateProduct(e) {
   // Create FormData object for multipart/form-data
   const formData = new FormData();
   formData.append("name", name);
-  formData.append("usd_price", usdPrice);
   formData.append("ils_price", ilsPrice);
   formData.append("description", description);
   formData.append("category", category);
@@ -2234,8 +2185,6 @@ async function updateProduct(e) {
   formData.append("security_margin", securityMargin);
   // Include fields for backward-compatible legacy update endpoints
   formData.append("id", productId);
-  formData.append("oldPrice", usdPrice);
-  formData.append("newPrice", ilsPrice);
 
   // Append new images if they exist
   if (mainImageFile) {
@@ -2711,13 +2660,16 @@ async function addProduct(e, data, form) {
     const description = document.getElementById("description").value || "";
     const category = document.getElementById("category").value;
     const quantity = document.getElementById("quantity").value;
-    const oldPrice = document.getElementById("old-price").value;
-    const newPrice = document.getElementById("new-price").value;
+    const ilsPrice = document.getElementById("new-price").value;
     const securityMargin =
       document.getElementById("security-margin").value || "5";
+    const applyGlobalDiscountCheckbox = document.getElementById(
+      "apply-global-discount"
+    );
+    const applyGlobalDiscount = !!applyGlobalDiscountCheckbox?.checked;
 
     // Validate required fields
-    if (!name || !oldPrice) {
+    if (!name || !ilsPrice) {
       console.error("[addProduct] Validation failed: Missing required fields");
       throw new Error("Please fill in all required fields");
     }
@@ -2831,9 +2783,9 @@ async function addProduct(e, data, form) {
       description,
       category,
       quantity: Number(quantity) || 0,
-      oldPrice: parseFloat(oldPrice),
-      newPrice: parseFloat(newPrice),
+      ils_price: Math.round(parseFloat(ilsPrice)),
       security_margin: securityMargin,
+      apply_global_discount: applyGlobalDiscount,
       // Include all image data from the upload response
       mainImage: imageData.mainImage,
       smallImages: imageData.smallImages,
@@ -3106,20 +3058,18 @@ async function loadAddProductsPage() {
               <h3 class="card__title">Pricing</h3>
             </div>
             <div class="card__body">
-              <div class="grid-2">
-                <div class="field">
-                  <div class="label">Price in $</div>
-                  <input class="input" type="text" name="usd_price" id="old-price" placeholder="0.00" />
-                </div>
-                <div class="field">
-                  <div class="label">Security Margin (%)</div>
-                  <input class="input" type="number" name="security_margin" id="security-margin" placeholder="5" value="5" min="0" max="100" />
-                </div>
+              <div class="field">
+                <div class="label">Price in ₪</div>
+                <input class="input" type="number" name="ils_price" id="new-price" placeholder="0" min="0" step="1" required />
+                <div class="help">USD price will be calculated automatically based on current exchange rate.</div>
               </div>
               <div class="field" style="margin-top:12px;">
-                <div class="label">Price in ₪ (Auto-calculated)</div>
-                <input class="input" type="text" name="ils_price" id="new-price" placeholder="Auto-calculated" readonly />
-                <div class="help">ILS is calculated from USD with a security margin.</div>
+                <div class="label">Security Margin (%)</div>
+                <input class="input" type="number" name="security_margin" id="security-margin" placeholder="5" value="5" min="0" max="100" />
+              </div>
+              <div class="field" style="margin-top:12px; display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="apply-global-discount" name="apply_global_discount" />
+                <label for="apply-global-discount" style="margin:0;">Apply current store sale discount (if active)</label>
               </div>
             </div>
           </div>
@@ -3278,9 +3228,6 @@ async function loadAddProductsPage() {
     'label.dropzone[for="smallImages"]'
   );
   setupDragAndDrop(smallDropzone, smallInput, true);
-
-  // Calculate initial price if values are present
-  calculateILSPrice();
 }
 
 function addProductHandler() {
@@ -3319,21 +3266,20 @@ function addProductHandler() {
       return;
     }
 
-    const prodOldPrice = document.getElementById("old-price").value.trim();
-    console.log("[runSubmit] prodOldPrice:", prodOldPrice);
+    const prodIlsPrice = document.getElementById("new-price").value.trim();
+    console.log("[runSubmit] prodIlsPrice:", prodIlsPrice);
     if (
-      !prodOldPrice ||
-      isNaN(parseFloat(prodOldPrice)) ||
-      parseFloat(prodOldPrice) <= 0
+      !prodIlsPrice ||
+      isNaN(parseFloat(prodIlsPrice)) ||
+      parseFloat(prodIlsPrice) <= 0
     ) {
-      alert("Please enter a valid price in USD (must be greater than 0)");
+      alert("Please enter a valid price in ILS (must be greater than 0)");
       return;
     }
 
     const prodDescription = document.getElementById("description").value.trim();
     const prodCategory = document.getElementById("category").value;
     const quantity = document.getElementById("quantity").value;
-    const prodNewPrice = document.getElementById("new-price").value;
     const securityMargin =
       document.getElementById("security-margin").value || "5";
 
@@ -3380,8 +3326,7 @@ function addProductHandler() {
       description: prodDescription,
       category: prodCategory,
       quantity: Number(quantity) || 0,
-      oldPrice: parseFloat(prodOldPrice),
-      newPrice: parseFloat(prodNewPrice),
+      ils_price: Math.round(parseFloat(prodIlsPrice)),
       security_margin: securityMargin,
       // Image data for upload
       mainImage: prodImage,
@@ -3393,16 +3338,7 @@ function addProductHandler() {
   };
 
   // Add event listeners for both USD price and security margin inputs
-  const usdPriceInput = document.getElementById("old-price");
   const securityMarginInput = document.getElementById("security-margin");
-
-  if (usdPriceInput) {
-    usdPriceInput.addEventListener("input", calculateILSPrice);
-  }
-
-  if (securityMarginInput) {
-    securityMarginInput.addEventListener("input", calculateILSPrice);
-  }
 
   // Allow Enter-to-submit from inputs, but route to the same handler.
   form.addEventListener("submit", runSubmit);
@@ -3438,7 +3374,6 @@ function addProductHandler() {
 const BisliView = {
   loadAddProductsPage,
   fetchInfo,
-  calculateILSPrice,
   getImageUrl,
   checkAuth,
   showLoginPage,

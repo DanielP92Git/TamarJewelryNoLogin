@@ -20,6 +20,11 @@ const fs = require('fs');
 const sharp = require('sharp');
 const AWS = require('aws-sdk');
 const { resolveRequestLocale } = require('./config/locale');
+const exchangeRateService = require('./services/exchangeRateService');
+const {
+  startExchangeRateJob,
+  runExchangeRateUpdate,
+} = require('./jobs/exchangeRateJob');
 
 // #region agent log
 function agentLog(hypothesisId, location, message, data) {
@@ -608,9 +613,51 @@ app.use(
 // =============================================
 // Database Models
 // =============================================
-connectDb().catch(err => {
-  console.error('MongoDB connection failed:', err?.message || err);
-});
+// Initialize exchange rate on database connection
+async function initializeExchangeRate() {
+  try {
+    console.log('Initializing exchange rate...');
+    // Check if we have a stored rate
+    const storedRate = await exchangeRateService.getStoredRate();
+    const isStale = await exchangeRateService.isRateStale(24);
+
+    if (!storedRate || isStale) {
+      // Fetch fresh rate from API
+      console.log('Fetching current exchange rate from API...');
+      try {
+        const { rate, source } = await exchangeRateService.fetchCurrentRate();
+        await exchangeRateService.updateRate(rate, source);
+        console.log(`✓ Exchange rate initialized: ${rate} (source: ${source})`);
+      } catch (error) {
+        console.warn(
+          'Failed to fetch exchange rate from API, using fallback:',
+          error.message
+        );
+        // Will use fallback from getExchangeRate
+        const fallbackRate = await exchangeRateService.getExchangeRate();
+        console.log(`✓ Using fallback exchange rate: ${fallbackRate}`);
+      }
+    } else {
+      console.log(`✓ Using stored exchange rate: ${storedRate}`);
+    }
+
+    // Start the daily job
+    startExchangeRateJob();
+  } catch (error) {
+    console.error('Error initializing exchange rate:', error.message);
+    // Still start the job even if initialization fails
+    startExchangeRateJob();
+  }
+}
+
+connectDb()
+  .then(() => {
+    // Initialize exchange rate after database connection
+    initializeExchangeRate();
+  })
+  .catch(err => {
+    console.error('MongoDB connection failed:', err?.message || err);
+  });
 
 // =============================================
 // File Upload Configuration
@@ -1579,9 +1626,6 @@ app.post(
       });
       // #endregion
 
-      console.log('\n=== Product Creation Request Details ===');
-      console.log('Request body:', JSON.stringify(req.body, null, 2));
-
       // Input guards (fail fast with actionable 400s)
       if (!req.body || typeof req.body !== 'object') {
         return res
@@ -1608,9 +1652,54 @@ app.post(
       const products = await Product.find({}).sort({ id: -1 }).limit(1);
       const nextId = products.length > 0 ? Number(products[0].id) + 1 : 1;
 
+      // Get ILS price as input (primary currency)
+      const ilsPriceRaw = req.body.ils_price;
+      const ilsPrice = Math.round(Number(ilsPriceRaw) || 0);
+
+      if (ilsPrice <= 0) {
+        console.error('ILS price validation failed:', ilsPrice);
+        return res.status(400).json({
+          success: false,
+          error: 'ILS price is required and must be greater than 0',
+        });
+      }
+
+      // Get current exchange rate and calculate USD price
+      const exchangeRate = await exchangeRateService.getExchangeRate();
+      const usdPrice = Math.round(ilsPrice / exchangeRate);
+
+      // Security margin is stored but not used in price calculation anymore
       const securityMargin = parseFloat(req.body.security_margin) || 5;
-      const usdPrice = Number(req.body.oldPrice) || 0;
-      const ilsPrice = Math.round(usdPrice * 3.7 * (1 + securityMargin / 100));
+
+      // Determine if we should apply the current global store discount
+      const applyGlobalDiscountFlag =
+        req.body.apply_global_discount === true ||
+        req.body.apply_global_discount === 'true';
+
+      const settings = await Settings.getSettings();
+      const hasActiveGlobalDiscount =
+        settings.discount_active &&
+        settings.global_discount_percentage &&
+        settings.global_discount_percentage > 0;
+
+      let finalIlsPrice = ilsPrice;
+      let finalUsdPrice = usdPrice;
+      let originalIlsPrice = ilsPrice;
+      let originalUsdPrice = usdPrice;
+      let discountPercentage = 0;
+
+      if (applyGlobalDiscountFlag && hasActiveGlobalDiscount) {
+        discountPercentage = settings.global_discount_percentage;
+        const ratio = 1 - discountPercentage / 100;
+
+        // Ensure original prices represent the full (pre-discount) price
+        originalIlsPrice = ilsPrice;
+        originalUsdPrice = usdPrice;
+
+        // Apply discount to get the final prices that will be used on the storefront
+        finalIlsPrice = Math.round(originalIlsPrice * ratio);
+        finalUsdPrice = Math.round(originalUsdPrice * ratio);
+      }
 
       // Get image URLs from the upload response.
       // - Absolute (Spaces/CDN) URLs should be stored as-is.
@@ -1640,10 +1729,6 @@ app.post(
             return img;
           })
         : [];
-
-      console.log('\n=== Image Data Received ===');
-      console.log('Main Image URLs:', JSON.stringify(mainImageUrls, null, 2));
-      console.log('Small Image URLs:', JSON.stringify(smallImageUrls, null, 2));
 
       // #region agent log
       agentLog(
@@ -1743,11 +1828,11 @@ app.post(
         category: req.body.category,
         quantity: Math.max(0, Number(req.body.quantity) || 0),
         description: req.body.description || '',
-        ils_price: ilsPrice,
-        usd_price: usdPrice,
-        original_ils_price: ilsPrice,
-        original_usd_price: usdPrice,
-        discount_percentage: 0,
+        ils_price: finalIlsPrice,
+        usd_price: finalUsdPrice,
+        original_ils_price: originalIlsPrice,
+        original_usd_price: originalUsdPrice,
+        discount_percentage: discountPercentage,
         security_margin: securityMargin,
       });
 
@@ -1758,6 +1843,10 @@ app.post(
             {
               id: product.id,
               name: product.name,
+              ils_price: product.ils_price,
+              usd_price: product.usd_price,
+              original_ils_price: product.original_ils_price,
+              original_usd_price: product.original_usd_price,
               image: product.image,
               publicImage: product.publicImage,
               mainImage: product.mainImage,
@@ -1772,9 +1861,9 @@ app.post(
       }
 
       await product.save();
+
       if (!isProd) {
         console.log('\n=== Product Saved Successfully ===');
-        console.log('Product ID:', nextId);
       }
 
       // #region agent log
@@ -1846,7 +1935,6 @@ app.post(
       // Extract form data
       const {
         name,
-        usd_price,
         ils_price,
         description,
         category,
@@ -1856,8 +1944,20 @@ app.post(
 
       // Update basic product information
       product.name = name;
-      const newUsdPrice = Number(usd_price) || 0;
-      const newIlsPrice = Number(ils_price) || 0;
+
+      // Get ILS price as input (primary currency)
+      const newIlsPrice = Math.round(Number(ils_price) || 0);
+
+      if (newIlsPrice <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'ILS price is required and must be greater than 0',
+        });
+      }
+
+      // Get current exchange rate and calculate USD price
+      const exchangeRate = await exchangeRateService.getExchangeRate();
+      const newUsdPrice = Math.round(newIlsPrice / exchangeRate);
 
       // Preserve original prices if they don't exist or if discount is not active
       // Only update original prices if discount is 0 (no active discount)
@@ -2021,19 +2121,26 @@ app.post(
           .status(400)
           .json({ success: false, message: 'Invalid product id' });
       }
-      const securityMargin = parseFloat(req.body.security_margin) || 5;
-      const exchangeRate = 3.7;
 
-      const usdPrice = Number(req.body.oldPrice) || 0;
-      const ilsPrice = Math.round(
-        usdPrice * exchangeRate * (1 + securityMargin / 100)
-      );
+      // Get ILS price as input (primary currency)
+      const ilsPrice = Math.round(Number(req.body.ils_price) || 0);
+
+      if (ilsPrice <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: 'ILS price is required and must be greater than 0',
+        });
+      }
+
+      // Get current exchange rate and calculate USD price
+      const exchangeRate = await exchangeRateService.getExchangeRate();
+      const usdPrice = Math.round(ilsPrice / exchangeRate);
 
       const updatedFields = {
         name: req.body.name,
         ils_price: ilsPrice,
         usd_price: usdPrice,
-        security_margin: securityMargin,
+        security_margin: parseFloat(req.body.security_margin) || 5,
         description: req.body.description,
         quantity: Math.max(0, Number(req.body.quantity) || 0),
         category: req.body.category,
@@ -2175,10 +2282,9 @@ app.post(
           );
         }
         if (product.original_usd_price) {
-          product.usd_price =
-            Math.round(
-              product.original_usd_price * (1 - discountPercentage / 100) * 100
-            ) / 100; // Round to 2 decimal places for USD
+          product.usd_price = Math.round(
+            product.original_usd_price * (1 - discountPercentage / 100)
+          ); // Round to whole number for USD
         }
 
         product.discount_percentage = discountPercentage;
@@ -2229,6 +2335,15 @@ app.post(
 
       // Revert prices to original
       for (const product of products) {
+        // Ensure original prices are set (for old products that might not have them)
+        if (!product.original_ils_price && product.ils_price) {
+          product.original_ils_price = product.ils_price;
+        }
+        if (!product.original_usd_price && product.usd_price) {
+          product.original_usd_price = product.usd_price;
+        }
+
+        // Restore prices from original
         if (product.original_ils_price) {
           product.ils_price = product.original_ils_price;
         }
@@ -2257,6 +2372,29 @@ app.post(
         success: false,
         message: 'Failed to remove discount',
         error: isProd ? undefined : error.message,
+      });
+    }
+  }
+);
+
+// Admin endpoint to manually trigger exchange rate update
+app.post(
+  '/admin/update-exchange-rate',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      await runExchangeRateUpdate();
+      res.json({
+        success: true,
+        message: 'Exchange rate and product prices updated successfully',
+      });
+    } catch (error) {
+      console.error('Error updating exchange rate:', error);
+      res.status(500).json({
+        success: false,
+        error: error.message,
       });
     }
   }
@@ -2357,13 +2495,11 @@ app.post('/getAllProductsByCategory', async (req, res) => {
 
 // Cart Management Endpoints
 app.post('/getcart', fetchUser, async (req, res) => {
-  console.log('GetCart');
   let userData = await Users.findOne({ _id: req.user.id });
   res.json(userData.cartData);
 });
 
 app.post('/addtocart', fetchUser, async (req, res) => {
-  console.log('added', req.body.itemId);
   let userData = await Users.findOne({ _id: req.user.id });
   userData.cartData[req.body.itemId] += 1;
   await Users.findOneAndUpdate(
@@ -2374,7 +2510,6 @@ app.post('/addtocart', fetchUser, async (req, res) => {
 });
 
 app.post('/removefromcart', fetchUser, async (req, res) => {
-  console.log('removed', req.body.itemId);
   let userData = await Users.findOne({ _id: req.user.id });
   if (userData.cartData[req.body.itemId] > 0)
     userData.cartData[req.body.itemId] -= 1;
@@ -2386,7 +2521,6 @@ app.post('/removefromcart', fetchUser, async (req, res) => {
 });
 
 app.post('/removeAll', fetchUser, async (req, res) => {
-  console.log('removed all');
   let userData = await Users.findOne({ _id: req.user.id });
   for (let i = 0; i < 300; i++) {
     userData.cartData[i] = 0;
@@ -2426,11 +2560,6 @@ app.post(
   ]),
   async (req, res) => {
     try {
-      if (!isProd) {
-        console.log('\n=== Upload Request Details ===');
-        console.log('Files received:', JSON.stringify(req.files, null, 2));
-      }
-
       // #region agent log
       agentLog('B', 'backend/index.js:/upload:entry', 'upload received', {
         hasFiles: !!req.files,
@@ -2464,25 +2593,18 @@ app.post(
         });
       }
 
-      if (!isProd) console.log('Processing main image:', mainImage.path);
-
       // Process main image
       const mainImageResults = await processImage(
         mainImage.path,
         mainImage.filename,
         true
       );
-      if (!isProd)
-        console.log('Main image processing results:', mainImageResults);
-
       // Process small images
       const smallImagesResults = await Promise.all(
         smallImages.map(async image => {
           return await processImage(image.path, image.filename, false);
         })
       );
-      if (!isProd)
-        console.log('Small images processing results:', smallImagesResults);
 
       // Construct URLs for main image
       const mainImageUrls = {
@@ -2510,10 +2632,6 @@ app.post(
           result?.mobile?.spacesUrl || `/smallImages/${result.mobile.filename}`,
       }));
 
-      console.log('\n=== Generated Image URLs ===');
-      console.log('Main Image URLs:', mainImageUrls);
-      console.log('Small Image URLs:', smallImageUrlSets);
-
       // Send response with all URL formats
       const response = {
         success: true,
@@ -2527,9 +2645,6 @@ app.post(
           smallImages: smallImagesResults,
         },
       };
-
-      console.log('\n=== Final Response ===');
-      console.log(JSON.stringify(response, null, 2));
 
       // #region agent log
       agentLog('B', 'backend/index.js:/upload:exit', 'upload response urls', {
@@ -2667,34 +2782,122 @@ app.post('/create-checkout-session', async (req, res) => {
 
     const reqCurrency = req.body.currency;
 
+    // Debug logging: Log incoming cart items
+    if (!isProd) {
+      console.log('=== Stripe Checkout Debug ===');
+      console.log('Request currency:', reqCurrency);
+      console.log('Cart items received:', JSON.stringify(items, null, 2));
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       mode: 'payment',
-      line_items: items.map(item => {
-        let inCents =
-          reqCurrency == '$'
-            ? item.price * 100
-            : Number((item.price / `${process.env.USD_ILS_RATE}`).toFixed(0)) *
-              100;
+      line_items: await Promise.all(
+        items.map(async item => {
+          // Debug logging: Log price fields for each item
+          if (!isProd) {
+            console.log(`\nProcessing item ${item.id} (${item.title}):`);
+            console.log(
+              '  - item.price:',
+              item.price,
+              'type:',
+              typeof item.price
+            );
+            console.log(
+              '  - item.discountedPrice:',
+              item.discountedPrice,
+              'type:',
+              typeof item.discountedPrice
+            );
+            console.log(
+              '  - item.originalPrice:',
+              item.originalPrice,
+              'type:',
+              typeof item.originalPrice
+            );
+            console.log(
+              '  - item.usdPrice:',
+              item.usdPrice,
+              'type:',
+              typeof item.usdPrice
+            );
+            console.log('  - item.currency:', item.currency);
+          }
 
-        const myItem = {
-          name: item.title,
-          price: inCents,
-          quantity: item.amount,
-          productId: item.id,
-        };
+          // Fetch product from database to get stored USD price
+          const dbProduct = await Product.findOne({ id: item.id });
+          if (!dbProduct) {
+            throw new Error(`Product ${item.id} not found in database`);
+          }
 
-        return {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: myItem.name,
+          // Use stored USD price from database (always use USD for Stripe)
+          // The database already has the correct USD price (discounted if discount is active)
+          let itemPriceUSD = Math.round(Number(dbProduct.usd_price) || 0);
+
+          if (!isProd) {
+            console.log('  - Product USD price from database:', itemPriceUSD);
+            console.log(
+              '  - Product discount_percentage:',
+              dbProduct.discount_percentage
+            );
+            if (dbProduct.original_usd_price) {
+              console.log(
+                '  - Product original USD price:',
+                dbProduct.original_usd_price
+              );
+            }
+          }
+
+          // Validate the price is a valid number
+          if (
+            !Number.isFinite(itemPriceUSD) ||
+            itemPriceUSD <= 0 ||
+            itemPriceUSD > 1000000
+          ) {
+            const errorMsg = `Invalid USD price for item ${item.id}: usd_price=${dbProduct.usd_price}, parsed=${itemPriceUSD}`;
+            console.error('Price validation failed:', errorMsg);
+            throw new Error(errorMsg);
+          }
+
+          // Convert USD price to cents (Stripe uses cents)
+          const inCents = Math.round(itemPriceUSD * 100);
+
+          if (!isProd) {
+            console.log(`  - Price in USD: $${itemPriceUSD}`);
+            console.log(
+              `  - Converted to cents: ${inCents} ($${(inCents / 100).toFixed(
+                2
+              )})`
+            );
+          }
+
+          const myItem = {
+            name: item.title,
+            price: inCents,
+            quantity: item.amount,
+            productId: item.id,
+          };
+
+          if (!isProd) {
+            console.log(
+              `  - Final Stripe amount: ${inCents} cents ($${(
+                inCents / 100
+              ).toFixed(2)}) for quantity ${item.amount}`
+            );
+          }
+
+          return {
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: myItem.name,
+              },
+              unit_amount: myItem.price,
             },
-            unit_amount: myItem.price,
-          },
-          quantity: myItem.quantity,
-        };
-      }),
+            quantity: myItem.quantity,
+          };
+        })
+      ),
       shipping_address_collection: {
         allowed_countries: ['US', 'IL'],
       },
@@ -2746,6 +2949,84 @@ app.post('/create-checkout-session', async (req, res) => {
         productId: requestedProductId.toString(),
       },
     });
+
+    // Debug logging: Log the actual session data sent to Stripe
+    if (!isProd) {
+      console.log('\n=== Stripe Session Created ===');
+      console.log('Session ID:', session.id);
+      console.log('Session URL:', session.url);
+      console.log('Currency:', session.currency);
+      console.log(
+        'Amount total (from session):',
+        session.amount_total,
+        'cents = $' + ((session.amount_total || 0) / 100).toFixed(2)
+      );
+      console.log(
+        'Amount subtotal (from session):',
+        session.amount_subtotal,
+        'cents = $' + ((session.amount_subtotal || 0) / 100).toFixed(2)
+      );
+
+      // Try to retrieve the session with line items expanded
+      try {
+        const expandedSession = await stripe.checkout.sessions.retrieve(
+          session.id,
+          {
+            expand: ['line_items', 'line_items.data.price'],
+          }
+        );
+        console.log('\n=== Expanded Session Details ===');
+        console.log('Currency:', expandedSession.currency);
+        console.log(
+          'Amount total:',
+          expandedSession.amount_total,
+          'cents = $' + (expandedSession.amount_total / 100).toFixed(2)
+        );
+        console.log(
+          'Amount subtotal:',
+          expandedSession.amount_subtotal,
+          'cents = $' + (expandedSession.amount_subtotal / 100).toFixed(2)
+        );
+        console.log('Display items:', expandedSession.display_items);
+
+        if (expandedSession.line_items && expandedSession.line_items.data) {
+          expandedSession.line_items.data.forEach((lineItem, index) => {
+            console.log(`\nLine Item ${index + 1}:`);
+            console.log('  - Description:', lineItem.description);
+            console.log(
+              '  - Amount total:',
+              lineItem.amount_total,
+              'cents = $' + (lineItem.amount_total / 100).toFixed(2)
+            );
+            console.log('  - Quantity:', lineItem.quantity);
+            if (lineItem.price) {
+              console.log(
+                '  - Unit amount:',
+                lineItem.price.unit_amount,
+                'cents = $' +
+                  ((lineItem.price.unit_amount || 0) / 100).toFixed(2)
+              );
+              console.log('  - Currency:', lineItem.price.currency);
+              console.log('  - Product:', lineItem.price.product);
+            }
+          });
+        }
+
+        // Calculate what it should be in ILS (for debug purposes)
+        const totalUSD = expandedSession.amount_subtotal / 100;
+        const exchangeRate = await exchangeRateService.getExchangeRate();
+        const totalILS = Math.round(totalUSD * exchangeRate);
+        console.log(`\n=== Currency Conversion Check ===`);
+        console.log(`Total in USD: $${totalUSD.toFixed(2)}`);
+        console.log(`Exchange rate: ${exchangeRate}`);
+        console.log(`Expected in ILS: ₪${totalILS.toFixed(2)}`);
+        console.log(`You're seeing on Stripe: ₪95.86`);
+        console.log(`Difference: ₪${(totalILS - 95.86).toFixed(2)}`);
+      } catch (expandError) {
+        console.log('Could not expand session:', expandError.message);
+        console.log('Error details:', expandError);
+      }
+    }
 
     res.json({ sessionId: session.id, url: session.url });
   } catch (err) {

@@ -78,37 +78,89 @@ class CategoriesView extends View {
     }, 1000);
   }
 
-  // Prefer stored USD/ILS prices from the backend when available.
-  // Fallback to exchange-rate conversion to avoid breaking legacy data.
+  // Use stored prices from database (no conversions needed)
+  // Prices are always stored in both currencies on the backend
   getDisplayPrice(product) {
     const cur = this.selectedCurrency === 'usd' ? 'usd' : 'ils';
-    const ils = Number(product?.ils_price);
-    const usd = Number(product?.usd_price);
-
+    
     if (cur === 'usd') {
-      if (Number.isFinite(usd) && usd > 0) return usd;
-      if (Number.isFinite(ils)) return Math.trunc(ils / this.exchangeRate);
+      // Prefer stored USD price
+      const usd = Number(product?.usd_price);
+      if (Number.isFinite(usd) && usd > 0) return Math.round(usd);
+      
+      // Fallback: calculate from ILS price if USD is missing (for old products)
+      const ils = Number(product?.ils_price);
+      if (Number.isFinite(ils) && ils > 0) {
+        // Use approximate exchange rate (3.3) as fallback
+        // This should rarely happen if exchange rate job has run
+        const calculatedUsd = Math.round(ils / 3.3);
+        if (calculatedUsd > 0) return calculatedUsd;
+      }
       return 0;
     }
 
-    if (Number.isFinite(ils) && ils > 0) return Math.trunc(ils);
-    if (Number.isFinite(usd)) return Math.trunc(usd * this.exchangeRate);
+    // ILS currency
+    const ils = Number(product?.ils_price);
+    if (Number.isFinite(ils) && ils > 0) return Math.round(ils);
     return 0;
   }
 
   getOriginalPrice(product) {
     const cur = this.selectedCurrency === 'usd' ? 'usd' : 'ils';
-    const originalIls = Number(product?.original_ils_price);
-    const originalUsd = Number(product?.original_usd_price);
-
+    
     if (cur === 'usd') {
-      if (Number.isFinite(originalUsd) && originalUsd > 0) return originalUsd;
-      if (Number.isFinite(originalIls)) return Math.trunc(originalIls / this.exchangeRate);
+      const originalIls = Number(product?.original_ils_price);
+      let originalUsd = Number(product?.original_usd_price);
+
+      // If we have both original ILS and USD, verify USD is plausible.
+      // Some legacy products stored ILS value in original_usd_price by mistake.
+      if (Number.isFinite(originalUsd) && originalUsd > 0) {
+        if (Number.isFinite(originalIls) && originalIls > 0) {
+          const impliedRate = originalIls / originalUsd;
+          // Valid USD/ILS rate should be in a reasonable range (e.g. 2–5).
+          if (impliedRate >= 2 && impliedRate <= 5) {
+            return Math.round(originalUsd);
+          }
+          // If the implied rate is unrealistic (e.g. ~1), treat stored USD as invalid
+          // and fall through to recalculation.
+        } else {
+          // No ILS to compare with – accept stored USD as-is.
+          return Math.round(originalUsd);
+        }
+      }
+
+      // Fallback: calculate from original ILS price using current price ratio
+      const currentUsd = Number(product?.usd_price);
+      const currentIls = Number(product?.ils_price);
+      
+      if (Number.isFinite(originalIls) && originalIls > 0) {
+        if (
+          Number.isFinite(currentUsd) &&
+          Number.isFinite(currentIls) &&
+          currentIls > 0 &&
+          currentUsd > 0
+        ) {
+          // Calculate exchange rate from current prices: rate = ils / usd
+          const exchangeRate = currentIls / currentUsd;
+          if (Number.isFinite(exchangeRate) && exchangeRate > 0) {
+            // Apply same rate to original ILS: original_usd = original_ils / rate
+            const calculatedUsd = Math.round(originalIls / exchangeRate);
+            if (calculatedUsd > 0) {
+              return calculatedUsd;
+            }
+          }
+        }
+        
+        // Last resort: use approximate rate of 3.3
+        return Math.round(originalIls / 3.3);
+      }
+      
       return 0;
     }
 
-    if (Number.isFinite(originalIls) && originalIls > 0) return Math.trunc(originalIls);
-    if (Number.isFinite(originalUsd)) return Math.trunc(originalUsd * this.exchangeRate);
+    // ILS currency
+    const originalIls = Number(product?.original_ils_price);
+    if (Number.isFinite(originalIls) && originalIls > 0) return Math.round(originalIls);
     return 0;
   }
 
@@ -469,6 +521,11 @@ class CategoriesView extends View {
         quant: data.dataset.quant,
         price: data.dataset.price,
         currency: this.selectedCurrency || data.dataset.currency || 'ils',
+        // Include both USD and ILS prices from data attributes
+        usdPrice: data.dataset.usdPrice || data.dataset.usd_price || null,
+        ilsPrice: data.dataset.ilsPrice || data.dataset.ils_price || null,
+        originalUsdPrice: data.dataset.originalUsdPrice || data.dataset.original_usd_price || null,
+        originalIlsPrice: data.dataset.originalIlsPrice || data.dataset.original_ils_price || null,
       },
       getAttribute: function (attr) {
         switch (attr) {
@@ -1276,7 +1333,11 @@ class CategoriesView extends View {
     const curSign = this.selectedCurrency === 'usd' ? '$' : '₪';
     const price = this.getDisplayPrice(item);
     const originalPrice = this.getOriginalPrice(item);
-    const hasDiscount = item.discount_percentage > 0 && originalPrice > 0 && originalPrice > price;
+    const hasDiscount =
+      item.discount_percentage > 0 &&
+      originalPrice > 0 &&
+      originalPrice > price;
+
 
     // Format description with ellipsis for list view
     const maxDescriptionLength = 150;
@@ -1312,8 +1373,14 @@ class CategoriesView extends View {
       `
       : `<div class="item-price">${curSign}${price}</div>`;
 
+    // Store both USD and ILS prices (and original prices) as data attributes for cart
+    const usdPrice = Math.round(Number(item?.usd_price) || 0);
+    const ilsPrice = Math.round(Number(item?.ils_price) || 0);
+    const originalUsdPrice = Math.round(Number(item?.original_usd_price) || usdPrice);
+    const originalIlsPrice = Math.round(Number(item?.original_ils_price) || ilsPrice);
+
     return `
-      <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}">
+      <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}" data-usd-price="${usdPrice}" data-ils-price="${ilsPrice}" data-original-usd-price="${originalUsdPrice}" data-original-ils-price="${originalIlsPrice}">
         <div class="product-image-container">
           <div class="loading-spinner"></div>
           <picture>

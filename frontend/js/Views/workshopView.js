@@ -1,5 +1,4 @@
 import View from '../View.js';
-import whatsappIcon from '../../imgs/svgs/whatsapp.svg';
 
 class WorkshopView extends View {
   addWorkshopHandler(handler) {
@@ -21,6 +20,9 @@ class WorkshopView extends View {
     const sliderContainer = document.querySelector('.slide-images-container');
     if (!sliderContainer) return;
 
+    const slideContainers = sliderContainer.querySelectorAll('.slide-image');
+    if (!slideContainers || slideContainers.length === 0) return;
+
     const images = sliderContainer.querySelectorAll('.slide-image-img');
     if (!images || images.length === 0) return;
 
@@ -38,9 +40,9 @@ class WorkshopView extends View {
     btnRight.style.display = 'flex';
 
     let curImg = 0;
-    const maxImages = images.length;
+    const maxImages = slideContainers.length;
     let autoSlideTimeout;
-    const autoSlideDelay = 4500;
+    const autoSlideDelay = 10000;
 
     // Function to reset button styles (if they're somehow lost)
     const resetButtonStyles = () => {
@@ -67,15 +69,19 @@ class WorkshopView extends View {
         padding: '0',
         margin: '0',
         verticalAlign: 'middle',
+        direction: 'ltr', // Force LTR direction for buttons
+        unicodeBidi: 'bidi-override', // Prevent RTL from affecting content
       };
 
       Object.assign(btnLeft.style, commonStyles, {
         left: window.innerWidth >= 800 ? '25px' : '10px',
+        right: 'auto', // Prevent RTL from flipping to right
         paddingBottom: window.innerWidth >= 800 ? '5px' : '4px',
       });
 
       Object.assign(btnRight.style, commonStyles, {
         right: window.innerWidth >= 800 ? '25px' : '10px',
+        left: 'auto', // Prevent RTL from flipping to left
         paddingBottom: window.innerWidth >= 800 ? '5px' : '4px',
       });
     };
@@ -87,8 +93,9 @@ class WorkshopView extends View {
     setTimeout(resetButtonStyles, 100);
 
     const goToImage = function (slide) {
-      images.forEach(img => {
-        img.style.transform = `translateX(${-100 * slide}%)`;
+      slideContainers.forEach((container, index) => {
+        const offset = (index - slide) * 100;
+        container.style.transform = `translateX(${offset}%)`;
       });
     };
 
@@ -115,8 +122,22 @@ class WorkshopView extends View {
       restartAutoSlide();
     };
 
-    // Initial setup
+    // Initial setup - ensure first image is visible and others are positioned correctly
+    // Remove transition temporarily for initial positioning to avoid animation on page load
+    slideContainers.forEach(container => {
+      container.style.transition = 'none';
+    });
+
+    // Position all images correctly without animation
     goToImage(0);
+
+    // Re-enable transitions after a brief moment
+    setTimeout(() => {
+      slideContainers.forEach(container => {
+        container.style.transition = '';
+      });
+    }, 50);
+
     restartAutoSlide();
 
     // Ensure we clean up previous event listeners to avoid duplicates
@@ -240,6 +261,9 @@ class WorkshopView extends View {
 
   handleCostsLng(lng) {
     const costsContainer = document.querySelector('.workshop-costs');
+    // Use the same relative path pattern as all other images on the workshop page
+    // All workshop images use ../imgs/... so this should work consistently
+    const whatsappPath = '../imgs/svgs/whatsapp.svg';
 
     if (lng === 'eng') {
       return ` Workshop Costs: <br /><br />• One-on-one workshop - 250 NIS <br /><br />
@@ -253,7 +277,7 @@ class WorkshopView extends View {
             <a href="https://wa.me/972524484763" class="whatsapp-atr">
               <br /><br />
               &nbsp;&nbsp;<img
-                src=${whatsappIcon}
+                src="${whatsappPath}"
                 class="whatsapp-svg"
                 alt=""
               />
@@ -280,7 +304,7 @@ class WorkshopView extends View {
             <a href="https://wa.me/972524484763" class="whatsapp-atr">
               <br /><br />
               &nbsp;&nbsp;<img
-                src=${whatsappIcon}
+                src="${whatsappPath}"
                 class="whatsapp-svg"
                 alt=""
               />
@@ -300,9 +324,60 @@ class WorkshopView extends View {
 
   setCostsLng(lng) {
     const costsContainer = document.querySelector('.workshop-costs');
-    costsContainer.innerHTML = '';
-    const markup = this.handleCostsLng(lng);
-    costsContainer.insertAdjacentHTML('afterbegin', markup);
+    if (!costsContainer) return;
+
+    // Update text content only, don't replace HTML structure
+    const titleEl = costsContainer.querySelector('.workshop-costs-title');
+    const costItems = costsContainer.querySelectorAll('.workshop-cost-item');
+    const noteEl = costsContainer.querySelector('.workshop-cost-note');
+    const whatsappLabel = costsContainer.querySelector(
+      '.contact-block .contact-label'
+    );
+    const telLabel = costsContainer.querySelectorAll(
+      '.contact-block .contact-label'
+    )[1];
+    const emailLabel = costsContainer.querySelectorAll(
+      '.contact-block .contact-label'
+    )[2];
+    const telValue = costsContainer.querySelectorAll('.contact-value')[0];
+    const emailValue = costsContainer.querySelectorAll('.contact-value')[1];
+
+    if (lng === 'eng') {
+      costsContainer.style.direction = 'ltr';
+      if (titleEl) titleEl.textContent = 'Workshop Costs:';
+      if (costItems[0])
+        costItems[0].textContent = '• One-on-one workshop - 250 NIS';
+      if (costItems[1])
+        costItems[1].textContent = '• 2 participants - 220 NIS per participant';
+      if (costItems[2])
+        costItems[2].textContent =
+          '• 3 participants and more- 200 NIS per participant';
+      if (noteEl)
+        noteEl.textContent =
+          "*Each workshop takes an hour and a half. For any questions please don't hesitate to contact me:";
+      if (whatsappLabel) whatsappLabel.textContent = 'Whatsapp:';
+      if (telLabel) telLabel.textContent = ' Tel.:';
+      if (emailLabel) emailLabel.textContent = ' Email:';
+      if (telValue) telValue.textContent = '+972-524484763';
+      if (emailValue) emailValue.textContent = 'tamarkfir91@gmail.com';
+    } else if (lng === 'heb') {
+      costsContainer.style.direction = 'rtl';
+      if (titleEl) titleEl.textContent = 'מחירי הסדנאות:';
+      if (costItems[0])
+        costItems[0].textContent = '• סדנא אחת על אחת - 250 ש"ח';
+      if (costItems[1])
+        costItems[1].textContent = '• 2 משתתפות - 220 ש"ח לכל משתתפת';
+      if (costItems[2])
+        costItems[2].textContent = '• 3 משתתפות ומעלה- 200 ש"ח לכל משתתפת';
+      if (noteEl)
+        noteEl.textContent =
+          '*כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי:';
+      if (whatsappLabel) whatsappLabel.textContent = 'וואטסאפ:';
+      if (telLabel) telLabel.textContent = ' נייד:';
+      if (emailLabel) emailLabel.textContent = ' דוא"ל:';
+      if (telValue) telValue.textContent = '052-4484763';
+      if (emailValue) emailValue.textContent = 'tamarkfir91@gmail.com';
+    }
   }
 
   // Override the placeholder from View.js
