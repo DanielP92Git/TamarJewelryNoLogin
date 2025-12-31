@@ -3195,42 +3195,50 @@ app.post(
       }
 
       // small image deletion
-      const target = extractFilename(imageUrl);
-      if (!target) {
+      const relFromUrl = url => {
+        if (!url || typeof url !== 'string') return '';
+        const rel = toRelativeApiPath(url);
+        return typeof rel === 'string' ? rel : '';
+      };
+
+      const targetRel = relFromUrl(imageUrl);
+      if (!targetRel) {
         return res
           .status(400)
           .json({ success: false, message: 'Missing imageUrl' });
       }
-      const validation = validateImageFilename(target);
+
+      const targetFilename = extractFilename(imageUrl);
+      const validation = validateImageFilename(targetFilename);
       if (!validation.ok) {
         return res
           .status(400)
           .json({ success: false, message: 'Invalid imageUrl' });
       }
 
-      const base = target.replace(/-(desktop|mobile)\.webp$/i, '');
-      const variantDesktop = `${base}-desktop.webp`;
-      const variantMobile = `${base}-mobile.webp`;
+      const filenamesToDelete = new Set();
+      const matchesRel = url => relFromUrl(url) === targetRel;
 
       if (Array.isArray(product.smallImages)) {
         product.smallImages = product.smallImages.filter(si => {
           if (typeof si === 'string') {
-            const fn = extractFilename(si);
-            return (
-              fn !== target && fn !== variantDesktop && fn !== variantMobile
-            );
+            if (matchesRel(si)) {
+              const fn = extractFilename(si);
+              if (fn) filenamesToDelete.add(fn);
+              return false;
+            }
+            return true;
           }
           if (si && typeof si === 'object') {
-            const fnD = extractFilename(si.desktop);
-            const fnM = extractFilename(si.mobile);
-            return (
-              fnD !== target &&
-              fnM !== target &&
-              fnD !== variantDesktop &&
-              fnM !== variantDesktop &&
-              fnD !== variantMobile &&
-              fnM !== variantMobile
-            );
+            const matchDesktop = matchesRel(si.desktop);
+            const matchMobile = matchesRel(si.mobile);
+            if (matchDesktop || matchMobile) {
+              const fnD = extractFilename(si.desktop);
+              const fnM = extractFilename(si.mobile);
+              if (fnD) filenamesToDelete.add(fnD);
+              if (fnM) filenamesToDelete.add(fnM);
+              return false;
+            }
           }
           return true;
         });
@@ -3238,21 +3246,28 @@ app.post(
 
       if (Array.isArray(product.smallImagesLocal)) {
         product.smallImagesLocal = product.smallImagesLocal.filter(u => {
+          if (!matchesRel(u)) return true;
           const fn = extractFilename(u);
-          return fn !== target && fn !== variantDesktop && fn !== variantMobile;
+          if (fn) filenamesToDelete.add(fn);
+          return false;
+        });
+      }
+
+      if (filenamesToDelete.size === 0) {
+        return res.status(404).json({
+          success: false,
+          message: 'Image not found on product',
         });
       }
 
       await product.save();
 
-      await Promise.all([
-        unlinkIfExists(path.join(smallImagesDir, variantDesktop)),
-        unlinkIfExists(path.join(smallImagesDir, variantMobile)),
-        unlinkIfExists(path.join(publicSmallImagesDir, variantDesktop)),
-        unlinkIfExists(path.join(publicSmallImagesDir, variantMobile)),
-        unlinkIfExists(path.join(smallImagesDir, target)),
-        unlinkIfExists(path.join(publicSmallImagesDir, target)),
-      ]);
+      await Promise.all(
+        [...filenamesToDelete].flatMap(fn => [
+          unlinkIfExists(path.join(smallImagesDir, fn)),
+          unlinkIfExists(path.join(publicSmallImagesDir, fn)),
+        ])
+      );
 
       return res.json({
         success: true,
