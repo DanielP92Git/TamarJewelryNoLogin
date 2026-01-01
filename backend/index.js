@@ -3195,48 +3195,71 @@ app.post(
       }
 
       // small image deletion
-      const relFromUrl = url => {
-        if (!url || typeof url !== 'string') return '';
-        const rel = toRelativeApiPath(url);
-        return typeof rel === 'string' ? rel : '';
-      };
-
-      const targetRel = relFromUrl(imageUrl);
-      if (!targetRel) {
+      const target = extractFilename(imageUrl);
+      if (!target) {
         return res
           .status(400)
           .json({ success: false, message: 'Missing imageUrl' });
       }
 
-      const targetFilename = extractFilename(imageUrl);
-      const validation = validateImageFilename(targetFilename);
+      const validation = validateImageFilename(target);
       if (!validation.ok) {
         return res
           .status(400)
           .json({ success: false, message: 'Invalid imageUrl' });
       }
 
+      // Robust matching across legacy JPG/PNG and processed WEBP variants.
+      // We match by a "base id" derived from the filename:
+      // - remove extension
+      // - remove trailing "-desktop" / "-mobile"
+      const toBaseId = filename => {
+        if (!filename || typeof filename !== 'string') return '';
+        const withoutExt = filename.replace(/\.[a-z0-9]+$/i, '');
+        return withoutExt.replace(/-(desktop|mobile)$/i, '');
+      };
+
+      const targetBaseId = toBaseId(target);
       const filenamesToDelete = new Set();
-      const matchesRel = url => relFromUrl(url) === targetRel;
+      const extractStringFromMalformed = maybeObj => {
+        // Some legacy data has smallImages entries like {0:'h',1:'t',...,_id:'...'}
+        // which happens when a string URL was accidentally spread into an object.
+        if (!maybeObj || typeof maybeObj !== 'object' || Array.isArray(maybeObj))
+          return '';
+        const keys = Object.keys(maybeObj).filter(k => /^\d+$/.test(k));
+        if (keys.length === 0) return '';
+        keys.sort((a, b) => Number(a) - Number(b));
+        return keys.map(k => maybeObj[k]).join('');
+      };
 
       if (Array.isArray(product.smallImages)) {
         product.smallImages = product.smallImages.filter(si => {
           if (typeof si === 'string') {
-            if (matchesRel(si)) {
-              const fn = extractFilename(si);
-              if (fn) filenamesToDelete.add(fn);
+            const fn = extractFilename(si);
+            if (fn && toBaseId(fn) === targetBaseId) {
+              filenamesToDelete.add(fn);
               return false;
             }
             return true;
           }
           if (si && typeof si === 'object') {
-            const matchDesktop = matchesRel(si.desktop);
-            const matchMobile = matchesRel(si.mobile);
-            if (matchDesktop || matchMobile) {
-              const fnD = extractFilename(si.desktop);
-              const fnM = extractFilename(si.mobile);
-              if (fnD) filenamesToDelete.add(fnD);
-              if (fnM) filenamesToDelete.add(fnM);
+            // Handle malformed "string spread into object" entries
+            if (!si.desktop && !si.mobile) {
+              const recovered = extractStringFromMalformed(si);
+              const fnRecovered = extractFilename(recovered);
+              if (fnRecovered && toBaseId(fnRecovered) === targetBaseId) {
+                filenamesToDelete.add(fnRecovered);
+                return false;
+              }
+              return true;
+            }
+            const fnD = extractFilename(si.desktop);
+            const fnM = extractFilename(si.mobile);
+            const matchD = fnD && toBaseId(fnD) === targetBaseId;
+            const matchM = fnM && toBaseId(fnM) === targetBaseId;
+            if (matchD || matchM) {
+              if (matchD) filenamesToDelete.add(fnD);
+              if (matchM) filenamesToDelete.add(fnM);
               return false;
             }
           }
@@ -3246,11 +3269,44 @@ app.post(
 
       if (Array.isArray(product.smallImagesLocal)) {
         product.smallImagesLocal = product.smallImagesLocal.filter(u => {
-          if (!matchesRel(u)) return true;
           const fn = extractFilename(u);
-          if (fn) filenamesToDelete.add(fn);
-          return false;
+          if (fn && toBaseId(fn) === targetBaseId) {
+            filenamesToDelete.add(fn);
+            return false;
+          }
+          return true;
         });
+      }
+
+      // Fallback for deeply malformed legacy data:
+      // if we still didn't detect anything to delete, do a last-resort match
+      // by searching the raw serialized object for the target filename.
+      if (
+        filenamesToDelete.size === 0 &&
+        Array.isArray(product.smallImages) &&
+        target
+      ) {
+        const serializedTarget = target;
+        let foundInFallback = false;
+        product.smallImages = product.smallImages.filter(si => {
+          try {
+            const raw = JSON.stringify(si);
+            if (raw && raw.includes(serializedTarget)) {
+              // Best effort: try to extract a filename-like token from the raw string
+              const m = raw.match(/smallImages-[0-9]+\.[a-z0-9]+/i);
+              if (m && m[0]) filenamesToDelete.add(m[0]);
+              foundInFallback = true;
+              return false;
+            }
+          } catch {
+            // ignore serialization errors
+          }
+          return true;
+        });
+        if (foundInFallback && filenamesToDelete.size === 0) {
+          // At minimum remove the base target if we matched by substring
+          filenamesToDelete.add(target);
+        }
       }
 
       if (filenamesToDelete.size === 0) {
