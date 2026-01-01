@@ -657,6 +657,14 @@ class CategoriesView extends View {
     if (modal) {
       modal.innerHTML = '';
       this.isModalOpen = false;
+      // Re-enable body scrolling
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      if (this.scrollPosition !== undefined) {
+        window.scrollTo(0, this.scrollPosition);
+        this.scrollPosition = undefined;
+      }
     }
   }
 
@@ -945,6 +953,14 @@ class CategoriesView extends View {
 
     modal.innerHTML = modalContent;
     this.isModalOpen = true;
+    
+    // Disable body scrolling when modal is open
+    this.scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = `-${this.scrollPosition}px`;
+    document.body.style.width = '100%';
+    
     this._setupModalEventListeners();
   }
 
