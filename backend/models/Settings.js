@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const SettingsSchema = new mongoose.Schema({
   global_discount_percentage: { type: Number, default: 0 },
   discount_active: { type: Boolean, default: false },
-  discount_label: { type: String, default: 'End of Year Discount' },
+  discount_label: { type: String, default: 'Discount' },
   updatedAt: { type: Date, default: Date.now },
   // Exchange rate fields
   usd_ils_rate: { type: Number, default: null },
