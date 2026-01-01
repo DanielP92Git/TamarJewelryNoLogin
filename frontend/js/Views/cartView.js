@@ -284,7 +284,7 @@ class CartView extends View {
       lng === 'heb'
         ? {
             subtotal: 'סכום ביניים:',
-            discount: 'הנחת סוף שנה:',
+            discount: 'הנחה:',
             shipping: 'משלוח:',
             shippingValue: 'מחושב בקופה',
             total: 'סה"כ:',
@@ -293,7 +293,7 @@ class CartView extends View {
           }
         : {
             subtotal: 'Subtotal:',
-            discount: 'End of Year Discount:',
+            discount: 'Discount:',
             shipping: 'Shipping:',
             shippingValue: 'Calculated at checkout',
             total: 'Total:',

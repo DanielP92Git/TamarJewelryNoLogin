@@ -339,7 +339,7 @@ export const getGlobalDiscount = async function () {
         globalDiscountCache = {
           percentage: result.global_discount_percentage || 0,
           active: result.discount_active || false,
-          label: result.discount_label || 'End of Year Discount',
+          label: result.discount_label || 'Discount',
         };
         discountCacheTimestamp = Date.now();
         return globalDiscountCache;
@@ -353,7 +353,7 @@ export const getGlobalDiscount = async function () {
   return {
     percentage: 0,
     active: false,
-    label: 'End of Year Discount',
+    label: 'Discount',
   };
 };
 
