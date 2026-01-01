@@ -23,6 +23,8 @@ const ProductSchema = new mongoose.Schema({
       mobileLocal: { type: String },
     },
   ],
+  // Legacy small images field (older products stored gallery URLs here)
+  smallImagesLocal: [{ type: String }],
   // Additional image URLs for better accessibility
   imageLocal: { type: String },
   publicImage: { type: String },
