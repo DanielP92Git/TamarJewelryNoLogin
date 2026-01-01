@@ -651,14 +651,14 @@ main {
   width: 92%;
   height: auto;
   min-height: 85vh;
-  max-height: 98vh;
+  max-height: 90vh;
   padding: 20px;
   position: relative;
   border-radius: 8px;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
   overflow-y: auto;
   gap: 15px;
-  margin: 10px 0;
+  margin: 20px 0;
 }
 
 .images-container {
@@ -1262,7 +1262,8 @@ main {
   }
 
   .modal-content {
-    max-height: 100vh;
+    max-height: 90vh;
+    margin: 20px 0;
   }
 }
 
