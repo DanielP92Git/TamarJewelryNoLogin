@@ -92,11 +92,27 @@ class WorkshopView extends View {
     // Reapply styles after a short delay (in case they're overridden)
     setTimeout(resetButtonStyles, 100);
 
-    const goToImage = function (slide) {
+    const goToImage = function (slide, skipTransition = false) {
+      if (skipTransition) {
+        // Temporarily disable transitions for instant jump
+        slideContainers.forEach(container => {
+          container.style.transition = 'none';
+        });
+      }
+
       slideContainers.forEach((container, index) => {
         const offset = (index - slide) * 100;
         container.style.transform = `translateX(${offset}%)`;
       });
+
+      if (skipTransition) {
+        // Re-enable transitions after a brief moment
+        setTimeout(() => {
+          slideContainers.forEach(container => {
+            container.style.transition = '';
+          });
+        }, 50);
+      }
     };
 
     const restartAutoSlide = function () {
@@ -105,20 +121,32 @@ class WorkshopView extends View {
     };
 
     const nextImage = function () {
+      const prevImg = curImg;
       curImg = (curImg + 1) % maxImages;
-      goToImage(curImg);
+      
+      // If wrapping from last to first, skip transition for instant jump
+      const isWrapping = prevImg === maxImages - 1 && curImg === 0;
+      goToImage(curImg, isWrapping);
       restartAutoSlide();
     };
 
     const nextSlideManual = function () {
+      const prevImg = curImg;
       curImg = (curImg + 1) % maxImages;
-      goToImage(curImg);
+      
+      // If wrapping from last to first, skip transition for instant jump
+      const isWrapping = prevImg === maxImages - 1 && curImg === 0;
+      goToImage(curImg, isWrapping);
       restartAutoSlide();
     };
 
     const prevSlide = function () {
+      const prevImg = curImg;
       curImg = (curImg - 1 + maxImages) % maxImages;
-      goToImage(curImg);
+      
+      // If wrapping from first to last, skip transition for instant jump
+      const isWrapping = prevImg === 0 && curImg === maxImages - 1;
+      goToImage(curImg, isWrapping);
       restartAutoSlide();
     };
 
@@ -236,9 +264,20 @@ class WorkshopView extends View {
     const descriptionContainer = document.querySelector(
       '.workshop-description'
     );
+    const containerParent = document.querySelector(
+      '.workshop-description-container'
+    );
+    
     descriptionContainer.innerHTML = '';
     const markup = this.handleWorkshopLng(lng);
     descriptionContainer.insertAdjacentHTML('afterbegin', markup);
+
+    // Add/remove RTL class for CSS targeting
+    if (lng === 'heb') {
+      containerParent?.classList.add('rtl-layout');
+    } else {
+      containerParent?.classList.remove('rtl-layout');
+    }
 
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
@@ -266,7 +305,7 @@ class WorkshopView extends View {
     const whatsappPath = '../imgs/svgs/whatsapp.svg';
 
     if (lng === 'eng') {
-      return ` Workshop Costs: <br /><br />• One-on-one workshop - 250 NIS <br /><br />
+      return ` Workshop Costs: <br /><br />• One-on-one workshop - 450 NIS <br /><br />
         • 2 participants - 220 NIS per participant <br /><br />• 3 participants
         and more- 200 NIS per participant <br /><br />
         *Each workshop takes an hour and a half. For any questions please don't
@@ -294,7 +333,7 @@ class WorkshopView extends View {
         </div>`;
     } else if (lng === 'heb') {
       costsContainer.style.direction = 'rtl';
-      return ` מחירי הסדנאות: <br /><br />• סדנא אחת על אחת - 250 ש"ח <br /><br />
+      return ` מחירי הסדנאות: <br /><br />• סדנא אחת על אחת - 450 ש"ח <br /><br />
         • 2 משתתפות - 220 ש"ח לכל משתתפת <br /><br />• 3 משתתפות
         ומעלה- 200 ש"ח לכל משתתפת <br /><br />
         *כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי:
@@ -346,7 +385,7 @@ class WorkshopView extends View {
       costsContainer.style.direction = 'ltr';
       if (titleEl) titleEl.textContent = 'Workshop Costs:';
       if (costItems[0])
-        costItems[0].textContent = '• One-on-one workshop - 250 NIS';
+        costItems[0].textContent = '• One-on-one workshop - 450 NIS';
       if (costItems[1])
         costItems[1].textContent = '• 2 participants - 220 NIS per participant';
       if (costItems[2])
@@ -364,7 +403,7 @@ class WorkshopView extends View {
       costsContainer.style.direction = 'rtl';
       if (titleEl) titleEl.textContent = 'מחירי הסדנאות:';
       if (costItems[0])
-        costItems[0].textContent = '• סדנא אחת על אחת - 250 ש"ח';
+        costItems[0].textContent = '• סדנא אחת על אחת - 450 ש"ח';
       if (costItems[1])
         costItems[1].textContent = '• 2 משתתפות - 220 ש"ח לכל משתתפת';
       if (costItems[2])
