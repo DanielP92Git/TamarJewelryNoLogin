@@ -36,6 +36,10 @@ body {
   /* border: 5px solid rgb(228, 152, 37); */
 }
 
+#page-title {
+  font-size: 2.5rem;
+}
+
 .main-nav-tab {
   display: flex;
   flex-flow: row;
@@ -299,7 +303,7 @@ h1 {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   font-size: 1.2rem;
-  text-align: center;
+  text-align: left; /* Default for English/LTR */
   padding: 2rem;
   box-sizing: border-box;
   font-family: Raleway, sans-serif;
@@ -309,6 +313,14 @@ h1 {
 
   /* ~~~~ FOR DEBUGGING~~~~ */
   /* border: 2px solid rgb(37, 155, 228); */
+}
+
+/* RTL support for Hebrew - right-align text to match English left-alignment visually */
+.workshop-description-container.rtl-layout .workshop-description,
+.workshop-description[style*='direction: rtl'],
+.workshop-description[style*='direction:rtl'] {
+  text-align: right;
+  direction: rtl;
 }
 
 .workshop-description--img {

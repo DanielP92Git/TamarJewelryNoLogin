@@ -230,6 +230,7 @@ class WorkshopView extends View {
     );
     if (lng === 'eng') {
       descriptionContainer.style.direction = 'ltr';
+      descriptionContainer.style.textAlign = 'left';
       return `I am delighted to invite you to a jewelry workshop for women and
           girls. In this workshop you will make your own unique jewelry. From a
           young age, jewelry design has given me a place for creation, freedom
@@ -252,6 +253,7 @@ class WorkshopView extends View {
           buy the jewelry workshop as a gift card`;
     } else if (lng === 'heb') {
       descriptionContainer.style.direction = 'rtl';
+      descriptionContainer.style.textAlign = 'right';
       return `אני שמחה להזמין אותך לסדנת תכשיטים לנשים ולנערות. בסדנה הזו תכיני תכשיטים ייחודיים משלך. מגיל צעיר, עיצוב תכשיטים נתן לי מקום ליצירה, חופש ואהבה לעבודה עם הידיים וליצירת דברים חדשים. אני רוצה לחלוק את החוויה הזו עם כמה שיותר נשים ונערות, כדי שגם הן יוכלו ליצור בעצמן ולדעת שאין גבול ליצירתיות. אני עובדת עם תכשיטים מתוך אמונה ביכולת שלנו לרפא את עצמנו דרך הידיים.
 
 בסדנה אלמד ואלווה אותך בתהליך יצירת התכשיטים, ואשתף איך תוכלי להמשיך ליצור פריטים חדשים גם בבית. אלמד אותך אילו חומרים כדאי לקנות ואיך לעשות זאת בצורה חסכונית. אתן לך את הידע והכלים הדרושים כדי שתוכלי להמשיך ליצור פריטים ייחודיים משלך. בסדנה נכין עגילים וכמו כן שרשרת או צמיד (תלוי בזמן), ותלמדי כמה טכניקות עבודה עם חומרים שונים, כולל חרוזים ומתכת.

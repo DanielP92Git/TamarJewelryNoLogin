@@ -391,6 +391,7 @@ h1 {
   margin-right: 5rem;
   padding-left: 0;
   padding-right: 0;
+  gap: 6rem; /* Add gap between text and image for consistent spacing */
 
   width: calc(100% - 10rem);
   max-width: calc(100% - 10rem);
@@ -418,6 +419,7 @@ h1 {
   font-family: Raleway, sans-serif;
   color: rgba(68, 68, 68, 0.9);
   letter-spacing: 0.5px;
+  text-align: left; /* Default for English/LTR */
 
   width: 50%;
   max-height: 100%;
@@ -429,8 +431,8 @@ h1 {
 .workshop-description--img {
   width: 30%;
   height: 40%;
-  margin-left: 6rem;
-  margin-right: 6rem;
+  margin-left: 0; /* Gap property handles spacing now */
+  margin-right: 0; /* Gap property handles spacing now */
   margin-top: 4rem;
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -443,18 +445,21 @@ h1 {
 /* RTL support - when description is RTL, reverse flex order to keep image on right */
 .workshop-description-container.rtl-layout {
   flex-direction: row-reverse;
+  gap: 6rem; /* Add gap between text and image to match English spacing */
 }
 
 /* Ensure image has proper margins in RTL layout */
 .workshop-description-container.rtl-layout .workshop-description--img {
   margin-left: 0;
-  margin-right: 6rem;
+  margin-right: 0; /* Remove right margin since gap handles spacing */
 }
 
-/* Ensure consistent padding for RTL text */
+/* Ensure consistent padding and alignment for RTL text */
 .workshop-description-container.rtl-layout .workshop-description {
   padding: 2.5rem;
-  text-align: right;
+  text-align: right; /* Right-align Hebrew text to match English left-alignment visually */
+  direction: rtl;
+  margin-right: 0; /* Remove any margin that might interfere with gap */
 }
 
 .workshop-description--img:hover {

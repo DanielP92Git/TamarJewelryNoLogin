@@ -22,10 +22,14 @@
   ); /* Add bottom padding for safe area */
   overflow: hidden; /* Prevent menu itself from scrolling */
   direction: ltr; /* Force LTR layout for menu structure, regardless of document direction */
+  pointer-events: none; /* Disable all pointer events when menu is hidden */
+  visibility: hidden; /* Completely hide menu from interaction when closed */
 }
 
 .menu.menu-open {
   transform: translateX(0%); /* Slide in */
+  pointer-events: auto; /* Re-enable pointer events when menu is open */
+  visibility: visible; /* Make menu visible and interactive when open */
 }
 
 /* Prevent background scroll when menu is open */
