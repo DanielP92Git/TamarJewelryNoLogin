@@ -60,7 +60,7 @@ a {
   height: 3rem;
   color: rgb(78, 78, 78);
   font-size: 0.95rem;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-body);
   text-decoration: none;
   text-transform: uppercase;
 }
@@ -73,7 +73,7 @@ a {
 html[dir='rtl'] .attrib,
 .ul-heb .attrib {
   font-size: 1.2rem !important;
-  font-family: 'Amatic SC', sans-serif !important;
+  font-family: var(--font-accent) !important;
   font-weight: 700 !important;
 }
 
@@ -156,7 +156,7 @@ html[dir='rtl'] .attrib,
 /* Apply Amatic SC font to Hebrew category items */
 .category-item .attrib-heb,
 .ul-heb .category-item .attrib {
-  font-family: 'Amatic SC', sans-serif !important;
+  font-family: var(--font-accent) !important;
   font-weight: 700 !important;
 }
 
@@ -165,7 +165,7 @@ html[dir='rtl'] .attrib,
 .site-header .category-item .attrib-heb,
 html[dir='rtl'] .site-header .category-item .attrib {
   font-size: 1.2rem !important;
-  font-family: 'Amatic SC', sans-serif !important;
+  font-family: var(--font-accent) !important;
   font-weight: 700 !important;
 }
 
@@ -485,7 +485,7 @@ html[dir='rtl'] .site-header .category-item .attrib {
     justify-content: flex-start;
     width: auto;
     height: auto;
-    font-family: 'Great Vibes', cursive;
+    font-family: var(--font-decorative);
     /* Keep brand from overpowering / colliding with nav on medium widths */
     font-size: clamp(22px, 2.2vw, 32px);
     line-height: 1;
@@ -554,7 +554,7 @@ html[dir='rtl'] .site-header .category-item .attrib {
   .site-header .menu a.attrib-cart {
     display: inline-flex;
     width: auto;
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-secondary);
     font-size: clamp(10px, 0.85vw, 12px);
     font-weight: 500;
     letter-spacing: 0.12em;
@@ -571,7 +571,7 @@ html[dir='rtl'] .site-header .category-item .attrib {
   .site-header .menu__ul.ul-heb a.attrib,
   .site-header .menu .menu__ul.ul-heb a.attrib {
     font-size: 1.2rem !important;
-    font-family: 'Amatic SC', sans-serif !important;
+    font-family: var(--font-accent) !important;
     font-weight: 700 !important;
   }
 
@@ -638,7 +638,7 @@ html[dir='rtl'] .site-header .category-item .attrib {
   }
 
   .site-header .desktop-lang-selector .header-currency-selector {
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-secondary);
     font-size: 12px;
     border-radius: 999px;
     border: 1px solid rgba(17, 17, 17, 0.14);
@@ -673,7 +673,7 @@ html[dir='rtl'] .site-header .category-item .attrib {
     border: none;
     font-size: 12px;
     font-weight: 500;
-    font-family: 'Montserrat', sans-serif;
+    font-family: var(--font-secondary);
     color: #111 !important;
     display: inline-flex !important;
     align-items: center;

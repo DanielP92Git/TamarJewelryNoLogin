@@ -1,6 +1,27 @@
+/* =========================================================
+   CENTRALIZED TYPOGRAPHY SYSTEM
+   Update these custom properties to change fonts site-wide
+   ========================================================= */
+:root {
+  /* Primary Display Font - Used for titles, headings, and prominent text */
+  --font-display: 'Montserrat', sans-serif;
+
+  /* Body Font - Used for general content, navigation, and UI elements */
+  --font-body: 'Montserrat', sans-serif;
+
+  /* Accent Font - Used for Hebrew text and special decorative elements */
+  --font-accent: 'Amatic SC', cursive;
+
+  /* Secondary Display Font - Used for hero sections and special headings */
+  --font-secondary: 'Montserrat', sans-serif;
+
+  /* Decorative Font - Used for brand name and special decorative text */
+  --font-decorative: 'Great Vibes', cursive;
+}
+
 * {
   font-display: swap;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
 }
 
 html,
@@ -27,5 +48,5 @@ input,
   padding: 0;
   border: 0;
   box-sizing: border-box;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
 }
