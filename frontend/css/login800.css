@@ -31,94 +31,9 @@ header {
   /* border: 4px solid rgb(177, 20, 143); */
 }
 
-/* ~~~~~~ Mobile Menu ~~~~~~~ */
+/* Menu styles centralized in desktop-menu.css */
 
-.menubars-svg {
-  display: none;
-}
-
-#menubars-svg {
-  display: none;
-}
-
-#show-menu-button {
-  display: none;
-}
-
-/* ````` Mobile Menu END ``````` */
-
-/* ~~~~~~~ Desktop Navbar ~~~~~~~~~ */
-
-.menu {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 50px;
-  z-index: 7;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(20, 177, 35); */
-}
-
-.menu__ul {
-  display: flex;
-  flex-flow: row;
-  justify-content: space-around;
-  background-color: rgba(255, 255, 255, 0.8);
-  width: 100%;
-  height: 50px;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(228, 152, 37); */
-}
-
-.main-nav-tab {
-  width: 100%;
-  height: 50px;
-  list-style: none;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(46, 37, 228); */
-}
-
-.main-nav-tab:hover {
-  cursor: pointer;
-}
-
-/* .li.sticky:hover {
-    background-color: rgba(212, 199, 171, 0.925);
-  } */
-
-a {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 100%;
-  height: 50px;
-  color: black;
-  font-size: 1.1rem;
-  font-family: 'Raleway';
-  text-decoration: none;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(40, 228, 37); */
-}
-
-a:hover {
-  color: rgb(152, 152, 152);
-}
-
-/* Hebrew menu items font size */
-html[dir='rtl'] .attrib,
-html[dir='rtl'] a,
-.ul-heb .attrib {
-  font-size: 0.8rem !important;
-}
-
+/* Login page-specific: categories dropdown styles (if needed for this page) */
 .categories-list {
   display: flex;
   flex-flow: column;
@@ -142,92 +57,15 @@ html[dir='rtl'] a,
   transform: translateY(20rem);
 }
 
-.category-item {
-  position: relative;
-}
-
 .category-item:hover {
   cursor: pointer;
   background-color: rgba(255, 255, 255, 0.5);
 }
 
-.menu.sticky {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  height: 50px;
-  z-index: 15;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(248, 248, 248, 0.95) 50%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-
-  transition: all;
-  transition-duration: 500ms;
-  transition-timing-function: ease;
-  position: fixed;
-}
-
-.menu.hidden {
-  opacity: 0;
-  transform: translateY(8rem);
-}
-.icons-container {
-  display: none;
-}
-.shoppingcart-svg {
-  display: flex;
-  flex-flow: row;
-  justify-content: flex-start;
-  width: 25px;
-  height: 25px;
-  left: 600px;
-}
-
+/* Login page-specific: cart icon hover effect */
 .shoppingcart-svg:hover {
   fill: rgb(121, 221, 255);
 }
-
-.cart-number {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.8rem;
-  position: absolute;
-  right: 6.5%;
-  top: 10%;
-  width: 15px;
-  height: 15px;
-  border: 1px solid black;
-  border-radius: 50%;
-  text-align: center;
-}
-
-.main-nav-tab.login {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-btn {
-  width: 100px;
-  height: 30px;
-  margin: 5px;
-  border: 1px solid;
-  border-radius: 10px;
-}
-
-.login-btn:hover {
-  color: aqua;
-  cursor: pointer;
-}
-/* ```````Navbar END`````````` */
 main {
   width: 100%;
   /* height: 100%; */

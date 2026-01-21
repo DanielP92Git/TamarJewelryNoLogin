@@ -3,243 +3,17 @@ header {
   margin-bottom: 0;
 }
 
-/* ~~~~~~ Mobile Menu ~~~~~~~ */
+/* Menu styles centralized in desktop-menu.css */
 
-.menubars-svg {
-  display: none;
-}
-
-#menubars-svg {
-  display: none;
-}
-
-#show-menu-button {
-  display: none;
-}
-
-/* ````` Mobile Menu END ``````` */
-
-/* ~~~~~~~ Desktop Navbar ~~~~~~~~~ */
-
+/* Cart page-specific menu customization: fixed at top, higher z-index */
 .menu {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 15%;
   z-index: 10050;
   position: fixed;
-  background-color: rgba(255, 255, 255, 0.8);
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(20, 177, 35); */
-}
-
-.menu__ul {
-  display: flex;
-  flex-flow: row;
-  justify-content: space-around;
-  background-color: rgba(255, 255, 255, 0.8);
-  width: 100%;
-  height: 50px;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(228, 152, 37); */
-}
-
-.ul-heb {
-  display: flex !important;
-  flex-direction: row-reverse !important;
-}
-
-/* Ensure menu is reversed in RTL mode */
-html[dir='rtl'] .menu__ul,
-.menu__ul.ul-heb {
-  flex-direction: row-reverse !important;
-}
-
-.main-nav-tab {
-  width: 100%;
-  height: 50px;
-  list-style: none;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(46, 37, 228); */
-}
-
-.main-nav-tab:hover {
-  cursor: pointer;
-}
-
-/* .li.sticky:hover {
-  background-color: rgba(212, 199, 171, 0.925);
-} */
-
-.attrib,
-a {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 100%;
-  height: 50px;
-  color: rgb(78, 78, 78);
-  font-size: 0.95rem;
-  font-family: var(--font-body);
-  text-decoration: none;
-  text-transform: uppercase;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(40, 228, 37); */
-}
-
-.attrib:hover {
-  color: rgb(152, 152, 152);
-}
-
-/* Larger font size for Hebrew menu items */
-html[dir='rtl'] .attrib,
-.ul-heb .attrib {
-  font-size: 0.8rem !important;
-}
-
-.main-nav-tab.cart-tab {
-  display: flex;
-  width: auto;
-}
-
-.attrib-cart {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 100%;
-  height: 3rem;
-  color: black;
-  font-size: 0.95rem;
-  font-family: var(--font-body);
-  text-decoration: none;
-}
-
-.attrib-heb {
-  font-size: 1.8rem;
-  font-family: var(--font-accent);
-}
-
-.cart-container {
-  display: flex;
-  /* border: 1px solid red; */
-}
-
-.shoppingcart-svg {
-  display: inline-block;
-  flex-flow: row;
-  justify-content: flex-start;
-  width: 1.4rem;
-  visibility: visible;
-  /* border: 1px solid; */
-}
-
-.cart-number {
-  display: inline-block !important;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.8rem;
-  position: relative;
-  left: -5%;
-  top: 35%;
-  width: 15px;
-  height: 15px;
-  border: 1px solid black;
-  border-radius: 50%;
-  text-align: center;
 }
 
 .menu.sticky {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  height: 50px;
   z-index: 10050;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.95) 0%,
-    rgba(248, 248, 248, 0.95) 50%,
-    rgba(255, 255, 255, 0.95) 100%
-  );
-  backdrop-filter: blur(15px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-
-  transition: all;
-  transition-duration: 500ms;
-  transition-timing-function: ease;
-  position: fixed;
 }
-
-.menu.hidden {
-  opacity: 0;
-  transform: translateY(8rem);
-}
-
-.icons-container {
-  display: none;
-}
-
-.main-nav-tab.login {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-btn {
-  width: 100px;
-  height: 30px;
-  margin: 5px;
-  border: 1px solid;
-  border-radius: 10px;
-}
-
-.login-btn:hover {
-  color: aqua;
-  cursor: pointer;
-}
-
-.languages-container {
-  display: flex;
-  padding: 10px;
-  background-color: rgba(255, 255, 255, 0);
-
-  border-left: 2px solid gray;
-
-  /* border: 1px solid red; */
-}
-
-.languages-container button {
-  cursor: pointer;
-  background-color: rgba(255, 255, 255, 0.146);
-  border: none;
-  font-size: 1rem;
-}
-
-.languages-container button:first-child {
-  border-right: 1px solid;
-  padding-right: 5px;
-}
-
-.languages-container button:last-child {
-  padding-left: 5px;
-}
-
-.languages-container button:hover {
-  cursor: pointer;
-  color: gray;
-}
-/* ```````Navbar END`````````` */
 
 .main-image {
   display: flex;
@@ -267,14 +41,19 @@ html[dir='rtl'] .attrib,
 
 /* ============================================================
    Shopping Cart - Desktop (>= 800px)
-   Modern design with brand colors and improved UX
+   Minimalist Design - Clean, elegant aesthetic
    ============================================================ */
 
 body#cart {
-  background-color: #fcfbf9;
-  --brand-gold: #a88b63;
-  --brand-bg: #fcfbf9;
-  --brand-border: #d4c5b0;
+  background-color: #fafafa;
+  /* Minimalist color palette - clean grayscale */
+  --minimal-text: #1a1a1a;
+  --minimal-text-light: #666666;
+  --minimal-border: #e0e0e0;
+  --minimal-border-hover: #999999;
+  --minimal-bg: #fafafa;
+  --minimal-white: #ffffff;
+  --minimal-black: #000000;
 }
 
 main.cart-page {
@@ -291,12 +70,12 @@ main.cart-page {
 }
 
 .cart-page-title {
-  font-family: var(--font-display);
-  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(2rem, 3vw, 2.75rem);
   font-weight: 300;
-  letter-spacing: 0.02em;
-  color: var(--brand-gold);
-  margin: 0 0 2rem;
+  letter-spacing: -0.01em;
+  color: var(--minimal-black);
+  margin: 0 0 1rem;
   padding-top: 0;
   text-align: center;
 }
@@ -314,11 +93,11 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .cart-items-container {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(17, 17, 17, 0.08);
-  padding: 2rem;
-  border: 1px solid rgba(212, 197, 176, 0.3);
+  background: var(--minimal-white);
+  border-radius: 0;
+  box-shadow: none;
+  padding: 2.5rem;
+  border: 1px solid var(--minimal-border);
   min-width: 0; /* Prevent grid blowout */
   margin-right: 1rem;
 }
@@ -333,11 +112,11 @@ html[dir='rtl'] .cart-page-title {
   gap: 1.5rem;
   align-items: flex-start;
   border: none;
-  border-bottom: 1px solid rgba(212, 197, 176, 0.25);
+  border-bottom: 1px solid var(--minimal-border);
   border-radius: 0;
-  padding: 1.75rem 0;
+  padding: 2rem 0;
   margin: 0;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.15s ease;
 }
 
 .cart-item:first-child {
@@ -350,32 +129,33 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .cart-item:hover {
-  background-color: rgba(248, 245, 239, 0.5);
-  margin: 0 -1rem;
-  padding-left: 1rem;
-  padding-right: 1rem;
+  background-color: #fafafa;
+  margin: 0 -1.5rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
 }
 
 .cart-item__media {
   width: 200px;
   height: 130px;
   flex: 0 0 auto;
-  background: #f9f7f4;
+  background: #fafafa;
   overflow: hidden;
-  border-radius: 8px;
-  border: 1px solid rgba(212, 197, 176, 0.2);
+  border-radius: 2px;
+  border: 1px solid var(--minimal-border);
 }
 
 .item-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 8px;
-  transition: transform 0.3s ease;
+  border-radius: 2px;
+  transition: transform 0.3s ease, opacity 0.2s ease;
 }
 
 .cart-item:hover .item-img {
-  transform: scale(1.03);
+  transform: scale(1.02);
+  opacity: 0.95;
 }
 
 .cart-item__content {
@@ -390,13 +170,14 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .item-title {
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  color: #333;
+  font-family: 'Raleway', var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  color: var(--minimal-text);
   margin: 0;
   text-transform: none;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.005em;
   font-weight: 400;
+  line-height: 1.4;
 }
 
 .cart-item__right {
@@ -408,10 +189,10 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .item-price {
-  font-family: var(--font-body);
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #111;
+  font-family: 'Raleway', var(--font-body), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--minimal-text);
   margin: 0;
 }
 
@@ -419,27 +200,28 @@ html[dir='rtl'] .cart-page-title {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid var(--brand-border);
-  border-radius: 6px;
-  width: 110px;
-  height: 36px;
-  background: #faf9f7;
+  border: 1px solid var(--minimal-border);
+  border-radius: 2px;
+  width: 100px;
+  height: 34px;
+  background: var(--minimal-white);
 }
 
 .cart-qty__btn {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border: none;
   background: transparent;
-  color: var(--brand-gold);
+  color: var(--minimal-text);
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
+  font-weight: 400;
+  font-size: 1.1rem;
+  transition: all 0.15s ease;
 }
 
 .cart-qty__btn:hover {
-  background: rgba(168, 139, 99, 0.1);
-  color: var(--brand-gold);
+  background: #fafafa;
+  color: var(--minimal-black);
 }
 
 .cart-qty__btn:disabled {
@@ -448,52 +230,52 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .cart-qty__input {
-  width: 38px;
+  width: 32px;
   border: none;
   text-align: center;
-  font-size: 0.95rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 400;
   background: transparent;
-  color: #333;
+  color: var(--minimal-text);
 }
 
 .cart-remove {
   border: none;
   background: transparent;
-  color: #999;
-  font-size: 0.85rem;
+  color: var(--minimal-text-light);
+  font-size: 0.8rem;
   text-decoration: none;
   cursor: pointer;
   padding: 0;
-  transition: color 0.2s ease;
-  font-family: var(--font-body);
+  transition: color 0.15s ease;
+  font-family: 'Raleway', var(--font-body), sans-serif;
+  font-weight: 400;
 }
 
 .cart-remove:hover {
-  color: #c85a54;
+  color: var(--minimal-black);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.mobile-lang-selector {
-  display: none;
-}
+/* Mobile language selector hidden on desktop (handled by desktop-menu.css) */
 
 /* keep .delete-item for JS hooks; style it like the reference link */
 .delete-item {
   border: none;
   background: transparent;
-  color: #999;
-  font-size: 0.85rem;
+  color: var(--minimal-text-light);
+  font-size: 0.8rem;
   text-decoration: none;
   cursor: pointer;
   padding: 0;
-  transition: color 0.2s ease;
-  font-family: var(--font-body);
+  transition: color 0.15s ease;
+  font-family: 'Raleway', var(--font-body), sans-serif;
+  font-weight: 400;
 }
 
 .delete-item:hover {
-  color: #c85a54;
+  color: var(--minimal-black);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -504,14 +286,15 @@ html[dir='rtl'] .cart-page-title {
 
 .cart-empty {
   text-align: center;
-  font-family: var(--font-display);
-  font-size: 1.4rem;
-  color: #999;
+  font-family: 'Raleway', var(--font-display), sans-serif;
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: var(--minimal-text-light);
   padding: 4rem 2rem;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(17, 17, 17, 0.08);
-  border: 1px solid rgba(212, 197, 176, 0.3);
+  background: var(--minimal-white);
+  border-radius: 0;
+  box-shadow: none;
+  border: 1px solid var(--minimal-border);
   margin-bottom: 2rem;
 }
 
@@ -530,13 +313,14 @@ html[dir='rtl'] .cart-page-title {
   margin-left: auto;
   border: none;
   background: transparent;
-  color: #999;
-  font-size: 0.9rem;
+  color: var(--minimal-text-light);
+  font-size: 0.85rem;
   text-decoration: none;
   cursor: pointer;
   padding: 0.5rem 0;
-  transition: color 0.2s ease;
-  font-family: var(--font-body);
+  transition: color 0.15s ease;
+  font-family: 'Raleway', var(--font-body), sans-serif;
+  font-weight: 400;
 }
 
 .delete-all-active {
@@ -544,7 +328,7 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .delete-all:hover {
-  color: #c85a54;
+  color: var(--minimal-black);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -552,11 +336,11 @@ html[dir='rtl'] .cart-page-title {
 .summary-container {
   display: flex;
   flex-flow: column;
-  border-radius: 12px;
-  background: #ffffff;
-  padding: 2rem;
-  box-shadow: 0 8px 24px rgba(17, 17, 17, 0.08);
-  border: 1px solid rgba(212, 197, 176, 0.3);
+  border-radius: 0;
+  background: var(--minimal-white);
+  padding: 2.5rem;
+  box-shadow: none;
+  border: 1px solid var(--minimal-border);
   position: sticky;
   top: 2rem;
   min-width: 0; /* Prevent grid blowout */
@@ -565,12 +349,13 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .summary-title {
-  font-family: var(--font-display);
-  font-size: 2rem;
-  margin: 0 0 1.5rem;
-  color: var(--brand-gold);
+  font-family: 'Raleway', var(--font-display), sans-serif;
+  font-size: 1.5rem;
+  margin: 0 0 2rem;
+  color: var(--minimal-black);
   font-weight: 400;
-  text-align: center;
+  text-align: left;
+  letter-spacing: -0.01em;
 }
 
 .summary-item {
@@ -592,32 +377,33 @@ html[dir='rtl'] .cart-page-title {
   display: flex;
   flex-flow: column;
   width: 100%;
-  margin: 0 0 1.75rem;
-  padding-bottom: 1.75rem;
-  border-bottom: 1px solid rgba(212, 197, 176, 0.3);
+  margin: 0 0 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--minimal-border);
 }
 
 .total-container {
   display: flex;
   width: 100%;
   justify-content: space-between;
-  margin-bottom: 1rem;
-  font-size: 1rem;
-  font-family: var(--font-body);
+  margin-bottom: 0.875rem;
+  font-size: 0.95rem;
+  font-family: 'Raleway', var(--font-body), sans-serif;
   gap: 1rem;
 }
 
 .shipping-text {
-  font-size: 0.85rem;
-  color: #999;
+  font-size: 0.8rem;
+  color: var(--minimal-text-light);
   line-height: 1.6;
-  text-align: center;
-  font-style: italic;
+  text-align: left;
+  font-style: normal;
+  margin-top: 0.5rem;
 }
 
 .total-text {
-  font-weight: 500;
-  color: #333;
+  font-weight: 400;
+  color: var(--minimal-text);
   white-space: nowrap;
 }
 
@@ -656,19 +442,19 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .total-price {
-  font-weight: 500;
-  color: #111;
+  font-weight: 400;
+  color: var(--minimal-text);
   white-space: nowrap;
 }
 
 .total.total-container {
   border: none;
-  border-top: 2px solid rgba(168, 139, 99, 0.3);
+  border-top: 1px solid var(--minimal-border);
   padding-top: 1.25rem;
   margin-top: 1rem;
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: var(--brand-gold);
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: var(--minimal-black);
 }
 
 .checkout-btns-container {
@@ -679,19 +465,20 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .check-me-out {
-  font-family: var(--font-body);
-  font-size: 1rem;
-  color: #666;
-  text-align: center;
-  margin-bottom: 0.75rem;
+  font-family: 'Raleway', var(--font-body), sans-serif;
+  font-size: 0.9rem;
+  color: var(--minimal-text-light);
+  text-align: left;
+  margin-bottom: 1rem;
+  font-weight: 400;
 }
 
 .stripe-trust-copy {
-  text-align: center;
-  font-size: 0.8rem;
-  color: #999;
+  text-align: left;
+  font-size: 0.75rem;
+  color: var(--minimal-text-light);
   margin-top: 0.5rem;
-  font-style: italic;
+  font-style: normal;
   line-height: 1.5;
 }
 
@@ -701,22 +488,20 @@ html[dir='rtl'] .cart-page-title {
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  padding: 0.75rem 1.5rem;
-  border-radius: 10px;
+  gap: 0.25rem;
+  padding: 0.875rem 1.5rem;
+  border-radius: 2px;
   width: 100%;
-  border: none;
-  background: linear-gradient(135deg, var(--brand-gold) 0%, #c5a572 100%);
-  color: #fff;
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  font-weight: 600;
+  border: 1px solid var(--minimal-black);
+  background: var(--minimal-black);
+  color: var(--minimal-white);
+  font-family: 'Raleway', var(--font-body), sans-serif;
+  font-size: 0.9rem;
+  font-weight: 400;
   text-align: center;
-  box-shadow:
-    0 4px 16px rgba(168, 139, 99, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: none;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
 }
@@ -728,27 +513,25 @@ html[dir='rtl'] .cart-page-title {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  background: transparent;
   pointer-events: none;
 }
 
 .stripe-checkout-btn:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 24px rgba(168, 139, 99, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  background: linear-gradient(135deg, #c5a572 0%, #b89960 100%);
+  transform: none;
+  box-shadow: none;
+  background: var(--minimal-white);
+  color: var(--minimal-black);
+  border-color: var(--minimal-black);
 }
 
 .stripe-checkout-btn:active {
-  transform: translateY(0);
-  box-shadow:
-    0 2px 8px rgba(168, 139, 99, 0.3),
-    inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
 .stripe-checkout-btn:focus-visible {
-  outline: 3px solid rgba(168, 139, 99, 0.5);
+  outline: 2px solid var(--minimal-black);
   outline-offset: 2px;
 }
 
@@ -759,38 +542,38 @@ html[dir='rtl'] .cart-page-title {
   gap: 0.5rem;
   position: relative;
   z-index: 1;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .stripe-powered-by {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  font-size: 0.68rem;
-  font-weight: 500;
-  opacity: 0.92;
+  gap: 0.3rem;
+  font-size: 0.65rem;
+  font-weight: 400;
+  opacity: 0.8;
   direction: ltr;
   unicode-bidi: isolate;
   position: relative;
   z-index: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: none;
 }
 
 .stripe-powered-by-label {
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   font-weight: 400;
 }
 
 .stripe-logo-text {
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 #paypal {
-  border-top: 1px solid rgba(212, 197, 176, 0.3);
+  border-top: 1px solid var(--minimal-border);
   padding: 1.5rem 0 0;
   margin-bottom: 0;
   margin-top: 1rem;
@@ -800,220 +583,4 @@ html[dir='rtl'] .cart-page-title {
   z-index: 0;
 }
 
-/* =========================================================
-   FOOTER REDESIGN - CARTIER-INSPIRED LUXURY AESTHETIC
-   Clean, professional footer with elegant hierarchy
-   ========================================================= */
-
-.footer {
-  width: 100%;
-  background: #ffffff;
-  border-top: 1px solid #e5e5e5;
-  padding: 5rem 0 0;
-  margin-top: 5rem;
-  position: relative;
-}
-
-.columns-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4rem;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 4rem 4rem;
-}
-
-.footer-left-column,
-.footer-middle-column,
-.footer-right-column {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-}
-
-/* Column headers with luxury brand styling */
-.footer-left-column::before {
-  content: 'SHOP';
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.75rem;
-}
-
-.footer-middle-column::before {
-  content: 'CUSTOMER CARE';
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.75rem;
-}
-
-.footer-right-column::before {
-  content: 'ABOUT';
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.75rem;
-}
-
-/* RTL column headers */
-html[dir='rtl'] .footer-left-column::before {
-  content: 'חנות';
-}
-
-html[dir='rtl'] .footer-middle-column::before {
-  content: 'שירות לקוחות';
-}
-
-html[dir='rtl'] .footer-right-column::before {
-  content: 'אודות';
-}
-
-.attrib-footer {
-  display: inline-flex;
-  font-size: 0.8rem;
-  font-family: var(--font-body);
-  font-weight: 400;
-  color: #666;
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  line-height: 2.2;
-  transition: color 0.25s ease;
-  position: relative;
-  width: auto;
-  padding: 0;
-  border: none;
-  margin: 0;
-}
-
-/* Simple hover - color change only */
-.attrib-footer:hover {
-  color: #333;
-}
-
-/* RTL support for footer links */
-html[dir='rtl'] .footer-left-column,
-html[dir='rtl'] .footer-middle-column,
-html[dir='rtl'] .footer-right-column {
-  align-items: flex-end;
-}
-
-html[dir='rtl'] .attrib-footer {
-  text-transform: none;
-  letter-spacing: 0;
-  font-family: var(--font-accent);
-}
-
-/* Copyright bar with brand gold background */
-.rights-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  width: 100%;
-  padding: 1.5rem 2rem;
-  background: #000000;
-  border-top: none;
-}
-
-.rights-text {
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 400;
-  color: #ffffff;
-  letter-spacing: 0.02em;
-  text-align: center;
-}
-
-/* Social media & newsletter section (to be added to HTML) */
-.footer-social-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 2.5rem 2rem;
-  border-top: 1px solid rgba(168, 139, 99, 0.12);
-}
-
-.footer-social-title {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #6a6a6a;
-}
-
-.footer-social-links {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.footer-social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(168, 139, 99, 0.25);
-  border-radius: 50%;
-  background: #ffffff;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.footer-social-link:hover {
-  background: #c5a572;
-  border-color: #c5a572;
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(197, 165, 114, 0.25);
-}
-
-.footer-social-link svg,
-.footer-social-link img {
-  width: 18px;
-  height: 18px;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-}
-
-.footer-social-link:hover svg,
-.footer-social-link:hover img {
-  opacity: 1;
-  filter: brightness(0) invert(1);
-}
-
-/* Payment icons section */
-.footer-payment-icons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  opacity: 0.6;
-}
-
-.footer-payment-icon {
-  height: 24px;
-  width: auto;
-  filter: grayscale(1);
-  opacity: 0.5;
-  transition: all 0.3s ease;
-}
-
-.footer-payment-icon:hover {
-  filter: grayscale(0);
-  opacity: 1;
-}
+/* Footer styles moved to footer-desktop.css */

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -33,6 +33,11 @@
       href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@300;400;500;600&display=swap"
       rel="stylesheet"
     />
+    <!-- Rubik font for Hebrew text -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap"
+      rel="stylesheet"
+    />
 
     <link rel="stylesheet" href="./css/standard-reset.css" />
     <link rel="stylesheet" href="./css/desktop-menu.css" />
@@ -45,6 +50,16 @@
       rel="stylesheet"
       href="./css/home-800plus.css"
       media="(min-width: 800px)"
+    />
+    <link
+      rel="stylesheet"
+      href="./css/footer-desktop.css"
+      media="(min-width: 800px)"
+    />
+    <link
+      rel="stylesheet"
+      href="./css/footer-mobile.css"
+      media="(max-width: 799.9px)"
     />
     <link
       rel="stylesheet"
@@ -107,7 +122,9 @@
           </div>
 
           <!-- Brand -->
-          <a class="site-brand" href="/index.html">Tamar Kfir Jewelry</a>
+          <a class="site-brand" href="/index.html">
+            <span class="site-logo-text">Tamar Kfir Jewelry</span>
+          </a>
         </div>
 
         <!-- Desktop navigation (tabs injected by View.js) -->
@@ -139,12 +156,21 @@
           fetchpriority="high"
         /> -->
       <section class="hero-section">
-        <img
-          src="./imgs/Hero-imgs/hero-test.png"
-          alt="main website image"
-          class="hero-background"
-          fetchpriority="high"
-        />
+        <picture>
+          <source
+            media="(max-width: 799.9px)"
+            srcset="./imgs/Hero-imgs/hero-test2-(small).png"
+          />
+          <img
+            src="./imgs/Hero-imgs/hero-test2.png"
+            alt="main website image"
+            class="hero-background"
+            fetchpriority="high"
+          />
+        </picture>
+        <div class="hero-tagline">
+          <p class="tagline-text">One of a kind in mind</p>
+        </div>
         <!-- <div class="hero-overlay">
           <div class="hero-content">
             <h1 class="hero-title">INSPIRED BY TIMELESS ELEGANCE</h1>
@@ -163,6 +189,37 @@
         /></a>
       </div>
       <div class="categories-container" id="categories">
+        <a href="./html/categories/crochetNecklaces.html" class="category-box">
+          <img
+            class="large-img-item"
+            src="./imgs/Hero-imgs/categories-images/crochet-category.webp"
+            alt=""
+            loading="lazy"
+          />
+          <span class="category-name category-name_crochet-necklaces"
+            >Crochet Necklaces</span
+          >
+        </a>
+        <a href="./html/categories/hoops.html" class="category-box">
+          <img
+            class="large-img-item"
+            src="./imgs/Hero-imgs/categories-images/hoop-category.webp"
+            alt=""
+            loading="lazy"
+          />
+          <span class="category-name category-name_hoops">Hoop Earrings</span>
+        </a>
+        <a href="./html/categories/dangle.html" class="category-box">
+          <img
+            class="large-img-item"
+            src="./imgs/Hero-imgs/categories-images/dangle-category.webp"
+            alt=""
+            loading="lazy"
+          />
+          <span class="category-name category-name_dangle"
+            >Dangle Earrings</span
+          >
+        </a>
         <a href="./html/categories/necklaces.html" class="category-box">
           <img
             class="large-img-item"
@@ -172,48 +229,16 @@
           />
           <span class="category-name category-name_necklaces">Necklaces</span>
         </a>
-        <a href="./html/categories/dangle.html" class="category-box">
+        <!-- <a href="./html/categories/bracelets.html" class="category-box">
           <img
             class="large-img-item"
-            src="./imgs/Hero-imgs/_MG_9124.jpg"
-            alt=""
-            loading="lazy"
-          />
-          <span class="category-name category-name_dangle"
-            >Dangle Earrings</span
-          >
-        </a>
-        <a href="./html/categories/hoops.html" class="category-box">
-          <img
-            class="large-img-item"
-            src="./imgs/Hero-imgs/D02A2704_conv.webp"
-            alt=""
-            loading="lazy"
-          />
-          <span class="category-name category-name_hoops">Hoop Earrings</span>
-        </a>
-        <a href="./html/categories/crochetNecklaces.html" class="category-box">
-          <img
-            class="large-img-item"
-            src="./imgs/Hero-imgs/in.jpg"
-            alt=""
-            loading="lazy"
-          />
-          <span class="category-name category-name_crochet-necklaces"
-            >Crochet Necklaces</span
-          >
-        </a>
-
-        <a href="./html/categories/bracelets.html" class="category-box">
-          <img
-            class="large-img-item"
-            src="./imgs/Hero-imgs/_MG_9974_conv.webp"
+            src="./imgs/Hero-imgs/categories-images/bracelet-category.png"
             alt=""
             loading="lazy"
           />
           <span class="category-name category-name_bracelets">Bracelets</span>
-        </a>
-        <a href="./html/categories/unisex.html" class="category-box">
+        </a> -->
+        <!-- <a href="./html/categories/unisex.html" class="category-box">
           <img
             class="large-img-item"
             src="./imgs/Hero-imgs/unisex(Small).jpg"
@@ -221,7 +246,7 @@
             loading="lazy"
           />
           <span class="category-name category-name_unisex">Unisex Jewelry</span>
-        </a>
+        </a> -->
         <!-- HIDDEN: Shalom Club - uncomment to restore
         <a href="./html/categories/shalom-club.html" class="category-box">
           <img

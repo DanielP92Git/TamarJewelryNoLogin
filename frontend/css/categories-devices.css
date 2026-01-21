@@ -642,20 +642,15 @@ main {
 .modal-content {
   display: flex;
   flex-direction: column;
-  background-color: rgba(250, 240, 255, 0.95);
-  background-image: linear-gradient(
-    to top right,
-    rgba(155, 136, 183, 0.4),
-    rgba(154, 191, 201, 0.4)
-  );
+  background-color: #ffffff;
   width: 92%;
   height: auto;
   min-height: 85vh;
   max-height: 90vh;
-  padding: 20px;
+  padding: 20px 16px;
   position: relative;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  border-radius: 0;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
   overflow-y: auto;
   gap: 15px;
   margin: 20px 0;
@@ -679,8 +674,8 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(255, 255, 255, 0.5);
-  border-radius: 8px;
+  background-color: #fafafa;
+  border-radius: 0;
   overflow: hidden;
   margin-bottom: 10px;
 }
@@ -689,7 +684,7 @@ main {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  padding: 15px 10px;
+  padding: 20px 16px;
   padding-bottom: 20px;
   margin-bottom: 0;
   position: relative;
@@ -704,8 +699,8 @@ main {
 
 .item-description_modal {
   font-size: 0.95rem;
-  line-height: 1.5;
-  color: #333;
+  line-height: 1.7;
+  color: #666;
   width: 100%;
   margin-bottom: 20px;
   padding-bottom: 10px;
@@ -719,8 +714,8 @@ main {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  align-items: stretch;
+  border-top: 1px solid #e5e5e5;
 }
 
 /* RTL Specific Styles */
@@ -776,28 +771,30 @@ main {
 
 .add-to-cart-btn_modal {
   width: 100%;
-  max-width: 300px;
-  height: 40px;
-  margin: 10px auto 5px;
-  padding: 8px 15px;
+  max-width: 100%;
+  height: auto;
+  margin: 10px 0 5px;
+  padding: 14px 24px;
   border: none;
   border-radius: 0;
   background-color: #1f2937;
   color: white;
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: auto;
+  transition: background-color 0.2s ease;
   display: block;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: none;
+  font-family: var(--font-body);
+  text-transform: uppercase;
 }
 
 .add-to-cart-btn_modal:hover {
   background-color: #111827;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px);
+  box-shadow: none;
+  transform: none;
 }
 
 .fullscreen-gallery {
@@ -876,18 +873,19 @@ main {
   flex: 0 0 auto;
   width: 70px;
   height: 70px;
-  border: 2px solid transparent;
-  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  border-radius: 0;
   overflow: hidden;
-  transition: border-color 0.3s ease;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
+  background-color: #fafafa;
 }
 
 .small-image-div.active {
-  border-color: #4a90e2;
+  border-color: #1f2937;
+  box-shadow: 0 0 0 1px #1f2937;
 }
 
 .small-image {
@@ -967,224 +965,7 @@ main {
   display: block;
 }
 
-/* =========================================================
-   FOOTER REDESIGN - MOBILE - CARTIER-INSPIRED LUXURY AESTHETIC
-   Clean, professional footer optimized for mobile screens
-   ========================================================= */
-
-.footer {
-  width: 100%;
-  background: #ffffff;
-  border-top: 1px solid #e5e5e5;
-  padding: 3rem 0 0;
-  margin-top: 3rem;
-  position: relative;
-}
-
-.columns-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-  width: 100%;
-  padding: 0 1.5rem 3rem;
-}
-
-.footer-left-column,
-.footer-middle-column,
-.footer-right-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  text-align: center;
-  width: 100%;
-  padding: 0;
-  border-bottom: none;
-}
-
-/* Column headers with luxury brand styling */
-.footer-left-column::before {
-  content: 'SHOP';
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.footer-middle-column::before {
-  content: 'CUSTOMER CARE';
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.footer-right-column::before {
-  content: 'ABOUT';
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-/* RTL column headers */
-html[dir='rtl'] .footer-left-column::before {
-  content: 'חנות';
-}
-
-html[dir='rtl'] .footer-middle-column::before {
-  content: 'שירות לקוחות';
-}
-
-html[dir='rtl'] .footer-right-column::before {
-  content: 'אודות';
-}
-
-.attrib-footer {
-  display: inline-flex;
-  font-size: 0.75rem;
-  font-family: var(--font-body);
-  font-weight: 400;
-  color: #666;
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  line-height: 2;
-  transition: color 0.25s ease;
-  position: relative;
-  width: auto;
-  padding: 0;
-  border: none;
-  margin: 0;
-  text-align: center;
-}
-
-/* Simple tap effect for mobile */
-.attrib-footer:active {
-  color: #333;
-}
-
-/* RTL support for footer links */
-html[dir='rtl'] .footer-left-column,
-html[dir='rtl'] .footer-middle-column,
-html[dir='rtl'] .footer-right-column {
-  align-items: center;
-}
-
-html[dir='rtl'] .attrib-footer {
-  text-transform: none;
-  letter-spacing: 0;
-  font-family: var(--font-accent);
-}
-
-/* Copyright bar with brand gold background */
-.rights-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  width: 100%;
-  padding: 1.25rem 1.5rem;
-  background: #000000;
-  border-top: none;
-}
-
-.rights-text {
-  font-family: var(--font-body);
-  font-size: 0.65rem;
-  font-weight: 400;
-  color: #ffffff;
-  letter-spacing: 0.02em;
-  text-align: center;
-  line-height: 1.5;
-}
-
-/* Social media & newsletter section (mobile) */
-.footer-social-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 2rem 1.5rem;
-  border-top: 1px solid rgba(168, 139, 99, 0.12);
-}
-
-.footer-social-title {
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #6a6a6a;
-}
-
-.footer-social-links {
-  display: flex;
-  gap: 1.25rem;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.footer-social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgba(168, 139, 99, 0.25);
-  border-radius: 50%;
-  background: #ffffff;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.footer-social-link:active {
-  background: #c5a572;
-  border-color: #c5a572;
-  transform: scale(0.95);
-}
-
-.footer-social-link svg,
-.footer-social-link img {
-  width: 20px;
-  height: 20px;
-  opacity: 0.7;
-}
-
-.footer-social-link:active svg,
-.footer-social-link:active img {
-  opacity: 1;
-  filter: brightness(0) invert(1);
-}
-
-/* Payment icons section (mobile) */
-.footer-payment-icons {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  opacity: 0.6;
-}
-
-.footer-payment-icon {
-  height: 20px;
-  width: auto;
-  filter: grayscale(1);
-  opacity: 0.5;
-}
-
+/* Footer styles are now imported from footer-mobile.css */
 /* Added rule to hide the container when there's only one image */
 .hide-small-images {
   display: none;
@@ -1335,9 +1116,9 @@ html[dir='rtl'] .attrib-footer {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid transparent;
-    border-radius: 8px;
-    background-color: #f8f9fa;
+    border: 1px solid #e5e5e5;
+    border-radius: 0;
+    background-color: #fafafa;
   }
 
   .small-image-thumb img {
@@ -1410,55 +1191,58 @@ html[dir='rtl'] .attrib-footer {
 
 .close-modal-btn {
   position: absolute;
-  right: 5px;
-  top: 5px;
-  width: 25px;
-  height: 25px;
-  background-color: rgba(255, 255, 255, 0.9);
-  border-radius: 50%;
+  right: 10px;
+  top: 10px;
+  width: 32px;
+  height: 32px;
+  background-color: transparent;
+  border-radius: 0;
   border: none;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  box-shadow: none;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  color: #333;
+  font-size: 26px;
+  color: #1f2937;
   z-index: 10002;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease;
 }
 
 .close-modal-btn:hover {
-  background-color: #fff;
-  transform: scale(1.1);
-  box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+  background-color: transparent;
+  transform: none;
+  box-shadow: none;
+  color: #000;
 }
 
 .item-title_modal {
-  font-size: 1.3rem;
+  font-size: 1.25rem;
   margin: 0 0 15px;
-  font-weight: 600;
-  line-height: 1.2;
-  color: #333;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  line-height: 1.3;
+  color: #1f2937;
   width: 100%;
+  font-family: var(--font-body);
 }
 
 .price-box {
-  background-color: #f8f9fa;
-  padding: 10px;
-  border-radius: 7px;
-  text-align: center;
-  margin-bottom: 10px;
-  width: 90%;
+  background-color: transparent;
+  padding: 0;
+  border-radius: 0;
+  text-align: left;
+  margin-bottom: 15px;
+  width: 100%;
   box-sizing: border-box;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .price-text-modal {
-  font-size: 0.9rem;
-  color: #333;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  font-size: 1.05rem;
+  color: #1f2937;
+  font-weight: 500;
+  font-family: var(--font-body);
+  letter-spacing: 0.3px;
 }
 
 [dir='rtl'] .currency-sort-container {
@@ -1467,6 +1251,10 @@ html[dir='rtl'] .attrib-footer {
 
 [dir='rtl'] .price-container {
   flex-direction: row-reverse;
+}
+
+[dir='rtl'] .price-box {
+  text-align: right;
 }
 
 /* Ensure magnifier works normally on desktop */

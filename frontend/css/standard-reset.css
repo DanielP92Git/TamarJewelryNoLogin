@@ -10,13 +10,13 @@
   --font-body: 'Montserrat', sans-serif;
 
   /* Accent Font - Used for Hebrew text and special decorative elements */
-  --font-accent: 'Amatic SC', cursive;
+  --font-accent: 'Rubik', sans-serif;
 
   /* Secondary Display Font - Used for hero sections and special headings */
   --font-secondary: 'Montserrat', sans-serif;
 
   /* Decorative Font - Used for brand name and special decorative text */
-  --font-decorative: 'Great Vibes', cursive;
+  --font-decorative: 'Montserrat', sans-serif;
 }
 
 * {

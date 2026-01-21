@@ -1,16 +1,17 @@
 /* =========================================================
    Contact page (< 800px)
-   UI only: keep existing IDs/classes/JS behavior
+   Minimalist Design - Clean, simple aesthetic
    ========================================================= */
 
 body#contact-me {
-  --brand-gold: #a88b63;
-  --brand-bg: #fcfbf9;
-  --brand-input: #f2efe9;
-  --brand-btn-bg: #f4f0e6;
-  --brand-btn-border: #c4b398;
-  --brand-input-border: #d4c5b0;
-  --brand-text: #333333;
+  /* Minimalist color palette - grayscale only */
+  --minimal-text: #1a1a1a;
+  --minimal-text-light: #666666;
+  --minimal-border: #e0e0e0;
+  --minimal-border-hover: #999999;
+  --minimal-bg: #fafafa;
+  --minimal-white: #ffffff;
+  --minimal-black: #000000;
 }
 
 html,
@@ -18,13 +19,10 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  color: var(--brand-text);
-  font-family: 'Lato', 'Raleway', sans-serif;
+  color: var(--minimal-text);
+  font-family: 'Raleway', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   line-height: 1.6;
-  background-color: var(--brand-bg);
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(177, 20, 169); */
+  background-color: var(--minimal-bg);
 }
 
 header {
@@ -43,38 +41,37 @@ main {
   padding: 5rem 1rem 2rem 1rem;
 }
 
-/* Modern Contact Form Styles */
+/* Minimalist Contact Form Styles */
 .contact-main {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: calc(100vh - 60px);
-  padding: 2.5rem 1.25rem;
+  padding: 2rem 1rem;
   position: relative;
-  overflow: hidden;
 }
 
-/* Modern glass-like container */
+/* Minimalist container */
 .contact-container {
   width: 100%;
   max-width: 640px;
-  background: rgba(255, 255, 255, 0.96);
-  padding: 2.5rem 1.75rem;
-  border-radius: 16px;
-  box-shadow: 0 12px 34px rgba(17, 17, 17, 0.10);
-  border: 1px solid rgba(212, 197, 176, 0.55);
+  background: var(--minimal-white);
+  padding: 2.5rem 1.5rem;
+  border-radius: 0;
+  box-shadow: none;
+  border: 1px solid var(--minimal-border);
   position: relative;
   z-index: 1;
 }
 
 .contact-title {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 8vw, 2.8rem);
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(1.75rem, 6vw, 2.25rem);
   font-weight: 300;
-  letter-spacing: 0.02em;
-  margin: 0 0 1.5rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.75rem;
   padding-top: 0;
-  color: var(--brand-gold);
+  color: var(--minimal-black);
   text-align: center;
 }
 
@@ -83,23 +80,24 @@ html[dir='rtl'] .contact-title {
 }
 
 .contact-subtitle {
-  font-size: 1.125rem;
-  color: rgba(51, 51, 51, 0.8);
+  font-size: 0.9375rem;
+  font-weight: 400;
+  color: var(--minimal-text-light);
   text-align: center;
-  margin-bottom: 3rem;
-  line-height: 1.6;
+  margin-bottom: 2.5rem;
+  line-height: 1.5;
 }
 
 .contact-form {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
 .form-group {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 2rem;
+  gap: 1.25rem;
 }
 
 @media (min-width: 480px) {
@@ -108,7 +106,7 @@ html[dir='rtl'] .contact-title {
   }
 }
 
-/* Modern input styling */
+/* Minimalist input styling */
 .input-group {
   position: relative;
   width: 100%;
@@ -118,28 +116,30 @@ html[dir='rtl'] .contact-title {
 .input-group input,
 .input-group textarea {
   width: 100%;
-  padding: 1.05rem 1.25rem;
-  font-size: 1rem;
-  border: 1px solid var(--brand-input-border);
-  border-radius: 6px;
-  background: var(--brand-input);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease,
-    background-color 0.2s ease;
-  color: var(--brand-text);
+  padding: 0.875rem 1rem;
+  font-size: 0.9375rem;
+  font-family: 'Raleway', sans-serif;
+  border: 1px solid var(--minimal-border);
+  border-radius: 2px;
+  background: var(--minimal-white);
+  transition: border-color 0.2s ease;
+  color: var(--minimal-text);
   outline: none;
   box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .input-group textarea {
-  min-height: 160px;
+  min-height: 140px;
   max-height: 300px;
-  resize: none;
+  resize: vertical;
   line-height: 1.6;
   overflow-y: auto;
 }
 
 .input-group label {
-  /* Keep labels for accessibility, but hide visually (reference uses placeholders) */
+  /* Keep labels for accessibility, but hide visually */
   position: absolute !important;
   width: 1px !important;
   height: 1px !important;
@@ -153,56 +153,67 @@ html[dir='rtl'] .contact-title {
 
 .input-group input::placeholder,
 .input-group textarea::placeholder {
-  color: rgba(51, 51, 51, 0.55);
+  color: #999999;
+  font-weight: 300;
 }
 
-/* Modern focus states */
+/* Minimalist focus states - simple border change */
 .input-group input:focus,
 .input-group textarea:focus {
-  border-color: var(--brand-gold);
-  background: #ffffff;
-  box-shadow: 0 0 0 2px rgba(168, 139, 99, 0.22);
+  border-color: var(--minimal-black);
 }
 
-/* Modern submit button */
+/* Minimalist submit button - clean black and white */
 #submit {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  padding: 1.25rem 2.5rem;
-  font-size: 1.125rem;
-  font-weight: 500;
-  color: var(--brand-gold);
-  background: var(--brand-btn-bg);
-  border: 1px solid var(--brand-btn-border);
-  border-radius: 999px;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  width: 100%;
+  font-size: 0.9375rem;
+  font-weight: 400;
+  font-family: 'Raleway', sans-serif;
+  letter-spacing: 0.02em;
+  color: var(--minimal-white);
+  background: var(--minimal-black);
+  border: 1px solid var(--minimal-black);
+  border-radius: 2px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   margin-top: 1.5rem;
-  box-shadow: 0 6px 16px rgba(17, 17, 17, 0.06);
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+@media (min-width: 480px) {
+  #submit {
+    width: auto;
+    align-self: flex-start;
+  }
 }
 
 .submit-button:hover {
-  background: var(--brand-btn-border);
-  color: #ffffff;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(17, 17, 17, 0.10);
+  background: var(--minimal-white);
+  color: var(--minimal-black);
+  border-color: var(--minimal-black);
 }
 
 .submit-button:active {
-  transform: translateY(0);
+  transform: translateY(1px);
 }
 
 .button-arrow {
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   fill: currentColor;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
+  display: none; /* Hide arrow for minimal aesthetic */
 }
 
 .submit-button:hover .button-arrow {
-  transform: translateX(6px);
+  transform: translateX(4px);
 }
 
 /* Flip arrow to point left in Hebrew/RTL */
@@ -213,23 +224,21 @@ html[dir='rtl'] .button-arrow,
 
 html[dir='rtl'] .submit-button:hover .button-arrow,
 .submit-heb:hover .button-arrow {
-  transform: scaleX(-1) translateX(-6px);
+  transform: scaleX(-1) translateX(-4px);
 }
 
-/* Modern error states */
+/* Minimalist error states */
 .input-group input:invalid:not(:placeholder-shown),
 .input-group textarea:invalid:not(:placeholder-shown) {
-  border-color: #d66a6a;
-  background: #fbf1f1;
+  border-color: #cc0000;
 }
 
-/* Label remains accessible but hidden; no visual error label needed */
-
-/* Modern loading state */
+/* Minimalist loading state */
 .submit-button.loading {
-  background: rgba(51, 51, 51, 0.65);
+  background: #666666;
+  border-color: #666666;
   cursor: not-allowed;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
 .submit-button.loading .button-arrow {
@@ -251,16 +260,16 @@ html[dir='rtl'] .submit-button.loading .button-arrow,
   }
 }
 
-/* Modern success message */
+/* Minimalist success message */
 .success-message {
-  text-align: center;
-  color: #2b7a3f;
-  background: rgba(242, 239, 233, 0.75);
-  border: 1px solid rgba(212, 197, 176, 0.65);
-  padding: 1rem;
-  border-radius: 12px;
+  text-align: left;
+  color: var(--minimal-text);
+  background: var(--minimal-white);
+  border: 1px solid var(--minimal-border);
+  padding: 1rem 1.25rem;
+  border-radius: 2px;
   margin-top: 1.5rem;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   opacity: 0;
   transform: translateY(10px);
   transition: all 0.3s ease;
@@ -271,151 +280,7 @@ html[dir='rtl'] .submit-button.loading .button-arrow,
   transform: translateY(0);
 }
 
-/* =========================================================
-   FOOTER REDESIGN - MOBILE - CARTIER-INSPIRED LUXURY AESTHETIC
-   Clean, professional footer optimized for mobile screens
-   ========================================================= */
-
-.footer {
-  width: 100%;
-  background: #ffffff;
-  border-top: 1px solid #e5e5e5;
-  padding: 3rem 0 0;
-  margin-top: 3rem;
-  position: relative;
-}
-
-.columns-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-  width: 100%;
-  padding: 0 1.5rem 3rem;
-}
-
-.footer-left-column,
-.footer-middle-column,
-.footer-right-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  text-align: center;
-  width: 100%;
-  padding: 0;
-  border-bottom: none;
-}
-
-/* Column headers with luxury brand styling */
-.footer-left-column::before {
-  content: 'SHOP';
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.footer-middle-column::before {
-  content: 'CUSTOMER CARE';
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.footer-right-column::before {
-  content: 'ABOUT';
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-/* RTL column headers */
-html[dir='rtl'] .footer-left-column::before {
-  content: 'חנות';
-}
-
-html[dir='rtl'] .footer-middle-column::before {
-  content: 'שירות לקוחות';
-}
-
-html[dir='rtl'] .footer-right-column::before {
-  content: 'אודות';
-}
-
-.attrib-footer {
-  display: inline-flex;
-  font-size: 0.75rem;
-  font-family: var(--font-body);
-  font-weight: 400;
-  color: #666;
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  line-height: 2;
-  transition: color 0.25s ease;
-  position: relative;
-  width: auto;
-  padding: 0;
-  border: none;
-  margin: 0;
-  text-align: center;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Simple tap effect for mobile */
-.attrib-footer:active {
-  color: #333;
-}
-
-/* RTL support for footer links */
-html[dir='rtl'] .footer-left-column,
-html[dir='rtl'] .footer-middle-column,
-html[dir='rtl'] .footer-right-column {
-  align-items: center;
-}
-
-html[dir='rtl'] .attrib-footer {
-  text-transform: none;
-  letter-spacing: 0;
-  font-family: var(--font-accent);
-}
-
-/* Copyright bar with brand gold background */
-.rights-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  width: 100%;
-  padding: 1.25rem 1.5rem;
-  background: #000000;
-  border-top: none;
-  margin: 0;
-}
-
-.rights-text {
-  font-family: var(--font-body);
-  font-size: 0.65rem;
-  font-weight: 400;
-  color: #ffffff;
-  letter-spacing: 0.02em;
-  text-align: center;
-  line-height: 1.5;
-}
+/* Footer styles are now imported from footer-mobile.css */
 
 /* Styles for categories list accordion */
 .categories-list {
