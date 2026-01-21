@@ -105,13 +105,18 @@ body#contact-me .site-header .menu {
   display: none;
 }
 .contact-title {
-  font-family: 'Montserrat', sans-serif;
-  font-size: clamp(2.2rem, 4vw, 3.1rem);
-  font-weight: 500;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 4vw, 3.4rem);
+  font-weight: 300;
+  letter-spacing: 0.02em;
   color: var(--brand-gold);
-  margin-bottom: 0.75rem;
+  margin: 0 0 2rem;
+  padding-top: 0;
   text-align: center;
-  letter-spacing: 0.01em;
+}
+
+html[dir='rtl'] .contact-title {
+  text-align: center;
 }
 
 .contact-subtitle {
