@@ -1,0 +1,261 @@
+/* =========================================================
+   SHARED FOOTER STYLES - MOBILE (<800px)
+   Cartier-inspired luxury aesthetic footer
+   Clean, professional footer optimized for mobile screens
+
+   This file contains all shared footer styles for mobile.
+   Import this file in all page-specific mobile CSS files.
+   ========================================================= */
+
+.footer {
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #e5e5e5;
+  padding: 3rem 0 0;
+  margin-top: 3rem;
+  position: relative;
+}
+
+.columns-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  width: 100%;
+  padding: 0 1.5rem 3rem;
+}
+
+.footer-left-column,
+.footer-middle-column,
+.footer-right-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  width: 100%;
+  padding: 0;
+  border-bottom: none;
+}
+
+/* Column headers with luxury brand styling */
+.footer-left-column::before {
+  content: 'SHOP';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.footer-middle-column::before {
+  content: 'CUSTOMER CARE';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.footer-right-column::before {
+  content: 'INFO';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/* RTL column headers */
+html[dir='rtl'] .footer-left-column::before,
+.columns-container_heb .footer-left-column::before {
+  content: 'חנות';
+  font-family: var(--font-accent);
+}
+
+html[dir='rtl'] .footer-middle-column::before,
+.columns-container_heb .footer-middle-column::before {
+  content: 'שירות לקוחות';
+  font-family: var(--font-accent);
+}
+
+html[dir='rtl'] .footer-right-column::before,
+.columns-container_heb .footer-right-column::before {
+  content: 'אודות';
+  font-family: var(--font-accent);
+}
+
+.attrib-footer {
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: #666;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.7;
+  transition: color 0.25s ease;
+  position: relative;
+  width: auto;
+  padding: 0;
+  border: none;
+  margin: 0;
+  text-align: center;
+}
+
+/* Simple tap effect for mobile */
+.attrib-footer:active {
+  color: #333;
+}
+
+/* RTL support for footer links */
+html[dir='rtl'] .footer-left-column,
+html[dir='rtl'] .footer-middle-column,
+html[dir='rtl'] .footer-right-column,
+.columns-container_heb .footer-left-column,
+.columns-container_heb .footer-middle-column,
+.columns-container_heb .footer-right-column {
+  align-items: center;
+}
+
+html[dir='rtl'] .attrib-footer,
+.columns-container_heb .attrib-footer {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-accent);
+  text-align: center;
+  direction: rtl;
+}
+
+/* Copyright bar with brand gold background */
+.rights-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  background: #000000;
+  border-top: none;
+}
+
+.rights-text {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Social media & newsletter section (mobile) */
+.footer-social-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid rgba(168, 139, 99, 0.12);
+}
+
+.footer-social-title {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6a6a6a;
+}
+
+.footer-social-links {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(168, 139, 99, 0.25);
+  border-radius: 50%;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.footer-social-link:active {
+  background: #c5a572;
+  border-color: #c5a572;
+  transform: scale(0.95);
+}
+
+.footer-social-link svg,
+.footer-social-link img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+.footer-social-link:active svg,
+.footer-social-link:active img {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}
+
+/* Payment icons section (mobile) */
+.footer-payment-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0.6;
+}
+
+.footer-payment-icon {
+  height: 20px;
+  width: auto;
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.whatsapp-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: fixed;
+  top: 85vh;
+  width: 100%;
+  z-index: 10;
+}
+
+.whatsapp-atr {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background-color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 10%;
+  z-index: 10;
+}
+
+.whatsapp-svg {
+  width: 40px;
+  height: 40px;
+  justify-self: self-end;
+}

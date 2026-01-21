@@ -1,0 +1,345 @@
+/* =========================================================
+   SHARED FOOTER STYLES - DESKTOP (>= 800px)
+   Cartier-inspired luxury aesthetic footer
+   Clean, professional footer with elegant hierarchy
+
+   This file contains all shared footer styles for desktop.
+   Import this file in all page-specific CSS files.
+   ========================================================= */
+
+.footer {
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #e5e5e5;
+  padding: 5rem 0 0;
+  margin-top: 5rem;
+  position: relative;
+}
+
+.columns-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4rem;
+  width: 50%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 4rem 4rem;
+}
+
+.footer-left-column,
+.footer-middle-column,
+.footer-right-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+/* Column headers with luxury brand styling */
+.footer-left-column::before {
+  content: 'SHOP';
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.75rem;
+  text-align: left;
+  width: 100%;
+  align-self: flex-start;
+}
+
+.footer-middle-column::before {
+  content: 'CUSTOMER CARE';
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.75rem;
+  text-align: left;
+  width: 100%;
+  align-self: flex-start;
+}
+
+.footer-right-column::before {
+  content: 'INFO';
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.75rem;
+  text-align: left;
+  width: 100%;
+  align-self: flex-start;
+}
+
+/* RTL column headers */
+html[dir='rtl'] .footer-left-column::before,
+.columns-container_heb .footer-left-column::before {
+  content: 'חנות';
+  text-align: right;
+  width: 100%;
+  font-size: 0.9rem;
+  font-family: var(--font-accent);
+}
+
+html[dir='rtl'] .footer-middle-column::before,
+.columns-container_heb .footer-middle-column::before {
+  content: 'שירות לקוחות';
+  text-align: right;
+  width: 100%;
+  font-size: 0.9rem;
+  font-family: var(--font-accent);
+}
+
+html[dir='rtl'] .footer-right-column::before,
+.columns-container_heb .footer-right-column::before {
+  content: 'אודות';
+  text-align: right;
+  width: 100%;
+  font-size: 0.9rem;
+  font-family: var(--font-accent);
+}
+
+.attrib-footer {
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: #666;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1.8;
+  transition: color 0.25s ease;
+  position: relative;
+  width: 100%;
+  padding: 0;
+  border: none;
+  margin: 0;
+  margin-bottom: 0.6rem;
+  height: auto;
+  text-align: left;
+  justify-content: flex-start;
+  align-self: flex-start;
+}
+
+/* Simple hover - color change only */
+.attrib-footer:hover {
+  color: #333;
+}
+
+/* Hebrew footer links - independent styling */
+.attrib-footer-heb {
+  display: inline-flex;
+  font-size: 0.9rem;
+  font-family: var(--font-accent);
+  font-weight: 400;
+  color: #666;
+  text-decoration: none;
+  text-transform: none;
+  letter-spacing: 0;
+  line-height: 1.8;
+  transition: color 0.25s ease;
+  position: relative;
+  width: 100%;
+  padding: 0;
+  border: none;
+  margin: 0;
+  margin-bottom: 0.6rem;
+  height: auto;
+  text-align: right;
+  direction: rtl;
+  justify-content: flex-start;
+  align-self: flex-end;
+}
+
+/* Hebrew footer links hover */
+.attrib-footer-heb:hover {
+  color: #333;
+}
+
+/* RTL support for footer columns */
+html[dir='rtl'] .columns-container,
+.columns-container_heb {
+  direction: rtl;
+  /* Reverse the grid column order for RTL */
+  grid-template-columns: repeat(3, 1fr);
+}
+
+html[dir='rtl'] .footer-left-column,
+html[dir='rtl'] .footer-middle-column,
+html[dir='rtl'] .footer-right-column,
+.columns-container_heb .footer-left-column,
+.columns-container_heb .footer-middle-column,
+.columns-container_heb .footer-right-column {
+  align-items: flex-end;
+  text-align: right;
+  direction: rtl;
+}
+
+/* Ensure column headers are right-aligned in RTL */
+html[dir='rtl'] .footer-left-column::before,
+html[dir='rtl'] .footer-middle-column::before,
+html[dir='rtl'] .footer-right-column::before,
+.columns-container_heb .footer-left-column::before,
+.columns-container_heb .footer-middle-column::before,
+.columns-container_heb .footer-right-column::before {
+  align-self: flex-end;
+}
+
+/* Legacy RTL support for footer links (kept for backward compatibility) */
+html[dir='rtl'] .attrib-footer {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-accent);
+  text-align: right;
+  direction: rtl;
+  display: flex;
+  justify-content: flex-start;
+  width: 100%;
+  align-self: flex-end;
+}
+
+/* Copyright bar with brand gold background */
+.rights-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  width: 100%;
+  padding: 1.5rem 2rem;
+  background: #000000;
+  border-top: none;
+}
+
+.rights-text {
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
+
+/* Social media & newsletter section (to be added to HTML) */
+.footer-social-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2.5rem 2rem;
+  border-top: 1px solid rgba(168, 139, 99, 0.12);
+}
+
+.footer-social-title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6a6a6a;
+}
+
+.footer-social-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(168, 139, 99, 0.25);
+  border-radius: 50%;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.footer-social-link:hover {
+  background: #c5a572;
+  border-color: #c5a572;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(197, 165, 114, 0.25);
+}
+
+.footer-social-link svg,
+.footer-social-link img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.footer-social-link:hover svg,
+.footer-social-link:hover img {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}
+
+/* Payment icons section */
+.footer-payment-icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  opacity: 0.6;
+}
+
+.footer-payment-icon {
+  height: 24px;
+  width: auto;
+  filter: grayscale(1);
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.footer-payment-icon:hover {
+  filter: grayscale(0);
+  opacity: 1;
+}
+
+.whatsapp-container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  position: fixed;
+  z-index: 9;
+  top: 89%;
+  width: 100%;
+}
+
+.whatsapp-atr {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background-color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 10%;
+  z-index: 10;
+}
+
+.whatsapp-svg {
+  width: 40px;
+  height: 40px;
+  justify-self: self-end;
+}
+
+.hide-lng {
+  display: none;
+}
+
+.lng--active {
+  display: flex;
+}

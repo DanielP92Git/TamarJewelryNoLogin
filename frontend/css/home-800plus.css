@@ -40,7 +40,7 @@ header {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 20%;
   z-index: 1;
 }
 
@@ -128,15 +128,6 @@ header {
    HOME (DESKTOP) — Header + Hero refactor to match screen.png
    Reference: frontend/code.html (fonts/colors/sizing)
    ========================================================= */
-
-/* Hero overlay to match reference (subtle dark wash over image) */
-body#home .hero-section::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.22);
-  z-index: 2;
-}
 
 /* Hero Promo Banner - Desktop */
 .hero-promo-banner {
@@ -238,93 +229,76 @@ html[dir='rtl'] .promo-bottom-text {
   }
 }
 
-.mobile-lang-selector {
-  display: none;
-}
-
-/* ~~~~~~ Mobile Menu ~~~~~~~ */
-
-.menubars-use {
-  display: none;
-}
-
-#menubars-svg {
-  display: none;
-}
-
-#show-menu-button {
-  display: none;
-}
-
-/* ````` Mobile Menu END ``````` */
-
-/* ~~~~~~~ Desktop Navbar ~~~~~~~~~ */
-
-.menu {
-  display: flex;
-  width: 100%;
-  height: 10%;
+/* Hero Tagline - Desktop */
+.hero-tagline {
+  position: absolute;
+  top: 80%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   z-index: 5;
-  background-color: rgba(0, 0, 0, 0.1);
+  text-align: center;
+  opacity: 0;
+  animation: fadeIn 2s ease-out 0.3s forwards;
+}
 
-  /* position: fixed; */
+.tagline-text {
+  font-family: var(--font-display);
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.8rem);
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0;
+  padding: 0 2rem;
+  text-shadow: 0 3px 15px rgba(0, 0, 0, 0.6);
+  line-height: 1.4;
+}
 
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(20, 177, 35); */
+/* Hebrew tagline styling */
+html[dir='rtl'] .tagline-text {
+  font-family: var(--font-accent);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  font-size: clamp(2rem, 3.5vw, 3.2rem);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateY(0);
+  }
+}
+
+/* Menu styles centralized in desktop-menu.css */
+
+/* Home page-specific menu customizations */
+.menu {
+  /* Home page has transparent menu over hero image */
+  background-color: transparent;
+  z-index: 5;
 }
 
 .menu__ul {
-  display: flex;
-  flex-flow: row;
-  align-items: center;
+  /* Transparent background for home hero */
   background-color: transparent;
-  width: 100%;
-  height: 100%;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(228, 152, 37); */
 }
 
-.main-nav-tab {
-  display: flex;
-  flex-flow: column;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  list-style: none;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(46, 37, 228); */
-}
-
-.main-nav-tab:hover {
-  cursor: pointer;
-}
-
+/* Home page menu links are white over the hero image */
 .attrib,
 a {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 100%;
-  height: 3rem;
   color: white;
-  font-size: 0.95rem;
-  font-family: var(--font-body);
-  font-weight: 400;
-  text-decoration: none;
-  text-transform: uppercase;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(40, 228, 37); */
 }
 
 .attrib:hover {
   color: rgba(255, 255, 255, 0.8);
 }
 
+/* When menu becomes sticky, revert to default colors */
 .menu.sticky .attrib,
 .menu.sticky a {
   color: rgb(78, 78, 78);
@@ -335,50 +309,8 @@ a {
   color: rgb(152, 152, 152);
 }
 
-/* Hebrew menu items font size */
-html[dir='rtl'] .attrib,
-.ul-heb .attrib {
-  font-size: 0.8rem !important;
-}
-
-.main-nav-tab.cart-tab {
-  display: flex !important;
-  width: auto;
-  visibility: visible !important;
-}
-
-.attrib-cart {
-  display: flex !important;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-  width: 100%;
-  height: 3rem;
-  font-size: 0.95rem;
-  font-family: var(--font-body);
-  text-decoration: none;
-  visibility: visible !important;
-}
-
-.menu.sticky .attrib-cart {
-  color: black;
-  text-shadow: none;
-}
-
-.cart-container {
-  display: flex !important;
-  width: 25%;
-  visibility: visible !important;
-}
-
+/* Home page cart icon styling (white over hero) */
 .shoppingcart-svg {
-  display: inline-block !important;
-  flex-flow: row;
-  justify-content: flex-start;
-  width: 1.4rem;
-  visibility: visible !important;
-  opacity: 1 !important;
   fill: white !important;
 }
 
@@ -387,22 +319,11 @@ html[dir='rtl'] .attrib,
   filter: none;
 }
 
+/* Home page cart number (white badge) */
 .cart-number {
-  display: inline-block !important;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.8rem;
-  position: relative;
-  left: -9%;
-  width: 14px;
-  height: 14px;
   border: 1px solid rgba(255, 255, 255, 0.8) !important;
-  border-radius: 50%;
   color: black !important;
   background-color: rgba(255, 255, 255, 0.95) !important;
-  font-weight: 600;
-  text-shadow: none !important;
-  visibility: visible !important;
 }
 
 .menu.sticky .cart-number {
@@ -411,93 +332,9 @@ html[dir='rtl'] .attrib,
   background-color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.cart-number-mobile {
-  border: 1px solid rgba(105, 105, 105, 0.804);
-}
-
-.ul-heb {
-  display: flex;
-  flex-flow: row-reverse;
-}
-
-/* @keyframes fillit {
-  0% {
-    background-color: none;
-    color: black;
-  }
-
-  100% {
-    background-color: rgb(0, 0, 0);
-    color: white;
-  }
-} */
-
-.img-list {
-  display: flex;
-  flex-flow: row;
-  width: 100%;
-  /* height: 300px; */
-}
-
-.menu.sticky {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  height: 50px;
-  z-index: 15;
-
-  backdrop-filter: blur(15px);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-
-  transition: all;
-  transition-duration: 500ms;
-  transition-timing-function: ease;
-  position: fixed;
-}
-
-.menu.sticky .menu__ul {
-  background: transparent;
-}
-
-.menu.hidden {
-  opacity: 0;
-  transform: translateY(8rem);
-}
-
-.icons-container {
-  display: none;
-}
-
-.main-nav-tab.login {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-btn {
-  width: 100px;
-  height: 30px;
-  margin: 5px;
-  border: 1px solid;
-  border-radius: 10px;
-}
-
-.login-btn:hover {
-  color: aqua;
-  cursor: pointer;
-}
-
+/* Home page language selector (white over hero) */
 .languages-container {
-  display: flex;
-  align-self: center;
-  padding: 10px;
-  height: 3rem;
-  width: 6rem;
-
   border-left: 2px solid rgba(255, 255, 255, 0.5);
-
-  /* border: 1px solid red; */
 }
 
 .menu.sticky .languages-container {
@@ -506,7 +343,6 @@ html[dir='rtl'] .attrib,
 
 .languages-container button {
   background-color: transparent;
-  border: none;
   color: white;
   font-size: 1.3rem;
   font-family: var(--font-accent);
@@ -519,21 +355,6 @@ html[dir='rtl'] .attrib,
   color: black;
   text-shadow: none;
 }
-
-.languages-container button:first-child {
-  border-right: 1px solid;
-  padding-right: 5px;
-}
-
-.languages-container button:last-child {
-  padding-left: 5px;
-}
-
-.languages-container button:hover {
-  cursor: pointer;
-  color: gray;
-}
-/* ```````Navbar END`````````` */
 
 .modal-section {
   display: flex;
@@ -909,7 +730,7 @@ main {
 /* RTL support for Hebrew */
 html[dir='rtl'] .category-name {
   font-family: var(--font-accent);
-  font-weight: 700;
+  /* font-weight: 700; */
   letter-spacing: 0.1em;
   font-size: clamp(1.1rem, 1.4vw, 1.3rem);
 }
@@ -956,263 +777,4 @@ html[dir='rtl'] .category-name {
   background: transparent;
 }
 
-/* =========================================================
-   FOOTER REDESIGN - CARTIER-INSPIRED LUXURY AESTHETIC
-   Clean, professional footer with elegant hierarchy
-   ========================================================= */
-
-.footer {
-  width: 100%;
-  background: #ffffff;
-  border-top: 1px solid #e5e5e5;
-  padding: 5rem 0 0;
-  margin-top: 5rem;
-  position: relative;
-}
-
-.columns-container {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4rem;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 4rem 4rem;
-}
-
-.footer-left-column,
-.footer-middle-column,
-.footer-right-column {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.5rem;
-}
-
-/* Column headers with luxury brand styling */
-.footer-left-column::before {
-  content: 'SHOP';
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.75rem;
-}
-
-.footer-middle-column::before {
-  content: 'CUSTOMER CARE';
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.75rem;
-}
-
-.footer-right-column::before {
-  content: 'ABOUT';
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.75rem;
-}
-
-/* RTL column headers */
-html[dir='rtl'] .footer-left-column::before {
-  content: 'חנות';
-}
-
-html[dir='rtl'] .footer-middle-column::before {
-  content: 'שירות לקוחות';
-}
-
-html[dir='rtl'] .footer-right-column::before {
-  content: 'אודות';
-}
-
-.attrib-footer {
-  display: inline-flex;
-  font-size: 0.8rem;
-  font-family: var(--font-body);
-  font-weight: 400;
-  color: #666;
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  line-height: 2.2;
-  transition: color 0.25s ease;
-  position: relative;
-  width: auto;
-  padding: 0;
-  border: none;
-  margin: 0;
-}
-
-/* Simple hover - color change only */
-.attrib-footer:hover {
-  color: #333;
-}
-
-/* RTL support for footer links */
-html[dir='rtl'] .footer-left-column,
-html[dir='rtl'] .footer-middle-column,
-html[dir='rtl'] .footer-right-column {
-  align-items: flex-end;
-}
-
-html[dir='rtl'] .attrib-footer {
-  text-transform: none;
-  letter-spacing: 0;
-  font-family: var(--font-accent);
-}
-
-/* Copyright bar with brand gold background */
-.rights-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  width: 100%;
-  padding: 1.5rem 2rem;
-  background: #000000;
-  border-top: none;
-}
-
-.rights-text {
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 400;
-  color: #ffffff;
-  letter-spacing: 0.02em;
-  text-align: center;
-}
-
-/* Social media & newsletter section (to be added to HTML) */
-.footer-social-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 2.5rem 2rem;
-  border-top: 1px solid rgba(168, 139, 99, 0.12);
-}
-
-.footer-social-title {
-  font-family: var(--font-display);
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #6a6a6a;
-}
-
-.footer-social-links {
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.footer-social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border: 1px solid rgba(168, 139, 99, 0.25);
-  border-radius: 50%;
-  background: #ffffff;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.footer-social-link:hover {
-  background: #c5a572;
-  border-color: #c5a572;
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(197, 165, 114, 0.25);
-}
-
-.footer-social-link svg,
-.footer-social-link img {
-  width: 18px;
-  height: 18px;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-}
-
-.footer-social-link:hover svg,
-.footer-social-link:hover img {
-  opacity: 1;
-  filter: brightness(0) invert(1);
-}
-
-/* Payment icons section */
-.footer-payment-icons {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  opacity: 0.6;
-}
-
-.footer-payment-icon {
-  height: 24px;
-  width: auto;
-  filter: grayscale(1);
-  opacity: 0.5;
-  transition: all 0.3s ease;
-}
-
-.footer-payment-icon:hover {
-  filter: grayscale(0);
-  opacity: 1;
-}
-
-.whatsapp-container {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  position: fixed;
-  z-index: 9;
-  top: 89%;
-  width: 100%;
-  /* border: 2px solid red; */
-}
-
-.whatsapp-atr {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 50px;
-  height: 50px;
-  background-color: rgb(255, 255, 255);
-  border: 1px solid rgb(60, 143, 37);
-  border-radius: 10%;
-  z-index: 10;
-  /* margin-right: 5%; */
-}
-
-.whatsapp-svg {
-  width: 40px;
-  height: 40px;
-  justify-self: self-end;
-  /* border: 1px solid red; */
-}
-
-.hide-lng {
-  display: none;
-}
-
-.lng--active {
-  display: flex;
-}
-
-.columns-container_heb {
-  display: flex;
-}
+/* Footer styles moved to footer-desktop.css */

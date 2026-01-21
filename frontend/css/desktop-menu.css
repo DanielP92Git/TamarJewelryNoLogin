@@ -8,29 +8,31 @@
   width: 100%;
   height: 10%;
   z-index: 10;
-  background-color: rgba(255, 255, 255);
+  background-color: #ffffff;
   position: absolute;
 }
 
 /* Menu list container */
 .menu__ul {
   display: flex;
-  flex-flow: row;
+  flex-direction: row;
   align-items: center;
   width: 100%;
   height: 100%;
 }
 
-/* RTL support for Hebrew - Desktop only (mobile keeps same order) */
+/* RTL support for Hebrew - Desktop only */
 @media (min-width: 800px) {
-  .ul-heb {
-    display: flex !important;
-    flex-direction: row-reverse !important;
-  }
-
-  /* Ensure menu is reversed in RTL mode on desktop */
+  /* Comprehensive RTL menu selectors */
+  /* Note: direction: ltr prevents double-reversal when html[dir='rtl'] is set */
   html[dir='rtl'] .menu__ul,
-  .menu__ul.ul-heb {
+  html[dir='rtl'] .site-header .menu__ul,
+  html[dir='rtl'] .site-header__center .menu__ul,
+  .menu__ul.ul-heb,
+  .site-header .menu__ul.ul-heb,
+  .site-header__center .menu .menu__ul.ul-heb {
+    display: flex !important;
+    direction: ltr !important;
     flex-direction: row-reverse !important;
   }
 }
@@ -72,9 +74,8 @@ a {
 /* Larger font size for Hebrew menu items */
 html[dir='rtl'] .attrib,
 .ul-heb .attrib {
-  font-size: 1.2rem !important;
-  font-family: var(--font-accent) !important;
-  font-weight: 700 !important;
+  font-size: 1rem !important;
+  font-weight: 500 !important;
 }
 
 .attrib-cart {
@@ -153,20 +154,20 @@ html[dir='rtl'] .attrib,
   transition: all 0.3s ease;
 }
 
-/* Apply Amatic SC font to Hebrew category items */
+/* Apply clean sans-serif font to Hebrew category items */
 .category-item .attrib-heb,
 .ul-heb .category-item .attrib {
-  font-family: var(--font-accent) !important;
-  font-weight: 700 !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 500 !important;
 }
 
 /* Hebrew category items in site-header dropdown */
 .site-header .ul-heb .category-item .attrib,
 .site-header .category-item .attrib-heb,
 html[dir='rtl'] .site-header .category-item .attrib {
-  font-size: 1.2rem !important;
-  font-family: var(--font-accent) !important;
-  font-weight: 700 !important;
+  font-size: 1rem !important;
+  font-family: 'Montserrat', sans-serif !important;
+  font-weight: 500 !important;
 }
 
 .category-item:hover {
@@ -196,8 +197,7 @@ html[dir='rtl'] .site-header .category-item .attrib {
 /* Sticky menu behavior */
 .menu.sticky {
   z-index: 15;
-
-  backdrop-filter: blur(15px);
+  background-color: #ffffff;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   transition: all;
   transition-duration: 500ms;
@@ -496,6 +496,29 @@ html[dir='rtl'] .site-header .category-item .attrib {
     margin-right: 0;
   }
 
+  .site-logo {
+    height: clamp(40px, 5vw, 56px);
+    width: auto;
+    object-fit: contain;
+    display: block;
+  }
+
+  .site-logo-text {
+    font-family: 'Raleway', sans-serif;
+    font-size: clamp(13px, 1.6vw, 20px);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: #1a1a1a;
+    text-transform: none;
+    white-space: nowrap;
+    transition: color 0.3s ease;
+    text-transform: uppercase;
+  }
+
+  .site-brand:hover .site-logo-text {
+    color: var(--site-gold-accent);
+  }
+
   /* Hide mobile icons on desktop */
   .site-header .icons-container {
     display: none;
@@ -537,6 +560,13 @@ html[dir='rtl'] .site-header .category-item .attrib {
     min-width: 0;
   }
 
+  /* RTL support for Hebrew menu in site header */
+  html[dir='rtl'] .site-header .menu__ul,
+  .site-header .menu__ul.ul-heb {
+    direction: ltr !important;
+    flex-direction: row-reverse !important;
+  }
+
   /* Ensure no gaps in categories tab that could create dead zones */
   .site-header .main-nav-tab.categories-tab {
     margin: 0;
@@ -566,13 +596,13 @@ html[dir='rtl'] .site-header .category-item .attrib {
     box-sizing: border-box;
   }
 
-  /* Hebrew menu items in site-header - override with Amatic SC and bold weight */
+  /* Hebrew menu items in site-header - use clean sans-serif with medium weight */
   html[dir='rtl'] .site-header .menu a.attrib,
   .site-header .menu__ul.ul-heb a.attrib,
   .site-header .menu .menu__ul.ul-heb a.attrib {
-    font-size: 1.2rem !important;
-    font-family: var(--font-accent) !important;
-    font-weight: 700 !important;
+    font-size: clamp(14px, 0.9vw, 13px) !important;
+    font-family: 'Rubik', sans-serif !important;
+    font-weight: 400 !important;
   }
 
   /* Make categories tab fully clickable - must come after general .attrib rule */
@@ -727,6 +757,16 @@ html[dir='rtl'] .site-header .category-item .attrib {
     font-size: clamp(18px, 2vw, 28px);
   }
 
+  .site-logo {
+    height: clamp(36px, 4.5vw, 48px);
+  }
+
+  .site-logo-text {
+    font-size: clamp(14px, 1.6vw, 20px);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
   .site-header .menu__ul {
     gap: clamp(2px, 0.8vw, 10px);
   }
@@ -771,6 +811,16 @@ html[dir='rtl'] .site-header .category-item .attrib {
 
   .site-brand {
     font-size: 18px;
+  }
+
+  .site-logo {
+    height: 32px;
+  }
+
+  .site-logo-text {
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   .site-header .menu a.attrib {

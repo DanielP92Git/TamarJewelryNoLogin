@@ -401,7 +401,7 @@ class CategoriesView extends View {
       categoryTitle.textContent = this.category.toUpperCase();
     }
     if (lng === 'heb') {
-      categoryTitle.style.fontFamily = `'Amatic SC', sans-serif`;
+      categoryTitle.style.fontFamily = `'Rubik', sans-serif`;
       categoryTitle.style.fontSize = '2.3rem';
       categoryTitle.textContent = this._categoryNameHebrew;
     }

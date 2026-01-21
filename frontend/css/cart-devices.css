@@ -239,14 +239,19 @@ html[dir='rtl'] .attrib,
 
 /* ============================================================
    Shopping Cart - Mobile (<800px)
-   Modern design with brand colors and improved UX
+   Minimalist Design - Clean, elegant aesthetic
    ============================================================ */
 
 body#cart {
-  background-color: #fcfbf9;
-  --brand-gold: #a88b63;
-  --brand-bg: #fcfbf9;
-  --brand-border: #d4c5b0;
+  background-color: #fafafa;
+  /* Minimalist color palette - clean grayscale */
+  --minimal-text: #1a1a1a;
+  --minimal-text-light: #666666;
+  --minimal-border: #e0e0e0;
+  --minimal-border-hover: #999999;
+  --minimal-bg: #fafafa;
+  --minimal-white: #ffffff;
+  --minimal-black: #000000;
 }
 
 main.cart-page {
@@ -265,13 +270,13 @@ main.cart-page {
 }
 
 .cart-page-title {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 8vw, 2.8rem);
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(1.75rem, 6vw, 2.25rem);
   font-weight: 300;
-  letter-spacing: 0.02em;
-  margin: 0 0 1.5rem;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.75rem;
   padding-top: 0;
-  color: var(--brand-gold);
+  color: var(--minimal-black);
   text-align: center;
 }
 
@@ -292,25 +297,26 @@ html[dir='rtl'] .cart-page-title {
   display: flex;
   flex-flow: column;
   align-items: stretch;
-  border-radius: 12px;
-  background: #ffffff;
+  border-radius: 0;
+  background: var(--minimal-white);
   margin-bottom: 0;
   padding: 1.5rem;
-  box-shadow: 0 6px 20px rgba(17, 17, 17, 0.08);
-  border: 1px solid rgba(212, 197, 176, 0.3);
+  box-shadow: none;
+  border: 1px solid var(--minimal-border);
   width: 100%;
 }
 
 .cart-empty {
   text-align: center;
-  font-family: var(--font-display);
-  font-size: 1.3rem;
-  color: #999;
+  font-family: 'Raleway', var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 300;
+  color: var(--minimal-text-light);
   padding: 3rem 1.5rem;
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(17, 17, 17, 0.08);
-  border: 1px solid rgba(212, 197, 176, 0.3);
+  background: var(--minimal-white);
+  border-radius: 0;
+  box-shadow: none;
+  border: 1px solid var(--minimal-border);
 }
 
 .remove {
@@ -322,7 +328,7 @@ html[dir='rtl'] .cart-page-title {
   flex-direction: column;
   gap: 1rem;
   border: none;
-  border-bottom: 1px solid rgba(212, 197, 176, 0.25);
+  border-bottom: 1px solid var(--minimal-border);
   border-radius: 0;
   padding: 1.5rem 0;
   margin-bottom: 0;
@@ -351,14 +357,14 @@ html[dir='rtl'] .cart-page-title {
 .cart-item__media {
   width: 100%;
   height: 200px;
-  background: #f9f7f4;
+  background: #fafafa;
   overflow: hidden;
-  border-radius: 8px;
-  border: 1px solid rgba(212, 197, 176, 0.2);
+  border-radius: 2px;
+  border: 1px solid var(--minimal-border);
 }
 
 .item-img {
-  border-radius: 8px;
+  border-radius: 2px;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -382,14 +388,15 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .item-title {
-  font-family: var(--font-display);
-  font-size: 1.25rem;
+  font-family: 'Raleway', var(--font-display), sans-serif;
+  font-size: 1.1rem;
   width: auto;
   text-align: left;
   margin: 0;
   text-transform: none;
-  color: #333;
+  color: var(--minimal-text);
   font-weight: 400;
+  line-height: 1.4;
 }
 
 .cart-item__right {
@@ -400,36 +407,38 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .item-price {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
   width: auto;
   text-align: right;
-  color: #333;
+  color: var(--minimal-text);
 }
 
 .cart-qty {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid var(--brand-border);
-  border-radius: 6px;
-  width: 110px;
-  height: 36px;
-  background: #faf9f7;
+  border: 1px solid var(--minimal-border);
+  border-radius: 2px;
+  width: 100px;
+  height: 34px;
+  background: var(--minimal-white);
 }
 
 .cart-qty__btn {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border: none;
   background: transparent;
-  color: var(--brand-gold);
-  font-weight: 600;
-  transition: all 0.2s ease;
+  color: var(--minimal-text);
+  font-weight: 400;
+  font-size: 1.1rem;
+  transition: all 0.15s ease;
 }
 
 .cart-qty__btn:hover {
-  background: rgba(168, 139, 99, 0.1);
+  background: #fafafa;
 }
 
 .cart-qty__btn:disabled {
@@ -437,28 +446,29 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .cart-qty__input {
-  width: 38px;
+  width: 32px;
   border: none;
   text-align: center;
   background: transparent;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #333;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--minimal-text);
 }
 
 .delete-item {
   border: none;
   background: transparent;
-  color: #999;
-  font-size: 0.85rem;
+  color: var(--minimal-text-light);
+  font-size: 0.8rem;
   text-decoration: none;
   padding: 0;
-  transition: color 0.2s ease;
-  font-family: var(--font-body);
+  transition: color 0.15s ease;
+  font-family: 'Raleway', var(--font-body), sans-serif;
+  font-weight: 400;
 }
 
 .delete-item:hover {
-  color: #c85a54;
+  color: var(--minimal-black);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -467,20 +477,21 @@ html[dir='rtl'] .cart-page-title {
   display: flex;
   flex-flow: column;
   width: 100%;
-  border-radius: 12px;
-  background: #ffffff;
+  border-radius: 0;
+  background: var(--minimal-white);
   padding: 1.5rem;
-  box-shadow: 0 6px 20px rgba(17, 17, 17, 0.08);
-  border: 1px solid rgba(212, 197, 176, 0.3);
+  box-shadow: none;
+  border: 1px solid var(--minimal-border);
 }
 
 .summary-title {
-  font-family: var(--font-display);
-  font-size: 1.9rem;
-  margin: 0 0 1.25rem;
-  text-align: center;
-  color: var(--brand-gold);
+  font-family: 'Raleway', var(--font-display), sans-serif;
+  font-size: 1.5rem;
+  margin: 0 0 1.5rem;
+  text-align: left;
+  color: var(--minimal-black);
   font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
 .summary-item {
@@ -502,15 +513,16 @@ html[dir='rtl'] .cart-page-title {
   width: 100%;
   margin: 0 0 1.5rem;
   padding-bottom: 1.5rem;
-  border-bottom: 1px solid rgba(212, 197, 176, 0.3);
+  border-bottom: 1px solid var(--minimal-border);
 }
 
 .shipping-text {
-  font-size: 0.8rem;
-  color: #999;
+  font-size: 0.75rem;
+  color: var(--minimal-text-light);
   line-height: 1.6;
-  text-align: center;
-  font-style: italic;
+  text-align: left;
+  font-style: normal;
+  margin-top: 0.5rem;
 }
 
 .summary-details {
@@ -523,25 +535,25 @@ html[dir='rtl'] .cart-page-title {
   justify-content: space-between;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.875rem;
   margin-left: 0;
   margin-right: 0;
-  font-size: 0.95rem;
-  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-family: 'Raleway', var(--font-body), sans-serif;
 }
 
 .total-text {
-  font-weight: 500;
+  font-weight: 400;
   margin-right: auto;
-  color: #333;
+  color: var(--minimal-text);
   white-space: nowrap;
 }
 
 .total-price {
   align-self: center;
   padding-right: 0;
-  font-weight: 500;
-  color: #333;
+  font-weight: 400;
+  color: var(--minimal-text);
   white-space: nowrap;
   text-align: right;
 }
@@ -588,11 +600,11 @@ html[dir='rtl'] .cart-page-title {
 .total.total-container {
   margin-top: 1rem;
   padding-top: 1.25rem;
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 500;
   border: none;
-  border-top: 2px solid rgba(168, 139, 99, 0.3);
-  color: var(--brand-gold);
+  border-top: 1px solid var(--minimal-border);
+  color: var(--minimal-black);
 }
 
 .checkout-btn {
@@ -620,11 +632,13 @@ html[dir='rtl'] .cart-page-title {
   margin-top: 1.25rem;
   margin-left: auto;
   background: transparent;
-  color: #999;
+  color: var(--minimal-text-light);
   text-decoration: none;
   padding: 0.5rem 0;
-  transition: color 0.2s ease;
-  font-family: var(--font-body);
+  transition: color 0.15s ease;
+  font-family: 'Raleway', var(--font-body), sans-serif;
+  font-weight: 400;
+  font-size: 0.85rem;
 }
 
 .delete-all-active {
@@ -632,7 +646,7 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .delete-all:hover {
-  color: #c85a54;
+  color: var(--minimal-black);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -645,11 +659,12 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .check-me-out {
-  font-family: var(--font-body);
-  font-size: 0.95rem;
-  color: #666;
-  text-align: center;
-  margin-bottom: 0.75rem;
+  font-family: 'Raleway', var(--font-body), sans-serif;
+  font-size: 0.85rem;
+  color: var(--minimal-text-light);
+  text-align: left;
+  margin-bottom: 1rem;
+  font-weight: 400;
 }
 
 .stripe-checkout-btn {
@@ -658,21 +673,19 @@ html[dir='rtl'] .cart-page-title {
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-  padding: 0.75rem 1.25rem;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(135deg, var(--brand-gold) 0%, #c5a572 100%);
-  color: #fff;
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  font-weight: 600;
+  gap: 0.25rem;
+  padding: 0.875rem 1.25rem;
+  border-radius: 2px;
+  border: 1px solid var(--minimal-black);
+  background: var(--minimal-black);
+  color: var(--minimal-white);
+  font-family: 'Raleway', var(--font-body), sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
   text-align: center;
-  box-shadow:
-    0 4px 16px rgba(168, 139, 99, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  box-shadow: none;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
 }
@@ -684,27 +697,25 @@ html[dir='rtl'] .cart-page-title {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  background: transparent;
   pointer-events: none;
 }
 
 .stripe-checkout-btn:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 8px 24px rgba(168, 139, 99, 0.35),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3);
-  background: linear-gradient(135deg, #c5a572 0%, #b89960 100%);
+  transform: none;
+  box-shadow: none;
+  background: var(--minimal-white);
+  color: var(--minimal-black);
+  border-color: var(--minimal-black);
 }
 
 .stripe-checkout-btn:active {
-  transform: translateY(0);
-  box-shadow:
-    0 2px 8px rgba(168, 139, 99, 0.3),
-    inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateY(1px);
+  box-shadow: none;
 }
 
 .stripe-checkout-btn:focus-visible {
-  outline: 3px solid rgba(168, 139, 99, 0.5);
+  outline: 2px solid var(--minimal-black);
   outline-offset: 2px;
 }
 
@@ -715,7 +726,7 @@ html[dir='rtl'] .cart-page-title {
   gap: 0.5rem;
   position: relative;
   z-index: 1;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .stripe-powered-by {
@@ -723,39 +734,39 @@ html[dir='rtl'] .cart-page-title {
   align-items: center;
   justify-content: center;
   gap: 0.3rem;
-  font-size: 0.65rem;
-  font-weight: 500;
-  opacity: 0.92;
+  font-size: 0.6rem;
+  font-weight: 400;
+  opacity: 0.8;
   direction: ltr;
   unicode-bidi: isolate;
   position: relative;
   z-index: 1;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: none;
 }
 
 .stripe-powered-by-label {
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   font-weight: 400;
 }
 
 .stripe-logo-text {
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
 .stripe-trust-copy {
   margin: 0.5rem 0 1.25rem;
-  font-size: 0.75rem;
-  color: #999;
-  text-align: center;
-  font-style: italic;
+  font-size: 0.7rem;
+  color: var(--minimal-text-light);
+  text-align: left;
+  font-style: normal;
   line-height: 1.5;
 }
 
 #paypal {
-  border-top: 1px solid rgba(212, 197, 176, 0.3);
+  border-top: 1px solid var(--minimal-border);
   padding: 1.25rem 0 0;
   margin-bottom: 0;
   margin-top: 1rem;
@@ -764,220 +775,4 @@ html[dir='rtl'] .cart-page-title {
   z-index: 0;
 }
 
-/* =========================================================
-   FOOTER REDESIGN - MOBILE - CARTIER-INSPIRED LUXURY AESTHETIC
-   Clean, professional footer optimized for mobile screens
-   ========================================================= */
-
-.footer {
-  width: 100%;
-  background: #ffffff;
-  border-top: 1px solid #e5e5e5;
-  padding: 3rem 0 0;
-  margin-top: 3rem;
-  position: relative;
-}
-
-.columns-container {
-  display: flex;
-  flex-direction: column;
-  gap: 2.5rem;
-  width: 100%;
-  padding: 0 1.5rem 3rem;
-}
-
-.footer-left-column,
-.footer-middle-column,
-.footer-right-column {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  text-align: center;
-  width: 100%;
-  padding: 0;
-  border-bottom: none;
-}
-
-/* Column headers with luxury brand styling */
-.footer-left-column::before {
-  content: 'SHOP';
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.footer-middle-column::before {
-  content: 'CUSTOMER CARE';
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.footer-right-column::before {
-  content: 'ABOUT';
-  font-family: var(--font-body);
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-/* RTL column headers */
-html[dir='rtl'] .footer-left-column::before {
-  content: 'חנות';
-}
-
-html[dir='rtl'] .footer-middle-column::before {
-  content: 'שירות לקוחות';
-}
-
-html[dir='rtl'] .footer-right-column::before {
-  content: 'אודות';
-}
-
-.attrib-footer {
-  display: inline-flex;
-  font-size: 0.75rem;
-  font-family: var(--font-body);
-  font-weight: 400;
-  color: #666;
-  text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  line-height: 2;
-  transition: color 0.25s ease;
-  position: relative;
-  width: auto;
-  padding: 0;
-  border: none;
-  margin: 0;
-  text-align: center;
-}
-
-/* Simple tap effect for mobile */
-.attrib-footer:active {
-  color: #333;
-}
-
-/* RTL support for footer links */
-html[dir='rtl'] .footer-left-column,
-html[dir='rtl'] .footer-middle-column,
-html[dir='rtl'] .footer-right-column {
-  align-items: center;
-}
-
-html[dir='rtl'] .attrib-footer {
-  text-transform: none;
-  letter-spacing: 0;
-  font-family: var(--font-accent);
-}
-
-/* Copyright bar with brand gold background */
-.rights-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  width: 100%;
-  padding: 1.25rem 1.5rem;
-  background: #000000;
-  border-top: none;
-}
-
-.rights-text {
-  font-family: var(--font-body);
-  font-size: 0.65rem;
-  font-weight: 400;
-  color: #ffffff;
-  letter-spacing: 0.02em;
-  text-align: center;
-  line-height: 1.5;
-}
-
-/* Social media & newsletter section (mobile) */
-.footer-social-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.25rem;
-  padding: 2rem 1.5rem;
-  border-top: 1px solid rgba(168, 139, 99, 0.12);
-}
-
-.footer-social-title {
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #6a6a6a;
-}
-
-.footer-social-links {
-  display: flex;
-  gap: 1.25rem;
-  align-items: center;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.footer-social-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border: 1px solid rgba(168, 139, 99, 0.25);
-  border-radius: 50%;
-  background: #ffffff;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.footer-social-link:active {
-  background: #c5a572;
-  border-color: #c5a572;
-  transform: scale(0.95);
-}
-
-.footer-social-link svg,
-.footer-social-link img {
-  width: 20px;
-  height: 20px;
-  opacity: 0.7;
-}
-
-.footer-social-link:active svg,
-.footer-social-link:active img {
-  opacity: 1;
-  filter: brightness(0) invert(1);
-}
-
-/* Payment icons section (mobile) */
-.footer-payment-icons {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  justify-content: center;
-  opacity: 0.6;
-}
-
-.footer-payment-icon {
-  height: 20px;
-  width: auto;
-  filter: grayscale(1);
-  opacity: 0.5;
-}
+/* Footer styles moved to footer-mobile.css */

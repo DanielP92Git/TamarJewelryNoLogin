@@ -617,14 +617,6 @@ export default class View {
                 <a class="attrib attrib-eng" href="/html/categories/dangle.html">
                   Dangle Earrings</a>
               </li>
-              <li class="category-item category-item--bracelets">
-                <a class="attrib attrib-eng" href="/html/categories/bracelets.html">
-                  Bracelets</a>
-              </li>
-              <li class="category-item category-item--unisex">
-                <a class="attrib attrib-eng" href="/html/categories/unisex.html">
-                  Unisex Jewelry</a>
-              </li>
               <!-- HIDDEN: Shalom Club - uncomment to restore
               <li class="category-item category-item--shalom-club">
                 <a class="attrib attrib-eng" href="/html/categories/shalom-club.html">
@@ -669,14 +661,6 @@ export default class View {
               <li class="category-item category-item--dangle">
                 <a class="attrib attrib-heb" href="/html/categories/dangle.html">
                   עגילים תלויים</a>
-              </li>
-              <li class="category-item category-item--bracelets">
-                <a class="attrib attrib-heb" href="/html/categories/bracelets.html">
-                  צמידים</a>
-              </li>
-              <li class="category-item category-item--unisex">
-                <a class="attrib attrib-heb" href="/html/categories/unisex.html">
-                  תכשיטי יוניסקס</a>
               </li>
               <!-- HIDDEN: Shalom Club - uncomment to restore
               <li class="category-item category-item--shalom-club" style="direction: rtl;">
@@ -1030,12 +1014,6 @@ export default class View {
           <a class="attrib-footer" href="/html/categories/dangle.html"
             >Dangle Earrings</a
           >
-          <a class="attrib-footer" href="/html/categories/bracelets.html"
-            >Bracelets</a
-          >
-          <a class="attrib-footer" href="/html/categories/unisex.html"
-            >Unisex Jewelry</a
-          >
           <!-- HIDDEN: Shalom Club - uncomment to restore
           <a class="attrib-footer" href="/html/categories/shalom-club.html"
             >Shalom Club</a
@@ -1066,45 +1044,39 @@ export default class View {
       return `
       <div class="columns-container columns-container_heb" style=" direction: rtl;">
         <div class="footer-left-column">
-          <a class="attrib-footer" href="/">בית</a>
-          <a class="attrib-footer" href="/html/categories/necklaces.html"
+          <a class="attrib-footer-heb" href="/">בית</a>
+          <a class="attrib-footer-heb" href="/html/categories/necklaces.html"
             >שרשראות</a
           >
           <a
-            class="attrib-footer"
+            class="attrib-footer-heb"
             href="/html/categories/crochetNecklaces.html"
             >שרשראות סרוגות</a
           >
-          <a class="attrib-footer" href="/html/categories/hoops.html"
+          <a class="attrib-footer-heb" href="/html/categories/hoops.html"
             >עגילי חישוק</a
           >
-          <a class="attrib-footer" href="/html/categories/dangle.html"
+          <a class="attrib-footer-heb" href="/html/categories/dangle.html"
             >עגילים תלויים</a
           >
-          <a class="attrib-footer" href="/html/categories/bracelets.html"
-            >צמידים</a
-          >
-          <a class="attrib-footer" href="/html/categories/unisex.html"
-            >תכשיטי יוניסקס</a
-          >
           <!-- HIDDEN: Shalom Club - uncomment to restore
-          <a class="attrib-footer" href="/html/categories/shalom-club.html"
+          <a class="attrib-footer-heb" href="/html/categories/shalom-club.html"
             >מועדון "שלום"</a
           >
           -->
         </div>
 
         <div class="footer-middle-column">
-          <a class="attrib-footer" href="/html/policies.html"
+          <a class="attrib-footer-heb" href="/html/policies.html"
             >מדיניות משלוח וביטול</a
           >
-          <a class="attrib-footer" href="/html/contact-me.html">צרו קשר</a>
+          <a class="attrib-footer-heb" href="/html/contact-me.html">צרו קשר</a>
         </div>
         <div class="footer-right-column">
-          <a class="attrib-footer" href="/html/jewelry-workshop.html"
+          <a class="attrib-footer-heb" href="/html/jewelry-workshop.html"
             >סדנאת תכשיטים</a
           >
-          <a class="attrib-footer" href="/html/about.html">אודות</a>
+          <a class="attrib-footer-heb" href="/html/about.html">אודות</a>
         </div>
       </div>
       <div class="rights-container">

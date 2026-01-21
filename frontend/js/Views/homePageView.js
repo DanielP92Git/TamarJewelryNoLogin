@@ -150,27 +150,28 @@ class HomePageView extends View {
     let braceletsCategory = document.querySelector('.category-name_bracelets');
     let dangleCategory = document.querySelector('.category-name_dangle');
     let unisexCategory = document.querySelector('.category-name_unisex');
+
     if (lng === 'eng') {
       categoryName.forEach(name => {
         name.style.fontSize = '1.3rem';
       });
-      necklacesCategory.textContent = 'Necklaces';
-      crochetNecklacesCategory.textContent = 'Crochet Necklaces';
-      hoopsCategory.textContent = 'Hoop Earrings';
-      braceletsCategory.textContent = 'Bracelets';
-      dangleCategory.textContent = 'Dangle Earrings';
-      unisexCategory.textContent = 'Unisex Jewelry';
+      if (necklacesCategory) necklacesCategory.textContent = 'Necklaces';
+      if (crochetNecklacesCategory) crochetNecklacesCategory.textContent = 'Crochet Necklaces';
+      if (hoopsCategory) hoopsCategory.textContent = 'Hoop Earrings';
+      if (braceletsCategory) braceletsCategory.textContent = 'Bracelets';
+      if (dangleCategory) dangleCategory.textContent = 'Dangle Earrings';
+      if (unisexCategory) unisexCategory.textContent = 'Unisex Jewelry';
     } else {
       categoryName.forEach(name => {
-        name.style.fontFamily = "'Amatic SC', sans-serif";
+        name.style.fontFamily = "'Rubik', sans-serif";
         name.style.fontSize = '1.3rem';
       });
-      necklacesCategory.textContent = 'שרשראות';
-      crochetNecklacesCategory.textContent = 'שרשראות סרוגות';
-      hoopsCategory.textContent = 'עגילי חישוק';
-      braceletsCategory.textContent = 'צמידים';
-      dangleCategory.textContent = 'עגילים תלויים';
-      unisexCategory.textContent = 'תכשיטי יוניסקס';
+      if (necklacesCategory) necklacesCategory.textContent = 'שרשראות';
+      if (crochetNecklacesCategory) crochetNecklacesCategory.textContent = 'שרשראות סרוגות';
+      if (hoopsCategory) hoopsCategory.textContent = 'עגילי חישוק';
+      if (braceletsCategory) braceletsCategory.textContent = 'צמידים';
+      if (dangleCategory) dangleCategory.textContent = 'עגילים תלויים';
+      if (unisexCategory) unisexCategory.textContent = 'תכשיטי יוניסקס';
     }
   }
 
