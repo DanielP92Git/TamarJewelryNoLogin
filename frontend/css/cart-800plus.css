@@ -307,7 +307,7 @@ html[dir='rtl'] .cart-page-title {
 
 .cart-layout {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr 380px;
   gap: 2rem;
   column-gap: 4rem;
   align-items: start;
@@ -604,6 +604,7 @@ html[dir='rtl'] .cart-page-title {
   margin-bottom: 1rem;
   font-size: 1rem;
   font-family: var(--font-body);
+  gap: 1rem;
 }
 
 .shipping-text {
@@ -617,6 +618,7 @@ html[dir='rtl'] .cart-page-title {
 .total-text {
   font-weight: 500;
   color: #333;
+  white-space: nowrap;
 }
 
 .discount-line {
@@ -656,6 +658,7 @@ html[dir='rtl'] .cart-page-title {
 .total-price {
   font-weight: 500;
   color: #111;
+  white-space: nowrap;
 }
 
 .total.total-container {
