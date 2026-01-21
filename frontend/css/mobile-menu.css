@@ -154,7 +154,7 @@ html[dir='rtl'] .main-nav-tab > .attrib,
   justify-content: center; /* Center content horizontally */
   width: 100%;
   color: #343a40; /* Darker text */
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-body);
   font-size: 0.9rem; /* Adjust font size */
   text-decoration: none;
   padding: 0.4rem 0; /* Further reduced padding for tighter spacing */
@@ -165,7 +165,7 @@ html[dir='rtl'] .main-nav-tab > .attrib,
 html[dir='rtl'] .attrib,
 .ul-heb .attrib {
   font-size: 1.2rem !important;
-  font-family: 'Amatic SC', sans-serif !important;
+  font-family: var(--font-accent) !important;
   font-weight: 700 !important;
 }
 
@@ -219,7 +219,7 @@ html[dir='rtl'] .category-item .attrib,
   text-align: center; /* Center category items too */
   direction: rtl; /* Allow RTL text flow */
   justify-content: center; /* Center horizontally */
-  font-family: 'Amatic SC', sans-serif !important;
+  font-family: var(--font-accent) !important;
   font-weight: 700 !important;
 }
 
@@ -411,7 +411,7 @@ body:not(#home) {
   justify-content: center;
   width: auto;
   height: auto;
-  font-family: 'Great Vibes', cursive;
+  font-family: var(--font-decorative);
   font-size: 20px;
   line-height: 1.1;
   color: #111;

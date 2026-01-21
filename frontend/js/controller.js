@@ -9,6 +9,7 @@ import AboutView from './Views/aboutView.js';
 import ContactMeView from './Views/contactMeView.js';
 import categoriesView from './Views/categoriesView.js';
 import CartView from './Views/cartView.js';
+import PoliciesView from './Views/policiesView.js';
 // User login functionality has been removed
 
 //----------------------------------------------------
@@ -103,6 +104,14 @@ const controlContactMePage = async function (lng) {
   ContactMeView.setFormLng(lng);
   ContactMeView.setContactTitleLng(lng);
   ContactMeView.stickyMenuFn();
+};
+
+const controlPoliciesPage = async function (lng) {
+  await model.handleLoadStorage();
+  const cartNum = await model.checkCartNumber();
+
+  PoliciesView.setLanguage(lng, cartNum);
+  PoliciesView.handleLanguage();
 };
 
 const controlCategoriesPage = async function () {
@@ -241,6 +250,9 @@ const init = async function () {
   }
   if (document.body.id.includes('contact-me')) {
     ContactMeView.addContactMeHandler(controlContactMePage);
+  }
+  if (document.body.id.includes('policies')) {
+    PoliciesView.addPoliciesHandler(controlPoliciesPage);
   }
   if (document.body.id.includes('cart')) {
     CartView.addCartViewHandler(controlCartPage);

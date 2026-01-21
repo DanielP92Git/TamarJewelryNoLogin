@@ -2,6 +2,9 @@ body {
   display: flex;
   flex-flow: column;
   align-items: center;
+  background-color: #fcfbf9;
+  color: #333;
+  line-height: 1.6;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid black; */
@@ -11,246 +14,7 @@ body {
     overflow-x: hidden;
   } */
 
-header {
-  width: 100%;
-  height: 10vh;
-  margin: 0 auto;
-  padding: 0;
-  margin-bottom: 2rem;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(177, 20, 143); */
-}
-
-.main-image {
-  background-image: url(../imgs/working.jpg);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-
-  width: 100%;
-  height: 50vh;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(177, 20, 143); */
-}
-
-/* ====MENU SETTINGS==== */
-
-.menu {
-  display: flex;
-  flex-flow: column;
-  width: 165px;
-  height: 305px;
-  transition-property: all;
-  transition-duration: 1s;
-  transition-timing-function: ease;
-  position: absolute;
-  top: 20px;
-  left: -200px;
-  z-index: 10;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(20, 177, 35); */
-}
-
-.menu__ul {
-  display: flex;
-  flex-flow: column;
-  justify-content: space-around;
-  align-items: center;
-  max-width: 115%;
-  width: 160px;
-  height: 300px;
-  position: relative;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(228, 152, 37); */
-}
-
-.main-nav-tab {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-  width: 160px;
-  height: 60px;
-  border-bottom: 1px solid;
-  background-color: rgba(255, 255, 255, 0.808);
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(46, 37, 228); */
-}
-.contact {
-  border-bottom: none;
-}
-.main-nav-tab:hover {
-  background-color: rgb(255, 242, 201);
-  cursor: pointer;
-}
-
-.attrib {
-  display: flex;
-  flex-flow: row;
-  align-items: center;
-  justify-content: center;
-
-  width: 100%;
-  color: black;
-  font-family: Raleway, sans-serif;
-  text-decoration: none;
-}
-
-/* Hebrew menu items font size */
-html[dir='rtl'] .attrib,
-.ul-heb .attrib {
-  font-size: 0.8rem !important;
-}
-
-/* ~~~~ FOR DEBUGGING~~~~*/
-/* border: 5px solid rgb(40, 228, 37); */
-
-.attrib-heb {
-  font-size: 1.4rem;
-  font-family: 'Amatic SC', sans-serif;
-}
-
-.shoppingcart-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 35px;
-  height: 35px;
-  position: relative;
-  z-index: 10;
-  /* border: 2px solid blue; */
-}
-
-.shoppingcart-mobile {
-  fill: rgb(0, 0, 0);
-  width: 30px;
-  height: 30px;
-  padding: 3px;
-  position: relative;
-  border-radius: 5px;
-}
-
-.cart-number {
-  display: none;
-}
-
-.cart-number-mobile {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 0.6rem;
-  position: absolute;
-  left: 55%;
-  top: 35%;
-  background-color: rgba(255, 255, 255);
-  width: 10px;
-  height: 10px;
-  border: 1px solid black;
-  border-radius: 50%;
-  text-align: center;
-  z-index: 10;
-}
-.cart-number-mobile-header {
-  position: absolute;
-  top: 5px;
-  left: 70px;
-}
-.shoppingcart-svg {
-  display: none;
-}
-
-.toggle-svg {
-  display: none;
-}
-
-.shoppingcart-svg {
-  display: none;
-}
-
-.menu.sticky {
-  display: none;
-}
-
-.main-images-container {
-  display: flex;
-  overflow: hidden;
-  height: 70%;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(21, 224, 255); */
-}
-
-.workshop-image {
-  width: 100%;
-  transition: transform 1s;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(20, 177, 93); */
-}
-
-#login-tab {
-  border-bottom: none;
-}
-
-#show-menu-button {
-  display: none;
-}
-
-.languages-container {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  width: 160px;
-  /* height: 80px; */
-  border-top: 1px solid;
-  padding-top: 15px;
-  padding-bottom: 15px;
-  background-color: rgba(255, 255, 255, 0.808);
-
-  /* border: 2px solid red; */
-}
-
-.languages-container button {
-  background-color: rgba(255, 255, 255, 0.9);
-  border: none;
-  box-shadow: 0px 0px 10px 5px rgba(128, 128, 128, 0.6);
-  border-radius: 5px;
-  font-size: 1rem;
-  height: 1.6rem;
-  width: 2.5rem;
-}
-
-input[type='checkbox']:checked + .menu {
-  left: 0;
-}
-
-.category-item {
-  display: flex;
-  flex-flow: row;
-  justify-content: center;
-  align-items: center;
-
-  height: 60px;
-  background-color: #e1dcc1c7;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid yellowgreen; */
-}
-
-.category-item:hover {
-  background-color: rgba(202, 173, 183, 0.813);
-}
-
-.reveal {
-  display: inline;
-  left: 160px;
-}
-/* ===== END OF MENU SETTINGS==== */
+/* Header and menu styles handled by mobile-menu.css */
 
 main {
   display: flex;
@@ -263,14 +27,17 @@ main {
 }
 
 h1 {
-  font-weight: 100;
+  font-weight: 300;
   font-family: Raleway, sans-serif;
+  font-size: clamp(1.5rem, 6vw, 2rem);
   text-align: center;
-
+  letter-spacing: 0.01em;
+  color: #4a4a4a;
   align-self: center;
-  width: 100%;
-  margin-top: 0.5rem;
+  width: 95%;
+  margin-top: 1rem;
   margin-bottom: 2rem;
+  padding: 0 1rem;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(40, 228, 37); */
@@ -282,10 +49,10 @@ h1 {
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
-  margin-bottom: 5rem;
-  padding: 10px;
+  margin-bottom: 3rem;
+  padding: 0 1rem;
 
-  width: 97%;
+  width: 100%;
   max-height: 100%;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
@@ -296,12 +63,15 @@ h1 {
   display: flex;
   flex-flow: column;
   align-items: center;
+  gap: 1.5rem;
   width: 100%;
-  background-color: rgba(245, 245, 220, 0.9);
-  box-shadow: 12px 2px 30px 2px rgb(168, 163, 154);
-  font-size: 1.3vw;
-  padding: 3rem;
+  background-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 32px rgba(17, 17, 17, 0.08);
+  border: 1px solid rgba(212, 197, 176, 0.4);
+  font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+  padding: 2rem 1.5rem;
   box-sizing: border-box;
+  border-radius: 12px;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
   /* border: 2px solid rgb(37, 183, 228); */
@@ -310,42 +80,77 @@ h1 {
 .column-box {
   display: flex;
   flex-flow: column;
-  padding: 20px;
-  margin-bottom: 2.5rem;
-  border: 2px solid rgb(203, 203, 181);
+  padding: 1.5rem;
+  margin-bottom: 0;
+  border: 1px solid rgba(212, 197, 176, 0.5);
+  background-color: rgba(252, 251, 249, 0.6);
   width: 100%;
   text-align: center;
-  font-size: 1.3rem;
+  font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+  font-family: Raleway, sans-serif;
+  line-height: 1.7;
+  border-radius: 8px;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
   /* border: 2px solid rgb(37, 50, 228); */
 }
 
+.column-box:last-child {
+  margin-bottom: 0;
+}
+
 h3 {
   font-family: Raleway, sans-serif;
-  margin: 0 15px 25px 15px;
+  font-size: clamp(1.1rem, 4vw, 1.25rem);
+  font-weight: 600;
+  color: #4a4a4a;
+  margin: 0 0 1rem 0;
+  letter-spacing: 0.01em;
 }
 
 .shipping-policy,
 .return-policy,
 .workshop-description {
-  background-color: rgba(245, 245, 220, 0.9);
-  box-shadow: 12px 2px 30px 2px rgb(168, 163, 154);
-  font-size: 4vw;
-  padding: 3rem;
+  background-color: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 32px rgba(17, 17, 17, 0.08);
+  border: 1px solid rgba(212, 197, 176, 0.4);
+  font-size: clamp(0.95rem, 3.5vw, 1.05rem);
+  padding: 2rem 1.5rem;
   box-sizing: border-box;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
+  font-family: Raleway, sans-serif;
+  line-height: 1.8;
+  border-radius: 12px;
 
-  width: 90%;
+  width: 95%;
   max-height: 100%;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
   /* border: 2px solid rgb(37, 155, 228); */
 }
 
+h2 {
+  font-family: Raleway, sans-serif;
+  font-size: clamp(1.3rem, 5vw, 1.6rem);
+  font-weight: 500;
+  color: #a88b63;
+  margin-bottom: 1.25rem;
+  letter-spacing: 0.01em;
+}
+
+.countries {
+  font-weight: 600;
+  color: #4a4a4a;
+  border-bottom: 2px solid rgba(168, 139, 99, 0.4);
+  padding-bottom: 2px;
+}
+
 .underline-bold {
-  text-decoration: underline;
-  font-weight: 800;
+  font-weight: 600;
+  color: #4a4a4a;
+  border-bottom: 2px solid rgba(168, 139, 99, 0.5);
+  padding-bottom: 2px;
+  display: inline-block;
 }
 
 .go-to-top {
@@ -373,80 +178,259 @@ h3 {
   background: transparent;
 }
 
-.footer {
-  display: flex;
-  flex-flow: row wrap;
-  max-width: 100%;
-  padding-top: 0.2rem;
-  margin-top: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+/* =========================================================
+   FOOTER REDESIGN - MOBILE - CARTIER-INSPIRED LUXURY AESTHETIC
+   Clean, professional footer optimized for mobile screens
+   ========================================================= */
 
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(4, 255, 0); */
+.footer {
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #e5e5e5;
+  padding: 3rem 0 0;
+  margin-top: 3rem;
+  position: relative;
 }
 
 .columns-container {
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  gap: 2.5rem;
   width: 100%;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(8, 0, 255); */
+  padding: 0 1.5rem 3rem;
 }
 
-.footer-right-column,
+.footer-left-column,
 .footer-middle-column,
-.footer-left-column {
+.footer-right-column {
   display: flex;
-  flex-flow: column wrap;
+  flex-direction: column;
   align-items: center;
-  width: 30%;
-  padding-top: 3px;
-  padding-bottom: 5px;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(89, 0, 255); */
+  gap: 0.5rem;
+  text-align: center;
+  width: 100%;
+  padding: 0;
+  border-bottom: none;
 }
 
-.footer-middle-column {
-  padding-right: 5px;
+/* Column headers with luxury brand styling */
+.footer-left-column::before {
+  content: 'SHOP';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.footer-middle-column::before {
+  content: 'CUSTOMER CARE';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.footer-right-column::before {
+  content: 'ABOUT';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/* RTL column headers */
+html[dir='rtl'] .footer-left-column::before {
+  content: 'חנות';
+}
+
+html[dir='rtl'] .footer-middle-column::before {
+  content: 'שירות לקוחות';
+}
+
+html[dir='rtl'] .footer-right-column::before {
+  content: 'אודות';
 }
 
 .attrib-footer {
-  display: flex;
-  flex-flow: row;
-  font-size: 0.5rem;
-  align-items: center;
-  width: 100%;
-  height: fit-content;
-  color: black;
-  margin-bottom: 1px;
-  padding: 5px;
-  padding-bottom: 10px;
-  font-family: Raleway, sans-serif;
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: #666;
   text-decoration: none;
-  line-height: 1.2;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(40, 228, 37); */
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 2;
+  transition: color 0.25s ease;
+  position: relative;
+  width: auto;
+  padding: 0;
+  border: none;
+  margin: 0;
+  text-align: center;
 }
 
+/* Simple tap effect for mobile */
+.attrib-footer:active {
+  color: #333;
+}
+
+/* RTL support for footer links */
+html[dir='rtl'] .footer-left-column,
+html[dir='rtl'] .footer-middle-column,
+html[dir='rtl'] .footer-right-column {
+  align-items: center;
+}
+
+html[dir='rtl'] .attrib-footer {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-accent);
+}
+
+/* Copyright bar with brand gold background */
 .rights-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 1rem;
   width: 100%;
-  height: 1.5rem;
-  font-family: Raleway, sans-serif;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid rgb(210, 28, 140); */
+  padding: 1.25rem 1.5rem;
+  background: #000000;
+  border-top: none;
 }
 
 .rights-text {
-  color: white;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: #ffffff;
+  letter-spacing: 0.02em;
   text-align: center;
-  font-size: 0.55rem;
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid green; */
+  line-height: 1.5;
+}
+
+/* Social media & newsletter section (mobile) */
+.footer-social-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid rgba(168, 139, 99, 0.12);
+}
+
+.footer-social-title {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6a6a6a;
+}
+
+.footer-social-links {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(168, 139, 99, 0.25);
+  border-radius: 50%;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.footer-social-link:active {
+  background: #c5a572;
+  border-color: #c5a572;
+  transform: scale(0.95);
+}
+
+.footer-social-link svg,
+.footer-social-link img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+.footer-social-link:active svg,
+.footer-social-link:active img {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}
+
+/* Payment icons section (mobile) */
+.footer-payment-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0.6;
+}
+
+.footer-payment-icon {
+  height: 20px;
+  width: auto;
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+/* RTL Support for Hebrew */
+html[dir='rtl'] .first-row-container,
+html[dir='rtl'] .columns-wrap,
+html[dir='rtl'] .shipping-policy,
+html[dir='rtl'] .return-policy {
+  text-align: right;
+  direction: rtl;
+}
+
+html[dir='rtl'] h1 {
+  font-family: 'Amatic SC', sans-serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 7vw, 2.5rem);
+}
+
+html[dir='rtl'] h2 {
+  font-family: 'Amatic SC', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.6rem, 6vw, 2rem);
+}
+
+html[dir='rtl'] h3 {
+  font-family: 'Amatic SC', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.3rem, 5vw, 1.6rem);
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Improve touch targets on mobile */
+@media (hover: none) and (pointer: coarse) {
+  .column-box {
+    min-height: 44px;
+  }
 }

@@ -3,6 +3,8 @@ import View from '../View.js';
 
 class ContactMeView extends View {
   _submitBtn = document.getElementById('submit');
+  // ANTI-SPAM: Track when form was loaded
+  _formLoadTime = null;
 
   addContactMeHandler(handler) {
     window.addEventListener('load', () => {
@@ -12,27 +14,151 @@ class ContactMeView extends View {
         lng = 'eng';
       }
 
+      // ANTI-SPAM: Record form load time
+      this._formLoadTime = Date.now();
+      const formLoadedAtField = document.getElementById('formLoadedAt');
+      if (formLoadedAtField) {
+        formLoadedAtField.value = this._formLoadTime;
+      }
+
       handler(lng);
     });
   }
 
+  // ANTI-SPAM: Validate submission is not from a bot
+  _validateNotBot() {
+    // Check 1: Honeypot field should be empty
+    const honeypot = document.getElementById('website');
+    if (honeypot && honeypot.value.trim() !== '') {
+      console.log('ANTI-SPAM: Honeypot triggered');
+      return { valid: false, reason: 'honeypot' };
+    }
+
+    // Check 2: Time-based validation (minimum 3 seconds to fill form)
+    const formLoadedAt = this._formLoadTime || parseInt(document.getElementById('formLoadedAt')?.value || '0');
+    const timeElapsed = Date.now() - formLoadedAt;
+    const MIN_FILL_TIME = 3000; // 3 seconds minimum
+    if (formLoadedAt && timeElapsed < MIN_FILL_TIME) {
+      console.log('ANTI-SPAM: Form submitted too quickly');
+      return { valid: false, reason: 'too_fast' };
+    }
+
+    return { valid: true };
+  }
+
+  // ANTI-SPAM: Validate input content quality
+  _validateContent(name, lastname, email, message) {
+    // Check for excessive URLs in message (common spam indicator)
+    const urlPattern = /https?:\/\/[^\s]+/gi;
+    const urlMatches = message.match(urlPattern) || [];
+    if (urlMatches.length > 2) {
+      console.log('ANTI-SPAM: Too many URLs in message');
+      return { valid: false, reason: 'too_many_urls' };
+    }
+
+    // Check for very short or suspicious names (single character, numbers only)
+    const namePattern = /^[a-zA-Z\u0590-\u05FF\s'-]{2,}$/; // Letters (including Hebrew), spaces, hyphens, apostrophes
+    if (!namePattern.test(name) || !namePattern.test(lastname)) {
+      console.log('ANTI-SPAM: Invalid name format');
+      return { valid: false, reason: 'invalid_name' };
+    }
+
+    // Check message has reasonable content (at least 10 characters of actual text)
+    const cleanMessage = message.replace(/\s+/g, '').replace(urlPattern, '');
+    if (cleanMessage.length < 10) {
+      console.log('ANTI-SPAM: Message too short or empty');
+      return { valid: false, reason: 'message_too_short' };
+    }
+
+    // Check for common spam patterns
+    const spamPatterns = [
+      /\b(viagra|cialis|casino|lottery|winner|click here|buy now|free money)\b/i,
+      /(.)\1{5,}/,  // Same character repeated 6+ times
+      /^[^a-zA-Z\u0590-\u05FF]*$/,  // No letters at all
+    ];
+    for (const pattern of spamPatterns) {
+      if (pattern.test(message)) {
+        console.log('ANTI-SPAM: Spam pattern detected');
+        return { valid: false, reason: 'spam_pattern' };
+      }
+    }
+
+    // Basic email format validation
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(email)) {
+      console.log('ANTI-SPAM: Invalid email format');
+      return { valid: false, reason: 'invalid_email' };
+    }
+
+    return { valid: true };
+  }
+
   async sendEmail() {
+    const name = document.getElementById('name').value.trim();
+    const lastname = document.getElementById('lastname').value.trim();
+    const email = document.getElementById('contact-email').value.trim();
+    const message = document.getElementById('message').value.trim();
+
+    // ANTI-SPAM: Run bot detection checks
+    const botCheck = this._validateNotBot();
+    if (!botCheck.valid) {
+      // Silently fail for bots - don't give feedback
+      console.log('Submission blocked:', botCheck.reason);
+      // Clear form to make it look like it worked (confuse bots)
+      document.getElementById('name').value = '';
+      document.getElementById('lastname').value = '';
+      document.getElementById('contact-email').value = '';
+      document.getElementById('message').value = '';
+      alert('Message Sent Successfully!');
+      return;
+    }
+
+    // ANTI-SPAM: Validate content quality
+    const contentCheck = this._validateContent(name, lastname, email, message);
+    if (!contentCheck.valid) {
+      // For content issues, give user feedback so legitimate users can fix
+      const lng = localStorage.getItem('language') || 'eng';
+      let errorMsg = lng === 'heb'
+        ? 'אנא בדוק את הפרטים שהזנת ונסה שוב.'
+        : 'Please check your input and try again.';
+
+      if (contentCheck.reason === 'message_too_short') {
+        errorMsg = lng === 'heb'
+          ? 'אנא כתוב הודעה מפורטת יותר.'
+          : 'Please write a more detailed message.';
+      } else if (contentCheck.reason === 'invalid_name') {
+        errorMsg = lng === 'heb'
+          ? 'אנא הזן שם תקין.'
+          : 'Please enter a valid name.';
+      } else if (contentCheck.reason === 'invalid_email') {
+        errorMsg = lng === 'heb'
+          ? 'אנא הזן כתובת דואר אלקטרוני תקינה.'
+          : 'Please enter a valid email address.';
+      }
+
+      alert(errorMsg);
+      return;
+    }
+
     const params = {
-      name: document.getElementById('name').value,
-      lastname: document.getElementById('lastname').value,
-      email: document.getElementById('contact-email').value,
-      message: document.getElementById('message').value,
+      name: name,
+      lastname: lastname,
+      email: email,
+      message: message,
     };
 
     try {
       await emailjs.send('service_t4qcx4j', 'template_kwezl8a', params, {
         publicKey: 'dyz9UzngEOQUHFgv3',
       });
-      (document.getElementById('name').value = ''),
-        (document.getElementById('lastname').value = ''),
-        (document.getElementById('contact-email').value = ''),
-        (document.getElementById('message').value = ''),
-        alert('Message Sent Successfully!');
+      document.getElementById('name').value = '';
+      document.getElementById('lastname').value = '';
+      document.getElementById('contact-email').value = '';
+      document.getElementById('message').value = '';
+      // ANTI-SPAM: Reset honeypot field too
+      const honeypot = document.getElementById('website');
+      if (honeypot) honeypot.value = '';
+      alert('Message Sent Successfully!');
     } catch (err) {
       if (err instanceof EmailJSResponseStatus) {
         console.error('EMAILJS FAILED...', err);
@@ -44,7 +170,8 @@ class ContactMeView extends View {
   }
 
   sendHandler() {
-    this._submitBtn.addEventListener('click', this.sendEmail);
+    // ANTI-SPAM: Bind this context so validation methods work
+    this._submitBtn.addEventListener('click', this.sendEmail.bind(this));
   }
 
   handleLanguage() {
@@ -75,9 +202,20 @@ class ContactMeView extends View {
 
   generateFormLanguage(lng) {
     const formContainer = document.querySelector('.contact-form');
+    // ANTI-SPAM: Common honeypot and timestamp fields for both languages
+    const antiSpamFields = `
+      <!-- ANTI-SPAM: Honeypot field - hidden from humans, bots will fill it -->
+      <div style="position: absolute; left: -9999px;" aria-hidden="true">
+        <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" />
+      </div>
+      <!-- ANTI-SPAM: Hidden timestamp for time-based validation -->
+      <input type="hidden" name="form_loaded_at" id="formLoadedAt" value="${this._formLoadTime || Date.now()}" />
+    `;
+
     if (lng === 'eng') {
       formContainer.style.direction = 'ltr';
       return `
+        ${antiSpamFields}
         <div class="form-group">
           <div class="input-group">
             <input
@@ -141,6 +279,7 @@ class ContactMeView extends View {
       formContainer.style.direction = 'rtl';
 
       return `
+        ${antiSpamFields}
         <div class="form-group">
           <div class="input-group">
             <input
@@ -208,6 +347,12 @@ class ContactMeView extends View {
     formContainer.innerHTML = '';
     const markup = this.generateFormLanguage(lng);
     formContainer.insertAdjacentHTML('afterbegin', markup);
+
+    // ANTI-SPAM: Re-attach submit handler after form regeneration
+    this._submitBtn = document.getElementById('submit');
+    if (this._submitBtn) {
+      this._submitBtn.addEventListener('click', this.sendEmail.bind(this));
+    }
 
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');

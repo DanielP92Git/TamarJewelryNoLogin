@@ -625,10 +625,12 @@ export default class View {
                 <a class="attrib attrib-eng" href="/html/categories/unisex.html">
                   Unisex Jewelry</a>
               </li>
+              <!-- HIDDEN: Shalom Club - uncomment to restore
               <li class="category-item category-item--shalom-club">
                 <a class="attrib attrib-eng" href="/html/categories/shalom-club.html">
                   Shalom Club</a>
               </li>
+              -->
             </ul>
           </li>
           <li class="main-nav-tab">
@@ -676,10 +678,12 @@ export default class View {
                 <a class="attrib attrib-heb" href="/html/categories/unisex.html">
                   תכשיטי יוניסקס</a>
               </li>
+              <!-- HIDDEN: Shalom Club - uncomment to restore
               <li class="category-item category-item--shalom-club" style="direction: rtl;">
                 <a class="attrib attrib-heb" href="/html/categories/shalom-club.html">
                   מועדון "שלום"</a>
               </li>
+              -->
             </ul>
           </li>
           <li class="main-nav-tab">
@@ -1032,9 +1036,11 @@ export default class View {
           <a class="attrib-footer" href="/html/categories/unisex.html"
             >Unisex Jewelry</a
           >
+          <!-- HIDDEN: Shalom Club - uncomment to restore
           <a class="attrib-footer" href="/html/categories/shalom-club.html"
             >Shalom Club</a
           >
+          -->
         </div>
 
         <div class="footer-middle-column">
@@ -1081,9 +1087,11 @@ export default class View {
           <a class="attrib-footer" href="/html/categories/unisex.html"
             >תכשיטי יוניסקס</a
           >
+          <!-- HIDDEN: Shalom Club - uncomment to restore
           <a class="attrib-footer" href="/html/categories/shalom-club.html"
             >מועדון "שלום"</a
           >
+          -->
         </div>
 
         <div class="footer-middle-column">

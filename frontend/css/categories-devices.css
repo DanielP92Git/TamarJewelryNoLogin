@@ -144,7 +144,7 @@ body#categories.shalom-club header {
 
   width: 100%;
   color: black;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-body);
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -152,7 +152,7 @@ body#categories.shalom-club header {
 }
 .attrib-heb {
   font-size: 1.4rem;
-  font-family: 'Amatic SC', sans-serif;
+  font-family: var(--font-accent);
 }
 
 /* Hebrew menu items font size */
@@ -329,7 +329,7 @@ header {
   width: 100%;
   text-align: center;
   font-weight: 100;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-body);
   text-align: center;
   width: 100%;
   font-size: 2rem;
@@ -466,7 +466,7 @@ main {
   font-size: 0.95rem;
   font-weight: 500;
   color: #333;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
   line-height: 1.4;
   position: relative;
 }
@@ -480,7 +480,7 @@ main {
   font-size: 1rem;
   font-weight: 500;
   border: none;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
 }
 
 .item-price-container {
@@ -497,14 +497,14 @@ main {
   color: #999;
   text-decoration: line-through;
   opacity: 0.6;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
 }
 
 .item-price-discounted {
   font-size: 1.1rem;
   color: #333;
   font-weight: 600;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
 }
 
 .item-description {
@@ -568,7 +568,7 @@ main {
   transition: all 0.3s ease;
   font-size: 0.9rem;
   font-weight: 600;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -967,81 +967,222 @@ main {
   display: block;
 }
 
-.footer {
-  display: flex;
-  flex-flow: row wrap;
-  max-width: 100%;
-  padding-top: 0.2rem; /* Much smaller padding */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+/* =========================================================
+   FOOTER REDESIGN - MOBILE - CARTIER-INSPIRED LUXURY AESTHETIC
+   Clean, professional footer optimized for mobile screens
+   ========================================================= */
 
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(4, 255, 0); */
+.footer {
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #e5e5e5;
+  padding: 3rem 0 0;
+  margin-top: 3rem;
+  position: relative;
 }
 
 .columns-container {
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  gap: 2.5rem;
   width: 100%;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(8, 0, 255); */
+  padding: 0 1.5rem 3rem;
 }
 
-.footer-right-column,
+.footer-left-column,
 .footer-middle-column,
-.footer-left-column {
+.footer-right-column {
   display: flex;
-  flex-flow: column wrap;
+  flex-direction: column;
   align-items: center;
-  width: 30%;
-  padding-top: 3px; /* Very minimal padding */
-  padding-bottom: 5px; /* Very minimal padding */
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(89, 0, 255); */
+  gap: 0.5rem;
+  text-align: center;
+  width: 100%;
+  padding: 0;
+  border-bottom: none;
 }
 
-.footer-middle-column {
-  padding-right: 5px;
+/* Column headers with luxury brand styling */
+.footer-left-column::before {
+  content: 'SHOP';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.footer-middle-column::before {
+  content: 'CUSTOMER CARE';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.footer-right-column::before {
+  content: 'ABOUT';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/* RTL column headers */
+html[dir='rtl'] .footer-left-column::before {
+  content: 'חנות';
+}
+
+html[dir='rtl'] .footer-middle-column::before {
+  content: 'שירות לקוחות';
+}
+
+html[dir='rtl'] .footer-right-column::before {
+  content: 'אודות';
 }
 
 .attrib-footer {
-  display: flex;
-  flex-flow: row;
-  font-size: 0.5rem; /* Much smaller like reference */
-  align-items: center;
-  width: 100%;
-  height: fit-content;
-  color: black;
-  margin-bottom: 1px;
-  padding: 5px;
-  padding-bottom: 10px;
-  font-family: Raleway, sans-serif;
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: #666;
   text-decoration: none;
-  line-height: 1.2; /* Compact line height */
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(40, 228, 37); */
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 2;
+  transition: color 0.25s ease;
+  position: relative;
+  width: auto;
+  padding: 0;
+  border: none;
+  margin: 0;
+  text-align: center;
 }
 
+/* Simple tap effect for mobile */
+.attrib-footer:active {
+  color: #333;
+}
+
+/* RTL support for footer links */
+html[dir='rtl'] .footer-left-column,
+html[dir='rtl'] .footer-middle-column,
+html[dir='rtl'] .footer-right-column {
+  align-items: center;
+}
+
+html[dir='rtl'] .attrib-footer {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-accent);
+}
+
+/* Copyright bar with brand gold background */
 .rights-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 1rem;
   width: 100%;
-  height: 1.5rem; /* Much smaller like reference */
-  font-family: Raleway, sans-serif;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid rgb(210, 28, 140); */
+  padding: 1.25rem 1.5rem;
+  background: #000000;
+  border-top: none;
 }
 
 .rights-text {
-  color: white;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: #ffffff;
+  letter-spacing: 0.02em;
   text-align: center;
-  font-size: 0.55rem; /* Much smaller like reference */
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid green; */
+  line-height: 1.5;
+}
+
+/* Social media & newsletter section (mobile) */
+.footer-social-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid rgba(168, 139, 99, 0.12);
+}
+
+.footer-social-title {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6a6a6a;
+}
+
+.footer-social-links {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(168, 139, 99, 0.25);
+  border-radius: 50%;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.footer-social-link:active {
+  background: #c5a572;
+  border-color: #c5a572;
+  transform: scale(0.95);
+}
+
+.footer-social-link svg,
+.footer-social-link img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+.footer-social-link:active svg,
+.footer-social-link:active img {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}
+
+/* Payment icons section (mobile) */
+.footer-payment-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0.6;
+}
+
+.footer-payment-icon {
+  height: 20px;
+  width: auto;
+  filter: grayscale(1);
+  opacity: 0.5;
 }
 
 /* Added rule to hide the container when there's only one image */

@@ -2,7 +2,7 @@
 header {
   display: flex;
   flex-flow: column;
-  margin-bottom: 1rem;
+  margin-bottom: 0;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 3px solid rgb(20, 177, 35); */
@@ -67,7 +67,7 @@ header {
 
   width: 100%;
   color: black;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-body);
   text-decoration: none;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
@@ -81,7 +81,7 @@ html[dir='rtl'] .attrib,
 }
 .attrib-heb {
   font-size: 1.4rem;
-  font-family: 'Amatic SC', sans-serif;
+  font-family: var(--font-accent);
 }
 #show-menu-button {
   display: none;
@@ -237,54 +237,84 @@ html[dir='rtl'] .attrib,
 }
 /*  */
 
-/* ~~~~~~~~~~~~ Shopping cart ~~~~~~~~~~~~~~ */
+/* ============================================================
+   Shopping Cart - Mobile (<800px)
+   Modern design with brand colors and improved UX
+   ============================================================ */
+
+body#cart {
+  background-color: #fcfbf9;
+  --brand-gold: #a88b63;
+  --brand-bg: #fcfbf9;
+  --brand-border: #d4c5b0;
+}
+
 main.cart-page {
   display: block;
-  padding-top: 2.5rem;
+  padding-top: 0.5rem;
   margin-bottom: 4rem;
+  min-height: calc(100vh - 200px);
 }
 
 .cart-shell {
-  padding: 0.5rem 1.25rem 0;
+  padding: 0.5rem 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .cart-page-title {
-  font-family: 'Poiret One', 'Raleway', sans-serif;
+  font-family: var(--font-display);
   font-size: clamp(2rem, 8vw, 2.8rem);
   font-weight: 300;
   letter-spacing: 0.02em;
-  margin: 0 0 0.9rem;
-  padding-top: 0.25rem;
-  color: #000;
+  margin: 0 0 1.5rem;
+  padding-top: 0;
+  color: var(--brand-gold);
+  text-align: center;
 }
 
 html[dir='rtl'] .cart-page-title {
-  text-align: right;
+  text-align: center;
 }
 
 .cart-layout {
   display: flex;
   flex-direction: column;
-  gap: 2.5rem;
+  gap: 2rem;
+  width: 100%;
+  max-width: 600px;
+  align-items: center;
 }
 
 .cart-items-container {
   display: flex;
   flex-flow: column;
   align-items: stretch;
-  border-radius: 0;
-  background: #fff;
+  border-radius: 12px;
+  background: #ffffff;
   margin-bottom: 0;
-  padding-bottom: 0;
-  box-shadow: none;
+  padding: 1.5rem;
+  box-shadow: 0 6px 20px rgba(17, 17, 17, 0.08);
+  border: 1px solid rgba(212, 197, 176, 0.3);
+  width: 100%;
 }
 
 .cart-empty {
   text-align: center;
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  color: #999;
+  padding: 3rem 1.5rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(17, 17, 17, 0.08);
+  border: 1px solid rgba(212, 197, 176, 0.3);
 }
 
 .remove {
-  display: none;
+  display: none !important;
 }
 
 .cart-item {
@@ -292,31 +322,43 @@ html[dir='rtl'] .cart-page-title {
   flex-direction: column;
   gap: 1rem;
   border: none;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(212, 197, 176, 0.25);
   border-radius: 0;
-  padding: 1.25rem 0;
+  padding: 1.5rem 0;
   margin-bottom: 0;
   width: 100%;
 }
 
+.cart-item:first-child {
+  padding-top: 0;
+}
+
+.cart-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
 .cart-title {
-  text-align: left;
+  text-align: center;
 }
 
 .added-items {
   width: 100%;
   border-radius: 0;
+  padding: 0;
 }
 
 .cart-item__media {
   width: 100%;
-  height: 180px;
-  background: #f3f3f3;
+  height: 200px;
+  background: #f9f7f4;
   overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 197, 176, 0.2);
 }
 
 .item-img {
-  border-radius: 0;
+  border-radius: 8px;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -340,12 +382,14 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .item-title {
-  font-family: 'Poiret One', 'Raleway', sans-serif;
-  font-size: 1.2rem;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
   width: auto;
   text-align: left;
   margin: 0;
   text-transform: none;
+  color: #333;
+  font-weight: 400;
 }
 
 .cart-item__right {
@@ -356,70 +400,87 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .item-price {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
   font-weight: 700;
   width: auto;
   text-align: right;
+  color: #333;
 }
 
 .cart-qty {
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--brand-border);
+  border-radius: 6px;
   width: 110px;
-  height: 34px;
+  height: 36px;
+  background: #faf9f7;
 }
 
 .cart-qty__btn {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   border: none;
   background: transparent;
-  color: #6b7280;
+  color: var(--brand-gold);
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.cart-qty__btn:hover {
+  background: rgba(168, 139, 99, 0.1);
 }
 
 .cart-qty__btn:disabled {
-  opacity: 0.4;
+  opacity: 0.3;
 }
 
 .cart-qty__input {
-  width: 42px;
+  width: 38px;
   border: none;
   text-align: center;
   background: transparent;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
 }
 
 .delete-item {
   border: none;
   background: transparent;
-  color: #6b7280;
+  color: #999;
   font-size: 0.85rem;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  text-decoration: none;
   padding: 0;
+  transition: color 0.2s ease;
+  font-family: var(--font-body);
 }
 
 .delete-item:hover {
-  color: #000;
+  color: #c85a54;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .summary-container {
   display: flex;
   flex-flow: column;
   width: 100%;
-  border-radius: 0;
-  background: #fff;
-  padding: 0;
-  box-shadow: none;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 1.5rem;
+  box-shadow: 0 6px 20px rgba(17, 17, 17, 0.08);
+  border: 1px solid rgba(212, 197, 176, 0.3);
 }
 
 .summary-title {
-  font-family: 'Poiret One', 'Raleway', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.9rem;
   margin: 0 0 1.25rem;
-  text-align: left;
-  align-self: flex-start;
+  text-align: center;
+  color: var(--brand-gold);
+  font-weight: 400;
 }
 
 .summary-item {
@@ -439,16 +500,17 @@ html[dir='rtl'] .cart-page-title {
 
 .price-summary-container {
   width: 100%;
-  margin: 0 0 1.25rem;
-  padding-bottom: 1.25rem;
-  border-bottom: 1px solid #f0f0f0;
+  margin: 0 0 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(212, 197, 176, 0.3);
 }
 
 .shipping-text {
-  font-size: 0.9rem;
-  color: #6b7280;
-  line-height: 1.5;
-  text-align: left;
+  font-size: 0.8rem;
+  color: #999;
+  line-height: 1.6;
+  text-align: center;
+  font-style: italic;
 }
 
 .summary-details {
@@ -459,23 +521,29 @@ html[dir='rtl'] .cart-page-title {
   display: flex;
   width: 100%;
   justify-content: space-between;
-  margin-bottom: 0.9rem;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
   margin-left: 0;
   margin-right: 0;
-
-  /* border: solid salmon; */
+  font-size: 0.95rem;
+  font-family: var(--font-body);
 }
 
 .total-text {
-  font-weight: 600;
+  font-weight: 500;
   margin-right: auto;
+  color: #333;
+  white-space: nowrap;
 }
 
 .total-price {
   align-self: center;
-  padding-right: 5px;
-  /* margin-right: 5%; */
-  /* border: solid firebrick; */
+  padding-right: 0;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  text-align: right;
 }
 
 .discount-line {
@@ -514,15 +582,17 @@ html[dir='rtl'] .cart-page-title {
 
 .subtotal,
 .shipping {
-  width: 110px;
+  width: 100%;
 }
 
 .total.total-container {
   margin-top: 1rem;
-  padding-top: 1rem;
-  font-size: 1.25rem;
+  padding-top: 1.25rem;
+  font-size: 1.3rem;
   font-weight: 700;
   border: none;
+  border-top: 2px solid rgba(168, 139, 99, 0.3);
+  color: var(--brand-gold);
 }
 
 .checkout-btn {
@@ -547,13 +617,14 @@ html[dir='rtl'] .cart-page-title {
 .delete-all {
   display: none;
   border: none;
-  margin-top: 1rem;
+  margin-top: 1.25rem;
   margin-left: auto;
   background: transparent;
-  color: #6b7280;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  padding: 0;
+  color: #999;
+  text-decoration: none;
+  padding: 0.5rem 0;
+  transition: color 0.2s ease;
+  font-family: var(--font-body);
 }
 
 .delete-all-active {
@@ -561,56 +632,80 @@ html[dir='rtl'] .cart-page-title {
 }
 
 .delete-all:hover {
-  color: #000;
+  color: #c85a54;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .checkout-btns-container {
   display: flex;
   flex-flow: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: space-between;
 }
+
 .check-me-out {
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: #666;
+  text-align: center;
+  margin-bottom: 0.75rem;
 }
 
 .stripe-checkout-btn {
-  margin-top: 1rem;
+  margin-top: 0;
   margin-bottom: 0.5rem;
   align-self: stretch;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding: 0.85rem 1rem;
-  border-radius: 999px;
+  gap: 0.3rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
   border: none;
-  background: linear-gradient(135deg, #635bff, #4b47e0);
+  background: linear-gradient(135deg, var(--brand-gold) 0%, #c5a572 100%);
   color: #fff;
-  font-family: Raleway, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-    sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
   font-weight: 600;
   text-align: center;
-  box-shadow: 0 8px 18px rgba(20, 20, 60, 0.35);
+  box-shadow:
+    0 4px 16px rgba(168, 139, 99, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
   cursor: pointer;
-  transition: transform 150ms ease, box-shadow 150ms ease,
-    background-color 150ms ease, background 150ms ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stripe-checkout-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+  pointer-events: none;
 }
 
 .stripe-checkout-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 22px rgba(20, 20, 60, 0.4);
-  background: linear-gradient(135deg, #4b47e0, #3430c4);
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 24px rgba(168, 139, 99, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, #c5a572 0%, #b89960 100%);
 }
 
 .stripe-checkout-btn:active {
   transform: translateY(0);
-  box-shadow: 0 6px 14px rgba(20, 20, 60, 0.3);
+  box-shadow:
+    0 2px 8px rgba(168, 139, 99, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .stripe-checkout-btn:focus-visible {
-  outline: 3px solid #99a2ff;
-  outline-offset: 3px;
+  outline: 3px solid rgba(168, 139, 99, 0.5);
+  outline-offset: 2px;
 }
 
 .stripe-checkout-main {
@@ -618,123 +713,271 @@ html[dir='rtl'] .cart-page-title {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  position: relative;
+  z-index: 1;
+  font-size: 0.9rem;
 }
 
 .stripe-powered-by {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
-  font-size: 0.7rem;
+  gap: 0.3rem;
+  font-size: 0.65rem;
   font-weight: 500;
-  opacity: 0.95;
+  opacity: 0.92;
   direction: ltr;
   unicode-bidi: isolate;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .stripe-powered-by-label {
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
+  font-weight: 400;
 }
 
 .stripe-logo-text {
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
 .stripe-trust-copy {
-  margin: 0 0 1.5rem;
+  margin: 0.5rem 0 1.25rem;
   font-size: 0.75rem;
-  color: #4b4b4b;
+  color: #999;
   text-align: center;
+  font-style: italic;
+  line-height: 1.5;
 }
 
 #paypal {
-  border-top: 1px solid #f0f0f0;
-  padding: 1.25rem 0;
-  margin-bottom: 1.25rem;
+  border-top: 1px solid rgba(212, 197, 176, 0.3);
+  padding: 1.25rem 0 0;
+  margin-bottom: 0;
+  margin-top: 1rem;
   width: 100%;
   position: relative;
   z-index: 0;
 }
 
-/* ~~~~~~~~~~~~~~ Footer ~~~~~~~~~~~~~~~~~~~~ */
+/* =========================================================
+   FOOTER REDESIGN - MOBILE - CARTIER-INSPIRED LUXURY AESTHETIC
+   Clean, professional footer optimized for mobile screens
+   ========================================================= */
 
 .footer {
-  display: flex;
-  flex-flow: row wrap;
-  max-width: 100%;
-  padding-top: 0.2rem;
-  margin-top: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(4, 255, 0); */
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #e5e5e5;
+  padding: 3rem 0 0;
+  margin-top: 3rem;
+  position: relative;
 }
 
 .columns-container {
   display: flex;
-  justify-content: space-around;
+  flex-direction: column;
+  gap: 2.5rem;
   width: 100%;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(8, 0, 255); */
+  padding: 0 1.5rem 3rem;
 }
 
-.footer-right-column,
+.footer-left-column,
 .footer-middle-column,
-.footer-left-column {
+.footer-right-column {
   display: flex;
-  flex-flow: column wrap;
+  flex-direction: column;
   align-items: center;
-  width: 30%;
-  padding-top: 3px;
-  padding-bottom: 5px;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(89, 0, 255); */
+  gap: 0.5rem;
+  text-align: center;
+  width: 100%;
+  padding: 0;
+  border-bottom: none;
 }
 
-.footer-middle-column {
-  padding-right: 5px;
+/* Column headers with luxury brand styling */
+.footer-left-column::before {
+  content: 'SHOP';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.footer-middle-column::before {
+  content: 'CUSTOMER CARE';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.footer-right-column::before {
+  content: 'ABOUT';
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+/* RTL column headers */
+html[dir='rtl'] .footer-left-column::before {
+  content: 'חנות';
+}
+
+html[dir='rtl'] .footer-middle-column::before {
+  content: 'שירות לקוחות';
+}
+
+html[dir='rtl'] .footer-right-column::before {
+  content: 'אודות';
 }
 
 .attrib-footer {
-  display: flex;
-  flex-flow: row;
-  font-size: 0.5rem;
-  align-items: center;
-  width: 100%;
-  height: fit-content;
-  color: black;
-  margin-bottom: 1px;
-  padding: 5px;
-  padding-bottom: 10px;
-  font-family: Raleway, sans-serif;
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: #666;
   text-decoration: none;
-  line-height: 1.2;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 5px solid rgb(40, 228, 37); */
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 2;
+  transition: color 0.25s ease;
+  position: relative;
+  width: auto;
+  padding: 0;
+  border: none;
+  margin: 0;
+  text-align: center;
 }
 
+/* Simple tap effect for mobile */
+.attrib-footer:active {
+  color: #333;
+}
+
+/* RTL support for footer links */
+html[dir='rtl'] .footer-left-column,
+html[dir='rtl'] .footer-middle-column,
+html[dir='rtl'] .footer-right-column {
+  align-items: center;
+}
+
+html[dir='rtl'] .attrib-footer {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-accent);
+}
+
+/* Copyright bar with brand gold background */
 .rights-container {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  gap: 1rem;
   width: 100%;
-  height: 1.5rem;
-  font-family: Raleway, sans-serif;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid rgb(210, 28, 140); */
+  padding: 1.25rem 1.5rem;
+  background: #000000;
+  border-top: none;
 }
 
 .rights-text {
-  color: white;
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 400;
+  color: #ffffff;
+  letter-spacing: 0.02em;
   text-align: center;
-  font-size: 0.55rem;
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid green; */
+  line-height: 1.5;
+}
+
+/* Social media & newsletter section (mobile) */
+.footer-social-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid rgba(168, 139, 99, 0.12);
+}
+
+.footer-social-title {
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6a6a6a;
+}
+
+.footer-social-links {
+  display: flex;
+  gap: 1.25rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(168, 139, 99, 0.25);
+  border-radius: 50%;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.footer-social-link:active {
+  background: #c5a572;
+  border-color: #c5a572;
+  transform: scale(0.95);
+}
+
+.footer-social-link svg,
+.footer-social-link img {
+  width: 20px;
+  height: 20px;
+  opacity: 0.7;
+}
+
+.footer-social-link:active svg,
+.footer-social-link:active img {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}
+
+/* Payment icons section (mobile) */
+.footer-payment-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  opacity: 0.6;
+}
+
+.footer-payment-icon {
+  height: 20px;
+  width: auto;
+  filter: grayscale(1);
+  opacity: 0.5;
 }

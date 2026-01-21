@@ -132,7 +132,7 @@ a {
   height: 3rem;
   color: rgb(78, 78, 78);
   font-size: 0.95rem;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-body);
   text-decoration: none;
   text-transform: uppercase;
 
@@ -160,13 +160,13 @@ html[dir='rtl'] .attrib,
   height: 3rem;
   color: black;
   font-size: 0.95rem;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-body);
   text-decoration: none;
 }
 
 .attrib-heb {
   font-size: 1.8rem;
-  font-family: 'Amatic SC', sans-serif;
+  font-family: var(--font-accent);
 }
 .mobile-lang-selector {
   display: none;
@@ -444,14 +444,14 @@ html[dir='rtl'] .attrib,
   color: #999;
   text-decoration: line-through;
   opacity: 0.6;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
 }
 
 .item-price-discounted {
   font-size: 1.2rem;
   color: #333;
   font-weight: 600;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
 }
 
 .add-to-cart-btn {
@@ -470,7 +470,7 @@ html[dir='rtl'] .attrib,
   top: auto;
   font-size: 0.95rem;
   font-weight: 600;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
@@ -488,7 +488,7 @@ html[dir='rtl'] .attrib,
   font-size: 1rem;
   font-weight: 500;
   color: #333;
-  font-family: 'Raleway', sans-serif;
+  font-family: var(--font-body);
   line-height: 1.4;
   position: relative;
   top: auto;
@@ -628,13 +628,18 @@ html[dir='rtl'] .attrib,
   background: transparent;
 }
 
+/* =========================================================
+   FOOTER REDESIGN - CARTIER-INSPIRED LUXURY AESTHETIC
+   Clean, professional footer with elegant hierarchy
+   ========================================================= */
+
 .footer {
   width: 100%;
-  padding-top: 1rem;
-  margin-top: 1rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(4, 255, 0); */
+  background: #ffffff;
+  border-top: 1px solid #e5e5e5;
+  padding: 5rem 0 0;
+  margin-top: 5rem;
+  position: relative;
 }
 
 .hero-image-unisex {
@@ -642,78 +647,207 @@ html[dir='rtl'] .attrib,
 }
 
 .columns-container {
-  display: flex;
-  justify-content: space-around;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4rem;
   width: 100%;
-  height: 40%;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(4, 255, 0); */
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 4rem 4rem;
 }
 
-.footer-right-column,
+.footer-left-column,
 .footer-middle-column,
-.footer-left-column {
+.footer-right-column {
   display: flex;
-  flex-flow: column;
-  align-items: center;
-  width: 50%;
-  padding-top: 3px; /* Very minimal padding */
-  padding-bottom: 5px; /* Very minimal padding */
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(89, 0, 255); */
-}
-.footer-middle-column {
-  height: 100%;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
 }
 
-.footer-item:hover {
-  color: black;
+/* Column headers with luxury brand styling */
+.footer-left-column::before {
+  content: 'SHOP';
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.75rem;
 }
 
-/* Add specific styles for attrib-footer which is actually used in the HTML */
+.footer-middle-column::before {
+  content: 'CUSTOMER CARE';
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+.footer-right-column::before {
+  content: 'ABOUT';
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #333;
+  margin-bottom: 0.75rem;
+}
+
+/* RTL column headers */
+html[dir='rtl'] .footer-left-column::before {
+  content: 'חנות';
+}
+
+html[dir='rtl'] .footer-middle-column::before {
+  content: 'שירות לקוחות';
+}
+
+html[dir='rtl'] .footer-right-column::before {
+  content: 'אודות';
+}
+
 .attrib-footer {
-  display: flex;
-  flex-flow: row;
-  font-size: 0.65rem; /* Much smaller like reference */
-  align-items: center;
-  width: 30%;
-  height: fit-content;
-  color: black;
-  margin-bottom: 1px;
-  padding: 5px;
-  padding-bottom: 10px;
-  font-family: Raleway, sans-serif;
+  display: inline-flex;
+  font-size: 0.8rem;
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: #666;
   text-decoration: none;
-  line-height: 1.2; /* Compact line height */
-  border-bottom: 1px solid rgba(128, 128, 128, 0.2);
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid green; */
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 2.2;
+  transition: color 0.25s ease;
+  position: relative;
+  width: auto;
+  padding: 0;
+  border: none;
+  margin: 0;
 }
 
+/* Simple hover - color change only */
 .attrib-footer:hover {
-  color: rgb(152, 152, 152);
+  color: #333;
 }
 
+/* RTL support for footer links */
+html[dir='rtl'] .footer-left-column,
+html[dir='rtl'] .footer-middle-column,
+html[dir='rtl'] .footer-right-column {
+  align-items: flex-end;
+}
+
+html[dir='rtl'] .attrib-footer {
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--font-accent);
+}
+
+/* Copyright bar with brand gold background */
 .rights-container {
   display: flex;
-  justify-content: center;
+  flex-direction: row;
   align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
   width: 100%;
-  height: 1.5rem; /* Much smaller like reference */
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid rgb(210, 28, 140); */
+  padding: 1.5rem 2rem;
+  background: #000000;
+  border-top: none;
 }
 
 .rights-text {
-  color: rgb(130, 130, 130);
-  font-size: 0.6rem; /* Much smaller like reference */
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  text-align: center;
+}
 
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 1px solid green; */
+/* Social media & newsletter section (to be added to HTML) */
+.footer-social-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 2.5rem 2rem;
+  border-top: 1px solid rgba(168, 139, 99, 0.12);
+}
+
+.footer-social-title {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6a6a6a;
+}
+
+.footer-social-links {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(168, 139, 99, 0.25);
+  border-radius: 50%;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.footer-social-link:hover {
+  background: #c5a572;
+  border-color: #c5a572;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(197, 165, 114, 0.25);
+}
+
+.footer-social-link svg,
+.footer-social-link img {
+  width: 18px;
+  height: 18px;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.footer-social-link:hover svg,
+.footer-social-link:hover img {
+  opacity: 1;
+  filter: brightness(0) invert(1);
+}
+
+/* Payment icons section */
+.footer-payment-icons {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  opacity: 0.6;
+}
+
+.footer-payment-icon {
+  height: 24px;
+  width: auto;
+  filter: grayscale(1);
+  opacity: 0.5;
+  transition: all 0.3s ease;
+}
+
+.footer-payment-icon:hover {
+  filter: grayscale(0);
+  opacity: 1;
 }
 
 /* Modal Item Preview - Updated Styles */

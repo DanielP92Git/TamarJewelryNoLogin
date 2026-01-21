@@ -154,6 +154,13 @@
         </script>
 
         <form class="contact-form" id="contactForm">
+          <!-- ANTI-SPAM: Honeypot field - hidden from humans, bots will fill it -->
+          <div style="position: absolute; left: -9999px;" aria-hidden="true">
+            <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" />
+          </div>
+          <!-- ANTI-SPAM: Hidden timestamp for time-based validation -->
+          <input type="hidden" name="form_loaded_at" id="formLoadedAt" value="" />
+
           <div class="form-group">
             <div class="input-group">
               <input
@@ -240,9 +247,11 @@
           <a class="attrib-footer" href="/html/categories/unisex.html"
             >Unisex Jewelry</a
           >
+          <!-- HIDDEN: Shalom Club - uncomment to restore
           <a class="attrib-footer" href="/html/categories/shalom-club.html"
             >Shalom Club</a
           >
+          -->
         </div>
 
         <div class="footer-middle-column">
