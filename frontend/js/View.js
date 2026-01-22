@@ -528,9 +528,17 @@ export default class View {
     });
 
     // Prevent clicks inside the menu from propagating to the document listener
+    // EXCEPT for clicks on actual links (which need to navigate)
     if (menu) {
       menu.addEventListener('click', e => {
-        e.stopPropagation();
+        // Allow clicks on links to propagate normally for navigation
+        const target = e.target;
+        const isLink = target.tagName === 'A' || target.closest('a');
+
+        // Only stop propagation if NOT clicking on a link
+        if (!isLink) {
+          e.stopPropagation();
+        }
       });
     }
   }
