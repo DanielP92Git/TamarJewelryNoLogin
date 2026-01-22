@@ -21,6 +21,7 @@
     "start": "parcel index.html",
     "prebuild": "npx update-browserslist-db@latest",
     "build": "parcel build index.html --dist-dir ./dist",
+    "postbuild": "node postbuild.js",
     "postinstall": "npx update-browserslist-db@latest",
     "lint": "eslint ."
   },
