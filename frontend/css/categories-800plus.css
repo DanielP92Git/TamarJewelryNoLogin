@@ -22,7 +22,7 @@ header {
 
 /* Category-specific header backgrounds as a fallback */
 body#categories.bracelets header {
-  background-image: url('../imgs/website-images/bracelets/B3.jpg');
+  background-image: url('../imgs/website-images/bracelets/B3.webp');
   background-position: center 5%; /* Show pendant area, slightly lower than mobile */
 }
 

@@ -19,7 +19,7 @@ header {
 
 /* Category-specific header backgrounds as a fallback for mobile */
 body#categories.bracelets header {
-  background-image: url('../imgs/website-images/bracelets/B3.jpg');
+  background-image: url('../imgs/website-images/bracelets/B3.webp');
   background-position: center 20%; /* Show more of the upper portion where pendant is */
 }
 
