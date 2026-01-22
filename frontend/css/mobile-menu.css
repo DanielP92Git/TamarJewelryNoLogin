@@ -438,7 +438,7 @@ body:not(#home) {
   font-size: 18px;
   font-weight: 400;
   letter-spacing: 0.06em;
-  color: #1a1a1a;
+  color: var(--site-gold-accent);
   text-transform: none;
   white-space: nowrap;
   transition: color 0.3s ease;

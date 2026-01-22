@@ -476,7 +476,7 @@ html[dir='rtl'] .site-header .category-item .attrib {
    ========================================================= */
 @media (min-width: 800px) {
   :root {
-    --site-gold-accent: #c5a572;
+    --site-gold-accent: #ca9136;
     --site-header-height: 76px;
     --site-header-pad-x: 48px;
   }
@@ -556,7 +556,7 @@ html[dir='rtl'] .site-header .category-item .attrib {
     font-size: clamp(13px, 1.6vw, 20px);
     font-weight: 400;
     letter-spacing: 0.08em;
-    color: #1a1a1a;
+    color: var(--site-gold-accent);
     text-transform: none;
     white-space: nowrap;
     transition: color 0.3s ease;
@@ -564,7 +564,7 @@ html[dir='rtl'] .site-header .category-item .attrib {
   }
 
   .site-brand:hover .site-logo-text {
-    color: var(--site-gold-accent);
+    color: #000;
   }
 
   /* Hide mobile icons on desktop */
