@@ -777,4 +777,152 @@ html[dir='rtl'] .category-name {
   background: transparent;
 }
 
+/* =========================================================
+   ANNOUNCEMENT BAR - Desktop
+   ========================================================= */
+
+.announcement-bar {
+  background-color: #000000;
+  color: #ffffff;
+  width: 100%;
+  z-index: 1000;
+  position: relative;
+}
+
+.announcement-bar.hidden {
+  display: none;
+}
+
+.announcement-bar__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.announcement-bar__text {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.announcement-bar__close {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.announcement-bar__close:hover {
+  opacity: 1;
+}
+
+/* RTL Support for Announcement Bar */
+html[dir='rtl'] .announcement-bar__text {
+  font-family: 'Rubik', sans-serif;
+  letter-spacing: 0.02em;
+}
+
+html[dir='rtl'] .announcement-bar__close {
+  right: auto;
+  left: 20px;
+}
+
+/* =========================================================
+   VALUE PROPOSITIONS STRIP - Desktop
+   ========================================================= */
+
+.value-props {
+  background-color: #fafafa;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 25px 20px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.value-props__container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.value-prop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 10px;
+}
+
+.value-prop__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  flex-shrink: 0;
+}
+
+.value-prop__icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.value-prop__text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.value-prop__title {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #000000;
+  letter-spacing: 0.03em;
+}
+
+.value-prop__subtitle {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #666666;
+}
+
+/* RTL Support for Value Props */
+html[dir='rtl'] .value-prop {
+  flex-direction: row-reverse;
+}
+
+html[dir='rtl'] .value-prop__text {
+  text-align: right;
+}
+
+html[dir='rtl'] .value-prop__title {
+  font-family: 'Rubik', sans-serif;
+  letter-spacing: 0;
+}
+
+html[dir='rtl'] .value-prop__subtitle {
+  font-family: 'Rubik', sans-serif;
+}
+
 /* Footer styles moved to footer-desktop.css */

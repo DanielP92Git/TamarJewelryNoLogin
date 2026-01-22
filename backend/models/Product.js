@@ -41,6 +41,11 @@ const ProductSchema = new mongoose.Schema({
   date: { type: Date, default: Date.now },
   available: { type: Boolean, default: true },
   security_margin: { type: Number },
+  // Featured products
+  featured: { type: Boolean, default: false, index: true },
+  bestseller: { type: Boolean, default: false },
+  featuredOrder: { type: Number, default: 0 },
+  salesCount: { type: Number, default: 0 },
 });
 
 module.exports =

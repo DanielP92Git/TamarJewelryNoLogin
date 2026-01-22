@@ -1,0 +1,99 @@
+/* Trust Footer Section - Mobile (<800px) */
+
+.trust-footer {
+  background: #f8f8f8;
+  padding: 2rem 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.trust-footer__container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.trust-footer__payment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.trust-footer__label {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.8125rem;
+  color: #666666;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+  text-align: center;
+}
+
+.trust-footer__logos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.875rem;
+}
+
+.trust-footer__logo {
+  height: 24px;
+  width: auto;
+  opacity: 0.7;
+  filter: grayscale(100%);
+}
+
+.trust-footer__logo svg,
+.trust-footer__logo img {
+  height: 24px;
+  width: auto;
+  display: block;
+}
+
+.trust-footer__divider {
+  width: 60px;
+  height: 1px;
+  background: #d0d0d0;
+}
+
+.trust-footer__security {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.trust-footer__lock-icon {
+  color: #4caf50;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+.trust-footer__security-text {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.8125rem;
+  color: #666666;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* RTL Support */
+html[dir='rtl'] .trust-footer__payment {
+  flex-direction: column;
+}
+
+html[dir='rtl'] .trust-footer__label,
+html[dir='rtl'] .trust-footer__security-text {
+  font-family: 'Rubik', sans-serif;
+}
+
+html[dir='rtl'] .trust-footer__security {
+  flex-direction: row-reverse;
+}

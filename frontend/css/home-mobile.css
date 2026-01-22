@@ -940,3 +940,172 @@ html[dir='rtl'] .category-name {
    HOME (MOBILE) — Header + Hero refactor to match screen.png
    Reference: frontend/code.html (fonts/colors/sizing)
    ========================================================= */
+
+/* =========================================================
+   ANNOUNCEMENT BAR - Mobile
+   ========================================================= */
+
+.announcement-bar {
+  background-color: #000000;
+  color: #ffffff;
+  width: 100%;
+  z-index: 1000;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+
+.announcement-bar.hidden {
+  display: none;
+}
+
+.announcement-bar__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 40px 8px 15px;
+  position: relative;
+}
+
+.announcement-bar__text {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.announcement-bar__close {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 5px 8px;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.announcement-bar__close:hover {
+  opacity: 1;
+}
+
+/* RTL Support for Announcement Bar - Mobile */
+html[dir='rtl'] .announcement-bar__text {
+  font-family: 'Rubik', sans-serif;
+  letter-spacing: 0;
+}
+
+html[dir='rtl'] .announcement-bar__close {
+  right: auto;
+  left: 10px;
+}
+
+html[dir='rtl'] .announcement-bar__content {
+  padding: 8px 15px 8px 40px;
+}
+
+/* Adjust hero section when announcement bar is visible */
+.hero-section {
+  margin-top: 86px; /* 56px header + ~30px announcement bar */
+  height: calc(100vh - 86px);
+}
+
+/* When announcement bar is hidden, revert to original */
+.announcement-bar.hidden ~ header .hero-section,
+body:has(.announcement-bar.hidden) .hero-section {
+  margin-top: 56px;
+  height: calc(100vh - 56px);
+}
+
+/* =========================================================
+   VALUE PROPOSITIONS STRIP - Mobile
+   ========================================================= */
+
+.value-props {
+  background-color: #fafafa;
+  border-top: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 20px 15px;
+  width: 100%;
+  margin-top: 20px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.value-props__container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-sizing: border-box;
+}
+
+.value-prop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.value-prop:last-child {
+  border-bottom: none;
+}
+
+.value-prop__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+  flex-shrink: 0;
+}
+
+.value-prop__icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.value-prop__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.value-prop__title {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #000000;
+  letter-spacing: 0.02em;
+}
+
+.value-prop__subtitle {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #666666;
+}
+
+/* RTL Support for Value Props - Mobile */
+html[dir='rtl'] .value-prop {
+  flex-direction: row-reverse;
+}
+
+html[dir='rtl'] .value-prop__text {
+  text-align: right;
+}
+
+html[dir='rtl'] .value-prop__title {
+  font-family: 'Rubik', sans-serif;
+  letter-spacing: 0;
+}
+
+html[dir='rtl'] .value-prop__subtitle {
+  font-family: 'Rubik', sans-serif;
+}

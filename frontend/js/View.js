@@ -397,6 +397,12 @@ export default class View {
       if (!categoriesTabElement) return;
     }
 
+    // Check if element has a parent node before attempting to replace
+    if (!categoriesTabElement.parentNode) {
+      console.warn('Categories tab element is not attached to the DOM');
+      return;
+    }
+
     // Remove existing listeners to prevent duplicates
     const clonedElement = categoriesTabElement.cloneNode(true);
     categoriesTabElement.parentNode.replaceChild(

@@ -1,0 +1,98 @@
+/* Limited Edition / Promo Banner - Mobile (<800px) */
+
+.promo-banner {
+  padding: 3rem 1.5rem;
+  background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
+}
+
+.promo-banner__container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.promo-banner__content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  text-align: center;
+  align-items: center;
+}
+
+.promo-banner__badge {
+  display: inline-block;
+  background: #000000;
+  color: #ffffff;
+  padding: 0.4rem 1rem;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-radius: 2px;
+}
+
+.promo-banner__title {
+  font-family: 'Raleway', sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  color: #000000;
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: 0.02em;
+}
+
+.promo-banner__description {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  color: #666666;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.promo-banner__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 1rem 2rem;
+  background: #000000;
+  color: #ffffff;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.9375rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 2px solid #000000;
+  border-radius: 2px;
+  margin-top: 0.5rem;
+}
+
+.promo-banner__cta svg {
+  width: 18px;
+  height: 18px;
+}
+
+.promo-banner__image {
+  aspect-ratio: 4 / 5;
+  background: #f0f0f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.promo-banner__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* RTL Support */
+html[dir='rtl'] .promo-banner__badge,
+html[dir='rtl'] .promo-banner__title,
+html[dir='rtl'] .promo-banner__description,
+html[dir='rtl'] .promo-banner__cta-text {
+  font-family: 'Rubik', sans-serif;
+}
+
+html[dir='rtl'] .promo-banner__cta {
+  flex-direction: row-reverse;
+}

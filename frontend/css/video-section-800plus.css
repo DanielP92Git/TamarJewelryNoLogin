@@ -1,0 +1,219 @@
+/* =========================================================
+   CRAFTSMANSHIP VIDEO SECTION - Desktop (≥800px)
+   Strategic placement: Between value props and featured products
+   Purpose: Build emotional connection and showcase artisan quality
+   ========================================================= */
+
+.craftsmanship-video-section {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, #fafaf9 0%, #ffffff 100%);
+  padding: 80px 0;
+  overflow: hidden;
+}
+
+.craftsmanship-video-section__container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 48px;
+}
+
+/* Header area with optional title/subtitle */
+.craftsmanship-video-section__header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.craftsmanship-video-section__badge {
+  display: inline-block;
+  font-family: var(--font-secondary, 'Montserrat', sans-serif);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #9a7b4f;
+  background: rgba(197, 165, 114, 0.12);
+  padding: 8px 20px;
+  border-radius: 50px;
+  margin-bottom: 20px;
+}
+
+.craftsmanship-video-section__title {
+  font-family: var(--font-accent, 'Poiret One', cursive);
+  font-size: clamp(2.2rem, 3.5vw, 3rem);
+  font-weight: 400;
+  color: #2c2c2c;
+  margin: 0 0 16px 0;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.craftsmanship-video-section__subtitle {
+  font-family: var(--font-secondary, 'Montserrat', sans-serif);
+  font-size: 1.05rem;
+  font-weight: 300;
+  color: #666666;
+  margin: 0;
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+}
+
+/* Video container with elegant aspect ratio */
+.craftsmanship-video-section__video-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.08),
+    0 10px 40px rgba(0, 0, 0, 0.05);
+  background: #f8f8f8;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.craftsmanship-video-section__video-wrapper:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.12),
+    0 16px 60px rgba(0, 0, 0, 0.08);
+}
+
+/* Aspect ratio container for 16:9 video */
+.craftsmanship-video-section__aspect-ratio {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+}
+
+.craftsmanship-video-section__video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Play/pause overlay button (optional - for user control) */
+.craftsmanship-video-section__play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 72px;
+  height: 72px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(197, 165, 114, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.craftsmanship-video-section__video-wrapper:hover .craftsmanship-video-section__play-button {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.craftsmanship-video-section__play-button:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.craftsmanship-video-section__play-button svg {
+  width: 28px;
+  height: 28px;
+  fill: #9a7b4f;
+  margin-left: 4px; /* Visual centering for play triangle */
+}
+
+/* Video paused state - show play button */
+.craftsmanship-video-section__video-wrapper.is-paused .craftsmanship-video-section__play-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Optional caption below video */
+.craftsmanship-video-section__caption {
+  text-align: center;
+  font-family: var(--font-secondary, 'Montserrat', sans-serif);
+  font-size: 0.9rem;
+  font-style: italic;
+  color: #888888;
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* RTL support for Hebrew */
+html[dir='rtl'] .craftsmanship-video-section__header,
+html[dir='rtl'] .craftsmanship-video-section__caption {
+  direction: rtl;
+  text-align: center;
+}
+
+html[dir='rtl'] .craftsmanship-video-section__title {
+  font-family: var(--font-accent, 'Rubik', sans-serif);
+  letter-spacing: 0;
+}
+
+html[dir='rtl'] .craftsmanship-video-section__subtitle,
+html[dir='rtl'] .craftsmanship-video-section__caption {
+  font-family: var(--font-body, 'Rubik', sans-serif);
+  letter-spacing: 0;
+}
+
+/* Loading state shimmer effect */
+.craftsmanship-video-section__video-wrapper.is-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+  z-index: 1;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Accessibility: Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .craftsmanship-video-section__video-wrapper {
+    transition: none;
+  }
+
+  .craftsmanship-video-section__play-button {
+    transition: none;
+  }
+
+  .craftsmanship-video-section__video-wrapper.is-loading::before {
+    animation: none;
+  }
+}

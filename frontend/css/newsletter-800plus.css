@@ -1,0 +1,227 @@
+/* Newsletter Signup Section - Desktop (≥800px) */
+
+.newsletter {
+  background: linear-gradient(135deg, #000000 0%, #2d2d2d 100%);
+  padding: 5rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.newsletter::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(255, 255, 255, 0.02) 10px,
+      rgba(255, 255, 255, 0.02) 20px
+    );
+  pointer-events: none;
+}
+
+.newsletter__container {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.newsletter__badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 0.5rem 1.25rem;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.newsletter__title {
+  font-family: 'Raleway', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0 0 1rem 0;
+  letter-spacing: 0.05em;
+}
+
+.newsletter__subtitle {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.125rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 2.5rem 0;
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.newsletter__form {
+  margin-bottom: 1rem;
+}
+
+.newsletter__input-wrapper {
+  display: flex;
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.newsletter__input {
+  flex: 1;
+  padding: 1.125rem 1.5rem;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid transparent;
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.newsletter__input:focus {
+  background: #ffffff;
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+}
+
+.newsletter__input::placeholder {
+  color: #999999;
+}
+
+.newsletter__button {
+  padding: 1.125rem 2.5rem;
+  background: #ffffff;
+  color: #000000;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border: 2px solid #ffffff;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.newsletter__button:hover {
+  background: transparent;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+}
+
+.newsletter__button:active {
+  transform: translateY(0);
+}
+
+.newsletter__error {
+  color: #ff6b6b;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.875rem;
+  margin-top: 0.75rem;
+  min-height: 1.25rem;
+}
+
+/* Success State */
+.newsletter__success {
+  display: none;
+  animation: fadeInUp 0.5s ease;
+}
+
+.newsletter__success.show {
+  display: block;
+}
+
+.newsletter__form.hide {
+  display: none;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.newsletter__success-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.5rem;
+  background: rgba(76, 175, 80, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.newsletter__success-icon svg {
+  color: #4caf50;
+}
+
+.newsletter__success-title {
+  font-family: 'Raleway', sans-serif;
+  font-size: 2rem;
+  font-weight: 400;
+  color: #ffffff;
+  margin: 0 0 1rem 0;
+}
+
+.newsletter__success-text {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 1rem 0;
+}
+
+.newsletter__code {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  padding: 1rem 2rem;
+  font-family: 'Courier New', monospace;
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  border-radius: 8px;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  margin: 0 0 1.5rem 0;
+}
+
+.newsletter__success-subtext {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.9375rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+/* RTL Support */
+html[dir='rtl'] .newsletter__badge,
+html[dir='rtl'] .newsletter__title,
+html[dir='rtl'] .newsletter__subtitle,
+html[dir='rtl'] .newsletter__input,
+html[dir='rtl'] .newsletter__button-text,
+html[dir='rtl'] .newsletter__error,
+html[dir='rtl'] .newsletter__success-title,
+html[dir='rtl'] .newsletter__success-text,
+html[dir='rtl'] .newsletter__success-subtext {
+  font-family: 'Rubik', sans-serif;
+}
+
+html[dir='rtl'] .newsletter__input {
+  text-align: right;
+}

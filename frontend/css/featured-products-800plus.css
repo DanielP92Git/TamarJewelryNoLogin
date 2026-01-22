@@ -1,0 +1,216 @@
+/* Featured Products Section - Desktop (≥800px) */
+
+.featured-products {
+  padding: 5rem 2rem;
+  background: #ffffff;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.featured-products__header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.featured-products__title {
+  font-family: 'Raleway', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 400;
+  color: #000000;
+  margin: 0 0 1rem 0;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.featured-products__subtitle {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.125rem;
+  color: #666666;
+  margin: 0;
+  font-weight: 300;
+}
+
+.featured-products__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+/* Product Card */
+.featured-product {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.3s ease;
+}
+
+.featured-product:hover {
+  transform: translateY(-8px);
+}
+
+.featured-product__image-container {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #f8f8f8;
+  margin-bottom: 1rem;
+  border-radius: 2px;
+}
+
+.featured-product__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.featured-product:hover .featured-product__image {
+  transform: scale(1.08);
+}
+
+.featured-product__badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #000000;
+  color: #ffffff;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem;
+  font-family: 'Raleway', sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  z-index: 1;
+}
+
+.featured-product__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.featured-product:hover .featured-product__overlay {
+  opacity: 1;
+}
+
+.featured-product__quick-view {
+  color: #ffffff;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.875rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 2px solid #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 2px;
+  background: transparent;
+  transition: all 0.2s ease;
+}
+
+.featured-product:hover .featured-product__quick-view {
+  background: #ffffff;
+  color: #000000;
+}
+
+.featured-product__info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.featured-product__category {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.875rem;
+  color: #999999;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.featured-product__name {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.125rem;
+  color: #000000;
+  font-weight: 400;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.featured-product__price {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.125rem;
+  color: #000000;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+/* CTA Button */
+.featured-products__cta {
+  text-align: center;
+}
+
+.featured-products__button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  background: #000000;
+  color: #ffffff;
+  font-family: 'Raleway', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 2px solid #000000;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+}
+
+.featured-products__button:hover {
+  background: #ffffff;
+  color: #000000;
+}
+
+.featured-products__button svg {
+  transition: transform 0.3s ease;
+}
+
+.featured-products__button:hover svg {
+  transform: translateX(4px);
+}
+
+/* RTL Support */
+html[dir='rtl'] .featured-products__title,
+html[dir='rtl'] .featured-products__subtitle {
+  font-family: 'Rubik', sans-serif;
+}
+
+html[dir='rtl'] .featured-product__badge {
+  right: auto;
+  left: 12px;
+}
+
+html[dir='rtl'] .featured-product__category,
+html[dir='rtl'] .featured-product__name,
+html[dir='rtl'] .featured-product__price {
+  font-family: 'Rubik', sans-serif;
+  text-align: right;
+}
+
+html[dir='rtl'] .featured-products__button {
+  flex-direction: row-reverse;
+}
+
+html[dir='rtl'] .featured-products__button:hover svg {
+  transform: translateX(-4px);
+}
+
+html[dir='rtl'] .featured-products__button-text {
+  font-family: 'Rubik', sans-serif;
+}

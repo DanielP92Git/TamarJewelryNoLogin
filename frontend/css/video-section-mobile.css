@@ -1,0 +1,220 @@
+/* =========================================================
+   CRAFTSMANSHIP VIDEO SECTION - Mobile (<800px)
+   Optimized for mobile viewing and bandwidth
+   ========================================================= */
+
+.craftsmanship-video-section {
+  position: relative;
+  width: 100%;
+  background: linear-gradient(180deg, #fafaf9 0%, #ffffff 100%);
+  padding: 48px 0;
+  overflow: hidden;
+}
+
+.craftsmanship-video-section__container {
+  width: 100%;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+/* Header area - mobile optimized */
+.craftsmanship-video-section__header {
+  text-align: center;
+  width: 100%;
+}
+
+.craftsmanship-video-section__badge {
+  display: inline-block;
+  font-family: var(--font-secondary, 'Montserrat', sans-serif);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9a7b4f;
+  background: rgba(197, 165, 114, 0.12);
+  padding: 6px 16px;
+  border-radius: 50px;
+  margin-bottom: 16px;
+}
+
+.craftsmanship-video-section__title {
+  font-family: var(--font-accent, 'Poiret One', cursive);
+  font-size: clamp(1.75rem, 7vw, 2.2rem);
+  font-weight: 400;
+  color: #2c2c2c;
+  margin: 0 0 12px 0;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.craftsmanship-video-section__subtitle {
+  font-family: var(--font-secondary, 'Montserrat', sans-serif);
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: #666666;
+  margin: 0;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  padding: 0 8px;
+}
+
+/* Video container - mobile friendly */
+.craftsmanship-video-section__video-wrapper {
+  position: relative;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow:
+    0 3px 15px rgba(0, 0, 0, 0.1),
+    0 8px 30px rgba(0, 0, 0, 0.06);
+  background: #f8f8f8;
+}
+
+/* Aspect ratio container - maintains 16:9 */
+.craftsmanship-video-section__aspect-ratio {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+}
+
+.craftsmanship-video-section__video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Play/pause button - larger touch target for mobile */
+.craftsmanship-video-section__play-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 64px;
+  height: 64px;
+  min-width: 44px; /* WCAG minimum touch target */
+  min-height: 44px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 2px solid rgba(197, 165, 114, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0;
+  z-index: 2;
+  pointer-events: none;
+  /* Ensure touch-friendly tap area */
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Show play button on tap/touch for mobile */
+.craftsmanship-video-section__video-wrapper:active .craftsmanship-video-section__play-button,
+.craftsmanship-video-section__video-wrapper.is-paused .craftsmanship-video-section__play-button {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.craftsmanship-video-section__play-button:active {
+  transform: translate(-50%, -50%) scale(0.95);
+  background: rgba(255, 255, 255, 1);
+}
+
+.craftsmanship-video-section__play-button svg {
+  width: 24px;
+  height: 24px;
+  fill: #9a7b4f;
+  margin-left: 3px; /* Visual centering for play triangle */
+}
+
+/* Optional caption - mobile spacing */
+.craftsmanship-video-section__caption {
+  text-align: center;
+  font-family: var(--font-secondary, 'Montserrat', sans-serif);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: #888888;
+  width: 100%;
+  margin: 0;
+  line-height: 1.5;
+  padding: 0 12px;
+}
+
+/* RTL support for Hebrew on mobile */
+html[dir='rtl'] .craftsmanship-video-section__header,
+html[dir='rtl'] .craftsmanship-video-section__caption {
+  direction: rtl;
+  text-align: center;
+}
+
+html[dir='rtl'] .craftsmanship-video-section__title {
+  font-family: var(--font-accent, 'Rubik', sans-serif);
+  letter-spacing: 0;
+}
+
+html[dir='rtl'] .craftsmanship-video-section__subtitle,
+html[dir='rtl'] .craftsmanship-video-section__caption {
+  font-family: var(--font-body, 'Rubik', sans-serif);
+  letter-spacing: 0;
+}
+
+/* Loading state shimmer - mobile */
+.craftsmanship-video-section__video-wrapper.is-loading::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2s infinite;
+  z-index: 1;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+}
+
+/* Reduced motion for mobile accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .craftsmanship-video-section__play-button {
+    transition: none;
+  }
+
+  .craftsmanship-video-section__video-wrapper.is-loading::before {
+    animation: none;
+  }
+}
+
+/* Very small screens - adjust padding */
+@media (max-width: 360px) {
+  .craftsmanship-video-section {
+    padding: 40px 0;
+  }
+
+  .craftsmanship-video-section__container {
+    padding: 0 16px;
+    gap: 24px;
+  }
+
+  .craftsmanship-video-section__video-wrapper {
+    border-radius: 8px;
+  }
+}

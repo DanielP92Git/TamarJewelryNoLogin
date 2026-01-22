@@ -133,6 +133,58 @@ html[dir='rtl'] .attrib-footer,
   direction: rtl;
 }
 
+/* Social Links Section */
+.social-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  background: #fafafa;
+  border-top: 1px solid #e5e5e5;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  padding: 0.75rem 1.5rem;
+  background: transparent;
+  color: #000000;
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 2px solid #000000;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+  max-width: 320px;
+  width: 100%;
+}
+
+.social-link:active {
+  background: #000000;
+  color: #ffffff;
+}
+
+.social-link svg {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+}
+
+/* RTL Support */
+html[dir='rtl'] .social-link,
+html[dir='rtl'] .social-link__text {
+  font-family: 'Rubik', sans-serif;
+}
+
+html[dir='rtl'] .social-link {
+  flex-direction: row-reverse;
+}
+
 /* Copyright bar with brand gold background */
 .rights-container {
   display: flex;

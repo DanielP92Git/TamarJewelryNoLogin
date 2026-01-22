@@ -5,7 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const { connectDb } = require('./config/db');
-const { Users, Product, Settings } = require('./models');
+const { Users, Product, Settings, Newsletter, PromoBanner } = require('./models');
 const {
   getTokenFromRequest,
   authUser,
@@ -2404,6 +2404,140 @@ app.get('/allproducts', async (req, res) => {
   let products = await Product.find({}).lean();
   if (!isProd) console.log('All Products Fetched');
   res.send(products.map(normalizeProductForClient));
+});
+
+// Featured Products Endpoint - for homepage showcase
+app.get('/api/products/featured', async (req, res) => {
+  try {
+    const limit = parseInt(req.query.limit) || 8;
+
+    // Fetch featured products that are in stock and available
+    const products = await Product.find({
+      featured: true,
+      quantity: { $gt: 0 },
+      available: { $ne: false },
+    })
+      .sort({ featuredOrder: 1, date: -1 })
+      .limit(limit)
+      .lean();
+
+    if (!isProd) console.log(`Fetched ${products.length} featured products`);
+    res.json(products.map(normalizeProductForClient));
+  } catch (err) {
+    if (!isProd) console.error('Error fetching featured products:', err);
+    res.status(500).json({
+      error: 'Failed to fetch featured products',
+      ...(isProd ? {} : { message: err?.message })
+    });
+  }
+});
+
+// Newsletter Subscription Endpoint
+app.post('/api/newsletter/subscribe', async (req, res) => {
+  try {
+    const { email, language } = req.body;
+
+    // Validate email
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Valid email is required' });
+    }
+
+    // Get IP address for rate limiting
+    const ipAddress = req.ip || req.connection.remoteAddress;
+
+    // Check if email already subscribed
+    const existingSubscriber = await Newsletter.findOne({ email: email.toLowerCase() });
+    if (existingSubscriber) {
+      return res.status(200).json({
+        success: true,
+        alreadySubscribed: true,
+        discountCode: existingSubscriber.discountCode,
+        message: language === 'heb' ? 'כבר נרשמת! קוד ההנחה שלך נשלח למייל.' : 'You\'re already subscribed! Check your email for your discount code.'
+      });
+    }
+
+    // Generate unique discount code (format: WELCOME10-XXXXX)
+    const generateDiscountCode = () => {
+      const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
+      return `WELCOME10-${randomPart}`;
+    };
+
+    let discountCode = generateDiscountCode();
+
+    // Ensure uniqueness
+    let codeExists = await Newsletter.findOne({ discountCode });
+    while (codeExists) {
+      discountCode = generateDiscountCode();
+      codeExists = await Newsletter.findOne({ discountCode });
+    }
+
+    // Create new subscriber
+    const subscriber = new Newsletter({
+      email: email.toLowerCase(),
+      language: language || 'eng',
+      discountCode,
+      ipAddress,
+    });
+
+    await subscriber.save();
+
+    if (!isProd) console.log(`New newsletter subscriber: ${email}, code: ${discountCode}`);
+
+    res.status(201).json({
+      success: true,
+      discountCode,
+      message: language === 'heb' ? 'תודה שנרשמת! קוד ההנחה שלך:' : 'Thanks for subscribing! Your discount code:'
+    });
+
+  } catch (err) {
+    if (!isProd) console.error('Error processing newsletter subscription:', err);
+
+    // Handle duplicate email error (in case of race condition)
+    if (err.code === 11000) {
+      return res.status(200).json({
+        success: true,
+        alreadySubscribed: true,
+        message: 'You\'re already subscribed! Check your email for your discount code.'
+      });
+    }
+
+    res.status(500).json({
+      error: 'Failed to process subscription',
+      ...(isProd ? {} : { message: err?.message })
+    });
+  }
+});
+
+// Promo Banner Endpoint - Get active promotional banner
+app.get('/api/promo-banner', async (req, res) => {
+  try {
+    // Find the active banner that hasn't expired
+    const banner = await PromoBanner.findOne({
+      active: true,
+      $or: [
+        { expiresAt: { $exists: false } },
+        { expiresAt: null },
+        { expiresAt: { $gt: new Date() } }
+      ]
+    })
+      .sort({ createdAt: -1 })
+      .limit(1)
+      .lean();
+
+    if (!banner) {
+      return res.json({ banner: null });
+    }
+
+    if (!isProd) console.log('Active promo banner found:', banner.titleEng);
+    res.json({ banner });
+
+  } catch (err) {
+    if (!isProd) console.error('Error fetching promo banner:', err);
+    res.status(500).json({
+      error: 'Failed to fetch promo banner',
+      ...(isProd ? {} : { message: err?.message })
+    });
+  }
 });
 
 app.post('/productsByCategory', async (req, res) => {

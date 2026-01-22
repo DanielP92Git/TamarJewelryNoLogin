@@ -1,0 +1,95 @@
+/* Social Proof Strip - Desktop (≥800px) */
+
+.social-proof {
+  background: linear-gradient(to bottom, #fafafa 0%, #ffffff 100%);
+  padding: 3rem 2rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.social-proof__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.social-proof__item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  padding: 0 1.5rem;
+  position: relative;
+}
+
+.social-proof__item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 40px;
+  background: #e0e0e0;
+}
+
+.social-proof__icon {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.social-proof__icon svg {
+  width: 24px;
+  height: 24px;
+  color: #000000;
+}
+
+.social-proof__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.social-proof__value {
+  font-family: 'Raleway', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #000000;
+  line-height: 1.2;
+}
+
+.social-proof__label {
+  font-family: 'Raleway', sans-serif;
+  font-size: 0.875rem;
+  color: #666666;
+  line-height: 1.2;
+}
+
+/* RTL Support */
+html[dir='rtl'] .social-proof__container {
+  direction: rtl;
+}
+
+html[dir='rtl'] .social-proof__item {
+  flex-direction: row-reverse;
+}
+
+html[dir='rtl'] .social-proof__item:not(:last-child)::after {
+  right: auto;
+  left: 0;
+}
+
+html[dir='rtl'] .social-proof__label,
+html[dir='rtl'] .social-proof__value {
+  font-family: 'Rubik', sans-serif;
+  text-align: right;
+}
