@@ -17,6 +17,7 @@ class AboutView extends View {
     const descriptionContainer = document.querySelector('.aboutme-description');
     if (lng === 'eng') {
       descriptionContainer.style.direction = 'ltr';
+      descriptionContainer.style.textAlign = 'left';
 
       return `A bit about me and my jewelry... <br />
           <br />
@@ -40,6 +41,7 @@ class AboutView extends View {
           feel special, and as beautiful as she really is!`;
     } else if (lng === 'heb') {
       descriptionContainer.style.direction = 'rtl';
+      descriptionContainer.style.textAlign = 'right';
 
       return `ברוכים הבאים! שמי תמר, אני אמנית ויוצרת ירושלמית. אני מקבלת המון השראה מירושלים ההיסטורית והיפה שבה אני גרה ומההרים שמקיפים עליה. אני שואבת השראה מהעיר שלי ומהמקומות הרבים שבהם טיילתי. הטכניקה האהובה עליי – והייחודית לי – היא סריגה עם חוטים דמויי מתכת, שבאמצעותם אני יוצרת שילובי צבעים ייחודיים שמעניקים לכל תכשיט מראה מיוחד ושונה.
 האהבה שלי לעיצוב ולאמנות החלה בגיל צעיר מאוד. כשהייתי בת 12, כבר יצרתי תכשיטים לעצמי, ובהדרגה התחלתי לעצב עבור משפחתי וחבריי. כשהתחלתי לקבל תגובות נלהבות מחברות של אמא שלי, הבנתי שיש ביקוש לתכשיטים שלי והתחלתי למכור אותם.
