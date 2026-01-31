@@ -910,11 +910,11 @@ class CategoriesView extends View {
             <div class="item-specs" dir="${
               this.lang === 'heb' ? 'rtl' : 'ltr'
             }">
-              <h2 class="item-title_modal">${title}</h2>
+              <h2 class="item-title_modal" dir="${this.lang === 'heb' ? 'rtl' : 'ltr'}">${title}</h2>
               ${
                 description
                   ? `<div class="details-container">
-                      <div class="item-description_modal">${description.replace(
+                      <div class="item-description_modal" dir="${this.lang === 'heb' ? 'rtl' : 'ltr'}">${description.replace(
                         /\n/g,
                         '<br>'
                       )}</div>
@@ -1412,8 +1412,8 @@ class CategoriesView extends View {
               type="image/webp"
               crossorigin="anonymous"
             />
-            <img 
-              class="image-item front-image" 
+            <img
+              class="image-item front-image"
               src="${desktopImage}"
               alt="${name}"
               loading="lazy"
@@ -1423,8 +1423,8 @@ class CategoriesView extends View {
             />
           </picture>
         </div>
-        <div class="item-title">${name}</div>
-        <div class="item-description">${formattedDescription}</div>
+        <div class="item-title" dir="${this.lang === 'heb' ? 'rtl' : 'ltr'}">${name}</div>
+        <div class="item-description" dir="${this.lang === 'heb' ? 'rtl' : 'ltr'}">${formattedDescription}</div>
         ${priceMarkup}
         <button class="add-to-cart-btn">${
           this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל'
@@ -1469,8 +1469,20 @@ class CategoriesView extends View {
 
     const products =
       this.innerProductsContainer.querySelectorAll('.item-container');
+    const direction = lng === 'heb' ? 'rtl' : 'ltr';
 
     products.forEach(product => {
+      // Update text direction for title and description
+      const title = product.querySelector('.item-title');
+      if (title) {
+        title.setAttribute('dir', direction);
+      }
+
+      const description = product.querySelector('.item-description');
+      if (description) {
+        description.setAttribute('dir', direction);
+      }
+
       // Update "Add to Cart" button text
       const addToCartBtn = product.querySelector('.add-to-cart-btn');
       if (addToCartBtn) {
