@@ -15,32 +15,11 @@ body {
 header {
   display: flex;
   flex-flow: column;
-  justify-content: flex-start;
-  background-image: url(../imgs/working.jpg);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  margin-bottom: 2rem;
+  width: 100vw;
   position: relative;
-
-  height: 80vh;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(177, 20, 143); */
-}
-
-.logo {
-  display: block;
-  background-image: url(../imgs/tamar-logo.png);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  width: 180px;
-  height: 140px;
-  position: relative;
-  left: 5%;
-
-  z-index: 0;
 }
 
 /* ====MENU SETTINGS==== */
@@ -256,64 +235,26 @@ main {
   display: flex;
   flex-flow: column;
   align-items: center;
-  justify-content: center;
-  position: relative;
-  top: 25%;
+
+  max-height: 160rem;
+  width: 100%;
+  padding-bottom: 3rem;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(229, 247, 89); */
+  /* border: 2px solid rgb(37, 136, 228); */
 }
 
 h1 {
   font-weight: 100;
   font-family: Raleway, sans-serif;
-  text-align: center;
-
-  align-self: center;
   width: 100%;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
   font-size: 1.5rem;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 2px solid rgb(40, 228, 37); */
 }
-
-.about-title-overlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2.5rem;
-  font-weight: 100;
-  color: white;
-  font-family: 'Raleway', sans-serif;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
-  z-index: 3;
-  text-align: center;
-  width: 90%;
-
-  /* Slide up animation */
-  opacity: 0;
-  animation: slideUpFade 1.2s ease-out 0.5s forwards;
-}
-
-@keyframes slideUpFade {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -50%) translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -50%) translateY(0);
-  }
-}
-
-/* .first-row-container {
-
-} */
 
 .first-row-container {
   display: flex;
@@ -330,13 +271,12 @@ h1 {
 .aboutme-description {
   width: 95%;
   font-size: 1.2rem;
-  padding: 0.5rem;
+  padding: 0 1.5rem 1.5rem 1.5rem;
   line-height: 1.8rem;
   box-sizing: border-box;
   font-family: Raleway, sans-serif;
   color: rgba(68, 68, 68, 0.9);
   letter-spacing: 0.5px;
-  padding: 30px;
 }
 
 .description-img {

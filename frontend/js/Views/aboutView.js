@@ -91,10 +91,12 @@ class AboutView extends View {
 
     if (lng === 'eng') {
       pageTitle.style.fontFamily = 'Raleway, sans-serif';
+      pageTitle.style.textAlign = 'left';
       pageTitle.textContent = 'ABOUT ME';
     }
     if (lng === 'heb') {
-      pageTitle.style.fontFamily = `'Amatic SC', sans-serif`;
+      pageTitle.style.fontFamily = 'Raleway, sans-serif';
+      pageTitle.style.textAlign = 'right';
       pageTitle.textContent = 'אודותי';
     }
   }

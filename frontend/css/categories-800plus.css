@@ -76,17 +76,7 @@ body#categories.crochet-necklaces header {
   z-index: 5;
 }
 
-.currency-sort-container {
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
-  gap: 15px;
-  padding: 15px;
-  margin-bottom: 20px;
-}
-
-.header-currency-selector,
-#sort {
+.header-currency-selector {
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -96,13 +86,11 @@ body#categories.crochet-necklaces header {
   transition: border-color 0.3s ease;
 }
 
-.header-currency-selector:hover,
-#sort:hover {
+.header-currency-selector:hover {
   border-color: #4a90e2;
 }
 
-.currency-option,
-.sort-option {
+.currency-option {
   padding: 8px;
 }
 

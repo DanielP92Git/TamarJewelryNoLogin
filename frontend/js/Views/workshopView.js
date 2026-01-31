@@ -35,62 +35,9 @@ class WorkshopView extends View {
       return;
     }
 
-    // Make sure buttons are visible
-    btnLeft.style.display = 'flex';
-    btnRight.style.display = 'flex';
-
+    // Buttons are now styled purely via CSS
     let curImg = 0;
     const maxImages = slideContainers.length;
-    let autoSlideTimeout;
-    const autoSlideDelay = 10000;
-
-    // Function to reset button styles (if they're somehow lost)
-    const resetButtonStyles = () => {
-      const commonStyles = {
-        position: 'absolute',
-        top: '50%',
-        transform: 'translateY(-50%)',
-        zIndex: '100',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        color: 'white',
-        border: 'none',
-        borderRadius: '50%',
-        width: window.innerWidth >= 800 ? '50px' : '40px',
-        height: window.innerWidth >= 800 ? '50px' : '40px',
-        cursor: 'pointer',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: window.innerWidth >= 800 ? '3rem' : '2.5rem',
-        fontWeight: 'bold',
-        lineHeight: '0',
-        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
-        textAlign: 'center',
-        padding: '0',
-        margin: '0',
-        verticalAlign: 'middle',
-        direction: 'ltr', // Force LTR direction for buttons
-        unicodeBidi: 'bidi-override', // Prevent RTL from affecting content
-      };
-
-      Object.assign(btnLeft.style, commonStyles, {
-        left: window.innerWidth >= 800 ? '25px' : '10px',
-        right: 'auto', // Prevent RTL from flipping to right
-        paddingBottom: window.innerWidth >= 800 ? '5px' : '4px',
-      });
-
-      Object.assign(btnRight.style, commonStyles, {
-        right: window.innerWidth >= 800 ? '25px' : '10px',
-        left: 'auto', // Prevent RTL from flipping to left
-        paddingBottom: window.innerWidth >= 800 ? '5px' : '4px',
-      });
-    };
-
-    // Apply styles immediately
-    resetButtonStyles();
-
-    // Reapply styles after a short delay (in case they're overridden)
-    setTimeout(resetButtonStyles, 100);
 
     const goToImage = function (slide, skipTransition = false) {
       if (skipTransition) {
@@ -115,39 +62,22 @@ class WorkshopView extends View {
       }
     };
 
-    const restartAutoSlide = function () {
-      clearTimeout(autoSlideTimeout);
-      autoSlideTimeout = setTimeout(nextImage, autoSlideDelay);
-    };
-
-    const nextImage = function () {
+    const nextSlide = function () {
       const prevImg = curImg;
       curImg = (curImg + 1) % maxImages;
-      
+
       // If wrapping from last to first, skip transition for instant jump
       const isWrapping = prevImg === maxImages - 1 && curImg === 0;
       goToImage(curImg, isWrapping);
-      restartAutoSlide();
-    };
-
-    const nextSlideManual = function () {
-      const prevImg = curImg;
-      curImg = (curImg + 1) % maxImages;
-      
-      // If wrapping from last to first, skip transition for instant jump
-      const isWrapping = prevImg === maxImages - 1 && curImg === 0;
-      goToImage(curImg, isWrapping);
-      restartAutoSlide();
     };
 
     const prevSlide = function () {
       const prevImg = curImg;
       curImg = (curImg - 1 + maxImages) % maxImages;
-      
+
       // If wrapping from first to last, skip transition for instant jump
       const isWrapping = prevImg === 0 && curImg === maxImages - 1;
       goToImage(curImg, isWrapping);
-      restartAutoSlide();
     };
 
     // Initial setup - ensure first image is visible and others are positioned correctly
@@ -166,8 +96,6 @@ class WorkshopView extends View {
       });
     }, 50);
 
-    restartAutoSlide();
-
     // Ensure we clean up previous event listeners to avoid duplicates
     const newBtnLeft = btnLeft.cloneNode(true);
     const newBtnRight = btnRight.cloneNode(true);
@@ -177,7 +105,7 @@ class WorkshopView extends View {
 
     // Add Event Listeners to the new buttons
     newBtnLeft.addEventListener('click', prevSlide);
-    newBtnRight.addEventListener('click', nextSlideManual);
+    newBtnRight.addEventListener('click', nextSlide);
   }
 
   handleLanguage() {
@@ -299,7 +227,7 @@ class WorkshopView extends View {
       pageTitle.textContent = 'MY JEWELRY WORKSHOP';
     }
     if (lng === 'heb') {
-      pageTitle.style.fontFamily = `'Amatic SC', sans-serif`;
+      pageTitle.style.fontFamily = 'Raleway, sans-serif';
       pageTitle.textContent = 'סדנאות התכשיטים שלי';
     }
   }

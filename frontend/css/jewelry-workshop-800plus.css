@@ -395,43 +395,86 @@ h1 {
   top: 50%;
   transform: translateY(-50%);
   z-index: 100;
-  background-color: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
+
+  /* Modern glassmorphism design */
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  width: 50px; /* Slightly larger on desktop */
-  height: 50px; /* Slightly larger on desktop */
   cursor: pointer;
+
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 3rem;
-  font-weight: bold;
-  font-family: sans-serif;
-  line-height: 0; /* Changed from 1 to 0 to remove extra space */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-  text-align: center;
+
+  /* Modern shadow */
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 2px 4px rgba(0, 0, 0, 0.1);
+
+  /* Smooth transitions */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Prevent RTL issues */
+  direction: ltr;
+  unicode-bidi: bidi-override;
+
+  /* Remove default button styles */
   padding: 0;
   margin: 0;
-  vertical-align: middle;
-  direction: ltr; /* Force LTR direction for buttons */
-  unicode-bidi: bidi-override; /* Prevent RTL from affecting content */
 }
 
+/* Chevron icon using CSS */
+.slider-btn::before {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-right: 2.5px solid rgba(50, 50, 50, 0.9);
+  border-bottom: 2.5px solid rgba(50, 50, 50, 0.9);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slider-btn--left::before {
+  transform: rotate(135deg);
+  margin-left: 4px;
+}
+
+.slider-btn--right::before {
+  transform: rotate(-45deg);
+  margin-right: 4px;
+}
+
+/* Hover state */
 .slider-btn:hover {
-  background-color: rgba(0, 0, 0, 0.7);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow:
+    0 6px 16px rgba(0, 0, 0, 0.2),
+    0 3px 6px rgba(0, 0, 0, 0.15);
 }
 
+.slider-btn:hover::before {
+  border-color: rgba(20, 20, 20, 1);
+}
+
+/* Active state */
+.slider-btn:active {
+  transform: translateY(-50%) scale(1.05);
+}
+
+/* Positioning */
 .slider-btn--left {
-  left: 25px !important; /* Further from the left edge - force left position */
-  right: auto !important; /* Prevent RTL from flipping to right */
-  padding-bottom: 5px; /* Slightly more adjustment for larger desktop button */
+  left: 32px !important;
+  right: auto !important;
 }
 
 .slider-btn--right {
-  right: 25px !important; /* Further from the right edge - force right position */
-  left: auto !important; /* Prevent RTL from flipping to left */
-  padding-bottom: 5px; /* Slightly more adjustment for larger desktop button */
+  right: 32px !important;
+  left: auto !important;
 }
 
 /* Hide Mobile-specific buttons on desktop */
