@@ -15,7 +15,6 @@ class CategoriesView extends View {
     this.limit = 6;
     this.isLoading = false;
     this.selectedCurrency = localStorage.getItem('currency') || 'usd';
-    this.sortedByPrice = '';
     this.products = [];
     this.totalProducts = 0;
     this.allProductsFetched = false;
@@ -259,10 +258,8 @@ class CategoriesView extends View {
     this.lang = lng;
     this.setHeaderLng(this.lang);
 
-    // Initialize sort toggle (currency is now in header)
-    this.setCurSortLng(this.lang);
+    // Currency is now in header
     this.setupCurrencyHandler();
-    this.setupSortHandler();
   }
 
   // Updated method for page-specific LANGUAGE updates only
@@ -277,10 +274,7 @@ class CategoriesView extends View {
     // 1. Update Category Header
     this.setHeaderLng(lng);
 
-    // 2. Update Sort/Currency Dropdown Option TEXT
-    this.updateCurSortOptionText(lng);
-
-    // 3. Update all product-related text
+    // 2. Update all product-related text
     const products =
       this.innerProductsContainer?.querySelectorAll('.item-container');
     if (products) {
@@ -314,29 +308,6 @@ class CategoriesView extends View {
     }
   }
 
-  // New helper method to update only the text of dropdown options
-  updateCurSortOptionText(lng) {
-    const currencySelects = document.querySelectorAll(
-      'select.header-currency-selector[name="currency"]'
-    );
-    const sortSelect = document.getElementById('sort');
-
-    // Currency selector is now in header, handled by View.js
-    // But we still update it here if it exists (for backward compatibility)
-    currencySelects.forEach(currencySelect => {
-      if (!currencySelect || currencySelect.options.length < 3) return;
-      currencySelect.options[0].text = lng === 'eng' ? 'Currency' : 'מטבע';
-      currencySelect.options[1].text = lng === 'eng' ? 'USD' : 'דולר';
-      currencySelect.options[2].text = lng === 'eng' ? 'ILS' : 'שקל';
-    });
-    if (sortSelect) {
-      sortSelect.options[0].text = lng === 'eng' ? 'Sort by:' : 'מיין לפי:';
-      sortSelect.options[1].text =
-        lng === 'eng' ? 'Price (Low to High)' : 'מחיר (מנמוך לגבוה)';
-      sortSelect.options[2].text =
-        lng === 'eng' ? 'Price (High to Low)' : 'מחיר (מגבוה לנמוך)';
-    }
-  }
 
   // New helper method to update button text
   updateAddToCartButtonText(lng) {
@@ -354,44 +325,6 @@ class CategoriesView extends View {
     });
   }
 
-  setCurSortLng(lng) {
-    const curSortContainer = document.querySelector('.currency-sort-container');
-    if (!curSortContainer) return;
-    curSortContainer.innerHTML = '';
-    const markup = this.handleCurSortLng(lng);
-    curSortContainer.insertAdjacentHTML('afterbegin', markup);
-  }
-
-  handleCurSortLng(lng) {
-    const curSortContainer = document.querySelector('.currency-sort-container');
-    if (!curSortContainer) return '';
-    curSortContainer.style.direction = 'ltr';
-
-    if (lng === 'eng') {
-      return `<select name="sort" id="sort">
-        <option value="default" class="sort-option">Sort by:</option>
-        <option value="low-to-high" class="sort-option">
-          Price (Low to High)
-        </option>
-        <option value="high-to-low" class="sort-option">
-          Price (High to Low)
-        </option>
-      </select>`;
-    } else if (lng === 'heb') {
-      curSortContainer.style.direction = 'rtl';
-
-      return `<select name="sort" id="sort">
-        <option value="default" class="sort-option">מיין לפי:</option>
-        <option value="low-to-high" class="sort-option">
-          מחיר (מנמוך לגבוה)
-        </option>
-        <option value="high-to-low" class="sort-option">
-          מחיר (מגבוה לנמוך)
-        </option>
-      </select>`;
-    }
-    return '';
-  }
 
   setHeaderLng(lng) {
     const categoryTitle = document.querySelector('.category-title');
@@ -1002,85 +935,6 @@ class CategoriesView extends View {
     });
   }
 
-  setupSortHandler() {
-    const sortSelector = document.getElementById('sort');
-    sortSelector.addEventListener('change', async () => {
-      const spinner = this.outerProductsContainer?.querySelector('.loader');
-      if (spinner) {
-        spinner.classList.remove('spinner-hidden');
-      }
-
-      try {
-        this.sortedByPrice = sortSelector.value;
-
-        if (this.sortedByPrice === 'default') {
-          // Reset to initial state and fetch with pagination
-          this.page = 1;
-          this.products = [];
-          this.allProductsFetched = false;
-          await this.fetchProductsByCategory();
-        } else {
-          // Always fetch all products for sorting
-          const response = await fetch(
-            `${this.apiUrl}/getAllProductsByCategory`,
-            {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ category: this.category }),
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-          }
-
-          const data = await response.json();
-
-          if (!data || !data.products) {
-            console.error(
-              '[CategoriesView] Invalid data format received:',
-              data
-            );
-            return;
-          }
-
-          // Store all products and sort them
-          this.products = (data.products || []).filter(
-            p => Number(p?.quantity) > 0
-          );
-          this.totalProducts = this.products.length;
-          this.allProductsFetched = true;
-
-          // Sort products by price
-          this.products.sort((a, b) => {
-            // Convert prices to the selected currency
-            const priceA =
-              this.selectedCurrency === 'usd'
-                ? this.getDisplayPrice(a)
-                : this.getDisplayPrice(a);
-            const priceB =
-              this.selectedCurrency === 'usd'
-                ? this.getDisplayPrice(b)
-                : this.getDisplayPrice(b);
-
-            // Sort based on the converted prices
-            return this.sortedByPrice === 'low-to-high'
-              ? priceA - priceB
-              : priceB - priceA;
-          });
-
-          // Display sorted products
-          this.displayProducts();
-        }
-      } catch (err) {
-        console.error('[CategoriesView] Error in sort handler:', err);
-      } finally {
-        if (spinner) {
-          spinner.classList.add('spinner-hidden');
-        }
-      }
-    });
-  }
 
   async fetchProductsByCategory() {
     if (this.isLoading) {
