@@ -397,6 +397,7 @@ html[dir='rtl'] .cart-page-title {
   color: var(--minimal-text);
   font-weight: 400;
   line-height: 1.4;
+  unicode-bidi: plaintext;
 }
 
 .cart-item__right {

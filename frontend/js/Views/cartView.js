@@ -214,7 +214,7 @@ class CartView extends View {
           const itemOriginalPrice = this._getItemPrice(item, true);
           const hasDiscount = itemOriginalPrice > itemPrice;
 
-          return `     
+          return `
           <div class="cart-item" id="${item.id}">
             <div class="cart-item__media">
               <img src='${item.image}' class="item-img" alt="${
@@ -223,7 +223,7 @@ class CartView extends View {
             </div>
             <div class="cart-item__content">
               <div class="cart-item__title">
-                <h2 class="item-title">${item.title}</h2>
+                <h2 class="item-title" dir="auto">${item.title}</h2>
               </div>
               <div class="cart-item__right">
                 ${

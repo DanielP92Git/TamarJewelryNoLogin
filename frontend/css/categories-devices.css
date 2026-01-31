@@ -469,6 +469,7 @@ main {
   font-family: var(--font-body);
   line-height: 1.4;
   position: relative;
+  unicode-bidi: plaintext;
 }
 
 .item-price {
@@ -1225,6 +1226,7 @@ main {
   color: #1f2937;
   width: 100%;
   font-family: var(--font-body);
+  unicode-bidi: plaintext;
 }
 
 .price-box {
