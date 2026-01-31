@@ -269,15 +269,19 @@ class WorkshopView extends View {
     const containerParent = document.querySelector(
       '.workshop-description-container'
     );
-    
+
     descriptionContainer.innerHTML = '';
     const markup = this.handleWorkshopLng(lng);
     descriptionContainer.insertAdjacentHTML('afterbegin', markup);
 
-    // Add/remove RTL class for CSS targeting
+    // Set text alignment and direction
     if (lng === 'heb') {
+      descriptionContainer.style.direction = 'rtl';
+      descriptionContainer.style.textAlign = 'right';
       containerParent?.classList.add('rtl-layout');
     } else {
+      descriptionContainer.style.direction = 'ltr';
+      descriptionContainer.style.textAlign = 'left';
       containerParent?.classList.remove('rtl-layout');
     }
 
@@ -385,6 +389,7 @@ class WorkshopView extends View {
 
     if (lng === 'eng') {
       costsContainer.style.direction = 'ltr';
+      costsContainer.style.textAlign = 'left';
       if (titleEl) titleEl.textContent = 'Workshop Costs:';
       if (costItems[0])
         costItems[0].textContent = '• One-on-one workshop - 450 NIS';
@@ -403,6 +408,7 @@ class WorkshopView extends View {
       if (emailValue) emailValue.textContent = 'tamarkfir91@gmail.com';
     } else if (lng === 'heb') {
       costsContainer.style.direction = 'rtl';
+      costsContainer.style.textAlign = 'right';
       if (titleEl) titleEl.textContent = 'מחירי הסדנאות:';
       if (costItems[0])
         costItems[0].textContent = '• סדנא אחת על אחת - 450 ש"ח';
