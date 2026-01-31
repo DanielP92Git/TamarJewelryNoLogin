@@ -1,280 +1,263 @@
 # Codebase Structure
 
-**Analysis Date:** 2026-01-31
+**Analysis Date:** 2026-02-01
 
 ## Directory Layout
 
 ```
-Online/
-├── frontend/                    # SPA frontend (Parcel bundler)
-│   ├── js/                      # JavaScript MVC implementation
-│   │   ├── controller.js        # Router and page initialization
-│   │   ├── model.js             # Data layer, API calls, cart state
-│   │   ├── View.js              # Base view class with shared UI logic
-│   │   ├── locale.js            # Language/currency detection and persistence
-│   │   └── Views/               # Page-specific view classes
-│   │       ├── homePageView.js
-│   │       ├── cartView.js
-│   │       ├── categoriesView.js
-│   │       ├── contactMeView.js
-│   │       ├── workshopView.js
-│   │       ├── aboutView.js
-│   │       └── policiesView.js
-│   ├── css/                     # Responsive stylesheets
-│   │   ├── *-800plus.css        # Desktop styles (≥800px breakpoint)
-│   │   ├── *-devices.css        # Mobile styles (<800px)
-│   │   └── standard-reset.css   # CSS reset
-│   ├── html/                    # Static HTML templates (partial pages)
-│   │   ├── about.html
+project-root/
+├── frontend/                           # Client-side SPA application
+│   ├── js/                            # JavaScript source (MVC pattern)
+│   │   ├── Views/                     # Page-specific view classes
+│   │   │   ├── homePageView.js
+│   │   │   ├── categoriesView.js
+│   │   │   ├── cartView.js
+│   │   │   ├── aboutView.js
+│   │   │   ├── workshopView.js
+│   │   │   ├── contactMeView.js
+│   │   │   └── policiesView.js
+│   │   ├── View.js                    # Base view class (shared DOM, locale, currency)
+│   │   ├── controller.js              # Router & event coordination
+│   │   ├── model.js                   # State management & API calls
+│   │   └── locale.js                  # Client-side locale detection & persistence
+│   ├── html/                          # HTML entry points (not bundled)
+│   │   ├── categories/                # Category pages (one per jewelry type)
+│   │   ├── templates/                 # Shared HTML partials (header, footer, menu)
+│   │   ├── index.html                 # Home page
 │   │   ├── cart.html
-│   │   ├── contact-me.html
+│   │   ├── about.html
 │   │   ├── jewelry-workshop.html
-│   │   ├── policies.html
-│   │   ├── categories/          # Category-specific HTML
-│   │   └── templates/           # Reusable HTML snippets
-│   ├── imgs/                    # Static images and SVG assets
-│   ├── index.html               # SPA entry point (single HTML file)
-│   ├── package.json             # Frontend dependencies (Parcel, EmailJS, Testing)
-│   ├── .parcelrc                # Parcel bundler config
-│   ├── dist/                    # Built output (generated)
-│   └── .env                     # Frontend env vars (API_URL)
-├── backend/                     # Node.js Express API server
-│   ├── index.js                 # Monolithic Express app (all routes, ~3500 lines)
-│   ├── config/                  # Configuration modules
-│   │   ├── db.js                # MongoDB connection setup
-│   │   └── locale.js            # GeoIP-based locale detection
-│   ├── middleware/              # Express middleware
-│   │   └── auth.js              # JWT verification, password auth, role checks
-│   ├── models/                  # Mongoose schemas
-│   │   ├── User.js              # User schema (email, password, cart, userType)
-│   │   ├── Product.js           # Product schema (name, prices, images, categories)
-│   │   ├── Settings.js          # App settings (exchange rates, discounts)
-│   │   └── index.js             # Module exports
-│   ├── services/                # Business logic services
-│   │   └── exchangeRateService.js # Fetch and cache USD/ILS conversion rates
-│   ├── jobs/                    # Scheduled tasks
-│   │   └── exchangeRateJob.js   # Daily exchange rate update (node-cron)
-│   ├── uploads/                 # Local file storage (dev only, ephemeral in prod)
-│   ├── smallImages/             # Cached thumbnail directory
-│   ├── public/                  # Public static assets
-│   ├── scripts/                 # Utility scripts (migrations, tools)
-│   ├── package.json             # Backend dependencies (Express, Mongoose, Payment SDKs)
-│   ├── .env                     # Backend secrets (API keys, DB URI)
-│   └── env.example              # Template for required env vars
-├── admin/                       # Admin dashboard (minimal structure)
-│   ├── index.html               # Admin entry point
-│   ├── BisliView.js             # Single admin view component (~3500 lines)
-│   └── assets/                  # Admin static files
-├── public/                      # Root-level static files served by server
-├── .git/                        # Git repository
-├── .planning/                   # GSD planning documents (new)
+│   │   ├── contact-me.html
+│   │   └── policies.html
+│   ├── css/                           # Stylesheets (responsive)
+│   │   ├── cssTemplates/              # Reusable style snippets
+│   │   ├── *-800plus.css              # Desktop styles (≥800px)
+│   │   └── *-devices.css              # Mobile styles (<800px)
+│   ├── imgs/                          # Images & assets
+│   │   ├── Hero-imgs/                 # Homepage hero carousel images
+│   │   ├── website-images/            # Category & product images
+│   │   ├── svgs/                      # Icon SVGs (navigation, cart, close, etc.)
+│   │   ├── icons/
+│   │   ├── favicon/
+│   │   └── videos/
+│   ├── dist/                          # Build output (Parcel)
+│   └── package.json                   # Frontend dependencies (Parcel, ESLint)
+│
+├── backend/                            # Node.js/Express API server
+│   ├── index.js                       # Main server (monolithic - all routes & middleware)
+│   ├── index-prev.js                  # Previous version (backup)
+│   ├── reset-admin-password.js        # Admin credential reset script
+│   ├── html-rewrite-middleware.js     # Custom middleware for clean URL rewriting
+│   ├── models/                        # Mongoose schemas
+│   │   ├── index.js                   # Schema exports
+│   │   ├── Product.js                 # Product with image variants (desktop/mobile)
+│   │   ├── User.js                    # User with cart & auth fields
+│   │   └── Settings.js                # Global settings (exchange rate, config)
+│   ├── middleware/
+│   │   └── auth.js                    # JWT validation, role-based access control
+│   ├── services/
+│   │   └── exchangeRateService.js     # USD/ILS rate fetching with fallback chain
+│   ├── jobs/
+│   │   └── exchangeRateJob.js         # Scheduled exchange rate updates (node-cron)
+│   ├── config/
+│   │   ├── db.js                      # MongoDB connection
+│   │   └── locale.js                  # GeoIP detection, CDN header parsing
+│   ├── uploads/                       # Local image storage (temp, non-persistent)
+│   ├── smallImages/                   # Thumbnail storage (temp)
+│   ├── public/                        # Public assets
+│   │   ├── uploads/                   # Fallback for image serving
+│   │   └── smallImages/
+│   ├── env.example                    # Environment variable template
+│   └── package.json                   # Backend dependencies (Express, Mongoose, PayPal, Sharp, etc.)
+│
+├── .planning/                          # GSD planning documents (auto-generated)
 │   └── codebase/
-├── CLAUDE.md                    # Project guidelines and architecture overview
-├── DIGITALOCEAN_SETUP.md        # Deployment configuration
-├── FAVICON_FIX.md               # Notes on favicon generation
-├── package.json                 # Root package (if workspace)
-└── prettier.config.js           # Code formatting config
+│
+├── CLAUDE.md                          # Project guidance for Claude
+├── DIGITALOCEAN_SETUP.md              # Deployment configuration
+└── README.md                          # Project overview
 ```
 
 ## Directory Purposes
 
-**frontend/js/:**
-- Purpose: Core SPA logic - routing, data management, view rendering
-- Contains: Module-based JavaScript (ES6 imports/exports, Parcel-bundled)
-- Key files: `controller.js` (orchestrator), `model.js` (state), `View.js` (base component), `locale.js` (i18n)
+**frontend/js:**
+- Purpose: Core application logic, MVC implementation
+- Contains: View classes (ES6), controller router, model state manager, locale utilities
+- Key files: controller.js (entry point), View.js (base class), model.js (API layer)
 
-**frontend/css/:**
-- Purpose: Responsive styles organized by page and breakpoint
-- Contains: Separate files per page (home, cart, categories, etc.) + breakpoint variants (800plus, devices)
-- Pattern: `home-800plus.css` for desktop, `home-devices.css` for mobile; RTL handled via conditional class selectors
+**frontend/js/Views:**
+- Purpose: Page-specific UI rendering and event handling
+- Contains: One View subclass per page (inherits from View base class)
+- Pattern: Each view extends View, overrides setXxxLanguage() and handleLanguage() for page-specific content
+- Examples: homePageView extends View, adds image slider, sticky menu handlers
 
-**frontend/html/:**
-- Purpose: Static HTML structure templates loaded dynamically by views
-- Contains: Markup for each page (about.html, cart.html, contact-me.html, etc.)
-- Pattern: Rendered into DOM by view classes; language switching done via display:none on parallel HTML blocks
+**frontend/html:**
+- Purpose: Static HTML templates (not bundled by Parcel)
+- Contains: One entry point per page, includes shared templates via comments or server-side includes
+- Key: Each HTML file loads the Parcel-bundled JS bundle and triggers controller
+- Template organization: header, footer, menu in separate template files
 
-**frontend/imgs/:**
-- Purpose: Static image and SVG asset storage
-- Contains: Product images (cached from DigitalOcean in prod), SVG icons (shopping-bag, menu bars, close X), background images
+**frontend/css:**
+- Purpose: Responsive stylesheets with RTL support
+- Pattern: Breakpoint-based organization (800px = desktop/mobile split)
+- Files: `*-800plus.css` loaded via media query or separate stylesheet, `*-devices.css` for mobile
+- RTL: Hebrew pages apply `dir="rtl"` to HTML element, conditional CSS handles text alignment
 
-**backend/:**
-- Purpose: Express REST API server and MongoDB interface
-- Contains: Monolithic app with inline route definitions (~115K lines in index.js); modular config, models, middleware, services
+**backend/index.js:**
+- Purpose: Monolithic server application
+- Contains: All route handlers, middleware setup, payment integrations (PayPal, Stripe), image upload
+- Size: Large (~1000+ lines) - contains business logic inline rather than extracted to separate files
+- Routes: /api/products, /api/cart, /api/payments/*, /upload, /addproduct, /admin/*, /locale
 
-**backend/config/:**
-- Purpose: Initialization and configuration modules
-- Contains: `db.js` manages MongoDB connection; `locale.js` provides GeoIP-based locale detection for API responses
+**backend/models:**
+- Purpose: Database schema definitions
+- Product.js: Complex image handling (mainImage object with desktop/mobile/public variants, smallImages array)
+- User.js: Cart field (array), email, password, userType (admin/user)
+- Settings.js: usd_ils_rate, exchange_rate_last_updated, configuration
 
-**backend/middleware/:**
-- Purpose: HTTP request preprocessing
-- Contains: `auth.js` exports functions for JWT verification (fetchUser), password authentication (authUser), role enforcement (requireAdmin)
+**backend/middleware/auth.js:**
+- Purpose: JWT-based authentication
+- Exports: getTokenFromRequest (extracts token from headers), authUser (login), fetchUser (middleware), requireAdmin
+- Pattern: authUser and fetchUser both used as express middleware, requireAdmin used as final guard
 
-**backend/models/:**
-- Purpose: MongoDB data structure definitions
-- Contains: Mongoose schemas for User (authentication, cart), Product (inventory, pricing), Settings (exchange rates, app config)
+**backend/config:**
+- Purpose: Environment setup and external service configuration
+- db.js: MongoDB connection with retry logic
+- locale.js: Client IP extraction, GeoIP lookup, CDN header parsing (Cloudflare, Vercel, etc.)
 
-**backend/services/:**
-- Purpose: Reusable business logic for external integrations
-- Contains: `exchangeRateService.js` for fetching USD-to-ILS rates from external API, caching in MongoDB
+**backend/services:**
+- Purpose: Business logic abstraction
+- exchangeRateService.js: Single source of truth for USD/ILS conversion, tries multiple APIs with fallback
 
-**backend/jobs/:**
+**backend/jobs:**
 - Purpose: Scheduled background tasks
-- Contains: `exchangeRateJob.js` runs daily via node-cron to update exchange rates
+- exchangeRateJob.js: node-cron job that updates Settings.usd_ils_rate periodically
 
-**admin/:**
-- Purpose: Dashboard for content/order management
-- Contains: Single `BisliView.js` (~3500 lines, monolithic like backend index.js); accessed via protected routes in backend
+**backend/uploads, backend/smallImages:**
+- Purpose: Local file storage for images (development fallback)
+- Note: Ephemeral on production (DigitalOcean App Platform), use DigitalOcean Spaces in production
 
 ## Key File Locations
 
 **Entry Points:**
-- `frontend/index.html`: SPA entry point; loads parcel-bundled js/controller.js module script
-- `backend/index.js`: API server entry point; defines all routes and middleware
-- `admin/index.html`: Admin dashboard entry point
+
+- `frontend/html/index.html`: Home page, imports Parcel-bundled JS, triggers homePageView via controller
+- `backend/index.js`: Express server main file, starts on port 5000 (default)
 
 **Configuration:**
-- `frontend/.env`: API_URL for backend
-- `backend/.env`: Secrets (MongoDB URI, JWT key, PayPal/Stripe keys, DigitalOcean credentials, exchange rate API key)
-- `frontend/.parcelrc`: Parcel bundler configuration
-- `backend/package.json`: Backend dependencies and scripts
+
+- `frontend/.env` or `frontend/.env.local`: API_URL, build settings (Parcel)
+- `backend/.env` or `backend/env.example`: All backend config (DB, JWT, PayPal, Stripe, DigitalOcean, exchange rate API)
 
 **Core Logic:**
-- `frontend/js/model.js`: API calls, cart state management, localStorage persistence
-- `frontend/js/controller.js`: Page routing, view initialization, locale setup
-- `frontend/js/View.js`: Base class for all views; shared DOM manipulation, language/currency switching
-- `frontend/js/locale.js`: Language/currency detection and synchronization with backend
-- `backend/index.js`: All route definitions, payment processing, file uploads, order management
 
-**Styling:**
-- `frontend/css/standard-reset.css`: Global CSS reset
-- `frontend/css/desktop-menu.css`: Shared desktop navigation styles
-- `frontend/css/home-800plus.css`, `frontend/css/home-devices.css`: Page-specific responsive styles
-- `frontend/css/*-devices.css` and `frontend/css/*-800plus.css`: Breakpoint-specific variants for each page
+- `frontend/js/View.js`: Base class with setLanguage(), changeToHeb(), changeToEng(), header/menu rendering
+- `frontend/js/model.js`: handleLoadStorage(), checkCartNumber(), addToCart() functions
+- `frontend/js/controller.js`: controlHomePage(), controlAboutPage(), event delegation setup
+- `backend/middleware/auth.js`: JWT verification, user lookup, admin checks
+- `backend/services/exchangeRateService.js`: getExchangeRate() with fallback chain
 
-**Testing/Utilities:**
-- `frontend/package.json`: Testing libraries (@testing-library/user-event, @testing-library/jest-dom)
-- `backend/reset-admin-password.js`: Admin password reset utility
-- `frontend/generate-favicon.js`: Favicon generation script
-- `frontend/postbuild.js`: Post-build processing (called by `npm run postbuild`)
+**Database Models:**
+
+- `backend/models/Product.js`: Product schema with mainImage (object), smallImages (array)
+- `backend/models/User.js`: User schema with cart, password, email, userType
+- `backend/models/Settings.js`: Settings schema with usd_ils_rate, timestamps
+
+**Testing:**
+
+- No dedicated test files present (none detected)
 
 ## Naming Conventions
 
 **Files:**
-- JavaScript: camelCase (model.js, controller.js, homePageView.js, exchangeRateService.js)
-- CSS: kebab-case with breakpoint suffix (home-800plus.css, mobile-menu.css, footer-desktop.css)
-- HTML: kebab-case (contact-me.html, jewelry-workshop.html)
-- Schemas/Classes: PascalCase (User.js, Product.js, Settings.js, View, HomePageView)
+
+- Views: `*View.js` in PascalCase (homePageView.js, categoriesView.js)
+- Pages: Kebab-case for HTML files (about.html, jewelry-workshop.html, contact-me.html)
+- CSS: Kebab-case with breakpoint suffix (*-800plus.css, *-devices.css)
+- Utilities: Lowercase with descriptive names (locale.js, model.js, controller.js)
+- Config: Descriptive names in lowercase (db.js, locale.js)
 
 **Directories:**
-- Lowercase, plural for collections (Views/, models/, middleware/, services/, jobs/, uploads/)
-- Except: Mixed casing in css/ (both descriptive files and utility files)
 
-**JavaScript Variables/Functions:**
-- Constants: UPPERCASE_WITH_UNDERSCORES (API_URL, JWT_KEY, LANGUAGE_KEY, CURRENCY_STORAGE_KEY)
-- Functions: camelCase (handleLoadStorage, checkCartNumber, setLanguage, changeToHeb)
-- Classes: PascalCase (View, HomePageView, CartView)
-- DOM selectors: camelCase with underscore prefix in View class (_cartNumber, _menu, _menuHeb)
-- Private/internal: underscore prefix (_data, _addHandler, _imageSlider)
+- Features: PascalCase (Views, Spaces) or lowercase (js, css, models, middleware)
+- Categories: Lowercase plural (categories, uploads, smallImages)
 
-**CSS Classes:**
-- kebab-case: .header-cart, .cart-container, .categories-container_heb, .menu-button, .go-to-top
-- Suffix for language variants: _heb, _eng (e.g., .ul-heb, .footer_eng)
-- Breakpoint-specific: -800plus, -devices (in filename, not class selector)
+**JavaScript Variables & Functions:**
+
+Frontend:
+- Functions: camelCase (handleLoadStorage, checkCartNumber, setLanguage)
+- Classes: PascalCase (View, HomePageView, Model)
+- Constants: UPPER_SNAKE_CASE (LANGUAGE_KEY, CURRENCY_KEY)
+- localStorage keys: kebab-case (language, currency, cart, auth-token)
+
+Backend:
+- Functions: camelCase (fetchUserCartAPI, normalizeProductForClient)
+- Classes: PascalCase (Product, User, Settings - Mongoose models)
+- Middleware: Named functions (authUser, fetchUser, requireAdmin)
+- Constants: UPPER_SNAKE_CASE (ALLOWED_IMAGE_EXTENSIONS, PAYPAL_CLIENT_ID)
 
 ## Where to Add New Code
 
-**New Frontend Page/Feature:**
-- Create view class in `frontend/js/Views/featureName.js` extending View class
-- Create control function in `frontend/js/controller.js` (controlFeatureName)
-- Create HTML template in `frontend/html/featureName.html`
-- Create CSS files: `frontend/css/featureName-800plus.css` and `frontend/css/featureName-devices.css`
-- Import view in controller, add route handler in window.addEventListener('hashchange', ...) or Router pattern
-- Add language strings via duplication in HTML blocks or implement string translation function
+**New Feature (Product Display Page):**
+- Primary code: `frontend/js/Views/newFeatureView.js` (extend View class)
+- HTML: `frontend/html/newFeature.html` (link Parcel bundle, include templates)
+- CSS: `frontend/css/newFeature-800plus.css` and `frontend/css/newFeature-devices.css`
+- Controller: Add controlNewFeature() function in `frontend/js/controller.js`
+- Backend: Add new route in `backend/index.js` (e.g., /api/newfeature)
+- Tests: None currently enforced
 
-**New Backend API Endpoint:**
-- Add route handler in `backend/index.js` (app.get/post/put/delete('/endpoint', middlewares, handler))
-- If authentication required, include `fetchUser` middleware before handler
-- If admin-only, include `requireAdmin` middleware after `fetchUser`
-- Return JSON response: `res.json({ success: true, data: ... })` or `res.status(400).json({ errors: 'message' })`
-- Add rate limiting middleware if needed (authRateLimiter, paymentRateLimiter)
+**New Component/Module (Reusable View Part):**
+- Implementation: `frontend/js/` (either add method to View base class or extract separate module)
+- Usage: Import in specific view (e.g., `import { modalComponent } from './components.js'`)
+- Pattern: Export as function or class, call from view's render method
 
-**New Database Model:**
-- Create schema file in `backend/models/ModelName.js` using Mongoose
-- Export model as `module.exports = mongoose.model('ModelName', schema)`
-- Add to exports in `backend/models/index.js`
-- Update model imports in `backend/index.js` and services
+**New Service (External API Integration):**
+- Implementation: `backend/services/newService.js` (export async functions, use try-catch with fallbacks)
+- Usage: Import in `backend/index.js` routes, call from route handlers
+- Pattern: Follow exchangeRateService.js model (fetch → cache → fallback)
 
-**New Scheduled Task:**
-- Create job file in `backend/jobs/jobName.js`
-- Use node-cron for scheduling (pattern-based or specific times)
-- Import and invoke in `backend/index.js` (startJobName() or runJobName())
-- Add env var to control enable/disable if needed
+**Utilities:**
+- Frontend utilities: `frontend/js/utils/` (new directory if none exist) or add to locale.js
+- Backend utilities: `backend/utils/` (new directory) or add to appropriate config/service file
+- Pattern: Export pure functions or simple factories
 
-**Utilities/Helpers:**
-- Frontend utilities: Create in `frontend/js/utils/` (new directory) or add to existing service files
-- Backend utilities: Create in `backend/services/` directory for reusable business logic
-
-**Admin Dashboard Additions:**
-- Update `admin/BisliView.js` (single monolithic file)
-- Use same pattern as backend routes: check `req.user.userType === 'admin'` in backend handlers
-- Frontend admin calls backend /api/admin/* endpoints
+**Database Schema Addition:**
+- New collection: `backend/models/NewModel.js` (follow Product.js/User.js structure)
+- Updates to existing model: Edit `backend/models/Product.js`, add fields with type and default
+- Changes: No migrations system present; update schema and test manually with MongoDB
 
 ## Special Directories
 
-**frontend/dist/:**
-- Purpose: Production build output
-- Generated: Yes (by `npm run build` via Parcel)
-- Committed: No (.gitignore excludes)
-- Contents: Bundled JS, CSS, HTML, images with hashes for cache busting
+**frontend/dist:**
+- Purpose: Build output from Parcel bundler
+- Generated: Yes (by `npm run build`)
+- Committed: No (in .gitignore)
 
-**frontend/.parcel-cache/:**
-- Purpose: Parcel development cache
-- Generated: Yes (by `npm run dev`)
-- Committed: No (.gitignore excludes)
-- Note: Cleaned on dev start via `npm run cleanup`
+**frontend/.parcel-cache:**
+- Purpose: Parcel build cache
+- Generated: Yes (during `npm run dev`)
+- Committed: No
 
-**backend/uploads/ and backend/smallImages/:**
-- Purpose: Temporary image storage during development
-- Generated: Yes (by image upload handlers)
-- Committed: No (.gitignore excludes)
-- Note: Ephemeral in production (App Platform filesystem not persistent); use DigitalOcean Spaces instead
-
-**backend/node_modules/ and frontend/node_modules/:**
-- Purpose: Package dependencies
+**backend/node_modules:**
+- Purpose: Installed dependencies
 - Generated: Yes (by `npm install`)
-- Committed: No (.gitignore excludes)
+- Committed: No
 
-**admin/assets/:**
-- Purpose: Admin dashboard static files (images, CSS, fonts)
-- Generated: No (committed)
+**backend/uploads, backend/smallImages:**
+- Purpose: Local image storage (fallback for development)
+- Generated: Yes (during image upload routes)
+- Committed: No (user-generated, transient)
+
+**.planning/codebase:**
+- Purpose: GSD codebase analysis documents
+- Generated: Yes (by `/gsd:map-codebase` command)
 - Committed: Yes
 
-## File Organization Patterns
-
-**Frontend MVC Module Pattern:**
-- Each view is a class file in Views/ extending View base
-- Views use ES6 imports to import View base and model functions
-- Controller imports all view classes and instantiates them on route change
-- Locale system is standalone module imported by controller and View
-
-**Backend Monolithic Pattern:**
-- All routes defined in single index.js file (not modular, ~115K lines)
-- Middleware applied via app.use() at top, specific to routes via route parameter
-- Models imported at top, used directly in route handlers
-- Services imported and called from route handlers
-
-**CSS Breakpoint Pattern:**
-- Two separate stylesheets per page: `-800plus.css` (desktop) and `-devices.css` (mobile)
-- Linked in HTML with media queries: `media="(min-width: 800px)"` and `media="(max-width: 799.9px)"`
-- No mixins or SCSS preprocessing; plain CSS
-- RTL support via duplicate HTML elements and CSS class selectors (.ul-heb, .ul-eng)
-
-**Language/Currency Persistence Pattern:**
-- localStorage keys: 'language' (eng/heb), 'currency' (usd/ils), 'auth-token'
-- All views access localStorage directly or via View base class methods
-- Locale.js synchronizes with backend via /api/locale endpoint for GeoIP detection
-- Custom events dispatched on currency change for cross-page updates
+**frontend/html/templates:**
+- Purpose: Reusable HTML snippets (header, footer, menu)
+- Generated: No (manually authored)
+- Committed: Yes (source code)
 
 ---
 
-*Structure analysis: 2026-01-31*
+*Structure analysis: 2026-02-01*
