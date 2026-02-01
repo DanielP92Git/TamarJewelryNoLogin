@@ -1574,6 +1574,134 @@ function loadProducts(data) {
     resultsBadge.textContent = `${filteredData.length} items`;
   }
 
+  // Bind inline SKU edit handlers
+  document.querySelectorAll('.sku-cell[data-editable="true"]').forEach(cell => {
+    const display = cell.querySelector('.sku-display');
+    const input = cell.querySelector('.sku-inline-input');
+    const productId = cell.dataset.productId;
+
+    if (!display || !input) return;
+
+    // Click to edit
+    display.addEventListener('click', (e) => {
+      e.stopPropagation();
+      display.style.display = 'none';
+      input.style.display = 'block';
+      input.focus();
+      input.select();
+    });
+
+    // Auto-uppercase while typing
+    input.addEventListener('input', (e) => {
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+      e.target.value = e.target.value.toUpperCase();
+      e.target.setSelectionRange(start, end);
+    });
+
+    // Save handler
+    const saveSkuInline = async () => {
+      const newSku = input.value.trim().toUpperCase();
+      const originalSku = display.textContent === '—' ? '' : display.textContent;
+
+      // No change - just close
+      if (newSku === originalSku) {
+        display.style.display = 'inline';
+        input.style.display = 'none';
+        return;
+      }
+
+      // Validate format
+      if (newSku && (newSku.length < 2 || newSku.length > 7)) {
+        alert('SKU must be 2-7 characters');
+        input.focus();
+        return;
+      }
+      if (newSku && !/^[A-Z0-9]+$/.test(newSku)) {
+        alert('SKU must contain only letters and numbers');
+        input.focus();
+        return;
+      }
+
+      // Save via API
+      try {
+        input.disabled = true;
+        const response = await fetch(`${API_URL}/updateproduct/${productId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+          },
+          body: JSON.stringify({ sku: newSku || null })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          // Check for duplicate error
+          if (result.error && result.error.includes('already used')) {
+            alert(result.error);
+          } else {
+            alert(result.error || 'Failed to update SKU');
+          }
+          input.disabled = false;
+          input.focus();
+          return;
+        }
+
+        // Update display
+        display.textContent = newSku || '—';
+        display.style.display = 'inline';
+        input.style.display = 'none';
+        input.disabled = false;
+
+        // Update count if SKU was added/removed
+        const countSpan = document.getElementById('missing-sku-count');
+        if (countSpan) {
+          let count = parseInt(countSpan.textContent) || 0;
+          if (!originalSku && newSku) count--; // Added SKU
+          if (originalSku && !newSku) count++; // Removed SKU
+          countSpan.textContent = Math.max(0, count);
+        }
+
+        // Update product in state
+        const product = state.products?.find(p => p.id == productId);
+        if (product) {
+          product.sku = newSku || null;
+        }
+
+      } catch (error) {
+        console.error('Inline SKU update failed:', error);
+        alert('Failed to update SKU. Please try again.');
+        input.disabled = false;
+        input.focus();
+      }
+    };
+
+    // Save on blur
+    input.addEventListener('blur', () => {
+      // Small delay to allow cancel via Escape
+      setTimeout(() => {
+        if (input.style.display !== 'none') {
+          saveSkuInline();
+        }
+      }, 100);
+    });
+
+    // Save on Enter, cancel on Escape
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveSkuInline();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        input.value = display.textContent === '—' ? '' : display.textContent;
+        display.style.display = 'inline';
+        input.style.display = 'none';
+      }
+    });
+  });
+
   // Add event listeners for delete and edit buttons
   document.querySelectorAll(".delete-btn").forEach((deleteBtn) => {
     deleteBtn.addEventListener("click", async function () {
