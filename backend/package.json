@@ -27,7 +27,10 @@
   "scripts": {
     "start": "node index.js",
     "devStart": "nodemon index.js",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "migrate:up": "migrate-mongo up",
+    "migrate:down": "migrate-mongo down",
+    "migrate:status": "migrate-mongo status"
   },
   "author": "",
   "license": "ISC",
@@ -38,6 +41,7 @@
     "@types/regenerator-runtime": "^0.13.7",
     "eslint": "^9.10.0",
     "globals": "^15.9.0",
+    "migrate-mongo": "^14.0.7",
     "nodemon": "^3.1.4"
   }
 }
