@@ -1649,6 +1649,30 @@ app.post(
         });
       }
 
+      // SKU validation for new products
+      const rawSku = req.body.sku;
+      if (!rawSku || (typeof rawSku === 'string' && rawSku.trim() === '')) {
+        return res.status(400).json({
+          success: false,
+          error: 'SKU is required for new products'
+        });
+      }
+
+      // Normalize and validate SKU format before saving
+      const normalizedSku = String(rawSku).trim().toUpperCase();
+      if (normalizedSku.length < 2 || normalizedSku.length > 7) {
+        return res.status(400).json({
+          success: false,
+          error: 'SKU must be between 2 and 7 characters'
+        });
+      }
+      if (!/^[A-Z0-9]+$/.test(normalizedSku)) {
+        return res.status(400).json({
+          success: false,
+          error: 'SKU must contain only letters and numbers (A-Z, 0-9). No spaces or special characters allowed.'
+        });
+      }
+
       const products = await Product.find({}).sort({ id: -1 }).limit(1);
       const nextId = products.length > 0 ? Number(products[0].id) + 1 : 1;
 
@@ -1834,6 +1858,7 @@ app.post(
         original_usd_price: originalUsdPrice,
         discount_percentage: discountPercentage,
         security_margin: securityMargin,
+        sku: normalizedSku,
       });
 
       if (!isProd) {
@@ -1881,6 +1906,26 @@ app.post(
         name: req.body.name,
       });
     } catch (error) {
+      // Handle duplicate SKU error
+      if (error.code === 11000 && error.keyPattern?.sku) {
+        const duplicateSku = error.keyValue?.sku;
+        // Find conflicting product name for better error message
+        const existingProduct = await Product.findOne({ sku: duplicateSku }).select('name');
+        return res.status(409).json({
+          success: false,
+          error: `SKU '${duplicateSku}' is already used by ${existingProduct?.name || 'another product'}. Please choose a different SKU.`
+        });
+      }
+
+      // Handle Mongoose validation errors
+      if (error.name === 'ValidationError') {
+        const messages = Object.values(error.errors).map(e => e.message);
+        return res.status(400).json({
+          success: false,
+          error: messages.join('. ')
+        });
+      }
+
       if (!isProd) {
         console.error('\n=== Product Creation Error ===');
         console.error(error);
@@ -1940,6 +1985,7 @@ app.post(
         category,
         quantity,
         security_margin,
+        sku,
       } = req.body;
 
       // Update basic product information
@@ -1974,6 +2020,31 @@ app.post(
       product.category = category;
       product.quantity = Math.max(0, Number(quantity) || 0);
       product.security_margin = Math.max(0, Number(security_margin) || 5);
+
+      // Handle SKU update
+      // Only validate if SKU is being changed (not if it's the same or not provided)
+      if (sku !== undefined) {
+        const normalizedSku = sku ? String(sku).trim().toUpperCase() : null;
+
+        // If setting a SKU value (not clearing it)
+        if (normalizedSku) {
+          // Validate format
+          if (normalizedSku.length < 2 || normalizedSku.length > 7) {
+            return res.status(400).json({
+              success: false,
+              message: 'SKU must be between 2 and 7 characters'
+            });
+          }
+          if (!/^[A-Z0-9]+$/.test(normalizedSku)) {
+            return res.status(400).json({
+              success: false,
+              message: 'SKU must contain only letters and numbers (A-Z, 0-9)'
+            });
+          }
+        }
+
+        product.sku = normalizedSku;
+      }
 
       // Handle file uploads if present
       let mainImageUpdated = false;
@@ -2098,6 +2169,25 @@ app.post(
         smallImagesUpdated,
       });
     } catch (error) {
+      // Handle duplicate SKU error
+      if (error.code === 11000 && error.keyPattern?.sku) {
+        const duplicateSku = error.keyValue?.sku;
+        const existingProduct = await Product.findOne({ sku: duplicateSku }).select('name');
+        return res.status(409).json({
+          success: false,
+          message: `SKU '${duplicateSku}' is already used by ${existingProduct?.name || 'another product'}. Please choose a different SKU.`
+        });
+      }
+
+      // Handle Mongoose validation errors
+      if (error.name === 'ValidationError') {
+        const messages = Object.values(error.errors).map(e => e.message);
+        return res.status(400).json({
+          success: false,
+          message: messages.join('. ')
+        });
+      }
+
       console.error('Error updating product:', error);
       res.status(500).json({
         success: false,
