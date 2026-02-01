@@ -11,10 +11,10 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 
 Phase: 4 of 9 (Schema Foundation & Library Setup)
 Plan: 2 of 2 in phase (Phase 4 complete)
-Status: In progress
-Last activity: 2026-02-01 — Completed 04-02-PLAN.md
+Status: Phase complete
+Last activity: 2026-02-01 — Completed 04-01-PLAN.md and 04-02-PLAN.md
 
-Progress: [████████░░] 86% (v1.0: 5/5 plans, v1.1: 1/2 plans, total: 6/7)
+Progress: [████████░░] 100% Phase 4 (v1.0: 5/5 plans, v1.1: 2/2 Phase 4, total: 7/7 through Phase 4)
 
 ## Performance Metrics
 
@@ -30,14 +30,15 @@ Progress: [████████░░] 86% (v1.0: 5/5 plans, v1.1: 1/2 plans
 | 1 (v1.0) | 1 | ~3h | ~3h |
 | 2 (v1.0) | 2 | ~6h | ~3h |
 | 3 (v1.0) | 2 | ~7h | ~3.5h |
-| 4 (v1.1) | 1 | ~2min | ~2min |
+| 4 (v1.1) | 2 | ~5min | ~2.5min |
 
 **Recent Trend:**
-- Phase 4 infrastructure plans executing in <5min (pure library installation)
-- Consistent ~3-3.5h per plan for feature implementation
+- Phase 4 infrastructure plans executing in <5min (pure library/migration setup)
+- 04-01: 3min (migration infrastructure), 04-02: 2min (libraries)
+- Consistent ~3-3.5h per plan for feature implementation (Phases 1-3)
 - Trend: Stable (proven single-day milestone delivery)
 
-*Updated after 04-02 completion*
+*Updated after 04-01 completion*
 
 ## Accumulated Context
 
@@ -59,6 +60,9 @@ Recent decisions affecting current work:
 - Per-category product ordering — bracelets order ≠ necklaces order, natural scoping
 
 **Phase 4 Implementation Decisions:**
+- Gap-based displayOrder numbering (10, 20, 30) — allows insertions without renumbering, ~9 insertions before collision
+- Compound index {category, displayOrder, available} — follows ESR guideline for query optimization
+- Pre-save hook auto-assigns displayOrder — new products append to category end (max + 10)
 - Bootstrap-compatible z-index scale — modal: 1050-1060, drag: 1100-1110, allows future library integration
 - CSS variables not imported yet — deferred to Phase 6/8 when features implemented (no dead code in production)
 
@@ -79,10 +83,10 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-01 (Phase 4 execution)
-Stopped at: Completed 04-02-PLAN.md (SortableJS and CSS variables)
+Stopped at: Completed Phase 4 (04-01 and 04-02)
 Resume file: None
 
-**Next step:** Continue Phase 4 with remaining plans (or move to Phase 5 if Phase 4 complete)
+**Next step:** `/gsd:plan-phase 5` to create execution plan for Backend API Endpoints
 
 ---
-*Last updated: 2026-02-01 after 04-02 completion*
+*Last updated: 2026-02-01 after Phase 4 completion*
