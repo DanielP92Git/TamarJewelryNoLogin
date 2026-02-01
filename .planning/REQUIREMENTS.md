@@ -40,15 +40,15 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Customer Display
 
-- [ ] **DISP-01**: SKU displayed on frontend product modal (when SKU exists)
-- [ ] **DISP-02**: SKU formatted as small text with "SKU:" label (or Hebrew equivalent)
-- [ ] **DISP-03**: Products without SKUs display gracefully (no broken UI or error messages)
-- [ ] **DISP-04**: SKU positioned at bottom of product description container
+- [x] **DISP-01**: SKU displayed on frontend product modal (when SKU exists)
+- [x] **DISP-02**: SKU formatted as small text with "SKU:" label (or Hebrew equivalent)
+- [x] **DISP-03**: Products without SKUs display gracefully (no broken UI or error messages)
+- [x] **DISP-04**: SKU positioned at bottom of product description container
 
 ### Multi-Language Support
 
-- [ ] **LANG-01**: SKU label translated in English ("SKU:") and Hebrew ("מק"ט:")
-- [ ] **LANG-02**: SKU display works correctly with RTL layout (Hebrew)
+- [x] **LANG-01**: SKU label translated in English ("SKU:") and Hebrew ("מק"ט:")
+- [x] **LANG-02**: SKU display works correctly with RTL layout (Hebrew)
 
 ## v2 Requirements
 
@@ -107,12 +107,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LIST-01 | Phase 2 | Complete |
 | LIST-02 | Phase 2 | Complete |
 | LIST-03 | Phase 2 | Complete |
-| DISP-01 | Phase 3 | Pending |
-| DISP-02 | Phase 3 | Pending |
-| DISP-03 | Phase 3 | Pending |
-| DISP-04 | Phase 3 | Pending |
-| LANG-01 | Phase 3 | Pending |
-| LANG-02 | Phase 3 | Pending |
+| DISP-01 | Phase 3 | Complete |
+| DISP-02 | Phase 3 | Complete |
+| DISP-03 | Phase 3 | Complete |
+| DISP-04 | Phase 3 | Complete |
+| LANG-01 | Phase 3 | Complete |
+| LANG-02 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 22 total
