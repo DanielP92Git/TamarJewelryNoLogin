@@ -22,21 +22,21 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Admin Add Product
 
-- [ ] **ADD-01**: Admin "Add Product" form includes SKU input field
-- [ ] **ADD-02**: SKU field validation on submission (required, format check)
-- [ ] **ADD-03**: Clear error display if SKU already exists
+- [x] **ADD-01**: Admin "Add Product" form includes SKU input field
+- [x] **ADD-02**: SKU field validation on submission (required, format check)
+- [x] **ADD-03**: Clear error display if SKU already exists
 
 ### Admin Edit Product
 
-- [ ] **EDIT-01**: Admin "Edit Product" form includes SKU input field (pre-filled if exists)
-- [ ] **EDIT-02**: Admin can update SKU on existing products
-- [ ] **EDIT-03**: Uniqueness validation excludes current product's own SKU
+- [x] **EDIT-01**: Admin "Edit Product" form includes SKU input field (pre-filled if exists)
+- [x] **EDIT-02**: Admin can update SKU on existing products
+- [x] **EDIT-03**: Uniqueness validation excludes current product's own SKU
 
 ### Admin Product Listings
 
-- [ ] **LIST-01**: SKU column displayed in admin product tables/lists
-- [ ] **LIST-02**: Search products by SKU (exact or partial match)
-- [ ] **LIST-03**: Filter products by "Missing SKU" status (shows products without SKUs)
+- [x] **LIST-01**: SKU column displayed in admin product tables/lists
+- [x] **LIST-02**: Search products by SKU (exact or partial match)
+- [x] **LIST-03**: Filter products by "Missing SKU" status (shows products without SKUs)
 
 ### Customer Display
 
@@ -98,15 +98,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VAL-02 | Phase 1 | Complete |
 | VAL-03 | Phase 1 | Complete |
 | VAL-04 | Phase 1 | Complete |
-| ADD-01 | Phase 2 | Pending |
-| ADD-02 | Phase 2 | Pending |
-| ADD-03 | Phase 2 | Pending |
-| EDIT-01 | Phase 2 | Pending |
-| EDIT-02 | Phase 2 | Pending |
-| EDIT-03 | Phase 2 | Pending |
-| LIST-01 | Phase 2 | Pending |
-| LIST-02 | Phase 2 | Pending |
-| LIST-03 | Phase 2 | Pending |
+| ADD-01 | Phase 2 | Complete |
+| ADD-02 | Phase 2 | Complete |
+| ADD-03 | Phase 2 | Complete |
+| EDIT-01 | Phase 2 | Complete |
+| EDIT-02 | Phase 2 | Complete |
+| EDIT-03 | Phase 2 | Complete |
+| LIST-01 | Phase 2 | Complete |
+| LIST-02 | Phase 2 | Complete |
+| LIST-03 | Phase 2 | Complete |
 | DISP-01 | Phase 3 | Pending |
 | DISP-02 | Phase 3 | Pending |
 | DISP-03 | Phase 3 | Pending |
@@ -121,4 +121,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-01 (Phase 1 requirements complete)*
+*Last updated: 2026-02-01 (Phase 2 requirements complete)*
