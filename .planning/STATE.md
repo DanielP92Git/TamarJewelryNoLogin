@@ -19,20 +19,20 @@ Progress: [█████░░░░░] 50% (2/3 phases complete + partial ph
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: 4.1 minutes
-- Total execution time: 0.21 hours
+- Total plans completed: 4
+- Average duration: 4.9 minutes
+- Total execution time: 0.33 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-database-foundation | 1 | 2.5 min | 2.5 min |
-| 02-admin-workflow | 2 | 9.9 min | 5.0 min |
+| 02-admin-workflow | 3 | 18.1 min | 6.0 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (2.5 min), 02-01 (2.0 min), 02-03 (7.9 min)
-- Trend: Increasing complexity in phase 2
+- Last 5 plans: 01-01 (2.5 min), 02-01 (2.0 min), 02-02 (8.2 min), 02-03 (7.9 min)
+- Trend: Phase 2 plans consistently longer than phase 1 (more UI work)
 
 *Updated after each plan completion*
 
@@ -54,6 +54,9 @@ Recent decisions affecting current work:
 | Position at bottom of description | Project planning | Keeps SKU visible but secondary to product name/description/price |
 | Invalid SKU format returns duplicate: false | Phase 02-01 | Separates concerns: server checks duplicates, client validates format |
 | Admin auth required for duplicate check | Phase 02-01 | Consistent with other admin operations, prevents abuse |
+| Blur-based validation instead of submit-only | Phase 02-02 | Provides immediate feedback before form submission |
+| Auto-uppercase with cursor preservation | Phase 02-02 | Consistent SKU format without interrupting typing flow |
+| Confirmation dialog for SKU changes | Phase 02-02 | Safety mechanism prevents accidental changes to existing products |
 | SKU column as second column in listing | Phase 02-03 | Keeps product name primary while making SKU prominent |
 | Empty SKUs sorted to end | Phase 02-03 | Groups SKU'd products together regardless of sort direction |
 | sessionStorage for filter/sort state | Phase 02-03 | Lightweight persistence; state survives navigation within session |
@@ -70,9 +73,9 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-01
-Stopped at: Completed 02-03-PLAN.md (SKU Column with Filtering and Inline Editing)
+Stopped at: Completed 02-02-PLAN.md (SKU Form Fields with Validation)
 Resume file: None
 
 ---
 *Created: 2026-02-01*
-*Last updated: 2026-02-01 (Completed 02-03)*
+*Last updated: 2026-02-01 (Completed 02-02)*
