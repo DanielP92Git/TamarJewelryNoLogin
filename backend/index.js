@@ -2275,6 +2275,61 @@ app.post(
   }
 );
 
+// Check SKU duplicate endpoint for client-side validation
+app.post(
+  '/check-sku-duplicate',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const { sku, excludeProductId } = req.body;
+
+      // Normalize SKU (same as addproduct/updateproduct)
+      const normalizedSku = String(sku).trim().toUpperCase();
+
+      // Validate format - return { duplicate: false } for invalid SKUs
+      // (let form validation handle the error display)
+      if (normalizedSku.length < 2 || normalizedSku.length > 7) {
+        return res.json({ duplicate: false });
+      }
+      if (!/^[A-Z0-9]+$/.test(normalizedSku)) {
+        return res.json({ duplicate: false });
+      }
+
+      // Build query to check for existing SKU
+      const query = { sku: normalizedSku };
+
+      // Exclude current product if editing
+      if (excludeProductId) {
+        query.id = { $ne: Number(excludeProductId) };
+      }
+
+      // Check for duplicate
+      const existingProduct = await Product.findOne(query).select('id name');
+
+      if (existingProduct) {
+        return res.json({
+          duplicate: true,
+          conflictingProduct: {
+            id: existingProduct.id,
+            name: existingProduct.name
+          }
+        });
+      }
+
+      // No duplicate found
+      res.json({ duplicate: false });
+    } catch (error) {
+      console.error('Error checking SKU duplicate:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to check SKU'
+      });
+    }
+  }
+);
+
 app.post(
   '/removeproduct',
   adminRateLimiter,
