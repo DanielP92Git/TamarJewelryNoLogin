@@ -601,6 +601,24 @@ class CategoriesView extends View {
     }
   }
 
+  _generateSkuMarkup(sku) {
+    const hasValue = sku && sku.trim() !== '';
+    const label = this.lang === 'eng' ? 'SKU:' : 'מק״ט:';
+    const value = hasValue
+      ? sku
+      : (this.lang === 'eng' ? 'Not available' : 'לא זמין');
+
+    const classes = hasValue
+      ? 'product-sku'
+      : 'product-sku product-sku--placeholder';
+
+    return `
+    <div class="${classes}" ${hasValue ? `data-sku="${sku}" tabindex="0"` : ''}>
+      <span class="sku-label">${label}</span>
+      <span class="sku-value" dir="ltr">${value}</span>
+    </div>`;
+  }
+
   generatePreview(item, imageMarkup, hasMultipleImages) {
     const data = item;
     if (!data) return;
@@ -609,6 +627,7 @@ class CategoriesView extends View {
     const quantity = data.dataset.quant;
     const title = data.querySelector('.item-title').textContent;
     const product = this.products.find(prod => prod.id == id);
+    const sku = product?.sku || null;
     const description = (
       product?.description ||
       data.querySelector('.item-description')?.innerHTML ||
@@ -753,6 +772,7 @@ class CategoriesView extends View {
     // Create modal content
     const modal = document.querySelector('.modal');
     const addToCartText = this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל';
+    const skuMarkup = this._generateSkuMarkup(sku);
 
     // Check if we have a valid image
     const hasValidImage =
@@ -851,8 +871,9 @@ class CategoriesView extends View {
                         /\n/g,
                         '<br>'
                       )}</div>
+                      ${skuMarkup}
                     </div>`
-                  : '<div class="details-container"></div>'
+                  : `<div class="details-container">${skuMarkup}</div>`
               }
               <div class="price-actions-wrapper">
                 <div class="price-box">
@@ -1598,6 +1619,51 @@ class CategoriesView extends View {
         this.addFromPrev(dataObj);
       });
     }
+
+    // SKU copy-to-clipboard handler
+    const copySkuToClipboard = async (skuElement) => {
+      const skuValue = skuElement.dataset.sku;
+      if (!skuValue) return;
+
+      // Check if Clipboard API is available
+      if (!navigator.clipboard) {
+        console.warn('Clipboard API not available');
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(skuValue);
+
+        // Show tooltip
+        const tooltipText = this.lang === 'eng' ? 'Copied!' : 'הועתק!';
+        skuElement.setAttribute('data-tooltip', tooltipText);
+        skuElement.classList.add('copied');
+
+        setTimeout(() => {
+          skuElement.classList.remove('copied');
+          skuElement.removeAttribute('data-tooltip');
+        }, 2000);
+      } catch (err) {
+        console.error('Failed to copy SKU:', err);
+      }
+    };
+
+    // Click handler for SKU
+    modal.addEventListener('click', (e) => {
+      const skuElement = e.target.closest('.product-sku:not(.product-sku--placeholder)');
+      if (skuElement) {
+        copySkuToClipboard(skuElement);
+      }
+    });
+
+    // Keyboard handler for SKU accessibility
+    modal.addEventListener('keydown', (e) => {
+      const skuElement = e.target.closest('.product-sku:not(.product-sku--placeholder)');
+      if (skuElement && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault(); // Prevent scrolling on Space
+        copySkuToClipboard(skuElement);
+      }
+    });
 
     // Magnifier effect removed: keep only click-to-open fullscreen gallery behavior
 
