@@ -8,6 +8,15 @@ Professional SKU (Stock Keeping Unit) management for an existing handmade jewelr
 
 Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency.
 
+## Current Milestone: v1.1 Admin Product Management UX
+
+**Goal:** Enhance admin product management workflow with modern UX patterns for viewing, ordering, and organizing products.
+
+**Target features:**
+- Product preview modal (customer view with edit button)
+- Drag-and-drop product reordering within categories
+- Drag-and-drop gallery image reordering (merge main + gallery images)
+
 ## Requirements
 
 ### Validated
@@ -38,7 +47,20 @@ Clean, professional product information management that matches real-world e-com
 
 ### Active
 
-<!-- No active requirements - next milestone not yet defined -->
+<!-- v1.1 milestone: Admin UX improvements -->
+
+- [ ] Product preview modal opens when clicking product row in admin list
+- [ ] Modal displays customer-facing product view (images, description, price, SKU)
+- [ ] Modal includes "Edit" button to navigate to edit page
+- [ ] Modal closes on ESC or click outside
+- [ ] Drag-and-drop reordering of products within each category
+- [ ] Product display order persists per-category (bracelets order ≠ necklaces order)
+- [ ] "Save Order" button to commit reordering changes
+- [ ] New products default to creation date order
+- [ ] Merge main image + gallery images into single sortable gallery in edit form
+- [ ] First image in gallery becomes the main product image
+- [ ] Drag image to position 1 to set as new main image
+- [ ] Drag-and-drop interface follows UX best practices
 
 ### Out of Scope
 
@@ -96,4 +118,4 @@ Clean, professional product information management that matches real-world e-com
 | SKU value always LTR in RTL mode | Product codes are identifiers, not translatable text | ✓ Good - prevents reversal confusion |
 
 ---
-*Last updated: 2026-02-01 after v1.0 milestone completion*
+*Last updated: 2026-02-01 after v1.1 milestone started*
