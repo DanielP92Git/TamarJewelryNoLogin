@@ -1,341 +1,303 @@
 # Project Research Summary
 
-**Project:** SKU Management for E-commerce Product Catalog
-**Domain:** E-commerce Product Information Management
+**Project:** Admin Dashboard UX Enhancements - Drag-and-Drop Product/Image Reordering with Modals
+**Domain:** E-commerce Admin Tools
 **Researched:** 2026-02-01
 **Confidence:** HIGH
 
 ## Executive Summary
 
-Adding SKU (Stock Keeping Unit) management to the Tamar Kfir Jewelry e-commerce platform is a straightforward database schema enhancement that requires zero new dependencies. The current tech stack (Mongoose 8.6.1, MongoDB 5.0+, vanilla JavaScript frontend, Express 4.20.0 backend) already provides all necessary primitives for implementing professional SKU management. The core challenge is not technical complexity but rather ensuring backwards compatibility with 100+ existing products that lack SKU fields while enforcing uniqueness for new products.
+This project enhances an existing e-commerce admin dashboard with drag-and-drop product reordering, image gallery management, and product preview modals. Research shows this is a well-trodden domain with established patterns from major platforms like Shopify and WooCommerce. The recommended approach uses **SortableJS** (industry-standard library with 2.3M+ weekly downloads) for drag-and-drop functionality and native HTML5 `<dialog>` elements for modals, avoiding unnecessary dependencies while ensuring touch support and accessibility.
 
-The recommended approach centers on MongoDB's sparse unique index pattern, which allows existing products without SKUs to coexist with new products that have unique SKUs. Implementation follows a three-layer validation strategy (database constraints for atomicity, server-side validation for business logic, client-side validation for UX), ensuring data integrity even under concurrent admin operations. The feature delivers professional product identification capabilities expected in all major e-commerce platforms (Shopify, WooCommerce, Square) while avoiding over-engineering pitfalls like auto-generation, complex templates, or variant SKU architecture.
+The critical path focuses on backend schema extensions first (adding `displayOrder` field and unified `images` array), followed by API endpoints for batch reordering, then frontend drag-and-drop implementation. This sequence enables incremental testing at each layer before adding UI complexity. The existing vanilla JS MVC architecture is well-suited to this enhancement—SortableJS integrates seamlessly with the current pattern, and the frontend already has production-tested modal patterns that can be extended for admin use.
 
-The primary risk is database index misconfiguration: using a regular unique index instead of a sparse unique index would immediately break all existing products. This is prevented by explicit sparse index configuration in Phase 1. Secondary risks include race conditions on duplicate submissions (mitigated by database-level uniqueness constraints) and frontend null-handling crashes (mitigated by graceful degradation in display logic). With proper implementation of sparse indexes and multi-layer validation, this feature can be delivered in 2-4 hours of development time without data migration requirements.
+Key risks center on **RTL/Hebrew interface compatibility** (drag coordinates invert in RTL layouts), **touch device support** (native HTML5 drag-and-drop fails on mobile without polyfills), and **data migration safety** (merging mainImage + smallImages arrays without breaking existing products). All three risks are mitigated by choosing SortableJS (which handles touch and has RTL awareness), testing with `dir="rtl"` from Phase 1, and implementing conservative migration with rollback capability.
 
 ## Key Findings
 
 ### Recommended Stack
 
-**No new dependencies required.** The current stack already supports professional SKU management without adding npm packages or external services.
+The research recommends a minimal dependency approach leveraging the existing stack while adding proven libraries only where necessary. SortableJS emerges as the clear choice for drag-and-drop—it's actively maintained, has built-in touch support, works with vanilla JS, and integrates with Parcel's existing bundler setup. For modals, the native `<dialog>` element (96%+ browser support in 2026) provides all required functionality with zero dependencies, avoiding the 50-200KB overhead of modal libraries.
 
-**Core technologies (no changes):**
-- **Mongoose 8.6.1** (current): ODM with built-in sparse + unique index support — handles optional-but-unique fields without race conditions
-- **MongoDB 5.0+** (current): Native sparse unique index support enhanced in 5.0+ to allow multiple sparse/non-sparse indexes
-- **Express 4.20.0** (current): Existing error handling middleware can catch E11000 duplicate key errors
-- **Vanilla JavaScript ES6+** (current): Existing fetch API and form handling patterns work for SKU input
+**Core technologies:**
+- **SortableJS 1.15.6**: Drag-and-drop for products and images—chosen for 2.3M+ weekly downloads, active maintenance, touch support, and vanilla JS compatibility
+- **Native `<dialog>` Element**: Product preview modals—provides built-in focus trap, ESC key handling, backdrop support, and accessibility without dependencies
+- **MongoDB Schema Extensions**: `displayOrder` field with compound index `{category, displayOrder, available}` for efficient sorted queries
 
-**What NOT to use:**
-- mongoose-unique-validator: Adds dependency for error handling that Express middleware can handle natively
-- mongoose-beautiful-unique-validation: Same rationale, marginal DX benefit doesn't justify dependency
-- Custom async validators: Race condition prone; database unique index is atomic
-- Auto-generated SKUs: Defeats human-readable identifier purpose
-- UUIDs as SKUs: Too long (36 chars), not human-readable
-
-**Key technical finding:** MongoDB's sparse unique index is the cornerstone pattern. It allows documents without the SKU field to exist (backwards compatibility) while enforcing uniqueness for documents that do have the field (data integrity). This is a database-level atomic operation, preventing race conditions that application-layer validation cannot prevent.
+**Supporting infrastructure:**
+- Unified `images` array field replacing fragmented mainImage/smallImages structure
+- Batch update API using MongoDB `bulkWrite()` for performance
+- Optimistic UI with rollback for responsive drag feedback
 
 ### Expected Features
 
-Research across Shopify, WooCommerce, and Square documentation reveals universal expectations for SKU management in professional e-commerce platforms.
+Feature research reveals a clear distinction between table stakes (features users assume exist based on Shopify/WooCommerce conventions) and differentiators that can wait for v2.
 
-**Must have (table stakes) — missing these makes SKU feature feel unprofessional:**
-- SKU input field in admin product form (separate from description)
-- Database schema with SKU field (optional for existing, required for new)
-- SKU uniqueness validation with database constraint
-- Display SKU in admin product listings (column in product table)
-- Search products by SKU (critical for order fulfillment workflow)
-- SKU in order line items (staff need SKU for picking/packing)
-- Basic input validation (alphanumeric + dash, max 16 chars, no special chars)
+**Must have (table stakes):**
+- Product preview modal with close options (X, ESC, backdrop) — universal pattern, users expect all three dismissal methods
+- Drag handles with visual indicators — without six-dot handle, users won't know items are draggable
+- Drop zone visual feedback (empty/ready/active states) — users need to see where items can drop
+- Explicit "Save Order" button — prevents accidental reorders from auto-save chaos
+- Image gallery reordering with first-image-as-featured convention — industry standard for product images
+- Per-category reordering scope — products reorder within their category, not globally
 
-**Should have (competitive) — workflow improvements that add polish:**
-- Duplicate SKU detection UI (catch duplicates before save with friendly message)
-- Filter by "Has SKU" / "No SKU" status (migration helper for backfilling)
-- Bulk SKU CSV import/export (batch operations for existing catalog)
-- SKU format guidance in UI (pattern suggestions for consistency)
+**Should have (competitive):**
+- Keyboard shortcuts in modal (arrows, 'e' for edit) — efficiency boost for power users
+- Undo button after save — safety net for accidental drags
+- Touch-friendly alternatives (up/down arrows) — mobile admin usage may be low, defer until data shows need
 
-**Defer to v2+ — advanced features with low ROI:**
-- SKU-based barcode generation (warehouse integration, defer until physical inventory becomes priority)
-- SKU audit history/change log (compliance feature, defer until SKU change issues arise)
-- Auto-suggest next sequential SKU (low value for handmade products with inconsistent patterns)
+**Defer (v2+):**
+- Quick edit in modal — adds complexity, wait for data on which fields are edited frequently
+- Haptic feedback on mobile — polish feature after mobile touch proves valuable
+- Batch reordering tools (move selected to top/bottom) — only needed if single-item drag proves insufficient
 
-**Anti-features (deliberately NOT building):**
-- Complex SKU templates with dynamic rules: Over-engineering for handmade jewelry with minimal variants
-- Multi-variant SKU management: Requires complete product model rewrite, out of scope
-- Auto-generate SKU from product name: Creates terrible SKUs, loses human-readable benefit
-- Hierarchical SKU categories: Premature optimization for flat category structure
-- Barcode scanning in admin: Requires hardware integration, massive scope for minimal admin benefit
+**Critical anti-patterns to avoid:**
+- Auto-save on every drag (prevents undo, accidental drags permanent)
+- Dragging entire product row (conflicts with click-to-open-modal, no clear affordance)
+- Nested modal workflows (modal-in-modal is disorienting, breaks navigation)
 
 ### Architecture Approach
 
-The existing MVC architecture requires minimal modification. SKU integration follows established patterns already proven in the codebase.
+The existing vanilla JS MVC architecture is well-suited to this enhancement. The frontend follows a clear separation: model.js handles data/API calls, View.js provides base functionality (DOM management, language/currency), and page-specific views extend the base. This pattern extends naturally—create adminProductsView.js for product reordering, add modal helper methods to base View.js, and integrate SortableJS as an imported library initialized on mount/destroyed on unmount.
 
-**Major components and responsibilities:**
-1. **Product Schema (backend/models/Product.js)**: Add sku field with sparse unique index configuration — centralized validation at database layer
-2. **Backend API Routes (backend/index.js)**: Modify POST /addproduct and POST /updateproduct to accept req.body.sku with uniqueness validation and E11000 error handling
-3. **normalizeProductForClient() (backend/index.js)**: No changes needed — SKU is simple string that passes through unchanged (unlike image URLs requiring transformation)
-4. **Admin Forms (frontend/admin/)**: Add HTML input field with HTML5 pattern validation and submit handler updates
-5. **Frontend Display (frontend/js/Views/categoriesView.js)**: Add SKU display in product modal with language-aware labels (SKU: / מק"ט:) and null-safe rendering
+**Major components:**
 
-**Key architectural patterns:**
-- **Mongoose Schema Extension**: Add new field to existing schema with sparse: true + unique: true for backwards compatibility
-- **Backend Route Validation**: Three-layer validation (database unique index for atomicity, server validation for business logic, client validation for UX)
-- **Language-Aware Frontend Display**: SKU label translates (SKU ↔ מק"ט), SKU value stays ASCII/LTR even in Hebrew UI
+1. **Product Schema (MongoDB)** — Add `displayOrder` integer field and unified `images` array; migrate existing products from mainImage/smallImages structure to images array with position metadata
+2. **Backend API (Express)** — New POST `/api/admin/products/reorder` endpoint using `bulkWrite()` for batch position updates; extend PUT `/api/admin/products/:id` to handle images array structure
+3. **adminProductsView.js (Frontend)** — New View class extending base View.js; initializes SortableJS on product list, handles drag events, saves order via API with optimistic UI and rollback on failure
+4. **Base View.js Extensions (Frontend)** — Add modal helper methods (`showProductModal()`, `_createProductModal()`) using native `<dialog>` element; integrate SortableJS for image reordering within modal
 
-**Data flow for add product:**
-```
-Admin Form → fetch POST /addproduct → Backend validation (uniqueness check) →
-Mongoose Model (schema validation: trim, uppercase, unique index) → MongoDB insert →
-Response (success or E11000 error)
-```
+**Data flow for reordering:**
+Admin drags product → SortableJS `onEnd` event → adminProductsView calculates new positions → POST to `/api/admin/products/reorder` with category + position array → Backend validates and uses `bulkWrite()` → MongoDB updates `displayOrder` fields → Success response → Frontend shows toast notification
 
-**Integration with existing patterns:**
-- Language switching: Reuse this.lang property and dir="${this.lang === 'heb' ? 'rtl' : 'ltr'}" pattern
-- Error handling: Existing Express error middleware catches E11000, return user-friendly messages
-- Form patterns: Existing fetch API + JSON body submission pattern works unchanged
-
-**Build order (dependency-driven):**
-1. Database schema (foundation for all downstream)
-2. Backend API validation (required before forms can save)
-3. Admin forms (depend on working API)
-4. Frontend display (cosmetic, can be added anytime after API works)
+**Migration strategy:**
+Add `images` array field without removing legacy fields → Run migration script to merge mainImage + smallImages → Frontend reads from `images` array with fallback to legacy fields → Verify all products display correctly → (Future) Remove deprecated fields after confidence period
 
 ### Critical Pitfalls
 
-Research identified seven critical pitfalls with proven prevention strategies:
+Research identified six critical pitfalls that have broken similar implementations in production systems. The top five must be addressed proactively:
 
-1. **Database NULL handling in unique indexes** — Using regular unique index instead of sparse breaks existing products. MongoDB treats NULL as duplicate value. **Prevention:** Use sparse: true + unique: true index from the start. **Phase 1 risk.**
+1. **Touch Support Missing on Mobile Devices** — Native HTML5 drag-and-drop does not fire touch events. Developers test on desktop and discover iPad/tablet failures too late. **Mitigation:** Choose SortableJS from Phase 1 (built-in touch support), test on actual mobile devices during development, verify iOS Safari and Android Chrome.
 
-2. **Race condition on duplicate SKU submissions** — Two concurrent admin requests with same SKU can both pass validation, then one fails with cryptic error. **Prevention:** Database-level unique constraint (atomic), plus server-side try-catch for E11000 errors with user-friendly messages. **Phase 1-2 risk.**
+2. **RTL (Hebrew Interface) Coordinate Inversion** — In RTL mode, drag coordinates are inverted (dragging right moves elements left). Drag ghost appears in wrong positions, drop zones highlight on opposite side. **Mitigation:** Test with `dir="rtl"` from Phase 1, use SortableJS which respects RTL attribute, verify Hebrew admin interface before building features.
 
-3. **Frontend display of products without SKUs** — UI crashes or shows "undefined" when rendering products lacking SKU values. **Prevention:** Graceful fallback (show "N/A"), null-safe operations (product.sku?.toUpperCase()), conditional features. **Phase 2-3 risk.**
+3. **Race Conditions in Concurrent Product Order Updates** — Two admins reordering simultaneously causes duplicate order values, missing positions, or gaps (1, 2, 5, 8 instead of 1, 2, 3, 4). **Mitigation:** Implement optimistic concurrency control with version field (`__v`), use atomic `bulkWrite()` operations, add multi-admin stress testing.
 
-4. **Required vs. optional field confusion** — Making SKU required at schema level breaks existing products; making it optional everywhere allows bad new data. **Prevention:** Keep schema-level optional (sparse index), enforce at application layer for new products only. **Phase 1-2 risk.**
+4. **Image Array Migration Breaks Existing Products** — Products have inconsistent schema evolution (legacy `image` field, current `mainImage`/`smallImages`, target `images` array). Migration script assumes consistent structure and corrupts data. **Mitigation:** Pre-migration audit of field combinations, add new field without removing old, implement rollback plan, handle all legacy formats with field existence checks.
 
-5. **Missing server-side validation** — Relying only on client-side validation allows duplicate/invalid SKUs via API calls. **Prevention:** Never trust the client; always implement validation on both sides. **Phase 2 risk.**
+5. **Memory Leaks from Orphaned Event Listeners** — Navigating between admin pages accumulates event listeners (dragstart, dragover, drop), creating memory leaks that crash browser after 10-15 transitions. **Mitigation:** Implement explicit cleanup with AbortController or SortableJS destroy() method, pair every addEventListener with removeEventListener on unmount.
 
-6. **No migration rollback plan** — Migration adds sparse index but team realizes later they can't safely roll back. **Prevention:** Write "up" and "down" migration scripts, test rollback on staging. **Phase 1 risk.**
-
-7. **SKU format inconsistency** — Admins create varied formats (SKU-001, sku001, 001-SKU) causing duplicate detection failures and report breakage. **Prevention:** Define format pattern (/^[A-Z0-9][A-Z0-9-]{4,10}[A-Z0-9]$/), case normalization (uppercase), whitespace trimming, regex validation. **Phase 2 risk.**
-
-**"Looks done but isn't" checklist:**
-- Sparse index configured? (Test: can multiple products without SKU coexist?)
-- Server validation enforced? (Test: direct POST to API bypasses frontend)
-- Race condition handled? (Test: concurrent duplicate submissions)
-- Null handling graceful? (Test: sort by SKU with mixed null/non-null)
-- Rollback tested? (Test: down migration on staging)
+**Secondary pitfalls to watch:**
+- Modal z-index conflicts (drag ghost appears behind modal overlay) — establish z-index CSS variable scale upfront
+- Large list performance (200+ products) — consider pagination or virtual scrolling if needed
 
 ## Implications for Roadmap
 
-Based on research, this feature naturally decomposes into 3 tight phases ordered by architectural dependencies.
+Based on research, suggested phase structure follows dependency order to enable incremental testing:
 
-### Phase 1: Database Foundation & Backend Validation
-**Rationale:** Database schema must exist before any other component can reference SKU. This phase establishes data integrity guarantees that protect all downstream features.
-
-**Delivers:**
-- Product schema with SKU field (String, sparse: true, unique: true, uppercase: true, trim: true)
-- Sparse unique index creation (automatic in dev, manual command for production)
-- Backend API modification: POST /addproduct accepts req.body.sku with uniqueness validation
-- Backend API modification: POST /updateproduct accepts req.body.sku with edit-safe validation
-- E11000 error handling middleware (converts database error to user-friendly message)
-- Migration rollback script
-
-**Addresses features from FEATURES.md:**
-- Database schema with SKU field (table stakes)
-- SKU uniqueness validation (table stakes)
-
-**Uses stack elements from STACK.md:**
-- Mongoose sparse unique index pattern
-- MongoDB 5.0+ sparse index support
-- Express error handling middleware
-
-**Avoids pitfalls from PITFALLS.md:**
-- Pitfall #1 (NULL handling): Sparse index configured from start
-- Pitfall #2 (race conditions): Database-level unique constraint is atomic
-- Pitfall #4 (required/optional): Schema-level optional, application-level conditional
-- Pitfall #6 (rollback): Down migration script created alongside up migration
-
-**Why this order:** Schema and backend API are the critical path. Without database support, forms have nowhere to save data. Without API validation, data integrity cannot be guaranteed.
-
-### Phase 2: Admin UI & Workflow
-**Rationale:** Once backend API accepts and validates SKUs, admin forms can submit the data. This phase delivers the primary user-facing workflow.
+### Phase 1: Schema Foundation & Library Setup
+**Rationale:** Backend schema must exist before API or frontend can use it. Library choice (SortableJS vs alternatives) is a foundational decision that affects all subsequent phases. RTL testing infrastructure must be established early to catch coordinate inversion issues before they're deeply embedded.
 
 **Delivers:**
-- Admin add product form: SKU input field with HTML5 validation (pattern, maxlength, required)
-- Admin edit product form: SKU input field pre-filled with existing value
-- Form submit handlers updated to include req.body.sku in JSON payload
-- Client-side duplicate detection UI (debounced API check, show "✓ SKU available" or "✗ Already exists")
-- Display SKU column in admin product listing table
-- Search products by SKU filter
+- Product schema with `displayOrder` field and compound index `{category, displayOrder, available}`
+- Migration script to assign initial displayOrder values to existing products
+- SortableJS installed and integrated with Parcel bundler
+- RTL testing environment (`dir="rtl"` toggle in admin)
+- Z-index CSS variable scale for modal/drag interactions
 
-**Addresses features from FEATURES.md:**
-- SKU input field in admin product form (table stakes)
-- Display SKU in admin product listings (table stakes)
-- Search products by SKU (table stakes)
-- Basic input validation (table stakes)
-- Duplicate SKU detection UI (competitive differentiator)
+**Addresses (from FEATURES.md):**
+- Groundwork for drag-and-drop product reordering
 
-**Implements architecture component:**
-- Admin Forms (HTML input + submit handler)
-- Frontend-to-backend data flow (fetch POST with JSON body)
+**Avoids (from PITFALLS.md):**
+- Pitfall #1: Touch support missing (choosing SortableJS with built-in touch)
+- Pitfall #2: RTL coordinate inversion (establishing RTL testing early)
+- Pitfall #5: Modal z-index conflicts (CSS variable scale upfront)
 
-**Avoids pitfalls from PITFALLS.md:**
-- Pitfall #5 (server-side validation): Backend already validates (Phase 1), client-side is UX layer only
-- Pitfall #7 (format inconsistency): Regex validation + uppercase normalization enforced
-- Pitfall #3 (frontend null handling): Display logic includes null checks and fallbacks
-
-**Why this order:** Depends on Phase 1 API working. Delivers the core admin workflow: create products with SKUs, see SKUs in product list, search by SKU.
-
-### Phase 3: Customer-Facing Display & Polish
-**Rationale:** Customer display is cosmetic and independent of core workflow. Can be developed in parallel with Phase 2 or deferred entirely.
+### Phase 2: Product Ordering Backend
+**Rationale:** API must work before frontend can call it. Backend ordering logic with concurrency handling must be solid before adding UI complexity. This phase proves the end-to-end flow (backend → database) independently of frontend drag-and-drop.
 
 **Delivers:**
-- Product modal (frontend/js/Views/categoriesView.js): Display SKU with language-aware label
-- Language switching support: "SKU:" (English) ↔ "מק"ט:" (Hebrew)
-- RTL-safe SKU display (SKU value stays LTR even in Hebrew mode)
-- SKU in order line items (admin order view)
-- CSS styling for SKU display in modal
+- POST `/api/admin/products/reorder` endpoint with validation
+- Batch update using MongoDB `bulkWrite()` for performance
+- Optimistic locking with `__v` version field to prevent race conditions
+- Admin authentication middleware on reorder routes
+- Test suite for concurrent reorder scenarios
 
-**Addresses features from FEATURES.md:**
-- SKU in order line items (table stakes)
+**Uses (from STACK.md):**
+- MongoDB compound index for efficient category-ordered queries
+- Express route patterns (monolithic index.js)
 
-**Implements architecture component:**
-- Frontend Display (categoriesView.js generatePreview)
-- Language-aware UI pattern (reuses existing locale system)
+**Implements (from ARCHITECTURE.md):**
+- Batch update API component
+- Atomic position swap operations
 
-**Avoids pitfalls from PITFALLS.md:**
-- Pitfall #3 (null handling): Graceful degradation (hide SKU section if product.sku is null)
+**Avoids (from PITFALLS.md):**
+- Pitfall #3: Race conditions (optimistic locking from day one)
+- Security: Missing auth checks on reorder endpoint
 
-**Why this order:** Display can be added anytime after backend API delivers SKU data. Not blocking for admin workflow.
-
-### Phase 4 (Defer to v1.x): Migration & Bulk Operations
-**Rationale:** Backfilling SKUs for existing products is operational work, not blocking for new product workflow. Add only if admin requests faster bulk assignment.
+### Phase 3: Frontend Product Reordering
+**Rationale:** Drag-and-drop is the core feature—validate it works before adding modal complexity. Customer-facing display update confirms end-to-end flow from drag to frontend rendering.
 
 **Delivers:**
-- CSV export with SKU column
-- CSV import to bulk-update SKUs
-- Filter products by "Has SKU" / "No SKU" status
-- SKU format examples/documentation in admin UI
+- adminProductsView.js extending base View.js
+- SortableJS integration with drag handles and visual feedback
+- Optimistic UI with rollback on save failure
+- Loading states and error handling
+- Updated model.js to fetch products sorted by displayOrder
+- Customer-facing categoriesView displays products in admin-defined order
 
-**Addresses features from FEATURES.md:**
-- Bulk SKU CSV import/export (competitive differentiator)
-- Filter Has SKU / No SKU (competitive differentiator)
-- SKU format guidance (competitive differentiator)
+**Addresses (from FEATURES.md):**
+- Drag-and-drop product reordering (table stakes)
+- Drag handle visual indicator
+- Drop zone visual feedback (empty/ready/active states)
+- "Save Order" and "Cancel" buttons
+- Loading state during save
 
-**Why defer:** New products get SKUs immediately. Existing products can be updated individually via edit form. Bulk operations only needed if backfilling 100+ products becomes bottleneck.
+**Implements (from ARCHITECTURE.md):**
+- adminProductsView component
+- Drag-and-drop data flow (view → API → MongoDB → response)
+
+**Avoids (from PITFALLS.md):**
+- Pitfall #6: Memory leaks (implement lifecycle cleanup from start)
+- UX pitfall: No visual feedback during drag
+- UX pitfall: No error handling for failed reorder
+
+### Phase 4: Image Array Migration
+**Rationale:** Migration must complete before modal can edit images array. Separating migration into its own phase allows extensive testing without blocking other features.
+
+**Delivers:**
+- Unified `images` array field added to Product schema
+- Migration script with dry-run mode and rollback plan
+- Pre-migration audit of existing field combinations
+- Handles all legacy formats (image, mainImage, smallImagesLocal)
+- Frontend updated to read from images array with fallback to legacy fields
+- Verification queries to detect products with empty arrays
+
+**Uses (from STACK.md):**
+- MongoDB array operations and schema updates
+
+**Implements (from ARCHITECTURE.md):**
+- Image array restructuring component
+- Migration strategy (add new field, dual-write period, incremental batches)
+
+**Avoids (from PITFALLS.md):**
+- Pitfall #4: Image migration breaks products (conservative migration with rollback)
+
+### Phase 5: Modal Integration & Image Reordering
+**Rationale:** Modal is least critical feature—build last to avoid blocking other work. Image reordering within modal requires images array migration to be complete.
+
+**Delivers:**
+- Base View.js extended with modal helper methods
+- Native `<dialog>` element for product preview
+- SortableJS integration for image reordering within modal
+- Modal save connected to PUT `/api/admin/products/:id`
+- Triple-redundancy dismissal (X button, ESC key, backdrop click)
+- Focus trap and keyboard navigation
+
+**Addresses (from FEATURES.md):**
+- Product preview modal (table stakes)
+- Modal close options (X, ESC, backdrop)
+- Image gallery reordering
+- First image auto-set as featured
+- "Edit" button in modal navigates to edit page
+
+**Implements (from ARCHITECTURE.md):**
+- Base View.js modal extensions
+- Native `<dialog>` pattern with accessibility
+
+**Avoids (from PITFALLS.md):**
+- Modal z-index conflicts (using established CSS variable scale)
+- UX pitfall: No indication of what's draggable (drag handles on images)
+
+### Phase 6: Testing & Polish
+**Rationale:** Comprehensive testing across all features with focus on integration scenarios not covered in unit tests.
+
+**Delivers:**
+- Multi-admin concurrency stress testing (2 admins reordering simultaneously)
+- Memory leak testing (20+ page navigations with heap snapshots)
+- Mobile/touch device testing (iPad Safari, Android Chrome)
+- RTL testing in Hebrew mode (full admin interface)
+- Performance testing with 200+ products in single category
+- Keyboard accessibility testing (reorder without mouse)
+- Success/error toast notifications
+- CSS polish for drag handles and modal animations
+
+**Addresses (from FEATURES.md):**
+- Touch-friendly drag validation
+- Keyboard navigation polish
+
+**Avoids (from PITFALLS.md):**
+- All pitfalls validation (comprehensive testing scenarios)
 
 ### Phase Ordering Rationale
 
-**Dependency-driven order:**
-- Phase 1 (database) → Phase 2 (admin UI) is strict dependency (forms need API)
-- Phase 2 → Phase 3 (display) is loose dependency (display can wait)
-- Phase 4 is optional enhancement triggered by operational need
-
-**Grouping logic:**
-- Phase 1: Backend/infrastructure (invisible to users but foundational)
-- Phase 2: Admin workflow (core feature delivery)
-- Phase 3: Customer experience (polish)
-- Phase 4: Operational tooling (deferred nice-to-have)
-
-**Pitfall avoidance:**
-- Phase 1 addresses all database/integrity pitfalls before any UI touches SKUs
-- Phase 2 validates data flow (server + client) before exposing to customers
-- Phase 3 handles edge cases (nulls, language switching) in public-facing UI
-- Phased rollout allows testing at each integration point
+- **Dependencies drive order:** Schema → API → Frontend → Migration → Modal follows natural dependency chain where each layer depends on previous
+- **Incremental testing:** Each phase delivers testable functionality before moving to next layer, preventing integration issues
+- **Risk mitigation early:** Library choice, RTL testing, and z-index scale in Phase 1 prevent late discovery of architectural issues
+- **Feature isolation:** Migration gets dedicated phase to avoid rushing or cutting corners on data safety
+- **Modal last:** Least critical feature deferred to avoid blocking core reordering functionality
 
 ### Research Flags
 
 **Phases with standard patterns (skip research-phase):**
-- **Phase 1:** Mongoose schema extension and Express route validation are well-documented patterns with official documentation
-- **Phase 2:** HTML form + fetch API patterns already proven in existing admin codebase
-- **Phase 3:** Language switching pattern already exists in categoriesView.js
+- **Phase 1:** Schema extensions are standard MongoDB patterns, well-documented
+- **Phase 2:** Express API endpoints follow existing monolithic pattern in index.js
+- **Phase 3:** SortableJS has comprehensive documentation and examples
+- **Phase 5:** Native `<dialog>` element has MDN documentation and accessibility guides
 
-**Phases unlikely to need deeper research:**
-- All phases leverage existing stack and patterns. No new integrations, APIs, or external services.
-- Documentation sources are official (MongoDB, Mongoose) or verified across multiple platforms (Shopify, WooCommerce, Square)
-
-**Validation needs during implementation:**
-- Phase 1: Verify sparse index works with existing products on staging environment
-- Phase 2: Test concurrent duplicate submissions (race condition scenario)
-- Phase 3: Test null SKU handling in Hebrew RTL mode
+**Phases needing validation during planning:**
+- **Phase 4 (Image Migration):** Audit existing products in staging database to discover actual field combinations—research assumes certain legacy formats but production data may have surprises
+- **Phase 6 (Performance):** If product count per category exceeds 200, may need to research virtual scrolling or pagination patterns for drag-and-drop lists
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All technologies are current versions in use. Zero new dependencies. Sparse unique index pattern verified in official MongoDB 5.0+ and Mongoose 8.x documentation. |
-| Features | HIGH | Feature expectations verified across Shopify, WooCommerce, and Square official documentation. Table stakes vs. differentiators validated against industry standards. |
-| Architecture | HIGH | Integration points analyzed from existing codebase (backend/models/Product.js, backend/index.js, frontend/js/Views/categoriesView.js). Patterns already proven in current implementation. |
-| Pitfalls | HIGH | Pitfalls sourced from MongoDB community forums, e-commerce migration case studies, and official documentation. Sparse index NULL handling is documented MongoDB behavior. |
+| Stack | HIGH | SortableJS and native `<dialog>` are verified technologies with official documentation. Verified integration with existing Parcel setup and vanilla JS MVC pattern. |
+| Features | HIGH | Feature expectations validated against Shopify and WooCommerce admin interfaces. Table stakes vs differentiators clearly established from major e-commerce platforms. |
+| Architecture | HIGH | MongoDB patterns verified in official documentation. Existing MVC architecture maps cleanly to new components. Data flow patterns are standard Express/Mongoose. |
+| Pitfalls | HIGH | All six critical pitfalls documented with real-world examples from GitHub issues and production bug reports. Mitigation strategies verified across multiple sources. |
 
 **Overall confidence:** HIGH
 
-All research findings verified against primary sources (official documentation) or validated across multiple secondary sources (platform documentation, community consensus). No significant gaps requiring speculation or inference.
+Research sources include official documentation (MongoDB, MDN, SortableJS), major platform references (Shopify, WooCommerce), and production issue databases (GitHub issues for RTL bugs, race conditions, memory leaks). The domain is mature with well-established patterns.
 
 ### Gaps to Address
 
-**No significant gaps identified.** Research covered all major implementation aspects:
-- Database schema patterns (official MongoDB/Mongoose docs)
-- Feature expectations (Shopify/WooCommerce/Square comparison)
-- Architecture integration (codebase analysis)
-- Common pitfalls (community forums + migration case studies)
+**Gap 1: Exact product count and schema variations in production database**
+- **What's unknown:** Research assumes ~50-100 products per category and certain legacy schema formats, but actual production data may vary
+- **When to validate:** During Phase 1 (run queries against production clone to get actual counts and field combinations)
+- **Impact if wrong:** If 500+ products per category, may need pagination in Phase 3. If unexpected schema variations, Phase 4 migration needs expansion.
 
-**Minor validation needs during implementation:**
-1. **Staging environment testing**: Confirm sparse index works with actual production data copy (100+ existing products)
-2. **Concurrent submission testing**: Load test duplicate SKU submissions to verify race condition prevention
-3. **Hebrew RTL edge cases**: Verify SKU display in Hebrew UI mode maintains LTR for SKU values
+**Gap 2: Actual mobile admin usage patterns**
+- **What's unknown:** Research recommends touch support as table stakes, but actual admin usage on tablets/phones is unknown
+- **When to validate:** During Phase 6 (check analytics for mobile admin sessions)
+- **Impact if wrong:** If mobile admin usage is <5%, could deprioritize touch-specific polish features, but SortableJS provides touch support by default so no rework needed.
 
-These are implementation validation tasks, not research gaps. Approach is clear; execution just needs verification.
+**Gap 3: RTL drag precision on actual Hebrew admin interface**
+- **What's unknown:** SortableJS documentation mentions RTL awareness but community reports suggest it's not perfect—exact behavior in this app's Hebrew mode needs verification
+- **When to validate:** During Phase 1 RTL testing setup
+- **Impact if wrong:** May need manual coordinate adjustments or fallback to up/down arrow buttons for Hebrew mode if drag positioning is unusable.
 
 ## Sources
 
-### Primary Sources (HIGH confidence)
+### Primary (HIGH confidence)
+- [SortableJS Official Documentation](https://sortablejs.github.io/Sortable/) and [GitHub Repository](https://github.com/SortableJS/Sortable) — Drag-and-drop library features, integration patterns, version verification
+- [MongoDB Official Documentation](https://docs.mongodb.com/manual/) — Schema indexing, bulkWrite operations, concurrency patterns
+- [MDN Web Docs: `<dialog>` Element](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog) — Native modal API, accessibility features
+- [Shopify Admin UI Extensions](https://shopify.dev/docs/apps/build/admin) and [WooCommerce Documentation](https://woocommerce.com/document/) — E-commerce admin feature expectations, established patterns
+- [MongoDB Product Catalog Use Case](https://mongodb-documentation.readthedocs.io/en/latest/use-cases/product-catalog.html) — Category-scoped ordering patterns
 
-**Official Documentation:**
-- [MongoDB Sparse Indexes](https://www.mongodb.com/docs/manual/core/index-sparse/) — Sparse unique index behavior, NULL handling
-- [MongoDB Unique Indexes](https://www.mongodb.com/docs/manual/core/index-unique/) — Uniqueness enforcement
-- [Mongoose SchemaTypes](https://mongoosejs.com/docs/schematypes.html) — Sparse and unique options, field transforms
-- [Mongoose Validation](https://mongoosejs.com/docs/validation.html) — Custom validators, unique option clarification
-- [Mongoose Changelog](https://github.com/Automattic/mongoose/blob/master/CHANGELOG.md) — Version 8/9 compatibility
-- [Mongoose Version Support](https://mongoosejs.com/docs/version-support.html) — Support timeline
+### Secondary (MEDIUM confidence)
+- [GitHub Issues: RTL Drag-and-Drop Bugs](https://github.com/mattlewis92/angular-calendar/issues/1203) — Real-world RTL coordinate inversion examples
+- [Medium: MongoDB Race Conditions](https://medium.com/tales-from-nimilandia/handling-race-conditions-and-concurrent-resource-updates-in-node-and-mongodb-by-performing-atomic-9f1a902bd5fa) — Optimistic locking patterns
+- [Drag-and-Drop UX Best Practices](https://www.pencilandpaper.io/articles/ux-pattern-drag-and-drop) — Visual feedback patterns, user expectations
+- [Modal Accessibility Best Practices](https://www.a11y-collective.com/blog/modal-accessibility/) — Focus trap, keyboard navigation
 
-**Platform Documentation:**
-- [Shopify: What Is a Stock Keeping Unit (SKU)? Complete 2026 Guide](https://www.shopify.com/blog/what-is-a-stock-keeping-unit) — SKU best practices, format recommendations
-- [Shopify Help Center: Using SKUs to manage your inventory](https://help.shopify.com/en/manual/products/details/sku) — Feature expectations
-- [WooCommerce: Product CSV Importer and Exporter](https://woocommerce.com/document/product-csv-importer-exporter/) — Bulk operations patterns
-- [Square: SKU: What It Means and How To Use It](https://squareup.com/us/en/the-bottom-line/operating-your-business/stock-keeping-unit) — Industry standards
-- [Square Support: Automatically generate SKUs](https://squareup.com/help/us/en/article/7632-auto-generate-skus-with-square-for-retail) — Auto-generation considerations
-
-**Codebase Analysis:**
-- backend/models/Product.js — Current schema structure
-- backend/index.js — API routes, normalizeProductForClient pattern
-- frontend/js/Views/categoriesView.js — Display logic, language switching
-- frontend/js/model.js — Cart state patterns
-
-### Secondary Sources (MEDIUM confidence)
-
-**Best Practices & Industry Standards:**
-- [Ablestar: SKU best practices for ecommerce](https://www.ablestar.com/sku-best-practices/) — Format guidelines (6-12 chars, alphanumeric)
-- [ShipBob: SKU Management Best Practices](https://www.shipbob.com/blog/sku-management/) — Inventory management patterns
-- [Ecwid: Understanding SKU Formats](https://support.ecwid.com/hc/en-us/articles/360011125640-Understanding-SKU-formats) — Length and character guidance
-
-**Pitfalls & Migration:**
-- [Sling Academy: Fixing Mongoose E11000 Duplicate Key Error](https://www.slingacademy.com/article/fixing-mongoose-e11000-duplicate-key-error-collection/) — Error handling patterns
-- [Dev.to: Handling Mongoose Duplication Errors](https://dev.to/ahmedmagdy11/handling-mongoose-dublication-errors-3f6n) — E11000 code handling
-- [MongoDB Community: Unique Index Ignoring Nulls](https://www.mongodb.com/community/forums/t/cant-create-a-unique-index-that-ignores-nulls-in-mongodb/199145) — Sparse index use cases
-- [Next-Cart: Product Data Migration Checklist](https://next-cart.com/blog/a-checklist-for-preparing-your-product-data-for-migration/) — Migration best practices
-
-**Validation & Security:**
-- [MDN: Client-side Form Validation](https://developer.mozilla.org/en-US/docs/Learn_web_development/Extensions/Forms/Form_validation) — Validation strategy
-- [SurveyJS: Client-Side vs Server-Side Validation](https://surveyjs.io/stay-updated/blog/client-server-data-validation) — Multi-layer validation approach
-
-### Tertiary Sources (MEDIUM-LOW confidence)
-
-**Handmade Product Context:**
-- [ProfitTree: Mastering SKU Systems for Small Business on Etsy](https://profittree.io/blog/mastering-sku-systems-how-to-create-skus-for-small-business-on-etsy) — SKU patterns for handmade goods
-- [Midwest AWD: How to Create SKU Numbers](https://www.midwestawd.com/blog/how-to-create-sku-numbers/) — Format creation guide
+### Tertiary (LOW confidence, needs validation)
+- Community forum discussions on MongoDB schema migrations — Best practices vary, requires case-by-case evaluation
+- Stack Overflow answers on SortableJS + RTL — Mixed results reported, needs direct testing in this app's environment
 
 ---
-
 *Research completed: 2026-02-01*
-*Ready for roadmap: Yes*
-*Next step: Roadmap creation based on Phase 1-4 structure*
+*Ready for roadmap: yes*
