@@ -10,6 +10,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "regenerator-runtime": "^0.14.1",
+    "sortablejs": "^1.15.6",
     "web-vitals": "^2.1.4"
   },
   "overrides": {
