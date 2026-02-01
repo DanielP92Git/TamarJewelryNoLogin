@@ -58,11 +58,41 @@ const ProductSchema = new mongoose.Schema({
       },
       message: 'SKU must contain only letters and numbers (A-Z, 0-9)'
     }
+  },
+  displayOrder: {
+    type: Number,
+    index: true,  // For efficient sorting (compound index handles category-scoped queries)
+    default: null,  // Will be set by pre-save hook for new products
+    min: [1, 'displayOrder must be positive']
   }
 });
 
 // Add explicit sparse unique index for SKU
 ProductSchema.index({ sku: 1 }, { unique: true, sparse: true });
+
+// Pre-save hook: Auto-assign displayOrder for new products
+ProductSchema.pre('save', async function(next) {
+  // Only assign displayOrder for new documents without one
+  if (this.isNew && this.displayOrder == null && this.category) {
+    try {
+      const Product = this.constructor;
+      // Find highest displayOrder in the same category
+      const maxProduct = await Product.findOne({ category: this.category })
+        .sort({ displayOrder: -1 })
+        .select('displayOrder')
+        .lean();
+
+      // Assign next gap-based value (10 higher than max, or 10 if first)
+      this.displayOrder = maxProduct?.displayOrder
+        ? maxProduct.displayOrder + 10
+        : 10;
+    } catch (err) {
+      console.error('Error assigning displayOrder:', err);
+      // Continue without displayOrder if there's an error
+    }
+  }
+  next();
+});
 
 module.exports =
   mongoose.models.Product || mongoose.model('Product', ProductSchema);
