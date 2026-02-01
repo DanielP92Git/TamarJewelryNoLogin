@@ -3568,6 +3568,7 @@ function addProductHandler() {
       category: prodCategory,
       quantity: Number(quantity) || 0,
       ils_price: Math.round(parseFloat(prodIlsPrice)),
+      sku: skuValue.toUpperCase(),
       security_margin: securityMargin,
       // Image data for upload
       mainImage: prodImage,
