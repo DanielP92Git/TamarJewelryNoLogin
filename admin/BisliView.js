@@ -1040,6 +1040,9 @@ async function loadProductsPage(data) {
           <div class="listproduct-format-main">
             <p>Select</p>
             <p>Product</p>
+            <p class="sortable-header" data-column="sku" style="cursor:pointer;">
+              SKU <span class="sort-indicator"></span>
+            </p>
             <p class="hide-sm">Category</p>
             <p>Stock Qty</p>
             <p class="hide-sm">ILS</p>
@@ -1099,6 +1102,60 @@ async function loadProductsPage(data) {
       setupBulkActions();
     });
     search.dataset.bound = "true";
+  }
+
+  // SKU column sorting
+  const skuHeader = document.querySelector('.sortable-header[data-column="sku"]');
+  if (skuHeader) {
+    skuHeader.addEventListener('click', () => {
+      // Get current sort state
+      const savedSort = sessionStorage.getItem('productListSort');
+      let skuSortState = { active: false, direction: 'asc' };
+
+      if (savedSort) {
+        try {
+          skuSortState = JSON.parse(savedSort);
+        } catch (e) {
+          console.error('Failed to parse sort state:', e);
+        }
+      }
+
+      // Toggle sort direction
+      if (skuSortState.active) {
+        skuSortState.direction = skuSortState.direction === 'asc' ? 'desc' : 'asc';
+      } else {
+        skuSortState.active = true;
+        skuSortState.direction = 'asc';
+      }
+
+      // Update sort indicator
+      const indicator = skuHeader.querySelector('.sort-indicator');
+      if (indicator) {
+        indicator.textContent = skuSortState.direction === 'asc' ? ' ↑' : ' ↓';
+      }
+
+      // Save sort state to session
+      sessionStorage.setItem('productListSort', JSON.stringify(skuSortState));
+
+      // Re-render products with sorting
+      loadProducts(data);
+    });
+  }
+
+  // Restore sort indicator if sort is active
+  const savedSort = sessionStorage.getItem('productListSort');
+  if (savedSort) {
+    try {
+      const sortState = JSON.parse(savedSort);
+      if (sortState.active && skuHeader) {
+        const indicator = skuHeader.querySelector('.sort-indicator');
+        if (indicator) {
+          indicator.textContent = sortState.direction === 'asc' ? ' ↑' : ' ↓';
+        }
+      }
+    } catch (e) {
+      console.error('Failed to restore sort indicator:', e);
+    }
   }
 
   // Load current discount settings
@@ -1298,6 +1355,30 @@ function loadProducts(data) {
     });
   }
 
+  // Apply SKU sorting if active
+  const savedSort = sessionStorage.getItem('productListSort');
+  if (savedSort) {
+    try {
+      const sortState = JSON.parse(savedSort);
+      if (sortState.active) {
+        filteredData = [...filteredData].sort((a, b) => {
+          const aVal = a.sku || '';
+          const bVal = b.sku || '';
+
+          // Put empty SKUs at the end
+          if (!aVal && bVal) return 1;
+          if (aVal && !bVal) return -1;
+          if (!aVal && !bVal) return 0;
+
+          const comparison = aVal.localeCompare(bVal);
+          return sortState.direction === 'asc' ? comparison : -comparison;
+        });
+      }
+    } catch (e) {
+      console.error('Failed to parse sort state:', e);
+    }
+  }
+
   const productsContainer = document.querySelector(".listproduct-allproducts");
   if (!productsContainer) {
     console.error("Products container not found");
@@ -1364,6 +1445,16 @@ function loadProducts(data) {
           <div class="row__title">${item.name}</div>
           <div class="mono">${String(item.id ?? "")}</div>
         </div>
+      </div>
+      <div class="sku-cell mono" data-product-id="${item.id}" data-editable="true" style="cursor:pointer;" title="Click to edit">
+        <span class="sku-display">${item.sku || '—'}</span>
+        <input
+          type="text"
+          class="sku-inline-input input"
+          value="${item.sku || ''}"
+          maxlength="7"
+          style="display:none; width:80px; text-transform:uppercase;"
+        />
       </div>
       <div class="mono hide-sm">${item.category ?? ""}</div>
       <div class="mono">${qty}</div>
@@ -3161,6 +3252,28 @@ async function loadAddProductsPage() {
               </div>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Product Identifier</h3>
+            </div>
+            <div class="card__body">
+              <div class="field">
+                <div class="label">SKU <span style="color: #ef4444;">*</span></div>
+                <input
+                  class="input"
+                  type="text"
+                  name="sku"
+                  id="sku-input"
+                  placeholder="ABC123"
+                  maxlength="7"
+                  style="text-transform: uppercase;"
+                />
+                <div class="help">Stock Keeping Unit - 2-7 alphanumeric characters (required for new products)</div>
+                <div id="sku-error" style="display:none; color: #ef4444; font-size: 13px; margin-top: 6px;"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:14px;">
@@ -3260,6 +3373,23 @@ async function loadAddProductsPage() {
   qtyEl?.addEventListener("change", updateInvBadges);
   updateInvBadges();
 
+  // SKU input handlers
+  const skuInput = document.getElementById('sku-input');
+  if (skuInput) {
+    // Auto-uppercase while preserving cursor position
+    skuInput.addEventListener('input', (e) => {
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+      e.target.value = e.target.value.toUpperCase();
+      e.target.setSelectionRange(start, end);
+    });
+
+    // Validate on blur
+    skuInput.addEventListener('blur', async () => {
+      await validateSkuField(skuInput.value.trim(), null);
+    });
+  }
+
   // Media previews + count
   const mainInput = document.getElementById("mainImage");
   const smallInput = document.getElementById("smallImages");
@@ -3326,7 +3456,7 @@ function addProductHandler() {
   }
   console.log("[addProductHandler] Form found, attaching event listeners...");
 
-  const runSubmit = (e) => {
+  const runSubmit = async (e) => {
     console.log("[runSubmit] Function called", e);
     // CRITICAL: Prevent all default actions and propagation
     if (e) {
@@ -3343,6 +3473,29 @@ function addProductHandler() {
       } catch (err) {
         console.error("[runSubmit] Error preventing default:", err);
       }
+    }
+
+    // SKU validation (required for new products)
+    const skuInput = document.getElementById('sku-input');
+    const skuValue = skuInput?.value?.trim() || '';
+
+    if (!skuValue) {
+      const errorDiv = document.getElementById('sku-error');
+      if (errorDiv) {
+        errorDiv.innerHTML = 'SKU is required for new products';
+        errorDiv.style.display = 'block';
+        errorDiv.setAttribute('role', 'alert');
+      }
+      skuInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      skuInput?.focus();
+      return;
+    }
+
+    const isSkuValid = await validateSkuField(skuValue, null);
+    if (!isSkuValid) {
+      skuInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      skuInput?.focus();
+      return;
     }
 
     // Validate form data
