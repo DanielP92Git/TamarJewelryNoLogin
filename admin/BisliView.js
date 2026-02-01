@@ -1626,8 +1626,8 @@ function loadProducts(data) {
       // Save via API
       try {
         input.disabled = true;
-        const response = await fetch(`${API_URL}/updateproduct/${productId}`, {
-          method: 'POST',
+        const response = await fetch(`${API_URL}/updateproduct/${productId}/sku`, {
+          method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
