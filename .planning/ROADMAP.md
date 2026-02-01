@@ -69,28 +69,28 @@ Plans:
 
 **Success Criteria** (what must be TRUE):
   1. Customer sees SKU displayed on frontend product modal when SKU exists for product
-  2. SKU displays as small text with proper label ("SKU:" in English, "מק"ט:" in Hebrew)
+  2. SKU displays as small text with proper label ("SKU:" in English, "makat:" in Hebrew)
   3. Products without SKUs display product modal without errors or broken UI elements
   4. SKU appears at bottom of product description container following professional e-commerce conventions
   5. SKU label switches language correctly when customer changes site language
   6. SKU value displays LTR (left-to-right) even in Hebrew RTL mode
 
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD after planning
+- [ ] 03-01-PLAN.md - SKU display on product modal with copy-to-clipboard and RTL support
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3
+Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Database Foundation | 1/1 | Complete | 2026-02-01 |
 | 2. Admin Workflow | 3/3 | Complete | 2026-02-01 |
-| 3. Customer Display | 0/TBD | Not started | - |
+| 3. Customer Display | 0/1 | Planned | - |
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-01 (Phase 2 complete)*
+*Last updated: 2026-02-01 (Phase 3 planned)*
