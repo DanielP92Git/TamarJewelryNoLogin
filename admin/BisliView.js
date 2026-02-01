@@ -998,7 +998,7 @@ async function loadProductsPage(data) {
 
       <div class="toolbar">
         <div class="control">
-          <input id="productSearch" class="input" type="text" placeholder="Search by product name, ID..." />
+          <input id="productSearch" class="input" type="text" placeholder="Search by product name, ID, SKU..." />
         </div>
         <div class="control" style="min-width: 220px; flex: 0 0 auto;">
           <select id="categoryFilter" class="select">
@@ -1011,6 +1011,11 @@ async function loadProductsPage(data) {
             <option value="unisex">Unisex</option>
             <option value="shalom-club">Shalom Club</option>
           </select>
+        </div>
+        <div class="control">
+          <button type="button" id="missing-sku-filter" class="badge" style="cursor:pointer; transition: all 0.2s;">
+            Missing SKU (<span id="missing-sku-count">0</span>)
+          </button>
         </div>
         <div class="control" style="min-width: 180px; flex: 0 0 auto;">
           <div class="badge" id="resultsBadge">0 items</div>
@@ -1097,6 +1102,11 @@ async function loadProductsPage(data) {
   const search = document.getElementById("productSearch");
   if (search && search.dataset.bound !== "true") {
     search.addEventListener("input", () => {
+      // Save search term to filter state
+      const currentFilters = JSON.parse(sessionStorage.getItem('productListFilters') || '{}');
+      currentFilters.searchTerm = search.value;
+      sessionStorage.setItem('productListFilters', JSON.stringify(currentFilters));
+
       loadProducts(data);
       updateSelectedCount();
       setupBulkActions();
@@ -1156,6 +1166,58 @@ async function loadProductsPage(data) {
     } catch (e) {
       console.error('Failed to restore sort indicator:', e);
     }
+  }
+
+  // Missing SKU filter state and handler
+  let showMissingSku = false;
+
+  // Restore filter state from session
+  const savedFilters = sessionStorage.getItem('productListFilters');
+  if (savedFilters) {
+    try {
+      const filters = JSON.parse(savedFilters);
+      showMissingSku = filters.showMissingSku || false;
+      if (showMissingSku) {
+        const badge = document.getElementById('missing-sku-filter');
+        if (badge) {
+          badge.style.background = 'rgba(239, 68, 68, 0.2)';
+          badge.style.color = '#ef4444';
+          badge.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        }
+      }
+    } catch (e) {
+      console.error('Failed to restore filter state:', e);
+    }
+  }
+
+  // Missing SKU filter click handler
+  const missingSkuBtn = document.getElementById('missing-sku-filter');
+  if (missingSkuBtn) {
+    missingSkuBtn.addEventListener('click', () => {
+      showMissingSku = !showMissingSku;
+
+      // Update badge appearance
+      if (showMissingSku) {
+        missingSkuBtn.style.background = 'rgba(239, 68, 68, 0.2)';
+        missingSkuBtn.style.color = '#ef4444';
+        missingSkuBtn.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+      } else {
+        missingSkuBtn.style.background = '';
+        missingSkuBtn.style.color = '';
+        missingSkuBtn.style.borderColor = '';
+      }
+
+      // Save filter state
+      const currentFilters = {
+        showMissingSku: showMissingSku,
+        category: document.getElementById('categoryFilter')?.value || 'all',
+        searchTerm: document.getElementById('productSearch')?.value || ''
+      };
+      sessionStorage.setItem('productListFilters', JSON.stringify(currentFilters));
+
+      // Re-render
+      loadProducts(data);
+    });
   }
 
   // Load current discount settings
@@ -1347,11 +1409,35 @@ function loadProducts(data) {
       ? data
       : data.filter((product) => product.category === state.selectedCategory);
 
+  // Apply missing SKU filter
+  const savedFilters = sessionStorage.getItem('productListFilters');
+  let showMissingSku = false;
+  if (savedFilters) {
+    try {
+      showMissingSku = JSON.parse(savedFilters).showMissingSku || false;
+    } catch (e) {
+      // Ignore parse errors
+    }
+  }
+
+  // Count missing SKUs (before filtering)
+  const missingSkuCount = filteredData.filter(p => !p.sku || p.sku.trim() === '').length;
+  const countSpan = document.getElementById('missing-sku-count');
+  if (countSpan) {
+    countSpan.textContent = missingSkuCount;
+  }
+
+  // Apply filter
+  if (showMissingSku) {
+    filteredData = filteredData.filter(product => !product.sku || product.sku.trim() === '');
+  }
+
   if (searchTerm) {
     filteredData = filteredData.filter((product) => {
       const name = (product.name || "").toLowerCase();
       const id = String(product.id ?? "").toLowerCase();
-      return name.includes(searchTerm) || id.includes(searchTerm);
+      const sku = (product.sku || "").toLowerCase();
+      return name.includes(searchTerm) || id.includes(searchTerm) || sku.includes(searchTerm);
     });
   }
 
@@ -1552,6 +1638,11 @@ function addCategoryFilterHandler(data) {
   const categoryFilter = document.getElementById("categoryFilter");
   if (categoryFilter) {
     categoryFilter.addEventListener("change", () => {
+      // Save category to filter state
+      const currentFilters = JSON.parse(sessionStorage.getItem('productListFilters') || '{}');
+      currentFilters.category = categoryFilter.value;
+      sessionStorage.setItem('productListFilters', JSON.stringify(currentFilters));
+
       loadProducts(data);
       updateSelectedCount(); // Update the count when changing category
       setupBulkActions(); // Re-bind after list re-render
@@ -1972,6 +2063,29 @@ function editProduct(product) {
               </div>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Product Identifier</h3>
+            </div>
+            <div class="card__body">
+              <div class="field">
+                <div class="label">SKU</div>
+                <input
+                  class="input"
+                  type="text"
+                  name="sku"
+                  id="sku-input"
+                  value="${product.sku || ''}"
+                  placeholder="${product.sku ? '' : 'ABC123'}"
+                  maxlength="7"
+                  style="text-transform: uppercase;"
+                />
+                <div class="help">${product.sku ? 'Current SKU - editing will update the product identifier' : 'No SKU assigned - enter one to add a product identifier'}</div>
+                <div id="sku-error" style="display:none; color: #ef4444; font-size: 13px; margin-top: 6px;"></div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:14px;">
@@ -2063,12 +2177,32 @@ function editProduct(product) {
 
   pageContent.insertAdjacentHTML("afterbegin", markup);
 
+  // Store original SKU for change detection
+  const originalSku = product.sku || '';
+
   // Cancel -> back to products list
   const cancelBtn = document.getElementById("cancel-edit-product");
   if (cancelBtn) {
     cancelBtn.addEventListener("click", () => {
       setActiveNav("products-list");
       fetchInfo();
+    });
+  }
+
+  // SKU input handlers for edit form
+  const skuInput = document.getElementById('sku-input');
+  if (skuInput) {
+    // Auto-uppercase while preserving cursor position
+    skuInput.addEventListener('input', (e) => {
+      const start = e.target.selectionStart;
+      const end = e.target.selectionEnd;
+      e.target.value = e.target.value.toUpperCase();
+      e.target.setSelectionRange(start, end);
+    });
+
+    // Validate on blur (exclude current product from duplicate check)
+    skuInput.addEventListener('blur', async () => {
+      await validateSkuField(skuInput.value.trim(), product.id);
     });
   }
 
