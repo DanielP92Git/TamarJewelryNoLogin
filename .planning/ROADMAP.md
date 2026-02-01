@@ -53,10 +53,12 @@ Plans:
   6. Admin can search/filter products by SKU (exact or partial match)
   7. Admin can filter products to show only those missing SKUs
 
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD after planning
+- [ ] 02-01-PLAN.md - Backend API endpoint for SKU duplicate checking
+- [ ] 02-02-PLAN.md - Add SKU fields to Add Product and Edit Product forms
+- [ ] 02-03-PLAN.md - Product listing SKU column, sorting, search, and inline editing
 
 ### Phase 3: Customer Display
 **Goal**: Customers see SKU displayed professionally on product pages with correct language labels and RTL support
@@ -86,9 +88,9 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Database Foundation | 1/1 | Complete | 2026-02-01 |
-| 2. Admin Workflow | 0/TBD | Not started | - |
+| 2. Admin Workflow | 0/3 | In progress | - |
 | 3. Customer Display | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-01 (Phase 1 complete)*
+*Last updated: 2026-02-01 (Phase 2 planned)*
