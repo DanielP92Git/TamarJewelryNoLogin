@@ -638,7 +638,7 @@ body#categories.crochet-necklaces header {
 .product-sku.copied::after {
   content: attr(data-tooltip);
   position: absolute;
-  top: calc(100% + 8px);
+  bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   background-color: #1f2937;
@@ -653,10 +653,10 @@ body#categories.crochet-necklaces header {
 }
 
 @keyframes tooltip-fade-in-out {
-  0% { opacity: 0; transform: translateX(-50%) translateY(-5px); }
+  0% { opacity: 0; transform: translateX(-50%) translateY(5px); }
   15% { opacity: 1; transform: translateX(-50%) translateY(0); }
   85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-  100% { opacity: 0; transform: translateX(-50%) translateY(-5px); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(5px); }
 }
 
 .price-actions-wrapper {
