@@ -9,16 +9,16 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Database Schema
 
-- [ ] **SKU-01**: Product model has SKU field (string, optional in schema, sparse unique index)
-- [ ] **SKU-02**: SKU uniqueness enforced at database level (prevents duplicate SKUs)
-- [ ] **SKU-03**: Existing products without SKUs continue to function (backwards compatible)
+- [x] **SKU-01**: Product model has SKU field (string, optional in schema, sparse unique index)
+- [x] **SKU-02**: SKU uniqueness enforced at database level (prevents duplicate SKUs)
+- [x] **SKU-03**: Existing products without SKUs continue to function (backwards compatible)
 
 ### Server Validation
 
-- [ ] **VAL-01**: Server validates SKU uniqueness before saving (handles race conditions)
-- [ ] **VAL-02**: New products require SKU field (validation at API level)
-- [ ] **VAL-03**: Edit operations exclude current product from uniqueness check
-- [ ] **VAL-04**: User-friendly error messages for duplicate SKUs (not raw database errors)
+- [x] **VAL-01**: Server validates SKU uniqueness before saving (handles race conditions)
+- [x] **VAL-02**: New products require SKU field (validation at API level)
+- [x] **VAL-03**: Edit operations exclude current product from uniqueness check
+- [x] **VAL-04**: User-friendly error messages for duplicate SKUs (not raw database errors)
 
 ### Admin Add Product
 
@@ -91,13 +91,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SKU-01 | Phase 1 | Pending |
-| SKU-02 | Phase 1 | Pending |
-| SKU-03 | Phase 1 | Pending |
-| VAL-01 | Phase 1 | Pending |
-| VAL-02 | Phase 1 | Pending |
-| VAL-03 | Phase 1 | Pending |
-| VAL-04 | Phase 1 | Pending |
+| SKU-01 | Phase 1 | Complete |
+| SKU-02 | Phase 1 | Complete |
+| SKU-03 | Phase 1 | Complete |
+| VAL-01 | Phase 1 | Complete |
+| VAL-02 | Phase 1 | Complete |
+| VAL-03 | Phase 1 | Complete |
+| VAL-04 | Phase 1 | Complete |
 | ADD-01 | Phase 2 | Pending |
 | ADD-02 | Phase 2 | Pending |
 | ADD-03 | Phase 2 | Pending |
@@ -121,4 +121,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-01 after roadmap creation*
+*Last updated: 2026-02-01 (Phase 1 requirements complete)*

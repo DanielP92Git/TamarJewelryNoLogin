@@ -12,7 +12,7 @@ This roadmap delivers professional SKU (Stock Keeping Unit) management for Tamar
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Database Foundation** - SKU schema and backend validation
+- [x] **Phase 1: Database Foundation** - SKU schema and backend validation
 - [ ] **Phase 2: Admin Workflow** - Product management forms and listings
 - [ ] **Phase 3: Customer Display** - Frontend modal and multi-language support
 
@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md - Add SKU field to Product schema and integrate validation into API routes
+- [x] 01-01-PLAN.md - Add SKU field to Product schema and integrate validation into API routes
 
 ### Phase 2: Admin Workflow
 **Goal**: Admin can create new products with SKUs, edit existing products to add/update SKUs, and search products by SKU through dashboard
@@ -85,10 +85,10 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Database Foundation | 0/1 | Planned | - |
+| 1. Database Foundation | 1/1 | Complete | 2026-02-01 |
 | 2. Admin Workflow | 0/TBD | Not started | - |
 | 3. Customer Display | 0/TBD | Not started | - |
 
 ---
 *Roadmap created: 2026-02-01*
-*Last updated: 2026-02-01*
+*Last updated: 2026-02-01 (Phase 1 complete)*
