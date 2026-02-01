@@ -2605,6 +2605,29 @@ async function updateProduct(e) {
   e.preventDefault();
 
   const productId = document.getElementById("product-id").value;
+
+  // SKU validation
+  const skuInput = document.getElementById('sku-input');
+  const newSkuValue = skuInput?.value?.trim().toUpperCase() || '';
+
+  // Validate if SKU is provided
+  if (newSkuValue) {
+    const isSkuValid = await validateSkuField(newSkuValue, productId);
+    if (!isSkuValid) {
+      skuInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      skuInput?.focus();
+      return;
+    }
+  }
+
+  // Warn if SKU is being changed (not just added to empty)
+  if (originalSku && newSkuValue !== originalSku) {
+    const confirmed = confirm(`You are changing the SKU from "${originalSku}" to "${newSkuValue}". This may affect inventory tracking. Continue?`);
+    if (!confirmed) {
+      return;
+    }
+  }
+
   const name = document.getElementById("name").value;
   const ilsPrice = document.getElementById("new-price").value;
   const description = document.getElementById("description").value;
@@ -2626,6 +2649,11 @@ async function updateProduct(e) {
   formData.append("security_margin", securityMargin);
   // Include fields for backward-compatible legacy update endpoints
   formData.append("id", productId);
+
+  // Add SKU to update data if changed
+  if (newSkuValue !== originalSku) {
+    formData.append("sku", newSkuValue || null); // null to remove SKU if emptied
+  }
 
   // Append new images if they exist
   if (mainImageFile) {
