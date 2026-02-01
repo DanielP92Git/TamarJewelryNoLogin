@@ -2,8 +2,8 @@
 
 ## Milestones
 
-- ✅ **v1.0 SKU Management** - Phases 1-3 (shipped 2026-02-01)
-- 🚧 **v1.1 Admin Product Management UX** - Phases 4-9 (in progress)
+- v1.0 SKU Management - Phases 1-3 (shipped 2026-02-01)
+- v1.1 Admin Product Management UX - Phases 4-9 (in progress)
 
 ## Overview
 
@@ -18,7 +18,7 @@ Enhance admin product management workflow with modern UX patterns for viewing, o
 Decimal phases appear between their surrounding integers in numeric order.
 
 <details>
-<summary>✅ v1.0 SKU Management (Phases 1-3) - SHIPPED 2026-02-01</summary>
+<summary>v1.0 SKU Management (Phases 1-3) - SHIPPED 2026-02-01</summary>
 
 ### Phase 1: Schema & Validation Foundation
 **Goal**: Establish SKU database schema and validation infrastructure
@@ -45,7 +45,7 @@ Plans:
 
 </details>
 
-## 🚧 v1.1 Admin Product Management UX (In Progress)
+## v1.1 Admin Product Management UX (In Progress)
 
 **Milestone Goal:** Enhance admin product management workflow with modern UX patterns for viewing, ordering, and organizing products.
 
@@ -62,12 +62,12 @@ Plans:
   1. Every product has a displayOrder integer field with default values assigned
   2. Products can be queried efficiently in sorted order per category
   3. SortableJS library is installed and verified working in admin environment
-  4. RTL testing environment (dir="rtl" toggle) is established in admin
-  5. Z-index CSS variable scale prevents modal/drag conflicts
-**Plans**: TBD
+  4. Z-index CSS variable scale prevents modal/drag conflicts
+**Plans**: 2 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [ ] 04-01-PLAN.md — Backend migration infrastructure and displayOrder schema
+- [ ] 04-02-PLAN.md — SortableJS library and z-index CSS variables
 
 ### Phase 5: Product Ordering Backend
 **Goal**: API endpoint for batch product reordering with concurrency protection
@@ -151,14 +151,14 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 4 → 5 → 6 → 7 → 8 → 9
+Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 1. Schema & Validation | v1.0 | 1/1 | Complete | 2026-02-01 |
 | 2. Admin Forms | v1.0 | 2/2 | Complete | 2026-02-01 |
 | 3. Customer Display | v1.0 | 2/2 | Complete | 2026-02-01 |
-| 4. Schema Foundation & Library | v1.1 | 0/TBD | Not started | - |
+| 4. Schema Foundation & Library | v1.1 | 0/2 | Planned | - |
 | 5. Product Ordering Backend | v1.1 | 0/TBD | Not started | - |
 | 6. Frontend Product Reordering | v1.1 | 0/TBD | Not started | - |
 | 7. Image Array Migration | v1.1 | 0/TBD | Not started | - |
@@ -166,4 +166,4 @@ Phases execute in numeric order: 4 → 5 → 6 → 7 → 8 → 9
 | 9. Testing & Polish | v1.1 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-01 after v1.1 roadmap creation*
+*Last updated: 2026-02-01 after Phase 4 planning*
