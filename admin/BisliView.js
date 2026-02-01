@@ -170,6 +170,94 @@ const state = {
   maxRetries: 3,
 };
 
+// SKU validation function for forms
+async function validateSkuField(skuValue, excludeProductId = null) {
+  const errorDiv = document.getElementById('sku-error');
+  if (!errorDiv) return true;
+
+  // Clear previous error
+  errorDiv.style.display = 'none';
+  errorDiv.innerHTML = '';
+  errorDiv.removeAttribute('role');
+
+  const trimmedSku = (skuValue || '').trim();
+
+  // Empty check - let form submission handle required validation
+  if (!trimmedSku) {
+    return true;
+  }
+
+  const normalized = trimmedSku.toUpperCase();
+
+  // Format validation
+  if (normalized.length < 2 || normalized.length > 7) {
+    errorDiv.innerHTML = 'SKU must be between 2 and 7 characters';
+    errorDiv.style.display = 'block';
+    errorDiv.setAttribute('role', 'alert');
+    return false;
+  }
+
+  if (!/^[A-Z0-9]+$/.test(normalized)) {
+    errorDiv.innerHTML = 'SKU must contain only letters and numbers (A-Z, 0-9)';
+    errorDiv.style.display = 'block';
+    errorDiv.setAttribute('role', 'alert');
+    return false;
+  }
+
+  // Duplicate check via API
+  try {
+    const response = await fetch(`${API_URL}/check-sku-duplicate`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+      },
+      body: JSON.stringify({
+        sku: normalized,
+        excludeProductId: excludeProductId
+      })
+    });
+
+    if (!response.ok) {
+      console.error('SKU duplicate check failed:', response.status);
+      return true; // Allow submission - backend will validate
+    }
+
+    const result = await response.json();
+
+    if (result.duplicate) {
+      const productName = result.conflictingProduct?.name || 'another product';
+      const productId = result.conflictingProduct?.id;
+
+      errorDiv.innerHTML = `SKU <strong>${normalized}</strong> is already used by <a href="#" class="sku-error-link" data-product-id="${productId}">${productName}</a> <span style="color: #3b82f6;">[View Product]</span>`;
+      errorDiv.style.display = 'block';
+      errorDiv.setAttribute('role', 'alert');
+
+      // Bind click handler to navigate to conflicting product
+      const errorLink = errorDiv.querySelector('.sku-error-link');
+      if (errorLink && productId) {
+        errorLink.addEventListener('click', async (e) => {
+          e.preventDefault();
+          // Find product in state.products and open edit
+          const conflictingProduct = state.products?.find(p => p.id === productId);
+          if (conflictingProduct) {
+            editProduct(conflictingProduct);
+          } else {
+            alert('Could not find product. Please refresh the product list.');
+          }
+        });
+      }
+
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('SKU duplicate check error:', error);
+    return true; // Allow submission - backend will validate
+  }
+}
+
 // Drag and drop functionality for file inputs
 function setupDragAndDrop(dropzone, fileInput, isMultiple = false) {
   if (!dropzone || !fileInput) return;
