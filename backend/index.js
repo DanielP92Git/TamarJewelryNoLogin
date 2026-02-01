@@ -2330,6 +2330,78 @@ app.post(
   }
 );
 
+// Update product SKU only (for inline editing)
+app.patch(
+  '/updateproduct/:id/sku',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const productId = Number(req.params.id);
+      const { sku } = req.body;
+
+      // Find product
+      const product = await Product.findOne({ id: productId });
+      if (!product) {
+        return res.status(404).json({
+          success: false,
+          message: 'Product not found'
+        });
+      }
+
+      // Normalize and validate SKU
+      let normalizedSku = null;
+      if (sku) {
+        normalizedSku = String(sku).trim().toUpperCase();
+
+        // Validate format
+        if (normalizedSku.length < 2 || normalizedSku.length > 7) {
+          return res.status(400).json({
+            success: false,
+            message: 'SKU must be 2-7 characters'
+          });
+        }
+        if (!/^[A-Z0-9]+$/.test(normalizedSku)) {
+          return res.status(400).json({
+            success: false,
+            message: 'SKU must contain only letters and numbers'
+          });
+        }
+
+        // Check for duplicates
+        const existingProduct = await Product.findOne({
+          sku: normalizedSku,
+          id: { $ne: productId }
+        }).select('id name');
+
+        if (existingProduct) {
+          return res.status(400).json({
+            success: false,
+            message: `SKU already exists on product: ${existingProduct.name} (ID: ${existingProduct.id})`
+          });
+        }
+      }
+
+      // Update SKU
+      product.sku = normalizedSku;
+      await product.save();
+
+      res.json({
+        success: true,
+        message: 'SKU updated successfully',
+        sku: normalizedSku
+      });
+    } catch (error) {
+      console.error('Error updating SKU:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Failed to update SKU'
+      });
+    }
+  }
+);
+
 app.post(
   '/removeproduct',
   adminRateLimiter,
