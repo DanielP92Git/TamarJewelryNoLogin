@@ -91,13 +91,54 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (To be filled by roadmapper) | | |
+| FOUND-01 | Phase 4 | Pending |
+| FOUND-02 | Phase 4 | Pending |
+| FOUND-03 | Phase 4 | Pending |
+| FOUND-04 | Phase 5 | Pending |
+| FOUND-05 | Phase 7 | Pending |
+| FOUND-06 | Phase 7 | Pending |
+| ORDER-01 | Phase 6 | Pending |
+| ORDER-02 | Phase 6 | Pending |
+| ORDER-03 | Phase 6 | Pending |
+| ORDER-04 | Phase 6 | Pending |
+| ORDER-05 | Phase 6 | Pending |
+| ORDER-06 | Phase 6 | Pending |
+| ORDER-07 | Phase 6 | Pending |
+| ORDER-08 | Phase 6 | Pending |
+| ORDER-09 | Phase 6 | Pending |
+| ORDER-10 | Phase 6 | Pending |
+| ORDER-11 | Phase 6 | Pending |
+| IMAGE-01 | Phase 7 | Pending |
+| IMAGE-02 | Phase 7 | Pending |
+| IMAGE-03 | Phase 8 | Pending |
+| IMAGE-04 | Phase 8 | Pending |
+| IMAGE-05 | Phase 8 | Pending |
+| IMAGE-06 | Phase 8 | Pending |
+| IMAGE-07 | Phase 8 | Pending |
+| IMAGE-08 | Phase 8 | Pending |
+| MODAL-01 | Phase 8 | Pending |
+| MODAL-02 | Phase 8 | Pending |
+| MODAL-03 | Phase 8 | Pending |
+| MODAL-04 | Phase 8 | Pending |
+| MODAL-05 | Phase 8 | Pending |
+| MODAL-06 | Phase 8 | Pending |
+| MODAL-07 | Phase 8 | Pending |
+| MODAL-08 | Phase 8 | Pending |
+| MODAL-09 | Phase 8 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 28 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 28 ⚠️
+- v1.1 requirements: 34 total
+- Mapped to phases: 34/34 ✓
+- Unmapped: 0
+
+**Phase Breakdown:**
+- Phase 4 (Foundation): 3 requirements (FOUND-01, FOUND-02, FOUND-03)
+- Phase 5 (Backend API): 1 requirement (FOUND-04)
+- Phase 6 (Product Reordering): 11 requirements (ORDER-01 through ORDER-11)
+- Phase 7 (Migration): 4 requirements (FOUND-05, FOUND-06, IMAGE-01, IMAGE-02)
+- Phase 8 (Modal & Image UI): 15 requirements (MODAL-01 through MODAL-09, IMAGE-03 through IMAGE-08)
+- Phase 9 (Testing): 0 new requirements (validates all 34 existing requirements)
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-01 after initial definition*
+*Last updated: 2026-02-01 after roadmap creation with full traceability*
