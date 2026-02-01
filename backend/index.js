@@ -583,7 +583,7 @@ const corsOptions = {
   },
   credentials: true,
   optionsSuccessStatus: 204,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: [
     'Content-Type',
     'Authorization',
