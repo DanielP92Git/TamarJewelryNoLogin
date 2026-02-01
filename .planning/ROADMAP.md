@@ -32,10 +32,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   4. Backend API validates SKU uniqueness before saving new products and returns user-friendly error messages for duplicates
   5. Edit operations can update SKU without triggering false duplicate errors when SKU unchanged
 
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] TBD after planning
+- [ ] 01-01-PLAN.md - Add SKU field to Product schema and integrate validation into API routes
 
 ### Phase 2: Admin Workflow
 **Goal**: Admin can create new products with SKUs, edit existing products to add/update SKUs, and search products by SKU through dashboard
@@ -85,7 +85,7 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Database Foundation | 0/TBD | Not started | - |
+| 1. Database Foundation | 0/1 | Planned | - |
 | 2. Admin Workflow | 0/TBD | Not started | - |
 | 3. Customer Display | 0/TBD | Not started | - |
 
