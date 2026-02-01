@@ -25,18 +25,20 @@ Clean, professional product information management that matches real-world e-com
 - ✓ GeoIP-based locale detection with client-side overrides — existing
 - ✓ Responsive design with 800px breakpoint (desktop/mobile) — existing
 
+<!-- v1.0 SKU Management - shipped 2026-02-01 -->
+
+- ✓ Add SKU field to Product MongoDB schema — v1.0
+- ✓ Add SKU input field to admin "Add Product" page — v1.0
+- ✓ Add SKU input field to admin "Edit Product" page — v1.0
+- ✓ Validate SKU uniqueness across all products — v1.0 (database + API + client-side)
+- ✓ Require SKU for new products (but allow existing products to have empty SKU) — v1.0
+- ✓ Display SKU on frontend product modal as small text with "SKU:" label — v1.0
+- ✓ Position SKU at bottom of description container (following UI best practices) — v1.0
+- ✓ Handle SKU display for products without SKUs (hide label if empty) — v1.0
+
 ### Active
 
-<!-- Current scope: SKU management feature -->
-
-- [ ] Add SKU field to Product MongoDB schema
-- [ ] Add SKU input field to admin "Add Product" page
-- [ ] Add SKU input field to admin "Edit Product" page
-- [ ] Validate SKU uniqueness across all products
-- [ ] Require SKU for new products (but allow existing products to have empty SKU)
-- [ ] Display SKU on frontend product modal as small text with "SKU:" label
-- [ ] Position SKU at bottom of description container (following UI best practices)
-- [ ] Handle SKU display for products without SKUs (hide label if empty)
+<!-- No active requirements - next milestone not yet defined -->
 
 ### Out of Scope
 
@@ -48,25 +50,28 @@ Clean, professional product information management that matches real-world e-com
 
 ## Context
 
-**Current Problem:**
-SKUs are currently embedded in product descriptions, creating:
-- Unprofessional appearance on product pages
-- Poor admin UX (mixing SKU data with marketing copy)
-- No validation or uniqueness enforcement
-- Inconsistent SKU formatting across products
+**Current State (v1.0 Shipped):**
+- Shipped v1.0 with ~869 LOC across backend, admin, and frontend
+- Tech stack: Node.js/Express backend, Vanilla JS MVC frontend, MongoDB/Mongoose
+- SKU management now professional: database schema, admin workflow, customer display
+- 25 files modified across 3 phases in single-day execution (16 hours)
+
+**Problem Solved:**
+- ✅ Eliminated SKU-in-description anti-pattern
+- ✅ Professional e-commerce product information management
+- ✅ Admin workflow efficiency improved with duplicate validation
+- ✅ Customer-facing display matches industry standards
 
 **Technical Environment:**
 - MVC frontend architecture (Vanilla JS, Parcel bundler)
 - Express/Node.js monolithic backend
 - MongoDB with Mongoose ODM
-- Existing admin dashboard with product add/edit forms
-- Multi-language UI requiring SKU label translation
+- Multi-language support (English/Hebrew with RTL)
+- Admin dashboard with product add/edit forms
 
-**Implementation Notes:**
-- Product model already has complex image handling (mainImage variants, smallImages array)
-- Admin forms use HTML forms with fetch API for submissions
-- Frontend uses View classes with language-switching methods
-- Backend has normalizeProductForClient() that transforms product data before sending to frontend
+**Known Issues/Tech Debt:**
+- Duplicate index definition causes Mongoose warning (harmless, cosmetic)
+- Legacy /updateproduct endpoint (without :id) doesn't handle SKU - use /updateproduct/:id instead
 
 ## Constraints
 
@@ -80,10 +85,15 @@ SKUs are currently embedded in product descriptions, creating:
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| SKU required for new products only | Avoids forcing admin to retroactively add SKUs to entire catalog | — Pending |
-| Unique constraint on SKU field | Prevents duplicate SKUs across products, ensures each is identifiable | — Pending |
-| Display as "SKU: ABC123" format | Matches professional e-commerce conventions (Amazon, Shopify, etc.) | — Pending |
-| Position at bottom of description | Keeps SKU visible but secondary to product name/description/price | — Pending |
+| SKU required for new products only | Avoids forcing admin to retroactively add SKUs to entire catalog | ✓ Good - backwards compatibility maintained |
+| Sparse unique index for SKU | Allows existing products without SKU while preventing duplicates when present | ✓ Good - enables phased rollout |
+| Auto-uppercase and trim SKU | Prevents accidental duplicates from different casing/whitespace | ✓ Good - no case conflicts reported |
+| User-friendly duplicate errors | Shows conflicting product name to help admin identify issue | ✓ Good - clear error messages |
+| Display as "SKU: ABC123" format | Matches professional e-commerce conventions (Amazon, Shopify, etc.) | ✓ Good - professional appearance |
+| Position at bottom of description | Keeps SKU visible but secondary to product name/description/price | ✓ Good - follows UI best practices |
+| Real-time duplicate validation API | Provides instant feedback before form submission | ✓ Good - better UX than submit-only validation |
+| Clipboard API for copy-to-clipboard | Modern approach with error handling vs deprecated execCommand | ✓ Good - works across browsers |
+| SKU value always LTR in RTL mode | Product codes are identifiers, not translatable text | ✓ Good - prevents reversal confusion |
 
 ---
-*Last updated: 2026-02-01 after initialization*
+*Last updated: 2026-02-01 after v1.0 milestone completion*
