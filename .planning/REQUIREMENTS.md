@@ -91,34 +91,34 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SKU-01 | Pending | Pending |
-| SKU-02 | Pending | Pending |
-| SKU-03 | Pending | Pending |
-| VAL-01 | Pending | Pending |
-| VAL-02 | Pending | Pending |
-| VAL-03 | Pending | Pending |
-| VAL-04 | Pending | Pending |
-| ADD-01 | Pending | Pending |
-| ADD-02 | Pending | Pending |
-| ADD-03 | Pending | Pending |
-| EDIT-01 | Pending | Pending |
-| EDIT-02 | Pending | Pending |
-| EDIT-03 | Pending | Pending |
-| LIST-01 | Pending | Pending |
-| LIST-02 | Pending | Pending |
-| LIST-03 | Pending | Pending |
-| DISP-01 | Pending | Pending |
-| DISP-02 | Pending | Pending |
-| DISP-03 | Pending | Pending |
-| DISP-04 | Pending | Pending |
-| LANG-01 | Pending | Pending |
-| LANG-02 | Pending | Pending |
+| SKU-01 | Phase 1 | Pending |
+| SKU-02 | Phase 1 | Pending |
+| SKU-03 | Phase 1 | Pending |
+| VAL-01 | Phase 1 | Pending |
+| VAL-02 | Phase 1 | Pending |
+| VAL-03 | Phase 1 | Pending |
+| VAL-04 | Phase 1 | Pending |
+| ADD-01 | Phase 2 | Pending |
+| ADD-02 | Phase 2 | Pending |
+| ADD-03 | Phase 2 | Pending |
+| EDIT-01 | Phase 2 | Pending |
+| EDIT-02 | Phase 2 | Pending |
+| EDIT-03 | Phase 2 | Pending |
+| LIST-01 | Phase 2 | Pending |
+| LIST-02 | Phase 2 | Pending |
+| LIST-03 | Phase 2 | Pending |
+| DISP-01 | Phase 3 | Pending |
+| DISP-02 | Phase 3 | Pending |
+| DISP-03 | Phase 3 | Pending |
+| DISP-04 | Phase 3 | Pending |
+| LANG-01 | Phase 3 | Pending |
+| LANG-02 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 22 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 22 ⚠️
+- Mapped to phases: 22/22 (100%)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-01 after initial definition*
+*Last updated: 2026-02-01 after roadmap creation*
