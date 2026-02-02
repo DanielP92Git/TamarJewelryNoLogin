@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency
-**Current focus:** Phase 5 - Product Ordering Backend (Complete)
+**Current focus:** Phase 6 - Frontend Product Reordering (In Progress)
 
 ## Current Position
 
-Phase: 5 of 9 (Product Ordering Backend)
-Plan: 1 of 1 in phase (Phase 5 complete)
-Status: Phase complete - API endpoint ready for Phase 6
-Last activity: 2026-02-03 — Phase 5 execution complete
+Phase: 6 of 9 (Frontend Product Reordering)
+Plan: 1 of 3 in phase
+Status: In progress - UI infrastructure complete
+Last activity: 2026-02-03 — Completed 06-01-PLAN.md (Reorder Mode UI Infrastructure)
 
-Progress: [█████████░] 100% Phase 5 (v1.0: 5/5 plans, v1.1: 4/4 Phase 4-5, total: 9/9 through Phase 5)
+Progress: [██████████] 100% through Phase 6 Plan 01 (v1.0: 5/5 plans, v1.1: 6/10 plans total)
 
 ## Performance Metrics
 
@@ -32,15 +32,17 @@ Progress: [█████████░] 100% Phase 5 (v1.0: 5/5 plans, v1.1: 
 | 3 (v1.0) | 2 | ~7h | ~3.5h |
 | 4 (v1.1) | 3 | ~7min | ~2.3min |
 | 5 (v1.1) | 1 | ~4min | ~4min |
+| 6 (v1.1) | 1/3 | ~4min | ~4min |
 
 **Recent Trend:**
+- 06-01: 4min (UI infrastructure) - frontend-only, no API calls
 - Phase 5 backend API: 4min (single-plan backend phase)
 - Phase 4 infrastructure: <5min (library/migration/gap closure)
-- 05-01: 4min (API endpoint), 04-01-03: 2-3min each
+- Consistent 3-4min for isolated backend/frontend tasks
 - Consistent ~3-3.5h per plan for full-stack features (Phases 1-3)
-- Trend: Backend-only phases execute quickly; full-stack features take ~3h
+- Trend: Backend-only or frontend-only phases execute quickly; full integration takes ~3h
 
-*Updated after 05-01 completion*
+*Updated after 06-01 completion*
 
 ## Accumulated Context
 
@@ -77,33 +79,39 @@ Recent decisions affecting current work:
 - Full category reorder required — prevents orphaned products, simplifies validation
 - 409 Conflict on concurrency — frontend refreshes and retries (standard optimistic pattern)
 
+**Phase 6 Implementation Decisions:**
+- Toastify.js for toast notifications — CDN-based, zero dependencies, z-index 2000 ensures visibility
+- Mode-based UI toggling — enterReorderMode/exitReorderMode with state-driven button management
+- Category must be selected before reordering — prevents confusing "All Categories" view, error toast blocks entry
+- Floating action bar at bottom — always visible, Gmail/Trello pattern, body padding prevents overlap
+- Drag handles hidden by default — clean UI in normal mode, shown only when reordering possible
+- Grid column dynamic adjustment — 24px drag handle column prepended in reorder mode
+
 ### Pending Todos
 
 None yet.
 
 ### Blockers/Concerns
 
-**Phase 5 Completion (100% verified):**
-- API endpoint complete: POST /api/admin/products/reorder
-- Validation: Category scope, ObjectId format, duplicates, existence, completeness
-- Concurrency: Optimistic control with __v field, returns 409 on conflict
-- Performance: bulkWrite handles 200+ products efficiently (single round-trip)
+**Phase 6 Progress (Plan 01 complete):**
+- UI infrastructure complete: Toast system, action bar, drag handles, mode toggle
+- Plan 02 ready: SortableJS CSS classes pre-defined, state.sortableInstance placeholder ready
+- Plan 03 ready: Button DOM IDs established, undo/redo stacks initialized
 
-**Phase 6 Readiness:**
-- API contract defined and tested
-- Frontend needs to handle 409 Conflict (refresh and retry pattern)
-- Unknown: actual product count per category in production (if >200, may need UI pagination)
+**Phase 6 Remaining:**
+- Plan 02: Integrate SortableJS for drag-and-drop (handle selection, undo/redo operations)
+- Plan 03: Wire Save button to backend API, implement 409 Conflict handling
 
 **Phase 7 Migration Risk:**
 - Image array migration flagged as high-risk (Pitfall #4 in research) — needs conservative approach with pre-migration audit and rollback capability
 
 ## Session Continuity
 
-Last session: 2026-02-03 (Phase 5 execution)
-Stopped at: Completed Phase 5 (05-01 - API endpoint complete, verified)
+Last session: 2026-02-03 (Phase 6 Plan 01 execution)
+Stopped at: Completed 06-01-PLAN.md (UI infrastructure with toast notifications, action bar, drag handles)
 Resume file: None
 
-**Next step:** Plan Phase 6 (Frontend Product Reordering)
+**Next step:** Execute Plan 06-02 (Drag-and-Drop Integration with SortableJS)
 
 ---
-*Last updated: 2026-02-03 after Phase 5 verification*
+*Last updated: 2026-02-03 after 06-01 completion*
