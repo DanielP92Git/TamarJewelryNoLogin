@@ -1092,6 +1092,75 @@ function getFilteredProducts() {
   return state.products.filter(p => p.category === category);
 }
 
+// Reorder mode handlers
+function handleUndo() {
+  if (!state.undoManager || !state.undoManager.canUndo()) return;
+
+  state.undoManager.undo();
+  rerenderProductList();
+  updateReorderButtonStates();
+  showInfoToast('Undid last change');
+}
+
+function handleRedo() {
+  if (!state.undoManager || !state.undoManager.canRedo()) return;
+
+  state.undoManager.redo();
+  rerenderProductList();
+  updateReorderButtonStates();
+  showInfoToast('Redid change');
+}
+
+function rerenderProductList() {
+  if (!state.undoManager) return;
+
+  const productList = document.querySelector('.listproduct-allproducts');
+  if (!productList) return;
+
+  const currentOrder = state.undoManager.getCurrentOrder();
+  const rows = Array.from(productList.querySelectorAll('.listproduct-format'));
+
+  // Create map of productId -> row element
+  const rowMap = new Map();
+  rows.forEach(row => {
+    const editBtn = row.querySelector('.edit-btn');
+    if (editBtn) {
+      rowMap.set(editBtn.dataset.productId, row);
+    }
+  });
+
+  // Reorder rows in DOM according to undoManager order
+  currentOrder.forEach(productId => {
+    const row = rowMap.get(productId);
+    if (row) {
+      productList.appendChild(row);
+    }
+  });
+
+  // Reinitialize SortableJS with new order
+  if (state.sortableInstance) {
+    state.sortableInstance.destroy();
+  }
+
+  state.sortableInstance = Sortable.create(productList, {
+    handle: '.drag-handle',
+    animation: 150,
+    delay: 50,
+    delayOnTouchOnly: true,
+    ghostClass: 'sortable-ghost',
+    chosenClass: 'sortable-chosen',
+    dragClass: 'sortable-drag',
+    onEnd: function(evt) {
+      if (evt.oldIndex === evt.newIndex) return;
+      const movedElement = evt.item;
+      const productId = movedElement.querySelector('.edit-btn')?.dataset.productId;
+      const command = new MoveCommand(evt.oldIndex, evt.newIndex, productId);
+      state.undoManager.execute(command);
+      updateReorderButtonStates();
+    }
+  });
+}
+
 function updateReorderButtonStates(disabled = false) {
   const undoBtn = document.getElementById('undoBtn');
   const redoBtn = document.getElementById('redoBtn');
@@ -1146,6 +1215,47 @@ function enterReorderMode() {
   document.querySelectorAll('.drag-handle').forEach(el => {
     el.style.display = 'flex';
   });
+
+  // Initialize SortableJS
+  const productList = document.querySelector('.listproduct-allproducts');
+  if (productList) {
+    state.sortableInstance = Sortable.create(productList, {
+      handle: '.drag-handle',
+      animation: 150,
+      delay: 50,
+      delayOnTouchOnly: true,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
+      forceFallback: false,
+      onStart: function(evt) {
+        // Add class to body for additional styling if needed
+        document.body.classList.add('dragging-active');
+      },
+      onEnd: function(evt) {
+        document.body.classList.remove('dragging-active');
+
+        if (evt.oldIndex === evt.newIndex) return; // No change
+
+        // Get product ID from the moved element
+        const movedElement = evt.item;
+        const productId = movedElement.querySelector('.edit-btn')?.dataset.productId;
+
+        // Create and execute command
+        const command = new MoveCommand(evt.oldIndex, evt.newIndex, productId);
+        state.undoManager.execute(command);
+
+        // Update button states
+        updateReorderButtonStates();
+
+        console.log(`[Reorder] Moved from ${evt.oldIndex} to ${evt.newIndex}`, {
+          productId,
+          canUndo: state.undoManager.canUndo(),
+          stackSize: state.undoManager.undoStack.length
+        });
+      }
+    });
+  }
 
   updateReorderButtonStates();
   showInfoToast('Reorder mode active. Drag products to reorder.');
@@ -1312,7 +1422,18 @@ async function loadProductsPage(data) {
     });
   }
 
-  // Save and undo/redo handlers will be added in Plan 03
+  // Undo/Redo button handlers
+  const undoBtn = document.getElementById('undoBtn');
+  if (undoBtn) {
+    undoBtn.addEventListener('click', handleUndo);
+  }
+
+  const redoBtn = document.getElementById('redoBtn');
+  if (redoBtn) {
+    redoBtn.addEventListener('click', handleRedo);
+  }
+
+  // Save handler will be added in Plan 03
 
   // Set the category filter to the stored category
   const categoryFilter = document.getElementById("categoryFilter");
