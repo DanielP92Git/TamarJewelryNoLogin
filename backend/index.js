@@ -2197,6 +2197,104 @@ app.post(
   }
 );
 
+// Product reordering endpoint
+app.post(
+  '/api/admin/products/reorder',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const { category, productIds } = req.body;
+
+      // Validate request body structure
+      if (!category || typeof category !== 'string' || category.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          errors: 'Category is required and must be a non-empty string'
+        });
+      }
+
+      if (!Array.isArray(productIds) || productIds.length === 0) {
+        return res.status(400).json({
+          success: false,
+          errors: 'productIds must be a non-empty array'
+        });
+      }
+
+      // Validate each productId is a valid MongoDB ObjectId format
+      const mongoose = require('mongoose');
+      for (const productId of productIds) {
+        if (!mongoose.Types.ObjectId.isValid(productId)) {
+          return res.status(400).json({
+            success: false,
+            errors: `Invalid product ID format: ${productId}`
+          });
+        }
+      }
+
+      // Check for duplicate productIds
+      const uniqueIds = new Set(productIds);
+      if (uniqueIds.size !== productIds.length) {
+        return res.status(400).json({
+          success: false,
+          errors: 'Duplicate product IDs in request'
+        });
+      }
+
+      // Fetch products from database
+      const fetchedProducts = await Product.find({
+        _id: { $in: productIds }
+      }).select('_id category __v');
+
+      // Check all products exist
+      if (fetchedProducts.length !== productIds.length) {
+        const foundIds = new Set(fetchedProducts.map(p => p._id.toString()));
+        const missingIds = productIds.filter(id => !foundIds.has(id));
+        return res.status(400).json({
+          success: false,
+          errors: `Products not found: ${missingIds.join(', ')}`
+        });
+      }
+
+      // Check all products belong to requested category
+      const categories = new Set(fetchedProducts.map(p => p.category));
+      if (categories.size > 1) {
+        return res.status(400).json({
+          success: false,
+          errors: `Cannot reorder: products from multiple categories (${Array.from(categories).join(', ')})`
+        });
+      }
+
+      if (categories.size === 1 && !categories.has(category)) {
+        return res.status(400).json({
+          success: false,
+          errors: `Products belong to category '${fetchedProducts[0].category}', not '${category}'`
+        });
+      }
+
+      // Check request includes all products in category
+      const totalInCategory = await Product.countDocuments({ category });
+      if (productIds.length !== totalInCategory) {
+        return res.status(400).json({
+          success: false,
+          errors: `Incomplete reorder: category '${category}' has ${totalInCategory} products but request includes ${productIds.length}`
+        });
+      }
+
+      // Task 2: bulkWrite implementation
+      res.json({ success: true, message: 'Validation passed', productIds });
+
+    } catch (error) {
+      console.error('Error in reorder endpoint:', error);
+      return res.status(500).json({
+        success: false,
+        errors: 'Internal server error while reordering products'
+      });
+    }
+  }
+);
+
 // Keep the old endpoint for backward compatibility
 app.post(
   '/updateproduct',
