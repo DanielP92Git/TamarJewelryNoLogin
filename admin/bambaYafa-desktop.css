@@ -1506,3 +1506,63 @@ code {
 body.reorder-mode-active {
   padding-bottom: 80px;
 }
+
+/* Drag Handle */
+.drag-handle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 100%;
+  cursor: grab;
+  color: #9ca3af;
+  font-size: 14px;
+  user-select: none;
+  transition: color 0.15s;
+}
+
+.drag-handle:hover {
+  color: #4b5563;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-icon {
+  letter-spacing: 2px;
+}
+
+/* RTL support for drag handle */
+[dir="rtl"] .drag-handle {
+  order: -1;
+}
+
+/* Product row adjustments for drag handle */
+.listproduct-format {
+  transition: background-color 0.15s, box-shadow 0.15s;
+}
+
+.reorder-mode-active .listproduct-format {
+  cursor: default;
+}
+
+/* Adjust grid when in reorder mode */
+.reorder-mode-active .row {
+  grid-template-columns: 24px 50px 1.45fr 1fr 0.75fr 0.85fr 0.85fr 1fr 140px;
+}
+
+/* SortableJS classes (from variables.css) - ensure proper layering */
+.sortable-ghost {
+  opacity: 0.4;
+  background-color: #f0f0f0;
+}
+
+.sortable-chosen {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: white;
+}
+
+.sortable-drag {
+  opacity: 1;
+}
