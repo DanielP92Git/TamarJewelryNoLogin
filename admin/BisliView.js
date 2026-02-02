@@ -168,6 +168,7 @@ const state = {
   isProduction: IS_PRODUCTION,
   retryCount: 0,
   maxRetries: 3,
+  products: null,
   isReorderMode: false,
   originalProductOrder: [],
   undoStack: [],
@@ -1027,6 +1028,82 @@ function clear() {
   pageContent.innerHTML = "";
 }
 
+// Reorder Mode Functions
+function getFilteredProducts() {
+  // Return products currently visible in the list
+  const category = state.selectedCategory;
+  if (!state.products || category === 'all') return [];
+  return state.products.filter(p => p.category === category);
+}
+
+function updateReorderButtonStates(disabled = false) {
+  const undoBtn = document.getElementById('undoBtn');
+  const redoBtn = document.getElementById('redoBtn');
+  const saveBtn = document.getElementById('saveReorderBtn');
+  const cancelBtn = document.getElementById('cancelReorderBtn');
+
+  if (disabled) {
+    [undoBtn, redoBtn, saveBtn, cancelBtn].forEach(btn => btn && (btn.disabled = true));
+    return;
+  }
+
+  if (undoBtn) undoBtn.disabled = state.undoStack.length === 0;
+  if (redoBtn) redoBtn.disabled = state.redoStack.length === 0;
+  if (saveBtn) saveBtn.disabled = state.undoStack.length === 0;
+  if (cancelBtn) cancelBtn.disabled = false;
+}
+
+function enterReorderMode() {
+  if (state.selectedCategory === 'all') {
+    showErrorToast('Please select a specific category to reorder');
+    return;
+  }
+
+  const products = getFilteredProducts();
+  if (products.length === 0) {
+    showErrorToast('No products in this category to reorder');
+    return;
+  }
+
+  state.isReorderMode = true;
+  state.originalProductOrder = products.map(p => p.id);
+  state.undoStack = [];
+  state.redoStack = [];
+
+  document.body.classList.add('reorder-mode-active');
+  const actionBar = document.getElementById('reorderActionBar');
+  if (actionBar) actionBar.style.display = 'flex';
+  const toggleBtn = document.getElementById('reorderToggleBtn');
+  if (toggleBtn) toggleBtn.style.display = 'none';
+
+  // Disable category filter during reorder
+  const categoryFilter = document.getElementById('categoryFilter');
+  if (categoryFilter) categoryFilter.disabled = true;
+
+  updateReorderButtonStates();
+  showInfoToast('Reorder mode active. Drag products to reorder.');
+}
+
+function exitReorderMode() {
+  state.isReorderMode = false;
+
+  document.body.classList.remove('reorder-mode-active');
+  const actionBar = document.getElementById('reorderActionBar');
+  if (actionBar) actionBar.style.display = 'none';
+  const toggleBtn = document.getElementById('reorderToggleBtn');
+  if (toggleBtn) toggleBtn.style.display = 'inline-flex';
+
+  // Re-enable category filter
+  const categoryFilter = document.getElementById('categoryFilter');
+  if (categoryFilter) categoryFilter.disabled = false;
+
+  // Destroy sortable if exists (will be implemented in Plan 02)
+  if (state.sortableInstance) {
+    state.sortableInstance.destroy();
+    state.sortableInstance = null;
+  }
+}
+
 // Product Management Functions
 async function loadProductsPage(data) {
   if (!(await checkAuth())) return;
@@ -1044,6 +1121,9 @@ async function loadProductsPage(data) {
         <div class="page__actions">
           <button type="button" class="btn" id="export-products-btn">Export</button>
           <button type="button" class="btn btn--primary" id="go-add-product-btn">Add Product</button>
+          <button type="button" class="btn btn--primary reorder-toggle-btn" id="reorderToggleBtn">
+            <span class="btn-icon">↕</span> Reorder Products
+          </button>
         </div>
       </div>
 
@@ -1108,6 +1188,22 @@ async function loadProductsPage(data) {
           <div class="listproduct-allproducts"></div>
         </div>
       </div>
+
+      <div class="reorder-action-bar" id="reorderActionBar" style="display: none;">
+        <button type="button" class="btn btn--secondary btn-undo" id="undoBtn" disabled>
+          ↶ Undo
+        </button>
+        <button type="button" class="btn btn--secondary btn-redo" id="redoBtn" disabled>
+          ↷ Redo
+        </button>
+        <div class="action-bar-spacer"></div>
+        <button type="button" class="btn btn--secondary btn-cancel" id="cancelReorderBtn">
+          Cancel
+        </button>
+        <button type="button" class="btn btn--primary btn-save" id="saveReorderBtn" disabled>
+          Save Order
+        </button>
+      </div>
     </div>`;
 
   pageContent.insertAdjacentHTML("afterbegin", markup);
@@ -1125,6 +1221,25 @@ async function loadProductsPage(data) {
   if (exportBtn) {
     exportBtn.addEventListener("click", () => exportProductsCSV(data));
   }
+
+  // Reorder mode button handlers
+  const reorderToggleBtn = document.getElementById('reorderToggleBtn');
+  if (reorderToggleBtn) {
+    reorderToggleBtn.addEventListener('click', enterReorderMode);
+  }
+
+  const cancelReorderBtn = document.getElementById('cancelReorderBtn');
+  if (cancelReorderBtn) {
+    cancelReorderBtn.addEventListener('click', () => {
+      if (state.undoStack.length > 0) {
+        if (!confirm('Discard changes and exit reorder mode?')) return;
+      }
+      exitReorderMode();
+      loadProducts(state.products); // Restore original order
+    });
+  }
+
+  // Save and undo/redo handlers will be added in Plan 03
 
   // Set the category filter to the stored category
   const categoryFilter = document.getElementById("categoryFilter");

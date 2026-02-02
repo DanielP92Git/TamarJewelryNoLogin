@@ -1452,3 +1452,57 @@ code {
     transform: rotate(360deg);
   }
 }
+
+/* =========================
+   Reorder Mode - Action Bar
+   ========================= */
+
+.reorder-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e5e5e5;
+  padding: 12px 24px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 300;
+}
+
+.action-bar-spacer {
+  flex: 1;
+}
+
+.reorder-action-bar .btn {
+  min-width: 100px;
+}
+
+.reorder-action-bar .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Reorder toggle button */
+.reorder-toggle-btn {
+  margin-left: auto;
+}
+
+.reorder-toggle-btn .btn-icon {
+  margin-right: 6px;
+}
+
+/* Page header flex adjustment for reorder button */
+.page__header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* Ensure body has padding when action bar is visible */
+body.reorder-mode-active {
+  padding-bottom: 80px;
+}
