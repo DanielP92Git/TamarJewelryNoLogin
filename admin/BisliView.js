@@ -1092,6 +1092,29 @@ function getFilteredProducts() {
   return state.products.filter(p => p.category === category);
 }
 
+// Reorder mode keyboard handler
+function handleReorderKeyboard(e) {
+  if (!state.isReorderMode) return;
+
+  // Ctrl+Z or Cmd+Z for undo
+  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+    e.preventDefault();
+    handleUndo();
+  }
+
+  // Ctrl+Y or Cmd+Shift+Z for redo
+  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+    e.preventDefault();
+    handleRedo();
+  }
+
+  // Escape to cancel
+  if (e.key === 'Escape') {
+    const cancelBtn = document.getElementById('cancelReorderBtn');
+    if (cancelBtn) cancelBtn.click();
+  }
+}
+
 // Reorder mode handlers
 function handleUndo() {
   if (!state.undoManager || !state.undoManager.canUndo()) return;
@@ -1181,6 +1204,13 @@ function updateReorderButtonStates(disabled = false) {
 }
 
 function enterReorderMode() {
+  // Check if search is active
+  const searchInput = document.getElementById('productSearch');
+  if (searchInput && searchInput.value.trim()) {
+    showErrorToast('Clear search filter before reordering');
+    return;
+  }
+
   if (state.selectedCategory === 'all') {
     showErrorToast('Please select a specific category to reorder');
     return;
@@ -1211,9 +1241,12 @@ function enterReorderMode() {
   const categoryFilter = document.getElementById('categoryFilter');
   if (categoryFilter) categoryFilter.disabled = true;
 
-  // Show drag handles
-  document.querySelectorAll('.drag-handle').forEach(el => {
+  // Show drag handles and add accessibility attributes
+  document.querySelectorAll('.drag-handle').forEach((el, index) => {
     el.style.display = 'flex';
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', `Drag to reorder product ${index + 1}`);
   });
 
   // Initialize SortableJS
@@ -1257,6 +1290,9 @@ function enterReorderMode() {
     });
   }
 
+  // Add keyboard event listener
+  document.addEventListener('keydown', handleReorderKeyboard);
+
   updateReorderButtonStates();
   showInfoToast('Reorder mode active. Drag products to reorder.');
 }
@@ -1264,6 +1300,9 @@ function enterReorderMode() {
 function exitReorderMode() {
   state.isReorderMode = false;
   state.undoManager = null;
+
+  // Remove keyboard event listener
+  document.removeEventListener('keydown', handleReorderKeyboard);
 
   document.body.classList.remove('reorder-mode-active');
   const actionBar = document.getElementById('reorderActionBar');
@@ -1414,11 +1453,20 @@ async function loadProductsPage(data) {
   const cancelReorderBtn = document.getElementById('cancelReorderBtn');
   if (cancelReorderBtn) {
     cancelReorderBtn.addEventListener('click', () => {
-      if (state.undoStack.length > 0) {
-        if (!confirm('Discard changes and exit reorder mode?')) return;
+      if (state.undoManager && state.undoManager.hasChanges()) {
+        if (!confirm('Discard all changes and exit reorder mode?')) return;
       }
+
+      // Destroy sortable before reloading
+      if (state.sortableInstance) {
+        state.sortableInstance.destroy();
+        state.sortableInstance = null;
+      }
+
       exitReorderMode();
-      loadProducts(state.products); // Restore original order
+
+      // Reload products to restore original order from server
+      fetchInfo();
     });
   }
 
