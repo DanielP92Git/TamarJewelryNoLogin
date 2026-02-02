@@ -1943,6 +1943,9 @@ function loadProducts(data) {
   // The category for filtering should primarily come from what was set in the DOM by loadProductsPage
   state.selectedCategory = selectedCategoryFromDOM;
 
+  // Store products in state for reorder mode to access
+  state.products = data;
+
   // Check if data is valid before proceeding
   if (!data || !Array.isArray(data)) {
     console.error("Invalid product data received:", data);
