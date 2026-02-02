@@ -1062,6 +1062,8 @@ function initializeEventHandlers() {
 
     // Add fresh event listener
     addProductsBtn.addEventListener("click", () => {
+      if (!canExitReorderMode()) return;
+      if (state.isReorderMode) exitReorderMode();
       setActiveNav("add-product");
       loadAddProductsPage();
     });
@@ -1072,9 +1074,11 @@ function initializeEventHandlers() {
     productsListBtn.removeEventListener("click", fetchInfo);
 
     // Add fresh event listener
-    productsListBtn.addEventListener("click", () => {
+    productsListBtn.addEventListener("click", async () => {
+      if (!canExitReorderMode()) return;
+      if (state.isReorderMode) exitReorderMode();
       setActiveNav("products-list");
-      fetchInfo();
+      await fetchInfo();
     });
   }
 }
@@ -1113,6 +1117,23 @@ function handleReorderKeyboard(e) {
     const cancelBtn = document.getElementById('cancelReorderBtn');
     if (cancelBtn) cancelBtn.click();
   }
+}
+
+function handleBeforeUnload(event) {
+  // Only block if in reorder mode with unsaved changes
+  if (!state.isReorderMode) return;
+  if (!state.undoManager || !state.undoManager.hasChanges()) return;
+
+  // Modern browsers show generic message, custom message ignored
+  event.preventDefault();
+  event.returnValue = ''; // Required for Chrome
+}
+
+function canExitReorderMode() {
+  if (!state.isReorderMode) return true;
+  if (!state.undoManager || !state.undoManager.hasChanges()) return true;
+
+  return confirm('You have unsaved changes. Discard and leave?');
 }
 
 // Reorder mode handlers
@@ -1385,6 +1406,9 @@ function enterReorderMode() {
   // Add keyboard event listener
   document.addEventListener('keydown', handleReorderKeyboard);
 
+  // Add beforeunload listener to warn about unsaved changes
+  window.addEventListener('beforeunload', handleBeforeUnload);
+
   updateReorderButtonStates();
   showInfoToast('Reorder mode active. Drag products to reorder.');
 }
@@ -1395,6 +1419,9 @@ function exitReorderMode() {
 
   // Remove keyboard event listener
   document.removeEventListener('keydown', handleReorderKeyboard);
+
+  // Remove beforeunload listener
+  window.removeEventListener('beforeunload', handleBeforeUnload);
 
   document.body.classList.remove('reorder-mode-active');
   const actionBar = document.getElementById('reorderActionBar');
