@@ -63,11 +63,12 @@ Plans:
   2. Products can be queried efficiently in sorted order per category
   3. SortableJS library is installed and verified working in admin environment
   4. Z-index CSS variable scale prevents modal/drag conflicts
-**Plans**: 2 plans
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Backend migration infrastructure and displayOrder schema
-- [ ] 04-02-PLAN.md — SortableJS library and z-index CSS variables
+- [x] 04-01-PLAN.md — Backend migration infrastructure and displayOrder schema
+- [x] 04-02-PLAN.md — SortableJS library and z-index CSS variables
+- [ ] 04-03-PLAN.md — Gap closure: compound index declaration and query sorting
 
 ### Phase 5: Product Ordering Backend
 **Goal**: API endpoint for batch product reordering with concurrency protection
@@ -158,7 +159,7 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 1. Schema & Validation | v1.0 | 1/1 | Complete | 2026-02-01 |
 | 2. Admin Forms | v1.0 | 2/2 | Complete | 2026-02-01 |
 | 3. Customer Display | v1.0 | 2/2 | Complete | 2026-02-01 |
-| 4. Schema Foundation & Library | v1.1 | 0/2 | Planned | - |
+| 4. Schema Foundation & Library | v1.1 | 2/3 | In Progress | - |
 | 5. Product Ordering Backend | v1.1 | 0/TBD | Not started | - |
 | 6. Frontend Product Reordering | v1.1 | 0/TBD | Not started | - |
 | 7. Image Array Migration | v1.1 | 0/TBD | Not started | - |
