@@ -70,6 +70,13 @@ const ProductSchema = new mongoose.Schema({
 // Add explicit sparse unique index for SKU
 ProductSchema.index({ sku: 1 }, { unique: true, sparse: true });
 
+// Compound index for category-scoped product ordering (ESR: Equality-Sort-Range)
+// Declared here in addition to migration to ensure persistence across schema changes
+ProductSchema.index(
+  { category: 1, displayOrder: 1, available: 1 },
+  { name: 'category_displayOrder_available_idx' }
+);
+
 // Pre-save hook: Auto-assign displayOrder for new products
 ProductSchema.pre('save', async function(next) {
   // Only assign displayOrder for new documents without one
