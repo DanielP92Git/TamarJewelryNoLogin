@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 6 of 9 (Frontend Product Reordering)
-Plan: 1 of 3 in phase
-Status: In progress - UI infrastructure complete
-Last activity: 2026-02-03 — Completed 06-01-PLAN.md (Reorder Mode UI Infrastructure)
+Plan: 2 of 3 in phase
+Status: In progress - Drag-and-drop complete
+Last activity: 2026-02-03 — Completed 06-02-PLAN.md (Drag-and-Drop Integration)
 
-Progress: [██████████] 100% through Phase 6 Plan 01 (v1.0: 5/5 plans, v1.1: 6/10 plans total)
+Progress: [██████████] 100% through Phase 6 Plan 02 (v1.0: 5/5 plans, v1.1: 7/10 plans total)
 
 ## Performance Metrics
 
@@ -32,17 +32,18 @@ Progress: [██████████] 100% through Phase 6 Plan 01 (v1.0: 5
 | 3 (v1.0) | 2 | ~7h | ~3.5h |
 | 4 (v1.1) | 3 | ~7min | ~2.3min |
 | 5 (v1.1) | 1 | ~4min | ~4min |
-| 6 (v1.1) | 1/3 | ~4min | ~4min |
+| 6 (v1.1) | 2/3 | ~9min | ~4.5min |
 
 **Recent Trend:**
+- 06-02: 5min (drag-and-drop + command pattern) - frontend interaction layer
 - 06-01: 4min (UI infrastructure) - frontend-only, no API calls
 - Phase 5 backend API: 4min (single-plan backend phase)
 - Phase 4 infrastructure: <5min (library/migration/gap closure)
-- Consistent 3-4min for isolated backend/frontend tasks
+- Consistent 4-5min for isolated backend/frontend tasks
 - Consistent ~3-3.5h per plan for full-stack features (Phases 1-3)
 - Trend: Backend-only or frontend-only phases execute quickly; full integration takes ~3h
 
-*Updated after 06-01 completion*
+*Updated after 06-02 completion*
 
 ## Accumulated Context
 
@@ -86,6 +87,11 @@ Recent decisions affecting current work:
 - Floating action bar at bottom — always visible, Gmail/Trello pattern, body padding prevents overlap
 - Drag handles hidden by default — clean UI in normal mode, shown only when reordering possible
 - Grid column dynamic adjustment — 24px drag handle column prepended in reorder mode
+- Command pattern for undo/redo — MoveCommand encapsulates operations, UndoManager manages stacks, unlimited depth
+- DOM re-rendering on undo — undoManager is source of truth, DOM follows state, prevents desync
+- Search filter blocks reorder — prevents reordering filtered subset, forces clear workflow
+- Keyboard shortcuts (Ctrl+Z/Y, Escape) — power user workflow, accessibility best practice
+- SortableJS handle mode — only grip icon drags, prevents accidental reordering
 
 ### Pending Todos
 
@@ -93,25 +99,24 @@ None yet.
 
 ### Blockers/Concerns
 
-**Phase 6 Progress (Plan 01 complete):**
-- UI infrastructure complete: Toast system, action bar, drag handles, mode toggle
-- Plan 02 ready: SortableJS CSS classes pre-defined, state.sortableInstance placeholder ready
-- Plan 03 ready: Button DOM IDs established, undo/redo stacks initialized
+**Phase 6 Progress (Plan 02 complete):**
+- UI infrastructure complete: Toast system, action bar, drag handles, mode toggle (Plan 01)
+- Drag-and-drop complete: SortableJS integration, command pattern undo/redo, keyboard shortcuts (Plan 02)
+- Plan 03 ready: undoManager.getCurrentOrder() provides final product order for API
 
 **Phase 6 Remaining:**
-- Plan 02: Integrate SortableJS for drag-and-drop (handle selection, undo/redo operations)
-- Plan 03: Wire Save button to backend API, implement 409 Conflict handling
+- Plan 03: Wire Save button to POST /api/admin/products/reorder, implement 409 Conflict handling, show success toast
 
 **Phase 7 Migration Risk:**
 - Image array migration flagged as high-risk (Pitfall #4 in research) — needs conservative approach with pre-migration audit and rollback capability
 
 ## Session Continuity
 
-Last session: 2026-02-03 (Phase 6 Plan 01 execution)
-Stopped at: Completed 06-01-PLAN.md (UI infrastructure with toast notifications, action bar, drag handles)
+Last session: 2026-02-03 (Phase 6 Plan 02 execution)
+Stopped at: Completed 06-02-PLAN.md (Drag-and-drop with SortableJS, command pattern undo/redo, keyboard shortcuts)
 Resume file: None
 
-**Next step:** Execute Plan 06-02 (Drag-and-Drop Integration with SortableJS)
+**Next step:** Execute Plan 06-03 (API Integration - Save to Backend)
 
 ---
-*Last updated: 2026-02-03 after 06-01 completion*
+*Last updated: 2026-02-03 after 06-02 completion*
