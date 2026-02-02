@@ -95,10 +95,13 @@ Plans:
   4. Customer-facing product displays reflect admin-defined order
   5. Admin can undo/redo order changes before saving
   6. Failed saves show user-friendly error messages and rollback to previous order
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md — Reorder mode UI with toast notifications, action bar, and drag handles
+- [ ] 06-02-PLAN.md — SortableJS integration with command pattern undo/redo
+- [ ] 06-03-PLAN.md — API integration, loading states, 409 conflict handling, beforeunload
+- [ ] 06-04-PLAN.md — Human verification of complete reorder feature
 
 ### Phase 7: Image Array Migration
 **Goal**: Unify mainImage and galleryImages into single sortable images array
@@ -161,10 +164,10 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 3. Customer Display | v1.0 | 2/2 | Complete | 2026-02-01 |
 | 4. Schema Foundation & Library | v1.1 | 3/3 | Complete | 2026-02-02 |
 | 5. Product Ordering Backend | v1.1 | 1/1 | Complete | 2026-02-03 |
-| 6. Frontend Product Reordering | v1.1 | 0/TBD | Not started | - |
+| 6. Frontend Product Reordering | v1.1 | 0/4 | Planned | - |
 | 7. Image Array Migration | v1.1 | 0/TBD | Not started | - |
 | 8. Modal Integration | v1.1 | 0/TBD | Not started | - |
 | 9. Testing & Polish | v1.1 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-03 after Phase 5 execution*
+*Last updated: 2026-02-03 after Phase 6 planning*
