@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 4 of 9 (Schema Foundation & Library Setup)
-Plan: 2 of 2 in phase (Phase 4 complete)
+Plan: 3 of 3 in phase (Phase 4 complete)
 Status: Phase complete
-Last activity: 2026-02-01 — Completed 04-01-PLAN.md and 04-02-PLAN.md
+Last activity: 2026-02-02 — Completed 04-03-PLAN.md (gap closure)
 
-Progress: [████████░░] 100% Phase 4 (v1.0: 5/5 plans, v1.1: 2/2 Phase 4, total: 7/7 through Phase 4)
+Progress: [████████░░] 100% Phase 4 (v1.0: 5/5 plans, v1.1: 3/3 Phase 4, total: 8/8 through Phase 4)
 
 ## Performance Metrics
 
@@ -30,15 +30,15 @@ Progress: [████████░░] 100% Phase 4 (v1.0: 5/5 plans, v1.1: 
 | 1 (v1.0) | 1 | ~3h | ~3h |
 | 2 (v1.0) | 2 | ~6h | ~3h |
 | 3 (v1.0) | 2 | ~7h | ~3.5h |
-| 4 (v1.1) | 2 | ~5min | ~2.5min |
+| 4 (v1.1) | 3 | ~7min | ~2.3min |
 
 **Recent Trend:**
-- Phase 4 infrastructure plans executing in <5min (pure library/migration setup)
-- 04-01: 3min (migration infrastructure), 04-02: 2min (libraries)
+- Phase 4 infrastructure plans executing in <5min (pure library/migration/gap closure)
+- 04-01: 3min (migration infrastructure), 04-02: 2min (libraries), 04-03: 2min (gap closure)
 - Consistent ~3-3.5h per plan for feature implementation (Phases 1-3)
 - Trend: Stable (proven single-day milestone delivery)
 
-*Updated after 04-01 completion*
+*Updated after 04-03 completion*
 
 ## Accumulated Context
 
@@ -65,6 +65,8 @@ Recent decisions affecting current work:
 - Pre-save hook auto-assigns displayOrder — new products append to category end (max + 10)
 - Bootstrap-compatible z-index scale — modal: 1050-1060, drag: 1100-1110, allows future library integration
 - CSS variables not imported yet — deferred to Phase 6/8 when features implemented (no dead code in production)
+- Schema declaration + migration (both) — index declared in schema AND created by migration for persistence
+- Database sorting vs client-side — queries use .sort({displayOrder: 1}) to leverage compound index
 
 ### Pending Todos
 
@@ -82,11 +84,11 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-01 (Phase 4 execution)
-Stopped at: Completed Phase 4 (04-01 and 04-02)
+Last session: 2026-02-02 (Phase 4 gap closure)
+Stopped at: Completed Phase 4 (04-01, 04-02, 04-03 - all plans done)
 Resume file: None
 
 **Next step:** `/gsd:plan-phase 5` to create execution plan for Backend API Endpoints
 
 ---
-*Last updated: 2026-02-01 after Phase 4 completion*
+*Last updated: 2026-02-02 after Phase 4 gap closure completion*
