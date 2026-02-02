@@ -2282,8 +2282,43 @@ app.post(
         });
       }
 
-      // Task 2: bulkWrite implementation
-      res.json({ success: true, message: 'Validation passed', productIds });
+      // Build version map from fetched products (for optimistic concurrency)
+      const versionMap = new Map(
+        fetchedProducts.map(p => [p._id.toString(), p.__v])
+      );
+
+      // Build bulkWrite operations with version check
+      const operations = productIds.map((productId, index) => ({
+        updateOne: {
+          filter: {
+            _id: new mongoose.Types.ObjectId(productId),
+            __v: versionMap.get(productId) // Optimistic concurrency check
+          },
+          update: {
+            $set: { displayOrder: (index + 1) * 10 }, // Gap-based: 10, 20, 30...
+            $inc: { __v: 1 } // Increment version
+          }
+        }
+      }));
+
+      // Execute with ordered: true for atomicity
+      const result = await Product.bulkWrite(operations, { ordered: true });
+
+      // Detect concurrency conflict
+      if (result.modifiedCount !== productIds.length) {
+        // Some updates failed version check - another admin modified products
+        return res.status(409).json({
+          success: false,
+          errors: 'Concurrency conflict detected. Another admin modified product order. Please refresh and try again.'
+        });
+      }
+
+      // Success response
+      res.json({
+        success: true,
+        message: `Product order updated for category '${category}'`,
+        reorderedCount: result.modifiedCount
+      });
 
     } catch (error) {
       console.error('Error in reorder endpoint:', error);
