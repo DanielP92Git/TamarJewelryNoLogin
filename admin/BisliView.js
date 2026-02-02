@@ -343,7 +343,7 @@ async function validateSkuField(skuValue, excludeProductId = null) {
 
     if (result.duplicate) {
       const productName = result.conflictingProduct?.name || 'another product';
-      const productId = result.conflictingProduct?.id;
+      const productId = result.conflictingProduct?._id || result.conflictingProduct?.id;
 
       errorDiv.innerHTML = `SKU <strong>${normalized}</strong> is already used by <a href="#" class="sku-error-link" data-product-id="${productId}">${productName}</a> <span style="color: #3b82f6;">[View Product]</span>`;
       errorDiv.style.display = 'block';
@@ -1357,12 +1357,12 @@ function enterReorderMode() {
   logReorder('Enter mode', { category: state.selectedCategory, productCount: products.length });
 
   state.isReorderMode = true;
-  state.originalProductOrder = products.map(p => p.id);
+  state.originalProductOrder = products.map(p => p._id);
   state.undoStack = [];
   state.redoStack = [];
 
-  // Initialize UndoManager with current product order
-  const productIds = products.map(p => p.id);
+  // Initialize UndoManager with current product order (use MongoDB _id not numeric id)
+  const productIds = products.map(p => p._id);
   state.undoManager = new UndoManager(productIds);
 
   document.body.classList.add('reorder-mode-active');
@@ -2075,7 +2075,7 @@ function loadProducts(data) {
       </div>
       <div style="display:flex; align-items:center; justify-content:center;">
         <input type="checkbox" class="product-checkbox" data-product-id="${
-          item.id
+          item._id
         }">
       </div>
       <div class="row__name">
@@ -2091,7 +2091,7 @@ function loadProducts(data) {
           <div class="mono">${String(item.id ?? "")}</div>
         </div>
       </div>
-      <div class="sku-cell mono" data-product-id="${item.id}" data-editable="true" style="cursor:pointer;" title="Click to edit">
+      <div class="sku-cell mono" data-product-id="${item._id}" data-editable="true" style="cursor:pointer;" title="Click to edit">
         <span class="sku-display">${item.sku || '—'}</span>
         <input
           type="text"
@@ -2109,17 +2109,17 @@ function loadProducts(data) {
       </div>
       <div class="actions">
         <button class="icon-action icon-action--primary edit-btn" title="Edit Product" data-product-id="${
-          item.id
+          item._id
         }">
           <span style="font-weight:900;">✎</span>
         </button>
         <button class="icon-action icon-action--primary duplicate-btn" title="Duplicate Product" data-product-id="${
-          item.id
+          item._id
         }">
           <span style="font-weight:900;">⧉</span>
         </button>
         <button class="icon-action icon-action--danger delete-btn" title="Delete Product" data-product-id="${
-          item.id
+          item._id
         }">
           <span style="font-weight:900;">✕</span>
         </button>
@@ -2795,7 +2795,7 @@ function editProduct(product) {
                       <button type="button" class="delete-image-btn" data-image-type="main" data-image-url="${encodeURIComponent(
                         mainImageUrls[0]
                       )}" data-product-id="${
-                          product.id
+                          product._id
                         }" style="position:absolute; top:-10px; right:-10px; width:28px; height:28px; border-radius:999px; border:1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.18); color: rgba(239,68,68,.95); cursor:pointer; font-weight:900;">✕</button>
                     </div>`
                       : `<span class="help">No main image</span>`
@@ -2816,7 +2816,7 @@ function editProduct(product) {
                       <button type="button" class="delete-image-btn" data-image-type="small" data-image-url="${encodeURIComponent(
                         url
                       )}" data-product-id="${
-                        product.id
+                        product._id
                       }" style="position:absolute; top:-10px; right:-10px; width:26px; height:26px; border-radius:999px; border:1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.18); color: rgba(239,68,68,.95); cursor:pointer; font-weight:900;">✕</button>
                     </div>`
                     )
