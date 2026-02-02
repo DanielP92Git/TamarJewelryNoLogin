@@ -94,7 +94,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-01 | Phase 4 | Pending |
 | FOUND-02 | Phase 4 | Pending |
 | FOUND-03 | Phase 4 | Pending |
-| FOUND-04 | Phase 5 | Pending |
+| FOUND-04 | Phase 5 | Complete |
 | FOUND-05 | Phase 7 | Pending |
 | FOUND-06 | Phase 7 | Pending |
 | ORDER-01 | Phase 6 | Pending |
