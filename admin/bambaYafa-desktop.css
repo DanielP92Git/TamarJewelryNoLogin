@@ -1606,3 +1606,22 @@ body.reorder-mode-active {
 .listproduct-allproducts {
   position: relative;
 }
+
+/* Empty State in Product List */
+.empty-state-reorder {
+  padding: 48px 24px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.empty-state-reorder h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.empty-state-reorder p {
+  margin: 0;
+  font-size: 14px;
+}
