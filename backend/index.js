@@ -2638,6 +2638,7 @@ app.post('/productsByCategory', async (req, res) => {
       quantity: { $gt: 0 },
       available: { $ne: false },
     })
+      .sort({ displayOrder: 1 })
       .lean()
       .skip(skip)
       .limit(limit);
@@ -2665,6 +2666,7 @@ app.post('/chunkProducts', async (req, res) => {
       quantity: { $gt: 0 },
       available: { $ne: false },
     })
+      .sort({ displayOrder: 1 })
       .lean()
       .skip(skip)
       .limit(limit);
@@ -2690,7 +2692,9 @@ app.post('/getAllProductsByCategory', async (req, res) => {
       category: category,
       quantity: { $gt: 0 },
       available: { $ne: false },
-    }).lean();
+    })
+      .sort({ displayOrder: 1 })
+      .lean();
     const total = products.length;
 
     if (!products || products.length === 0) {
