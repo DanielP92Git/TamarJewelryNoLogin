@@ -168,7 +168,58 @@ const state = {
   isProduction: IS_PRODUCTION,
   retryCount: 0,
   maxRetries: 3,
+  isReorderMode: false,
+  originalProductOrder: [],
+  undoStack: [],
+  redoStack: [],
+  sortableInstance: null
 };
+
+// Toast notification utilities
+function showSuccessToast(message) {
+  Toastify({
+    text: message,
+    duration: 3000,
+    close: true,
+    gravity: 'top',
+    position: 'right',
+    stopOnFocus: true,
+    style: {
+      background: 'linear-gradient(to right, #00b09b, #96c93d)',
+      zIndex: '2000'
+    }
+  }).showToast();
+}
+
+function showErrorToast(message) {
+  Toastify({
+    text: message,
+    duration: 5000,
+    close: true,
+    gravity: 'top',
+    position: 'right',
+    stopOnFocus: true,
+    style: {
+      background: 'linear-gradient(to right, #ff5f6d, #ffc371)',
+      zIndex: '2000'
+    }
+  }).showToast();
+}
+
+function showInfoToast(message) {
+  Toastify({
+    text: message,
+    duration: 3000,
+    close: true,
+    gravity: 'top',
+    position: 'right',
+    stopOnFocus: true,
+    style: {
+      background: 'linear-gradient(to right, #667eea, #764ba2)',
+      zIndex: '2000'
+    }
+  }).showToast();
+}
 
 // SKU validation function for forms
 async function validateSkuField(skuValue, excludeProductId = null) {
