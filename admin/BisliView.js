@@ -1080,6 +1080,11 @@ function enterReorderMode() {
   const categoryFilter = document.getElementById('categoryFilter');
   if (categoryFilter) categoryFilter.disabled = true;
 
+  // Show drag handles
+  document.querySelectorAll('.drag-handle').forEach(el => {
+    el.style.display = 'flex';
+  });
+
   updateReorderButtonStates();
   showInfoToast('Reorder mode active. Drag products to reorder.');
 }
@@ -1096,6 +1101,11 @@ function exitReorderMode() {
   // Re-enable category filter
   const categoryFilter = document.getElementById('categoryFilter');
   if (categoryFilter) categoryFilter.disabled = false;
+
+  // Hide drag handles
+  document.querySelectorAll('.drag-handle').forEach(el => {
+    el.style.display = 'none';
+  });
 
   // Destroy sortable if exists (will be implemented in Plan 02)
   if (state.sortableInstance) {
@@ -1680,6 +1690,9 @@ function loadProducts(data) {
     }
 
     productElement.innerHTML = `
+      <div class="drag-handle" style="display: none;" title="Drag to reorder">
+        <span class="drag-icon">⋮⋮</span>
+      </div>
       <div style="display:flex; align-items:center; justify-content:center;">
         <input type="checkbox" class="product-checkbox" data-product-id="${
           item.id
