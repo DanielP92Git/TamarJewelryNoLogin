@@ -177,6 +177,14 @@ const state = {
   undoManager: null
 };
 
+// Debug logging for reorder operations
+const DEBUG_REORDER = !IS_PRODUCTION;
+
+function logReorder(action, data = {}) {
+  if (!DEBUG_REORDER) return;
+  console.log(`[Reorder] ${action}`, data);
+}
+
 // Toast notification utilities
 function showSuccessToast(message) {
   Toastify({
@@ -1185,6 +1193,8 @@ async function saveProductOrder() {
   const category = state.selectedCategory;
   const productIds = state.undoManager.getCurrentOrder();
 
+  logReorder('Save', { category, productCount: productIds.length });
+
   showReorderLoadingOverlay();
   updateReorderButtonStates(true); // Disable all buttons
 
@@ -1238,6 +1248,10 @@ async function saveProductOrder() {
 
     // Reload to get fresh displayOrder values from server
     await fetchInfo();
+
+    // VERIFY: After saving reorder, check customer-facing page
+    // Products should appear in new order on /categories/{category}.html
+    // Backend query uses: .sort({ displayOrder: 1 })
 
   } catch (error) {
     hideReorderLoadingOverlay();
@@ -1335,6 +1349,13 @@ function enterReorderMode() {
     return;
   }
 
+  if (products.length === 1) {
+    showInfoToast('Only one product in category - nothing to reorder');
+    return;
+  }
+
+  logReorder('Enter mode', { category: state.selectedCategory, productCount: products.length });
+
   state.isReorderMode = true;
   state.originalProductOrder = products.map(p => p.id);
   state.undoStack = [];
@@ -1414,6 +1435,8 @@ function enterReorderMode() {
 }
 
 function exitReorderMode() {
+  logReorder('Exit mode');
+
   state.isReorderMode = false;
   state.undoManager = null;
 
