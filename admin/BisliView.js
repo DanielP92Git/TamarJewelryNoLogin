@@ -173,7 +173,8 @@ const state = {
   originalProductOrder: [],
   undoStack: [],
   redoStack: [],
-  sortableInstance: null
+  sortableInstance: null,
+  undoManager: null
 };
 
 // Toast notification utilities
@@ -220,6 +221,61 @@ function showInfoToast(message) {
       zIndex: '2000'
     }
   }).showToast();
+}
+
+// Command pattern for undo/redo (per RESEARCH.md)
+class MoveCommand {
+  constructor(fromIndex, toIndex, productId) {
+    this.fromIndex = fromIndex;
+    this.toIndex = toIndex;
+    this.productId = productId;
+  }
+
+  execute(productList) {
+    const item = productList.splice(this.fromIndex, 1)[0];
+    productList.splice(this.toIndex, 0, item);
+  }
+
+  undo(productList) {
+    const item = productList.splice(this.toIndex, 1)[0];
+    productList.splice(this.fromIndex, 0, item);
+  }
+}
+
+class UndoManager {
+  constructor(initialOrder) {
+    this.productOrder = [...initialOrder]; // Array of product IDs in current order
+    this.undoStack = [];
+    this.redoStack = [];
+  }
+
+  execute(command) {
+    command.execute(this.productOrder);
+    this.undoStack.push(command);
+    this.redoStack = []; // Clear redo on new action
+  }
+
+  undo() {
+    if (this.undoStack.length === 0) return false;
+    const command = this.undoStack.pop();
+    command.undo(this.productOrder);
+    this.redoStack.push(command);
+    return true;
+  }
+
+  redo() {
+    if (this.redoStack.length === 0) return false;
+    const command = this.redoStack.pop();
+    command.execute(this.productOrder);
+    this.undoStack.push(command);
+    return true;
+  }
+
+  canUndo() { return this.undoStack.length > 0; }
+  canRedo() { return this.redoStack.length > 0; }
+  hasChanges() { return this.undoStack.length > 0; }
+
+  getCurrentOrder() { return [...this.productOrder]; }
 }
 
 // SKU validation function for forms
@@ -1043,13 +1099,15 @@ function updateReorderButtonStates(disabled = false) {
   const cancelBtn = document.getElementById('cancelReorderBtn');
 
   if (disabled) {
-    [undoBtn, redoBtn, saveBtn, cancelBtn].forEach(btn => btn && (btn.disabled = true));
+    [undoBtn, redoBtn, saveBtn, cancelBtn].forEach(btn => {
+      if (btn) btn.disabled = true;
+    });
     return;
   }
 
-  if (undoBtn) undoBtn.disabled = state.undoStack.length === 0;
-  if (redoBtn) redoBtn.disabled = state.redoStack.length === 0;
-  if (saveBtn) saveBtn.disabled = state.undoStack.length === 0;
+  if (undoBtn) undoBtn.disabled = !state.undoManager?.canUndo();
+  if (redoBtn) redoBtn.disabled = !state.undoManager?.canRedo();
+  if (saveBtn) saveBtn.disabled = !state.undoManager?.hasChanges();
   if (cancelBtn) cancelBtn.disabled = false;
 }
 
@@ -1069,6 +1127,10 @@ function enterReorderMode() {
   state.originalProductOrder = products.map(p => p.id);
   state.undoStack = [];
   state.redoStack = [];
+
+  // Initialize UndoManager with current product order
+  const productIds = products.map(p => p.id);
+  state.undoManager = new UndoManager(productIds);
 
   document.body.classList.add('reorder-mode-active');
   const actionBar = document.getElementById('reorderActionBar');
@@ -1091,6 +1153,7 @@ function enterReorderMode() {
 
 function exitReorderMode() {
   state.isReorderMode = false;
+  state.undoManager = null;
 
   document.body.classList.remove('reorder-mode-active');
   const actionBar = document.getElementById('reorderActionBar');
