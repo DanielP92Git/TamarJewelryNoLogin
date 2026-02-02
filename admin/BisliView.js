@@ -1134,6 +1134,98 @@ function handleRedo() {
   showInfoToast('Redid change');
 }
 
+function showReorderLoadingOverlay() {
+  const container = document.querySelector('.listproduct-allproducts');
+  if (!container) return;
+
+  // Remove existing overlay if any
+  hideReorderLoadingOverlay();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'reorder-loading-overlay';
+  overlay.innerHTML = `
+    <div class="spinner"></div>
+    <p>Saving order...</p>
+  `;
+  container.appendChild(overlay);
+}
+
+function hideReorderLoadingOverlay() {
+  const overlay = document.querySelector('.reorder-loading-overlay');
+  if (overlay) overlay.remove();
+}
+
+async function saveProductOrder() {
+  if (!state.undoManager || !state.undoManager.hasChanges()) {
+    showInfoToast('No changes to save');
+    return;
+  }
+
+  const category = state.selectedCategory;
+  const productIds = state.undoManager.getCurrentOrder();
+
+  showReorderLoadingOverlay();
+  updateReorderButtonStates(true); // Disable all buttons
+
+  try {
+    const response = await apiFetch('/api/admin/products/reorder', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': localStorage.getItem('auth-token')
+      },
+      body: JSON.stringify({
+        category: category,
+        productIds: productIds
+      })
+    });
+
+    const data = await response.json();
+
+    hideReorderLoadingOverlay();
+
+    if (response.status === 409) {
+      // Concurrency conflict - another admin modified products
+      showErrorToast('Product list was updated by another admin. Refreshing...');
+      exitReorderMode();
+      await fetchInfo(); // Reload products from server
+      return;
+    }
+
+    if (!response.ok) {
+      const errorMsg = data.errors || data.message || 'Failed to save order';
+      showErrorToast(errorMsg);
+      updateReorderButtonStates(); // Re-enable buttons
+      return;
+    }
+
+    // Success
+    showSuccessToast('Order saved successfully!');
+    exitReorderMode();
+
+    // Update local product order to match saved order
+    // This ensures the list stays in the new order without refetch
+    if (state.products) {
+      const orderedProducts = productIds.map(id =>
+        state.products.find(p => p.id === id)
+      ).filter(Boolean);
+
+      // Update products that were reordered
+      const otherProducts = state.products.filter(p => p.category !== category);
+      state.products = [...otherProducts, ...orderedProducts];
+    }
+
+    // Reload to get fresh displayOrder values from server
+    await fetchInfo();
+
+  } catch (error) {
+    hideReorderLoadingOverlay();
+    console.error('Error saving product order:', error);
+    showErrorToast('Network error. Please check connection and try again.');
+    updateReorderButtonStates(); // Re-enable buttons
+  }
+}
+
 function rerenderProductList() {
   if (!state.undoManager) return;
 
@@ -1481,7 +1573,10 @@ async function loadProductsPage(data) {
     redoBtn.addEventListener('click', handleRedo);
   }
 
-  // Save handler will be added in Plan 03
+  const saveReorderBtn = document.getElementById('saveReorderBtn');
+  if (saveReorderBtn) {
+    saveReorderBtn.addEventListener('click', saveProductOrder);
+  }
 
   // Set the category filter to the stored category
   const categoryFilter = document.getElementById("categoryFilter");

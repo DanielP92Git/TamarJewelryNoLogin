@@ -1566,3 +1566,43 @@ body.reorder-mode-active {
 .sortable-drag {
   opacity: 1;
 }
+
+/* Loading Overlay for Reorder Save */
+.reorder-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: all;
+}
+
+.reorder-loading-overlay .spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e5e5e5;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.reorder-loading-overlay p {
+  margin-top: 12px;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Make product list container position relative for overlay */
+.listproduct-allproducts {
+  position: relative;
+}
