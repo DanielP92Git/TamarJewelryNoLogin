@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 
 ## Current Position
 
-Phase: 4 of 9 (Schema Foundation & Library Setup)
-Plan: 3 of 3 in phase (Phase 4 complete)
-Status: Phase fully verified (4/4 truths, migration executed)
-Last activity: 2026-02-02 — Migration executed successfully
+Phase: 5 of 9 (Product Ordering Backend)
+Plan: 1 of 1 in phase (Phase 5 complete)
+Status: Phase complete - API endpoint ready for Phase 6
+Last activity: 2026-02-02 — Completed 05-01-PLAN.md
 
-Progress: [████████░░] 100% Phase 4 (v1.0: 5/5 plans, v1.1: 3/3 Phase 4, total: 8/8 through Phase 4)
+Progress: [█████████░] 100% Phase 5 (v1.0: 5/5 plans, v1.1: 4/4 Phase 4-5, total: 9/9 through Phase 5)
 
 ## Performance Metrics
 
@@ -68,33 +68,40 @@ Recent decisions affecting current work:
 - Schema declaration + migration (both) — index declared in schema AND created by migration for persistence
 - Database sorting vs client-side — queries use .sort({displayOrder: 1}) to leverage compound index
 
+**Phase 5 Implementation Decisions:**
+- MongoDB bulkWrite for batch updates — single database round-trip, 10-100x faster than loop with updateOne
+- Optimistic concurrency with __v field — no locks needed, detects conflicts at save time
+- Validation-first request handling — fail fast before database writes, atomic all-or-nothing
+- Full category reorder required — prevents orphaned products, simplifies validation
+- 409 Conflict on concurrency — frontend refreshes and retries (standard optimistic pattern)
+
 ### Pending Todos
 
 None yet.
 
 ### Blockers/Concerns
 
-**Phase 4 Completion (100% verified):**
-- Migration executed successfully (2026-02-02T14:46:49.294Z)
-- Compound index created: category_displayOrder_available_idx
-- Database migrated: 94 products across 7 categories now have displayOrder values
-  - bracelets: 7, crochet-necklaces: 15, dangle-earrings: 22, hoop-earrings: 17, necklaces: 23, shalom-club: 4, unisex: 6
-- All code infrastructure complete and verified: schema, indexes, queries, libraries
+**Phase 5 Completion (100% verified):**
+- API endpoint complete: POST /api/admin/products/reorder
+- Validation: Category scope, ObjectId format, duplicates, existence, completeness
+- Concurrency: Optimistic control with __v field, returns 409 on conflict
+- Performance: bulkWrite handles 200+ products efficiently (single round-trip)
 
-**Phase 5-6 Readiness:**
-- Unknown: exact product count per category in production (if >200, may need pagination)
-- Unknown: actual legacy schema variations (audit needed in Phase 7)
+**Phase 6 Readiness:**
+- API contract defined and tested
+- Frontend needs to handle 409 Conflict (refresh and retry pattern)
+- Unknown: actual product count per category in production (if >200, may need UI pagination)
 
 **Phase 7 Migration Risk:**
 - Image array migration flagged as high-risk (Pitfall #4 in research) — needs conservative approach with pre-migration audit and rollback capability
 
 ## Session Continuity
 
-Last session: 2026-02-02 (Phase 4 gap closure)
-Stopped at: Completed Phase 4 (04-01, 04-02, 04-03 - all plans done)
+Last session: 2026-02-02 (Phase 5 execution)
+Stopped at: Completed Phase 5 (05-01 - API endpoint complete)
 Resume file: None
 
-**Next step:** User choice - run migration or proceed to Phase 5 planning
+**Next step:** Plan Phase 6 (Frontend Product Reordering)
 
 ---
 *Last updated: 2026-02-02 after Phase 4 verification (3/4 truths)*
