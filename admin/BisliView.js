@@ -2554,13 +2554,16 @@ async function bulkDeleteProducts() {
   }
 }
 
-// Define editProduct function if it doesn't exist
-function editProduct(product) {
-  clear();
-  setActiveNav("edit-product");
+// ===============================================================
+// Helper functions for image management (module scope for reuse)
+// ===============================================================
 
-  // Helper to get all main image URLs (desktop, mobile, public, legacy)
-  function getAllMainImageUrls(product) {
+/**
+ * Get all main image URLs (desktop, mobile, public, legacy)
+ * @param {Object} product - Product object
+ * @returns {Array<string>} Array of unique image URLs
+ */
+function getAllMainImageUrls(product) {
     // Extract the filename from the image URL
     const getFilename = (url) => {
       if (!url) return null;
@@ -2625,8 +2628,12 @@ function editProduct(product) {
     return [...new Set(urls.filter(Boolean))];
   }
 
-  // Helper to get all small image URLs (handle both new and legacy)
-  function getAllSmallImageUrls(product) {
+/**
+ * Get all small/gallery image URLs (handle both new and legacy)
+ * @param {Object} product - Product object
+ * @returns {Array<string>} Array of unique image URLs
+ */
+function getAllSmallImageUrls(product) {
     // Function to extract filename from URL
     const getFilename = (url) => {
       if (!url) return "";
@@ -2708,7 +2715,168 @@ function editProduct(product) {
 
     // Return just the unique URLs as an array
     return Array.from(uniqueUrls.values());
+}
+
+// Store sortable instance for cleanup
+let _galleryInstanceSortable = null;
+
+/**
+ * Setup image gallery with drag-and-drop reordering in edit form
+ * @param {Object} product - Product object with images array
+ * @param {HTMLElement} container - Container element for thumbnails
+ */
+function setupEditFormImageGallery(product, container) {
+  if (!container) return;
+
+  // Destroy previous instance if exists (prevents multiple bindings)
+  if (_galleryInstanceSortable) {
+    _galleryInstanceSortable.destroy();
+    _galleryInstanceSortable = null;
   }
+
+  // Get images using unified array (Phase 7) with fallback to legacy
+  let currentImages = [];
+
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    // New unified images array format
+    currentImages = product.images.map((img, idx) => ({
+      url: img.desktop || img.publicDesktop || img.desktopLocal || '',
+      index: idx,
+      original: img
+    })).filter(img => img.url); // Filter out empty images
+  } else {
+    // Fallback to legacy format using module-scope helpers
+    const mainUrls = getAllMainImageUrls(product);
+    const smallUrls = getAllSmallImageUrls(product);
+
+    // Main image first
+    if (mainUrls.length > 0) {
+      currentImages.push({ url: mainUrls[0], index: 0, original: null });
+    }
+
+    // Then gallery images
+    smallUrls.forEach((url, idx) => {
+      if (url && !currentImages.some(img => img.url === url)) {
+        currentImages.push({ url, index: currentImages.length, original: null });
+      }
+    });
+  }
+
+  if (currentImages.length === 0) {
+    container.innerHTML = '<p class="gallery-help-text">No images uploaded yet</p>';
+    return;
+  }
+
+  // Store original order for potential cancel/restore
+  const originalOrder = currentImages.map(img => img.url);
+  container.dataset.originalOrder = JSON.stringify(originalOrder);
+
+  // Render thumbnails with drag handles and delete buttons
+  container.innerHTML = currentImages.map((img, idx) => `
+    <div class="gallery-thumb ${idx === 0 ? 'is-main-image' : ''}"
+         data-index="${idx}"
+         data-url="${encodeURIComponent(img.url)}">
+      <div class="image-drag-handle" aria-label="Drag to reorder">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <circle cx="4" cy="4" r="1.5"/>
+          <circle cx="4" cy="8" r="1.5"/>
+          <circle cx="4" cy="12" r="1.5"/>
+          <circle cx="12" cy="4" r="1.5"/>
+          <circle cx="12" cy="8" r="1.5"/>
+          <circle cx="12" cy="12" r="1.5"/>
+        </svg>
+      </div>
+      <img src="${img.url}" alt="Gallery image ${idx + 1}" loading="lazy" />
+      <button type="button" class="delete-image-btn"
+              data-index="${idx}"
+              data-url="${encodeURIComponent(img.url)}"
+              aria-label="Delete image">&times;</button>
+      ${idx === 0 ? '<span class="main-badge">Main</span>' : ''}
+    </div>
+  `).join('');
+
+  // Initialize SortableJS with handle pattern (matches Phase 6 product reordering)
+  _galleryInstanceSortable = Sortable.create(container, {
+    handle: '.image-drag-handle',
+    animation: 150,
+    delay: 50,
+    delayOnTouchOnly: true,
+    ghostClass: 'gallery-sortable-ghost',
+    chosenClass: 'gallery-sortable-chosen',
+    dragClass: 'gallery-sortable-drag',
+    onEnd: function(evt) {
+      if (evt.oldIndex === evt.newIndex) return;
+
+      // Update main badge position
+      updateMainImageBadge(container);
+
+      // Update hidden form field with new order
+      updateImageOrderField(container);
+
+      // Mark form as having unsaved changes
+      if (typeof window.formHasUnsavedChanges !== 'undefined') {
+        window.formHasUnsavedChanges = true;
+      }
+
+      console.log('[Gallery] Image reordered:', {
+        from: evt.oldIndex,
+        to: evt.newIndex,
+        newOrder: getImageOrder(container)
+      });
+    }
+  });
+
+  // Setup delete button handlers (will be implemented in Plan 04)
+  // setupImageDeleteButtons(container, product._id);
+}
+
+/**
+ * Update main image badge after reorder
+ */
+function updateMainImageBadge(container) {
+  const thumbs = container.querySelectorAll('.gallery-thumb');
+  thumbs.forEach((thumb, idx) => {
+    // Update is-main-image class
+    thumb.classList.toggle('is-main-image', idx === 0);
+
+    // Update badge
+    const existingBadge = thumb.querySelector('.main-badge');
+    if (idx === 0 && !existingBadge) {
+      thumb.insertAdjacentHTML('beforeend', '<span class="main-badge">Main</span>');
+    } else if (idx !== 0 && existingBadge) {
+      existingBadge.remove();
+    }
+  });
+}
+
+/**
+ * Get current image order from DOM
+ */
+function getImageOrder(container) {
+  return Array.from(container.querySelectorAll('.gallery-thumb'))
+    .map(thumb => decodeURIComponent(thumb.dataset.url));
+}
+
+/**
+ * Update hidden form field with current image order
+ */
+function updateImageOrderField(container) {
+  const orderInput = document.getElementById('imageOrderInput');
+  if (orderInput) {
+    orderInput.value = JSON.stringify(getImageOrder(container));
+  }
+}
+
+// ===============================================================
+// Edit Product Form
+// ===============================================================
+
+// Define editProduct function if it doesn't exist
+function editProduct(product) {
+  clear();
+  setActiveNav("edit-product");
+
+  // getAllMainImageUrls and getAllSmallImageUrls moved to module scope for reuse
 
   const mainImageUrls = getAllMainImageUrls(product);
   const smallImageUrls = getAllSmallImageUrls(product);
