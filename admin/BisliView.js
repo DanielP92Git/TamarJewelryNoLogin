@@ -2295,7 +2295,7 @@ function loadProducts(data) {
   document.querySelectorAll(".edit-btn").forEach((editBtn) => {
     editBtn.addEventListener("click", function () {
       const productId = this.dataset.productId;
-      const product = data.find((p) => p.id == productId);
+      const product = data.find((p) => p._id == productId);
       if (product) {
         setActiveNav("edit-product");
         editProduct(product);
