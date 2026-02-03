@@ -3584,10 +3584,8 @@ function openProductPreview(product, triggerElement) {
       dialog.close();
 
       try {
-        // Fetch full product data (modal may have partial data)
-        // Use numeric id field, not MongoDB _id
-        const fullProduct = await fetchProduct(product.id);
-        await openDuplicateProduct(fullProduct);
+        // Product from list already has all data needed for duplication
+        await openDuplicateProduct(product);
       } catch (error) {
         console.error('Error duplicating product:', error);
         showErrorToast('Error duplicating product: ' + (error.message || 'Unknown error'));
