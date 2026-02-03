@@ -2279,6 +2279,58 @@ app.post(
         product.images = images;
       }
 
+      // Handle image reordering (Phase 8 Plan 04)
+      const { imageOrder } = req.body;
+      if (imageOrder) {
+        try {
+          const orderArray = typeof imageOrder === 'string' ? JSON.parse(imageOrder) : imageOrder;
+
+          if (Array.isArray(orderArray) && orderArray.length > 0) {
+            // Get current images from product
+            const currentImages = product.images || [];
+
+            // Create a map for quick lookup by URL
+            const imageMap = new Map();
+            currentImages.forEach(img => {
+              const key = img.desktop || img.publicDesktop || img.desktopLocal || '';
+              if (key) imageMap.set(key, img);
+            });
+
+            // Reorder images based on orderArray
+            const reorderedImages = [];
+            orderArray.forEach(url => {
+              const decodedUrl = decodeURIComponent(url);
+              if (imageMap.has(decodedUrl)) {
+                reorderedImages.push(imageMap.get(decodedUrl));
+                imageMap.delete(decodedUrl); // Mark as used
+              }
+            });
+
+            // Append any images not in orderArray (shouldn't happen, but defensive)
+            imageMap.forEach(img => reorderedImages.push(img));
+
+            // Update product images array
+            product.images = reorderedImages;
+
+            // Update derived fields for backwards compatibility
+            if (reorderedImages.length > 0) {
+              product.mainImage = reorderedImages[0];
+            }
+            if (reorderedImages.length > 1) {
+              product.smallImages = reorderedImages.slice(1);
+            }
+
+            console.log('[updateproduct] Reordered images:', {
+              productId: product.id,
+              newOrder: reorderedImages.map(img => img.desktop || img.publicDesktop).slice(0, 3)
+            });
+          }
+        } catch (err) {
+          console.error('[updateproduct] Error parsing imageOrder:', err);
+          // Continue without reordering on parse error
+        }
+      }
+
       // Save the updated product
       await product.save();
       console.log('Product updated successfully');
