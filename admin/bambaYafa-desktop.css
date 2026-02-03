@@ -1541,10 +1541,35 @@ body.reorder-mode-active {
 /* Product row adjustments for drag handle */
 .listproduct-format {
   transition: background-color 0.15s, box-shadow 0.15s;
+  cursor: pointer; /* Phase 8: Clickable for preview modal */
+}
+
+.listproduct-format:hover {
+  background: #f9fafb;
 }
 
 .reorder-mode-active .listproduct-format {
   cursor: default;
+}
+
+/* Override cursor for interactive elements within row */
+.listproduct-format .edit-btn,
+.listproduct-format .delete-btn,
+.listproduct-format .duplicate-btn,
+.listproduct-format .product-checkbox {
+  cursor: pointer;
+}
+
+.listproduct-format .drag-handle {
+  cursor: grab;
+}
+
+.listproduct-format .drag-handle:active {
+  cursor: grabbing;
+}
+
+.listproduct-format .sku-cell {
+  cursor: pointer;
 }
 
 /* Adjust grid when in reorder mode */
