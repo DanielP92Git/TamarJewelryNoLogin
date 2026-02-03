@@ -3585,7 +3585,8 @@ function openProductPreview(product, triggerElement) {
 
       try {
         // Fetch full product data (modal may have partial data)
-        const fullProduct = await fetchProduct(product._id);
+        // Use numeric id field, not MongoDB _id
+        const fullProduct = await fetchProduct(product.id);
         await openDuplicateProduct(fullProduct);
       } catch (error) {
         console.error('Error duplicating product:', error);
@@ -3636,8 +3637,45 @@ function openProductPreview(product, triggerElement) {
     setTimeout(() => dialog.remove(), 300); // Remove after CSS transition
   });
 
-  // Open the modal (enables ESC key and focus trap automatically)
+  // Open the modal (enables ESC key automatically)
   dialog.showModal();
+
+  // Manual focus trap (native dialog focus trap is inconsistent)
+  const focusableElements = dialog.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  const firstFocusable = focusableElements[0];
+  const lastFocusable = focusableElements[focusableElements.length - 1];
+
+  const handleFocusTrap = (e) => {
+    if (e.key === 'Tab') {
+      if (e.shiftKey) {
+        // Shift+Tab
+        if (document.activeElement === firstFocusable) {
+          e.preventDefault();
+          lastFocusable.focus();
+        }
+      } else {
+        // Tab
+        if (document.activeElement === lastFocusable) {
+          e.preventDefault();
+          firstFocusable.focus();
+        }
+      }
+    }
+  };
+
+  dialog.addEventListener('keydown', handleFocusTrap);
+
+  // Remove focus trap handler when dialog closes
+  dialog.addEventListener('close', () => {
+    dialog.removeEventListener('keydown', handleFocusTrap);
+  }, { once: true });
+
+  // Focus first element
+  if (firstFocusable) {
+    firstFocusable.focus();
+  }
 }
 
 // Helper function to fetch a single product
