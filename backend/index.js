@@ -341,6 +341,17 @@ function omitLocalImageFields(obj) {
     });
   }
 
+  // images array locals (Phase 7 unified array)
+  if (Array.isArray(obj.images)) {
+    obj.images = obj.images.map(img => {
+      if (!img || typeof img !== 'object' || Array.isArray(img)) return img;
+      const copy = { ...img };
+      delete copy.desktopLocal;
+      delete copy.mobileLocal;
+      return copy;
+    });
+  }
+
   return obj;
 }
 
@@ -401,16 +412,88 @@ function normalizeProductForClient(productDoc) {
       publicImageIn: obj?.publicImage,
       directImageUrlIn: obj?.directImageUrl,
       mainImageDesktopIn: obj?.mainImage?.desktop,
+      hasImagesArray: Array.isArray(obj?.images),
+      imagesArrayLength: Array.isArray(obj?.images) ? obj.images.length : 0,
     }
   );
   // #endregion
+
+  // Phase 7: Handle unified images array (new array wins per CONTEXT.md)
+  if (Array.isArray(obj.images) && obj.images.length > 0) {
+    // Normalize images array URLs (explicitly exclude local fields from response)
+    obj.images = obj.images.map(img => {
+      if (!img || typeof img !== 'object') return img;
+      // Only copy non-local fields
+      const normalized = {};
+      if (img.desktop) normalized.desktop = toAbsoluteApiUrl(img.desktop);
+      if (img.mobile) normalized.mobile = toAbsoluteApiUrl(img.mobile);
+      if (img.publicDesktop) normalized.publicDesktop = toAbsoluteApiUrl(img.publicDesktop);
+      if (img.publicMobile) normalized.publicMobile = toAbsoluteApiUrl(img.publicMobile);
+      // Explicitly DO NOT copy desktopLocal, mobileLocal
+      return normalized;
+    });
+
+    // Apply localAssetExistsForUrl checks to images array elements
+    try {
+      obj.images = obj.images.map(img => {
+        if (!img || typeof img !== 'object') return img;
+        const checked = { ...img };
+        if (checked.desktop && !localAssetExistsForUrl(img.desktop))
+          checked.desktop = fallbackNoImage();
+        if (checked.mobile && !localAssetExistsForUrl(img.mobile))
+          checked.mobile = fallbackNoImage();
+        if (checked.publicDesktop && !localAssetExistsForUrl(img.publicDesktop))
+          checked.publicDesktop = fallbackNoImage();
+        if (checked.publicMobile && !localAssetExistsForUrl(img.publicMobile))
+          checked.publicMobile = fallbackNoImage();
+        return checked;
+      });
+    } catch {
+      // ignore
+    }
+
+    // Derive mainImage from first element for backwards compatibility
+    // Create a clean copy without undefined fields
+    if (!obj.mainImage || typeof obj.mainImage !== 'object') {
+      const firstImage = obj.images[0];
+      obj.mainImage = {};
+      if (firstImage.desktop !== undefined) obj.mainImage.desktop = firstImage.desktop;
+      if (firstImage.mobile !== undefined) obj.mainImage.mobile = firstImage.mobile;
+      if (firstImage.publicDesktop !== undefined) obj.mainImage.publicDesktop = firstImage.publicDesktop;
+      if (firstImage.publicMobile !== undefined) obj.mainImage.publicMobile = firstImage.publicMobile;
+    }
+
+    // Derive smallImages from remaining elements for backwards compatibility
+    if (!Array.isArray(obj.smallImages) || obj.smallImages.length === 0) {
+      obj.smallImages = obj.images.slice(1).map(img => {
+        // Clean copy without undefined fields
+        const clean = {};
+        if (img.desktop !== undefined) clean.desktop = img.desktop;
+        if (img.mobile !== undefined) clean.mobile = img.mobile;
+        if (img.publicDesktop !== undefined) clean.publicDesktop = img.publicDesktop;
+        if (img.publicMobile !== undefined) clean.publicMobile = img.publicMobile;
+        return clean;
+      });
+    }
+
+    // Derive legacy single image fields from images[0] if not already set
+    if (!obj.image) {
+      obj.image = obj.images[0]?.desktop || fallbackNoImage();
+    }
+    if (!obj.publicImage) {
+      obj.publicImage = obj.images[0]?.publicDesktop || fallbackNoImage();
+    }
+    if (!obj.directImageUrl) {
+      obj.directImageUrl = obj.images[0]?.desktop || fallbackNoImage();
+    }
+  }
 
   // Normalize core image fields
   obj.image = toAbsoluteApiUrl(obj.image);
   obj.publicImage = toAbsoluteApiUrl(obj.publicImage);
   obj.directImageUrl = toAbsoluteApiUrl(obj.directImageUrl);
 
-  // mainImage object
+  // mainImage object (old field handling for products not yet migrated)
   if (obj.mainImage && typeof obj.mainImage === 'object') {
     obj.mainImage = { ...obj.mainImage };
     obj.mainImage.desktop = toAbsoluteApiUrl(obj.mainImage.desktop);
@@ -423,23 +506,26 @@ function normalizeProductForClient(productDoc) {
   }
 
   // If the referenced local file isn't on disk, return a safe placeholder instead of a broken icon
-  try {
-    if (!localAssetExistsForUrl(obj.image)) obj.image = fallbackNoImage();
-    if (obj.mainImage && typeof obj.mainImage === 'object') {
-      if (!localAssetExistsForUrl(obj.mainImage.desktop))
-        obj.mainImage.desktop = fallbackNoImage();
-      if (!localAssetExistsForUrl(obj.mainImage.mobile))
-        obj.mainImage.mobile = fallbackNoImage();
-      if (!localAssetExistsForUrl(obj.mainImage.publicDesktop))
-        obj.mainImage.publicDesktop = fallbackNoImage();
-      if (!localAssetExistsForUrl(obj.mainImage.publicMobile))
-        obj.mainImage.publicMobile = fallbackNoImage();
+  // Only apply to legacy fields if images array didn't already handle it
+  if (!Array.isArray(obj.images) || obj.images.length === 0) {
+    try {
+      if (!localAssetExistsForUrl(obj.image)) obj.image = fallbackNoImage();
+      if (obj.mainImage && typeof obj.mainImage === 'object') {
+        if (!localAssetExistsForUrl(obj.mainImage.desktop))
+          obj.mainImage.desktop = fallbackNoImage();
+        if (!localAssetExistsForUrl(obj.mainImage.mobile))
+          obj.mainImage.mobile = fallbackNoImage();
+        if (!localAssetExistsForUrl(obj.mainImage.publicDesktop))
+          obj.mainImage.publicDesktop = fallbackNoImage();
+        if (!localAssetExistsForUrl(obj.mainImage.publicMobile))
+          obj.mainImage.publicMobile = fallbackNoImage();
+      }
+    } catch {
+      // ignore
     }
-  } catch {
-    // ignore
   }
 
-  // smallImages can be array of strings or objects
+  // smallImages can be array of strings or objects (old field handling)
   if (Array.isArray(obj.smallImages)) {
     obj.smallImages = obj.smallImages.map(si => {
       if (typeof si === 'string') return toAbsoluteApiUrl(si);
