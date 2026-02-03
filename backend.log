@@ -1,0 +1,635 @@
+
+> backend@1.0.0 devStart
+> nodemon index.js
+
+[33m[nodemon] 3.1.4[39m
+[33m[nodemon] to restart at any time, enter `rs`[39m
+[33m[nodemon] watching path(s): *.*[39m
+[33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:75420) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:75420) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+All Products Fetched
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+All Products Fetched
+[32m[nodemon] starting `node index.js`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:41976) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:41976) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+[32m[nodemon] restarting due to changes...[39m
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:6600) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:6600) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:65564) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:65564) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:52776) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:52776) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+All Products Fetched
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:69068) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:69068) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:50244) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:50244) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:76296) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:76296) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:48768) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:48768) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:72568) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:72568) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:35200) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:35200) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:34784) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:34784) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:46276) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:46276) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.1
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+Authenticated successfully
+Token created for user: admin@tamarjewelry.com
+All Products Fetched
+All Products Fetched
+All Products Fetched
+[Static] Accessing: /mainImage-1720007122261.png from uploads dir
+[Static] Accessing: /mainImage-1720006846987.png from uploads dir
+[Static] Accessing: /mainImage-1720005687202.jpg from uploads dir
+[Static] Accessing: /mainImage-1720004901361.jpg from uploads dir
+[Static] Accessing: /mainImage-1719930455727.png from uploads dir
+Fetching products for category: necklaces
+Fetching products for category: necklaces
+Fetching products for category: necklaces
+Fetching products for category: crochet-necklaces
+Fetching products for category: crochet-necklaces
+Fetching products for category: hoop-earrings
+Fetching products for category: hoop-earrings
+Fetching products for category: hoop-earrings
+Fetching products for category: crochet-necklaces
+Fetching products for category: crochet-necklaces
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T17:55:53.000Z
+}
+Authenticated successfully
+Token created for user: admin@tamarjewelry.com
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
