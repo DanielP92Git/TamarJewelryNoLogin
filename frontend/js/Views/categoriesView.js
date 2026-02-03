@@ -1240,19 +1240,27 @@ class CategoriesView extends View {
         : description.replace(/\n/g, '<br>')
       : '';
 
+    // Helper to get image URL from images array element or mainImage object
+    const getMainImageUrl = (item, preferDesktop = true) => {
+      // Prefer unified images array
+      const mainImg = Array.isArray(item.images) && item.images.length > 0
+        ? item.images[0]
+        : item.mainImage;
+
+      if (!mainImg || typeof mainImg !== 'object') {
+        return item.publicImage || item.image || '';
+      }
+
+      if (preferDesktop) {
+        return mainImg.publicDesktop || mainImg.desktop || mainImg.publicMobile || mainImg.mobile || '';
+      } else {
+        return mainImg.publicMobile || mainImg.mobile || mainImg.publicDesktop || mainImg.desktop || '';
+      }
+    };
+
     // Get desktop and mobile image URLs with proper fallbacks and ensure HTTPS
-    const desktopImage = this.ensureHttps(
-      item.mainImage?.publicDesktop ||
-        item.mainImage?.desktop ||
-        item.publicImage ||
-        item.image
-    );
-    const mobileImage = this.ensureHttps(
-      item.mainImage?.publicMobile ||
-        item.mainImage?.mobile ||
-        item.mainImage?.desktop ||
-        item.image
-    );
+    const desktopImage = this.ensureHttps(getMainImageUrl(item, true));
+    const mobileImage = this.ensureHttps(getMainImageUrl(item, false));
 
     // Price markup with discount support
     const priceMarkup = hasDiscount
