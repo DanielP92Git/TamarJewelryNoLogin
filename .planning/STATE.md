@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 7 of 9 (Image Array Migration)
-Plan: 1 of 4 in phase (Plan 07-01 complete)
-Status: In progress - Migration infrastructure complete, dry-run verified
-Last activity: 2026-02-03 — Completed 07-01-PLAN.md (migration infrastructure)
+Plan: 2 of 4 in phase (Plan 07-02 complete)
+Status: In progress - Migration executed, schema updated, data verified
+Last activity: 2026-02-03 — Completed 07-02-PLAN.md (migration execution + schema update)
 
-Progress: [███████░░░] 70% Phase 7 (v1.0: 5/5 plans, v1.1: 10/? plans, 15 total through Plan 07-01)
+Progress: [███████░░░] 73% Phase 7 (v1.0: 5/5 plans, v1.1: 11/? plans, 16 total through Plan 07-02)
 
 ## Performance Metrics
 
@@ -33,9 +33,10 @@ Progress: [███████░░░] 70% Phase 7 (v1.0: 5/5 plans, v1.1: 1
 | 4 (v1.1) | 3 | ~7min | ~2.3min |
 | 5 (v1.1) | 1 | ~4min | ~4min |
 | 6 (v1.1) | 4 | ~59min | ~14.8min |
-| 7 (v1.1) | 1 | ~6min | ~6min |
+| 7 (v1.1) | 2 | ~10min | ~5min |
 
 **Recent Trend:**
+- 07-02: 4min (migration execution + schema update) - data transformation complete
 - 07-01: 6min (migration infrastructure + audit tooling) - backend migration setup
 - 06-04: 45min (human verification + 3 bug fixes) - checkpoint with debugging
 - 06-03: 5min (API integration + error handling) - save workflow complete
@@ -106,6 +107,8 @@ Recent decisions affecting current work:
 - Batched bulkWrite (1000 docs/batch) — memory efficiency for large collections, established pattern from Phase 4
 - Keep old fields during migration — mainImage/smallImages preserved for backwards compatibility, cleanup deferred
 - Dry-run via DRY_RUN environment variable — high-risk migration requires preview capability before committing changes
+- Migration retry after environment persistence — DRY_RUN flag persisted in shell, required explicit unset and re-execution
+- Verification scripts mandatory — post-migration integrity checks caught silent dry-run mode issue
 
 ### Pending Todos
 
@@ -122,21 +125,22 @@ None yet.
 - All requirements ORDER-01 through ORDER-11 satisfied and verified
 - Customer-facing product order reflects admin-defined order (backend sorts by displayOrder)
 
-**Phase 7 Progress (Plan 07-01 complete):**
-- Migration infrastructure complete: Audit script + migration with dry-run support
-- Audit identified edge cases: 30 products with mainImage, 94 with smallImages, 65 with empty mainImage URLs
-- No data corruption detected in current dataset
-- Dry-run verified: Shows preview without modifying database
-- Rollback capability implemented and tested
-- Ready for Plan 07-02 (execute migration in production)
+**Phase 7 Progress (Plans 07-01 and 07-02 complete):**
+- Migration infrastructure complete: Audit script + migration with dry-run support (Plan 07-01)
+- Migration executed successfully: All 94 products transformed to images array (Plan 07-02)
+- Data integrity verified: 89 products with images, 5 with empty arrays, all have correct structure
+- Schema updated: Product.js now defines images array field with 6-field responsive structure
+- Backwards compatibility maintained: Old fields (mainImage, smallImages) preserved in schema and data
+- Edge cases verified: mainImage-only products and no-mainImage products handled correctly
+- Ready for Plan 07-03 (update backend API to use images array)
 
 ## Session Continuity
 
 Last session: 2026-02-03 (Phase 7 in progress)
-Stopped at: Completed 07-01-PLAN.md (migration infrastructure)
+Stopped at: Completed 07-02-PLAN.md (migration execution + schema update)
 Resume file: None
 
-**Next step:** Execute Plan 07-02 (Run migration in production)
+**Next step:** Execute Plan 07-03 (Update backend API to use images array)
 
 ---
-*Last updated: 2026-02-03 after 07-01 completion*
+*Last updated: 2026-02-03 after 07-02 completion*
