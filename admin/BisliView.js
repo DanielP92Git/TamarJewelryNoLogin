@@ -2166,6 +2166,21 @@ function loadProducts(data) {
         </button>
       </div>
     `;
+
+    // Add click handler for product preview modal (Phase 8)
+    productElement.addEventListener('click', (e) => {
+      // Don't open modal if clicking on action buttons or interactive elements
+      if (e.target.closest('.edit-btn, .delete-btn, .duplicate-btn, .product-checkbox, .sku-cell, .drag-handle')) {
+        return;
+      }
+
+      // Find the product data
+      const product = data.find(p => p._id == item._id);
+      if (product) {
+        openProductPreview(product, productElement);
+      }
+    });
+
     productsContainer.appendChild(productElement);
   });
 
@@ -3111,6 +3126,224 @@ function editProduct(product) {
   });
 
   form.addEventListener("submit", updateProduct);
+}
+
+// ========================================
+// PRODUCT PREVIEW MODAL (Phase 8)
+// ========================================
+
+// Initialize and return the preview modal dialog element
+function initProductPreviewModal() {
+  // Remove existing modal if present
+  document.getElementById('productPreviewModal')?.remove();
+
+  // Create dialog element
+  const dialog = document.createElement('dialog');
+  dialog.id = 'productPreviewModal';
+  dialog.className = 'admin-preview-modal';
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', 'preview-modal-title');
+
+  document.body.appendChild(dialog);
+  return dialog;
+}
+
+// Helper to get best image URL from images array or legacy fields
+function getPreviewImageUrl(product) {
+  // Helper to ensure production URLs
+  const ensureProductionUrl = (url) => {
+    if (!url) return '';
+
+    // Convert localhost URLs to production URLs
+    if (state.isProduction && (url.includes('localhost') || url.includes('127.0.0.1'))) {
+      const parts = url.split('/');
+      const filename = parts[parts.length - 1];
+      let pathPart = 'images';
+      if (url.includes('/uploads/')) pathPart = 'uploads';
+      else if (url.includes('/smallImages/')) pathPart = 'smallImages';
+      return `${API_URL}/${pathPart}/${filename}`;
+    }
+
+    // Ensure HTTPS in production
+    if (state.isProduction && url.startsWith('http:')) {
+      return url.replace('http:', 'https:');
+    }
+
+    return url;
+  };
+
+  // NEW: Prefer unified images array (Phase 7)
+  if (Array.isArray(product.images) && product.images.length > 0) {
+    return product.images
+      .filter(img => img && typeof img === 'object')
+      .map(img => {
+        const url = img.publicDesktop || img.desktop || img.publicMobile || img.mobile || '';
+        return ensureProductionUrl(url);
+      })
+      .filter(url => url !== '');
+  }
+
+  // FALLBACK: Old structure
+  const urls = [];
+  if (product.mainImage?.publicDesktop) urls.push(ensureProductionUrl(product.mainImage.publicDesktop));
+  if (product.mainImage?.desktop) urls.push(ensureProductionUrl(product.mainImage.desktop));
+  if (product.publicImage) urls.push(ensureProductionUrl(product.publicImage));
+  if (product.image) urls.push(ensureProductionUrl(product.image));
+
+  // Add small images
+  if (Array.isArray(product.smallImages)) {
+    product.smallImages.forEach(img => {
+      if (typeof img === 'string') urls.push(ensureProductionUrl(img));
+      else if (img?.desktop) urls.push(ensureProductionUrl(img.desktop));
+      else if (img?.publicDesktop) urls.push(ensureProductionUrl(img.publicDesktop));
+    });
+  }
+
+  return urls.filter(Boolean);
+}
+
+// Render product preview HTML (customer-facing view)
+function renderProductPreview(product) {
+  const imageUrls = getPreviewImageUrl(product);
+  const mainImage = imageUrls[0] || '';
+  const hasImages = imageUrls.length > 0;
+
+  // Generate thumbnails HTML
+  const thumbnailsHtml = imageUrls.map((url, index) => `
+    <div class="preview-thumb ${index === 0 ? 'active' : ''}" data-image-url="${url}">
+      <img src="${url}" alt="Product view ${index + 1}" loading="lazy">
+    </div>
+  `).join('');
+
+  // Format description with line breaks
+  const description = (product.description || 'No description available')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  // Format SKU
+  const skuHtml = product.sku ? `
+    <div class="preview-sku">
+      <span class="preview-sku-label">SKU:</span>
+      <span class="preview-sku-value">${product.sku}</span>
+    </div>
+  ` : '';
+
+  return `
+    <div class="preview-layout">
+      <div class="preview-images">
+        ${hasImages ? `
+          <div class="preview-main-image">
+            <img src="${mainImage}" alt="${product.name}" id="preview-main-img">
+          </div>
+          ${imageUrls.length > 1 ? `
+            <div class="preview-thumbnails">
+              ${thumbnailsHtml}
+            </div>
+          ` : ''}
+        ` : `
+          <div class="preview-main-image">
+            <div style="color: #9ca3af; text-align: center;">No image available</div>
+          </div>
+        `}
+      </div>
+      <div class="preview-details">
+        <h3 class="preview-title">${product.name}</h3>
+        ${skuHtml}
+        <div class="preview-description">${description}</div>
+        <div class="preview-price">₪${product.ils_price || '0'}</div>
+      </div>
+    </div>
+  `;
+}
+
+// Open product preview modal
+function openProductPreview(product, triggerElement) {
+  const dialog = initProductPreviewModal();
+
+  // Set modal content
+  dialog.innerHTML = `
+    <div class="modal-header">
+      <h2 id="preview-modal-title">Product Preview</h2>
+      <button class="modal-close" aria-label="Close modal">×</button>
+    </div>
+    <div class="modal-body">
+      ${renderProductPreview(product)}
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn--secondary" data-action="edit">Edit Product</button>
+      <button class="btn btn--secondary" data-action="duplicate">Duplicate</button>
+      <button class="btn btn--danger" data-action="delete">Delete</button>
+    </div>
+  `;
+
+  // Close button handler
+  const closeBtn = dialog.querySelector('.modal-close');
+  closeBtn.addEventListener('click', () => dialog.close());
+
+  // Backdrop click handler (click outside modal)
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) {
+      dialog.close();
+    }
+  });
+
+  // Thumbnail click handlers (switch main image)
+  dialog.querySelectorAll('.preview-thumb').forEach(thumb => {
+    thumb.addEventListener('click', () => {
+      const imageUrl = thumb.dataset.imageUrl;
+      const mainImg = dialog.querySelector('#preview-main-img');
+      if (mainImg && imageUrl) {
+        mainImg.src = imageUrl;
+
+        // Update active state
+        dialog.querySelectorAll('.preview-thumb').forEach(t => t.classList.remove('active'));
+        thumb.classList.add('active');
+      }
+    });
+  });
+
+  // Footer action button handlers (wired in Plan 02)
+  const editBtn = dialog.querySelector('[data-action="edit"]');
+  const duplicateBtn = dialog.querySelector('[data-action="duplicate"]');
+  const deleteBtn = dialog.querySelector('[data-action="delete"]');
+
+  // Placeholder handlers (will be implemented in Plan 02)
+  if (editBtn) {
+    editBtn.addEventListener('click', () => {
+      dialog.close();
+      // TODO: Wire to editProduct in Plan 02
+      console.log('Edit product:', product._id);
+    });
+  }
+
+  if (duplicateBtn) {
+    duplicateBtn.addEventListener('click', () => {
+      dialog.close();
+      // TODO: Wire to duplicate handler in Plan 02
+      console.log('Duplicate product:', product._id);
+    });
+  }
+
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', () => {
+      dialog.close();
+      // TODO: Wire to delete handler in Plan 02
+      console.log('Delete product:', product._id);
+    });
+  }
+
+  // Close event handler (cleanup and restore focus)
+  dialog.addEventListener('close', () => {
+    if (triggerElement) {
+      triggerElement.focus();
+    }
+    setTimeout(() => dialog.remove(), 300); // Remove after CSS transition
+  });
+
+  // Open the modal (enables ESC key and focus trap automatically)
+  dialog.showModal();
 }
 
 // Helper function to fetch a single product
