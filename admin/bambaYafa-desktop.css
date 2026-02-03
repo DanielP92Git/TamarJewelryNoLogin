@@ -420,6 +420,7 @@ img {
 .listproduct-format {
   align-items: center;
   font-weight: 600;
+  cursor: pointer;
 }
 
 .delete-svg {
@@ -1635,7 +1636,7 @@ dialog.admin-preview-modal {
   position: fixed;
   inset: 0;
   max-width: 900px;
-  max-height: 80vh;
+  max-height: 90vh;
   margin: auto;
   padding: 0;
   border: none;
