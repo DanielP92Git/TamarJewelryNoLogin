@@ -35,8 +35,8 @@ Requirements for admin UX improvements milestone. Each maps to roadmap phases.
 
 ### Image Gallery Reordering
 
-- [ ] **IMAGE-01**: Product schema merges mainImage + galleryImages into single images array
-- [ ] **IMAGE-02**: First image in images array automatically becomes main/featured image
+- [x] **IMAGE-01**: Product schema merges mainImage + galleryImages into single images array
+- [x] **IMAGE-02**: First image in images array automatically becomes main/featured image
 - [ ] **IMAGE-03**: Admin can drag image thumbnails to reorder in edit form
 - [ ] **IMAGE-04**: Image thumbnails show visual feedback during dragging state
 - [ ] **IMAGE-05**: Image gallery shows visual feedback for drop indicator position
@@ -95,8 +95,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-02 | Phase 4 | Pending |
 | FOUND-03 | Phase 4 | Pending |
 | FOUND-04 | Phase 5 | Complete |
-| FOUND-05 | Phase 7 | Pending |
-| FOUND-06 | Phase 7 | Pending |
+| FOUND-05 | Phase 7 | Complete |
+| FOUND-06 | Phase 7 | Complete |
 | ORDER-01 | Phase 6 | Complete |
 | ORDER-02 | Phase 6 | Complete |
 | ORDER-03 | Phase 6 | Complete |
@@ -108,8 +108,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ORDER-09 | Phase 6 | Complete |
 | ORDER-10 | Phase 6 | Complete |
 | ORDER-11 | Phase 6 | Complete |
-| IMAGE-01 | Phase 7 | Pending |
-| IMAGE-02 | Phase 7 | Pending |
+| IMAGE-01 | Phase 7 | Complete |
+| IMAGE-02 | Phase 7 | Complete |
 | IMAGE-03 | Phase 8 | Pending |
 | IMAGE-04 | Phase 8 | Pending |
 | IMAGE-05 | Phase 8 | Pending |
@@ -141,4 +141,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-01*
-*Last updated: 2026-02-01 after roadmap creation with full traceability*
+*Last updated: 2026-02-03 after Phase 7 execution*
