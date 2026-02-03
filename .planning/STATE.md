@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 8 of 9 (Modal Integration & Image Reordering)
-Plan: 2 of ? in phase
-Status: In progress - Modal actions complete, gallery sortable next
-Last activity: 2026-02-03 — Completed 08-02 modal actions (3 tasks combined)
+Plan: 4 of ? in phase
+Status: In progress - Image persistence and deletion complete
+Last activity: 2026-02-03 — Completed 08-04 image persistence & deletion (3 tasks)
 
-Progress: [█████████░] 92% Phase 8 (v1.0: 5/5 plans, v1.1: 18/? plans, 23 total through 08-02)
+Progress: [█████████░] 93% Phase 8 (v1.0: 5/5 plans, v1.1: 20/? plans, 25 total through 08-04)
 
 ## Performance Metrics
 
@@ -34,9 +34,11 @@ Progress: [█████████░] 92% Phase 8 (v1.0: 5/5 plans, v1.1: 1
 | 5 (v1.1) | 1 | ~4min | ~4min |
 | 6 (v1.1) | 4 | ~59min | ~14.8min |
 | 7 (v1.1) | 5 | ~177min | ~35.4min |
-| 8 (v1.1) | 2 | ~6min | ~3min |
+| 8 (v1.1) | 4 | ~17min | ~4.3min |
 
 **Recent Trend:**
+- 08-04: 4min (image persistence & deletion) - imageOrder form submit, delete with confirmation, backend images array support
+- 08-03: 7min (gallery sortable) - SortableJS drag-drop, main badge automation, order tracking
 - 08-02: 2min (modal actions) - Edit/Duplicate/Delete wired, toast feedback, list refresh
 - 08-01: 4min (modal infrastructure) - native dialog with images array, accessibility complete
 - 07-05: 148min (human verification + edit button fix) - checkpoint with 1 bug discovered/fixed
@@ -54,7 +56,7 @@ Progress: [█████████░] 92% Phase 8 (v1.0: 5/5 plans, v1.1: 1
 - Consistent ~3-3.5h per plan for full-stack features (Phases 1-3)
 - Trend: Backend-only or frontend-only phases execute quickly; full integration takes ~3h
 
-*Updated after 08-02 completion (Phase 8 Plan 02 complete)*
+*Updated after 08-04 completion (Phase 8 Plan 04 complete)*
 
 ## Accumulated Context
 
@@ -133,6 +135,14 @@ Recent decisions affecting current work:
 - Toast feedback for delete — showSuccessToast/showErrorToast replace alert() for better UX (08-02)
 - Thumbnail gallery in modal — independent implementation, not reusing customer-facing modal code
 - z-index 1500 for modal — between sticky header (1000) and toasts (2000), maintains layering hierarchy
+- Helper function extraction — getAllMainImageUrls/getAllSmallImageUrls moved to module scope for reuse (08-03)
+- Handle-based dragging — .image-drag-handle for images (prevents accidental reorder, matches Phase 6 pattern) (08-03)
+- Automatic main badge — first image always main, badge updates on reorder (eliminates manual toggle) (08-03)
+- Hidden field tracking — imageOrderInput stores JSON array of URLs for form submission (08-03)
+- ImageOrder in FormData — send imageOrder with product update for atomic save (no race conditions) (08-04)
+- Delete uses "small" imageType — matches legacy deleteproductimage API contract (08-04)
+- Backend filters images array on delete — maintain Phase 7 unified array + derived fields for backwards compatibility (08-04)
+- Numeric id for delete API — existing endpoint expects numeric product.id, not MongoDB _id (08-04)
 
 ### Pending Todos
 
@@ -165,7 +175,7 @@ None yet.
 - All requirements FOUND-05, FOUND-06, IMAGE-01, IMAGE-02 satisfied and verified
 - Zero-downtime migration: Old and new code coexist gracefully, production-ready
 
-**Phase 8 Progress (Plans 01-02 complete):**
+**Phase 8 Progress (Plans 01-04 complete):**
 - Modal infrastructure complete: Native dialog element with ARIA attributes and accessibility (Plan 08-01)
 - Customer-facing preview: Product rows clickable, modal shows images/title/description/SKU/price
 - Images array integration: Modal consumes unified images array with legacy fallbacks
@@ -175,19 +185,24 @@ None yet.
 - RTL support: CSS logical properties for bidirectional layout
 - Mobile responsive: Stacked layout under 800px breakpoint
 - All requirements MODAL-01, MODAL-02, MODAL-04, MODAL-05, MODAL-06, MODAL-07, MODAL-08 satisfied
-- Modal actions complete: Edit navigates to form, Duplicate fetches and opens form, Delete with confirmation (Plan 08-02)
-- Action buttons reuse existing functions: editProduct, openDuplicateProduct, fetchProduct, removeproduct API
-- Toast notifications for delete: showSuccessToast on success, showErrorToast on failure
-- List auto-refresh after delete: fetchInfo() called after successful deletion
-- All requirements MODAL-03, MODAL-09 satisfied
+- Modal actions complete: Edit navigates to form, Duplicate clones with name suffix, Delete with confirmation (Plan 08-02)
+- Gallery sortable complete: Drag-drop reordering in edit form, SortableJS with handle pattern (Plan 08-03)
+- Main image badge: First thumbnail automatically marked, updates on reorder
+- Image order tracking: Hidden field stores JSON array for save implementation
+- All requirements IMAGE-03, IMAGE-04, IMAGE-05, IMAGE-07 satisfied
+- Image persistence complete: Order changes persist on form submit, delete removes from DB (Plan 08-04)
+- Backend reordering: Handles imageOrder in updateproduct endpoint, updates images array and derived fields
+- Backend deletion: Filters unified images array on delete, maintains backwards compatibility
+- Delete UI: Confirmation dialog, optimistic DOM updates, toast feedback
+- All requirements IMAGE-06, IMAGE-08 satisfied
 
 ## Session Continuity
 
-Last session: 2026-02-03 (Phase 8 Plan 02 execution complete)
-Stopped at: Completed 08-02-PLAN.md (modal actions)
+Last session: 2026-02-03 (Phase 8 Plan 04 execution complete)
+Stopped at: Completed 08-04-PLAN.md (image persistence & deletion)
 Resume file: None
 
-**Next step:** Execute 08-03-PLAN.md (gallery sortable) or plan next phase
+**Next step:** Execute 08-05-PLAN.md (human verification checkpoint) or plan next phase
 
 ---
 *Last updated: 2026-02-03 after Phase 8 Plan 02 completion*
