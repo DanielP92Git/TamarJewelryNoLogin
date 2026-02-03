@@ -2826,8 +2826,8 @@ function setupEditFormImageGallery(product, container) {
     }
   });
 
-  // Setup delete button handlers (will be implemented in Plan 04)
-  // setupImageDeleteButtons(container, product._id);
+  // Setup delete button handlers (Phase 8 Plan 04)
+  setupImageDeleteButtons(container, product._id);
 }
 
 /**
@@ -2865,6 +2865,78 @@ function updateImageOrderField(container) {
   if (orderInput) {
     orderInput.value = JSON.stringify(getImageOrder(container));
   }
+}
+
+/**
+ * Setup delete button handlers for gallery images
+ * @param {HTMLElement} container - Gallery container
+ * @param {string} productId - Product MongoDB _id (not numeric id)
+ */
+function setupImageDeleteButtons(container, productId) {
+  container.querySelectorAll('.delete-image-btn').forEach(btn => {
+    btn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const imageUrl = decodeURIComponent(btn.dataset.url);
+      const imageIndex = parseInt(btn.dataset.index, 10);
+      const thumb = btn.closest('.gallery-thumb');
+
+      // Confirmation dialog (IMAGE-08)
+      if (!confirm('Delete this image from the gallery?')) {
+        return;
+      }
+
+      btn.disabled = true;
+
+      try {
+        // Use numeric id from hidden field in form
+        const numericProductId = document.getElementById('product-id')?.value;
+        if (!numericProductId) {
+          throw new Error('Product ID not found');
+        }
+
+        const response = await fetch(`${API_URL}/deleteproductimage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+          },
+          body: JSON.stringify({
+            productId: numericProductId,
+            imageType: 'small', // Gallery images are "small" type
+            imageUrl
+          })
+        });
+
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          // Remove thumbnail from DOM
+          thumb.remove();
+
+          // Update main badge on new first image
+          updateMainImageBadge(container);
+
+          // Update hidden order field
+          updateImageOrderField(container);
+
+          showSuccessToast('Image deleted');
+
+          // Check if gallery is now empty
+          if (container.querySelectorAll('.gallery-thumb').length === 0) {
+            container.innerHTML = '<p class="gallery-help-text">No images remaining</p>';
+          }
+        } else {
+          throw new Error(result.message || 'Failed to delete image');
+        }
+      } catch (error) {
+        console.error('[deleteImage] Error:', error);
+        showErrorToast('Failed to delete image: ' + error.message);
+        btn.disabled = false;
+      }
+    });
+  });
 }
 
 // ===============================================================

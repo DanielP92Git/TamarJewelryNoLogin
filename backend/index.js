@@ -3805,6 +3805,50 @@ app.post(
         });
       }
 
+      // Phase 7: Also filter unified images array
+      if (Array.isArray(product.images)) {
+        product.images = product.images.filter(img => {
+          if (!img || typeof img !== 'object') return true;
+
+          const fnD = extractFilename(img.desktop);
+          const fnM = extractFilename(img.mobile);
+          const fnPD = extractFilename(img.publicDesktop);
+          const fnPM = extractFilename(img.publicMobile);
+          const fnDL = extractFilename(img.desktopLocal);
+          const fnML = extractFilename(img.mobileLocal);
+
+          const matchD = fnD && toBaseId(fnD) === targetBaseId;
+          const matchM = fnM && toBaseId(fnM) === targetBaseId;
+          const matchPD = fnPD && toBaseId(fnPD) === targetBaseId;
+          const matchPM = fnPM && toBaseId(fnPM) === targetBaseId;
+          const matchDL = fnDL && toBaseId(fnDL) === targetBaseId;
+          const matchML = fnML && toBaseId(fnML) === targetBaseId;
+
+          if (matchD || matchM || matchPD || matchPM || matchDL || matchML) {
+            if (matchD) filenamesToDelete.add(fnD);
+            if (matchM) filenamesToDelete.add(fnM);
+            if (matchPD) filenamesToDelete.add(fnPD);
+            if (matchPM) filenamesToDelete.add(fnPM);
+            if (matchDL) filenamesToDelete.add(fnDL);
+            if (matchML) filenamesToDelete.add(fnML);
+            return false;
+          }
+          return true;
+        });
+
+        // Update derived fields for backwards compatibility
+        if (product.images.length > 0) {
+          product.mainImage = product.images[0];
+        } else {
+          product.mainImage = null;
+        }
+        if (product.images.length > 1) {
+          product.smallImages = product.images.slice(1);
+        } else {
+          product.smallImages = [];
+        }
+      }
+
       // Fallback for deeply malformed legacy data:
       // if we still didn't detect anything to delete, do a last-resort match
       // by searching the raw serialized object for the target filename.
