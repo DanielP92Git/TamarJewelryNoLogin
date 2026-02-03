@@ -68,7 +68,7 @@ function getDevApiCandidates() {
 let API_URL = (() => {
   // Production remains explicit; dev is auto-resolved at runtime to avoid host/port mismatches.
   if (IS_PRODUCTION) {
-    return normalizeApiBase(`https://lobster-app-jipru.ondigitalocean.app/api`);
+    return normalizeApiBase(`${process.env.API_URL}`) || "https://tamarkfir.com/api";
   }
   return normalizeApiBase(
     window.location.hostname.includes("127.0.0.1")

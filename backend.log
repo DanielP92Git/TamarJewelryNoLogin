@@ -682,3 +682,174 @@ All Products Fetched
 All Products Fetched
 All Products Fetched
 All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+Error updating SKU: CastError: Cast to Number failed for value "NaN" (type number) at path "id" for model "Product"
+    at SchemaNumber.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:381:11)
+    at SchemaType.applySetters (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schemaType.js:1255:12)
+    at SchemaNumber.castForQuery (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:435:16)
+    at cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\cast.js:390:32)
+    at Query.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4999:12)
+    at Query._castConditions (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2325:10)
+    at model.Query._findOne (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2648:8)
+    at model.Query.exec (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4548:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:2599:23 {
+  stringValue: '"NaN"',
+  messageFormat: undefined,
+  kind: 'Number',
+  value: NaN,
+  path: 'id',
+  reason: AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!isNaN(val))
+  
+      at castNumber (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\cast\number.js:27:10)
+      at SchemaNumber.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:379:12)
+      at SchemaType.applySetters (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schemaType.js:1255:12)
+      at SchemaNumber.castForQuery (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:435:16)
+      at cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\cast.js:390:32)
+      at Query.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4999:12)
+      at Query._castConditions (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2325:10)
+      at model.Query._findOne (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2648:8)
+      at model.Query.exec (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4548:80)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  },
+  valueType: 'number'
+}
+Error updating SKU: CastError: Cast to Number failed for value "NaN" (type number) at path "id" for model "Product"
+    at SchemaNumber.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:381:11)
+    at SchemaType.applySetters (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schemaType.js:1255:12)
+    at SchemaNumber.castForQuery (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:435:16)
+    at cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\cast.js:390:32)
+    at Query.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4999:12)
+    at Query._castConditions (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2325:10)
+    at model.Query._findOne (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2648:8)
+    at model.Query.exec (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4548:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:2599:23 {
+  stringValue: '"NaN"',
+  messageFormat: undefined,
+  kind: 'Number',
+  value: NaN,
+  path: 'id',
+  reason: AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!isNaN(val))
+  
+      at castNumber (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\cast\number.js:27:10)
+      at SchemaNumber.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:379:12)
+      at SchemaType.applySetters (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schemaType.js:1255:12)
+      at SchemaNumber.castForQuery (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:435:16)
+      at cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\cast.js:390:32)
+      at Query.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4999:12)
+      at Query._castConditions (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2325:10)
+      at model.Query._findOne (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2648:8)
+      at model.Query.exec (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4548:80)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  },
+  valueType: 'number'
+}
+Error updating SKU: CastError: Cast to Number failed for value "NaN" (type number) at path "id" for model "Product"
+    at SchemaNumber.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:381:11)
+    at SchemaType.applySetters (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schemaType.js:1255:12)
+    at SchemaNumber.castForQuery (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:435:16)
+    at cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\cast.js:390:32)
+    at Query.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4999:12)
+    at Query._castConditions (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2325:10)
+    at model.Query._findOne (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2648:8)
+    at model.Query.exec (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4548:80)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:2599:23 {
+  stringValue: '"NaN"',
+  messageFormat: undefined,
+  kind: 'Number',
+  value: NaN,
+  path: 'id',
+  reason: AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!isNaN(val))
+  
+      at castNumber (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\cast\number.js:27:10)
+      at SchemaNumber.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:379:12)
+      at SchemaType.applySetters (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schemaType.js:1255:12)
+      at SchemaNumber.castForQuery (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\schema\number.js:435:16)
+      at cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\cast.js:390:32)
+      at Query.cast (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4999:12)
+      at Query._castConditions (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2325:10)
+      at model.Query._findOne (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:2648:8)
+      at model.Query.exec (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\mongoose\lib\query.js:4548:80)
+      at process.processTicksAndRejections (node:internal/process/task_queues:105:5) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '=='
+  },
+  valueType: 'number'
+}
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+All Products Fetched
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T19:57:11.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T19:57:11.000Z
+}
+Token verification error: TokenExpiredError: jwt expired
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:190:21
+    at getSecret (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:97:14)
+    at module.exports [as verify] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\jsonwebtoken\verify.js:101:10)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:1560:25
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at next (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:149:13)
+    at Route.dispatch (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\route.js:119:3)
+    at Layer.handle [as handle_request] (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\layer.js:95:5)
+    at C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:284:15
+    at Function.process_params (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\router\index.js:346:12) {
+  expiredAt: 2026-02-03T19:57:11.000Z
+}
