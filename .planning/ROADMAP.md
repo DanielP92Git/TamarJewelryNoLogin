@@ -113,10 +113,14 @@ Plans:
   3. First image in array automatically serves as main/featured image
   4. Frontend displays products correctly using new schema with fallback for legacy data
   5. Migration script includes rollback capability and dry-run mode
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 07-01: TBD
+- [ ] 07-01-PLAN.md — Migration infrastructure with dry-run audit and rollback
+- [ ] 07-02-PLAN.md — Execute migration and update Product schema
+- [ ] 07-03-PLAN.md — Backend API compatibility layer for images array
+- [ ] 07-04-PLAN.md — Frontend update to use images array
+- [ ] 07-05-PLAN.md — Human verification of complete migration
 
 ### Phase 8: Modal Integration & Image Reordering
 **Goal**: Product preview modal with drag-and-drop image gallery management
@@ -165,9 +169,9 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 4. Schema Foundation & Library | v1.1 | 3/3 | Complete | 2026-02-02 |
 | 5. Product Ordering Backend | v1.1 | 1/1 | Complete | 2026-02-03 |
 | 6. Frontend Product Reordering | v1.1 | 4/4 | Complete | 2026-02-03 |
-| 7. Image Array Migration | v1.1 | 0/TBD | Not started | - |
+| 7. Image Array Migration | v1.1 | 0/5 | Not started | - |
 | 8. Modal Integration | v1.1 | 0/TBD | Not started | - |
 | 9. Testing & Polish | v1.1 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-03 after Phase 6 execution*
+*Last updated: 2026-02-03 after Phase 7 planning*
