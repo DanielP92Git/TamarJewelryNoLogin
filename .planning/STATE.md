@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 8 of 9 (Modal Integration & Image Reordering)
-Plan: 4 of ? in phase
-Status: In progress - Image persistence and deletion complete
-Last activity: 2026-02-03 — Completed 08-04 image persistence & deletion (3 tasks)
+Plan: 5 of 5 in phase (Human verification in progress)
+Status: Testing checkpoint - 3 bugs fixed, awaiting gallery verification
+Last activity: 2026-02-03 — Plan 08-05 checkpoint: fixed modal height, cursor, focus trap, duplicate button
 
-Progress: [█████████░] 93% Phase 8 (v1.0: 5/5 plans, v1.1: 20/? plans, 25 total through 08-04)
+Progress: [█████████░] 95% Phase 8 (v1.0: 5/5 plans, v1.1: 21/? plans, 26 total through 08-05 partial)
 
 ## Performance Metrics
 
@@ -196,13 +196,32 @@ None yet.
 - Delete UI: Confirmation dialog, optimistic DOM updates, toast feedback
 - All requirements IMAGE-06, IMAGE-08 satisfied
 
+**Phase 8 Checkpoint (Plan 08-05 in progress):**
+- Human verification started: Modal tests in progress
+- 3 UX bugs found and fixed:
+  1. Modal height too small (80vh → 90vh) - thumbnails now visible
+  2. Product rows missing pointer cursor - added for better clickability indication
+  3. Focus trap not working - added manual Tab/Shift+Tab cycling within modal
+  4. Duplicate button 500 error - simplified to use product directly without fetch
+- Modal tests status: 7/8 passed (awaiting duplicate confirmation after fix)
+- Remaining: Gallery reordering tests (7 scenarios) + RTL/regression tests
+
 ## Session Continuity
 
-Last session: 2026-02-03 (Phase 8 Plan 04 execution complete)
-Stopped at: Completed 08-04-PLAN.md (image persistence & deletion)
+Last session: 2026-02-03 (Phase 8 checkpoint in progress)
+Stopped at: Plan 08-05 checkpoint - modal bugs fixed, awaiting gallery tests
 Resume file: None
 
-**Next step:** Execute 08-05-PLAN.md (human verification checkpoint) or plan next phase
+**Next step:** Continue Plan 08-05 verification - test gallery reordering and complete checkpoint
+
+**Resume command after /clear:**
+```
+Continue Phase 8 verification from checkpoint. Modal tests complete (3 bugs fixed).
+Need to test:
+1. Image gallery reordering (7 tests)
+2. RTL and regression testing
+Then create 08-05-SUMMARY.md and proceed to phase verification.
+```
 
 ---
-*Last updated: 2026-02-03 after Phase 8 Plan 02 completion*
+*Last updated: 2026-02-03 during Phase 8 Plan 05 checkpoint*
