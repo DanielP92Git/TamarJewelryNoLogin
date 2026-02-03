@@ -2151,6 +2151,9 @@ app.post(
       let mainImageUpdated = false;
       let smallImagesUpdated = false;
 
+      // Start with existing images array or empty
+      let images = Array.isArray(product.images) ? [...product.images] : [];
+
       // Process main image if uploaded
       if (req.files && req.files.mainImage && req.files.mainImage.length > 0) {
         console.log('Processing new main image');
@@ -2170,10 +2173,8 @@ app.post(
             mainImageResults?.mobile?.spacesUrl ||
             `/uploads/${mainImageResults.mobile.filename}`;
 
-          // Update main image URLs
-          // - Prefer Spaces/CDN absolute URLs when available (durable on App Platform)
-          // - Fall back to local relative paths in dev
-          product.mainImage = {
+          // Build new main image object
+          const newMainImage = {
             desktop: desktopUrl,
             mobile: mobileUrl,
             publicDesktop:
@@ -2183,6 +2184,16 @@ app.post(
               mainImageResults?.mobile?.spacesUrl ||
               `/public/uploads/${mainImageResults.mobile.filename}`,
           };
+
+          // Update main image URLs (old format)
+          product.mainImage = newMainImage;
+
+          // Update images array: replace images[0] with new main image
+          if (images.length > 0) {
+            images[0] = newMainImage;
+          } else {
+            images.push(newMainImage);
+          }
 
           // Update legacy fields
           product.image = desktopUrl;
@@ -2244,12 +2255,16 @@ app.post(
                   `/smallImages/${result.mobile.filename}`,
               }));
 
-          // Append new small images to existing ones
+          // Append new small images to existing ones (old format)
           if (!product.smallImages) {
             product.smallImages = [];
           }
 
           product.smallImages = [...product.smallImages, ...newSmallImages];
+
+          // Update images array: replace images[1..n] with new gallery images
+          // Keep images[0] (main image), append new small images
+          images = [images[0], ...newSmallImages].filter(Boolean);
 
           smallImagesUpdated = true;
           console.log('Small images updated');
@@ -2257,6 +2272,11 @@ app.post(
           console.error('Error processing small images:', error);
           // Continue without updating small images if processing fails
         }
+      }
+
+      // Update images array in product (Phase 7)
+      if (mainImageUpdated || smallImagesUpdated) {
+        product.images = images;
       }
 
       // Save the updated product
