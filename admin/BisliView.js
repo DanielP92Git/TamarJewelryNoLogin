@@ -3077,6 +3077,15 @@ function editProduct(product) {
                 </label>
                 <input type="file" name="smallImages" id="smallImages" multiple accept="image/*" style="display:none;" />
               </div>
+
+              <div class="field">
+                <div class="gallery-section-header">
+                  <span class="gallery-section-title">Product Gallery</span>
+                  <span class="gallery-help-text">Drag to reorder. First image is main.</span>
+                </div>
+                <div class="edit-gallery-thumbs" id="editGalleryThumbs"></div>
+                <input type="hidden" id="imageOrderInput" name="imageOrder" value="">
+              </div>
             </div>
           </div>
 
@@ -3098,6 +3107,18 @@ function editProduct(product) {
   `;
 
   pageContent.insertAdjacentHTML("afterbegin", markup);
+
+  // Setup sortable gallery for image reordering
+  const galleryContainer = document.getElementById('editGalleryThumbs');
+  if (galleryContainer) {
+    setupEditFormImageGallery(product, galleryContainer);
+
+    // Initialize the hidden input with current order
+    const orderInput = document.getElementById('imageOrderInput');
+    if (orderInput) {
+      orderInput.value = JSON.stringify(getImageOrder(galleryContainer));
+    }
+  }
 
   // Cancel -> back to products list
   const cancelBtn = document.getElementById("cancel-edit-product");
