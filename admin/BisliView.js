@@ -3498,28 +3498,61 @@ function openProductPreview(product, triggerElement) {
   const duplicateBtn = dialog.querySelector('[data-action="duplicate"]');
   const deleteBtn = dialog.querySelector('[data-action="delete"]');
 
-  // Placeholder handlers (will be implemented in Plan 02)
+  // Edit button handler
   if (editBtn) {
     editBtn.addEventListener('click', () => {
       dialog.close();
-      // TODO: Wire to editProduct in Plan 02
-      console.log('Edit product:', product._id);
+      editProduct(product);
     });
   }
 
+  // Duplicate button handler
   if (duplicateBtn) {
-    duplicateBtn.addEventListener('click', () => {
+    duplicateBtn.addEventListener('click', async () => {
       dialog.close();
-      // TODO: Wire to duplicate handler in Plan 02
-      console.log('Duplicate product:', product._id);
+
+      try {
+        // Fetch full product data (modal may have partial data)
+        const fullProduct = await fetchProduct(product._id);
+        await openDuplicateProduct(fullProduct);
+      } catch (error) {
+        console.error('Error duplicating product:', error);
+        showErrorToast('Error duplicating product: ' + (error.message || 'Unknown error'));
+      }
     });
   }
 
+  // Delete button handler
   if (deleteBtn) {
-    deleteBtn.addEventListener('click', () => {
+    deleteBtn.addEventListener('click', async () => {
+      // Use native confirm for simplicity (consistent with existing delete pattern)
+      if (!confirm(`Delete "${product.name}"? This cannot be undone.`)) {
+        return;
+      }
+
       dialog.close();
-      // TODO: Wire to delete handler in Plan 02
-      console.log('Delete product:', product._id);
+
+      try {
+        const response = await fetch(`${API_URL}/removeproduct`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+          },
+          body: JSON.stringify({ id: product._id })
+        });
+
+        const result = await response.json();
+        if (result.success) {
+          showSuccessToast('Product deleted successfully');
+          fetchInfo(); // Refresh the product list
+        } else {
+          throw new Error(result.message || 'Failed to delete product');
+        }
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        showErrorToast('Error deleting product: ' + error.message);
+      }
     });
   }
 
