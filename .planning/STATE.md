@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 8 of 9 (Modal Integration & Image Reordering)
-Plan: 1 of 2 in phase
-Status: In progress - Modal infrastructure complete, actions pending
-Last activity: 2026-02-03 — Completed 08-01 modal infrastructure (3 tasks)
+Plan: 3 of ? in phase
+Status: In progress - Gallery sortable complete, delete and save pending
+Last activity: 2026-02-03 — Completed 08-03 gallery sortable (3 tasks)
 
-Progress: [█████████░] 91% Phase 8 (v1.0: 5/5 plans, v1.1: 15/? plans, 20 total through 08-01)
+Progress: [█████████░] 92% Phase 8 (v1.0: 5/5 plans, v1.1: 17/? plans, 22 total through 08-03)
 
 ## Performance Metrics
 
@@ -34,9 +34,11 @@ Progress: [█████████░] 91% Phase 8 (v1.0: 5/5 plans, v1.1: 1
 | 5 (v1.1) | 1 | ~4min | ~4min |
 | 6 (v1.1) | 4 | ~59min | ~14.8min |
 | 7 (v1.1) | 5 | ~177min | ~35.4min |
-| 8 (v1.1) | 1 | ~4min | ~4min |
+| 8 (v1.1) | 3 | ~18min | ~6min |
 
 **Recent Trend:**
+- 08-03: 7min (gallery sortable) - SortableJS drag-drop for image reordering, main badge automation
+- 08-02: 7min (modal actions) - Edit/Duplicate/Delete wired, SKU copy, event delegation fixes
 - 08-01: 4min (modal infrastructure) - native dialog with images array, accessibility complete
 - 07-05: 148min (human verification + edit button fix) - checkpoint with 1 bug discovered/fixed
 - 07-04: 2min (frontend images array support) - prefer-new-fallback-old pattern
@@ -130,6 +132,10 @@ Recent decisions affecting current work:
 - Action buttons deferred — Edit/Duplicate/Delete present but placeholder (console.log), wired in Plan 02
 - Thumbnail gallery in modal — independent implementation, not reusing customer-facing modal code
 - z-index 1500 for modal — between sticky header (1000) and toasts (2000), maintains layering hierarchy
+- Helper function extraction — getAllMainImageUrls/getAllSmallImageUrls moved to module scope for reuse (08-03)
+- Handle-based dragging — .image-drag-handle for images (prevents accidental reorder, matches Phase 6 pattern) (08-03)
+- Automatic main badge — first image always main, badge updates on reorder (eliminates manual toggle) (08-03)
+- Hidden field tracking — imageOrderInput stores JSON array of URLs for form submission (08-03)
 
 ### Pending Todos
 
@@ -162,7 +168,7 @@ None yet.
 - All requirements FOUND-05, FOUND-06, IMAGE-01, IMAGE-02 satisfied and verified
 - Zero-downtime migration: Old and new code coexist gracefully, production-ready
 
-**Phase 8 Progress (Plan 01 complete):**
+**Phase 8 Progress (Plans 01-03 complete):**
 - Modal infrastructure complete: Native dialog element with ARIA attributes and accessibility (Plan 08-01)
 - Customer-facing preview: Product rows clickable, modal shows images/title/description/SKU/price
 - Images array integration: Modal consumes unified images array with legacy fallbacks
@@ -172,15 +178,20 @@ None yet.
 - RTL support: CSS logical properties for bidirectional layout
 - Mobile responsive: Stacked layout under 800px breakpoint
 - All requirements MODAL-01, MODAL-02, MODAL-04, MODAL-05, MODAL-06, MODAL-07, MODAL-08 satisfied
-- Action buttons placeholder: Edit/Duplicate/Delete present but deferred to Plan 02
+- Modal actions complete: Edit navigates to form, Duplicate clones with name suffix, Delete with confirmation (Plan 08-02)
+- SKU copy-to-clipboard: One-click copy, success toast feedback
+- Gallery sortable complete: Drag-drop reordering in edit form, SortableJS with handle pattern (Plan 08-03)
+- Main image badge: First thumbnail automatically marked, updates on reorder
+- Image order tracking: Hidden field stores JSON array for save implementation
+- All requirements IMAGE-03, IMAGE-04, IMAGE-05, IMAGE-07 satisfied
 
 ## Session Continuity
 
-Last session: 2026-02-03 (Phase 8 Plan 01 execution complete)
-Stopped at: Completed 08-01-PLAN.md (modal infrastructure)
+Last session: 2026-02-03 (Phase 8 Plan 03 execution complete)
+Stopped at: Completed 08-03-PLAN.md (gallery sortable)
 Resume file: None
 
-**Next step:** Execute 08-02-PLAN.md (modal actions - Edit/Duplicate/Delete) or plan next phase
+**Next step:** Execute 08-04-PLAN.md (drag-to-delete and save integration) or plan next phase
 
 ---
-*Last updated: 2026-02-03 after Phase 8 Plan 01 completion*
+*Last updated: 2026-02-03 after Phase 8 Plan 03 completion*
