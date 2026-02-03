@@ -3920,7 +3920,7 @@ app.get('/getproduct/:id', async (req, res) => {
         .status(404)
         .json({ success: false, message: 'Product not found' });
     }
-    res.json(product);
+    res.json(normalizeProductForClient(product));
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

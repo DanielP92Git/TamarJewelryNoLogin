@@ -970,11 +970,11 @@ function showLoginPage(errorMessage) {
       <form id="${uniqueId}" class="login-form">
           <div class="form-group">
           <label for="admin-email-${uniqueId}">Email:</label>
-          <input type="email" id="admin-email-${uniqueId}" class="login-input" required placeholder="Enter your email">
+          <input type="email" id="admin-email-${uniqueId}" name="email" class="login-input" required placeholder="Enter your email" autocomplete="email">
           </div>
           <div class="form-group">
           <label for="admin-password-${uniqueId}">Password:</label>
-          <input type="password" id="admin-password-${uniqueId}" class="login-input" required placeholder="Enter your password">
+          <input type="password" id="admin-password-${uniqueId}" name="password" class="login-input" required placeholder="Enter your password" autocomplete="current-password">
           </div>
           <button type="submit" class="login-btn">Login</button>
         </form>
@@ -1652,15 +1652,10 @@ async function loadProductsPage(data) {
 
   // Set the category filter to the stored category
   const categoryFilter = document.getElementById("categoryFilter");
-  console.log(
-    "[BisliView loadProductsPage] Current state.selectedCategory BEFORE setting filter:",
-    state.selectedCategory,
-  );
+ 
   if (categoryFilter && state.selectedCategory) {
     categoryFilter.value = state.selectedCategory;
-    console.log(
-      `[BisliView loadProductsPage] Set categoryFilter.value to: ${categoryFilter.value}. Expected: ${state.selectedCategory}`,
-    );
+    
   } else {
     console.warn(
       "[BisliView loadProductsPage] Category filter or state.selectedCategory not available. Filter might default to 'all'.",
@@ -2155,7 +2150,7 @@ function loadProducts(data) {
           <span style="font-weight:900;">✎</span>
         </button>
         <button class="icon-action icon-action--primary duplicate-btn" title="Duplicate Product" data-product-id="${
-          item._id
+          item.id
         }">
           <span style="font-weight:900;">⧉</span>
         </button>
@@ -4375,6 +4370,10 @@ async function addProduct(e, data, form) {
     // This is necessary because something (Live Server, extension, or browser)
     // is triggering page reloads during fetch operations
     window.addEventListener("beforeunload", beforeUnloadHandler);
+
+    // NOTE: Live Server auto-reload can interrupt uploads in dev mode.
+    // This is a dev-only issue - production doesn't have Live Server WebSocket.
+    // The beforeunload handler above provides user warning if reload is attempted.
 
     // CRITICAL: Add explicit try-catch around fetch to prevent navigation
     let imageResponse;
