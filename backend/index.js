@@ -2751,7 +2751,7 @@ app.post(
 );
 
 app.get('/allproducts', async (req, res) => {
-  let products = await Product.find({}).lean();
+  let products = await Product.find({}).sort({ category: 1, displayOrder: 1 }).lean();
   if (!isProd) console.log('All Products Fetched');
   res.send(products.map(normalizeProductForClient));
 });

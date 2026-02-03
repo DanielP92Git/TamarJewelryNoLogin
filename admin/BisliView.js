@@ -1238,7 +1238,7 @@ async function saveProductOrder() {
     // This ensures the list stays in the new order without refetch
     if (state.products) {
       const orderedProducts = productIds.map(id =>
-        state.products.find(p => p.id === id)
+        state.products.find(p => p._id === id)
       ).filter(Boolean);
 
       // Update products that were reordered
