@@ -1918,16 +1918,31 @@ app.post(
       // Create the product with new image structure
       const isSpacesDesktop = isAbsoluteHttpUrl(mainImageUrls.desktop);
 
+      // Build unified images array (Phase 7)
+      const images = [];
+
+      // Main image becomes first element
+      if (mainImageUrls && Object.keys(mainImageUrls).length > 0) {
+        images.push(mainImageUrls);
+      }
+
+      // Gallery images become subsequent elements
+      if (Array.isArray(smallImageUrls) && smallImageUrls.length > 0) {
+        images.push(...smallImageUrls);
+      }
+
       const product = new Product({
         id: nextId,
         name: req.body.name,
         // Legacy image field (using desktop version as default)
         image: mainImageUrls.desktop || mainImageUrls.publicDesktop || '',
         publicImage: mainImageUrls.publicDesktop || '',
-        // Store all image variations
+        // Store all image variations (old format - for backwards compatibility)
         mainImage: mainImageUrls,
-        // Store small images with all variations
+        // Store small images with all variations (old format - for backwards compatibility)
         smallImages: smallImageUrls,
+        // Unified images array (Phase 7 - new format, primary storage)
+        images: images,
         // Store relative direct image URL for better accessibility (absolute is built at response time)
         directImageUrl: mainImageUrls.desktop
           ? isSpacesDesktop
