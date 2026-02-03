@@ -2091,7 +2091,7 @@ function loadProducts(data) {
           <div class="mono">${String(item.id ?? "")}</div>
         </div>
       </div>
-      <div class="sku-cell mono" data-product-id="${item._id}" data-editable="true" style="cursor:pointer;" title="Click to edit">
+      <div class="sku-cell mono" data-product-id="${item.id}" data-editable="true" style="cursor:pointer;" title="Click to edit">
         <span class="sku-display">${item.sku || '—'}</span>
         <input
           type="text"
