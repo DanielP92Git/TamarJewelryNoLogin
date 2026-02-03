@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-01)
 
 **Core value:** Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency
-**Current focus:** Phase 7 - Image Array Migration (Complete)
+**Current focus:** Phase 8 - Modal Integration & Image Reordering (In Progress)
 
 ## Current Position
 
-Phase: 7 of 9 (Image Array Migration)
-Plan: 5 of 5 in phase (Phase 7 complete)
-Status: Phase complete - Image array migration verified and production-ready
-Last activity: 2026-02-03 — Completed 07-05 human verification (1 bug fixed)
+Phase: 8 of 9 (Modal Integration & Image Reordering)
+Plan: 1 of 2 in phase
+Status: In progress - Modal infrastructure complete, actions pending
+Last activity: 2026-02-03 — Completed 08-01 modal infrastructure (3 tasks)
 
-Progress: [█████████░] 90% Phase 7 (v1.0: 5/5 plans, v1.1: 14/? plans, 19 total through Phase 7)
+Progress: [█████████░] 91% Phase 8 (v1.0: 5/5 plans, v1.1: 15/? plans, 20 total through 08-01)
 
 ## Performance Metrics
 
@@ -34,8 +34,10 @@ Progress: [█████████░] 90% Phase 7 (v1.0: 5/5 plans, v1.1: 1
 | 5 (v1.1) | 1 | ~4min | ~4min |
 | 6 (v1.1) | 4 | ~59min | ~14.8min |
 | 7 (v1.1) | 5 | ~177min | ~35.4min |
+| 8 (v1.1) | 1 | ~4min | ~4min |
 
 **Recent Trend:**
+- 08-01: 4min (modal infrastructure) - native dialog with images array, accessibility complete
 - 07-05: 148min (human verification + edit button fix) - checkpoint with 1 bug discovered/fixed
 - 07-04: 2min (frontend images array support) - prefer-new-fallback-old pattern
 - 07-03: 15min (backend API images array support) - dual-write pattern, backwards compatibility
@@ -51,7 +53,7 @@ Progress: [█████████░] 90% Phase 7 (v1.0: 5/5 plans, v1.1: 1
 - Consistent ~3-3.5h per plan for full-stack features (Phases 1-3)
 - Trend: Backend-only or frontend-only phases execute quickly; full integration takes ~3h
 
-*Updated after 07-05 completion (Phase 7 complete)*
+*Updated after 08-01 completion (Phase 8 Plan 01 complete)*
 
 ## Accumulated Context
 
@@ -120,6 +122,15 @@ Recent decisions affecting current work:
 - Human verification as quality gate — manual testing catches visual issues and functional bugs automated tests miss (07-05)
 - Edit button handler field consistency — MongoDB _id vs numeric id requires consistent usage across UI event handlers (07-05)
 
+**Phase 8 Implementation Decisions:**
+- Native dialog for modals — zero dependencies, built-in ESC/focus trap/ARIA, 96%+ browser support, dialog.showModal() API
+- Images array consumption in admin — getPreviewImageUrl helper prefers images array, falls back to mainImage/smallImages
+- Event delegation with exclusions — row click opens modal except .edit-btn, .delete-btn, .duplicate-btn, .product-checkbox, .sku-cell, .drag-handle
+- Focus restoration on close — triggerElement.focus() returns focus to clicked row after modal closes
+- Action buttons deferred — Edit/Duplicate/Delete present but placeholder (console.log), wired in Plan 02
+- Thumbnail gallery in modal — independent implementation, not reusing customer-facing modal code
+- z-index 1500 for modal — between sticky header (1000) and toasts (2000), maintains layering hierarchy
+
 ### Pending Todos
 
 None yet.
@@ -151,13 +162,25 @@ None yet.
 - All requirements FOUND-05, FOUND-06, IMAGE-01, IMAGE-02 satisfied and verified
 - Zero-downtime migration: Old and new code coexist gracefully, production-ready
 
+**Phase 8 Progress (Plan 01 complete):**
+- Modal infrastructure complete: Native dialog element with ARIA attributes and accessibility (Plan 08-01)
+- Customer-facing preview: Product rows clickable, modal shows images/title/description/SKU/price
+- Images array integration: Modal consumes unified images array with legacy fallbacks
+- Thumbnail gallery: Main image switching, active state indicators
+- Close methods working: X button, ESC key, backdrop click all functional
+- Focus management: Focus trap enabled (native), focus restoration on close
+- RTL support: CSS logical properties for bidirectional layout
+- Mobile responsive: Stacked layout under 800px breakpoint
+- All requirements MODAL-01, MODAL-02, MODAL-04, MODAL-05, MODAL-06, MODAL-07, MODAL-08 satisfied
+- Action buttons placeholder: Edit/Duplicate/Delete present but deferred to Plan 02
+
 ## Session Continuity
 
-Last session: 2026-02-03 (Phase 7 execution complete)
-Stopped at: Completed Phase 7 (all 5 plans executed, verified, approved)
+Last session: 2026-02-03 (Phase 8 Plan 01 execution complete)
+Stopped at: Completed 08-01-PLAN.md (modal infrastructure)
 Resume file: None
 
-**Next step:** Plan Phase 8 or next priority from ROADMAP.md
+**Next step:** Execute 08-02-PLAN.md (modal actions - Edit/Duplicate/Delete) or plan next phase
 
 ---
-*Last updated: 2026-02-03 after Phase 7 verification*
+*Last updated: 2026-02-03 after Phase 8 Plan 01 completion*
