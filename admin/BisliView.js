@@ -68,7 +68,7 @@ function getDevApiCandidates() {
 let API_URL = (() => {
   // Production remains explicit; dev is auto-resolved at runtime to avoid host/port mismatches.
   if (IS_PRODUCTION) {
-    return normalizeApiBase(`${process.env.API_URL}`);
+    return normalizeApiBase("https://tamarkfir.com/api");
   }
   return normalizeApiBase(
     window.location.hostname.includes("127.0.0.1")
@@ -2910,13 +2910,11 @@ function editProduct(product) {
       </div>
 
       <input type="hidden" id="product-id" value="${product.id}">
+      <input type="hidden" id="original-sku" value="${product.sku || ""}">
     </form>
   `;
 
   pageContent.insertAdjacentHTML("afterbegin", markup);
-
-  // Store original SKU for change detection
-  const originalSku = product.sku || "";
 
   // Cancel -> back to products list
   const cancelBtn = document.getElementById("cancel-edit-product");
@@ -3219,6 +3217,7 @@ async function updateProduct(e) {
   // SKU validation
   const skuInput = document.getElementById("sku-input");
   const newSkuValue = skuInput?.value?.trim().toUpperCase() || "";
+  const originalSku = document.getElementById("original-sku")?.value || "";
 
   // Validate if SKU is provided
   if (newSkuValue) {
