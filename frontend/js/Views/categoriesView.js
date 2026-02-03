@@ -698,7 +698,10 @@ class CategoriesView extends View {
     };
 
     // Get main image URLs with fallbacks and ensure HTTPS
+    // Prefer unified images array, fall back to old structure
     const mainDesktopImage = this.ensureHttps(
+      (Array.isArray(product?.images) && product.images[0]?.publicDesktop) ||
+      (Array.isArray(product?.images) && product.images[0]?.desktop) ||
       clickedImageUrl ||
         getImageUrl(product?.mainImage, true) ||
         product?.image ||
@@ -706,6 +709,8 @@ class CategoriesView extends View {
     );
 
     const mainMobileImage = this.ensureHttps(
+      (Array.isArray(product?.images) && product.images[0]?.publicMobile) ||
+      (Array.isArray(product?.images) && product.images[0]?.mobile) ||
       getImageUrl(product?.mainImage, false) ||
         product?.image ||
         mainDesktopImage
@@ -717,8 +722,21 @@ class CategoriesView extends View {
     // Get the base API URL from the same source used elsewhere in this view
     const apiBaseUrl = this.apiUrl;
 
-    // Handle old format (array of strings)
-    if (Array.isArray(product?.smallImagesLocal)) {
+    // NEW: Prefer unified images array (Phase 7 migration)
+    if (Array.isArray(product?.images) && product.images.length > 0) {
+      smallImagesArray = product.images
+        .filter(img => img && typeof img === 'object')
+        .map(img => {
+          // Get best URL: prefer public, then regular, then local
+          const url = img.publicDesktop || img.desktop ||
+                      img.publicMobile || img.mobile ||
+                      img.desktopLocal || img.mobileLocal || '';
+          return this.ensureHttps(url);
+        })
+        .filter(url => url !== '');
+    }
+    // FALLBACK: Handle old format (array of strings)
+    else if (Array.isArray(product?.smallImagesLocal)) {
       smallImagesArray = product.smallImagesLocal
         .filter(url => url && typeof url === 'string' && url.trim() !== '')
         .map(url => {
@@ -736,7 +754,7 @@ class CategoriesView extends View {
         })
         .filter(url => url !== ''); // Remove any empty strings
     }
-    // Handle old/new format from API (array of URLs or image descriptor objects)
+    // FALLBACK: Handle old/new format from API (array of URLs or image descriptor objects)
     else if (Array.isArray(product?.smallImages)) {
       smallImagesArray = product.smallImages
         .filter(img => img) // Filter out null/undefined entries
