@@ -556,7 +556,16 @@ class CategoriesView extends View {
       const addToCart = e.target.closest('.add-to-cart-btn');
       if (addToCart) return;
 
-      const smallImages = filtered.smallImages || [];
+      // Prefer unified images array, fall back to smallImages
+      const smallImages = (Array.isArray(filtered.images) && filtered.images.length > 1)
+        ? filtered.images.slice(1).map(img => {
+            if (typeof img === 'string') return img;
+            if (img && typeof img === 'object') {
+              return img.publicDesktop || img.desktop || img.publicMobile || img.mobile || '';
+            }
+            return '';
+          }).filter(Boolean)
+        : (filtered.smallImages || []);
       const hasMultipleImages = smallImages.length > 1;
 
       const imageMarkup = smallImages
