@@ -918,7 +918,7 @@ code {
 }
 
 /* =========================
-   Product list “table”
+   Product list "table"
    ========================= */
 
 .table {
@@ -1541,35 +1541,10 @@ body.reorder-mode-active {
 /* Product row adjustments for drag handle */
 .listproduct-format {
   transition: background-color 0.15s, box-shadow 0.15s;
-  cursor: pointer; /* Phase 8: Clickable for preview modal */
-}
-
-.listproduct-format:hover {
-  background: #f9fafb;
 }
 
 .reorder-mode-active .listproduct-format {
   cursor: default;
-}
-
-/* Override cursor for interactive elements within row */
-.listproduct-format .edit-btn,
-.listproduct-format .delete-btn,
-.listproduct-format .duplicate-btn,
-.listproduct-format .product-checkbox {
-  cursor: pointer;
-}
-
-.listproduct-format .drag-handle {
-  cursor: grab;
-}
-
-.listproduct-format .drag-handle:active {
-  cursor: grabbing;
-}
-
-.listproduct-format .sku-cell {
-  cursor: pointer;
 }
 
 /* Adjust grid when in reorder mode */
@@ -1893,4 +1868,147 @@ dialog.admin-preview-modal::backdrop {
   .preview-main-image {
     max-height: 60vh;
   }
+}
+
+/* =========================
+   Image Gallery Sortable (Edit Form)
+   ========================= */
+
+.edit-gallery-container {
+  margin-top: 16px;
+}
+
+.edit-gallery-thumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.gallery-thumb {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  background: var(--surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-thumb.is-main-image {
+  border-color: var(--success);
+}
+
+.gallery-thumb:hover {
+  border-color: var(--primary);
+}
+
+/* Main image badge */
+.main-badge {
+  position: absolute;
+  bottom: 4px;
+  inset-inline-start: 4px;
+  padding: 2px 8px;
+  background: var(--success);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Drag handle */
+.image-drag-handle {
+  position: absolute;
+  top: 4px;
+  inset-inline-start: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.15s;
+  color: var(--muted);
+}
+
+.gallery-thumb:hover .image-drag-handle {
+  opacity: 1;
+}
+
+.image-drag-handle:active {
+  cursor: grabbing;
+}
+
+/* Delete button - will be styled to match gallery in Plan 04 */
+.gallery-thumb .delete-image-btn {
+  position: absolute;
+  top: 4px;
+  inset-inline-end: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--danger);
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.gallery-thumb:hover .delete-image-btn {
+  opacity: 1;
+}
+
+.gallery-thumb .delete-image-btn:hover {
+  background: #dc2626;
+}
+
+/* SortableJS states */
+.gallery-sortable-ghost {
+  opacity: 0.4;
+  border-color: var(--primary) !important;
+}
+
+.gallery-sortable-chosen {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: scale(1.02);
+}
+
+.gallery-sortable-drag {
+  opacity: 0.9;
+}
+
+/* Gallery section header */
+.gallery-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.gallery-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.gallery-help-text {
+  font-size: 12px;
+  color: var(--muted);
 }
