@@ -25,6 +25,20 @@ const ProductSchema = new mongoose.Schema({
   ],
   // Legacy small images field (older products stored gallery URLs here)
   smallImagesLocal: [{ type: String }],
+  // Unified images array (Phase 7 migration)
+  // First image = main/featured image
+  // Old fields (mainImage, smallImages, smallImagesLocal) kept for backwards compatibility
+  // TODO: Remove old fields after frontend fully migrated
+  images: [
+    {
+      desktop: { type: String },
+      mobile: { type: String },
+      desktopLocal: { type: String },
+      mobileLocal: { type: String },
+      publicDesktop: { type: String },
+      publicMobile: { type: String },
+    },
+  ],
   // Additional image URLs for better accessibility
   imageLocal: { type: String },
   publicImage: { type: String },
