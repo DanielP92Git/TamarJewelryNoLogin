@@ -138,11 +138,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Modal infrastructure with native dialog, CSS, click handlers
-- [ ] 08-02-PLAN.md — Modal action buttons (Edit, Delete, Duplicate)
-- [ ] 08-03-PLAN.md — Image gallery sortable in edit form with SortableJS
-- [ ] 08-04-PLAN.md — Image order persistence and delete functionality
-- [ ] 08-05-PLAN.md — Human verification of modal and image reordering
+- [x] 08-01-PLAN.md — Modal infrastructure with native dialog, CSS, click handlers
+- [x] 08-02-PLAN.md — Modal action buttons (Edit, Delete, Duplicate)
+- [x] 08-03-PLAN.md — Image gallery sortable in edit form with SortableJS
+- [x] 08-04-PLAN.md — Image order persistence and delete functionality
+- [x] 08-05-PLAN.md — Human verification of modal and image reordering
 
 ### Phase 9: Testing & Polish
 **Goal**: Validate all features across devices, languages, and edge cases
@@ -174,8 +174,8 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 5. Product Ordering Backend | v1.1 | 1/1 | Complete | 2026-02-03 |
 | 6. Frontend Product Reordering | v1.1 | 4/4 | Complete | 2026-02-03 |
 | 7. Image Array Migration | v1.1 | 5/5 | Complete | 2026-02-03 |
-| 8. Modal Integration | v1.1 | 0/5 | Planned | - |
+| 8. Modal Integration | v1.1 | 5/5 | Complete | 2026-02-04 |
 | 9. Testing & Polish | v1.1 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-03 after Phase 8 planning*
+*Last updated: 2026-02-04 after Phase 8 completion*
