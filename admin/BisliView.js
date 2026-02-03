@@ -3731,6 +3731,13 @@ async function updateProduct(e) {
     });
   }
 
+  // Get image order from hidden field (Phase 8 Plan 04)
+  const imageOrderInput = document.getElementById("imageOrderInput");
+  const imageOrder = imageOrderInput ? imageOrderInput.value : null;
+  if (imageOrder) {
+    formData.append("imageOrder", imageOrder);
+  }
+
   // Show spinner in button
   const submitBtn =
     document.querySelector("#editForm #save-edit-product") ||
