@@ -140,28 +140,38 @@ function mergeImageArraysPreview(mainImage, smallImages) {
 
   // Handle mainImage (first in array = featured)
   if (mainImage && typeof mainImage === 'object' && Object.keys(mainImage).length > 0) {
-    images.push({
-      desktop: mainImage.desktop || null,
-      mobile: mainImage.mobile || null,
-      desktopLocal: mainImage.desktopLocal || null,
-      mobileLocal: mainImage.mobileLocal || null,
-      publicDesktop: mainImage.publicDesktop || null,
-      publicMobile: mainImage.publicMobile || null
-    });
+    // Check if mainImage has actual content (not all null/empty)
+    const hasContent = mainImage.desktop || mainImage.mobile ||
+                      mainImage.publicDesktop || mainImage.publicMobile;
+
+    if (hasContent) {
+      images.push({
+        desktop: mainImage.desktop || null,
+        mobile: mainImage.mobile || null,
+        desktopLocal: mainImage.desktopLocal || null,
+        mobileLocal: mainImage.mobileLocal || null,
+        publicDesktop: mainImage.publicDesktop || null,
+        publicMobile: mainImage.publicMobile || null
+      });
+    }
   }
 
   // Handle smallImages (gallery)
   if (Array.isArray(smallImages) && smallImages.length > 0) {
     smallImages.forEach(img => {
       if (img && typeof img === 'object') {
-        images.push({
-          desktop: img.desktop || null,
-          mobile: img.mobile || null,
-          desktopLocal: img.desktopLocal || null,
-          mobileLocal: img.mobileLocal || null,
-          publicDesktop: img.publicDesktop || null,
-          publicMobile: img.publicMobile || null
-        });
+        // Check if object has actual content
+        const hasContent = img.desktop || img.mobile || img.publicDesktop || img.publicMobile;
+        if (hasContent) {
+          images.push({
+            desktop: img.desktop || null,
+            mobile: img.mobile || null,
+            desktopLocal: img.desktopLocal || null,
+            mobileLocal: img.mobileLocal || null,
+            publicDesktop: img.publicDesktop || null,
+            publicMobile: img.publicMobile || null
+          });
+        }
       } else if (typeof img === 'string' && img.trim()) {
         // Handle legacy string format
         images.push({
