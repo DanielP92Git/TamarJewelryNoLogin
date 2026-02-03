@@ -68,12 +68,12 @@ function getDevApiCandidates() {
 let API_URL = (() => {
   // Production remains explicit; dev is auto-resolved at runtime to avoid host/port mismatches.
   if (IS_PRODUCTION) {
-    return normalizeApiBase(`${process.env.API_URL}`) || "https://tamarkfir.com/api";
+    return normalizeApiBase("https://tamarkfir.com/api");
   }
   return normalizeApiBase(
     window.location.hostname.includes("127.0.0.1")
       ? "http://127.0.0.1:4000"
-      : "http://localhost:4000"
+      : "http://localhost:4000",
   );
 })();
 
@@ -91,7 +91,7 @@ async function resolveApiUrl({ force = false } = {}) {
       String(API_URL).startsWith("http:")
     ) {
       console.warn(
-        "[Admin] Admin page is https but API_URL is http (mixed content will fail). Open admin over http:// in dev."
+        "[Admin] Admin page is https but API_URL is http (mixed content will fail). Open admin over http:// in dev.",
       );
     }
 
@@ -139,7 +139,7 @@ async function resolveApiUrl({ force = false } = {}) {
     _apiUrlResolved = false;
     console.warn(
       `[Admin] Could not resolve a working API base via /health. Using default API_URL=${API_URL}. Candidates:`,
-      candidates
+      candidates,
     );
     return API_URL;
   })().finally(() => {
@@ -174,7 +174,7 @@ const state = {
   undoStack: [],
   redoStack: [],
   sortableInstance: null,
-  undoManager: null
+  undoManager: null,
 };
 
 // Debug logging for reorder operations
@@ -191,13 +191,13 @@ function showSuccessToast(message) {
     text: message,
     duration: 3000,
     close: true,
-    gravity: 'top',
-    position: 'right',
+    gravity: "top",
+    position: "right",
     stopOnFocus: true,
     style: {
-      background: 'linear-gradient(to right, #00b09b, #96c93d)',
-      zIndex: '2000'
-    }
+      background: "linear-gradient(to right, #00b09b, #96c93d)",
+      zIndex: "2000",
+    },
   }).showToast();
 }
 
@@ -206,13 +206,13 @@ function showErrorToast(message) {
     text: message,
     duration: 5000,
     close: true,
-    gravity: 'top',
-    position: 'right',
+    gravity: "top",
+    position: "right",
     stopOnFocus: true,
     style: {
-      background: 'linear-gradient(to right, #ff5f6d, #ffc371)',
-      zIndex: '2000'
-    }
+      background: "linear-gradient(to right, #ff5f6d, #ffc371)",
+      zIndex: "2000",
+    },
   }).showToast();
 }
 
@@ -221,13 +221,13 @@ function showInfoToast(message) {
     text: message,
     duration: 3000,
     close: true,
-    gravity: 'top',
-    position: 'right',
+    gravity: "top",
+    position: "right",
     stopOnFocus: true,
     style: {
-      background: 'linear-gradient(to right, #667eea, #764ba2)',
-      zIndex: '2000'
-    }
+      background: "linear-gradient(to right, #667eea, #764ba2)",
+      zIndex: "2000",
+    },
   }).showToast();
 }
 
@@ -279,24 +279,32 @@ class UndoManager {
     return true;
   }
 
-  canUndo() { return this.undoStack.length > 0; }
-  canRedo() { return this.redoStack.length > 0; }
-  hasChanges() { return this.undoStack.length > 0; }
+  canUndo() {
+    return this.undoStack.length > 0;
+  }
+  canRedo() {
+    return this.redoStack.length > 0;
+  }
+  hasChanges() {
+    return this.undoStack.length > 0;
+  }
 
-  getCurrentOrder() { return [...this.productOrder]; }
+  getCurrentOrder() {
+    return [...this.productOrder];
+  }
 }
 
 // SKU validation function for forms
 async function validateSkuField(skuValue, excludeProductId = null) {
-  const errorDiv = document.getElementById('sku-error');
+  const errorDiv = document.getElementById("sku-error");
   if (!errorDiv) return true;
 
   // Clear previous error
-  errorDiv.style.display = 'none';
-  errorDiv.innerHTML = '';
-  errorDiv.removeAttribute('role');
+  errorDiv.style.display = "none";
+  errorDiv.innerHTML = "";
+  errorDiv.removeAttribute("role");
 
-  const trimmedSku = (skuValue || '').trim();
+  const trimmedSku = (skuValue || "").trim();
 
   // Empty check - let form submission handle required validation
   if (!trimmedSku) {
@@ -307,59 +315,62 @@ async function validateSkuField(skuValue, excludeProductId = null) {
 
   // Format validation
   if (normalized.length < 2 || normalized.length > 7) {
-    errorDiv.innerHTML = 'SKU must be between 2 and 7 characters';
-    errorDiv.style.display = 'block';
-    errorDiv.setAttribute('role', 'alert');
+    errorDiv.innerHTML = "SKU must be between 2 and 7 characters";
+    errorDiv.style.display = "block";
+    errorDiv.setAttribute("role", "alert");
     return false;
   }
 
   if (!/^[A-Z0-9]+$/.test(normalized)) {
-    errorDiv.innerHTML = 'SKU must contain only letters and numbers (A-Z, 0-9)';
-    errorDiv.style.display = 'block';
-    errorDiv.setAttribute('role', 'alert');
+    errorDiv.innerHTML = "SKU must contain only letters and numbers (A-Z, 0-9)";
+    errorDiv.style.display = "block";
+    errorDiv.setAttribute("role", "alert");
     return false;
   }
 
   // Duplicate check via API
   try {
     const response = await fetch(`${API_URL}/check-sku-duplicate`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
       },
       body: JSON.stringify({
         sku: normalized,
-        excludeProductId: excludeProductId
-      })
+        excludeProductId: excludeProductId,
+      }),
     });
 
     if (!response.ok) {
-      console.error('SKU duplicate check failed:', response.status);
+      console.error("SKU duplicate check failed:", response.status);
       return true; // Allow submission - backend will validate
     }
 
     const result = await response.json();
 
     if (result.duplicate) {
-      const productName = result.conflictingProduct?.name || 'another product';
-      const productId = result.conflictingProduct?._id || result.conflictingProduct?.id;
+      const productName = result.conflictingProduct?.name || "another product";
+      const productId =
+        result.conflictingProduct?._id || result.conflictingProduct?.id;
 
       errorDiv.innerHTML = `SKU <strong>${normalized}</strong> is already used by <a href="#" class="sku-error-link" data-product-id="${productId}">${productName}</a> <span style="color: #3b82f6;">[View Product]</span>`;
-      errorDiv.style.display = 'block';
-      errorDiv.setAttribute('role', 'alert');
+      errorDiv.style.display = "block";
+      errorDiv.setAttribute("role", "alert");
 
       // Bind click handler to navigate to conflicting product
-      const errorLink = errorDiv.querySelector('.sku-error-link');
+      const errorLink = errorDiv.querySelector(".sku-error-link");
       if (errorLink && productId) {
-        errorLink.addEventListener('click', async (e) => {
+        errorLink.addEventListener("click", async (e) => {
           e.preventDefault();
           // Find product in state.products and open edit
-          const conflictingProduct = state.products?.find(p => p.id === productId);
+          const conflictingProduct = state.products?.find(
+            (p) => p.id === productId,
+          );
           if (conflictingProduct) {
             editProduct(conflictingProduct);
           } else {
-            alert('Could not find product. Please refresh the product list.');
+            alert("Could not find product. Please refresh the product list.");
           }
         });
       }
@@ -369,7 +380,7 @@ async function validateSkuField(skuValue, excludeProductId = null) {
 
     return true;
   } catch (error) {
-    console.error('SKU duplicate check error:', error);
+    console.error("SKU duplicate check error:", error);
     return true; // Allow submission - backend will validate
   }
 }
@@ -403,7 +414,7 @@ function setupDragAndDrop(dropzone, fileInput, isMultiple = false) {
     dropzone.classList.remove("drag-over");
 
     const files = Array.from(e.dataTransfer.files).filter((file) =>
-      file.type.startsWith("image/")
+      file.type.startsWith("image/"),
     );
 
     if (files.length === 0) {
@@ -502,7 +513,7 @@ function getImageUrl(image, imageLocal, publicImage, mainImage) {
     let resolvedUrl;
     if (state.isProduction) {
       resolvedUrl = ensureProductionUrl(
-        mainImage.publicDesktop || mainImage.desktop
+        mainImage.publicDesktop || mainImage.desktop,
       );
     } else {
       resolvedUrl = ensureDevUrl(mainImage.desktopLocal || mainImage.desktop);
@@ -533,7 +544,7 @@ function getImageUrl(image, imageLocal, publicImage, mainImage) {
   }
 
   console.warn(
-    "[BisliView Global getImageUrl] No valid image URL found, returning empty string."
+    "[BisliView Global getImageUrl] No valid image URL found, returning empty string.",
   );
   return "";
 }
@@ -591,7 +602,7 @@ function getCurrentScriptPath() {
   // If this is a frontend page and we're using BisliView, warn about it
   if (currentUrl.includes("/frontend/") && !currentUrl.includes("/admin/")) {
     console.warn(
-      "⚠️ BisliView.js should only be included on admin pages, not frontend pages!"
+      "⚠️ BisliView.js should only be included on admin pages, not frontend pages!",
     );
     // Don't do further initialization for frontend pages
     // This prevents the login page from showing on frontend
@@ -601,7 +612,7 @@ function getCurrentScriptPath() {
   // If we're on a page with frontend/html in the URL, definitely not an admin page
   if (currentUrl.includes("/frontend/html/")) {
     console.warn(
-      "🛑 BisliView detected on frontend HTML page. Will not initialize admin features."
+      "🛑 BisliView detected on frontend HTML page. Will not initialize admin features.",
     );
     return;
   }
@@ -620,7 +631,7 @@ async function init() {
   } catch (e) {
     console.warn(
       "[Admin] API_URL resolution failed, continuing with default.",
-      e
+      e,
     );
   }
 
@@ -847,7 +858,7 @@ async function fetchInfo() {
       error.message === "wrong_server_port"
     ) {
       showLoginPage(
-        "The API server appears to be unavailable. Please make sure your Node.js backend is running on port 4000."
+        "The API server appears to be unavailable. Please make sure your Node.js backend is running on port 4000.",
       );
     } else {
       alert("Error fetching products: " + error.message);
@@ -879,8 +890,8 @@ async function checkAuth() {
       const authTimeoutPromise = new Promise((_, reject) =>
         setTimeout(
           () => reject(new Error("auth_check_timed_out")),
-          DEFAULT_TIMEOUT
-        )
+          DEFAULT_TIMEOUT,
+        ),
       );
 
       const response = await Promise.race([authPromise, authTimeoutPromise]);
@@ -899,7 +910,7 @@ async function checkAuth() {
       // Check if user has admin privileges
       if (data.user.userType !== "admin") {
         showLoginPage(
-          "You must have administrator privileges to access this page."
+          "You must have administrator privileges to access this page.",
         );
         return false;
       }
@@ -1007,7 +1018,7 @@ function showLoginPage(errorMessage) {
     e.preventDefault();
     const email = document.getElementById(`admin-email-${uniqueId}`).value;
     const password = document.getElementById(
-      `admin-password-${uniqueId}`
+      `admin-password-${uniqueId}`,
     ).value;
 
     try {
@@ -1100,8 +1111,8 @@ function clear() {
 function getFilteredProducts() {
   // Return products currently visible in the list
   const category = state.selectedCategory;
-  if (!state.products || category === 'all') return [];
-  return state.products.filter(p => p.category === category);
+  if (!state.products || category === "all") return [];
+  return state.products.filter((p) => p.category === category);
 }
 
 // Reorder mode keyboard handler
@@ -1109,20 +1120,23 @@ function handleReorderKeyboard(e) {
   if (!state.isReorderMode) return;
 
   // Ctrl+Z or Cmd+Z for undo
-  if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+  if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
     e.preventDefault();
     handleUndo();
   }
 
   // Ctrl+Y or Cmd+Shift+Z for redo
-  if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+  if (
+    (e.ctrlKey || e.metaKey) &&
+    (e.key === "y" || (e.key === "z" && e.shiftKey))
+  ) {
     e.preventDefault();
     handleRedo();
   }
 
   // Escape to cancel
-  if (e.key === 'Escape') {
-    const cancelBtn = document.getElementById('cancelReorderBtn');
+  if (e.key === "Escape") {
+    const cancelBtn = document.getElementById("cancelReorderBtn");
     if (cancelBtn) cancelBtn.click();
   }
 }
@@ -1134,14 +1148,14 @@ function handleBeforeUnload(event) {
 
   // Modern browsers show generic message, custom message ignored
   event.preventDefault();
-  event.returnValue = ''; // Required for Chrome
+  event.returnValue = ""; // Required for Chrome
 }
 
 function canExitReorderMode() {
   if (!state.isReorderMode) return true;
   if (!state.undoManager || !state.undoManager.hasChanges()) return true;
 
-  return confirm('You have unsaved changes. Discard and leave?');
+  return confirm("You have unsaved changes. Discard and leave?");
 }
 
 // Reorder mode handlers
@@ -1151,7 +1165,7 @@ function handleUndo() {
   state.undoManager.undo();
   rerenderProductList();
   updateReorderButtonStates();
-  showInfoToast('Undid last change');
+  showInfoToast("Undid last change");
 }
 
 function handleRedo() {
@@ -1160,18 +1174,18 @@ function handleRedo() {
   state.undoManager.redo();
   rerenderProductList();
   updateReorderButtonStates();
-  showInfoToast('Redid change');
+  showInfoToast("Redid change");
 }
 
 function showReorderLoadingOverlay() {
-  const container = document.querySelector('.listproduct-allproducts');
+  const container = document.querySelector(".listproduct-allproducts");
   if (!container) return;
 
   // Remove existing overlay if any
   hideReorderLoadingOverlay();
 
-  const overlay = document.createElement('div');
-  overlay.className = 'reorder-loading-overlay';
+  const overlay = document.createElement("div");
+  overlay.className = "reorder-loading-overlay";
   overlay.innerHTML = `
     <div class="spinner"></div>
     <p>Saving order...</p>
@@ -1180,35 +1194,35 @@ function showReorderLoadingOverlay() {
 }
 
 function hideReorderLoadingOverlay() {
-  const overlay = document.querySelector('.reorder-loading-overlay');
+  const overlay = document.querySelector(".reorder-loading-overlay");
   if (overlay) overlay.remove();
 }
 
 async function saveProductOrder() {
   if (!state.undoManager || !state.undoManager.hasChanges()) {
-    showInfoToast('No changes to save');
+    showInfoToast("No changes to save");
     return;
   }
 
   const category = state.selectedCategory;
   const productIds = state.undoManager.getCurrentOrder();
 
-  logReorder('Save', { category, productCount: productIds.length });
+  logReorder("Save", { category, productCount: productIds.length });
 
   showReorderLoadingOverlay();
   updateReorderButtonStates(true); // Disable all buttons
 
   try {
-    const response = await apiFetch('/api/admin/products/reorder', {
-      method: 'POST',
+    const response = await apiFetch("/api/admin/products/reorder", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'auth-token': localStorage.getItem('auth-token')
+        "Content-Type": "application/json",
+        "auth-token": localStorage.getItem("auth-token"),
       },
       body: JSON.stringify({
         category: category,
-        productIds: productIds
-      })
+        productIds: productIds,
+      }),
     });
 
     const data = await response.json();
@@ -1217,32 +1231,36 @@ async function saveProductOrder() {
 
     if (response.status === 409) {
       // Concurrency conflict - another admin modified products
-      showErrorToast('Product list was updated by another admin. Refreshing...');
+      showErrorToast(
+        "Product list was updated by another admin. Refreshing...",
+      );
       exitReorderMode();
       await fetchInfo(); // Reload products from server
       return;
     }
 
     if (!response.ok) {
-      const errorMsg = data.errors || data.message || 'Failed to save order';
+      const errorMsg = data.errors || data.message || "Failed to save order";
       showErrorToast(errorMsg);
       updateReorderButtonStates(); // Re-enable buttons
       return;
     }
 
     // Success
-    showSuccessToast('Order saved successfully!');
+    showSuccessToast("Order saved successfully!");
     exitReorderMode();
 
     // Update local product order to match saved order
     // This ensures the list stays in the new order without refetch
     if (state.products) {
-      const orderedProducts = productIds.map(id =>
-        state.products.find(p => p._id === id)
-      ).filter(Boolean);
+      const orderedProducts = productIds
+        .map((id) => state.products.find((p) => p._id === id))
+        .filter(Boolean);
 
       // Update products that were reordered
-      const otherProducts = state.products.filter(p => p.category !== category);
+      const otherProducts = state.products.filter(
+        (p) => p.category !== category,
+      );
       state.products = [...otherProducts, ...orderedProducts];
     }
 
@@ -1252,11 +1270,10 @@ async function saveProductOrder() {
     // VERIFY: After saving reorder, check customer-facing page
     // Products should appear in new order on /categories/{category}.html
     // Backend query uses: .sort({ displayOrder: 1 })
-
   } catch (error) {
     hideReorderLoadingOverlay();
-    console.error('Error saving product order:', error);
-    showErrorToast('Network error. Please check connection and try again.');
+    console.error("Error saving product order:", error);
+    showErrorToast("Network error. Please check connection and try again.");
     updateReorderButtonStates(); // Re-enable buttons
   }
 }
@@ -1264,23 +1281,23 @@ async function saveProductOrder() {
 function rerenderProductList() {
   if (!state.undoManager) return;
 
-  const productList = document.querySelector('.listproduct-allproducts');
+  const productList = document.querySelector(".listproduct-allproducts");
   if (!productList) return;
 
   const currentOrder = state.undoManager.getCurrentOrder();
-  const rows = Array.from(productList.querySelectorAll('.listproduct-format'));
+  const rows = Array.from(productList.querySelectorAll(".listproduct-format"));
 
   // Create map of productId -> row element
   const rowMap = new Map();
-  rows.forEach(row => {
-    const editBtn = row.querySelector('.edit-btn');
+  rows.forEach((row) => {
+    const editBtn = row.querySelector(".edit-btn");
     if (editBtn) {
       rowMap.set(editBtn.dataset.productId, row);
     }
   });
 
   // Reorder rows in DOM according to undoManager order
-  currentOrder.forEach(productId => {
+  currentOrder.forEach((productId) => {
     const row = rowMap.get(productId);
     if (row) {
       productList.appendChild(row);
@@ -1293,32 +1310,33 @@ function rerenderProductList() {
   }
 
   state.sortableInstance = Sortable.create(productList, {
-    handle: '.drag-handle',
+    handle: ".drag-handle",
     animation: 150,
     delay: 50,
     delayOnTouchOnly: true,
-    ghostClass: 'sortable-ghost',
-    chosenClass: 'sortable-chosen',
-    dragClass: 'sortable-drag',
-    onEnd: function(evt) {
+    ghostClass: "sortable-ghost",
+    chosenClass: "sortable-chosen",
+    dragClass: "sortable-drag",
+    onEnd: function (evt) {
       if (evt.oldIndex === evt.newIndex) return;
       const movedElement = evt.item;
-      const productId = movedElement.querySelector('.edit-btn')?.dataset.productId;
+      const productId =
+        movedElement.querySelector(".edit-btn")?.dataset.productId;
       const command = new MoveCommand(evt.oldIndex, evt.newIndex, productId);
       state.undoManager.execute(command);
       updateReorderButtonStates();
-    }
+    },
   });
 }
 
 function updateReorderButtonStates(disabled = false) {
-  const undoBtn = document.getElementById('undoBtn');
-  const redoBtn = document.getElementById('redoBtn');
-  const saveBtn = document.getElementById('saveReorderBtn');
-  const cancelBtn = document.getElementById('cancelReorderBtn');
+  const undoBtn = document.getElementById("undoBtn");
+  const redoBtn = document.getElementById("redoBtn");
+  const saveBtn = document.getElementById("saveReorderBtn");
+  const cancelBtn = document.getElementById("cancelReorderBtn");
 
   if (disabled) {
-    [undoBtn, redoBtn, saveBtn, cancelBtn].forEach(btn => {
+    [undoBtn, redoBtn, saveBtn, cancelBtn].forEach((btn) => {
       if (btn) btn.disabled = true;
     });
     return;
@@ -1332,81 +1350,85 @@ function updateReorderButtonStates(disabled = false) {
 
 function enterReorderMode() {
   // Check if search is active
-  const searchInput = document.getElementById('productSearch');
+  const searchInput = document.getElementById("productSearch");
   if (searchInput && searchInput.value.trim()) {
-    showErrorToast('Clear search filter before reordering');
+    showErrorToast("Clear search filter before reordering");
     return;
   }
 
-  if (state.selectedCategory === 'all') {
-    showErrorToast('Please select a specific category to reorder');
+  if (state.selectedCategory === "all") {
+    showErrorToast("Please select a specific category to reorder");
     return;
   }
 
   const products = getFilteredProducts();
   if (products.length === 0) {
-    showErrorToast('No products in this category to reorder');
+    showErrorToast("No products in this category to reorder");
     return;
   }
 
   if (products.length === 1) {
-    showInfoToast('Only one product in category - nothing to reorder');
+    showInfoToast("Only one product in category - nothing to reorder");
     return;
   }
 
-  logReorder('Enter mode', { category: state.selectedCategory, productCount: products.length });
+  logReorder("Enter mode", {
+    category: state.selectedCategory,
+    productCount: products.length,
+  });
 
   state.isReorderMode = true;
-  state.originalProductOrder = products.map(p => p._id);
+  state.originalProductOrder = products.map((p) => p._id);
   state.undoStack = [];
   state.redoStack = [];
 
   // Initialize UndoManager with current product order (use MongoDB _id not numeric id)
-  const productIds = products.map(p => p._id);
+  const productIds = products.map((p) => p._id);
   state.undoManager = new UndoManager(productIds);
 
-  document.body.classList.add('reorder-mode-active');
-  const actionBar = document.getElementById('reorderActionBar');
-  if (actionBar) actionBar.style.display = 'flex';
-  const toggleBtn = document.getElementById('reorderToggleBtn');
-  if (toggleBtn) toggleBtn.style.display = 'none';
+  document.body.classList.add("reorder-mode-active");
+  const actionBar = document.getElementById("reorderActionBar");
+  if (actionBar) actionBar.style.display = "flex";
+  const toggleBtn = document.getElementById("reorderToggleBtn");
+  if (toggleBtn) toggleBtn.style.display = "none";
 
   // Disable category filter during reorder
-  const categoryFilter = document.getElementById('categoryFilter');
+  const categoryFilter = document.getElementById("categoryFilter");
   if (categoryFilter) categoryFilter.disabled = true;
 
   // Show drag handles and add accessibility attributes
-  document.querySelectorAll('.drag-handle').forEach((el, index) => {
-    el.style.display = 'flex';
-    el.setAttribute('tabindex', '0');
-    el.setAttribute('role', 'button');
-    el.setAttribute('aria-label', `Drag to reorder product ${index + 1}`);
+  document.querySelectorAll(".drag-handle").forEach((el, index) => {
+    el.style.display = "flex";
+    el.setAttribute("tabindex", "0");
+    el.setAttribute("role", "button");
+    el.setAttribute("aria-label", `Drag to reorder product ${index + 1}`);
   });
 
   // Initialize SortableJS
-  const productList = document.querySelector('.listproduct-allproducts');
+  const productList = document.querySelector(".listproduct-allproducts");
   if (productList) {
     state.sortableInstance = Sortable.create(productList, {
-      handle: '.drag-handle',
+      handle: ".drag-handle",
       animation: 150,
       delay: 50,
       delayOnTouchOnly: true,
-      ghostClass: 'sortable-ghost',
-      chosenClass: 'sortable-chosen',
-      dragClass: 'sortable-drag',
+      ghostClass: "sortable-ghost",
+      chosenClass: "sortable-chosen",
+      dragClass: "sortable-drag",
       forceFallback: false,
-      onStart: function(evt) {
+      onStart: function (evt) {
         // Add class to body for additional styling if needed
-        document.body.classList.add('dragging-active');
+        document.body.classList.add("dragging-active");
       },
-      onEnd: function(evt) {
-        document.body.classList.remove('dragging-active');
+      onEnd: function (evt) {
+        document.body.classList.remove("dragging-active");
 
         if (evt.oldIndex === evt.newIndex) return; // No change
 
         // Get product ID from the moved element
         const movedElement = evt.item;
-        const productId = movedElement.querySelector('.edit-btn')?.dataset.productId;
+        const productId =
+          movedElement.querySelector(".edit-btn")?.dataset.productId;
 
         // Create and execute command
         const command = new MoveCommand(evt.oldIndex, evt.newIndex, productId);
@@ -1418,47 +1440,47 @@ function enterReorderMode() {
         console.log(`[Reorder] Moved from ${evt.oldIndex} to ${evt.newIndex}`, {
           productId,
           canUndo: state.undoManager.canUndo(),
-          stackSize: state.undoManager.undoStack.length
+          stackSize: state.undoManager.undoStack.length,
         });
-      }
+      },
     });
   }
 
   // Add keyboard event listener
-  document.addEventListener('keydown', handleReorderKeyboard);
+  document.addEventListener("keydown", handleReorderKeyboard);
 
   // Add beforeunload listener to warn about unsaved changes
-  window.addEventListener('beforeunload', handleBeforeUnload);
+  window.addEventListener("beforeunload", handleBeforeUnload);
 
   updateReorderButtonStates();
-  showInfoToast('Reorder mode active. Drag products to reorder.');
+  showInfoToast("Reorder mode active. Drag products to reorder.");
 }
 
 function exitReorderMode() {
-  logReorder('Exit mode');
+  logReorder("Exit mode");
 
   state.isReorderMode = false;
   state.undoManager = null;
 
   // Remove keyboard event listener
-  document.removeEventListener('keydown', handleReorderKeyboard);
+  document.removeEventListener("keydown", handleReorderKeyboard);
 
   // Remove beforeunload listener
-  window.removeEventListener('beforeunload', handleBeforeUnload);
+  window.removeEventListener("beforeunload", handleBeforeUnload);
 
-  document.body.classList.remove('reorder-mode-active');
-  const actionBar = document.getElementById('reorderActionBar');
-  if (actionBar) actionBar.style.display = 'none';
-  const toggleBtn = document.getElementById('reorderToggleBtn');
-  if (toggleBtn) toggleBtn.style.display = 'inline-flex';
+  document.body.classList.remove("reorder-mode-active");
+  const actionBar = document.getElementById("reorderActionBar");
+  if (actionBar) actionBar.style.display = "none";
+  const toggleBtn = document.getElementById("reorderToggleBtn");
+  if (toggleBtn) toggleBtn.style.display = "inline-flex";
 
   // Re-enable category filter
-  const categoryFilter = document.getElementById('categoryFilter');
+  const categoryFilter = document.getElementById("categoryFilter");
   if (categoryFilter) categoryFilter.disabled = false;
 
   // Hide drag handles
-  document.querySelectorAll('.drag-handle').forEach(el => {
-    el.style.display = 'none';
+  document.querySelectorAll(".drag-handle").forEach((el) => {
+    el.style.display = "none";
   });
 
   // Destroy sortable if exists (will be implemented in Plan 02)
@@ -1587,16 +1609,16 @@ async function loadProductsPage(data) {
   }
 
   // Reorder mode button handlers
-  const reorderToggleBtn = document.getElementById('reorderToggleBtn');
+  const reorderToggleBtn = document.getElementById("reorderToggleBtn");
   if (reorderToggleBtn) {
-    reorderToggleBtn.addEventListener('click', enterReorderMode);
+    reorderToggleBtn.addEventListener("click", enterReorderMode);
   }
 
-  const cancelReorderBtn = document.getElementById('cancelReorderBtn');
+  const cancelReorderBtn = document.getElementById("cancelReorderBtn");
   if (cancelReorderBtn) {
-    cancelReorderBtn.addEventListener('click', () => {
+    cancelReorderBtn.addEventListener("click", () => {
       if (state.undoManager && state.undoManager.hasChanges()) {
-        if (!confirm('Discard all changes and exit reorder mode?')) return;
+        if (!confirm("Discard all changes and exit reorder mode?")) return;
       }
 
       // Destroy sortable before reloading
@@ -1613,36 +1635,36 @@ async function loadProductsPage(data) {
   }
 
   // Undo/Redo button handlers
-  const undoBtn = document.getElementById('undoBtn');
+  const undoBtn = document.getElementById("undoBtn");
   if (undoBtn) {
-    undoBtn.addEventListener('click', handleUndo);
+    undoBtn.addEventListener("click", handleUndo);
   }
 
-  const redoBtn = document.getElementById('redoBtn');
+  const redoBtn = document.getElementById("redoBtn");
   if (redoBtn) {
-    redoBtn.addEventListener('click', handleRedo);
+    redoBtn.addEventListener("click", handleRedo);
   }
 
-  const saveReorderBtn = document.getElementById('saveReorderBtn');
+  const saveReorderBtn = document.getElementById("saveReorderBtn");
   if (saveReorderBtn) {
-    saveReorderBtn.addEventListener('click', saveProductOrder);
+    saveReorderBtn.addEventListener("click", saveProductOrder);
   }
 
   // Set the category filter to the stored category
   const categoryFilter = document.getElementById("categoryFilter");
   console.log(
     "[BisliView loadProductsPage] Current state.selectedCategory BEFORE setting filter:",
-    state.selectedCategory
+    state.selectedCategory,
   );
   if (categoryFilter && state.selectedCategory) {
     categoryFilter.value = state.selectedCategory;
     console.log(
-      `[BisliView loadProductsPage] Set categoryFilter.value to: ${categoryFilter.value}. Expected: ${state.selectedCategory}`
+      `[BisliView loadProductsPage] Set categoryFilter.value to: ${categoryFilter.value}. Expected: ${state.selectedCategory}`,
     );
   } else {
     console.warn(
       "[BisliView loadProductsPage] Category filter or state.selectedCategory not available. Filter might default to 'all'.",
-      { hasFilter: !!categoryFilter, selectedCat: state.selectedCategory }
+      { hasFilter: !!categoryFilter, selectedCat: state.selectedCategory },
     );
     if (categoryFilter) categoryFilter.value = "all"; // Ensure it defaults visibly if state is messy
   }
@@ -1656,9 +1678,14 @@ async function loadProductsPage(data) {
   if (search && search.dataset.bound !== "true") {
     search.addEventListener("input", () => {
       // Save search term to filter state
-      const currentFilters = JSON.parse(sessionStorage.getItem('productListFilters') || '{}');
+      const currentFilters = JSON.parse(
+        sessionStorage.getItem("productListFilters") || "{}",
+      );
       currentFilters.searchTerm = search.value;
-      sessionStorage.setItem('productListFilters', JSON.stringify(currentFilters));
+      sessionStorage.setItem(
+        "productListFilters",
+        JSON.stringify(currentFilters),
+      );
 
       loadProducts(data);
       updateSelectedCount();
@@ -1668,37 +1695,40 @@ async function loadProductsPage(data) {
   }
 
   // SKU column sorting
-  const skuHeader = document.querySelector('.sortable-header[data-column="sku"]');
+  const skuHeader = document.querySelector(
+    '.sortable-header[data-column="sku"]',
+  );
   if (skuHeader) {
-    skuHeader.addEventListener('click', () => {
+    skuHeader.addEventListener("click", () => {
       // Get current sort state
-      const savedSort = sessionStorage.getItem('productListSort');
-      let skuSortState = { active: false, direction: 'asc' };
+      const savedSort = sessionStorage.getItem("productListSort");
+      let skuSortState = { active: false, direction: "asc" };
 
       if (savedSort) {
         try {
           skuSortState = JSON.parse(savedSort);
         } catch (e) {
-          console.error('Failed to parse sort state:', e);
+          console.error("Failed to parse sort state:", e);
         }
       }
 
       // Toggle sort direction
       if (skuSortState.active) {
-        skuSortState.direction = skuSortState.direction === 'asc' ? 'desc' : 'asc';
+        skuSortState.direction =
+          skuSortState.direction === "asc" ? "desc" : "asc";
       } else {
         skuSortState.active = true;
-        skuSortState.direction = 'asc';
+        skuSortState.direction = "asc";
       }
 
       // Update sort indicator
-      const indicator = skuHeader.querySelector('.sort-indicator');
+      const indicator = skuHeader.querySelector(".sort-indicator");
       if (indicator) {
-        indicator.textContent = skuSortState.direction === 'asc' ? ' ↑' : ' ↓';
+        indicator.textContent = skuSortState.direction === "asc" ? " ↑" : " ↓";
       }
 
       // Save sort state to session
-      sessionStorage.setItem('productListSort', JSON.stringify(skuSortState));
+      sessionStorage.setItem("productListSort", JSON.stringify(skuSortState));
 
       // Re-render products with sorting
       loadProducts(data);
@@ -1706,18 +1736,18 @@ async function loadProductsPage(data) {
   }
 
   // Restore sort indicator if sort is active
-  const savedSort = sessionStorage.getItem('productListSort');
+  const savedSort = sessionStorage.getItem("productListSort");
   if (savedSort) {
     try {
       const sortState = JSON.parse(savedSort);
       if (sortState.active && skuHeader) {
-        const indicator = skuHeader.querySelector('.sort-indicator');
+        const indicator = skuHeader.querySelector(".sort-indicator");
         if (indicator) {
-          indicator.textContent = sortState.direction === 'asc' ? ' ↑' : ' ↓';
+          indicator.textContent = sortState.direction === "asc" ? " ↑" : " ↓";
         }
       }
     } catch (e) {
-      console.error('Failed to restore sort indicator:', e);
+      console.error("Failed to restore sort indicator:", e);
     }
   }
 
@@ -1725,48 +1755,51 @@ async function loadProductsPage(data) {
   let showMissingSku = false;
 
   // Restore filter state from session
-  const savedFilters = sessionStorage.getItem('productListFilters');
+  const savedFilters = sessionStorage.getItem("productListFilters");
   if (savedFilters) {
     try {
       const filters = JSON.parse(savedFilters);
       showMissingSku = filters.showMissingSku || false;
       if (showMissingSku) {
-        const badge = document.getElementById('missing-sku-filter');
+        const badge = document.getElementById("missing-sku-filter");
         if (badge) {
-          badge.style.background = 'rgba(239, 68, 68, 0.2)';
-          badge.style.color = '#ef4444';
-          badge.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+          badge.style.background = "rgba(239, 68, 68, 0.2)";
+          badge.style.color = "#ef4444";
+          badge.style.borderColor = "rgba(239, 68, 68, 0.4)";
         }
       }
     } catch (e) {
-      console.error('Failed to restore filter state:', e);
+      console.error("Failed to restore filter state:", e);
     }
   }
 
   // Missing SKU filter click handler
-  const missingSkuBtn = document.getElementById('missing-sku-filter');
+  const missingSkuBtn = document.getElementById("missing-sku-filter");
   if (missingSkuBtn) {
-    missingSkuBtn.addEventListener('click', () => {
+    missingSkuBtn.addEventListener("click", () => {
       showMissingSku = !showMissingSku;
 
       // Update badge appearance
       if (showMissingSku) {
-        missingSkuBtn.style.background = 'rgba(239, 68, 68, 0.2)';
-        missingSkuBtn.style.color = '#ef4444';
-        missingSkuBtn.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        missingSkuBtn.style.background = "rgba(239, 68, 68, 0.2)";
+        missingSkuBtn.style.color = "#ef4444";
+        missingSkuBtn.style.borderColor = "rgba(239, 68, 68, 0.4)";
       } else {
-        missingSkuBtn.style.background = '';
-        missingSkuBtn.style.color = '';
-        missingSkuBtn.style.borderColor = '';
+        missingSkuBtn.style.background = "";
+        missingSkuBtn.style.color = "";
+        missingSkuBtn.style.borderColor = "";
       }
 
       // Save filter state
       const currentFilters = {
         showMissingSku: showMissingSku,
-        category: document.getElementById('categoryFilter')?.value || 'all',
-        searchTerm: document.getElementById('productSearch')?.value || ''
+        category: document.getElementById("categoryFilter")?.value || "all",
+        searchTerm: document.getElementById("productSearch")?.value || "",
       };
-      sessionStorage.setItem('productListFilters', JSON.stringify(currentFilters));
+      sessionStorage.setItem(
+        "productListFilters",
+        JSON.stringify(currentFilters),
+      );
 
       // Re-render
       loadProducts(data);
@@ -1794,7 +1827,7 @@ async function loadProductsPage(data) {
 
       if (
         !confirm(
-          `Are you sure you want to apply ${discountPercentage}% discount to all products? This will update prices for all items.`
+          `Are you sure you want to apply ${discountPercentage}% discount to all products? This will update prices for all items.`,
         )
       ) {
         return;
@@ -1822,7 +1855,7 @@ async function loadProductsPage(data) {
 
         if (result.success) {
           alert(
-            `Successfully updated ${result.updatedCount} products with ${discountPercentage}% discount`
+            `Successfully updated ${result.updatedCount} products with ${discountPercentage}% discount`,
           );
           loadDiscountSettings();
           loadProducts(data); // Refresh products list
@@ -1845,7 +1878,7 @@ async function loadProductsPage(data) {
     removeDiscountBtn.addEventListener("click", async () => {
       if (
         !confirm(
-          "Are you sure you want to remove the discount from all products? Prices will revert to original values."
+          "Are you sure you want to remove the discount from all products? Prices will revert to original values.",
         )
       ) {
         return;
@@ -1872,7 +1905,7 @@ async function loadProductsPage(data) {
 
         if (result.success) {
           alert(
-            `Successfully removed discount from ${result.updatedCount} products`
+            `Successfully removed discount from ${result.updatedCount} products`,
           );
           document.getElementById("discount-input").value = "";
           loadDiscountSettings();
@@ -1950,7 +1983,7 @@ function loadProducts(data) {
   if (!data || !Array.isArray(data)) {
     console.error("Invalid product data received:", data);
     const productsContainer = document.querySelector(
-      ".listproduct-allproducts"
+      ".listproduct-allproducts",
     );
     if (productsContainer) {
       productsContainer.innerHTML =
@@ -1966,7 +1999,7 @@ function loadProducts(data) {
       : data.filter((product) => product.category === state.selectedCategory);
 
   // Apply missing SKU filter
-  const savedFilters = sessionStorage.getItem('productListFilters');
+  const savedFilters = sessionStorage.getItem("productListFilters");
   let showMissingSku = false;
   if (savedFilters) {
     try {
@@ -1977,15 +2010,19 @@ function loadProducts(data) {
   }
 
   // Count missing SKUs (before filtering)
-  const missingSkuCount = filteredData.filter(p => !p.sku || p.sku.trim() === '').length;
-  const countSpan = document.getElementById('missing-sku-count');
+  const missingSkuCount = filteredData.filter(
+    (p) => !p.sku || p.sku.trim() === "",
+  ).length;
+  const countSpan = document.getElementById("missing-sku-count");
   if (countSpan) {
     countSpan.textContent = missingSkuCount;
   }
 
   // Apply filter
   if (showMissingSku) {
-    filteredData = filteredData.filter(product => !product.sku || product.sku.trim() === '');
+    filteredData = filteredData.filter(
+      (product) => !product.sku || product.sku.trim() === "",
+    );
   }
 
   if (searchTerm) {
@@ -1993,19 +2030,23 @@ function loadProducts(data) {
       const name = (product.name || "").toLowerCase();
       const id = String(product.id ?? "").toLowerCase();
       const sku = (product.sku || "").toLowerCase();
-      return name.includes(searchTerm) || id.includes(searchTerm) || sku.includes(searchTerm);
+      return (
+        name.includes(searchTerm) ||
+        id.includes(searchTerm) ||
+        sku.includes(searchTerm)
+      );
     });
   }
 
   // Apply SKU sorting if active
-  const savedSort = sessionStorage.getItem('productListSort');
+  const savedSort = sessionStorage.getItem("productListSort");
   if (savedSort) {
     try {
       const sortState = JSON.parse(savedSort);
       if (sortState.active) {
         filteredData = [...filteredData].sort((a, b) => {
-          const aVal = a.sku || '';
-          const bVal = b.sku || '';
+          const aVal = a.sku || "";
+          const bVal = b.sku || "";
 
           // Put empty SKUs at the end
           if (!aVal && bVal) return 1;
@@ -2013,11 +2054,11 @@ function loadProducts(data) {
           if (!aVal && !bVal) return 0;
 
           const comparison = aVal.localeCompare(bVal);
-          return sortState.direction === 'asc' ? comparison : -comparison;
+          return sortState.direction === "asc" ? comparison : -comparison;
         });
       }
     } catch (e) {
-      console.error('Failed to parse sort state:', e);
+      console.error("Failed to parse sort state:", e);
     }
   }
 
@@ -2055,7 +2096,7 @@ function loadProducts(data) {
       item.image,
       item.imageLocal,
       item.publicImage,
-      item.mainImage
+      item.mainImage,
     );
 
     const qty = Number(item.quantity || 0);
@@ -2083,8 +2124,8 @@ function loadProducts(data) {
           <source media="(min-width: 768px)" srcset="${desktopSrc}" type="image/webp" />
           <source media="(max-width: 767px)" srcset="${mobileSrc}" type="image/webp" />
           <img src="${mainImgSrc}" class="listproduct-product-icon" alt="${
-      item.name
-    }" loading="lazy" />
+            item.name
+          }" loading="lazy" />
         </picture>
         <div style="min-width:0;">
           <div class="row__title">${item.name}</div>
@@ -2092,11 +2133,11 @@ function loadProducts(data) {
         </div>
       </div>
       <div class="sku-cell mono" data-product-id="${item.id}" data-editable="true" style="cursor:pointer;" title="Click to edit">
-        <span class="sku-display">${item.sku || '—'}</span>
+        <span class="sku-display">${item.sku || "—"}</span>
         <input
           type="text"
           class="sku-inline-input input"
-          value="${item.sku || ''}"
+          value="${item.sku || ""}"
           maxlength="7"
           style="display:none; width:80px; text-transform:uppercase;"
         />
@@ -2134,132 +2175,137 @@ function loadProducts(data) {
   }
 
   // Bind inline SKU edit handlers
-  document.querySelectorAll('.sku-cell[data-editable="true"]').forEach(cell => {
-    const display = cell.querySelector('.sku-display');
-    const input = cell.querySelector('.sku-inline-input');
-    const productId = cell.dataset.productId;
+  document
+    .querySelectorAll('.sku-cell[data-editable="true"]')
+    .forEach((cell) => {
+      const display = cell.querySelector(".sku-display");
+      const input = cell.querySelector(".sku-inline-input");
+      const productId = cell.dataset.productId;
 
-    if (!display || !input) return;
+      if (!display || !input) return;
 
-    // Click to edit
-    display.addEventListener('click', (e) => {
-      e.stopPropagation();
-      display.style.display = 'none';
-      input.style.display = 'block';
-      input.focus();
-      input.select();
-    });
-
-    // Auto-uppercase while typing
-    input.addEventListener('input', (e) => {
-      const start = e.target.selectionStart;
-      const end = e.target.selectionEnd;
-      e.target.value = e.target.value.toUpperCase();
-      e.target.setSelectionRange(start, end);
-    });
-
-    // Save handler
-    const saveSkuInline = async () => {
-      const newSku = input.value.trim().toUpperCase();
-      const originalSku = display.textContent === '—' ? '' : display.textContent;
-
-      // No change - just close
-      if (newSku === originalSku) {
-        display.style.display = 'inline';
-        input.style.display = 'none';
-        return;
-      }
-
-      // Validate format
-      if (newSku && (newSku.length < 2 || newSku.length > 7)) {
-        alert('SKU must be 2-7 characters');
+      // Click to edit
+      display.addEventListener("click", (e) => {
+        e.stopPropagation();
+        display.style.display = "none";
+        input.style.display = "block";
         input.focus();
-        return;
-      }
-      if (newSku && !/^[A-Z0-9]+$/.test(newSku)) {
-        alert('SKU must contain only letters and numbers');
-        input.focus();
-        return;
-      }
+        input.select();
+      });
 
-      // Save via API
-      try {
-        input.disabled = true;
-        const response = await fetch(`${API_URL}/updateproduct/${productId}/sku`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('auth-token')}`
-          },
-          body: JSON.stringify({ sku: newSku || null })
-        });
+      // Auto-uppercase while typing
+      input.addEventListener("input", (e) => {
+        const start = e.target.selectionStart;
+        const end = e.target.selectionEnd;
+        e.target.value = e.target.value.toUpperCase();
+        e.target.setSelectionRange(start, end);
+      });
 
-        const result = await response.json();
+      // Save handler
+      const saveSkuInline = async () => {
+        const newSku = input.value.trim().toUpperCase();
+        const originalSku =
+          display.textContent === "—" ? "" : display.textContent;
 
-        if (!response.ok || !result.success) {
-          // Check for duplicate error
-          if (result.error && result.error.includes('already used')) {
-            alert(result.error);
-          } else {
-            alert(result.error || 'Failed to update SKU');
-          }
-          input.disabled = false;
+        // No change - just close
+        if (newSku === originalSku) {
+          display.style.display = "inline";
+          input.style.display = "none";
+          return;
+        }
+
+        // Validate format
+        if (newSku && (newSku.length < 2 || newSku.length > 7)) {
+          alert("SKU must be 2-7 characters");
+          input.focus();
+          return;
+        }
+        if (newSku && !/^[A-Z0-9]+$/.test(newSku)) {
+          alert("SKU must contain only letters and numbers");
           input.focus();
           return;
         }
 
-        // Update display
-        display.textContent = newSku || '—';
-        display.style.display = 'inline';
-        input.style.display = 'none';
-        input.disabled = false;
+        // Save via API
+        try {
+          input.disabled = true;
+          const response = await fetch(
+            `${API_URL}/updateproduct/${productId}/sku`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+              },
+              body: JSON.stringify({ sku: newSku || null }),
+            },
+          );
 
-        // Update count if SKU was added/removed
-        const countSpan = document.getElementById('missing-sku-count');
-        if (countSpan) {
-          let count = parseInt(countSpan.textContent) || 0;
-          if (!originalSku && newSku) count--; // Added SKU
-          if (originalSku && !newSku) count++; // Removed SKU
-          countSpan.textContent = Math.max(0, count);
+          const result = await response.json();
+
+          if (!response.ok || !result.success) {
+            // Check for duplicate error
+            if (result.error && result.error.includes("already used")) {
+              alert(result.error);
+            } else {
+              alert(result.error || "Failed to update SKU");
+            }
+            input.disabled = false;
+            input.focus();
+            return;
+          }
+
+          // Update display
+          display.textContent = newSku || "—";
+          display.style.display = "inline";
+          input.style.display = "none";
+          input.disabled = false;
+
+          // Update count if SKU was added/removed
+          const countSpan = document.getElementById("missing-sku-count");
+          if (countSpan) {
+            let count = parseInt(countSpan.textContent) || 0;
+            if (!originalSku && newSku) count--; // Added SKU
+            if (originalSku && !newSku) count++; // Removed SKU
+            countSpan.textContent = Math.max(0, count);
+          }
+
+          // Update product in state
+          const product = state.products?.find((p) => p.id == productId);
+          if (product) {
+            product.sku = newSku || null;
+          }
+        } catch (error) {
+          console.error("Inline SKU update failed:", error);
+          alert("Failed to update SKU. Please try again.");
+          input.disabled = false;
+          input.focus();
         }
+      };
 
-        // Update product in state
-        const product = state.products?.find(p => p.id == productId);
-        if (product) {
-          product.sku = newSku || null;
-        }
+      // Save on blur
+      input.addEventListener("blur", () => {
+        // Small delay to allow cancel via Escape
+        setTimeout(() => {
+          if (input.style.display !== "none") {
+            saveSkuInline();
+          }
+        }, 100);
+      });
 
-      } catch (error) {
-        console.error('Inline SKU update failed:', error);
-        alert('Failed to update SKU. Please try again.');
-        input.disabled = false;
-        input.focus();
-      }
-    };
-
-    // Save on blur
-    input.addEventListener('blur', () => {
-      // Small delay to allow cancel via Escape
-      setTimeout(() => {
-        if (input.style.display !== 'none') {
+      // Save on Enter, cancel on Escape
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
           saveSkuInline();
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          input.value = display.textContent === "—" ? "" : display.textContent;
+          display.style.display = "inline";
+          input.style.display = "none";
         }
-      }, 100);
+      });
     });
-
-    // Save on Enter, cancel on Escape
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        saveSkuInline();
-      } else if (e.key === 'Escape') {
-        e.preventDefault();
-        input.value = display.textContent === '—' ? '' : display.textContent;
-        display.style.display = 'inline';
-        input.style.display = 'none';
-      }
-    });
-  });
 
   // Add event listeners for delete and edit buttons
   document.querySelectorAll(".delete-btn").forEach((deleteBtn) => {
@@ -2314,7 +2360,7 @@ function loadProducts(data) {
         console.error("Error duplicating product:", err);
         alert(
           "Error duplicating product: " +
-            (typeof err?.message === "string" ? err.message : "Unknown error")
+            (typeof err?.message === "string" ? err.message : "Unknown error"),
         );
       }
     });
@@ -2326,9 +2372,14 @@ function addCategoryFilterHandler(data) {
   if (categoryFilter) {
     categoryFilter.addEventListener("change", () => {
       // Save category to filter state
-      const currentFilters = JSON.parse(sessionStorage.getItem('productListFilters') || '{}');
+      const currentFilters = JSON.parse(
+        sessionStorage.getItem("productListFilters") || "{}",
+      );
       currentFilters.category = categoryFilter.value;
-      sessionStorage.setItem('productListFilters', JSON.stringify(currentFilters));
+      sessionStorage.setItem(
+        "productListFilters",
+        JSON.stringify(currentFilters),
+      );
 
       loadProducts(data);
       updateSelectedCount(); // Update the count when changing category
@@ -2426,7 +2477,7 @@ function exportProductsCSV(data) {
           JSON.stringify(p.category ?? ""),
           JSON.stringify(p.ils_price ?? ""),
           JSON.stringify(p.quantity ?? 0),
-        ].join(",")
+        ].join(","),
       ),
     ].join("\n");
 
@@ -2722,7 +2773,7 @@ function editProduct(product) {
                       (_, i) =>
                         `<option id="${i}" value="${i}" ${
                           product.quantity == i ? "selected" : ""
-                        }>${i}</option>`
+                        }>${i}</option>`,
                     ).join("")}
                   </select>
                 </div>
@@ -2763,12 +2814,12 @@ function editProduct(product) {
                   type="text"
                   name="sku"
                   id="sku-input"
-                  value="${product.sku || ''}"
-                  placeholder="${product.sku ? '' : 'ABC123'}"
+                  value="${product.sku || ""}"
+                  placeholder="${product.sku ? "" : "ABC123"}"
                   maxlength="7"
                   style="text-transform: uppercase;"
                 />
-                <div class="help">${product.sku ? 'Current SKU - editing will update the product identifier' : 'No SKU assigned - enter one to add a product identifier'}</div>
+                <div class="help">${product.sku ? "Current SKU - editing will update the product identifier" : "No SKU assigned - enter one to add a product identifier"}</div>
                 <div id="sku-error" style="display:none; color: #ef4444; font-size: 13px; margin-top: 6px;"></div>
               </div>
             </div>
@@ -2793,10 +2844,10 @@ function editProduct(product) {
                         mainImageUrls[0]
                       }" alt="Main Image" loading="lazy" />
                       <button type="button" class="delete-image-btn" data-image-type="main" data-image-url="${encodeURIComponent(
-                        mainImageUrls[0]
+                        mainImageUrls[0],
                       )}" data-product-id="${
-                          product._id
-                        }" style="position:absolute; top:-10px; right:-10px; width:28px; height:28px; border-radius:999px; border:1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.18); color: rgba(239,68,68,.95); cursor:pointer; font-weight:900;">✕</button>
+                        product._id
+                      }" style="position:absolute; top:-10px; right:-10px; width:28px; height:28px; border-radius:999px; border:1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.18); color: rgba(239,68,68,.95); cursor:pointer; font-weight:900;">✕</button>
                     </div>`
                       : `<span class="help">No main image</span>`
                   }
@@ -2814,11 +2865,11 @@ function editProduct(product) {
                         idx + 1
                       }" loading="lazy" />
                       <button type="button" class="delete-image-btn" data-image-type="small" data-image-url="${encodeURIComponent(
-                        url
+                        url,
                       )}" data-product-id="${
                         product._id
                       }" style="position:absolute; top:-10px; right:-10px; width:26px; height:26px; border-radius:999px; border:1px solid rgba(239,68,68,.35); background: rgba(239,68,68,.18); color: rgba(239,68,68,.95); cursor:pointer; font-weight:900;">✕</button>
-                    </div>`
+                    </div>`,
                     )
                     .join("")}
                 </div>
@@ -2865,7 +2916,7 @@ function editProduct(product) {
   pageContent.insertAdjacentHTML("afterbegin", markup);
 
   // Store original SKU for change detection
-  const originalSku = product.sku || '';
+  const originalSku = product.sku || "";
 
   // Cancel -> back to products list
   const cancelBtn = document.getElementById("cancel-edit-product");
@@ -2877,10 +2928,10 @@ function editProduct(product) {
   }
 
   // SKU input handlers for edit form
-  const skuInput = document.getElementById('sku-input');
+  const skuInput = document.getElementById("sku-input");
   if (skuInput) {
     // Auto-uppercase while preserving cursor position
-    skuInput.addEventListener('input', (e) => {
+    skuInput.addEventListener("input", (e) => {
       const start = e.target.selectionStart;
       const end = e.target.selectionEnd;
       e.target.value = e.target.value.toUpperCase();
@@ -2888,7 +2939,7 @@ function editProduct(product) {
     });
 
     // Validate on blur (exclude current product from duplicate check)
-    skuInput.addEventListener('blur', async () => {
+    skuInput.addEventListener("blur", async () => {
       await validateSkuField(skuInput.value.trim(), product.id);
     });
   }
@@ -2925,7 +2976,7 @@ function editProduct(product) {
 
   // Setup drag and drop for main image in edit form
   const editMainDropzone = document.querySelector(
-    '#editForm label.dropzone[for="mainImage"]'
+    '#editForm label.dropzone[for="mainImage"]',
   );
   if (editMainDropzone && editMainInput) {
     setupDragAndDrop(editMainDropzone, editMainInput, false);
@@ -2933,7 +2984,7 @@ function editProduct(product) {
 
   // Setup drag and drop for additional images in edit form
   const editSmallDropzone = document.querySelector(
-    '#editForm label.dropzone[for="smallImages"]'
+    '#editForm label.dropzone[for="smallImages"]',
   );
   if (editSmallDropzone && editSmallInput) {
     setupDragAndDrop(editSmallDropzone, editSmallInput, true);
@@ -2989,7 +3040,7 @@ function editProduct(product) {
               .text()
               .catch(() => "Could not retrieve error text from server.");
             console.error(
-              `HTTP error! status: ${response.status}, body: ${errorText}`
+              `HTTP error! status: ${response.status}, body: ${errorText}`,
             );
             // Ensure errorText is a string
             errorText =
@@ -2999,8 +3050,8 @@ function editProduct(product) {
             throw new Error(
               `Server error: ${response.status}. Details: ${errorText.substring(
                 0,
-                200
-              )}`
+                200,
+              )}`,
             );
           }
 
@@ -3166,14 +3217,14 @@ async function updateProduct(e) {
   const productId = document.getElementById("product-id").value;
 
   // SKU validation
-  const skuInput = document.getElementById('sku-input');
-  const newSkuValue = skuInput?.value?.trim().toUpperCase() || '';
+  const skuInput = document.getElementById("sku-input");
+  const newSkuValue = skuInput?.value?.trim().toUpperCase() || "";
 
   // Validate if SKU is provided
   if (newSkuValue) {
     const isSkuValid = await validateSkuField(newSkuValue, productId);
     if (!isSkuValid) {
-      skuInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      skuInput?.scrollIntoView({ behavior: "smooth", block: "center" });
       skuInput?.focus();
       return;
     }
@@ -3181,7 +3232,9 @@ async function updateProduct(e) {
 
   // Warn if SKU is being changed (not just added to empty)
   if (originalSku && newSkuValue !== originalSku) {
-    const confirmed = confirm(`You are changing the SKU from "${originalSku}" to "${newSkuValue}". This may affect inventory tracking. Continue?`);
+    const confirmed = confirm(
+      `You are changing the SKU from "${originalSku}" to "${newSkuValue}". This may affect inventory tracking. Continue?`,
+    );
     if (!confirmed) {
       return;
     }
@@ -3421,7 +3474,7 @@ async function updateProduct(e) {
 
         // Insert at the top of the product list
         const listProductHeader = document.querySelector(
-          ".list-product-header"
+          ".list-product-header",
         );
         if (listProductHeader) {
           listProductHeader.after(successMsg);
@@ -3448,10 +3501,10 @@ async function updateProduct(e) {
         } catch (fallbackError) {
           console.error(
             "Error during fallback fetchInfo after product update:",
-            fallbackError
+            fallbackError,
           );
           alert(
-            "Product was updated, but reloading the product list failed. Please refresh the page."
+            "Product was updated, but reloading the product list failed. Please refresh the page.",
           );
         }
       }
@@ -3475,7 +3528,7 @@ async function fetchWithRetry(
   url,
   options,
   maxRetries = state.maxRetries,
-  timeoutMs = DEFAULT_TIMEOUT
+  timeoutMs = DEFAULT_TIMEOUT,
 ) {
   let lastError;
 
@@ -3569,7 +3622,7 @@ async function fetchWithRetry(
         // Exponential backoff with jitter
         const delay = Math.min(
           1000 * Math.pow(2, attempt) + Math.random() * 1000,
-          10000
+          10000,
         );
         await new Promise((resolve) => setTimeout(resolve, delay));
       }
@@ -3586,7 +3639,7 @@ async function optimizeImage(
   file,
   maxWidth = 1200,
   maxHeight = 1200,
-  quality = 0.8
+  quality = 0.8,
 ) {
   return new Promise((resolve, reject) => {
     if (!file || !file.type.startsWith("image/")) {
@@ -3637,7 +3690,7 @@ async function optimizeImage(
             resolve(optimizedFile);
           },
           file.type,
-          quality
+          quality,
         );
       };
 
@@ -3692,7 +3745,7 @@ async function addProduct(e, data, form) {
     const securityMargin =
       document.getElementById("security-margin").value || "5";
     const applyGlobalDiscountCheckbox = document.getElementById(
-      "apply-global-discount"
+      "apply-global-discount",
     );
     const applyGlobalDiscount = !!applyGlobalDiscountCheckbox?.checked;
 
@@ -3719,7 +3772,7 @@ async function addProduct(e, data, form) {
     console.log("[addProduct] Main image file:", mainImage);
     console.log(
       "[addProduct] Small images files count:",
-      smallImages?.length || 0
+      smallImages?.length || 0,
     );
 
     if (!mainImage) {
@@ -3742,7 +3795,7 @@ async function addProduct(e, data, form) {
     console.log("[addProduct] Step 3: Uploading images to /upload...");
     console.log("[addProduct] FormData prepared, about to call fetchWithRetry");
     console.log(
-      "[addProduct] IMPORTANT: About to start upload - page should NOT reload!"
+      "[addProduct] IMPORTANT: About to start upload - page should NOT reload!",
     );
     console.log("[addProduct] Current URL:", window.location.href);
 
@@ -3769,13 +3822,13 @@ async function addProduct(e, data, form) {
           body: formData,
         },
         state.maxRetries,
-        60000 // uploads can take longer due to server-side image processing
+        60000, // uploads can take longer due to server-side image processing
       );
       console.log("[addProduct] fetchWithRetry completed successfully");
     } catch (fetchError) {
       console.error(
         "[addProduct] FETCH ERROR during image upload:",
-        fetchError
+        fetchError,
       );
       console.error("[addProduct] Fetch error stack:", fetchError.stack);
       // Keep protection on for now, will remove at end of entire process
@@ -3785,12 +3838,12 @@ async function addProduct(e, data, form) {
 
     console.log(
       "[addProduct] Image upload response status:",
-      imageResponse.status
+      imageResponse.status,
     );
     if (!imageResponse.ok) {
       console.error(
         "[addProduct] Image upload failed with status:",
-        imageResponse.status
+        imageResponse.status,
       );
       throw new Error(`Image upload failed: ${imageResponse.status}`);
     }
@@ -3840,13 +3893,13 @@ async function addProduct(e, data, form) {
         body: JSON.stringify(productData),
       },
       state.maxRetries,
-      30000
+      30000,
     );
 
     console.log("[addProduct] CHECKPOINT: After /addproduct fetch");
     console.log(
       "[addProduct] /addproduct response received! Status:",
-      productResponse.status
+      productResponse.status,
     );
     if (!productResponse.ok) {
       const errorText = await productResponse.text();
@@ -3861,14 +3914,14 @@ async function addProduct(e, data, form) {
     if (!productResult.success) {
       console.error(
         "[addProduct] Product creation failed:",
-        productResult.error
+        productResult.error,
       );
       throw new Error(productResult.error || "Failed to create product");
     }
 
     console.log(
       "[addProduct] SUCCESS! Product created with ID:",
-      productResult.id
+      productResult.id,
     );
     console.log("[addProduct] About to show success UI...");
 
@@ -3973,7 +4026,7 @@ async function addProduct(e, data, form) {
     if (msg === "wrong_server_port") {
       alert(
         `Could not reach the API at ${API_URL} (wrong port / wrong server).\n\n` +
-          `Make sure the backend is running and that API_URL is correct.`
+          `Make sure the backend is running and that API_URL is correct.`,
       );
     } else if (
       msg === "network_error_after_retries" ||
@@ -3989,13 +4042,13 @@ async function addProduct(e, data, form) {
           `- Backend not running on port 4000\n` +
           `- Admin page opened over https:// but API is http:// (mixed content)\n` +
           `- Wrong origin/port (Live Server port changed)\n\n` +
-          `Tip: run window.diagnoseBisliServer() in the console to test endpoints.`
+          `Tip: run window.diagnoseBisliServer() in the console to test endpoints.`,
       );
     } else if (msg.startsWith("request_timed_out_after_")) {
       alert(
         `Request timed out while calling the API.\n\n` +
           `API_URL: ${API_URL}\n` +
-          `This can happen if the server is busy (e.g. DB/processing) or unreachable.`
+          `This can happen if the server is busy (e.g. DB/processing) or unreachable.`,
       );
     } else {
       alert(`Error: ${msg}\n\nCheck browser console for details.`);
@@ -4186,14 +4239,14 @@ async function loadAddProductsPage() {
       "submit",
       (e) => {
         console.log(
-          "[loadAddProductsPage] Form submit event captured - preventing default"
+          "[loadAddProductsPage] Form submit event captured - preventing default",
         );
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
         return false;
       },
-      true // capture, to ensure this runs even if other handlers misbehave
+      true, // capture, to ensure this runs even if other handlers misbehave
     );
   }
 
@@ -4223,10 +4276,10 @@ async function loadAddProductsPage() {
   updateInvBadges();
 
   // SKU input handlers
-  const skuInput = document.getElementById('sku-input');
+  const skuInput = document.getElementById("sku-input");
   if (skuInput) {
     // Auto-uppercase while preserving cursor position
-    skuInput.addEventListener('input', (e) => {
+    skuInput.addEventListener("input", (e) => {
       const start = e.target.selectionStart;
       const end = e.target.selectionEnd;
       e.target.value = e.target.value.toUpperCase();
@@ -4234,7 +4287,7 @@ async function loadAddProductsPage() {
     });
 
     // Validate on blur
-    skuInput.addEventListener('blur', async () => {
+    skuInput.addEventListener("blur", async () => {
       await validateSkuField(skuInput.value.trim(), null);
     });
   }
@@ -4286,13 +4339,13 @@ async function loadAddProductsPage() {
 
   // Setup drag and drop for main image
   const mainDropzone = document.querySelector(
-    'label.dropzone[for="mainImage"]'
+    'label.dropzone[for="mainImage"]',
   );
   setupDragAndDrop(mainDropzone, mainInput, false);
 
   // Setup drag and drop for additional images
   const smallDropzone = document.querySelector(
-    'label.dropzone[for="smallImages"]'
+    'label.dropzone[for="smallImages"]',
   );
   setupDragAndDrop(smallDropzone, smallInput, true);
 }
@@ -4325,24 +4378,24 @@ function addProductHandler() {
     }
 
     // SKU validation (required for new products)
-    const skuInput = document.getElementById('sku-input');
-    const skuValue = skuInput?.value?.trim() || '';
+    const skuInput = document.getElementById("sku-input");
+    const skuValue = skuInput?.value?.trim() || "";
 
     if (!skuValue) {
-      const errorDiv = document.getElementById('sku-error');
+      const errorDiv = document.getElementById("sku-error");
       if (errorDiv) {
-        errorDiv.innerHTML = 'SKU is required for new products';
-        errorDiv.style.display = 'block';
-        errorDiv.setAttribute('role', 'alert');
+        errorDiv.innerHTML = "SKU is required for new products";
+        errorDiv.style.display = "block";
+        errorDiv.setAttribute("role", "alert");
       }
-      skuInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      skuInput?.scrollIntoView({ behavior: "smooth", block: "center" });
       skuInput?.focus();
       return;
     }
 
     const isSkuValid = await validateSkuField(skuValue, null);
     if (!isSkuValid) {
-      skuInput?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      skuInput?.scrollIntoView({ behavior: "smooth", block: "center" });
       skuInput?.focus();
       return;
     }
@@ -4402,13 +4455,13 @@ function addProductHandler() {
       alert(
         isRAW
           ? "RAW image file is too large. Please select an image smaller than 50MB."
-          : "Image file is too large. Please select an image smaller than 5MB."
+          : "Image file is too large. Please select an image smaller than 5MB.",
       );
       return;
     }
 
     const multiProdImage = Array.from(
-      document.getElementById("smallImages").files
+      document.getElementById("smallImages").files,
     );
 
     const data = {
@@ -4440,7 +4493,7 @@ function addProductHandler() {
 
   if (submitBtn1) {
     console.log(
-      "[addProductHandler] Attaching event listener to submit-add-product"
+      "[addProductHandler] Attaching event listener to submit-add-product",
     );
     submitBtn1.addEventListener("click", runSubmit);
   } else {
@@ -4449,12 +4502,12 @@ function addProductHandler() {
 
   if (submitBtn2) {
     console.log(
-      "[addProductHandler] Attaching event listener to submit-add-product-inventory"
+      "[addProductHandler] Attaching event listener to submit-add-product-inventory",
     );
     submitBtn2.addEventListener("click", runSubmit);
   } else {
     console.error(
-      "[addProductHandler] Button #submit-add-product-inventory not found!"
+      "[addProductHandler] Button #submit-add-product-inventory not found!",
     );
   }
 
@@ -4521,12 +4574,12 @@ window.diagnoseBisliServer = async function () {
         endpoint === "/health"
           ? "GET"
           : endpoint === "/verify-token" ||
-            endpoint === "/login" ||
-            endpoint === "/upload" ||
-            endpoint === "/addproduct" ||
-            endpoint === "/removeproduct"
-          ? "POST"
-          : "GET";
+              endpoint === "/login" ||
+              endpoint === "/upload" ||
+              endpoint === "/addproduct" ||
+              endpoint === "/removeproduct"
+            ? "POST"
+            : "GET";
 
       const response = await fetch(`${API_URL}${endpoint}`, {
         method: method,
@@ -4563,7 +4616,7 @@ window.diagnoseBisliServer = async function () {
         console.log(
           `  Response: ${text.substring(0, 100)}${
             text.length > 100 ? "..." : ""
-          }`
+          }`,
         );
       } catch (e) {
         row.responseSnippet = null;
