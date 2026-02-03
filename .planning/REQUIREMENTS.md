@@ -21,17 +21,17 @@ Requirements for admin UX improvements milestone. Each maps to roadmap phases.
 
 ### Product Reordering
 
-- [ ] **ORDER-01**: Each product row has drag handle (six-dot icon)
-- [ ] **ORDER-02**: Product row shows visual feedback during dragging state
-- [ ] **ORDER-03**: Product list shows visual feedback for drop zones
-- [ ] **ORDER-04**: Ghost preview appears during drag operation
-- [ ] **ORDER-05**: Product order is per-category (bracelets order ≠ necklaces order)
-- [ ] **ORDER-06**: "Save Order" button commits reordering changes
-- [ ] **ORDER-07**: "Cancel" button reverts unsaved changes
-- [ ] **ORDER-08**: Loading state displays while saving order
-- [ ] **ORDER-09**: Error handling displays user-friendly message for failed saves
-- [ ] **ORDER-10**: Undo button reverts last order change
-- [ ] **ORDER-11**: Redo button reapplies undone order change
+- [x] **ORDER-01**: Each product row has drag handle (six-dot icon)
+- [x] **ORDER-02**: Product row shows visual feedback during dragging state
+- [x] **ORDER-03**: Product list shows visual feedback for drop zones
+- [x] **ORDER-04**: Ghost preview appears during drag operation
+- [x] **ORDER-05**: Product order is per-category (bracelets order ≠ necklaces order)
+- [x] **ORDER-06**: "Save Order" button commits reordering changes
+- [x] **ORDER-07**: "Cancel" button reverts unsaved changes
+- [x] **ORDER-08**: Loading state displays while saving order
+- [x] **ORDER-09**: Error handling displays user-friendly message for failed saves
+- [x] **ORDER-10**: Undo button reverts last order change
+- [x] **ORDER-11**: Redo button reapplies undone order change
 
 ### Image Gallery Reordering
 
@@ -97,17 +97,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-04 | Phase 5 | Complete |
 | FOUND-05 | Phase 7 | Pending |
 | FOUND-06 | Phase 7 | Pending |
-| ORDER-01 | Phase 6 | Pending |
-| ORDER-02 | Phase 6 | Pending |
-| ORDER-03 | Phase 6 | Pending |
-| ORDER-04 | Phase 6 | Pending |
-| ORDER-05 | Phase 6 | Pending |
-| ORDER-06 | Phase 6 | Pending |
-| ORDER-07 | Phase 6 | Pending |
-| ORDER-08 | Phase 6 | Pending |
-| ORDER-09 | Phase 6 | Pending |
-| ORDER-10 | Phase 6 | Pending |
-| ORDER-11 | Phase 6 | Pending |
+| ORDER-01 | Phase 6 | Complete |
+| ORDER-02 | Phase 6 | Complete |
+| ORDER-03 | Phase 6 | Complete |
+| ORDER-04 | Phase 6 | Complete |
+| ORDER-05 | Phase 6 | Complete |
+| ORDER-06 | Phase 6 | Complete |
+| ORDER-07 | Phase 6 | Complete |
+| ORDER-08 | Phase 6 | Complete |
+| ORDER-09 | Phase 6 | Complete |
+| ORDER-10 | Phase 6 | Complete |
+| ORDER-11 | Phase 6 | Complete |
 | IMAGE-01 | Phase 7 | Pending |
 | IMAGE-02 | Phase 7 | Pending |
 | IMAGE-03 | Phase 8 | Pending |
