@@ -5,6 +5,11 @@ export default defineConfig({
     // Test environment
     environment: 'node',
 
+    // Environment variables for tests
+    env: {
+      NODE_ENV: 'test',
+    },
+
     // Test file patterns
     include: ['tests/**/*.test.js'],
 
