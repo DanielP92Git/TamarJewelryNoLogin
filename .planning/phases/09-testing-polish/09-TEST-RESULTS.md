@@ -408,6 +408,40 @@ Performance is production-ready for v1.1. Current catalog size (~40 products) pe
 *Plan 09-03 testing complete - All RTL and Performance tests passed*
 
 
+## Touch Device Testing
+
+### Test Environment
+- Method: TBD (BrowserStack Live / Physical Device / Chrome Emulation)
+- Devices Tested: TBD
+- Date: 2026-02-04
+- Admin Panel URL: http://localhost:3000/admin (development) or production URL
+
+### Test Scenarios
+1. **Product List Drag-and-Drop (Success Criterion #1)**
+   - Enter reorder mode
+   - Touch and hold drag handle on product row
+   - Drag product to new position
+   - Release to drop
+   - Verify visual feedback during drag
+   - Save order
+   - Verify persistence after refresh
+
+2. **Image Gallery Drag-and-Drop**
+   - Open product edit modal with multiple images
+   - Touch and hold image thumbnail drag handle
+   - Drag to reorder images
+   - Verify visual feedback
+   - Save product
+   - Verify image order persists
+
+3. **Modal Touch Interactions**
+   - Tap product row to open preview modal
+   - Tap Edit, Delete, Duplicate buttons
+   - Tap X button to close
+   - Tap backdrop to close
+   - Verify all interactions respond correctly
+
+
 ## Memory Leak Testing
 
 **Test Date:** 2026-02-04
