@@ -207,10 +207,14 @@ Plans:
   4. Password hashing with bcrypt is tested (unique salts, correct validation)
   5. Login and signup endpoints are tested with valid and invalid credentials
   6. Middleware auth.js functions are unit tested in isolation
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] TBD
+- [ ] 11-01-PLAN.md — Auth helpers and login endpoint integration tests
+- [ ] 11-02-PLAN.md — Signup endpoint integration tests with bcrypt verification
+- [ ] 11-03-PLAN.md — Protected route tests (fetchUser middleware via HTTP)
+- [ ] 11-04-PLAN.md — Admin route authorization tests (requireAdmin middleware)
+- [ ] 11-05-PLAN.md — Middleware unit tests (fetchUser, requireAdmin, authUser)
 
 ### Phase 12: Payment Processing Tests
 **Goal**: Test PayPal and Stripe payment flows with mocked APIs
@@ -305,7 +309,7 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 ->
 | 8. Modal Integration | v1.1 | 5/5 | Complete | 2026-02-04 |
 | 9. Testing & Polish | v1.1 | 5/5 | Complete | 2026-02-04 |
 | 10. Test Infrastructure | v1.2 | 7/7 | Complete | 2026-02-04 |
-| 11. Auth & Authorization | v1.2 | 0/0 | Not started | - |
+| 11. Auth & Authorization | v1.2 | 0/5 | Not started | - |
 | 12. Payment Processing | v1.2 | 0/0 | Not started | - |
 | 13. Currency Conversion | v1.2 | 0/0 | Not started | - |
 | 14. File Upload & Images | v1.2 | 0/0 | Not started | - |
@@ -313,4 +317,4 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 ->
 | 16. Security & Middleware | v1.2 | 0/0 | Not started | - |
 
 ---
-*Last updated: 2026-02-04 after Phase 10 completion*
+*Last updated: 2026-02-04 after Phase 11 planning*
