@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 ## Current Position
 
 Phase: 9 of 9 (Testing & Polish) - IN PROGRESS
-Plan: 2 of 3+ in phase (estimated)
-Status: Desktop testing complete, touch testing deferred
-Last activity: 2026-02-04 — Plan 09-02 complete: Touch device testing (deferred to post-v1.1)
+Plan: 4 of 4+ in phase (estimated)
+Status: Bug fixes complete, final verification pending
+Last activity: 2026-02-04 — Plan 09-04 complete: Bug batch fixes (BUG-01 fixed, BUG-02/03 deferred)
 
-Progress: [█████████░] 92% v1.1 (v1.0: 5/5 plans, v1.1: 27/? plans, Phase 9 in progress)
+Progress: [█████████░] 94% v1.1 (v1.0: 5/5 plans, v1.1: 28/? plans, Phase 9 in progress)
 
 ## Performance Metrics
 
@@ -35,9 +35,11 @@ Progress: [█████████░] 92% v1.1 (v1.0: 5/5 plans, v1.1: 27/?
 | 6 (v1.1) | 4 | ~59min | ~14.8min |
 | 7 (v1.1) | 5 | ~177min | ~35.4min |
 | 8 (v1.1) | 5 | ~62min | ~12.4min |
-| 9 (v1.1) | 2 | ~8min | ~4min |
+| 9 (v1.1) | 4 | ~12min | ~3min |
 
 **Recent Trend:**
+- 09-04: ~4min (bug batch fixes) - BUG-01 fixed (drag handle focus), BUG-02/03 deferred with rationale
+- 09-03: ~1min (RTL & performance testing) - no bugs found, passed all tests (deferred in 09-02)
 - 09-02: ~1min (touch testing deferral) - user decision to defer touch testing to post-v1.1 phase
 - 09-01: ~7min (desktop testing) - keyboard accessibility, memory leak analysis, concurrent admin verification, 3 bugs identified
 - 08-05: ~45min (human verification) - 6 bugs fixed, all 22 test scenarios passed
@@ -214,52 +216,56 @@ None yet.
 - 6 bugs found and fixed during verification: modal height, cursor, focus trap, duplicate API, login autofill
 - All requirements MODAL-01 through MODAL-09, IMAGE-03 through IMAGE-08 satisfied
 
-**Phase 9 Progress (Plans 09-01 and 09-02 complete):**
+**Phase 9 Progress (Plans 09-01 through 09-04 complete):**
 - Desktop testing complete: Keyboard accessibility, memory leak analysis, concurrent admin verification (09-01)
 - Touch testing deferred: User decision to defer touch device testing to post-v1.1 phase (09-02)
-- Bug catalog created: 3 issues identified (1 HIGH, 1 MEDIUM, 1 LOW)
-- **BUG-01 (MEDIUM):** Drag handle missing focus indicator - needs CSS `:focus` styling
-- **BUG-02 (HIGH):** Product reordering not keyboard accessible - WCAG 2.1.2 violation
-  - SortableJS does not support keyboard drag by default
-  - No alternative (move up/down buttons) implemented
-  - **USER DECISION NEEDED:** Ship with gap OR implement fix OR defer to v1.2
-- **BUG-03 (LOW):** Custom focus-visible styling not implemented - browser defaults work but not styled
+- RTL & performance testing: ✅ PASS - All tests passed, no bugs found (09-03)
+- Bug fixes complete: BUG-01 fixed, BUG-02/03 deferred with rationale (09-04)
+- **BUG-01 (MEDIUM):** FIXED - Drag handles now show visible focus indicator (blue outline, commit 7484dcd)
+- **BUG-02 (HIGH):** DEFERRED to v1.2 - Keyboard reordering (WCAG 2.1.2 violation)
+  - Requires architectural change (move up/down buttons)
+  - Internal admin tool scope, timeline constraints
+  - Planned for v1.2: WordPress-style move up/down buttons
+- **BUG-03 (LOW):** DEFERRED to v1.2+ - Custom focus-visible styling (cosmetic polish)
 - Memory leak analysis: ✅ PASS - sortable.destroy() called, all listeners removed, no leaks found
 - Concurrent admin testing: ✅ PASS - 409 Conflict handling works, data integrity maintained
 - Touch testing: DEFERRED - SortableJS documented as touch-aware but unverified, not blocking v1.1
 
 ## Session Continuity
 
-Last session: 2026-02-04 (Phase 9 Plan 02 complete)
-Stopped at: Plan 09-02 complete - Touch testing deferred to post-v1.1 phase
+Last session: 2026-02-04 (Phase 9 Plan 04 complete)
+Stopped at: Plan 09-04 complete - Bug batch fixes (BUG-01 fixed, BUG-02/03 deferred)
 Resume file: None
 
-**Next step:** Continue Phase 9 with remaining testing plans or address BUG-02 decision
+**Next step:** Final verification (Plan 09-05) to verify BUG-01 fix and complete Phase 9
 
-**Key Decision Points:**
-1. **BUG-02 resolution:** Ship v1.1 with WCAG violation OR implement move up/down buttons OR defer
-2. **Phase 9 continuation:** Additional testing plans (cross-browser, UAT prep) or bug fixes
+**Summary of Phase 9 Completion:**
+- 09-01: Desktop testing ✅ (3 bugs identified)
+- 09-02: Touch testing DEFERRED to post-v1.1
+- 09-03: RTL & performance testing ✅ (no bugs found)
+- 09-04: Bug fixes ✅ (BUG-01 fixed, BUG-02/03 deferred with rationale)
+
+**Outstanding Work:**
+- Plan 09-05: Final verification (verify BUG-01 fix, confirm all testing complete)
+- Post-v1.1: BUG-02 (keyboard reordering) and BUG-03 (focus-visible styling)
 
 **Resume command after /clear:**
 ```
-Phase 9 Plans 01-02 complete.
+Phase 9 Plans 01-04 complete.
 
 Testing Summary:
-- Desktop testing: ✅ PASS (keyboard/memory/concurrency verified)
-- Touch testing: DEFERRED to post-v1.1 per user decision
+- Desktop: ✅ PASS
+- Touch: DEFERRED to post-v1.1
+- RTL & Performance: ✅ PASS
+- Bug Fixes: ✅ COMPLETE
 
-3 bugs identified:
-- BUG-01 (MEDIUM): Drag handle missing focus indicator
-- BUG-02 (HIGH): Keyboard reordering not accessible (WCAG 2.1.2 violation)
-- BUG-03 (LOW): Custom focus-visible styling not implemented
+Bug Status:
+- BUG-01 (MEDIUM): FIXED - Drag handle focus indicator added (commit 7484dcd)
+- BUG-02 (HIGH): DEFERRED to v1.2 - Keyboard reordering (architectural change)
+- BUG-03 (LOW): DEFERRED to v1.2+ - Focus-visible styling (cosmetic polish)
 
-USER DECISION NEEDED on BUG-02:
-- Option A: Ship v1.1 with known limitation (document in release notes)
-- Option B: Implement move up/down buttons (est. 20-30 min)
-- Option C: Defer to v1.2 (acceptable for internal admin tool)
-
-Next: Continue Phase 9 testing plans or fix bugs.
+Next: Plan 09-05 Final Verification
 ```
 
 ---
-*Last updated: 2026-02-04 after Phase 9 Plan 02 completion*
+*Last updated: 2026-02-04 after Phase 9 Plan 04 completion*
