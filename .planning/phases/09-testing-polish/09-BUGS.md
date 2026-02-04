@@ -193,17 +193,35 @@ button:focus-visible {
 
 ---
 
+## Bug Triage Summary
+
+### Blocking (must fix for v1.1)
+None - all bugs are non-blocking for v1.1 ship
+
+### High (should fix for v1.1)
+- [ ] BUG-02: Product reordering not keyboard accessible (WCAG 2.1.2 violation)
+  - Status: Requires architectural decision (move up/down buttons vs custom keyboard drag)
+  - Decision: Defer to v1.2 per internal admin tool scope and timeline constraints
+  - Documentation: Will be noted in known limitations
+
+### Medium (defer to v1.2)
+- [x] BUG-01: Drag handle missing focus indicator
+  - Status: Simple CSS fix, will implement during batch fix phase
+  - Impact: Improves keyboard navigation visibility
+
+### Low (defer to v1.2+)
+- [ ] BUG-03: Custom focus-visible styling not implemented
+  - Status: Browser defaults work, cosmetic enhancement only
+  - Impact: Minor UX polish, not functionally required
+
 ## Batch Fix Recommendations
 
-### Must Fix for v1.1
-- None (all bugs are non-blocking, pending user decision on BUG-02)
+### Will Fix in This Plan (09-04)
+- BUG-01 (drag handle focus indicator) - Simple CSS addition, improves accessibility
 
-### Should Fix for v1.1
-- BUG-02 (keyboard reordering) - Pending user decision: ship with limitation or delay for fix
-
-### Can Defer to v1.2
-- BUG-01 (drag handle focus indicator)
-- BUG-03 (custom focus-visible styling)
+### Deferred to v1.2
+- BUG-02 (keyboard reordering) - Requires architectural decision and significant implementation effort
+- BUG-03 (custom focus-visible styling) - Low priority polish
 
 ---
 
