@@ -154,7 +154,7 @@ class WorkshopView extends View {
 
   handleWorkshopLng(lng) {
     const descriptionContainer = document.querySelector(
-      '.workshop-description'
+      '.workshop-description',
     );
     if (lng === 'eng') {
       descriptionContainer.style.direction = 'ltr';
@@ -183,19 +183,19 @@ class WorkshopView extends View {
       descriptionContainer.style.direction = 'rtl';
       descriptionContainer.style.textAlign = 'right';
       return `אני שמחה להזמין אותך לסדנת תכשיטים לנשים ולנערות. בסדנה הזו תכיני תכשיטים ייחודיים משלך. מגיל צעיר, עיצוב תכשיטים נתן לי מקום ליצירה, חופש ואהבה לעבודה עם הידיים וליצירת דברים חדשים. אני רוצה לחלוק את החוויה הזו עם כמה שיותר נשים ונערות, כדי שגם הן יוכלו ליצור בעצמן ולדעת שאין גבול ליצירתיות. אני עובדת עם תכשיטים מתוך אמונה ביכולת שלנו לרפא את עצמנו דרך הידיים.
-
+<br /><br /><br />
 בסדנה אלמד ואלווה אותך בתהליך יצירת התכשיטים, ואשתף איך תוכלי להמשיך ליצור פריטים חדשים גם בבית. אלמד אותך אילו חומרים כדאי לקנות ואיך לעשות זאת בצורה חסכונית. אתן לך את הידע והכלים הדרושים כדי שתוכלי להמשיך ליצור פריטים ייחודיים משלך. בסדנה נכין עגילים וכמו כן שרשרת או צמיד (תלוי בזמן), ותלמדי כמה טכניקות עבודה עם חומרים שונים, כולל חרוזים ומתכת.
-
+<br /><br /><br />
 הסדנה אינה דורשת ידע קודם ביצירת תכשיטים. כל החומרים יינתנו על ידי. את גם יכולה להכין הפתעה מיוחדת למישהו ולרכוש את סדנת התכשיטים ככרטיס מתנה.`;
     }
   }
 
   setWorkshopLng(lng) {
     const descriptionContainer = document.querySelector(
-      '.workshop-description'
+      '.workshop-description',
     );
     const containerParent = document.querySelector(
-      '.workshop-description-container'
+      '.workshop-description-container',
     );
 
     descriptionContainer.innerHTML = '';
@@ -304,13 +304,13 @@ class WorkshopView extends View {
     const costItems = costsContainer.querySelectorAll('.workshop-cost-item');
     const noteEl = costsContainer.querySelector('.workshop-cost-note');
     const whatsappLabel = costsContainer.querySelector(
-      '.contact-block .contact-label'
+      '.contact-block .contact-label',
     );
     const telLabel = costsContainer.querySelectorAll(
-      '.contact-block .contact-label'
+      '.contact-block .contact-label',
     )[1];
     const emailLabel = costsContainer.querySelectorAll(
-      '.contact-block .contact-label'
+      '.contact-block .contact-label',
     )[2];
     const telValue = costsContainer.querySelectorAll('.contact-value')[0];
     const emailValue = costsContainer.querySelectorAll('.contact-value')[1];

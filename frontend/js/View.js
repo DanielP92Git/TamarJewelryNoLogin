@@ -679,7 +679,7 @@ export default class View {
             </ul>
           </li>
           <li class="main-nav-tab">
-            <a class="attrib" href="/html/jewelry-workshop.html">סדנאת תכשיטים</a>
+            <a class="attrib" href="/html/jewelry-workshop.html">סדנאות תכשיטים</a>
           </li>
           <li class="main-nav-tab">
             <a class="attrib" href="/html/about.html">אודות</a>
@@ -1082,7 +1082,7 @@ export default class View {
         </div>
         <div class="footer-right-column">
           <a class="attrib-footer-heb" href="/html/jewelry-workshop.html"
-            >סדנאת תכשיטים</a
+            >סדנאות תכשיטים</a
           >
           <a class="attrib-footer-heb" href="/html/about.html">אודות</a>
         </div>
