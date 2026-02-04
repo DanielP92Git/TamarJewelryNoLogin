@@ -108,3 +108,130 @@
 
 ---
 
+## Known Issues (Deferred to v1.2)
+
+### Bug Catalog Summary
+
+| Bug ID | Priority | Category | Status | Description |
+|--------|----------|----------|--------|-------------|
+| BUG-01 | MEDIUM | Accessibility | ✅ FIXED | Drag handle missing focus indicator (fixed in 09-04, commit 7484dcd) |
+| BUG-02 | HIGH | Accessibility | DEFERRED | Product reordering not keyboard accessible (WCAG 2.1.2 violation) |
+| BUG-03 | LOW | UX Polish | DEFERRED | Custom focus-visible styling not implemented (browser defaults work) |
+
+### Detailed Deferral Rationale
+
+**BUG-02: Keyboard Reordering (HIGH Priority)**
+
+- **Issue:** Users cannot reorder products using keyboard (Space to grab, Arrow keys to move, Space to drop)
+- **Impact:** WCAG 2.1.2 violation - affects keyboard-only users and screen reader users
+- **Why Deferred:**
+  - Requires architectural change (move up/down buttons OR custom keyboard drag implementation)
+  - Estimated effort: 20-30 minutes for WordPress-style move buttons
+  - Internal admin tool with limited keyboard-only users
+  - Timeline constraints for v1.1 ship
+- **Planned Fix (v1.2):**
+  - Implement move up/down buttons (↑/↓) next to each product in reorder mode
+  - Pattern: WordPress admin menu reordering
+  - Benefit: Also improves touch device experience
+- **Workaround:** Admins must use mouse/trackpad for product reordering
+
+**BUG-03: Custom Focus-Visible Styling (LOW Priority)**
+
+- **Issue:** No explicit custom :focus-visible styling (relies on browser defaults)
+- **Impact:** Minor - browser defaults work correctly, cosmetic enhancement only
+- **Why Deferred:**
+  - No functional impact (default behavior works)
+  - Low priority relative to v1.2 feature backlog
+  - Cosmetic polish, not blocking
+- **Planned Fix (v1.2+):**
+  - Add custom :focus-visible styling for brand consistency
+  - Improve cross-browser visual uniformity
+- **Workaround:** Browser defaults provide adequate focus indicators
+
+### Expected Deferrals from Testing (CONTEXT.md)
+
+Per Phase 9 CONTEXT.md, these areas were identified as acceptable deferrals:
+
+1. **Touch drag-and-drop optimization** - DEFERRED
+   - Status: Testing deferred to post-v1.1 phase (user decision in 09-02)
+   - Risk: Low - SortableJS documented as touch-aware
+   - Next steps: Conduct UAT or v1.2 touch device testing
+
+2. **Extensive RTL testing** - COMPLETED (no issues found)
+   - Status: Basic RTL testing completed (13/13 tests passed)
+   - SortableJS and CSS logical properties handle RTL correctly
+   - Production-ready
+
+3. **Large catalog (200+) performance optimization** - COMPLETED (extrapolation passed)
+   - Status: Performance validated via extrapolation
+   - 200+ products remain within acceptable thresholds
+   - No optimization needed for v1.1
+
+4. **Keyboard-based drag reordering** - DEFERRED (BUG-02)
+   - Status: SortableJS limitation confirmed
+   - Architectural change required (move up/down buttons)
+   - Deferred to v1.2
+
+---
+
+## v1.2 Roadmap Candidates
+
+Based on Phase 9 testing findings, v1.2 should prioritize:
+
+### 1. Keyboard Accessibility Completion (HIGH Priority)
+
+**BUG-02: Product Reordering Keyboard Support**
+
+- **Options:**
+  - **Option A (Recommended):** Move up/down buttons next to each product
+    - Pattern: WordPress admin menu reordering
+    - Benefit: Simple, WCAG compliant, works for touch too
+    - Effort: ~20-30 minutes
+  - **Option B:** Custom keyboard drag pattern (Space/Arrow keys)
+    - Benefit: Better power-user UX
+    - Effort: More complex, requires custom event handling
+
+- **Recommended:** Option A (move up/down buttons)
+
+### 2. Touch Device Testing & Refinement (MEDIUM Priority)
+
+**Complete Success Criterion #1**
+
+- Conduct touch testing on iPad Safari and Android Chrome
+- Verify SortableJS touch support works as documented
+- Test scenarios:
+  - Product list drag-and-drop
+  - Image gallery drag-and-drop
+  - Modal touch interactions
+- If issues found: Optimize touch targets, visual feedback
+
+### 3. Performance Optimization (LOW Priority)
+
+**Future-proofing for Large Catalogs**
+
+- Monitor catalog growth toward 200+ products
+- If needed, implement:
+  - Virtual scrolling for 200+ products
+  - Pagination option for categories
+  - Lazy loading for off-screen products
+- Current: ~40 products perform excellently, optimization not urgent
+
+### 4. UX Polish (LOW Priority)
+
+**BUG-03: Custom Focus-Visible Styling**
+
+- Add custom :focus-visible styles for brand consistency
+- Improve cross-browser visual uniformity
+- Define focus style system for entire admin panel
+
+### 5. Additional Enhancements (Future)
+
+**From Testing Observations:**
+
+- WebSocket real-time notifications for concurrent admin ("Admin X is reordering Bracelets")
+- Soft locking for reorder mode ("Reorder mode locked by Admin X")
+- Merge strategies for non-conflicting concurrent changes
+- Heap snapshot testing in CI/CD for large catalogs
+
+---
+
