@@ -1,4 +1,7 @@
-require('dotenv').config();
+// Skip dotenv in test environment (tests set env vars directly)
+if (process.env.NODE_ENV !== 'test') {
+  require('dotenv').config();
+}
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
@@ -736,14 +739,17 @@ async function initializeExchangeRate() {
   }
 }
 
-connectDb()
-  .then(() => {
-    // Initialize exchange rate after database connection
-    initializeExchangeRate();
-  })
-  .catch(err => {
-    console.error('MongoDB connection failed:', err?.message || err);
-  });
+// Skip database connection in test environment (setup.js handles it)
+if (process.env.NODE_ENV !== 'test') {
+  connectDb()
+    .then(() => {
+      // Initialize exchange rate after database connection
+      initializeExchangeRate();
+    })
+    .catch(err => {
+      console.error('MongoDB connection failed:', err?.message || err);
+    });
+}
 
 // =============================================
 // File Upload Configuration
@@ -3997,31 +4003,34 @@ app.use((err, req, res, _next) => {
 // =============================================
 // Server Initialization
 // =============================================
-app.listen(process.env.SERVER_PORT || 4000, error => {
-  if (!error) {
-    console.log('Server Running on Port ' + (process.env.SERVER_PORT || 4000));
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('Environment Variables (dev):');
-      console.log('  API_URL:', process.env.API_URL);
-      console.log('  HOST:', process.env.HOST);
-      console.log('  NODE_ENV:', process.env.NODE_ENV);
-    }
+// Don't start server in test environment (supertest will handle requests)
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(process.env.SERVER_PORT || 4000, error => {
+    if (!error) {
+      console.log('Server Running on Port ' + (process.env.SERVER_PORT || 4000));
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Environment Variables (dev):');
+        console.log('  API_URL:', process.env.API_URL);
+        console.log('  HOST:', process.env.HOST);
+        console.log('  NODE_ENV:', process.env.NODE_ENV);
+      }
 
-    // #region agent log
-    agentLog('A', 'backend/index.js:app.listen', 'server started', {
-      port: process.env.SERVER_PORT || 4000,
-      hasApiUrl: !!process.env.API_URL,
-      apiUrlPrefix:
-        typeof process.env.API_URL === 'string'
-          ? process.env.API_URL.slice(0, 60)
-          : null,
-      nodeEnv: process.env.NODE_ENV || null,
-    });
-    // #endregion
-  } else {
-    console.log('Error : ' + error);
-  }
-});
+      // #region agent log
+      agentLog('A', 'backend/index.js:app.listen', 'server started', {
+        port: process.env.SERVER_PORT || 4000,
+        hasApiUrl: !!process.env.API_URL,
+        apiUrlPrefix:
+          typeof process.env.API_URL === 'string'
+            ? process.env.API_URL.slice(0, 60)
+            : null,
+        nodeEnv: process.env.NODE_ENV || null,
+      });
+      // #endregion
+    } else {
+      console.log('Error : ' + error);
+    }
+  });
+}
 
 // Image processing function
 const processImage = async (inputPath, filename, isMainImage = true) => {

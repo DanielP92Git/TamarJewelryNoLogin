@@ -40,7 +40,8 @@ beforeAll(async () => {
   // Suppress mongoose deprecation warnings
   mongoose.set('strictQuery', true);
 
-  // Clear payment credentials to ensure mocking is used
+  // Clear production credentials to ensure mocking/memory server is used
+  delete process.env.MONGO_URL; // Force use of memory server
   delete process.env.PAYPAL_CLIENT_ID;
   delete process.env.PAYPAL_CLIENT_SECRET;
   delete process.env.STRIPE_SECRET_KEY;
