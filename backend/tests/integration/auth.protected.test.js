@@ -258,6 +258,108 @@ describe('fetchUser middleware - Protected Routes', () => {
 
       expect(response.body).toHaveProperty('item', 1);
     });
+
+    it('should handle Bearer with lowercase (bearer)', async () => {
+      // Create user
+      const userData = createUser({
+        email: 'lowercase@example.com',
+        cartData: { test: 5 }
+      });
+      await new User(userData).save();
+
+      // Generate token
+      const token = createAuthToken(userData);
+
+      // Request with lowercase bearer (case insensitive per HTTP spec)
+      const response = await request(app)
+        .post('/getcart')
+        .set('Authorization', `bearer ${token}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('test', 5);
+    });
+
+    it('should handle Bearer with uppercase (BEARER)', async () => {
+      // Create user
+      const userData = createUser({
+        email: 'uppercase@example.com',
+        cartData: { test: 10 }
+      });
+      await new User(userData).save();
+
+      // Generate token
+      const token = createAuthToken(userData);
+
+      // Request with uppercase BEARER (case insensitive per HTTP spec)
+      const response = await request(app)
+        .post('/getcart')
+        .set('Authorization', `BEARER ${token}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('test', 10);
+    });
+
+    it('should reject Authorization header with extra spaces', async () => {
+      // Create user and token
+      const userData = createUser({ email: 'extraspace@example.com' });
+      await new User(userData).save();
+      const token = createAuthToken(userData);
+
+      // Request with extra space after Bearer (should fail strict parsing)
+      const response = await request(app)
+        .post('/getcart')
+        .set('Authorization', `Bearer  ${token}`)
+        .expect('Content-Type', /json/)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('success', false);
+      expect(response.body.errors).toMatch(/authenticate/i);
+    });
+
+    it('should reject Authorization header with wrong scheme', async () => {
+      // Create user and token
+      const userData = createUser({ email: 'wrongscheme@example.com' });
+      await new User(userData).save();
+      const token = createAuthToken(userData);
+
+      // Request with Basic auth scheme instead of Bearer
+      const response = await request(app)
+        .post('/getcart')
+        .set('Authorization', `Basic ${token}`)
+        .expect('Content-Type', /json/)
+        .expect(401);
+
+      expect(response.body).toHaveProperty('success', false);
+      expect(response.body.errors).toMatch(/authenticate/i);
+    });
+
+    it('should handle both headers present (auth-token takes priority)', async () => {
+      // Create two different users
+      const user1Data = createUser({
+        email: 'user1@example.com',
+        cartData: { priority: 1 }
+      });
+      const user2Data = createUser({
+        email: 'user2@example.com',
+        cartData: { priority: 2 }
+      });
+      await new User(user1Data).save();
+      await new User(user2Data).save();
+
+      // Generate tokens for both users
+      const token1 = createAuthToken(user1Data);
+      const token2 = createAuthToken(user2Data);
+
+      // Set both headers (auth-token should take priority)
+      const response = await request(app)
+        .post('/getcart')
+        .set('auth-token', token1)
+        .set('Authorization', `Bearer ${token2}`)
+        .expect(200);
+
+      // Should return user1's cart (auth-token priority)
+      expect(response.body).toHaveProperty('priority', 1);
+    });
   });
 
   describe('User validation', () => {
