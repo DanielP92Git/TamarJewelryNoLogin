@@ -2,10 +2,27 @@
  * Global test setup for Vitest
  *
  * This file runs before all tests to:
- * 1. Start mongodb-memory-server (in-memory MongoDB)
- * 2. Connect mongoose to the in-memory database
- * 3. Ensure tests are isolated from production database
+ * 1. Validate environment (no production credentials)
+ * 2. Start mongodb-memory-server (in-memory MongoDB)
+ * 3. Connect mongoose to the in-memory database
+ * 4. Ensure tests are isolated from production database
  */
+
+// SAFETY FIRST: Validate environment before anything else
+import { validateTestEnvironment } from './helpers/envGuard.js';
+
+// This runs at module load time, before any tests
+try {
+  validateTestEnvironment();
+} catch (error) {
+  console.error('\n========================================');
+  console.error('ENVIRONMENT SAFETY CHECK FAILED');
+  console.error('========================================');
+  console.error(error.message);
+  console.error('\nTests aborted to prevent production contamination.');
+  console.error('========================================\n');
+  process.exit(1);
+}
 
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
@@ -20,9 +37,20 @@ beforeAll(async () => {
   // Suppress mongoose deprecation warnings
   mongoose.set('strictQuery', true);
 
+  // Clear payment credentials to ensure mocking is used
+  delete process.env.PAYPAL_CLIENT_ID;
+  delete process.env.PAYPAL_CLIENT_SECRET;
+  delete process.env.STRIPE_SECRET_KEY;
+  delete process.env.STRIPE_WEBHOOK_SECRET;
+
   // Start in-memory MongoDB server
   mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
+
+  // Double-check: Ensure we're using memory server, not real MongoDB
+  if (!uri.includes('127.0.0.1')) {
+    throw new Error(`SAFETY: Expected in-memory MongoDB (127.0.0.1), got: ${uri}`);
+  }
 
   // Connect mongoose to in-memory server
   await mongoose.connect(uri);
