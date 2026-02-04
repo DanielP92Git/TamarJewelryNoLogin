@@ -290,4 +290,101 @@ describe('requireAdmin middleware', () => {
       expect(adminResponse.status).not.toBe(403);
     });
   });
+
+  describe('401 vs 403 distinction', () => {
+    it('should return 401 for invalid token (authentication failure)', async () => {
+      const invalidToken = createInvalidToken(adminUser);
+
+      const response = await request(app)
+        .post('/api/admin/products/reorder')
+        .set('Authorization', `Bearer ${invalidToken}`)
+        .send({
+          category: 'necklaces',
+          productIds: [1, 2, 3]
+        });
+
+      // Authentication fails first (invalid signature) - not 403
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+    });
+
+    it('should return 403 for valid non-admin token (authorization failure)', async () => {
+      // This test explicitly demonstrates the difference between 401 and 403
+      // 401 = invalid/missing token (authentication)
+      // 403 = valid token but insufficient permissions (authorization)
+
+      const response = await request(app)
+        .post('/api/admin/products/reorder')
+        .set('Authorization', `Bearer ${regularToken}`)
+        .send({
+          category: 'necklaces',
+          productIds: [1, 2, 3]
+        });
+
+      // Authentication passes (token is valid), authorization fails (not admin)
+      expect(response.status).toBe(403);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors).toMatch(/admin access required/i);
+    });
+  });
+
+  describe('User type validation', () => {
+    it('should handle userType case sensitivity', async () => {
+      const Users = mongoose.model('Users');
+      const userWithCapitalAdmin = await Users.create(
+        createUser({ userType: 'Admin' })
+      );
+      const token = createAuthToken(userWithCapitalAdmin);
+
+      const response = await request(app)
+        .post('/api/admin/products/reorder')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          category: 'necklaces',
+          productIds: [1, 2, 3]
+        });
+
+      // Code checks for exact 'admin' match (case-sensitive)
+      expect(response.status).toBe(403);
+    });
+
+    it('should handle userType: "administrator" (not just "admin")', async () => {
+      const Users = mongoose.model('Users');
+      const userWithAdministrator = await Users.create(
+        createUser({ userType: 'administrator' })
+      );
+      const token = createAuthToken(userWithAdministrator);
+
+      const response = await request(app)
+        .post('/api/admin/products/reorder')
+        .set('Authorization', `Bearer ${token}`)
+        .send({
+          category: 'necklaces',
+          productIds: [1, 2, 3]
+        });
+
+      // Only 'admin' is valid, not 'administrator'
+      expect(response.status).toBe(403);
+    });
+  });
+
+  describe('Sequential middleware behavior', () => {
+    it('should attach req.user before requireAdmin check', async () => {
+      // This test verifies the middleware chain is working:
+      // fetchUser (attaches req.user) -> requireAdmin (checks req.userDoc)
+
+      const response = await request(app)
+        .post('/api/admin/products/reorder')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          category: 'necklaces',
+          productIds: [1, 2, 3]
+        });
+
+      // Admin should pass both middlewares
+      expect(response.status).not.toBe(401); // fetchUser succeeded
+      expect(response.status).not.toBe(403); // requireAdmin succeeded
+      // May fail with other error codes (validation, etc) but not 401/403
+    });
+  });
 });
