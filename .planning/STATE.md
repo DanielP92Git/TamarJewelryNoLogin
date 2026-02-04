@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 11 of 16 (Authentication & Authorization Tests)
-Plan: 3 of ? (in progress)
+Plan: 4 of ? (in progress)
 Status: In progress
-Last activity: 2026-02-05 — Completed 11-03-PLAN.md (Protected route integration tests)
+Last activity: 2026-02-05 — Completed 11-04-PLAN.md (Admin route authorization tests)
 
-Progress: [████░░░░░░] 40% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 9/? plans ✓)
+Progress: [████░░░░░░] 41% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 10/? plans ✓)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 47 (v1.0: 5, v1.1: 33, v1.2: 9)
+- Total plans completed: 48 (v1.0: 5, v1.1: 33, v1.2: 10)
 - Average duration: ~15 min per plan
-- Total execution time: ~12.6 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~42min)
+- Total execution time: ~12.7 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~50min)
 
 **By Phase:**
 
@@ -37,18 +37,18 @@ Progress: [████░░░░░░] 40% overall (v1.0: 5/5 plans ✓, v1.
 | 8 (v1.1) | 5 | ~62min | ~12.4min |
 | 9 (v1.1) | 5 | ~15min | ~3min |
 | 10 (v1.2) | 7 | ~35min | ~5min |
-| 11 (v1.2) | 3 | ~7min | ~2.3min |
+| 11 (v1.2) | 4 | ~15min | ~3.8min |
 
 **Recent Trend:**
-- v1.2 momentum: 9 plans completed in 42 min (~4.7 min/plan)
-- Phase 11 velocity: Integration test plans executing quickly (~2.3 min/plan)
+- v1.2 momentum: 10 plans completed in 50 min (~5 min/plan)
+- Phase 11 velocity: Integration test plans executing quickly (~3.8 min/plan)
 - Phase 10 velocity: Infrastructure setup completed in ~5 min/plan
 - v1.1 velocity: ~6 hours for 33 plans (11 min/plan)
 - Significant improvement over v1.0 velocity (192 min/plan)
 - Testing/verification plans execute fastest (~3 min)
 - Migration/integration plans take longer (~35 min)
 
-*Updated after Phase 11-03 completion*
+*Updated after Phase 11-04 completion*
 
 ## Accumulated Context
 
@@ -105,7 +105,7 @@ Recent decisions affecting current work:
 - Clear MONGO_URL in setup.js beforeAll (prevents production DB access)
 - Rationale: Tests must never access production resources; conditional checks provide clean separation
 
-**Authentication Test Patterns (11-02, 11-03 - Completed):**
+**Authentication Test Patterns (11-01 through 11-04 - Completed):**
 - Counter-based unique email generation for test isolation
 - Direct database queries (Users.findOne) to verify API behavior
 - Password hashing verification: regex match ($2a$/$2b$) + bcrypt.compare
@@ -115,6 +115,9 @@ Recent decisions affecting current work:
 - Token validation: expired, invalid signature, malformed, missing payload
 - Header format testing: auth-token, Bearer prefix, case sensitivity, priority
 - 17 comprehensive fetchUser middleware tests
+- 16 comprehensive requireAdmin middleware tests
+- RBAC patterns: admin access, regular user blocked, 401 vs 403 distinction
+- userType validation: case sensitivity, exact match, edge cases
 
 ### Pending Todos
 
@@ -135,8 +138,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 (11-03 execution)
-Stopped at: Completed 11-03-PLAN.md (Protected route integration tests)
+Last session: 2026-02-05 (11-04 execution)
+Stopped at: Completed 11-04-PLAN.md (Admin route authorization tests)
 Resume file: None
 
 **v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
@@ -144,7 +147,7 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (9/? plans complete)
+**v1.2 Milestone:** In progress (10/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
@@ -162,8 +165,9 @@ Resume file: None
 - ✅ 11-01: Auth test helpers and login endpoint tests (12 tests)
 - ✅ 11-02: Signup endpoint integration tests (10 tests, password hashing verification)
 - ✅ 11-03: Protected route integration tests (17 tests, fetchUser middleware)
-- Next: 11-04: Admin authorization tests (requireAdmin middleware)
-- Next: 11-05: Comprehensive auth suite (combining all middleware)
+- ✅ 11-04: Admin route authorization tests (16 tests, requireAdmin middleware)
+- Next: 11-05: Cart operations tests (protected routes with data manipulation)
+- Next: Remaining Phase 11 plans as defined in phase plan
 
 **Next Steps:**
 1. ✅ Phase 10 complete - test infrastructure foundation established
@@ -175,4 +179,4 @@ Resume file: None
 7. Phase 16: Security testing
 
 ---
-*Last updated: 2026-02-05 after 11-03 completion*
+*Last updated: 2026-02-05 after 11-04 completion*
