@@ -42,9 +42,15 @@ beforeAll(async () => {
 
   // Clear production credentials to ensure mocking/memory server is used
   delete process.env.MONGO_URL; // Force use of memory server
-  delete process.env.PAYPAL_CLIENT_ID;
-  delete process.env.PAYPAL_CLIENT_SECRET;
-  delete process.env.STRIPE_SECRET_KEY;
+
+  // Set dummy test credentials for PayPal (backend requires them to exist)
+  // Actual API calls are intercepted by nock mocks
+  process.env.PAYPAL_CLIENT_ID = 'test-paypal-client-id';
+  process.env.PAYPAL_CLIENT_SECRET = 'test-paypal-client-secret';
+  process.env.PAYPAL_BASE_URL = 'https://api-m.sandbox.paypal.com';
+
+  // Set dummy test credentials for Stripe
+  process.env.STRIPE_SECRET_KEY = 'sk_test_dummy_stripe_key_for_testing';
   delete process.env.STRIPE_WEBHOOK_SECRET;
 
   // Start in-memory MongoDB server
