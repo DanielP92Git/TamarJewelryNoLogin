@@ -26,7 +26,10 @@ try {
 
 import { MongoMemoryServer } from 'mongodb-memory-server';
 import mongoose from 'mongoose';
-import { beforeAll, afterAll } from 'vitest';
+import { beforeAll, afterAll, afterEach } from 'vitest';
+import { clearDatabase } from './helpers/db.js';
+import { resetFactoryCounter } from './helpers/factories.js';
+import { cleanAllMocks } from './helpers/mocks/index.js';
 
 let mongoServer;
 
@@ -69,4 +72,18 @@ afterAll(async () => {
   await mongoServer.stop();
 
   console.log('✓ Test database disconnected');
+});
+
+/**
+ * Clean up after each test to ensure isolation
+ */
+afterEach(async () => {
+  // Clear all database collections between tests
+  await clearDatabase();
+
+  // Reset factory counter for predictable data sequences
+  resetFactoryCounter();
+
+  // Clear any HTTP mocks to prevent leakage
+  cleanAllMocks();
 });
