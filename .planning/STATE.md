@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-01)
 
 ## Current Position
 
-Phase: 8 of 9 (Modal Integration & Image Reordering) - COMPLETE
-Plan: 5 of 5 in phase - All verified
-Status: Phase 8 complete, ready for Phase 9 (Testing & Polish)
-Last activity: 2026-02-04 — Plan 08-05 verification complete: 6 bugs fixed, all tests passed
+Phase: 9 of 9 (Testing & Polish) - IN PROGRESS
+Plan: 1 of 3+ in phase (estimated)
+Status: Desktop testing complete, 3 bugs identified
+Last activity: 2026-02-04 — Plan 09-01 complete: Desktop browser testing (keyboard, memory, concurrency)
 
-Progress: [█████████░] 89% v1.1 (v1.0: 5/5 plans, v1.1: 25/? plans, Phase 8 complete)
+Progress: [█████████░] 91% v1.1 (v1.0: 5/5 plans, v1.1: 26/? plans, Phase 9 in progress)
 
 ## Performance Metrics
 
@@ -35,8 +35,10 @@ Progress: [█████████░] 89% v1.1 (v1.0: 5/5 plans, v1.1: 25/?
 | 6 (v1.1) | 4 | ~59min | ~14.8min |
 | 7 (v1.1) | 5 | ~177min | ~35.4min |
 | 8 (v1.1) | 5 | ~62min | ~12.4min |
+| 9 (v1.1) | 1 | ~7min | ~7min |
 
 **Recent Trend:**
+- 09-01: ~7min (desktop testing) - keyboard accessibility, memory leak analysis, concurrent admin verification, 3 bugs identified
 - 08-05: ~45min (human verification) - 6 bugs fixed, all 22 test scenarios passed
 - 08-04: 4min (image persistence & deletion) - imageOrder form submit, delete with confirmation, backend images array support
 - 08-03: 7min (gallery sortable) - SortableJS drag-drop, main badge automation, order tracking
@@ -47,7 +49,6 @@ Progress: [█████████░] 89% v1.1 (v1.0: 5/5 plans, v1.1: 25/?
 - 07-03: 15min (backend API images array support) - dual-write pattern, backwards compatibility
 - 07-02: 4min (migration execution + schema update) - data transformation complete
 - 07-01: 6min (migration infrastructure + audit tooling) - backend migration setup
-- 06-04: 45min (human verification + 3 bug fixes) - checkpoint with debugging
 - 06-03: 5min (API integration + error handling) - save workflow complete
 - 06-02: 5min (drag-and-drop + command pattern) - frontend interaction layer
 - 06-01: 4min (UI infrastructure) - frontend-only, no API calls
@@ -145,6 +146,11 @@ Recent decisions affecting current work:
 - Backend filters images array on delete — maintain Phase 7 unified array + derived fields for backwards compatibility (08-04)
 - Numeric id for delete API — existing endpoint expects numeric product.id, not MongoDB _id (08-04)
 
+**Phase 9 Testing Decisions:**
+- Code review methodology for memory leak testing — implementation analysis when live browser testing not feasible (09-01)
+- SortableJS keyboard drag gap documented as WCAG 2.1.2 violation — BUG-02 HIGH priority, user decision needed (09-01)
+- Testing via implementation verification — concurrent admin and memory cleanup verified through code review (09-01)
+
 ### Pending Todos
 
 None yet.
@@ -197,32 +203,55 @@ None yet.
 - Delete UI: Confirmation dialog, optimistic DOM updates, toast feedback
 - All requirements IMAGE-06, IMAGE-08 satisfied
 
-**Phase 8 Checkpoint (Plan 08-05 in progress):**
-- Human verification started: Modal tests in progress
-- 3 UX bugs found and fixed:
-  1. Modal height too small (80vh → 90vh) - thumbnails now visible
-  2. Product rows missing pointer cursor - added for better clickability indication
-  3. Focus trap not working - added manual Tab/Shift+Tab cycling within modal
-  4. Duplicate button 500 error - simplified to use product directly without fetch
-- Modal tests status: 7/8 passed (awaiting duplicate confirmation after fix)
-- Remaining: Gallery reordering tests (7 scenarios) + RTL/regression tests
+**Phase 8 Completion (100% verified):**
+- Modal infrastructure complete: Native dialog element with ARIA, focus trap, accessibility (Plan 08-01)
+- Modal actions complete: Edit/Duplicate/Delete wired, toast feedback (Plan 08-02)
+- Gallery sortable complete: Drag-drop reordering, main badge automation (Plan 08-03)
+- Image persistence complete: Order saves, delete removes from DB (Plan 08-04)
+- Human verification complete: All 22 test scenarios passed (Plan 08-05)
+- 6 bugs found and fixed during verification: modal height, cursor, focus trap, duplicate API, login autofill
+- All requirements MODAL-01 through MODAL-09, IMAGE-03 through IMAGE-08 satisfied
+
+**Phase 9 Progress (Plan 09-01 complete):**
+- Desktop testing complete: Keyboard accessibility, memory leak analysis, concurrent admin verification
+- Bug catalog created: 3 issues identified (1 HIGH, 1 MEDIUM, 1 LOW)
+- **BUG-01 (MEDIUM):** Drag handle missing focus indicator - needs CSS `:focus` styling
+- **BUG-02 (HIGH):** Product reordering not keyboard accessible - WCAG 2.1.2 violation
+  - SortableJS does not support keyboard drag by default
+  - No alternative (move up/down buttons) implemented
+  - **USER DECISION NEEDED:** Ship with gap OR implement fix OR defer to v1.2
+- **BUG-03 (LOW):** Custom focus-visible styling not implemented - browser defaults work but not styled
+- Memory leak analysis: ✅ PASS - sortable.destroy() called, all listeners removed, no leaks found
+- Concurrent admin testing: ✅ PASS - 409 Conflict handling works, data integrity maintained
 
 ## Session Continuity
 
-Last session: 2026-02-03 (Phase 8 checkpoint in progress)
-Stopped at: Plan 08-05 checkpoint - modal bugs fixed, awaiting gallery tests
+Last session: 2026-02-04 (Phase 9 Plan 01 complete)
+Stopped at: Plan 09-01 complete - Desktop testing done, 3 bugs cataloged
 Resume file: None
 
-**Next step:** Continue Plan 08-05 verification - test gallery reordering and complete checkpoint
+**Next step:** User decision on BUG-02 (keyboard reordering gap), then continue Phase 9 testing
+
+**Key Decision Points:**
+1. **BUG-02 resolution:** Ship v1.1 with WCAG violation OR implement move up/down buttons OR defer
+2. **Phase 9 continuation:** Touch device testing, RTL testing, bug fixes
 
 **Resume command after /clear:**
 ```
-Continue Phase 8 verification from checkpoint. Modal tests complete (3 bugs fixed).
-Need to test:
-1. Image gallery reordering (7 tests)
-2. RTL and regression testing
-Then create 08-05-SUMMARY.md and proceed to phase verification.
+Phase 9 Plan 01 complete. Desktop testing done (keyboard, memory, concurrency).
+
+3 bugs identified:
+- BUG-01 (MEDIUM): Drag handle missing focus indicator
+- BUG-02 (HIGH): Keyboard reordering not accessible (WCAG 2.1.2 violation)
+- BUG-03 (LOW): Custom focus-visible styling not implemented
+
+USER DECISION NEEDED on BUG-02:
+- Option A: Ship v1.1 with known limitation (document in release notes)
+- Option B: Implement move up/down buttons (est. 20-30 min)
+- Option C: Defer to v1.2 (acceptable for internal admin tool)
+
+Next: Continue Phase 9 with touch/RTL testing or fix bugs first.
 ```
 
 ---
-*Last updated: 2026-02-03 during Phase 8 Plan 05 checkpoint*
+*Last updated: 2026-02-04 after Phase 9 Plan 01 completion*
