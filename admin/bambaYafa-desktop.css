@@ -1526,6 +1526,12 @@ body.reorder-mode-active {
   color: #4b5563;
 }
 
+.drag-handle:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+  color: #4b5563;
+}
+
 .drag-handle:active {
   cursor: grabbing;
 }
