@@ -3,7 +3,8 @@
 ## Milestones
 
 - v1.0 SKU Management - Phases 1-3 (shipped 2026-02-01)
-- v1.1 Admin Product Management UX - Phases 4-9 (in progress)
+- v1.1 Admin Product Management UX - Phases 4-9 (shipped 2026-02-04)
+- v1.2 Test Infrastructure & Critical Coverage - Phases 10-16 (in progress)
 
 ## Overview
 
@@ -12,7 +13,7 @@ Enhance admin product management workflow with modern UX patterns for viewing, o
 ## Phases
 
 **Phase Numbering:**
-- Integer phases (4, 5, 6, 7, 8, 9): Planned milestone work
+- Integer phases (4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16): Planned milestone work
 - Decimal phases (e.g., 4.1, 4.2): Urgent insertions (marked with INSERTED)
 
 Decimal phases appear between their surrounding integers in numeric order.
@@ -45,14 +46,8 @@ Plans:
 
 </details>
 
-## v1.1 Admin Product Management UX (In Progress)
-
-**Milestone Goal:** Enhance admin product management workflow with modern UX patterns for viewing, ordering, and organizing products.
-
-**Target features:**
-- Product preview modal (customer view with edit button)
-- Drag-and-drop product reordering within categories
-- Drag-and-drop gallery image reordering (merge main + gallery images)
+<details>
+<summary>v1.1 Admin Product Management UX (Phases 4-9) - SHIPPED 2026-02-04</summary>
 
 ### Phase 4: Schema Foundation & Library Setup
 **Goal**: Establish database schema for ordering and install drag-and-drop infrastructure
@@ -158,16 +153,139 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Desktop testing: keyboard accessibility, memory leaks, concurrent admin
-- [ ] 09-02-PLAN.md — Touch device testing: iPad Safari, Android Chrome
-- [ ] 09-03-PLAN.md — RTL Hebrew testing and 200+ product performance
-- [ ] 09-04-PLAN.md — Bug batch fixes from testing
-- [ ] 09-05-PLAN.md — Ship decision and v1.1 final verification
+- [x] 09-01-PLAN.md — Desktop testing: keyboard accessibility, memory leaks, concurrent admin
+- [x] 09-02-PLAN.md — Touch device testing: iPad Safari, Android Chrome
+- [x] 09-03-PLAN.md — RTL Hebrew testing and 200+ product performance
+- [x] 09-04-PLAN.md — Bug batch fixes from testing
+- [x] 09-05-PLAN.md — Ship decision and v1.1 final verification
+
+</details>
+
+## v1.2 Test Infrastructure & Critical Coverage (In Progress)
+
+**Milestone Goal:** Establish comprehensive testing foundation and cover highest-risk areas to enable safe future development.
+
+**Target features:**
+- Test infrastructure setup (Vitest for backend and frontend)
+- Authentication & authorization test coverage (JWT, role-based access, token lifecycle)
+- Payment processing test coverage (PayPal & Stripe mocks for order flows)
+- Currency conversion test coverage (exchange rate logic, USD/ILS calculations)
+- File upload & image processing test coverage (validation, S3 integration, Sharp)
+- Database & model test coverage (Product, User, Settings schemas)
+- Security & middleware test coverage (CORS, rate limiting, input validation)
+
+### Phase 10: Test Infrastructure Foundation
+**Goal**: Establish safe test infrastructure with database isolation and external API mocking
+**Depends on**: Phase 9 (v1.1 complete)
+**Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-05, INFRA-06, INFRA-07, INFRA-08, INFRA-09, INFRA-10, INFRA-11, INFRA-12, INFRA-13, INFRA-14, INFRA-15
+**Success Criteria** (what must be TRUE):
+  1. Tests run against isolated test database only (mongodb-memory-server)
+  2. Environment validation rejects production credentials (MongoDB, PayPal, Stripe)
+  3. External APIs are mocked (PayPal, Stripe, exchange rate API, DigitalOcean Spaces)
+  4. Test cleanup automation prevents data pollution between test runs
+  5. Sample integration test passes without touching production resources
+  6. CI/CD pipeline executes tests on commit with coverage reporting
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 11: Authentication & Authorization Tests
+**Goal**: Comprehensive test coverage for JWT authentication and role-based access control
+**Depends on**: Phase 10
+**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, AUTH-06, AUTH-07, AUTH-08, AUTH-09, AUTH-10, AUTH-11, AUTH-12, AUTH-13, AUTH-14, AUTH-15, AUTH-16
+**Success Criteria** (what must be TRUE):
+  1. JWT token generation, validation, and expiration are tested and verified
+  2. Admin role can access admin-protected routes, regular users cannot
+  3. Unauthenticated requests to protected routes return 401
+  4. Password hashing with bcrypt is tested (unique salts, correct validation)
+  5. Login and signup endpoints are tested with valid and invalid credentials
+  6. Middleware auth.js functions are unit tested in isolation
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 12: Payment Processing Tests
+**Goal**: Test PayPal and Stripe payment flows with mocked APIs
+**Depends on**: Phase 10
+**Requirements**: PAY-01, PAY-02, PAY-03, PAY-04, PAY-05, PAY-06, PAY-07, PAY-08, PAY-09, PAY-10, PAY-11, PAY-12, PAY-13
+**Success Criteria** (what must be TRUE):
+  1. PayPal order creation, approval, and capture flows are tested with mocked responses
+  2. Stripe payment intent creation and confirmation flows are tested with mocked responses
+  3. Payment error scenarios are tested (declined cards, insufficient funds, timeouts)
+  4. Payment endpoints validate required fields and reject invalid amounts/currencies
+  5. No live payment API calls occur during test runs (verified by environment validation)
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 13: Currency Conversion Tests
+**Goal**: Test USD/ILS exchange rate logic and fallback chain
+**Depends on**: Phase 10
+**Requirements**: CURR-01, CURR-02, CURR-03, CURR-04, CURR-05, CURR-06, CURR-07, CURR-08, CURR-09
+**Success Criteria** (what must be TRUE):
+  1. Exchange rate API fetch and caching are tested
+  2. Currency conversion calculations (USD to ILS and reverse) are accurate
+  3. Fallback chain is tested (API failure falls back to cached rate)
+  4. Currency formatting displays correct symbols and decimal places
+  5. Edge cases are handled (zero amounts, negative values, stale rates)
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 14: File Upload & Image Processing Tests
+**Goal**: Test file upload validation, Sharp image processing, and S3 integration
+**Depends on**: Phase 10
+**Requirements**: FILE-01, FILE-02, FILE-03, FILE-04, FILE-05, FILE-06, FILE-07, FILE-08, FILE-09, FILE-10, FILE-11
+**Success Criteria** (what must be TRUE):
+  1. File upload validates MIME types (JPEG, PNG, WebP only)
+  2. File upload enforces size limits and rejects oversized files
+  3. Sharp image processing resizes and converts formats correctly
+  4. Sharp handles corrupted images gracefully without crashing
+  5. DigitalOcean Spaces upload is mocked and generates correct URLs
+  6. No files are uploaded to production storage during test runs
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 15: Database & Model Tests
+**Goal**: Test Mongoose models (Product, User, Settings) for validation and CRUD operations
+**Depends on**: Phase 10
+**Requirements**: DATA-01, DATA-02, DATA-03, DATA-04, DATA-05, DATA-06, DATA-07, DATA-08, DATA-09, DATA-10, DATA-11, DATA-12, DATA-13, DATA-14, DATA-15
+**Success Criteria** (what must be TRUE):
+  1. Product model creates, updates, deletes, and finds products correctly
+  2. Product model validates required fields (name, price) and enforces SKU uniqueness
+  3. Product model sorts by displayOrder for drag-and-drop reordering
+  4. User model creates users, validates email format, and enforces email uniqueness
+  5. Settings model reads and updates site settings (exchange rates, configurations)
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
+
+### Phase 16: Security & Middleware Tests
+**Goal**: Test CORS, rate limiting, and input validation for security vulnerabilities
+**Depends on**: Phase 10
+**Requirements**: SEC-01, SEC-02, SEC-03, SEC-04, SEC-05, SEC-06, SEC-07, SEC-08, SEC-09
+**Success Criteria** (what must be TRUE):
+  1. CORS middleware allows configured origins in production and rejects unauthorized origins
+  2. CORS middleware allows localhost origins in development
+  3. Rate limiting middleware enforces limits on auth and payment endpoints
+  4. Rate limiting allows requests within limits and rejects excess requests
+  5. Input validation sanitizes XSS attempts and rejects SQL injection patterns
+**Plans**: TBD
+
+Plans:
+- [ ] TBD
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9
+Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -179,7 +297,14 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 6. Frontend Product Reordering | v1.1 | 4/4 | Complete | 2026-02-03 |
 | 7. Image Array Migration | v1.1 | 5/5 | Complete | 2026-02-03 |
 | 8. Modal Integration | v1.1 | 5/5 | Complete | 2026-02-04 |
-| 9. Testing & Polish | v1.1 | 0/5 | Planning complete | - |
+| 9. Testing & Polish | v1.1 | 5/5 | Complete | 2026-02-04 |
+| 10. Test Infrastructure | v1.2 | 0/0 | Not started | - |
+| 11. Auth & Authorization | v1.2 | 0/0 | Not started | - |
+| 12. Payment Processing | v1.2 | 0/0 | Not started | - |
+| 13. Currency Conversion | v1.2 | 0/0 | Not started | - |
+| 14. File Upload & Images | v1.2 | 0/0 | Not started | - |
+| 15. Database & Models | v1.2 | 0/0 | Not started | - |
+| 16. Security & Middleware | v1.2 | 0/0 | Not started | - |
 
 ---
-*Last updated: 2026-02-04 after Phase 9 planning*
+*Last updated: 2026-02-04 after v1.2 roadmap creation*
