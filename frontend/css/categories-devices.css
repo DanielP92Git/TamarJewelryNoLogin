@@ -690,21 +690,14 @@ main {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 10px;
+  padding: 6px 0;
   margin-top: 12px;
-  background-color: #f5f5f5;
-  border-radius: 6px;
   font-size: 0.85rem;
-  transition: background-color 0.2s ease;
   position: relative;
 }
 
 .product-sku:not(.product-sku--placeholder) {
   cursor: pointer;
-}
-
-.product-sku:not(.product-sku--placeholder):hover {
-  background-color: #ebebeb;
 }
 
 .product-sku:not(.product-sku--placeholder):focus-visible {
@@ -719,7 +712,7 @@ main {
 
 .sku-value {
   color: #666;
-  font-family: 'Courier New', monospace;
+  font-family: 'SF Mono', 'Consolas', 'Monaco', 'Roboto Mono', monospace;
   direction: ltr;
   unicode-bidi: plaintext;
   display: inline-block;
@@ -780,6 +773,9 @@ main {
   margin-bottom: 20px;
   padding-bottom: 10px;
   text-align: left; /* Default for English/LTR */
+  white-space: pre-wrap;
+  text-indent: -1em;
+  padding-left: 1em;
 }
 
 .price-actions-wrapper {
@@ -813,6 +809,8 @@ main {
   direction: rtl;
   width: 100%;
   align-self: flex-end;
+  padding-left: 0;
+  padding-right: 1em;
 }
 
 .item-specs[dir='ltr'] .item-description_modal {
