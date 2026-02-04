@@ -4231,3 +4231,6 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
     throw error;
   }
 };
+
+// Export app for testing (without starting server)
+module.exports = { app };
