@@ -2,3 +2,9 @@ prettier.config
 .env
 
 debug.log
+
+# Test coverage
+coverage/
+backend/coverage/
+frontend/coverage/
+*.lcov
