@@ -66,7 +66,7 @@ Add CSS focus styling to drag handle:
 - Outline offset: 2px
 - Color change on focus: #4b5563 (matches hover state)
 **Files Modified:** `admin/bambaYafa-desktop.css`
-**Commit:** [pending]
+**Commit:** 7484dcd
 
 ---
 
