@@ -39,62 +39,25 @@ class WorkshopView extends View {
     let curImg = 0;
     const maxImages = slideContainers.length;
 
-    const goToImage = function (slide, skipTransition = false) {
-      if (skipTransition) {
-        // Temporarily disable transitions for instant jump
-        slideContainers.forEach(container => {
-          container.style.transition = 'none';
-        });
-      }
-
+    const goToImage = function (slide) {
       slideContainers.forEach((container, index) => {
         const offset = (index - slide) * 100;
         container.style.transform = `translateX(${offset}%)`;
       });
-
-      if (skipTransition) {
-        // Re-enable transitions after a brief moment
-        setTimeout(() => {
-          slideContainers.forEach(container => {
-            container.style.transition = '';
-          });
-        }, 50);
-      }
     };
 
     const nextSlide = function () {
-      const prevImg = curImg;
       curImg = (curImg + 1) % maxImages;
-
-      // If wrapping from last to first, skip transition for instant jump
-      const isWrapping = prevImg === maxImages - 1 && curImg === 0;
-      goToImage(curImg, isWrapping);
+      goToImage(curImg);
     };
 
     const prevSlide = function () {
-      const prevImg = curImg;
       curImg = (curImg - 1 + maxImages) % maxImages;
-
-      // If wrapping from first to last, skip transition for instant jump
-      const isWrapping = prevImg === 0 && curImg === maxImages - 1;
-      goToImage(curImg, isWrapping);
+      goToImage(curImg);
     };
 
     // Initial setup - ensure first image is visible and others are positioned correctly
-    // Remove transition temporarily for initial positioning to avoid animation on page load
-    slideContainers.forEach(container => {
-      container.style.transition = 'none';
-    });
-
-    // Position all images correctly without animation
     goToImage(0);
-
-    // Re-enable transitions after a brief moment
-    setTimeout(() => {
-      slideContainers.forEach(container => {
-        container.style.transition = '';
-      });
-    }, 50);
 
     // Ensure we clean up previous event listeners to avoid duplicates
     const newBtnLeft = btnLeft.cloneNode(true);

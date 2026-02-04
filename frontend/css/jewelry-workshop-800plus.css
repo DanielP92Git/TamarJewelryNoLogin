@@ -62,7 +62,6 @@ header {
   display: flex;
   flex-flow: column;
   width: 100%;
-  height: 80vh;
   position: relative;
   overflow: hidden;
 
@@ -74,10 +73,14 @@ header {
   display: flex;
   overflow: hidden;
   position: relative;
-  top: 5rem;
-
-  height: calc(80vh - 5rem);
-  max-height: calc(80vh - 5rem);
+  width: 35%;
+  max-width: 500px;
+  height: auto;
+  max-height: 60vh;
+  aspect-ratio: 4 / 5;
+  margin-top: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(177, 20, 143); */
@@ -88,13 +91,13 @@ header {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: transform 3s ease-in-out;
+  transition: none;
   /* Hide all images except first one initially */
   transform: translateX(100%);
 }
@@ -109,18 +112,12 @@ header {
 }
 
 .slide-image-img {
-  object-fit: contain;
+  object-fit: cover;
   position: relative;
-  max-width: 100vw;
-  max-height: 100%;
-  width: auto;
-  height: auto;
+  width: 100%;
+  height: 100%;
   transition: transform 2s;
-  background-image: linear-gradient(
-    white 10%,
-    rgba(240, 230, 214, 0.564) 35%,
-    white 60%
-  );
+  border-radius: 12px;
 
   /* ~~~~ FOR DEBUGGING~~~~*/
   /* border: 4px solid rgb(75, 20, 177); */
@@ -145,7 +142,6 @@ main {
   overflow: hidden;
   position: relative;
 
-  max-height: 100rem;
   width: 100%;
   padding-bottom: 4rem;
 
@@ -212,30 +208,10 @@ h1 {
   /* border: 2px solid rgb(37, 155, 228); */
 }
 
-.workshop-description--img {
-  width: 30%;
-  height: 40%;
-  margin-left: 0; /* Gap property handles spacing now */
-  margin-right: 0; /* Gap property handles spacing now */
-  margin-top: 4rem;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-  /* ~~~~ FOR DEBUGGING~~~~ */
-  /* border: 2px solid rgb(129, 37, 228); */
-}
-
-/* RTL support - when description is RTL, reverse flex order to keep image on right */
+/* RTL support - when description is RTL, reverse flex order to keep carousel on right */
 .workshop-description-container.rtl-layout {
   flex-direction: row-reverse;
-  gap: 6rem; /* Add gap between text and image to match English spacing */
-}
-
-/* Ensure image has proper margins in RTL layout */
-.workshop-description-container.rtl-layout .workshop-description--img {
-  margin-left: 0;
-  margin-right: 0; /* Remove right margin since gap handles spacing */
+  gap: 6rem; /* Add gap between text and carousel to match English spacing */
 }
 
 /* Ensure consistent padding and alignment for RTL text */
@@ -244,11 +220,6 @@ h1 {
   text-align: right; /* Right-align Hebrew text to match English left-alignment visually */
   direction: rtl;
   margin-right: 0; /* Remove any margin that might interfere with gap */
-}
-
-.workshop-description--img:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
 }
 
 .img-background {
@@ -292,6 +263,10 @@ h1 {
 }
 
 .workshop-costs {
+  display: flex;
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
   background: linear-gradient(
     135deg,
     rgba(255, 255, 255, 0.08) 0%,
@@ -299,7 +274,6 @@ h1 {
   );
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   width: 75vw;
   height: auto;
@@ -310,13 +284,12 @@ h1 {
   color: rgba(68, 68, 68, 0.9);
   letter-spacing: 0.5px;
   line-height: 1.8;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1); */
 
   text-align: center;
-  align-self: center;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
-  /* border: 2px solid rgb(37, 155, 228); */
+  border: 1px solid rgba(5, 10, 12, 0.548);
 }
 
 .workshop-costs-title {
@@ -401,8 +374,8 @@ h1 {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.3);
 
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   cursor: pointer;
 
@@ -430,21 +403,21 @@ h1 {
 /* Chevron icon using CSS */
 .slider-btn::before {
   content: '';
-  width: 12px;
-  height: 12px;
-  border-right: 2.5px solid rgba(50, 50, 50, 0.9);
-  border-bottom: 2.5px solid rgba(50, 50, 50, 0.9);
+  width: 10px;
+  height: 10px;
+  border-right: 2px solid rgba(50, 50, 50, 0.9);
+  border-bottom: 2px solid rgba(50, 50, 50, 0.9);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slider-btn--left::before {
   transform: rotate(135deg);
-  margin-left: 4px;
+  margin-left: 3px;
 }
 
 .slider-btn--right::before {
   transform: rotate(-45deg);
-  margin-right: 4px;
+  margin-right: 3px;
 }
 
 /* Hover state */
@@ -466,14 +439,14 @@ h1 {
   transform: translateY(-50%) scale(1.05);
 }
 
-/* Positioning */
+/* Positioning - adjusted for smaller container */
 .slider-btn--left {
-  left: 32px !important;
+  left: 12px !important;
   right: auto !important;
 }
 
 .slider-btn--right {
-  right: 32px !important;
+  right: 12px !important;
   left: auto !important;
 }
 
@@ -485,13 +458,4 @@ h1 {
 /* Ensure Desktop buttons are visible and positioned */
 .slide-images-container .slider-btn--desktop {
   display: flex;
-}
-
-/* Position Desktop Buttons */
-.slide-images-container .slider-btn--left.slider-btn--desktop {
-  left: 25px;
-}
-
-.slide-images-container .slider-btn--right.slider-btn--desktop {
-  right: 25px;
 }
