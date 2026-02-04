@@ -33,15 +33,28 @@ export default defineConfig({
     // Coverage configuration
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'json-summary', 'html'],
+      reportsDirectory: './coverage',
+      include: [
+        'js/**/*.js'
+      ],
       exclude: [
         'node_modules/**',
-        '.parcel-cache/**',
-        'dist/**',
         'tests/**',
+        'coverage/**',
+        'dist/**',
+        '.parcel-cache/**',
+        '*.config.js',
         '**/*.test.js',
         '**/postbuild.js'
-      ]
+      ],
+      thresholds: {
+        // Start with no thresholds, increase as coverage improves
+        // lines: 70,
+        // functions: 70,
+        // branches: 60,
+        // statements: 70
+      }
     }
   }
 });

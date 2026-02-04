@@ -23,14 +23,31 @@ export default defineConfig({
     // Coverage configuration
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'json', 'json-summary', 'html'],
+      reportsDirectory: './coverage',
+      include: [
+        'index.js',
+        'middleware/**/*.js',
+        'models/**/*.js',
+        'services/**/*.js',
+        'config/**/*.js',
+        'jobs/**/*.js'
+      ],
       exclude: [
-        'coverage/**',
+        'node_modules/**',
         'tests/**',
-        'vitest.config.js',
+        'coverage/**',
+        '*.config.js',
         'migrate-mongo-config.js',
         'migrations/**',
       ],
+      thresholds: {
+        // Start with no thresholds, increase as coverage improves
+        // lines: 70,
+        // functions: 70,
+        // branches: 60,
+        // statements: 70
+      }
     },
   },
 });
