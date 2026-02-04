@@ -160,19 +160,100 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 through INFRA-15 | Phase 10 | Pending |
-| AUTH-01 through AUTH-16 | Phase 11 | Pending |
-| PAY-01 through PAY-13 | Phase 12 | Pending |
-| CURR-01 through CURR-09 | Phase 13 | Pending |
-| FILE-01 through FILE-11 | Phase 14 | Pending |
-| DATA-01 through DATA-15 | Phase 15 | Pending |
-| SEC-01 through SEC-09 | Phase 16 | Pending |
+| INFRA-01 | Phase 10 | Pending |
+| INFRA-02 | Phase 10 | Pending |
+| INFRA-03 | Phase 10 | Pending |
+| INFRA-04 | Phase 10 | Pending |
+| INFRA-05 | Phase 10 | Pending |
+| INFRA-06 | Phase 10 | Pending |
+| INFRA-07 | Phase 10 | Pending |
+| INFRA-08 | Phase 10 | Pending |
+| INFRA-09 | Phase 10 | Pending |
+| INFRA-10 | Phase 10 | Pending |
+| INFRA-11 | Phase 10 | Pending |
+| INFRA-12 | Phase 10 | Pending |
+| INFRA-13 | Phase 10 | Pending |
+| INFRA-14 | Phase 10 | Pending |
+| INFRA-15 | Phase 10 | Pending |
+| AUTH-01 | Phase 11 | Pending |
+| AUTH-02 | Phase 11 | Pending |
+| AUTH-03 | Phase 11 | Pending |
+| AUTH-04 | Phase 11 | Pending |
+| AUTH-05 | Phase 11 | Pending |
+| AUTH-06 | Phase 11 | Pending |
+| AUTH-07 | Phase 11 | Pending |
+| AUTH-08 | Phase 11 | Pending |
+| AUTH-09 | Phase 11 | Pending |
+| AUTH-10 | Phase 11 | Pending |
+| AUTH-11 | Phase 11 | Pending |
+| AUTH-12 | Phase 11 | Pending |
+| AUTH-13 | Phase 11 | Pending |
+| AUTH-14 | Phase 11 | Pending |
+| AUTH-15 | Phase 11 | Pending |
+| AUTH-16 | Phase 11 | Pending |
+| PAY-01 | Phase 12 | Pending |
+| PAY-02 | Phase 12 | Pending |
+| PAY-03 | Phase 12 | Pending |
+| PAY-04 | Phase 12 | Pending |
+| PAY-05 | Phase 12 | Pending |
+| PAY-06 | Phase 12 | Pending |
+| PAY-07 | Phase 12 | Pending |
+| PAY-08 | Phase 12 | Pending |
+| PAY-09 | Phase 12 | Pending |
+| PAY-10 | Phase 12 | Pending |
+| PAY-11 | Phase 12 | Pending |
+| PAY-12 | Phase 12 | Pending |
+| PAY-13 | Phase 12 | Pending |
+| CURR-01 | Phase 13 | Pending |
+| CURR-02 | Phase 13 | Pending |
+| CURR-03 | Phase 13 | Pending |
+| CURR-04 | Phase 13 | Pending |
+| CURR-05 | Phase 13 | Pending |
+| CURR-06 | Phase 13 | Pending |
+| CURR-07 | Phase 13 | Pending |
+| CURR-08 | Phase 13 | Pending |
+| CURR-09 | Phase 13 | Pending |
+| FILE-01 | Phase 14 | Pending |
+| FILE-02 | Phase 14 | Pending |
+| FILE-03 | Phase 14 | Pending |
+| FILE-04 | Phase 14 | Pending |
+| FILE-05 | Phase 14 | Pending |
+| FILE-06 | Phase 14 | Pending |
+| FILE-07 | Phase 14 | Pending |
+| FILE-08 | Phase 14 | Pending |
+| FILE-09 | Phase 14 | Pending |
+| FILE-10 | Phase 14 | Pending |
+| FILE-11 | Phase 14 | Pending |
+| DATA-01 | Phase 15 | Pending |
+| DATA-02 | Phase 15 | Pending |
+| DATA-03 | Phase 15 | Pending |
+| DATA-04 | Phase 15 | Pending |
+| DATA-05 | Phase 15 | Pending |
+| DATA-06 | Phase 15 | Pending |
+| DATA-07 | Phase 15 | Pending |
+| DATA-08 | Phase 15 | Pending |
+| DATA-09 | Phase 15 | Pending |
+| DATA-10 | Phase 15 | Pending |
+| DATA-11 | Phase 15 | Pending |
+| DATA-12 | Phase 15 | Pending |
+| DATA-13 | Phase 15 | Pending |
+| DATA-14 | Phase 15 | Pending |
+| DATA-15 | Phase 15 | Pending |
+| SEC-01 | Phase 16 | Pending |
+| SEC-02 | Phase 16 | Pending |
+| SEC-03 | Phase 16 | Pending |
+| SEC-04 | Phase 16 | Pending |
+| SEC-05 | Phase 16 | Pending |
+| SEC-06 | Phase 16 | Pending |
+| SEC-07 | Phase 16 | Pending |
+| SEC-08 | Phase 16 | Pending |
+| SEC-09 | Phase 16 | Pending |
 
 **Coverage:**
-- v1.2 requirements: 80 total
-- Mapped to phases: 0 (awaiting roadmap creation)
-- Unmapped: 80 ⚠️
+- v1.2 requirements: 80 total (15 INFRA + 16 AUTH + 13 PAY + 9 CURR + 11 FILE + 15 DATA + 9 SEC)
+- Mapped to phases: 80/80 (100% coverage)
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-04*
-*Last updated: 2026-02-04 after initial definition*
+*Last updated: 2026-02-04 after roadmap creation*
