@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 10 of 16 (Test Infrastructure Foundation)
-Plan: 07 of unknown
-Status: In progress
-Last activity: 2026-02-04 — Completed 10-07-PLAN.md
+Plan: 06 of 6
+Status: Phase complete
+Last activity: 2026-02-04 — Completed 10-06-PLAN.md
 
-Progress: [███░░░░░░░] 35% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 7 plans)
+Progress: [███░░░░░░░] 36% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 6 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 45 (v1.0: 5, v1.1: 33, v1.2: 7)
-- Average duration: ~16 min per plan
-- Total execution time: ~12 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~31min)
+- Total plans completed: 44 (v1.0: 5, v1.1: 33, v1.2: 6)
+- Average duration: ~17 min per plan
+- Total execution time: ~12 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~32min)
 
 **By Phase:**
 
@@ -36,17 +36,17 @@ Progress: [███░░░░░░░] 35% overall (v1.0: 5/5 plans ✓, v1.
 | 7 (v1.1) | 5 | ~177min | ~35.4min |
 | 8 (v1.1) | 5 | ~62min | ~12.4min |
 | 9 (v1.1) | 5 | ~15min | ~3min |
-| 10 (v1.2) | 7 | ~31min | ~4.4min |
+| 10 (v1.2) | 6 | ~32min | ~5.3min |
 
 **Recent Trend:**
-- v1.2 momentum: 7 plans completed in 31 min (~4.4 min/plan)
+- v1.2 momentum: 6 plans completed in 32 min (~5.3 min/plan)
 - Phase 10 velocity: Infrastructure setup plans executing quickly
 - v1.1 velocity: ~6 hours for 33 plans (11 min/plan)
 - Significant improvement over v1.0 velocity (192 min/plan)
 - Testing/verification plans execute fastest (~3-7 min)
 - Migration/integration plans take longer (~35 min)
 
-*Updated after 10-07 completion*
+*Updated after 10-06 completion*
 
 ## Accumulated Context
 
@@ -69,7 +69,7 @@ Recent decisions affecting current work:
 - Environment validation to prevent production contamination
 - Supertest for HTTP-boundary integration tests
 
-**Backend Test Setup (10-01 through 10-07 - Completed):**
+**Backend Test Setup (10-01 through 10-06 - Completed):**
 - Vitest configured with node environment and 30s timeout
 - mongodb-memory-server provides in-memory database (127.0.0.1)
 - Global test setup with automatic database lifecycle
@@ -78,10 +78,10 @@ Recent decisions affecting current work:
 - Test data fixtures and factories for consistent and unique test data
 - Automated test cleanup (afterEach clears DB, resets counters, cleans mocks)
 - Express app exported for supertest integration testing
-- GitHub Actions CI/CD pipeline with coverage reporting
-- 20 tests passing (infrastructure + env guards)
+- Test environment isolation (skip dotenv/connectDb/app.listen when NODE_ENV=test)
+- 29 tests passing (20 infrastructure + 9 integration)
 - Database helpers: connect, disconnect, clearDatabase, getUri
-- Smoke tests verify infrastructure works (3 tests passing)
+- Sample integration test template for Phase 11-16
 
 **Environment Safety Guards (10-02, 10-03 - Completed):**
 - Production environment detection and test abortion
@@ -96,13 +96,12 @@ Recent decisions affecting current work:
 - Exchange rate API mocks (primary, fallback, timeout scenarios)
 - S3/Spaces mocks (upload, delete, get, errors)
 
-**CI/CD Pipeline (10-06, 10-07 - Completed):**
-- Express app exported for supertest integration testing
-- GitHub Actions workflow runs tests on push and PR
-- Parallel backend and frontend test execution
-- Coverage reporting with v8 provider (json-summary format)
-- Coverage artifacts uploaded to GitHub Actions
-- Coverage thresholds commented out (enable in Phase 11+)
+**Test Environment Isolation Pattern (10-06):**
+- Skip dotenv loading when NODE_ENV=test (prevents production credential leakage)
+- Skip connectDb when NODE_ENV=test (setup.js handles connection)
+- Skip app.listen when NODE_ENV=test (supertest makes requests without port)
+- Clear MONGO_URL in setup.js beforeAll (prevents production DB access)
+- Rationale: Tests must never access production resources; conditional checks provide clean separation
 
 ### Pending Todos
 
@@ -123,8 +122,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-04 (10-07 execution)
-Stopped at: Completed 10-07-PLAN.md (CI/CD pipeline with coverage reporting)
+Last session: 2026-02-04 (10-06 execution)
+Stopped at: Completed 10-06-PLAN.md (Sample integration test)
 Resume file: None
 
 **v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
@@ -132,7 +131,7 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (7/? plans complete)
+**v1.2 Milestone:** In progress (6/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
@@ -143,16 +142,18 @@ Resume file: None
 - ✅ 10-03: Environment guard integration and unit tests (17 tests)
 - ✅ 10-04: External API mocking (nock + PayPal/Stripe/exchange/S3 mocks)
 - ✅ 10-05: Test data fixtures and factories (mockProduct, mockUser, createProduct, cleanup automation)
-- ✅ 10-06: Express app export for testing (supertest integration)
-- ✅ 10-07: CI/CD pipeline with coverage reporting (GitHub Actions)
-- Status: Phase 10 infrastructure complete, ready for Phase 11
+- ✅ 10-06: Sample integration test (supertest + full infrastructure demonstration)
+- Status: ✅ PHASE 10 COMPLETE - Foundation ready for Phase 11-16 test development
 
 **Next Steps:**
-1. Proceed to Phase 11: Authentication testing
-2. Begin writing actual authentication tests (login, register, JWT validation)
-3. Continue with payment testing (PayPal, Stripe integration)
-4. Add currency conversion testing
-5. Add data validation testing
+1. ✅ Phase 10 complete - test infrastructure foundation established
+2. Proceed to Phase 11: Authentication testing
+3. Write authentication integration tests (login, register, JWT validation)
+4. Phase 12: Payment testing (PayPal, Stripe integration)
+5. Phase 13: Currency conversion testing
+6. Phase 14: File storage testing
+7. Phase 15: Data integrity testing
+8. Phase 16: Security testing
 
 ---
-*Last updated: 2026-02-04 after 10-07 completion*
+*Last updated: 2026-02-04 after 10-06 completion*
