@@ -226,10 +226,13 @@ Plans:
   3. Payment error scenarios are tested (declined cards, insufficient funds, timeouts)
   4. Payment endpoints validate required fields and reject invalid amounts/currencies
   5. No live payment API calls occur during test runs (verified by environment validation)
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] TBD
+- [ ] 12-01-PLAN.md — PayPal order creation and capture tests (PAY-01 through PAY-05)
+- [ ] 12-02-PLAN.md — Stripe checkout session tests (PAY-06 through PAY-10)
+- [ ] 12-03-PLAN.md — Payment validation tests (PAY-11, PAY-12, PAY-13)
+- [ ] 12-04-PLAN.md — Stripe webhook tests (signature validation, event handling)
 
 ### Phase 13: Currency Conversion Tests
 **Goal**: Test USD/ILS exchange rate logic and fallback chain
