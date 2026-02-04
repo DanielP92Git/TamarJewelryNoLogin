@@ -40,7 +40,7 @@ export function createProduct(overrides = {}) {
       }
     ],
     quantity: 10,
-    sku: `TEST${counter.toString().padStart(4, '0')}`,
+    sku: `T${counter.toString().padStart(3, '0')}`,
     displayOrder: counter * 10,
     available: true,
     date: new Date(),
