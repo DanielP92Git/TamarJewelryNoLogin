@@ -10,9 +10,9 @@
 
 | Bug ID | Priority | Status | Category | Test |
 |--------|----------|--------|----------|------|
-| BUG-01 | MEDIUM | Open | Accessibility | Keyboard - Focus Indicators |
-| BUG-02 | HIGH | Open | Accessibility | Keyboard - Product Reordering |
-| BUG-03 | LOW | Open | UX Polish | Focus-Visible Styling |
+| BUG-01 | MEDIUM | FIXED | Accessibility | Keyboard - Focus Indicators |
+| BUG-02 | HIGH | DEFERRED | Accessibility | Keyboard - Product Reordering |
+| BUG-03 | LOW | DEFERRED | UX Polish | Focus-Visible Styling |
 
 ---
 
@@ -21,7 +21,7 @@
 **Priority:** MEDIUM
 **Category:** Accessibility
 **Test:** Keyboard Accessibility - Focus Indicators (Test 4.3)
-**Status:** Open
+**Status:** FIXED
 
 ### Description
 Drag handles in reorder mode do not show visible focus indicator when navigating with Tab key.
@@ -58,6 +58,15 @@ Add CSS focus styling to drag handle:
 
 ### Blocking v1.1 Ship?
 **NO** - Medium priority, affects keyboard users but drag-and-drop isn't keyboard accessible anyway (BUG-02)
+
+### Fix Details
+**Fixed:** 2026-02-04
+**Fix:** Added CSS `:focus` state to `.drag-handle` class
+- Outline: 2px solid #007bff
+- Outline offset: 2px
+- Color change on focus: #4b5563 (matches hover state)
+**Files Modified:** `admin/bambaYafa-desktop.css`
+**Commit:** [pending]
 
 ---
 
@@ -132,6 +141,20 @@ From Phase 09 research (09-RESEARCH.md):
 - Product reordering is non-critical admin function
 - Decision: User decision needed - ship with known limitation or delay for fix?
 
+### Deferral Decision
+**Decision:** DEFERRED to v1.2
+**Rationale:**
+- Requires architectural change (move up/down buttons or custom keyboard drag)
+- Implementation effort: 20-30 minutes for Option A (move up/down buttons)
+- Internal admin tool with limited keyboard-only users
+- Timeline constraints for v1.1 ship
+- Will be documented in known limitations
+
+**Planned for v1.2:**
+- Implement Option A: Move Up/Down buttons
+- Pattern: WordPress admin menu reordering
+- Benefit: Works for touch devices too
+
 ---
 
 ## BUG-03: Focus-Visible Styling Not Explicitly Implemented
@@ -182,6 +205,13 @@ button:focus-visible {
 
 ### Blocking v1.1 Ship?
 **NO** - Low priority polish, can defer to v1.2
+
+### Deferral Decision
+**Decision:** DEFERRED to v1.2+
+**Rationale:**
+- Browser default `:focus-visible` behavior works correctly
+- No functional impact, cosmetic enhancement only
+- Low priority relative to other v1.2 features
 
 ---
 
