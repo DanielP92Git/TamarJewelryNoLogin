@@ -1,932 +1,1191 @@
-# Architecture Research: Admin UX Features (Drag-and-Drop Reordering & Modals)
+# Architecture Research: Testing Monolithic Express Applications
 
-**Domain:** E-commerce Admin Dashboard Enhancement
-**Researched:** 2026-02-01
+**Domain:** E-commerce backend testing without refactoring
+**Researched:** 2026-02-04
 **Confidence:** HIGH
 
-## Existing Architecture Context
-
-### Current System Overview
+## Current Architecture Overview
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                     Frontend (Vanilla JS MVC)                │
+│                     Frontend (SPA)                           │
+│  ┌──────────────────────────────────────────────────────┐   │
+│  │  MVC Pattern: model.js → controller.js → Views/      │   │
+│  │  - model.js: localStorage, cart state, API calls     │   │
+│  │  - View.js: Base view class, DOM management          │   │
+│  │  - controller.js: Router, page navigation            │   │
+│  │  - Views/: Page-specific views (home, cart, etc.)    │   │
+│  └──────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────┘
+                              ↓ HTTP/REST API
+┌─────────────────────────────────────────────────────────────┐
+│              Backend (Monolithic Express - 4,233 lines)      │
 ├─────────────────────────────────────────────────────────────┤
-│  ┌─────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐     │
-│  │ model.js│  │ View.js  │  │*View.js  │  │controller│     │
-│  │         │  │ (base)   │  │(pages)   │  │.js       │     │
-│  │ API     │  │ DOM mgmt │  │ Extends  │  │ Router   │     │
-│  │ calls   │  │ Language │  │ base     │  │ Nav      │     │
-│  └────┬────┘  └────┬─────┘  └────┬─────┘  └────┬─────┘     │
-│       │            │             │             │            │
-├───────┴────────────┴─────────────┴─────────────┴────────────┤
-│                   REST API (Express)                         │
-├─────────────────────────────────────────────────────────────┤
-│  ┌───────────────────────────────────────────────────┐      │
-│  │              index.js (monolithic)                 │      │
-│  │  Routes + Middleware + Business Logic              │      │
-│  └───────────────────────────────────────────────────┘      │
-├─────────────────────────────────────────────────────────────┤
-│                   Data Layer (MongoDB + Mongoose)            │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐                   │
-│  │ Product  │  │ User     │  │ Settings │                   │
-│  │ Schema   │  │ Schema   │  │ Schema   │                   │
-│  └──────────┘  └──────────┘  └──────────┘                   │
+│  index.js: ALL routes, middleware, business logic           │
+│  ┌─────────────┬─────────────┬─────────────┬──────────┐    │
+│  │   /auth     │  /products  │  /admin     │ /payment │    │
+│  │   routes    │  routes     │  routes     │  routes  │    │
+│  │             │             │             │          │    │
+│  └─────────────┴─────────────┴─────────────┴──────────┘    │
+│                              ↓                               │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  Middleware Layer                                    │    │
+│  │  - auth.js: JWT validation, role checks              │    │
+│  │  - multer: File upload handling                      │    │
+│  │  - cors, helmet, rate limiting                       │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                              ↓                               │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  Services                                            │    │
+│  │  - exchangeRateService.js: USD/ILS conversion        │    │
+│  │  - jobs/exchangeRateJob.js: Scheduled updates        │    │
+│  │  - config/locale.js: GeoIP-based detection           │    │
+│  └─────────────────────────────────────────────────────┘    │
+│                              ↓                               │
+│  ┌─────────────────────────────────────────────────────┐    │
+│  │  Models (Mongoose)                                   │    │
+│  │  - User.js, Product.js, Settings.js                  │    │
+│  └─────────────────────────────────────────────────────┘    │
+└─────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────┐
+│  External Services & Storage                                 │
+│  ┌──────────────┬──────────────┬──────────────┬─────────┐  │
+│  │   MongoDB    │  PayPal API  │  Stripe API  │  DO     │  │
+│  │   (Atlas)    │              │              │ Spaces  │  │
+│  └──────────────┴──────────────┴──────────────┴─────────┘  │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Current Product Schema Structure
+## Recommended Test Architecture
 
-**Existing fields relevant to new features:**
-- `category` (String, indexed) - Products belong to categories (necklaces, hoops, dangle, etc.)
-- `mainImage` (Object) - Desktop/mobile responsive versions
-- `smallImages` (Array) - Gallery images with responsive versions
-- `id` (Number, indexed) - Product identifier
-- `available` (Boolean) - Product visibility
+### Test Structure for Monolithic Backend
 
-**Key constraint:** `mainImage` and `smallImages` are separate fields, but admin needs unified sortable array.
-
-## Recommended Architecture Changes
-
-### 1. MongoDB Schema Extensions for Ordering
-
-#### Pattern: Category-Scoped Display Order
-
-Products display in category-specific order on frontend. Each category maintains independent ordering.
-
-**Schema Addition:**
-
-```javascript
-const ProductSchema = new mongoose.Schema({
-  // ... existing fields ...
-
-  // NEW: Category-specific display order
-  displayOrder: {
-    type: Number,
-    default: 0,
-    index: true  // Performance for category+order queries
-  }
-
-  // ... existing fields ...
-});
-
-// NEW: Compound index for efficient category-ordered queries
-ProductSchema.index({ category: 1, displayOrder: 1, available: 1 });
+```
+backend/
+├── index.js                 # 4,233 lines - NOT refactored
+├── tests/                   # NEW - Test suite
+│   ├── setup/
+│   │   ├── testServer.js    # Express app wrapper (exports app without listening)
+│   │   ├── dbSetup.js       # MongoDB test database connection
+│   │   └── fixtures.js      # Test data (users, products, tokens)
+│   │
+│   ├── integration/         # PRIMARY TEST FOCUS
+│   │   ├── auth.test.js     # /login, /signup, JWT flows
+│   │   ├── products.test.js # /products, /productsByCategory
+│   │   ├── cart.test.js     # /addtocart, /getcart, /removefromcart
+│   │   ├── admin.test.js    # /addproduct, /removeproduct (admin routes)
+│   │   ├── upload.test.js   # /upload (file uploads with multer)
+│   │   └── payment.test.js  # /create-order, /capture-order (mocked PayPal/Stripe)
+│   │
+│   ├── unit/                # SECONDARY - Testable modules only
+│   │   ├── middleware/
+│   │   │   └── auth.test.js # getTokenFromRequest, fetchUser, requireAdmin
+│   │   ├── services/
+│   │   │   └── exchangeRateService.test.js
+│   │   └── models/
+│   │       └── Settings.test.js
+│   │
+│   └── e2e/                 # DEFER to v1.3+ (requires running server)
+│       └── userFlows.test.js
+│
+├── package.json             # Test scripts added
+└── vitest.config.js         # NEW - Test configuration
 ```
 
-**Rationale:**
-- Simple integer field per product (not per-category nested structure)
-- Order is scoped by category in queries, not schema
-- Products in "necklaces" can have displayOrder 0-10, products in "hoops" can also have 0-5 (order values can overlap across categories)
-- Compound index `{category, displayOrder, available}` enables fast sorted queries: `Product.find({category: 'necklaces', available: true}).sort({displayOrder: 1})`
+### Frontend Test Structure
 
-**Alternative Considered: Separate OrderMap Collection**
+```
+frontend/
+├── js/
+│   ├── model.js
+│   ├── View.js
+│   ├── controller.js
+│   └── Views/
+│       ├── homePageView.js
+│       ├── cartView.js
+│       └── categoriesView.js
+│
+├── tests/                   # NEW
+│   ├── setup/
+│   │   └── domSetup.js      # happy-dom configuration
+│   │
+│   ├── unit/
+│   │   ├── model.test.js    # Cart operations, localStorage
+│   │   ├── View.test.js     # Base view methods
+│   │   └── Views/
+│   │       ├── cartView.test.js
+│   │       └── categoriesView.test.js
+│   │
+│   └── integration/
+│       └── controller.test.js  # Routing, view instantiation
+│
+├── package.json
+└── vitest.config.js         # NEW
+```
+
+## Testing Patterns for Monolithic Code
+
+### Pattern 1: Supertest Integration Testing (NO SERVER REFACTOR)
+
+**What:** Test Express routes via HTTP requests without starting a live server
+
+**How it works with monolithic code:**
+- Export `app` from index.js WITHOUT calling `app.listen()`
+- Supertest starts ephemeral server per test file
+- Tests hit actual routes in 4,233-line file
+- No refactoring required - test what exists
+
+**Implementation:**
+
+**backend/index.js** (minimal change at end of file):
 ```javascript
-// NOT RECOMMENDED for this use case
-OrderMap: {
-  category: String,
-  productOrder: [productId1, productId2, ...] // Array of IDs
+// Existing 4,200+ lines stay unchanged...
+
+// At the very end:
+const PORT = process.env.PORT || 3001;
+
+// Only listen if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 }
-```
-**Why not:** Adds complexity, requires two queries (fetch order array, then fetch products), harder to maintain consistency, no performance benefit for ~50-100 products per category.
 
-#### Data Migration Strategy
-
-**Migration Script for Existing Products:**
-
-```javascript
-// Migration: Add displayOrder to existing products
-// Run once during deployment
-
-const categories = ['necklaces', 'crochetNecklaces', 'hoops', 'dangle'];
-
-for (const category of categories) {
-  const products = await Product.find({ category })
-    .sort({ date: -1 })  // Default order: newest first
-    .exec();
-
-  for (let i = 0; i < products.length; i++) {
-    products[i].displayOrder = i;
-    await products[i].save();
-  }
-}
+// Export for testing
+module.exports = app;  // <-- ONLY NEW LINE
 ```
 
-**Confidence:** HIGH (Standard MongoDB pattern, verified in [MongoDB Product Catalog documentation](https://mongodb-documentation.readthedocs.io/en/latest/use-cases/product-catalog.html))
-
-### 2. Image Array Restructuring
-
-#### Current State Problem
-
+**backend/tests/integration/products.test.js:**
 ```javascript
-// CURRENT SCHEMA (fragmented)
-{
-  mainImage: {
-    desktop: "url1",
-    mobile: "url1-mobile"
-  },
-  smallImages: [
-    { desktop: "url2", mobile: "url2-mobile" },
-    { desktop: "url3", mobile: "url3-mobile" }
-  ]
-}
-```
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import request from 'supertest';
+import app from '../../index.js';
+import { connectDb } from '../../config/db.js';
+import mongoose from 'mongoose';
 
-**Issue:** Admin needs single sortable array for drag-and-drop, but frontend needs to distinguish main image from gallery.
+describe('Product API Integration Tests', () => {
+  beforeAll(async () => {
+    await connectDb(process.env.MONGO_TEST_URI);
+  });
 
-#### Recommended Pattern: Unified Array with Position Flag
+  afterAll(async () => {
+    await mongoose.connection.close();
+  });
 
-```javascript
-const ProductSchema = new mongoose.Schema({
-  // NEW: Unified image array (replaces mainImage + smallImages)
-  images: [
-    {
-      desktop: { type: String, required: true },
-      mobile: { type: String, required: true },
-      position: { type: Number, required: true },  // Determines display order
-      isMain: { type: Boolean, default: false }    // First image or explicitly marked
-    }
-  ]
+  it('should fetch all products', async () => {
+    const response = await request(app)
+      .get('/allproducts')
+      .expect(200);
 
-  // DEPRECATED (keep for backward compatibility during migration)
-  mainImage: { ... },
-  smallImages: [ ... ]
-});
-```
+    expect(response.body).toBeInstanceOf(Array);
+  });
 
-**Usage Pattern:**
-- Admin drag-and-drop updates `position` field
-- Frontend displays `images.find(img => img.isMain)` as main image
-- Gallery displays `images.filter(img => !img.isMain).sort((a,b) => a.position - b.position)`
-- If no `isMain` flag, first image (position 0) is main by convention
+  it('should filter products by category', async () => {
+    const response = await request(app)
+      .post('/productsByCategory')
+      .send({ category: 'rings' })
+      .expect(200);
 
-#### Data Migration for Image Arrays
-
-**Phase 1: Add new field without removing old**
-
-```javascript
-// Migration: Merge mainImage + smallImages → images array
-async function migrateProductImages() {
-  const products = await Product.find({});
-
-  for (const product of products) {
-    const images = [];
-
-    // Main image becomes position 0 with isMain flag
-    if (product.mainImage?.desktop) {
-      images.push({
-        desktop: product.mainImage.desktop,
-        mobile: product.mainImage.mobile || product.mainImage.desktop,
-        position: 0,
-        isMain: true
-      });
-    }
-
-    // Gallery images follow (position 1, 2, 3...)
-    if (product.smallImages?.length) {
-      product.smallImages.forEach((img, idx) => {
-        images.push({
-          desktop: img.desktop,
-          mobile: img.mobile || img.desktop,
-          position: idx + 1,
-          isMain: false
-        });
-      });
-    }
-
-    product.images = images;
-    await product.save();
-  }
-}
-```
-
-**Phase 2: Update frontend to read from `images` array**
-
-**Phase 3: (Future) Remove deprecated `mainImage` and `smallImages` fields**
-
-**Confidence:** HIGH (MongoDB `$mergeObjects` and array operations well-documented: [MongoDB $mergeObjects](https://database.guide/mongodb-mergeobjects/))
-
-### 3. Backend API Extensions
-
-#### New Endpoint: Update Product Display Order
-
-**Pattern:** Batch update for efficient reordering
-
-```javascript
-// POST /api/admin/products/reorder
-// Body: { category: string, productOrders: [{id: number, displayOrder: number}] }
-
-router.post('/api/admin/products/reorder', requireAdmin, async (req, res) => {
-  const { category, productOrders } = req.body;
-
-  try {
-    // Validate category
-    const validCategories = ['necklaces', 'crochetNecklaces', 'hoops', 'dangle'];
-    if (!validCategories.includes(category)) {
-      return res.status(400).json({ error: 'Invalid category' });
-    }
-
-    // Batch update using bulkWrite for performance
-    const bulkOps = productOrders.map(item => ({
-      updateOne: {
-        filter: { id: item.id, category },  // Ensure product belongs to category
-        update: { $set: { displayOrder: item.displayOrder } }
-      }
-    }));
-
-    const result = await Product.bulkWrite(bulkOps);
-
-    res.json({
-      success: true,
-      modifiedCount: result.modifiedCount
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    expect(response.body.every(p => p.category === 'rings')).toBe(true);
+  });
 });
 ```
-
-**Why bulkWrite:** Updates multiple products in single database round-trip (vs. N separate updates).
-
-**Confidence:** HIGH (Standard Express pattern, bulkWrite documented in [MongoDB updateMany](https://docs.mongodb.com/manual/reference/method/db.collection.updateMany/))
-
-#### Modified Endpoint: Update Product Images
-
-**Extend existing PUT /api/admin/products/:id**
-
-```javascript
-// Modified: Handle new images array structure
-router.put('/api/admin/products/:id', requireAdmin, async (req, res) => {
-  const { images } = req.body;  // NEW: Accept images array
-
-  // Validate images array structure
-  if (images && Array.isArray(images)) {
-    images.forEach((img, idx) => {
-      if (!img.desktop || !img.mobile) {
-        throw new Error('Image missing desktop/mobile URLs');
-      }
-      // Auto-assign position if not provided
-      if (img.position === undefined) {
-        img.position = idx;
-      }
-    });
-
-    // Ensure at least one image marked as main
-    if (!images.some(img => img.isMain)) {
-      images[0].isMain = true;
-    }
-  }
-
-  // ... rest of update logic
-});
-```
-
-### 4. Frontend MVC Integration
-
-#### Drag-and-Drop: SortableJS Integration
-
-**Library Choice:** SortableJS (no dependencies, 45KB minified, touch support)
-
-**Installation:**
-```bash
-npm install sortablejs --save
-```
-
-**Integration Location:** Create new admin view extending base View class
-
-**File Structure:**
-```
-frontend/js/Views/
-├── View.js              # Base class (existing)
-├── adminProductsView.js # NEW: Admin product management view
-└── ... other views
-```
-
-**adminProductsView.js Implementation:**
-
-```javascript
-import View from './View.js';
-import Sortable from 'sortablejs';
-
-class AdminProductsView extends View {
-  _parentElement = document.querySelector('.admin-products-container');
-  _currentCategory = 'necklaces';  // Track which category is being managed
-
-  // Initialize drag-and-drop after rendering product list
-  initDragAndDrop() {
-    const productList = this._parentElement.querySelector('.product-list');
-
-    if (!productList) return;
-
-    // SortableJS setup
-    this._sortable = Sortable.create(productList, {
-      animation: 150,           // Smooth animation
-      handle: '.drag-handle',   // Only drag via handle icon
-      ghostClass: 'sortable-ghost',  // CSS class for dragging placeholder
-
-      // Event: User finished dragging
-      onEnd: (evt) => {
-        this._handleReorder(evt);
-      }
-    });
-  }
-
-  async _handleReorder(evt) {
-    const productElements = [...this._parentElement.querySelectorAll('.product-item')];
-
-    // Build new order array
-    const productOrders = productElements.map((el, index) => ({
-      id: parseInt(el.dataset.productId),
-      displayOrder: index
-    }));
-
-    try {
-      // Save to backend
-      const response = await fetch('/api/admin/products/reorder', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'auth-token': localStorage.getItem('auth-token')
-        },
-        body: JSON.stringify({
-          category: this._currentCategory,
-          productOrders
-        })
-      });
-
-      if (!response.ok) throw new Error('Reorder failed');
-
-      // Show success feedback
-      this._showToast('Order saved successfully');
-
-    } catch (error) {
-      console.error('Reorder error:', error);
-      // Revert UI on failure
-      this._sortable.sort(evt.oldIndex);
-      this._showToast('Failed to save order', 'error');
-    }
-  }
-
-  // Cleanup when view unmounts
-  destroy() {
-    if (this._sortable) {
-      this._sortable.destroy();
-    }
-  }
-}
-
-export default new AdminProductsView();
-```
-
-**HTML Structure for Drag-and-Drop:**
-
-```html
-<div class="admin-products-container">
-  <ul class="product-list">
-    <li class="product-item" data-product-id="101">
-      <span class="drag-handle">☰</span>
-      <span class="product-name">Gold Necklace</span>
-      <span class="product-sku">NK001</span>
-      <button class="edit-btn">Edit</button>
-    </li>
-    <!-- More product items... -->
-  </ul>
-</div>
-```
-
-**CSS for Drag Feedback:**
-
-```css
-.sortable-ghost {
-  opacity: 0.4;
-  background: #f0f0f0;
-}
-
-.drag-handle {
-  cursor: grab;
-  user-select: none;
-}
-
-.drag-handle:active {
-  cursor: grabbing;
-}
-```
-
-**Confidence:** HIGH (SortableJS is production-ready, used by 50k+ projects, documented at [SortableJS GitHub](https://github.com/SortableJS/Sortable))
-
-#### Modal: Native HTML `<dialog>` Element
-
-**Library Choice:** Native `<dialog>` element (zero dependencies, built-in accessibility)
-
-**Why `<dialog>` over custom modal:**
-- **Built-in focus trap** (keyboard navigation contained)
-- **ESC key handling** (automatic close)
-- **Backdrop handling** (::backdrop pseudo-element)
-- **Accessibility** (implicit `aria-modal="true"` with `showModal()`)
-- **Browser support** (96%+ as of 2026, polyfill available for IE11 if needed)
-
-**Integration Location:** Extend base View class with modal helper methods
-
-**View.js Extension:**
-
-```javascript
-// Add to base View.js class
-class View {
-  // ... existing methods ...
-
-  /**
-   * Show modal with product details
-   * @param {Object} productData - Product data to display
-   * @param {Function} onSave - Callback when user saves changes
-   */
-  showProductModal(productData, onSave) {
-    // Get or create modal element
-    let modal = document.querySelector('#product-modal');
-
-    if (!modal) {
-      modal = this._createProductModal();
-      document.body.appendChild(modal);
-    }
-
-    // Populate with product data
-    this._populateModalContent(modal, productData);
-
-    // Setup save button handler
-    const saveBtn = modal.querySelector('.save-btn');
-    saveBtn.onclick = async () => {
-      const formData = this._getModalFormData(modal);
-      await onSave(formData);
-      modal.close();
-    };
-
-    // Show modal (native method)
-    modal.showModal();
-  }
-
-  _createProductModal() {
-    const modal = document.createElement('dialog');
-    modal.id = 'product-modal';
-    modal.className = 'product-modal';
-
-    modal.innerHTML = `
-      <div class="modal-content">
-        <button class="close-btn" aria-label="Close">&times;</button>
-        <h2 class="modal-title">Product Details</h2>
-
-        <form method="dialog" class="product-form">
-          <label>
-            Name:
-            <input type="text" name="name" required />
-          </label>
-
-          <label>
-            SKU:
-            <input type="text" name="sku" required />
-          </label>
-
-          <label>
-            Description:
-            <textarea name="description"></textarea>
-          </label>
-
-          <label>
-            Price (ILS):
-            <input type="number" name="ils_price" step="0.01" required />
-          </label>
-
-          <!-- Image reordering section -->
-          <div class="image-reorder-section">
-            <h3>Product Images</h3>
-            <ul class="image-list sortable">
-              <!-- Images populated dynamically -->
-            </ul>
-          </div>
-
-          <div class="modal-actions">
-            <button type="button" class="cancel-btn">Cancel</button>
-            <button type="submit" class="save-btn">Save</button>
-          </div>
-        </form>
-      </div>
-    `;
-
-    // Close button handler
-    modal.querySelector('.close-btn').onclick = () => modal.close();
-    modal.querySelector('.cancel-btn').onclick = () => modal.close();
-
-    // Close on backdrop click
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.close();
-    });
-
-    return modal;
-  }
-
-  _populateModalContent(modal, productData) {
-    modal.querySelector('[name="name"]').value = productData.name || '';
-    modal.querySelector('[name="sku"]').value = productData.sku || '';
-    modal.querySelector('[name="description"]').value = productData.description || '';
-    modal.querySelector('[name="ils_price"]').value = productData.ils_price || '';
-
-    // Populate image list for drag-and-drop reordering
-    const imageList = modal.querySelector('.image-list');
-    imageList.innerHTML = productData.images?.map((img, idx) => `
-      <li class="image-item" data-position="${img.position}">
-        <span class="drag-handle">☰</span>
-        <img src="${img.desktop}" alt="Product image ${idx + 1}" />
-        <label>
-          <input type="checkbox" ${img.isMain ? 'checked' : ''} />
-          Main Image
-        </label>
-      </li>
-    `).join('') || '';
-
-    // Initialize SortableJS on image list
-    Sortable.create(imageList, {
-      animation: 150,
-      handle: '.drag-handle'
-    });
-  }
-
-  _getModalFormData(modal) {
-    const form = modal.querySelector('.product-form');
-    const formData = new FormData(form);
-
-    // Get image order from sortable list
-    const imageItems = [...modal.querySelectorAll('.image-item')];
-    const images = imageItems.map((item, idx) => ({
-      position: idx,
-      isMain: item.querySelector('input[type="checkbox"]').checked,
-      // ... other image data
-    }));
-
-    return {
-      name: formData.get('name'),
-      sku: formData.get('sku'),
-      description: formData.get('description'),
-      ils_price: parseFloat(formData.get('ils_price')),
-      images
-    };
-  }
-}
-```
-
-**CSS for Modal:**
-
-```css
-/* Native dialog styling */
-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(3px);
-}
-
-dialog.product-modal {
-  border: none;
-  border-radius: 8px;
-  padding: 0;
-  max-width: 600px;
-  width: 90%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-
-dialog.product-modal .modal-content {
-  padding: 24px;
-}
-
-/* Open/close animations */
-dialog[open] {
-  animation: fadeIn 0.2s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-```
-
-**Confidence:** HIGH (Native `<dialog>` element is standard, documented at [MDN Web Docs](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog) and [HTML Dialog Accessibility Best Practices](https://jaredcunha.com/blog/html-dialog-getting-accessibility-and-ux-right))
-
-## Data Flow Diagrams
-
-### Reorder Flow (Admin Drag-and-Drop)
-
-```
-[Admin drags product in list]
-    ↓
-[SortableJS onEnd event fires]
-    ↓
-[adminProductsView._handleReorder()]
-    ↓ (collect new positions)
-[POST /api/admin/products/reorder]
-    ↓ (with category + productOrders array)
-[Backend validates & bulkWrite()]
-    ↓
-[MongoDB updates displayOrder fields]
-    ↓ (success response)
-[Frontend shows success toast]
-```
-
-### Modal Edit Flow
-
-```
-[Admin clicks "Edit" button on product]
-    ↓
-[adminProductsView triggers showProductModal()]
-    ↓
-[Base View creates/shows <dialog> element]
-    ↓
-[Modal populated with product data]
-    ↓
-[Admin edits fields + reorders images via SortableJS]
-    ↓
-[Admin clicks "Save"]
-    ↓
-[_getModalFormData() collects form + image positions]
-    ↓
-[PUT /api/admin/products/:id]
-    ↓
-[Backend validates & updates Product document]
-    ↓
-[MongoDB saves updated images array]
-    ↓
-[Modal closes, product list refreshes]
-```
-
-### Frontend Category Display Flow (Customer-Facing)
-
-```
-[User navigates to category page (e.g., /categories/necklaces)]
-    ↓
-[categoriesView.js fetches products]
-    ↓
-[GET /api/products?category=necklaces]
-    ↓
-[Backend queries: Product.find({category: 'necklaces', available: true})
-                        .sort({displayOrder: 1})]
-    ↓
-[Returns products in admin-defined order]
-    ↓
-[categoriesView renders products in order]
-    ↓
-[Main image (images[0] or images.find(img => img.isMain)) displays first]
-    ↓
-[Gallery images display in sorted order]
-```
-
-## Component Responsibilities
-
-| Component | Responsibility | Integration Pattern |
-|-----------|----------------|---------------------|
-| **Product Schema** | Store displayOrder and images array | MongoDB model with compound index {category, displayOrder} |
-| **Backend API** | Validate & persist reorder operations, serve ordered products | Express routes in index.js (monolithic pattern) |
-| **adminProductsView.js** | Admin UI for drag-and-drop product reordering per category | New View class extending base View.js |
-| **Base View.js** | Modal helper methods (showProductModal, create/populate dialog) | Extended with dialog management methods |
-| **SortableJS Library** | DOM manipulation for drag-and-drop UX | Imported in adminProductsView, attached to product list |
-| **Native `<dialog>`** | Modal container with built-in accessibility | Created/shown via View.js methods |
-| **model.js** | API calls to fetch/update products and orders | New methods: fetchProductsByCategory(), reorderProducts(), updateProduct() |
-| **controller.js** | Route admin product management page | New route handler for admin product page |
-
-## Architectural Patterns
-
-### Pattern 1: Category-Scoped Integer Ordering
-
-**What:** Each product has single `displayOrder` integer field. Category scope enforced in queries, not schema.
-
-**When to use:** Per-category ordering without nested data structures. Works for small-to-medium catalogs (~100 products per category).
 
 **Trade-offs:**
-- **Pro:** Simple schema, fast queries with compound index, easy to migrate
-- **Pro:** Standard MongoDB pattern (widely documented)
-- **Con:** Not ideal for thousands of products per category (would need sharding on category)
-- **Con:** Reordering all products in category requires multiple writes (mitigated by bulkWrite batch operation)
+- PRO: No refactoring needed - tests work with existing monolith
+- PRO: Tests real routes, middleware, error handling as-is
+- PRO: Fast to implement (supertest handles server lifecycle)
+- CON: Can't test business logic in isolation (but that's okay for integration tests)
+- CON: Slower than unit tests (acceptable - 100-200ms per test)
 
-**Example:**
-```javascript
-// Query products in necklaces category, sorted by display order
-const products = await Product
-  .find({ category: 'necklaces', available: true })
-  .sort({ displayOrder: 1 })
-  .limit(50)
-  .exec();
-```
-
-### Pattern 2: Unified Image Array with Position Metadata
-
-**What:** Single `images` array replaces `mainImage` + `smallImages`. Position order + `isMain` flag determine display.
-
-**When to use:** Need single sortable data structure for admin while maintaining frontend "main vs gallery" distinction.
-
-**Trade-offs:**
-- **Pro:** Single source of truth, no sync issues between mainImage and smallImages
-- **Pro:** Natural fit for drag-and-drop (array reordering)
-- **Pro:** Flexible (can mark any image as main, not just first)
-- **Con:** Migration required for existing products
-- **Con:** Slightly more complex queries (filter/find vs direct field access)
-
-**Example:**
-```javascript
-// Frontend code to get main image
-const mainImage = product.images.find(img => img.isMain) || product.images[0];
-
-// Admin code to reorder images
-product.images.forEach((img, idx) => {
-  img.position = idx;  // Update positions after drag-and-drop
-});
-```
-
-### Pattern 3: Optimistic UI with Rollback
-
-**What:** Update UI immediately on drag-and-drop, rollback if backend save fails.
-
-**When to use:** Improve perceived performance for user actions (drag feels instant).
-
-**Trade-offs:**
-- **Pro:** Feels fast and responsive
-- **Pro:** User sees immediate feedback
-- **Con:** Requires rollback logic if save fails
-- **Con:** Potential for confusion if multiple admins editing simultaneously (rare for small teams)
-
-**Example:**
-```javascript
-async _handleReorder(evt) {
-  const oldOrder = this._captureCurrentOrder();  // Snapshot for rollback
-
-  try {
-    await this._saveNewOrder();
-  } catch (error) {
-    this._sortable.sort(oldOrder);  // Rollback UI
-    this._showToast('Failed to save', 'error');
-  }
-}
-```
-
-## Scaling Considerations
-
-| Scale | Architecture Adjustments |
-|-------|--------------------------|
-| 0-500 products total | Current design sufficient. Single MongoDB instance, no sharding needed. |
-| 500-5k products | Add pagination to admin product list. Consider caching category order in Redis for frontend queries. |
-| 5k+ products | Implement virtual scrolling for admin drag-and-drop lists. Shard MongoDB on `category` field if query latency increases. |
-
-### Scaling Priorities
-
-1. **First bottleneck:** Admin drag-and-drop becomes sluggish with 200+ products in single category
-   - **Solution:** Add pagination/filtering to admin view (e.g., show 50 products at a time, drag within page)
-   - **Alternative:** Implement "Move to Position X" input field for large jumps
-
-2. **Second bottleneck:** Frontend category queries slow down with many products
-   - **Solution:** Add Redis caching layer for `Product.find({category}).sort({displayOrder})` results
-   - **Cache invalidation:** Clear cache on POST /api/admin/products/reorder
-
-## Anti-Patterns
-
-### Anti-Pattern 1: Storing Order as Array of IDs
-
-**What people do:** Create separate collection with `{category: 'necklaces', order: [id1, id2, id3...]}`
-
-**Why it's wrong:**
-- Requires two queries (fetch order array, then fetch products by IDs)
-- Hard to maintain consistency (delete product → must update order array)
-- No performance benefit for small catalogs
-- More complex to query (join operation needed)
-
-**Do this instead:** Use `displayOrder` field on each product with compound index `{category, displayOrder}`
-
-### Anti-Pattern 2: Using Date Field for Ordering
-
-**What people do:** Rely on `createdAt` or `updatedAt` for display order, update date when admin reorders
-
-**Why it's wrong:**
-- Semantic confusion (date doesn't mean order)
-- Breaks "sort by newest" functionality
-- Precision issues with millisecond timestamps (two products saved in same millisecond)
-- Harder to debug (order changes not explicit)
-
-**Do this instead:** Explicit `displayOrder` integer field clearly indicates purpose
-
-### Anti-Pattern 3: Client-Side Only Reordering
-
-**What people do:** Save product order in localStorage or cookies, only persist to DB on explicit "Save" button
-
-**Why it's wrong:**
-- Order lost if user closes browser before saving
-- Multiple admins can't see each other's changes
-- Order not reflected on frontend until manually saved
-
-**Do this instead:** Persist immediately on drag end (with optimistic UI and rollback on failure)
-
-### Anti-Pattern 4: Custom Modal Framework for Simple Use Case
-
-**What people do:** Import large modal library (Bootstrap modals, Material UI dialogs, etc.) for basic product edit modal
-
-**Why it's wrong:**
-- Adds 50-200KB bundle size for feature already in browser
-- Dependency maintenance burden
-- Styling conflicts with existing CSS
-- No accessibility benefit over native `<dialog>`
-
-**Do this instead:** Use native `<dialog>` element (zero dependencies, built-in accessibility, 96%+ browser support in 2026)
-
-## Integration Points
-
-### External Dependencies
-
-| Dependency | Integration Pattern | Notes |
-|------------|---------------------|-------|
-| SortableJS | NPM package imported in adminProductsView.js | 45KB minified, zero dependencies. [GitHub](https://github.com/SortableJS/Sortable) |
-| Native `<dialog>` | HTML5 standard element | No library needed. Polyfill available if IE11 support required (not recommended for admin panel). [MDN Docs](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog) |
-
-### Internal Boundaries
-
-| Boundary | Communication | Notes |
-|----------|---------------|-------|
-| adminProductsView ↔ model.js | Method calls (fetchProductsByCategory, reorderProducts) | Standard MVC pattern, same as existing views |
-| model.js ↔ Backend API | Fetch API (POST /api/admin/products/reorder) | RESTful JSON, auth-token header for admin auth |
-| Backend ↔ MongoDB | Mongoose ODM (Product.bulkWrite) | Existing pattern, no changes to connection/pooling |
-| Base View ↔ Child Views | Inheritance (extends View) | adminProductsView extends View, inherits modal methods |
-
-## Recommended Build Order
-
-Build in dependency order to enable incremental testing:
-
-### Phase 1: Schema Foundation (Backend)
-1. Add `displayOrder` field to Product schema
-2. Create compound index `{category, displayOrder, available}`
-3. Write migration script to assign initial displayOrder values
-4. Test: Query products sorted by displayOrder works
-
-**Rationale:** Schema must exist before API or frontend can use it.
-
-### Phase 2: Ordering API (Backend)
-1. Create POST `/api/admin/products/reorder` endpoint
-2. Implement validation (category check, admin auth)
-3. Implement bulkWrite logic for batch updates
-4. Test: Postman/curl can update displayOrder via API
-
-**Rationale:** API must work before frontend can call it.
-
-### Phase 3: Frontend Display (Customer-Facing)
-1. Update `model.js` to fetch products with `.sort({displayOrder: 1})`
-2. Verify categoriesView displays products in admin-defined order
-3. Test: Manually change displayOrder in DB, see order change on frontend
-
-**Rationale:** Proves end-to-end flow before building admin UI.
-
-### Phase 4: Admin Drag-and-Drop (Admin UI)
-1. Install SortableJS (`npm install sortablejs`)
-2. Create `adminProductsView.js` extending View
-3. Implement drag-and-drop with SortableJS
-4. Implement `_handleReorder()` with API call
-5. Add optimistic UI + rollback on failure
-6. Test: Drag products, verify order persists and displays on frontend
-
-**Rationale:** Drag-and-drop is core feature, validate before adding modal complexity.
-
-### Phase 5: Image Array Migration (Backend + Frontend)
-1. Add `images` array field to Product schema (keep old fields for now)
-2. Write migration script to merge mainImage + smallImages → images
-3. Update backend API to accept images array on product update
-4. Update frontend product display to read from images array
-5. Test: Existing products display correctly with new schema
-
-**Rationale:** Migration must complete before modal can edit images array.
-
-### Phase 6: Modal Integration (Admin UI)
-1. Extend base `View.js` with modal helper methods
-2. Create product edit modal using `<dialog>` element
-3. Integrate SortableJS for image reordering within modal
-4. Connect modal save to PUT `/api/admin/products/:id`
-5. Test: Edit product in modal, verify changes persist
-
-**Rationale:** Modal is least critical feature, build last to avoid blocking other work.
-
-### Phase 7: Polish & Cleanup
-1. Add loading states and error handling
-2. Add success/error toast notifications
-3. CSS polish for drag handles, modal animations
-4. (Optional) Remove deprecated mainImage/smallImages fields from schema
-
-**Confidence:** HIGH (Incremental build order prevents integration issues)
-
-## Sources
-
-- [SortableJS GitHub](https://github.com/SortableJS/Sortable) - Drag-and-drop library documentation
-- [MongoDB Product Catalog Schema Design](https://mongodb-documentation.readthedocs.io/en/latest/use-cases/product-catalog.html) - Official MongoDB use case patterns
-- [MongoDB $merge Aggregation](https://www.mongodb.com/docs/manual/reference/operator/aggregation/merge/) - Array field merging
-- [MongoDB updateMany Method](https://docs.mongodb.com/manual/reference/method/db.collection.updateMany/) - Batch update operations
-- [MDN Web Docs: `<dialog>` Element](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/dialog) - Native modal documentation
-- [HTML Dialog Accessibility Best Practices](https://jaredcunha.com/blog/html-dialog-getting-accessibility-and-ux-right) - Accessibility guide for dialog element
-- [Building Production-Ready Modal with Vanilla JavaScript](https://medium.com/@francesco.saviano87/building-a-production-ready-modal-component-with-vanilla-javascript-a-complete-guide-4c125d20ddc9) - Modal implementation patterns
-- [MongoDB Data Modeling Design Patterns](https://www.geopits.com/blog/mongodb-data-modeling-design-patterns) - Schema design patterns
-- [DZone: Product Catalog Part 1 - Schema Design](https://dzone.com/articles/product-catalog-part-1-schema) - E-commerce catalog patterns
+**When to use:** PRIMARY testing approach for monolithic backends until refactoring occurs
 
 ---
 
-*Architecture research for: Admin UX Features (Drag-and-Drop Reordering & Modals)*
-*Researched: 2026-02-01*
+### Pattern 2: Database Testing with mongodb-memory-server
+
+**What:** In-memory MongoDB for fast, isolated tests without mocking Mongoose
+
+**Why NOT real MongoDB:**
+- Tests run in parallel safely
+- No cleanup race conditions
+- CI/CD runs without external dependencies
+- 10-50x faster than real MongoDB
+
+**Implementation:**
+
+**backend/tests/setup/dbSetup.js:**
+```javascript
+import { MongoMemoryServer } from 'mongodb-memory-server';
+import mongoose from 'mongoose';
+
+let mongoServer;
+
+export async function setupTestDB() {
+  mongoServer = await MongoMemoryServer.create();
+  const uri = mongoServer.getUri();
+
+  await mongoose.connect(uri);
+}
+
+export async function teardownTestDB() {
+  await mongoose.disconnect();
+  await mongoServer.stop();
+}
+
+export async function clearTestDB() {
+  const collections = mongoose.connection.collections;
+  for (const key in collections) {
+    await collections[key].deleteMany({});
+  }
+}
+```
+
+**Usage in tests:**
+```javascript
+import { beforeAll, afterAll, beforeEach } from 'vitest';
+import { setupTestDB, teardownTestDB, clearTestDB } from '../setup/dbSetup.js';
+
+beforeAll(async () => {
+  await setupTestDB();
+});
+
+afterAll(async () => {
+  await teardownTestDB();
+});
+
+beforeEach(async () => {
+  await clearTestDB();  // Fresh state per test
+});
+```
+
+**Trade-offs:**
+- PRO: Same Mongoose models - no mocking
+- PRO: Fast (in-memory, no network)
+- PRO: Test independence (each test gets clean DB)
+- CON: mongodb-memory-server adds ~50MB download (one-time)
+- CON: Doesn't test MongoDB Atlas-specific features (rare concern)
+
+**Alternative:** Real test MongoDB database (slower, requires cleanup strategy)
+
+**When to use:** DEFAULT for all backend integration tests
+
+---
+
+### Pattern 3: JWT Authentication in Tests
+
+**What:** Test authenticated routes by generating valid tokens in test setup
+
+**Why NOT mocking auth:**
+- Tests actual JWT validation middleware
+- Catches token expiry, signature issues
+- Tests role-based access control (admin vs user)
+
+**Implementation:**
+
+**backend/tests/setup/fixtures.js:**
+```javascript
+import jwt from 'jsonwebtoken';
+import { Users } from '../../models/index.js';
+
+export async function createTestUser(userType = 'user') {
+  const user = await Users.create({
+    email: `test-${Date.now()}@example.com`,
+    password: 'hashedpassword123',  // Pre-hashed in model
+    userType,
+  });
+
+  return user;
+}
+
+export function generateAuthToken(userId, userType = 'user') {
+  return jwt.sign(
+    { user: { id: userId, userType } },
+    process.env.JWT_KEY,
+    { expiresIn: '1h' }
+  );
+}
+
+export async function createAuthenticatedUser(userType = 'user') {
+  const user = await createTestUser(userType);
+  const token = generateAuthToken(user._id.toString(), userType);
+
+  return { user, token };
+}
+```
+
+**Usage:**
+```javascript
+import { beforeEach } from 'vitest';
+import { createAuthenticatedUser } from '../setup/fixtures.js';
+import request from 'supertest';
+import app from '../../index.js';
+
+describe('Cart API (Authenticated)', () => {
+  let userToken;
+
+  beforeEach(async () => {
+    const { token } = await createAuthenticatedUser('user');
+    userToken = token;
+  });
+
+  it('should add item to cart', async () => {
+    await request(app)
+      .post('/addtocart')
+      .set('auth-token', userToken)
+      .send({ productId: '123' })
+      .expect(200);
+  });
+});
+
+describe('Admin Routes', () => {
+  let adminToken;
+
+  beforeEach(async () => {
+    const { token } = await createAuthenticatedUser('admin');
+    adminToken = token;
+  });
+
+  it('should allow admin to add product', async () => {
+    await request(app)
+      .post('/addproduct')
+      .set('auth-token', adminToken)
+      .send({ name: 'Test Product', price: 99 })
+      .expect(200);
+  });
+
+  it('should reject non-admin user', async () => {
+    const { token: userToken } = await createAuthenticatedUser('user');
+
+    await request(app)
+      .post('/addproduct')
+      .set('auth-token', userToken)
+      .send({ name: 'Test Product', price: 99 })
+      .expect(403);
+  });
+});
+```
+
+**Trade-offs:**
+- PRO: Tests actual middleware logic (fetchUser, requireAdmin)
+- PRO: Catches auth bugs (token format, role checks)
+- PRO: Simple setup - no mocking JWT library
+- CON: Requires JWT_KEY in test env
+- CON: Slightly slower than mocking (negligible - 1ms per token)
+
+**When to use:** ALL tests for authenticated routes
+
+---
+
+### Pattern 4: Mocking External Services (PayPal, Stripe, S3)
+
+**What:** Mock HTTP requests to external APIs using MSW (Mock Service Worker)
+
+**Why NOT real API calls:**
+- Tests fail when third-party is down
+- Can't test error scenarios (card declined, 500 errors)
+- Slow (network latency)
+- May hit rate limits or cost money
+
+**Implementation with MSW (2026 best practice):**
+
+**backend/tests/setup/mocks.js:**
+```javascript
+import { setupServer } from 'msw/node';
+import { http, HttpResponse } from 'msw';
+
+const handlers = [
+  // PayPal OAuth token
+  http.post('https://api-m.sandbox.paypal.com/v1/oauth2/token', () => {
+    return HttpResponse.json({ access_token: 'mock-token', expires_in: 3600 });
+  }),
+
+  // PayPal create order
+  http.post('https://api-m.sandbox.paypal.com/v2/checkout/orders', () => {
+    return HttpResponse.json({
+      id: 'mock-order-id',
+      status: 'CREATED',
+      links: [{ rel: 'approve', href: 'https://paypal.com/approve' }],
+    });
+  }),
+
+  // PayPal capture order
+  http.post('https://api-m.sandbox.paypal.com/v2/checkout/orders/:orderId/capture', () => {
+    return HttpResponse.json({
+      id: 'mock-order-id',
+      status: 'COMPLETED',
+    });
+  }),
+
+  // Stripe create payment intent
+  http.post('https://api.stripe.com/v1/payment_intents', () => {
+    return HttpResponse.json({
+      id: 'pi_mock123',
+      client_secret: 'pi_mock123_secret',
+      status: 'requires_payment_method',
+    });
+  }),
+
+  // DigitalOcean Spaces S3 upload
+  http.put(/.*digitaloceanspaces\.com.*/, () => {
+    return new HttpResponse(null, { status: 200 });
+  }),
+];
+
+export const mockServer = setupServer(...handlers);
+
+export function setupMocks() {
+  mockServer.listen({ onUnhandledRequest: 'warn' });
+}
+
+export function teardownMocks() {
+  mockServer.close();
+}
+
+export function resetMocks() {
+  mockServer.resetHandlers();
+}
+```
+
+**Usage:**
+```javascript
+import { beforeAll, afterAll, afterEach, describe, it, expect } from 'vitest';
+import { setupMocks, teardownMocks, resetMocks } from '../setup/mocks.js';
+import request from 'supertest';
+import app from '../../index.js';
+
+describe('Payment API', () => {
+  beforeAll(() => setupMocks());
+  afterAll(() => teardownMocks());
+  afterEach(() => resetMocks());
+
+  it('should create PayPal order', async () => {
+    const response = await request(app)
+      .post('/create-order')
+      .send({ amount: 99.99 })
+      .expect(200);
+
+    expect(response.body.orderId).toBe('mock-order-id');
+  });
+
+  it('should handle PayPal API errors', async () => {
+    // Override handler for this test
+    mockServer.use(
+      http.post('https://api-m.sandbox.paypal.com/v2/checkout/orders', () => {
+        return new HttpResponse(null, { status: 500 });
+      })
+    );
+
+    await request(app)
+      .post('/create-order')
+      .send({ amount: 99.99 })
+      .expect(500);
+  });
+});
+```
+
+**Alternative: Nock (older but simpler):**
+```javascript
+import nock from 'nock';
+
+beforeEach(() => {
+  nock('https://api-m.sandbox.paypal.com')
+    .post('/v2/checkout/orders')
+    .reply(200, { id: 'mock-order-id', status: 'CREATED' });
+});
+
+afterEach(() => {
+  nock.cleanAll();
+});
+```
+
+**Trade-offs:**
+- **MSW:**
+  - PRO: More modern (2026 standard), better TypeScript support
+  - PRO: Works in both Node.js and browser
+  - PRO: Can intercept fetch and http.request
+  - CON: Slightly more setup
+- **Nock:**
+  - PRO: Simpler API, less boilerplate
+  - PRO: More mature, extensive documentation
+  - CON: Node.js only, doesn't intercept fetch in Node 18+
+
+**When to use:** ALL tests that would make external HTTP requests (PayPal, Stripe, exchange rate API, S3 uploads)
+
+---
+
+### Pattern 5: Testing File Uploads (Multer)
+
+**What:** Test multipart form data with supertest's `.attach()` method
+
+**Implementation:**
+
+**backend/tests/integration/upload.test.js:**
+```javascript
+import { describe, it, expect, beforeAll } from 'vitest';
+import request from 'supertest';
+import app from '../../index.js';
+import path from 'path';
+import { createAuthenticatedUser } from '../setup/fixtures.js';
+import { setupMocks, teardownMocks } from '../setup/mocks.js';
+
+describe('File Upload', () => {
+  let adminToken;
+
+  beforeAll(async () => {
+    setupMocks();  // Mock S3 uploads
+    const { token } = await createAuthenticatedUser('admin');
+    adminToken = token;
+  });
+
+  afterAll(() => teardownMocks());
+
+  it('should upload product image', async () => {
+    const testImagePath = path.join(__dirname, '../fixtures/test-image.jpg');
+
+    const response = await request(app)
+      .post('/upload')
+      .set('auth-token', adminToken)
+      .attach('mainImage', testImagePath)  // supertest's .attach() method
+      .field('productName', 'Test Ring')
+      .expect(200);
+
+    expect(response.body.images).toBeDefined();
+    expect(response.body.images.desktop).toMatch(/\.webp$/);
+  });
+
+  it('should reject non-image files', async () => {
+    const testFilePath = path.join(__dirname, '../fixtures/test.txt');
+
+    await request(app)
+      .post('/upload')
+      .set('auth-token', adminToken)
+      .attach('mainImage', testFilePath)
+      .expect(400);
+  });
+
+  it('should require authentication', async () => {
+    const testImagePath = path.join(__dirname, '../fixtures/test-image.jpg');
+
+    await request(app)
+      .post('/upload')
+      .attach('mainImage', testImagePath)
+      .expect(401);
+  });
+});
+```
+
+**Fixture setup:**
+```
+backend/tests/fixtures/
+├── test-image.jpg      # 100x100 valid JPEG
+├── test-image.png      # 100x100 valid PNG
+├── test-image-large.jpg  # >5MB for size validation tests
+└── test.txt            # Non-image for rejection tests
+```
+
+**Trade-offs:**
+- PRO: Tests actual multer middleware (disk storage, file validation)
+- PRO: Tests Sharp image processing (WebP conversion)
+- PRO: Simple - supertest handles multipart encoding
+- CON: Requires fixture files in repo
+- CON: Tests create temporary files (cleaned up by multer)
+
+**When to use:** Test all file upload routes (/upload, /addproduct with images)
+
+---
+
+### Pattern 6: Unit Testing Isolated Modules
+
+**What:** Test services and middleware that CAN be tested in isolation
+
+**Which modules to unit test:**
+- ✅ `middleware/auth.js` - Pure functions (getTokenFromRequest, requireAdmin)
+- ✅ `services/exchangeRateService.js` - API calls (mockable with MSW)
+- ✅ `config/locale.js` - Pure logic (header parsing)
+- ❌ Routes in index.js - Test via integration tests instead
+- ❌ Mongoose models - Test via integration tests with real DB
+
+**Implementation:**
+
+**backend/tests/unit/middleware/auth.test.js:**
+```javascript
+import { describe, it, expect } from 'vitest';
+import { getTokenFromRequest, requireAdmin } from '../../../middleware/auth.js';
+
+describe('Auth Middleware Utils', () => {
+  describe('getTokenFromRequest', () => {
+    it('should extract token from auth-token header', () => {
+      const req = { header: (name) => name === 'auth-token' ? 'token123' : null };
+      expect(getTokenFromRequest(req)).toBe('token123');
+    });
+
+    it('should extract token from Bearer authorization', () => {
+      const req = { header: (name) => name === 'authorization' ? 'Bearer token456' : null };
+      expect(getTokenFromRequest(req)).toBe('token456');
+    });
+
+    it('should return null if no token', () => {
+      const req = { header: () => null };
+      expect(getTokenFromRequest(req)).toBeNull();
+    });
+  });
+
+  describe('requireAdmin', () => {
+    it('should call next() for admin user', () => {
+      const req = { userDoc: { userType: 'admin' } };
+      const res = {};
+      const next = vi.fn();
+
+      requireAdmin(req, res, next);
+      expect(next).toHaveBeenCalled();
+    });
+
+    it('should return 403 for non-admin user', () => {
+      const req = { userDoc: { userType: 'user' } };
+      const res = {
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
+      };
+      const next = vi.fn();
+
+      requireAdmin(req, res, next);
+      expect(res.status).toHaveBeenCalledWith(403);
+      expect(next).not.toHaveBeenCalled();
+    });
+  });
+});
+```
+
+**backend/tests/unit/services/exchangeRateService.test.js:**
+```javascript
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { fetchCurrentRate, getExchangeRate } from '../../../services/exchangeRateService.js';
+import { setupMocks, teardownMocks } from '../../setup/mocks.js';
+import { http, HttpResponse } from 'msw';
+import { mockServer } from '../../setup/mocks.js';
+
+describe('Exchange Rate Service', () => {
+  beforeAll(() => {
+    setupMocks();
+
+    // Mock exchange rate API
+    mockServer.use(
+      http.get('https://api.exchangerate-api.com/v4/latest/USD', () => {
+        return HttpResponse.json({ rates: { ILS: 3.65 } });
+      })
+    );
+  });
+
+  afterAll(() => teardownMocks());
+
+  it('should fetch current rate from API', async () => {
+    const { rate, source } = await fetchCurrentRate();
+    expect(rate).toBe(3.65);
+    expect(source).toBe('exchangerate-api.com');
+  });
+
+  it('should fall back to default rate on API failure', async () => {
+    mockServer.use(
+      http.get('https://api.exchangerate-api.com/v4/latest/USD', () => {
+        return new HttpResponse(null, { status: 500 });
+      })
+    );
+
+    const rate = await getExchangeRate();
+    expect(rate).toBe(3.3);  // DEFAULT_EXCHANGE_RATE
+  });
+});
+```
+
+**Trade-offs:**
+- PRO: Fast (no DB, no HTTP server)
+- PRO: Focused - tests single responsibility
+- CON: Limited scope in monolithic code (most logic is in routes)
+- CON: Can lead to over-mocking (prefer integration tests)
+
+**When to use:** ONLY for modules that are already separated (middleware, services) - DON'T extract code just to unit test
+
+---
+
+## Frontend Testing Architecture
+
+### Pattern 7: Testing Vanilla JS MVC with Vitest + happy-dom
+
+**What:** Test frontend code in Node.js environment with simulated DOM
+
+**Why happy-dom over jsdom:**
+- 10-20x faster than jsdom
+- Sufficient DOM API coverage for vanilla JS
+- Lighter memory footprint
+- 2026 standard for Vitest
+
+**Implementation:**
+
+**frontend/vitest.config.js:**
+```javascript
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'happy-dom',
+    globals: true,
+    setupFiles: ['./tests/setup/domSetup.js'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      exclude: ['node_modules/', 'tests/', 'dist/'],
+    },
+  },
+});
+```
+
+**frontend/tests/setup/domSetup.js:**
+```javascript
+import { beforeEach } from 'vitest';
+
+// Set up localStorage mock
+const localStorageMock = {
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
+};
+global.localStorage = localStorageMock;
+
+// Set up fetch mock
+global.fetch = vi.fn();
+
+// Reset DOM between tests
+beforeEach(() => {
+  document.body.innerHTML = '';
+  localStorageMock.getItem.mockClear();
+  localStorageMock.setItem.mockClear();
+  global.fetch.mockClear();
+});
+```
+
+**frontend/tests/unit/model.test.js:**
+```javascript
+import { describe, it, expect, beforeEach } from 'vitest';
+import { cart, handleLoadStorage } from '../../js/model.js';
+
+describe('Model - Cart Operations', () => {
+  beforeEach(() => {
+    cart.length = 0;  // Clear cart
+    localStorage.clear();
+  });
+
+  it('should load cart from localStorage when not logged in', async () => {
+    const mockCart = [
+      { id: 1, title: 'Ring', price: 99, amount: 1 },
+    ];
+    localStorage.getItem.mockReturnValue(JSON.stringify(mockCart));
+
+    await handleLoadStorage();
+
+    expect(cart).toHaveLength(1);
+    expect(cart[0].title).toBe('Ring');
+  });
+
+  it('should fetch cart from API when logged in', async () => {
+    localStorage.getItem.mockImplementation((key) => {
+      if (key === 'auth-token') return 'valid-token';
+      return null;
+    });
+
+    global.fetch.mockResolvedValue({
+      json: async () => [{ id: 2, title: 'Necklace', price: 150, amount: 1 }],
+    });
+
+    await handleLoadStorage();
+
+    expect(fetch).toHaveBeenCalledWith(
+      expect.stringContaining('/getcart'),
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'auth-token': 'valid-token',
+        }),
+      })
+    );
+    expect(cart).toHaveLength(1);
+  });
+});
+```
+
+**frontend/tests/unit/Views/cartView.test.js:**
+```javascript
+import { describe, it, expect, beforeEach } from 'vitest';
+import CartView from '../../../js/Views/cartView.js';
+
+describe('CartView', () => {
+  let cartView;
+
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="cart-container"></div>';
+    cartView = new CartView();
+  });
+
+  it('should render cart items', () => {
+    const mockCart = [
+      { id: 1, title: 'Ring', price: 99, amount: 2, image: 'ring.jpg' },
+    ];
+
+    cartView.render(mockCart);
+
+    const container = document.querySelector('#cart-container');
+    expect(container.innerHTML).toContain('Ring');
+    expect(container.innerHTML).toContain('$99');
+  });
+
+  it('should update total price', () => {
+    const mockCart = [
+      { id: 1, price: 99, amount: 2 },
+      { id: 2, price: 50, amount: 1 },
+    ];
+
+    cartView.render(mockCart);
+
+    const total = document.querySelector('.cart-total').textContent;
+    expect(total).toContain('248');  // (99 * 2) + (50 * 1)
+  });
+});
+```
+
+**Trade-offs:**
+- PRO: Fast (no real browser)
+- PRO: Tests actual DOM manipulation logic
+- PRO: Can test View rendering, controller routing
+- CON: Not a real browser (may miss CSS/layout bugs)
+- CON: Limited for complex interactions (drag-drop, animations)
+
+**When to use:** Unit tests for model, views, controller routing logic
+
+---
+
+## Data Flow in Testing
+
+### Request Flow (Backend Integration Tests)
+
+```
+Test → Supertest → Express App → Middleware → Route Handler → MongoDB (in-memory) → Response
+                                                      ↓
+                                            External Service (MSW mock)
+```
+
+### Test Data Flow
+
+```
+beforeAll: Setup test DB, mock server
+    ↓
+beforeEach: Clear DB, create fixtures (users, products), generate tokens
+    ↓
+Test: Make HTTP request with supertest
+    ↓
+Assert: Response status, body, DB state
+    ↓
+afterEach: (optional) Clean up test-specific data
+    ↓
+afterAll: Teardown test DB, close mock server
+```
+
+## Build Order for Test Implementation
+
+### Phase 1: Test Infrastructure (1-2 days)
+1. Install dependencies (vitest, supertest, mongodb-memory-server, msw)
+2. Create test directory structure
+3. Configure vitest.config.js (backend and frontend)
+4. Create setup files (dbSetup.js, mocks.js, fixtures.js, domSetup.js)
+5. Update package.json scripts
+6. Verify CI/CD compatibility
+
+### Phase 2: Backend Integration Tests (3-5 days)
+1. **Auth routes** (highest priority - security critical)
+   - /login, /signup
+   - JWT validation flows
+2. **Product routes** (core functionality)
+   - /allproducts, /productsByCategory
+   - Public routes (no auth)
+3. **Cart routes** (authenticated)
+   - /addtocart, /removefromcart, /getcart
+   - User-specific tests
+4. **Admin routes** (role-based access)
+   - /addproduct, /removeproduct
+   - Admin vs user permission tests
+5. **Upload routes** (file handling)
+   - /upload with multer
+   - Image validation, Sharp processing
+6. **Payment routes** (external service mocking)
+   - /create-order, /capture-order
+   - PayPal/Stripe mocked flows
+
+### Phase 3: Backend Unit Tests (1-2 days)
+1. Middleware (auth.js functions)
+2. Services (exchangeRateService.js)
+3. Config utilities (locale.js)
+
+### Phase 4: Frontend Tests (2-3 days)
+1. **Model tests** (localStorage, cart state)
+2. **View tests** (DOM rendering)
+3. **Controller tests** (routing logic)
+
+### Phase 5: CI/CD Integration (1 day)
+1. Update GitHub Actions / CI pipeline
+2. Add test coverage reporting
+3. Configure test database for CI
+
+## Anti-Patterns to Avoid
+
+### Anti-Pattern 1: Extracting Code Just to Test It
+
+**What people do:** Refactor monolithic code into smaller modules solely to enable unit testing
+
+**Why it's wrong:**
+- Violates "refactor later" constraint
+- Risk of breaking working code
+- Tests should inform refactoring, not vice versa
+
+**Do this instead:**
+- Test monolithic code via integration tests with supertest
+- Accept that integration tests are slower (100-200ms vs 5ms)
+- Wait until v1.3+ to refactor with tests as safety net
+
+---
+
+### Anti-Pattern 2: Mocking Everything
+
+**What people do:** Mock MongoDB, JWT, middleware, business logic to create "pure" unit tests
+
+**Why it's wrong:**
+- Tests become coupled to implementation, not behavior
+- Mocking mongoose queries is brittle and complex
+- False confidence - tests pass but real DB integration fails
+
+**Do this instead:**
+- Use mongodb-memory-server for REAL Mongoose interactions
+- Generate REAL JWT tokens in tests
+- Mock ONLY external HTTP services (PayPal, Stripe, S3)
+
+---
+
+### Anti-Pattern 3: Testing Implementation Details
+
+**What people do:** Test that specific internal functions are called or specific data structures exist
+
+**Example:**
+```javascript
+// BAD
+it('should call validateProduct helper', () => {
+  const spy = vi.spyOn(helpers, 'validateProduct');
+  addProduct({ name: 'Ring' });
+  expect(spy).toHaveBeenCalled();
+});
+
+// GOOD
+it('should reject product without name', async () => {
+  await request(app)
+    .post('/addproduct')
+    .send({ price: 99 })  // Missing name
+    .expect(400);
+});
+```
+
+**Why it's wrong:**
+- Refactoring breaks tests even if behavior unchanged
+- Tests become maintenance burden
+- Doesn't test user-facing behavior
+
+**Do this instead:**
+- Test HTTP API contract (request → response)
+- Test database state changes
+- Test user-observable behavior
+
+---
+
+### Anti-Pattern 4: One Giant Test File
+
+**What people do:** Put all 100+ tests in `backend/tests/api.test.js`
+
+**Why it's wrong:**
+- Slow to run (can't parallelize)
+- Hard to find failing tests
+- Shared state leaks between tests
+
+**Do this instead:**
+- One test file per route group (auth.test.js, products.test.js, cart.test.js)
+- Vitest runs files in parallel by default
+- Easier to run subset: `vitest auth.test.js`
+
+---
+
+### Anti-Pattern 5: Not Testing Error Cases
+
+**What people do:** Only test happy path (valid inputs, 200 responses)
+
+**Why it's wrong:**
+- Bugs happen in error handling
+- Edge cases cause production issues
+- Missing validation errors
+
+**Do this instead:**
+- Test BOTH success and failure for each route
+- Test validation errors (400 responses)
+- Test authentication failures (401, 403)
+- Test external service failures (PayPal 500 error)
+
+**Example:**
+```javascript
+describe('POST /addproduct', () => {
+  it('should create product with valid data', async () => { /* ... */ });
+  it('should reject product without name', async () => { /* ... */ });
+  it('should reject non-admin user', async () => { /* ... */ });
+  it('should reject invalid price', async () => { /* ... */ });
+  it('should handle database errors', async () => { /* ... */ });
+});
+```
+
+---
+
+## Scaling Considerations
+
+### Test Suite Size: 0-50 tests (MVP)
+- Run all tests on every commit
+- Total runtime: 10-30 seconds
+- mongodb-memory-server sufficient
+- No test parallelization needed
+
+### Test Suite Size: 50-200 tests (Growing)
+- Vitest parallel execution by default
+- Total runtime: 30-60 seconds
+- Consider test.only for focused development
+- CI/CD caching for node_modules, mongodb-memory-server
+
+### Test Suite Size: 200+ tests (Mature)
+- Split into unit/integration/e2e suites
+- Run unit tests in watch mode during development
+- Run integration tests pre-commit
+- Run e2e tests pre-deploy only
+- Total runtime: 1-3 minutes (acceptable for CI)
+
+### Performance Optimization Priorities
+
+1. **First bottleneck:** Test database setup/teardown
+   - **Fix:** Reuse mongodb-memory-server instance across test files
+   - **Setup:** globalSetup in vitest.config.js
+
+2. **Second bottleneck:** External service mocks not cleaning up
+   - **Fix:** Ensure mockServer.resetHandlers() in afterEach
+
+3. **Third bottleneck:** Too many integration tests
+   - **Fix:** Defer to unit tests where possible (but DON'T refactor code just to test)
+
+## Integration Points
+
+### External Services
+
+| Service | Integration Pattern | Test Strategy |
+|---------|---------------------|---------------|
+| PayPal API | HTTP (oauth + orders) | Mock with MSW (http handlers) |
+| Stripe API | HTTP (payment intents) | Mock with MSW or use stripe-mock server |
+| DigitalOcean Spaces | S3-compatible SDK | Mock with MSW (http.put for uploads) |
+| Exchange Rate API | HTTP (free API) | Mock with MSW (return fixed rate) |
+| EmailJS | HTTP (contact forms) | Mock with MSW or skip in tests |
+| MongoDB | Mongoose ODM | Use mongodb-memory-server (real DB) |
+
+### Internal Boundaries
+
+| Boundary | Communication | Test Strategy |
+|----------|---------------|---------------|
+| index.js → middleware/auth.js | Function calls | Integration tests (via supertest) + unit tests for pure functions |
+| index.js → models/*.js | Mongoose methods | Integration tests with mongodb-memory-server |
+| index.js → services/*.js | Function calls | Integration tests + unit tests for services |
+| Frontend → Backend API | HTTP/REST | Integration tests (backend) + mocked fetch (frontend) |
+
+## What NOT to Test Yet (Defer to v1.3+)
+
+### Skip These Until After Refactoring:
+
+1. **E2E tests with real browser**
+   - Playwright/Cypress tests
+   - Full user workflows (login → browse → checkout)
+   - Reason: Slow, brittle, high maintenance
+
+2. **Performance tests**
+   - Load testing (100s of concurrent requests)
+   - Response time benchmarks
+   - Reason: Premature optimization, requirements unclear
+
+3. **Visual regression tests**
+   - Screenshot comparison
+   - CSS/layout validation
+   - Reason: Frontend structure may change during refactoring
+
+4. **Tests for code you plan to delete**
+   - Legacy routes marked for removal
+   - Deprecated features
+   - Reason: Wasted effort, will be deleted anyway
+
+5. **100% code coverage**
+   - Chasing coverage metrics
+   - Testing trivial getters/setters
+   - Reason: Diminishing returns, integration tests cover most paths
+
+### Pragmatic Coverage Goals:
+
+- **Critical paths:** 90%+ coverage (auth, payments, cart)
+- **Public routes:** 80%+ coverage (products, categories)
+- **Admin routes:** 70%+ coverage (less used, lower risk)
+- **Edge cases:** Test known bugs, common errors
+- **Overall:** 70-80% coverage is excellent for monolithic code
+
+---
+
+## Sources
+
+### Testing Monolithic Express Applications
+- [How to Test Your Express.js and Mongoose Apps with Jest and SuperTest](https://www.freecodecamp.org/news/how-to-test-in-express-and-mongoose-apps/)
+- [How to Test Your Express API with SuperTest](https://rahmanfadhil.com/test-express-with-supertest/)
+- [Guide to writing integration tests in express js with Jest and Supertest](https://dev.to/ali_adeku/guide-to-writing-integration-tests-in-express-js-with-jest-and-supertest-1059)
+- [How to correctly unit test Express server](https://glebbahmutov.com/blog/how-to-correctly-unit-test-express-server/)
+
+### MongoDB Testing Strategies
+- [Integration and End-to-end Tests Made Easy with Node.js and MongoDB](https://www.toptal.com/nodejs/integration-and-e2e-tests-nodejs-mongodb)
+- [Reliable Integration Testing for MongoDB Atlas Search with Testcontainers and Jest](https://medium.com/adeo-tech/reliable-integration-testing-for-mongodb-atlas-search-with-testcontainers-and-jest-ef318abe7f7c)
+- [Integration Tests with In-Memory MongoDB](https://medium.com/tech-thesignalgroup/integration-tests-with-in-memory-mongodb-b1482ce5d179)
+
+### Mocking External Services
+- [How to Mock External APIs in Node.js Tests Without Flaky Network Calls](https://oneuptime.com/blog/post/2026-01-06-nodejs-mock-external-apis-tests/view)
+- [Automated testing | Stripe Documentation](https://docs.stripe.com/automated-testing)
+- [stripe-mock: HTTP server that responds like the real Stripe API](https://github.com/stripe/stripe-mock)
+
+### JWT Authentication Testing
+- [Test JWT-Authenticated Express Routes with Jest And SuperTest](https://blog.stvmlbrn.com/2018/06/18/test-jwt-authenticated-express-routes-with-jest-and-supertest.html)
+- [Testing with authenticated routes in Express](https://medium.com/@bill_broughton/testing-with-authenticated-routes-in-express-6fa9c4c335ca)
+
+### File Upload Testing
+- [Multer File Upload in Express.js: Complete Guide for 2026](https://dev.to/marufrahmanlive/multer-file-upload-in-expressjs-complete-guide-for-2026-1i9p)
+- [How to Test Your Express APIs with Supertest](https://dev.to/rahmanfadhil/how-to-test-your-express-apis-with-supertest-4j1a)
+
+### Vitest vs Jest
+- [Vitest vs Jest 30: Why 2026 is the Year of Browser-Native Testing](https://dev.to/dataformathub/vitest-vs-jest-30-why-2026-is-the-year-of-browser-native-testing-2fgb)
+- [Jest vs Vitest: Which Test Runner Should You Use in 2025?](https://medium.com/@ruverd/jest-vs-vitest-which-test-runner-should-you-use-in-2025-5c85e4f2bda9)
+- [Why I Chose Vitest Over Jest: 10x Faster Tests & Native ESM Support](https://dev.to/saswatapal/why-i-chose-vitest-over-jest-10x-faster-tests-native-esm-support-13g6)
+
+### Frontend Testing with Vanilla JavaScript
+- [The MVC Design Pattern in Vanilla JavaScript](https://www.sitepoint.com/mvc-design-pattern-javascript/)
+- [Vitest: Blazing fast unit test framework](https://uploadcare.com/blog/vitest-unit-test-framework/)
+- [Component Testing | Guide | Vitest](https://vitest.dev/guide/browser/component-testing)
+
+### happy-dom vs jsdom
+- [jsdom vs happy-dom: Navigating the Nuances of JavaScript Testing](https://blog.seancoughlin.me/jsdom-vs-happy-dom-navigating-the-nuances-of-javascript-testing)
+- [DOM Testing with Happy DOM and Testing Library](https://www.jetbrains.com/guide/javascript/tutorials/eleventy-tsx/happy-dom/)
+
+### Testing Strategies for Monolithic Applications
+- [Monolithic vs Microservices Testing: Strategies That Scale](https://www.virtuosoqa.com/post/microservices-vs-monolithic-architecture-testing-strategies)
+- [Testing Strategies in Monolithic vs Microservices Architecture](https://www.browserstack.com/guide/testing-strategies-in-microservices-vs-monolithic-applications)
+
+---
+
+*Architecture research for: Testing Monolithic Express E-commerce Backend*
+*Researched: 2026-02-04*
