@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 10 of 16 (Test Infrastructure Foundation)
-Plan: 01 of unknown
+Plan: 04 of unknown
 Status: In progress
-Last activity: 2026-02-04 — Completed 10-01-PLAN.md
+Last activity: 2026-02-04 — Completed 10-04-PLAN.md
 
-Progress: [███░░░░░░░] 33% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 1 plan)
+Progress: [███░░░░░░░] 33% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 4 plans)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 39 (v1.0: 5, v1.1: 33, v1.2: 1)
-- Average duration: ~18 min per plan
-- Total execution time: ~12 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~7min)
+- Total plans completed: 42 (v1.0: 5, v1.1: 33, v1.2: 4)
+- Average duration: ~17 min per plan
+- Total execution time: ~12 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~20min)
 
 **By Phase:**
 
@@ -36,16 +36,17 @@ Progress: [███░░░░░░░] 33% overall (v1.0: 5/5 plans ✓, v1.
 | 7 (v1.1) | 5 | ~177min | ~35.4min |
 | 8 (v1.1) | 5 | ~62min | ~12.4min |
 | 9 (v1.1) | 5 | ~15min | ~3min |
-| 10 (v1.2) | 1 | ~7min | ~7min |
+| 10 (v1.2) | 4 | ~20min | ~5min |
 
 **Recent Trend:**
-- v1.2 started: 1 plan completed in 7 min (backend test infrastructure)
+- v1.2 momentum: 4 plans completed in 20 min (~5 min/plan)
+- Phase 10 velocity: Infrastructure setup plans executing quickly
 - v1.1 velocity: ~6 hours for 33 plans (11 min/plan)
 - Significant improvement over v1.0 velocity (192 min/plan)
 - Testing/verification plans execute fastest (~3-7 min)
 - Migration/integration plans take longer (~35 min)
 
-*Updated after 10-01 completion*
+*Updated after 10-04 completion*
 
 ## Accumulated Context
 
@@ -75,6 +76,19 @@ Recent decisions affecting current work:
 - Database helpers: connect, disconnect, clearDatabase, getUri
 - Smoke tests verify infrastructure works (3 tests passing)
 
+**Environment Safety Guards (10-02, 10-03 - Completed):**
+- Production environment detection and test abortion
+- MongoDB URI validation (127.0.0.1 only)
+- Payment credential clearing in test environment
+- Unit tests confirm guard behavior (17 tests passing)
+
+**External API Mocking (10-04 - Completed):**
+- nock HTTP mocking library for API interception
+- PayPal API mocks (auth, order creation, capture, errors)
+- Stripe API mocks (payment intents, webhooks, errors)
+- Exchange rate API mocks (primary, fallback, timeout scenarios)
+- S3/Spaces mocks (upload, delete, get, errors)
+
 ### Pending Todos
 
 None yet.
@@ -94,8 +108,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-04 (10-01 execution)
-Stopped at: Completed 10-01-PLAN.md (Backend test infrastructure setup)
+Last session: 2026-02-04 (10-04 execution)
+Stopped at: Completed 10-04-PLAN.md (External API mocking infrastructure)
 Resume file: None
 
 **v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
@@ -103,21 +117,24 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (1/? plans complete)
+**v1.2 Milestone:** In progress (4/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
 
 **Phase 10 Progress:**
 - ✅ 10-01: Backend test infrastructure (Vitest + mongodb-memory-server + smoke tests)
-- Next: Continue Phase 10 plans (frontend test infrastructure, API mocking, safety guards)
+- ✅ 10-02: Environment safety guards (production detection + test abort)
+- ✅ 10-03: Environment guard integration and unit tests (17 tests)
+- ✅ 10-04: External API mocking (nock + PayPal/Stripe/exchange/S3 mocks)
+- Next: Continue Phase 10 plans (frontend test infrastructure, Supertest integration)
 
 **Next Steps:**
 1. Continue Phase 10 execution with remaining plans
 2. Set up frontend test infrastructure (Vitest + jsdom + DOM helpers)
 3. Add Supertest for HTTP-boundary integration tests
-4. Establish safety measures (environment validation, production credential rejection)
-5. Add nock for external API mocking (PayPal, Stripe, exchange rate)
+4. Create test fixtures and database seeding utilities
+5. Proceed to Phase 11: Authentication testing
 
 ---
-*Last updated: 2026-02-04 after 10-01 completion*
+*Last updated: 2026-02-04 after 10-04 completion*
