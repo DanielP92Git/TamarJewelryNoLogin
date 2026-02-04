@@ -155,10 +155,14 @@ Plans:
   4. Memory leak testing passes (20+ page navigations without heap growth)
   5. Product lists with 200+ items perform acceptably during drag operations
   6. All keyboard accessibility requirements met (reordering without mouse)
-**Plans**: TBD
+**Plans**: 5 plans
 
 Plans:
-- [ ] 09-01: TBD
+- [ ] 09-01-PLAN.md — Desktop testing: keyboard accessibility, memory leaks, concurrent admin
+- [ ] 09-02-PLAN.md — Touch device testing: iPad Safari, Android Chrome
+- [ ] 09-03-PLAN.md — RTL Hebrew testing and 200+ product performance
+- [ ] 09-04-PLAN.md — Bug batch fixes from testing
+- [ ] 09-05-PLAN.md — Ship decision and v1.1 final verification
 
 ## Progress
 
@@ -175,7 +179,7 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 6. Frontend Product Reordering | v1.1 | 4/4 | Complete | 2026-02-03 |
 | 7. Image Array Migration | v1.1 | 5/5 | Complete | 2026-02-03 |
 | 8. Modal Integration | v1.1 | 5/5 | Complete | 2026-02-04 |
-| 9. Testing & Polish | v1.1 | 0/TBD | Not started | - |
+| 9. Testing & Polish | v1.1 | 0/5 | Planning complete | - |
 
 ---
-*Last updated: 2026-02-04 after Phase 8 completion*
+*Last updated: 2026-02-04 after Phase 9 planning*
