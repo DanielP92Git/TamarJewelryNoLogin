@@ -2,47 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-01)
+See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency
-**Current focus:** Phase 8 Complete - Ready for Phase 9
+**Current focus:** v1.2 Test Infrastructure & Critical Coverage
 
 ## Current Position
 
-Phase: 9 of 9 (Testing & Polish) - COMPLETE ✅
-Plan: 5 of 5 in phase
-Status: v1.1 SHIPPED
-Last activity: 2026-02-04 — Plan 09-05 complete: v1.1 ship decision approved
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements for v1.2
+Last activity: 2026-02-04 — Milestone v1.2 Test Infrastructure & Critical Coverage started
 
-Progress: [██████████] 100% v1.1 (v1.0: 5/5 plans, v1.1: 33/33 plans complete)
-
-## v1.1 Milestone Complete
-
-**Ship Decision:** SHIP v1.1
-**Date:** 2026-02-04
-**Status:** ✅ READY FOR PRODUCTION
-
-**Features Delivered:**
-- Product drag-and-drop reordering per category (ORDER-01 through ORDER-11)
-- Image gallery reordering with drag-and-drop (IMAGE-03 through IMAGE-08)
-- Product preview modal with quick actions (MODAL-01 through MODAL-09)
-- Multi-image support with unified images array (IMAGE-01, IMAGE-02)
-- RTL Hebrew support verified
-- Concurrent admin safety with optimistic locking
-- Memory stability verified
-- Performance at scale validated
-
-**Quality Metrics:**
-- Success Criteria: 6/6 documented (5 PASS, 1 PARTIAL with acceptable deferrals)
-- Bugs Fixed: 1 (BUG-01 - drag handle focus indicator)
-- Bugs Deferred: 2 (BUG-02 keyboard reordering, BUG-03 focus styling - both acceptable)
-- Test Coverage: Desktop ✅, RTL ✅, Performance ✅, Touch DEFERRED
-- Risk Level: LOW
-
-**Deferred to v1.2:**
-- HIGH Priority: Keyboard reordering (move up/down buttons) - WCAG 2.1.2 compliance
-- MEDIUM Priority: Touch device testing and optimization
-- LOW Priority: Custom focus-visible styling (cosmetic polish)
+Progress: [░░░░░░░░░░] 0% v1.2 (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓)
 
 ## Performance Metrics
 
@@ -264,28 +236,25 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-04 (Phase 9 Plan 05 complete - v1.1 SHIPPED)
-Stopped at: v1.1 milestone complete, ready for production deployment
+Last session: 2026-02-04 (v1.2 milestone initialization)
+Stopped at: Defining requirements for v1.2 Test Infrastructure & Critical Coverage
 Resume file: None
 
-**v1.1 Milestone Status:** ✅ COMPLETE
-
-**Summary:**
+**v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
 - All 9 phases complete (33 plans total)
-- Success criteria: 6/6 documented (5 PASS, 1 PARTIAL with acceptable deferrals)
-- Bugs: 1 fixed (BUG-01), 2 deferred (BUG-02, BUG-03)
-- Ship decision: APPROVED (2026-02-04)
-- Risk level: LOW
+- Product reordering, image gallery, preview modal delivered
+- Ready for production deployment
+
+**v1.2 Milestone:** In progress (requirements phase)
+- Goal: Establish test infrastructure and cover high-risk areas
+- Focus: Authentication, payments, currency conversion, file uploads, CORS
+- Zero current test coverage - adding safety net for future development
 
 **Next Steps:**
-1. Deploy v1.1 to production
-2. Monitor initial usage and gather feedback
-3. Plan v1.2 milestone (keyboard reordering, touch testing, focus styling)
-
-**v1.2 Roadmap Priorities:**
-- HIGH: Keyboard reordering (move up/down buttons) - WCAG 2.1.2 compliance
-- MEDIUM: Touch device testing and optimization
-- LOW: Custom focus-visible styling (cosmetic polish)
+1. Research domain ecosystem (optional)
+2. Define requirements for test infrastructure
+3. Create roadmap with phase breakdown
+4. Begin Phase 10 (test infrastructure setup)
 
 ---
-*Last updated: 2026-02-04 after Phase 9 Plan 05 completion - v1.1 SHIPPED*
+*Last updated: 2026-02-04 after v1.2 milestone started*
