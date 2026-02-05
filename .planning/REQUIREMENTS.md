@@ -74,17 +74,17 @@ Requirements for test infrastructure milestone. Each maps to roadmap phases.
 
 ### File Upload & Image Processing Tests
 
-- [ ] **FILE-01**: File upload validates MIME types (JPEG, PNG, WebP only)
-- [ ] **FILE-02**: File upload rejects invalid MIME types
-- [ ] **FILE-03**: File upload enforces maximum file size limits
-- [ ] **FILE-04**: File upload rejects files exceeding size limit
-- [ ] **FILE-05**: Sharp image processing resizes images correctly
-- [ ] **FILE-06**: Sharp image processing converts formats (JPEG to WebP)
-- [ ] **FILE-07**: Sharp image processing handles corrupted images gracefully
-- [ ] **FILE-08**: DigitalOcean Spaces upload saves file to test bucket (mocked)
-- [ ] **FILE-09**: DigitalOcean Spaces upload generates correct public URL (mocked)
-- [ ] **FILE-10**: File upload validates image dimensions (min/max width/height)
-- [ ] **FILE-11**: File deletion removes file from storage (mocked)
+- [x] **FILE-01**: File upload validates MIME types (JPEG, PNG, WebP only)
+- [x] **FILE-02**: File upload rejects invalid MIME types
+- [x] **FILE-03**: File upload enforces maximum file size limits
+- [x] **FILE-04**: File upload rejects files exceeding size limit
+- [x] **FILE-05**: Sharp image processing resizes images correctly
+- [x] **FILE-06**: Sharp image processing converts formats (JPEG to WebP)
+- [x] **FILE-07**: Sharp image processing handles corrupted images gracefully
+- [x] **FILE-08**: DigitalOcean Spaces upload saves file to test bucket (mocked)
+- [x] **FILE-09**: DigitalOcean Spaces upload generates correct public URL (mocked)
+- [x] **FILE-10**: File upload validates image dimensions (min/max width/height)
+- [x] **FILE-11**: File deletion removes file from storage (mocked)
 
 ### Database & Model Tests
 
@@ -213,17 +213,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CURR-07 | Phase 13 | Complete |
 | CURR-08 | Phase 13 | Complete |
 | CURR-09 | Phase 13 | Complete |
-| FILE-01 | Phase 14 | Pending |
-| FILE-02 | Phase 14 | Pending |
-| FILE-03 | Phase 14 | Pending |
-| FILE-04 | Phase 14 | Pending |
-| FILE-05 | Phase 14 | Pending |
-| FILE-06 | Phase 14 | Pending |
-| FILE-07 | Phase 14 | Pending |
-| FILE-08 | Phase 14 | Pending |
-| FILE-09 | Phase 14 | Pending |
-| FILE-10 | Phase 14 | Pending |
-| FILE-11 | Phase 14 | Pending |
+| FILE-01 | Phase 14 | Complete |
+| FILE-02 | Phase 14 | Complete |
+| FILE-03 | Phase 14 | Complete |
+| FILE-04 | Phase 14 | Complete |
+| FILE-05 | Phase 14 | Complete |
+| FILE-06 | Phase 14 | Complete |
+| FILE-07 | Phase 14 | Complete |
+| FILE-08 | Phase 14 | Complete |
+| FILE-09 | Phase 14 | Complete |
+| FILE-10 | Phase 14 | Complete |
+| FILE-11 | Phase 14 | Complete |
 | DATA-01 | Phase 15 | Pending |
 | DATA-02 | Phase 15 | Pending |
 | DATA-03 | Phase 15 | Pending |
