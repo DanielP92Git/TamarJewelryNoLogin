@@ -105,33 +105,34 @@ export async function createCorruptImage() {
 /**
  * Create an oversized image buffer exceeding upload limits.
  *
- * Generates a large JPEG buffer that exceeds the default 50MB upload limit.
- * Uses high dimensions and maximum quality to maximize file size.
+ * Generates a large PNG buffer that exceeds the default 50MB upload limit.
+ * PNG has minimal compression, making file size more predictable.
  *
- * Note: Exact byte size varies due to JPEG compression characteristics.
- * Targets well above the limit to ensure consistent test behavior.
+ * Note: For a 60MB target, create an image with sufficient pixel data.
+ * PNG stores ~4 bytes per pixel (RGBA), so 60MB ≈ 15M pixels ≈ 4000x4000.
  *
  * @param {number} targetSizeMB - Target size in megabytes (default: 60)
- * @returns {Promise<Buffer>} Large JPEG buffer
+ * @returns {Promise<Buffer>} Large PNG buffer
  *
  * @example
  * const oversizedBuffer = await createOversizedBuffer(60);
  * // Should be rejected by Multer with LIMIT_FILE_SIZE (413 status)
  */
 export async function createOversizedBuffer(targetSizeMB = 60) {
-  // JPEG compression is variable, so we use large dimensions and max quality
-  // to approach the target size. For 60MB target, use ~8000x8000 at quality 100
-  const dimension = Math.floor(Math.sqrt(targetSizeMB * 1024 * 1024 / 3));
+  // PNG with RGBA stores ~4 bytes per pixel (less with compression, but closer to actual size)
+  // For 60MB target: 60 * 1024 * 1024 bytes / 4 bytes per pixel ≈ 15.7M pixels
+  // sqrt(15.7M) ≈ 3970, so use 4100x4100 to ensure we exceed 50MB even with PNG compression
+  const dimension = 4200;
 
   return sharp({
     create: {
       width: dimension,
       height: dimension,
-      channels: 3,
-      background: { r: 128, g: 128, b: 128 }
+      channels: 4,
+      background: { r: 128, g: 128, b: 128, alpha: 1 }
     }
   })
-    .jpeg({ quality: 100 })
+    .png({ compressionLevel: 0 }) // No compression for predictable size
     .toBuffer();
 }
 
