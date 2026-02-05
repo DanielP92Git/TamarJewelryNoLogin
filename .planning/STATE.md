@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency
-**Current focus:** Phase 11 - Authentication & Authorization Tests
+**Current focus:** Phase 12 - Payment Processing Tests
 
 ## Current Position
 
-Phase: 11 of 16 (Authentication & Authorization Tests)
-Plan: 5 of 5
-Status: Phase complete and verified
-Last activity: 2026-02-05 — Phase 11 verified (passed)
+Phase: 12 of 16 (Payment Processing Tests)
+Plan: 1 of ?
+Status: In progress
+Last activity: 2026-02-05 — Completed 12-01-PLAN.md (PayPal order tests)
 
-Progress: [█████░░░░░] 44% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 12/12 plans ✓)
+Progress: [█████░░░░░] 45% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 13/? plans ✓)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 49 (v1.0: 5, v1.1: 33, v1.2: 11)
-- Average duration: ~15 min per plan
-- Total execution time: ~12.8 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~56min)
+- Total plans completed: 50 (v1.0: 5, v1.1: 33, v1.2: 12)
+- Average duration: ~14 min per plan
+- Total execution time: ~13.0 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~62min)
 
 **By Phase:**
 
@@ -38,9 +38,11 @@ Progress: [█████░░░░░] 44% overall (v1.0: 5/5 plans ✓, v1.
 | 9 (v1.1) | 5 | ~15min | ~3min |
 | 10 (v1.2) | 7 | ~35min | ~5min |
 | 11 (v1.2) | 5 | ~21min | ~4.2min |
+| 12 (v1.2) | 1 | ~6min | ~6min |
 
 **Recent Trend:**
-- v1.2 momentum: 11 plans completed in 56 min (~5 min/plan)
+- v1.2 momentum: 12 plans completed in 62 min (~5.2 min/plan)
+- Phase 12 velocity: Payment tests executing quickly (~6 min/plan)
 - Phase 11 velocity: Test plans executing quickly (~4.2 min/plan)
 - Phase 10 velocity: Infrastructure setup completed in ~5 min/plan
 - v1.1 velocity: ~6 hours for 33 plans (11 min/plan)
@@ -48,7 +50,7 @@ Progress: [█████░░░░░] 44% overall (v1.0: 5/5 plans ✓, v1.
 - Testing/verification plans execute fastest (~3 min)
 - Migration/integration plans take longer (~35 min)
 
-*Updated after Phase 11-05 completion*
+*Updated after Phase 12-01 completion*
 
 ## Accumulated Context
 
@@ -120,6 +122,15 @@ Recent decisions affecting current work:
 - Mock req/res/next pattern for Express middleware unit tests
 - Promise wrapper for callback-based async middleware (bcrypt.compare)
 
+**Payment Test Patterns (12-01 - Completed):**
+- PayPal API mocking: auth token + order creation + capture flows
+- Dummy test credentials in setup.js (backend requires credentials existence)
+- Timeout testing with delayConnection for realistic simulation
+- Multi-currency cart testing (USD/ILS) in payment flows
+- Error scenario validation: HTTP status + error message structure
+- Payment endpoint pattern: mock auth → mock API call → verify response
+- 23 tests covering PAY-01 through PAY-05 requirements
+
 ### Pending Todos
 
 None yet.
@@ -139,8 +150,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 (11-05 execution)
-Stopped at: Completed 11-05-PLAN.md (Middleware unit tests)
+Last session: 2026-02-05 (12-01 execution)
+Stopped at: Completed 12-01-PLAN.md (PayPal order tests)
 Resume file: None
 
 **v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
@@ -148,7 +159,7 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (11/? plans complete)
+**v1.2 Milestone:** In progress (12/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
@@ -162,22 +173,26 @@ Resume file: None
 - ✅ 10-06: Sample integration test (supertest + full infrastructure demonstration)
 - Status: ✅ PHASE 10 COMPLETE - Foundation ready for Phase 11-16 test development
 
-**Phase 11 Progress:** In progress
+**Phase 11 Progress:** ✅ COMPLETE
 - ✅ 11-01: Auth test helpers and login endpoint tests (12 tests)
 - ✅ 11-02: Signup endpoint integration tests (10 tests, password hashing verification)
 - ✅ 11-03: Protected route integration tests (17 tests, fetchUser middleware)
 - ✅ 11-04: Admin route authorization tests (16 tests, requireAdmin middleware)
 - ✅ 11-05: Middleware unit tests (39 tests, mock req/res pattern, callback handling)
-- Next: Remaining Phase 11 plans as defined in phase plan
+- Status: ✅ PHASE 11 COMPLETE - Authentication & authorization fully tested
+
+**Phase 12 Progress:** In progress
+- ✅ 12-01: PayPal order endpoint tests (23 tests, PAY-01 through PAY-05)
+- Next: Remaining Phase 12 plans as defined in phase plan
 
 **Next Steps:**
 1. ✅ Phase 10 complete - test infrastructure foundation established
-2. ⏳ Phase 11: Authentication testing (in progress - 5/? plans complete)
-3. Phase 12: Payment testing (PayPal, Stripe integration)
+2. ✅ Phase 11 complete - Authentication & authorization tested
+3. ⏳ Phase 12: Payment testing (in progress - 1/? plans complete)
 4. Phase 13: Currency conversion testing
 5. Phase 14: File storage testing
 6. Phase 15: Data integrity testing
 7. Phase 16: Security testing
 
 ---
-*Last updated: 2026-02-05 after 11-05 completion*
+*Last updated: 2026-02-05 after 12-01 completion*
