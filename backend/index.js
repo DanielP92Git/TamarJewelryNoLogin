@@ -3281,7 +3281,7 @@ app.post('/webhook', (request, response) => {
   if (event.type === 'checkout.session.completed') {
     const session = event.data.object;
     if (process.env.NODE_ENV !== 'production') {
-      console.log('2. From webhook:', session.metadata.productId);
+      console.log('2. From webhook:', session.metadata?.productId);
     }
     void handleCheckoutSession(session).catch(err => {
       console.error('Error handling checkout.session.completed:', err);
