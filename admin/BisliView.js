@@ -4312,11 +4312,17 @@ async function addProduct(e, data, form) {
       "apply-global-discount",
     );
     const applyGlobalDiscount = !!applyGlobalDiscountCheckbox?.checked;
+    const sku = document.getElementById("sku-input")?.value?.trim() || "";
 
     // Validate required fields
     if (!name || !ilsPrice) {
       console.error("[addProduct] Validation failed: Missing required fields");
       throw new Error("Please fill in all required fields");
+    }
+
+    if (!sku) {
+      console.error("[addProduct] Validation failed: SKU is required");
+      throw new Error("SKU is required for new products");
     }
 
     console.log("[addProduct] Step 2: Preparing image upload...");
@@ -4431,6 +4437,7 @@ async function addProduct(e, data, form) {
       name,
       description,
       category,
+      sku,
       quantity: Number(quantity) || 0,
       ils_price: Math.round(parseFloat(ilsPrice)),
       security_margin: securityMargin,
