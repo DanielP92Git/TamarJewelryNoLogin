@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 12 of 16 (Payment Processing Tests)
-Plan: 1 of ?
+Plan: 2 of ?
 Status: In progress
-Last activity: 2026-02-05 — Completed 12-01-PLAN.md (PayPal order tests)
+Last activity: 2026-02-05 — Completed 12-02-PLAN.md (Stripe checkout tests)
 
-Progress: [█████░░░░░] 45% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 13/? plans ✓)
+Progress: [█████░░░░░] 46% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 14/? plans ✓)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 50 (v1.0: 5, v1.1: 33, v1.2: 12)
-- Average duration: ~14 min per plan
-- Total execution time: ~13.0 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~62min)
+- Total plans completed: 51 (v1.0: 5, v1.1: 33, v1.2: 13)
+- Average duration: ~15 min per plan
+- Total execution time: ~13.6 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~97min)
 
 **By Phase:**
 
@@ -38,11 +38,11 @@ Progress: [█████░░░░░] 45% overall (v1.0: 5/5 plans ✓, v1.
 | 9 (v1.1) | 5 | ~15min | ~3min |
 | 10 (v1.2) | 7 | ~35min | ~5min |
 | 11 (v1.2) | 5 | ~21min | ~4.2min |
-| 12 (v1.2) | 1 | ~6min | ~6min |
+| 12 (v1.2) | 2 | ~41min | ~20.5min |
 
 **Recent Trend:**
-- v1.2 momentum: 12 plans completed in 62 min (~5.2 min/plan)
-- Phase 12 velocity: Payment tests executing quickly (~6 min/plan)
+- v1.2 momentum: 13 plans completed in 97 min (~7.5 min/plan)
+- Phase 12 velocity: Payment tests averaging ~20.5 min/plan
 - Phase 11 velocity: Test plans executing quickly (~4.2 min/plan)
 - Phase 10 velocity: Infrastructure setup completed in ~5 min/plan
 - v1.1 velocity: ~6 hours for 33 plans (11 min/plan)
@@ -50,7 +50,7 @@ Progress: [█████░░░░░] 45% overall (v1.0: 5/5 plans ✓, v1.
 - Testing/verification plans execute fastest (~3 min)
 - Migration/integration plans take longer (~35 min)
 
-*Updated after Phase 12-01 completion*
+*Updated after Phase 12-02 completion*
 
 ## Accumulated Context
 
@@ -122,14 +122,18 @@ Recent decisions affecting current work:
 - Mock req/res/next pattern for Express middleware unit tests
 - Promise wrapper for callback-based async middleware (bcrypt.compare)
 
-**Payment Test Patterns (12-01 - Completed):**
+**Payment Test Patterns (12-01, 12-02 - Completed):**
 - PayPal API mocking: auth token + order creation + capture flows
+- Stripe checkout session mocking with nock HTTP interception
 - Dummy test credentials in setup.js (backend requires credentials existence)
+- Exchange rate API must be mocked in beforeEach for payment endpoint tests
 - Timeout testing with delayConnection for realistic simulation
 - Multi-currency cart testing (USD/ILS) in payment flows
 - Error scenario validation: HTTP status + error message structure
 - Payment endpoint pattern: mock auth → mock API call → verify response
-- 23 tests covering PAY-01 through PAY-05 requirements
+- Validation-first testing: test input validation before external API mocking
+- Product database setup required for checkout session tests
+- 30 tests covering PAY-01 through PAY-10 requirements (23 PayPal + 7 Stripe)
 
 ### Pending Todos
 
@@ -150,8 +154,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 (12-01 execution)
-Stopped at: Completed 12-01-PLAN.md (PayPal order tests)
+Last session: 2026-02-05 (12-02 execution)
+Stopped at: Completed 12-02-PLAN.md (Stripe checkout tests)
 Resume file: None
 
 **v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
@@ -159,7 +163,7 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (12/? plans complete)
+**v1.2 Milestone:** In progress (13/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
@@ -183,16 +187,17 @@ Resume file: None
 
 **Phase 12 Progress:** In progress
 - ✅ 12-01: PayPal order endpoint tests (23 tests, PAY-01 through PAY-05)
+- ✅ 12-02: Stripe checkout session tests (7 tests, PAY-06 through PAY-10)
 - Next: Remaining Phase 12 plans as defined in phase plan
 
 **Next Steps:**
 1. ✅ Phase 10 complete - test infrastructure foundation established
 2. ✅ Phase 11 complete - Authentication & authorization tested
-3. ⏳ Phase 12: Payment testing (in progress - 1/? plans complete)
+3. ⏳ Phase 12: Payment testing (in progress - 2/? plans complete)
 4. Phase 13: Currency conversion testing
 5. Phase 14: File storage testing
 6. Phase 15: Data integrity testing
 7. Phase 16: Security testing
 
 ---
-*Last updated: 2026-02-05 after 12-01 completion*
+*Last updated: 2026-02-05 after 12-02 completion*
