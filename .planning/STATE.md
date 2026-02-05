@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency
-**Current focus:** Phase 14 - File Upload & Image Processing Tests
+**Current focus:** Phase 15 - Database & Model Tests
 
 ## Current Position
 
-Phase: 14 of 16 (File Upload & Image Processing Tests)
-Plan: 2 of 2
-Status: Phase complete and verified
-Last activity: 2026-02-05 — Phase 14 verified (passed)
+Phase: 15 of 16 (Database & Model Tests)
+Plan: 2 of 3
+Status: In progress
+Last activity: 2026-02-05 — Completed 15-02-PLAN.md
 
-Progress: [██████░░░░] 54% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 19/? plans ✓)
+Progress: [███████░░░] 62% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 21/? plans ✓)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 57 (v1.0: 5, v1.1: 33, v1.2: 19)
-- Average duration: ~12.3 min per plan
-- Total execution time: ~14.4 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~143min)
+- Total plans completed: 58 (v1.0: 5, v1.1: 33, v1.2: 20)
+- Average duration: ~12.1 min per plan
+- Total execution time: ~14.6 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~154min)
 
 **By Phase:**
 
@@ -41,9 +41,11 @@ Progress: [██████░░░░] 54% overall (v1.0: 5/5 plans ✓, v1.
 | 12 (v1.2) | 3 | ~56min | ~18.7min |
 | 13 (v1.2) | 2 | ~13min | ~6.5min |
 | 14 (v1.2) | 2 | ~14min | ~7min |
+| 15 (v1.2) | 1 | ~11min | ~11min |
 
 **Recent Trend:**
-- v1.2 momentum: 19 plans completed in 143 min (~7.5 min/plan)
+- v1.2 momentum: 20 plans completed in 154 min (~7.7 min/plan)
+- Phase 15 velocity: Model tests averaging ~11 min/plan
 - Phase 14 velocity: File upload tests averaging ~7 min/plan
 - Phase 13 velocity: Currency conversion tests averaging ~6.5 min/plan
 - Phase 12 velocity: Payment tests averaging ~18.7 min/plan
@@ -173,6 +175,16 @@ Recent decisions affecting current work:
 - S3 mock verification: mockS3Upload/mockS3Delete/mockS3Error interceptor validation (FILE-08, FILE-11)
 - 41 tests covering FILE-01 through FILE-11 requirements (18 validation + 9 processing + 14 upload flow)
 
+**Model Testing Patterns (15-02 - Completed):**
+- Direct Mongoose model testing: Import model, call methods, verify DB state (no HTTP endpoints)
+- Dynamic CommonJS import in ESM tests: `let Model; beforeAll(async () => { Model = (await import('path')).default; })`
+- Counter-based unique data generation: Function generating unique emails/SKUs per test
+- Race condition testing: Promise.allSettled with concurrent operations, verify only one succeeded
+- Actual behavior documentation: Test names explicitly state observed behavior vs ideal (e.g., "no pre-save hook", "may create duplicates")
+- User model: Email validation lowercase-only regex, no password hashing hook, no userType enum constraint
+- Settings model: getSettings() singleton not atomic (race conditions possible), acceptable in production
+- 40 tests covering DATA-10 through DATA-15 (22 User model + 18 Settings model)
+
 ### Pending Todos
 
 None yet.
@@ -192,8 +204,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 (14-02 execution)
-Stopped at: Completed 14-02-PLAN.md (Sharp processing and S3 integration tests)
+Last session: 2026-02-05 (15-02 execution)
+Stopped at: Completed 15-02-PLAN.md (User and Settings model tests)
 Resume file: None
 
 **v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
@@ -201,11 +213,11 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (19/? plans complete)
+**v1.2 Milestone:** In progress (21/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
-- Current test count: 296 tests passing
+- Current test count: 336 tests passing (373 total including Phase 15-01)
 
 **Phase 10 Progress:** ✅ COMPLETE
 - ✅ 10-01: Backend test infrastructure (Vitest + mongodb-memory-server + smoke tests)
@@ -240,14 +252,20 @@ Resume file: None
 - ✅ 14-02: Sharp processing and S3 integration tests (23 tests, FILE-05 through FILE-11)
 - Status: ✅ PHASE 14 COMPLETE - File upload & image processing fully tested
 
+**Phase 15 Progress:** In progress (2/3 complete)
+- ✅ 15-01: Product model validation and CRUD tests (37 tests, DATA-01 through DATA-09)
+- ✅ 15-02: User and Settings model tests (40 tests, DATA-10 through DATA-15)
+- ⏳ 15-03: Pending (if exists)
+- Status: Model-level validation and uniqueness patterns established
+
 **Next Steps:**
 1. ✅ Phase 10 complete - test infrastructure foundation established
 2. ✅ Phase 11 complete - Authentication & authorization tested
 3. ✅ Phase 12 complete - Payment processing tested
 4. ✅ Phase 13 complete - Currency conversion tested
 5. ✅ Phase 14 complete - File upload & image processing tested
-6. Phase 15: Data integrity testing
+6. 🔄 Phase 15: Data integrity testing (2/3 plans complete)
 7. Phase 16: Security testing
 
 ---
-*Last updated: 2026-02-05 after Phase 14 completion*
+*Last updated: 2026-02-05 after Phase 15-02 completion*
