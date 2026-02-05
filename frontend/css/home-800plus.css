@@ -40,7 +40,7 @@ header {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 20%;
+  object-position: center 0%;
   z-index: 1;
 }
 
@@ -232,7 +232,7 @@ html[dir='rtl'] .promo-bottom-text {
 /* Hero Tagline - Desktop */
 .hero-tagline {
   position: absolute;
-  top: 80%;
+  top: 85%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
