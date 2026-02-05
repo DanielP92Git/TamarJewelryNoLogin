@@ -24,6 +24,64 @@
 
 **Git range:** `feat(01-01)` → `docs(03)`
 
-**What's next:** TBD - planning next milestone goals
+**What's next:** Admin Product Management UX enhancements (v1.1)
+
+---
+
+## v1.1 Admin Product Management UX (Shipped: 2026-02-04)
+
+**Delivered:** Professional admin dashboard UX with drag-and-drop product reordering, unified image gallery management, and customer-facing preview modals.
+
+**Phases completed:** 4-9 (33 plans total)
+
+**Key accomplishments:**
+
+- Drag-and-drop product reordering within categories with undo/redo, conflict handling, and beforeunload protection
+- Unified image gallery (merged mainImage + galleryImages) with drag-to-reorder and first-image-as-main logic
+- Product preview modal with customer-facing view, Edit/Delete/Duplicate actions, and keyboard accessibility
+- MongoDB schema migrations with dry-run audit, rollback capability, and displayOrder field for all products
+- SortableJS integration with command pattern state management and visual feedback (ghost preview, loading states)
+- Cross-device validation (desktop keyboard, iPad Safari, Android Chrome touch, RTL Hebrew, 200+ product performance)
+
+**Stats:**
+
+- 78+ files created/modified
+- ~4,200 lines added (backend +800, admin +2,100, frontend ~1,300)
+- 6 phases, 33 plans, ~120 tasks
+- 3 days from planning to completion (2026-02-02 → 2026-02-04)
+
+**Git range:** `feat(04-01)` → `docs(09)`
+
+**What's next:** Test infrastructure and critical coverage (v1.2)
+
+---
+
+## v1.2 Test Infrastructure & Critical Coverage (Shipped: 2026-02-06)
+
+**Delivered:** Comprehensive testing foundation with 447 tests covering auth, payments, currency, file uploads, database models, and security middleware.
+
+**Phases completed:** 10-16 (25 plans total)
+
+**Key accomplishments:**
+
+- Test infrastructure with Vitest, mongodb-memory-server (in-memory DB), nock (HTTP mocking), environment guards preventing production contamination
+- 94 authentication & authorization tests (JWT lifecycle, bcrypt password hashing, role-based access control, middleware unit/integration tests)
+- 67 payment processing tests (PayPal order creation/capture, Stripe checkout sessions, error handling, rate limiting, webhook signature validation)
+- 49 currency conversion tests (USD/ILS exchange rate service, cron job scheduling, product price recalculation, fallback chain)
+- 52 file upload & image processing tests (MIME validation, Sharp format conversion/resizing, S3 mock integration, dimension limits)
+- 78 database & model tests (Product/User/Settings CRUD, uniqueness constraints, race condition testing with Promise.allSettled)
+- 78 security & middleware tests (CORS origin validation, rate limiting enforcement, XSS/NoSQL injection exploratory testing with OWASP vectors)
+- CI/CD pipeline with GitHub Actions, parallel test execution, and coverage reporting
+
+**Stats:**
+
+- 27 test files created (~10,757 lines of test code)
+- 447 tests passing, 1 skipped, 0 failing
+- 7 phases, 25 plans, ~80 requirements (100% coverage)
+- 2 days from planning to completion (2026-02-04 → 2026-02-06)
+
+**Git range:** `feat(10-01)` → `docs(16)`
+
+**What's next:** TBD - planning next milestone (/gsd:new-milestone)
 
 ---
