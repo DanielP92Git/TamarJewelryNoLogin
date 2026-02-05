@@ -247,8 +247,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 13-01-PLAN.md — Exchange rate service unit tests (fetch, cache, fallback, staleness)
-- [ ] 13-02-PLAN.md — Cron job, admin endpoint, conversion accuracy, and currency symbols
+- [x] 13-01-PLAN.md — Exchange rate service unit tests (fetch, cache, fallback, staleness)
+- [x] 13-02-PLAN.md — Cron job, admin endpoint, conversion accuracy, and currency symbols
 
 ### Phase 14: File Upload & Image Processing Tests
 **Goal**: Test file upload validation, Sharp image processing, and S3 integration
@@ -264,8 +264,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 14-01-PLAN.md — Image test helpers and file upload validation tests (FILE-01 through FILE-04)
-- [ ] 14-02-PLAN.md — Sharp processing, S3 integration, and file deletion tests (FILE-05 through FILE-11)
+- [x] 14-01-PLAN.md — Image test helpers and file upload validation tests (FILE-01 through FILE-04)
+- [x] 14-02-PLAN.md — Sharp processing, S3 integration, and file deletion tests (FILE-05 through FILE-11)
 
 ### Phase 15: Database & Model Tests
 **Goal**: Test Mongoose models (Product, User, Settings) for validation and CRUD operations
@@ -292,11 +292,13 @@ Plans:
   2. CORS middleware allows localhost origins in development
   3. Rate limiting middleware enforces limits on auth and payment endpoints
   4. Rate limiting allows requests within limits and rejects excess requests
-  5. Input validation sanitizes XSS attempts and rejects SQL injection patterns
-**Plans**: TBD
+  5. Input validation sanitizes XSS attempts and rejects NoSQL injection patterns
+**Plans**: 3 plans
 
 Plans:
-- [ ] TBD
+- [ ] 16-01-PLAN.md — CORS middleware tests (production, development, preflight)
+- [ ] 16-02-PLAN.md — Rate limiting middleware tests (auth, payment endpoints)
+- [ ] 16-03-PLAN.md — Input validation security tests (XSS, NoSQL injection)
 
 ## Progress
 
@@ -320,7 +322,7 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 ->
 | 13. Currency Conversion | v1.2 | 2/2 | Complete | 2026-02-05 |
 | 14. File Upload & Images | v1.2 | 2/2 | Complete | 2026-02-05 |
 | 15. Database & Models | v1.2 | 2/2 | Complete | 2026-02-05 |
-| 16. Security & Middleware | v1.2 | 0/0 | Not started | - |
+| 16. Security & Middleware | v1.2 | 0/3 | Planned | - |
 
 ---
-*Last updated: 2026-02-05 after Phase 15 execution*
+*Last updated: 2026-02-05 after Phase 16 planning*
