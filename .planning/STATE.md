@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 16 of 16 (Security & Middleware Tests)
-Plan: 1 of 3
+Plan: 3 of 3
 Status: In progress
-Last activity: 2026-02-05 — Completed 16-01-PLAN.md
+Last activity: 2026-02-06 — Completed 16-03-PLAN.md
 
-Progress: [████████░░] 65% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 22/? plans ✓)
+Progress: [████████░░] 67% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 23/? plans ✓)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 60 (v1.0: 5, v1.1: 33, v1.2: 22)
-- Average duration: ~11.1 min per plan
-- Total execution time: ~15.0 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~172min)
+- Total plans completed: 61 (v1.0: 5, v1.1: 33, v1.2: 23)
+- Average duration: ~11.8 min per plan
+- Total execution time: ~15.9 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~234min)
 
 **By Phase:**
 
@@ -42,11 +42,11 @@ Progress: [████████░░] 65% overall (v1.0: 5/5 plans ✓, v1.
 | 13 (v1.2) | 2 | ~13min | ~6.5min |
 | 14 (v1.2) | 2 | ~14min | ~7min |
 | 15 (v1.2) | 2 | ~22min | ~11min |
-| 16 (v1.2) | 1 | ~7min | ~7min |
+| 16 (v1.2) | 2 | ~69min | ~34.5min |
 
 **Recent Trend:**
-- v1.2 momentum: 22 plans completed in 172 min (~7.8 min/plan)
-- Phase 16 velocity: Security tests averaging ~7 min/plan (1 plan complete)
+- v1.2 momentum: 23 plans completed in 234 min (~10.2 min/plan)
+- Phase 16 velocity: Security tests averaging ~34.5 min/plan (2 plans complete)
 - Phase 15 velocity: Model tests averaging ~11 min/plan (2 plans complete)
 - Phase 14 velocity: File upload tests averaging ~7 min/plan
 - Phase 13 velocity: Currency conversion tests averaging ~6.5 min/plan
@@ -58,7 +58,7 @@ Progress: [████████░░] 65% overall (v1.0: 5/5 plans ✓, v1.
 - Testing/verification plans execute fastest (~3-7 min)
 - Migration/integration plans take longer (~35 min)
 
-*Updated after Phase 15-02 completion*
+*Updated after Phase 16-03 completion*
 
 ## Accumulated Context
 
@@ -197,6 +197,15 @@ Recent decisions affecting current work:
 - Helmet security headers: X-Content-Type-Options, X-Frame-Options, X-DNS-Prefetch-Control, no X-Powered-By
 - 31 tests covering SEC-01 through SEC-03 requirements (19 production + 8 development + 4 additional security)
 
+**Input Validation Security Testing (16-03 - Completed):**
+- OWASP attack vector library: 17 XSS payloads, 10 NoSQL injection patterns, Unicode edge cases
+- Exploratory testing approach: Document actual behavior via console logging, not enforce ideal state
+- XSS prevention: Test script tags, event handlers, attribute injection, URL-based attacks in product fields
+- NoSQL injection: Test MongoDB operators ($gt, $ne, $regex, $where, $in) in login/signup
+- Unicode validation: Positive tests for Hebrew/Japanese/European chars, negative tests for null bytes/RTL override
+- Security posture documentation: Console logs capture whether payloads are sanitized or stored
+- 30 tests covering SEC-08 (XSS) and SEC-09 (NoSQL injection) requirements (8 XSS + 8 NoSQL + 9 Unicode + 4 dangerous + 3 content-type)
+
 ### Pending Todos
 
 None yet.
@@ -216,8 +225,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 (Phase 15 execution)
-Stopped at: Completed Phase 15 (Database & Model Tests)
+Last session: 2026-02-06 (Phase 16 execution)
+Stopped at: Completed 16-03-PLAN.md (Input validation security tests)
 Resume file: None
 
 **v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
@@ -225,11 +234,11 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (22/? plans complete)
+**v1.2 Milestone:** In progress (23/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
-- Current test count: 405 tests passing
+- Current test count: 435 tests passing
 
 **Phase 10 Progress:** ✅ COMPLETE
 - ✅ 10-01: Backend test infrastructure (Vitest + mongodb-memory-server + smoke tests)
@@ -271,7 +280,8 @@ Resume file: None
 
 **Phase 16 Progress:** In progress
 - ✅ 16-01: CORS middleware tests (31 tests, SEC-01 through SEC-03)
-- Status: 1 of 3 plans complete
+- ✅ 16-03: Input validation security tests (30 tests, SEC-08 through SEC-09, XSS and NoSQL injection)
+- Status: 2 of 3 plans complete
 
 **Next Steps:**
 1. ✅ Phase 10 complete - test infrastructure foundation established
@@ -283,4 +293,4 @@ Resume file: None
 7. Phase 16: Security & middleware testing (1 of 3 plans complete)
 
 ---
-*Last updated: 2026-02-05 after Phase 16-01 completion*
+*Last updated: 2026-02-06 after Phase 16-03 completion*
