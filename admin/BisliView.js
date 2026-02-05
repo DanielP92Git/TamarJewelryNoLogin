@@ -2155,7 +2155,7 @@ function loadProducts(data) {
           <span style="font-weight:900;">⧉</span>
         </button>
         <button class="icon-action icon-action--danger delete-btn" title="Delete Product" data-product-id="${
-          item._id
+          item.id
         }">
           <span style="font-weight:900;">✕</span>
         </button>
