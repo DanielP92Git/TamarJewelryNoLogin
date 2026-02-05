@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency
-**Current focus:** Phase 15 - Database & Model Tests
+**Current focus:** Phase 16 - Security & Middleware Tests
 
 ## Current Position
 
-Phase: 15 of 16 (Database & Model Tests)
-Plan: 2 of 2
-Status: Phase complete and verified
-Last activity: 2026-02-05 — Phase 15 verified (passed)
+Phase: 16 of 16 (Security & Middleware Tests)
+Plan: 1 of 3
+Status: In progress
+Last activity: 2026-02-05 — Completed 16-01-PLAN.md
 
-Progress: [███████░░░] 63% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 21/? plans ✓)
+Progress: [████████░░] 65% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 22/? plans ✓)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 59 (v1.0: 5, v1.1: 33, v1.2: 21)
-- Average duration: ~11.4 min per plan
-- Total execution time: ~14.8 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~165min)
+- Total plans completed: 60 (v1.0: 5, v1.1: 33, v1.2: 22)
+- Average duration: ~11.1 min per plan
+- Total execution time: ~15.0 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~172min)
 
 **By Phase:**
 
@@ -42,9 +42,11 @@ Progress: [███████░░░] 63% overall (v1.0: 5/5 plans ✓, v1.
 | 13 (v1.2) | 2 | ~13min | ~6.5min |
 | 14 (v1.2) | 2 | ~14min | ~7min |
 | 15 (v1.2) | 2 | ~22min | ~11min |
+| 16 (v1.2) | 1 | ~7min | ~7min |
 
 **Recent Trend:**
-- v1.2 momentum: 21 plans completed in 165 min (~7.9 min/plan)
+- v1.2 momentum: 22 plans completed in 172 min (~7.8 min/plan)
+- Phase 16 velocity: Security tests averaging ~7 min/plan (1 plan complete)
 - Phase 15 velocity: Model tests averaging ~11 min/plan (2 plans complete)
 - Phase 14 velocity: File upload tests averaging ~7 min/plan
 - Phase 13 velocity: Currency conversion tests averaging ~6.5 min/plan
@@ -185,6 +187,16 @@ Recent decisions affecting current work:
 - Settings model: getSettings() singleton not atomic (race conditions possible), acceptable in production
 - 40 tests covering DATA-10 through DATA-15 (22 User model + 18 Settings model)
 
+**CORS Testing Patterns (16-01 - Completed):**
+- Origin header manipulation: Use `.set('Origin', 'https://...')` to test CORS behavior
+- Simulated production mode: Set environment variables (HOST, ADMIN_URL) but keep NODE_ENV='test' to avoid port conflicts
+- Security threat model documentation: Each test documents requirement (SEC-XX), threat, and protection mechanism
+- Development mode permissiveness: Localhost/127.0.0.1 with any port allowed in development
+- Production mode strictness: Only whitelisted origins allowed
+- Preflight OPTIONS handling: Verify methods, headers, credentials flags
+- Helmet security headers: X-Content-Type-Options, X-Frame-Options, X-DNS-Prefetch-Control, no X-Powered-By
+- 31 tests covering SEC-01 through SEC-03 requirements (19 production + 8 development + 4 additional security)
+
 ### Pending Todos
 
 None yet.
@@ -213,11 +225,11 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (21/? plans complete)
+**v1.2 Milestone:** In progress (22/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
-- Current test count: 374 tests passing
+- Current test count: 405 tests passing
 
 **Phase 10 Progress:** ✅ COMPLETE
 - ✅ 10-01: Backend test infrastructure (Vitest + mongodb-memory-server + smoke tests)
@@ -257,6 +269,10 @@ Resume file: None
 - ✅ 15-02: User and Settings model tests (40 tests, DATA-10 through DATA-15)
 - Status: ✅ PHASE 15 COMPLETE - Database & model tests fully implemented
 
+**Phase 16 Progress:** In progress
+- ✅ 16-01: CORS middleware tests (31 tests, SEC-01 through SEC-03)
+- Status: 1 of 3 plans complete
+
 **Next Steps:**
 1. ✅ Phase 10 complete - test infrastructure foundation established
 2. ✅ Phase 11 complete - Authentication & authorization tested
@@ -264,11 +280,7 @@ Resume file: None
 4. ✅ Phase 13 complete - Currency conversion tested
 5. ✅ Phase 14 complete - File upload & image processing tested
 6. ✅ Phase 15 complete - Database & model tests implemented
-7. Phase 16: Security & middleware testing
+7. Phase 16: Security & middleware testing (1 of 3 plans complete)
 
 ---
-*Last updated: 2026-02-05 after Phase 15-02 completion*
-
-**Phase 15 Progress:** In progress
-- ✅ 15-01: Product model tests (38 tests, DATA-01 through DATA-09)
-- Status: 1 of 3 plans complete
+*Last updated: 2026-02-05 after Phase 16-01 completion*
