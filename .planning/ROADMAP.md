@@ -229,10 +229,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 12-01-PLAN.md — PayPal order creation and capture tests (PAY-01 through PAY-05)
-- [ ] 12-02-PLAN.md — Stripe checkout session tests (PAY-06 through PAY-10)
-- [ ] 12-03-PLAN.md — Payment validation tests (PAY-11, PAY-12, PAY-13)
-- [ ] 12-04-PLAN.md — Stripe webhook tests (signature validation, event handling)
+- [x] 12-01-PLAN.md — PayPal order creation and capture tests (PAY-01 through PAY-05)
+- [x] 12-02-PLAN.md — Stripe checkout session tests (PAY-06 through PAY-10)
+- [x] 12-03-PLAN.md — Payment validation tests (PAY-11, PAY-12, PAY-13)
+- [x] 12-04-PLAN.md — Stripe webhook tests (signature validation, event handling)
 
 ### Phase 13: Currency Conversion Tests
 **Goal**: Test USD/ILS exchange rate logic and fallback chain
@@ -313,11 +313,11 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 ->
 | 9. Testing & Polish | v1.1 | 5/5 | Complete | 2026-02-04 |
 | 10. Test Infrastructure | v1.2 | 7/7 | Complete | 2026-02-04 |
 | 11. Auth & Authorization | v1.2 | 5/5 | Complete | 2026-02-05 |
-| 12. Payment Processing | v1.2 | 0/0 | Not started | - |
+| 12. Payment Processing | v1.2 | 4/4 | Complete | 2026-02-05 |
 | 13. Currency Conversion | v1.2 | 0/0 | Not started | - |
 | 14. File Upload & Images | v1.2 | 0/0 | Not started | - |
 | 15. Database & Models | v1.2 | 0/0 | Not started | - |
 | 16. Security & Middleware | v1.2 | 0/0 | Not started | - |
 
 ---
-*Last updated: 2026-02-04 after Phase 11 planning*
+*Last updated: 2026-02-05 after Phase 12 execution*
