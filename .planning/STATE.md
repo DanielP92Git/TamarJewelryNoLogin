@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-04)
 
 **Core value:** Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency
-**Current focus:** Phase 13 - Currency Conversion Tests
+**Current focus:** Phase 14 - File Upload & Image Processing Tests
 
 ## Current Position
 
-Phase: 13 of 16 (Currency Conversion Tests)
-Plan: 2 of 2
-Status: Phase complete and verified
-Last activity: 2026-02-05 — Phase 13 verified (passed)
+Phase: 14 of 16 (File Upload & Image Processing Tests)
+Plan: 1 of ? complete
+Status: In progress
+Last activity: 2026-02-05 — Completed 14-01-PLAN.md
 
-Progress: [██████░░░░] 52% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 17/? plans ✓)
+Progress: [██████░░░░] 53% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 18/? plans ✓)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 55 (v1.0: 5, v1.1: 33, v1.2: 17)
-- Average duration: ~13 min per plan
-- Total execution time: ~14.1 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~129min)
+- Total plans completed: 56 (v1.0: 5, v1.1: 33, v1.2: 18)
+- Average duration: ~12.6 min per plan
+- Total execution time: ~14.3 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~139min)
 
 **By Phase:**
 
@@ -40,9 +40,11 @@ Progress: [██████░░░░] 52% overall (v1.0: 5/5 plans ✓, v1.
 | 11 (v1.2) | 5 | ~21min | ~4.2min |
 | 12 (v1.2) | 3 | ~56min | ~18.7min |
 | 13 (v1.2) | 2 | ~13min | ~6.5min |
+| 14 (v1.2) | 1 | ~10min | ~10min |
 
 **Recent Trend:**
-- v1.2 momentum: 17 plans completed in 129 min (~7.6 min/plan)
+- v1.2 momentum: 18 plans completed in 139 min (~7.7 min/plan)
+- Phase 14 velocity: File upload tests at ~10 min/plan (1 plan so far)
 - Phase 13 velocity: Currency conversion tests averaging ~6.5 min/plan
 - Phase 12 velocity: Payment tests averaging ~18.7 min/plan
 - Phase 11 velocity: Test plans executing quickly (~4.2 min/plan)
@@ -52,7 +54,7 @@ Progress: [██████░░░░] 52% overall (v1.0: 5/5 plans ✓, v1.
 - Testing/verification plans execute fastest (~3-7 min)
 - Migration/integration plans take longer (~35 min)
 
-*Updated after Phase 13-02 completion*
+*Updated after Phase 14-01 completion*
 
 ## Accumulated Context
 
@@ -153,6 +155,17 @@ Recent decisions affecting current work:
 - Modern product recalculation: products with ILS get USD recalculated on rate changes
 - 36 tests covering CURR-03 through CURR-09 requirements (11 unit + 25 integration)
 
+**File Upload Test Patterns (14-01 - Completed):**
+- Programmatic image generation: Sharp create API for JPEG/PNG/WebP buffers (no fixture files)
+- Oversized buffer testing: PNG with compressionLevel 0 for predictable 60MB files
+- Supertest .attach() for multipart/form-data file uploads
+- S3 mock persistence: scope.persist() for multiple file upload operations
+- MIME type validation: PDF, BMP, SVG, TXT magic bytes for rejection testing
+- File size limit enforcement: Multer LIMIT_FILE_SIZE error with 413 status
+- Authentication requirements: fetchUser + requireAdmin middleware on upload endpoint
+- Users created in beforeEach (not beforeAll) due to global afterEach database clearing
+- 18 tests covering FILE-01 through FILE-04 requirements (auth, MIME, size limits, missing files)
+
 ### Pending Todos
 
 None yet.
@@ -172,8 +185,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 (13-02 execution)
-Stopped at: Completed 13-02-PLAN.md (Currency conversion tests)
+Last session: 2026-02-05 (14-01 execution)
+Stopped at: Completed 14-01-PLAN.md (Image helpers and upload validation tests)
 Resume file: None
 
 **v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
@@ -181,10 +194,11 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (17/? plans complete)
+**v1.2 Milestone:** In progress (18/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
+- Current test count: 273 tests passing
 
 **Phase 10 Progress:** ✅ COMPLETE
 - ✅ 10-01: Backend test infrastructure (Vitest + mongodb-memory-server + smoke tests)
@@ -209,19 +223,23 @@ Resume file: None
 - ✅ 12-03: Payment validation tests (23 tests, PAY-11 through PAY-13)
 - Status: ✅ PHASE 12 COMPLETE - Payment processing fully tested
 
-**Phase 13 Progress:** In progress
+**Phase 13 Progress:** ✅ COMPLETE
 - ✅ 13-01: Currency conversion domain research (CURR-01 through CURR-09 requirements)
 - ✅ 13-02: Exchange rate job and conversion accuracy tests (36 tests, CURR-03 through CURR-09)
-- Next: Remaining Phase 13 plans for currency features
+- Status: ✅ PHASE 13 COMPLETE - Currency conversion fully tested
+
+**Phase 14 Progress:** In progress
+- ✅ 14-01: Image test helpers and upload validation tests (18 tests, FILE-01 through FILE-04)
+- Next: Image processing and storage tests
 
 **Next Steps:**
 1. ✅ Phase 10 complete - test infrastructure foundation established
 2. ✅ Phase 11 complete - Authentication & authorization tested
 3. ✅ Phase 12 complete - Payment processing tested
-4. ⏳ Phase 13: Currency conversion testing (in progress - 2/? plans complete)
-5. Phase 14: File storage testing
+4. ✅ Phase 13 complete - Currency conversion tested
+5. ⏳ Phase 14: File storage testing (in progress - 1/? plans complete)
 6. Phase 15: Data integrity testing
 7. Phase 16: Security testing
 
 ---
-*Last updated: 2026-02-05 after 13-02 completion*
+*Last updated: 2026-02-05 after 14-01 completion*
