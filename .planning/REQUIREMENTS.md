@@ -88,21 +88,21 @@ Requirements for test infrastructure milestone. Each maps to roadmap phases.
 
 ### Database & Model Tests
 
-- [ ] **DATA-01**: Product model creates new product with valid data
-- [ ] **DATA-02**: Product model validates required fields (name, price)
-- [ ] **DATA-03**: Product model enforces SKU uniqueness constraint
-- [ ] **DATA-04**: Product model validates price is positive number
-- [ ] **DATA-05**: Product model validates category is valid enum value
-- [ ] **DATA-06**: Product model updates existing product
-- [ ] **DATA-07**: Product model deletes product by ID
-- [ ] **DATA-08**: Product model finds products by category
-- [ ] **DATA-09**: Product model sorts products by displayOrder
-- [ ] **DATA-10**: User model creates new user with hashed password
-- [ ] **DATA-11**: User model validates email format
-- [ ] **DATA-12**: User model enforces email uniqueness constraint
-- [ ] **DATA-13**: User model validates role is valid enum value
-- [ ] **DATA-14**: Settings model reads site settings
-- [ ] **DATA-15**: Settings model updates site settings
+- [x] **DATA-01**: Product model creates new product with valid data
+- [x] **DATA-02**: Product model validates required fields (name, price)
+- [x] **DATA-03**: Product model enforces SKU uniqueness constraint
+- [x] **DATA-04**: Product model validates price is positive number
+- [x] **DATA-05**: Product model validates category is valid enum value
+- [x] **DATA-06**: Product model updates existing product
+- [x] **DATA-07**: Product model deletes product by ID
+- [x] **DATA-08**: Product model finds products by category
+- [x] **DATA-09**: Product model sorts products by displayOrder
+- [x] **DATA-10**: User model creates new user with hashed password
+- [x] **DATA-11**: User model validates email format
+- [x] **DATA-12**: User model enforces email uniqueness constraint
+- [x] **DATA-13**: User model validates role is valid enum value
+- [x] **DATA-14**: Settings model reads site settings
+- [x] **DATA-15**: Settings model updates site settings
 
 ### Security & Middleware Tests
 
@@ -224,21 +224,21 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FILE-09 | Phase 14 | Complete |
 | FILE-10 | Phase 14 | Complete |
 | FILE-11 | Phase 14 | Complete |
-| DATA-01 | Phase 15 | Pending |
-| DATA-02 | Phase 15 | Pending |
-| DATA-03 | Phase 15 | Pending |
-| DATA-04 | Phase 15 | Pending |
-| DATA-05 | Phase 15 | Pending |
-| DATA-06 | Phase 15 | Pending |
-| DATA-07 | Phase 15 | Pending |
-| DATA-08 | Phase 15 | Pending |
-| DATA-09 | Phase 15 | Pending |
-| DATA-10 | Phase 15 | Pending |
-| DATA-11 | Phase 15 | Pending |
-| DATA-12 | Phase 15 | Pending |
-| DATA-13 | Phase 15 | Pending |
-| DATA-14 | Phase 15 | Pending |
-| DATA-15 | Phase 15 | Pending |
+| DATA-01 | Phase 15 | Complete |
+| DATA-02 | Phase 15 | Complete |
+| DATA-03 | Phase 15 | Complete |
+| DATA-04 | Phase 15 | Complete |
+| DATA-05 | Phase 15 | Complete |
+| DATA-06 | Phase 15 | Complete |
+| DATA-07 | Phase 15 | Complete |
+| DATA-08 | Phase 15 | Complete |
+| DATA-09 | Phase 15 | Complete |
+| DATA-10 | Phase 15 | Complete |
+| DATA-11 | Phase 15 | Complete |
+| DATA-12 | Phase 15 | Complete |
+| DATA-13 | Phase 15 | Complete |
+| DATA-14 | Phase 15 | Complete |
+| DATA-15 | Phase 15 | Complete |
 | SEC-01 | Phase 16 | Pending |
 | SEC-02 | Phase 16 | Pending |
 | SEC-03 | Phase 16 | Pending |
