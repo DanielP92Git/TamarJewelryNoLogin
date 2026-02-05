@@ -261,10 +261,11 @@ Plans:
   4. Sharp handles corrupted images gracefully without crashing
   5. DigitalOcean Spaces upload is mocked and generates correct URLs
   6. No files are uploaded to production storage during test runs
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD
+- [ ] 14-01-PLAN.md — Image test helpers and file upload validation tests (FILE-01 through FILE-04)
+- [ ] 14-02-PLAN.md — Sharp processing, S3 integration, and file deletion tests (FILE-05 through FILE-11)
 
 ### Phase 15: Database & Model Tests
 **Goal**: Test Mongoose models (Product, User, Settings) for validation and CRUD operations
