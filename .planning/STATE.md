@@ -9,19 +9,19 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 
 ## Current Position
 
-Phase: 12 of 16 (Payment Processing Tests)
-Plan: 4 of 4
-Status: Phase complete and verified
-Last activity: 2026-02-05 — Phase 12 verified (passed)
+Phase: 13 of 16 (Currency Conversion Tests)
+Plan: 2 of 5
+Status: In progress
+Last activity: 2026-02-05 — Completed 13-02-PLAN.md
 
-Progress: [██████░░░░] 50% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 16/16 plans ✓)
+Progress: [██████░░░░] 52% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 17/? plans ✓)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 52 (v1.0: 5, v1.1: 33, v1.2: 14)
-- Average duration: ~14 min per plan
-- Total execution time: ~13.9 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~116min)
+- Total plans completed: 55 (v1.0: 5, v1.1: 33, v1.2: 17)
+- Average duration: ~13 min per plan
+- Total execution time: ~14.1 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~129min)
 
 **By Phase:**
 
@@ -39,18 +39,20 @@ Progress: [██████░░░░] 50% overall (v1.0: 5/5 plans ✓, v1.
 | 10 (v1.2) | 7 | ~35min | ~5min |
 | 11 (v1.2) | 5 | ~21min | ~4.2min |
 | 12 (v1.2) | 3 | ~56min | ~18.7min |
+| 13 (v1.2) | 2 | ~13min | ~6.5min |
 
 **Recent Trend:**
-- v1.2 momentum: 14 plans completed in 116 min (~8.3 min/plan)
+- v1.2 momentum: 17 plans completed in 129 min (~7.6 min/plan)
+- Phase 13 velocity: Currency conversion tests averaging ~6.5 min/plan
 - Phase 12 velocity: Payment tests averaging ~18.7 min/plan
 - Phase 11 velocity: Test plans executing quickly (~4.2 min/plan)
 - Phase 10 velocity: Infrastructure setup completed in ~5 min/plan
 - v1.1 velocity: ~6 hours for 33 plans (11 min/plan)
 - Significant improvement over v1.0 velocity (192 min/plan)
-- Testing/verification plans execute fastest (~3 min)
+- Testing/verification plans execute fastest (~3-7 min)
 - Migration/integration plans take longer (~35 min)
 
-*Updated after Phase 12-04 completion*
+*Updated after Phase 13-02 completion*
 
 ## Accumulated Context
 
@@ -138,6 +140,19 @@ Recent decisions affecting current work:
 - Invalid inputs may pass through to PayPal and be rejected with various error codes
 - 53 tests covering PAY-01 through PAY-13 requirements (23 PayPal orders + 7 Stripe checkout + 23 validation)
 
+**Currency Conversion Test Patterns (13-01, 13-02 - Completed):**
+- Cron job testing: static schedule validation with node-cron.validate() (no timing tests)
+- Product price recalculation: ILS-to-USD (Math.round(ils_price / rate)) and USD-to-ILS migration
+- Exchange rate API fallback chain: API → stored DB rate → env variable → default constant (3.3)
+- Round-trip conversion tolerance: ±2 acceptable for whole-number pricing
+- Admin endpoint testing: requires admin auth, triggers exchange rate update
+- Bidirectional math accuracy: USD→ILS and ILS→USD with edge cases (zero, large, small)
+- Currency symbol mapping: $ for USD, ₪ for ILS
+- Math.round behavior verification: 0.5 rounds up (JavaScript standard, not banker's rounding)
+- Legacy product migration: products with USD-only get ILS backfilled via reverse calculation
+- Modern product recalculation: products with ILS get USD recalculated on rate changes
+- 36 tests covering CURR-03 through CURR-09 requirements (11 unit + 25 integration)
+
 ### Pending Todos
 
 None yet.
@@ -166,7 +181,7 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (14/? plans complete)
+**v1.2 Milestone:** In progress (17/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
@@ -188,11 +203,16 @@ Resume file: None
 - ✅ 11-05: Middleware unit tests (39 tests, mock req/res pattern, callback handling)
 - Status: ✅ PHASE 11 COMPLETE - Authentication & authorization fully tested
 
-**Phase 12 Progress:** In progress
+**Phase 12 Progress:** ✅ COMPLETE
 - ✅ 12-01: PayPal order endpoint tests (23 tests, PAY-01 through PAY-05)
 - ✅ 12-02: Stripe checkout session tests (7 tests, PAY-06 through PAY-10)
 - ✅ 12-03: Payment validation tests (23 tests, PAY-11 through PAY-13)
-- Next: Remaining Phase 12 plans as defined in phase plan
+- Status: ✅ PHASE 12 COMPLETE - Payment processing fully tested
+
+**Phase 13 Progress:** In progress
+- ✅ 13-01: Currency conversion domain research (CURR-01 through CURR-09 requirements)
+- ✅ 13-02: Exchange rate job and conversion accuracy tests (36 tests, CURR-03 through CURR-09)
+- Next: Remaining Phase 13 plans for currency features
 
 **Next Steps:**
 1. ✅ Phase 10 complete - test infrastructure foundation established
