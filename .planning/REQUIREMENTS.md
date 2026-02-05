@@ -239,15 +239,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-13 | Phase 15 | Complete |
 | DATA-14 | Phase 15 | Complete |
 | DATA-15 | Phase 15 | Complete |
-| SEC-01 | Phase 16 | Pending |
-| SEC-02 | Phase 16 | Pending |
-| SEC-03 | Phase 16 | Pending |
-| SEC-04 | Phase 16 | Pending |
-| SEC-05 | Phase 16 | Pending |
-| SEC-06 | Phase 16 | Pending |
-| SEC-07 | Phase 16 | Pending |
-| SEC-08 | Phase 16 | Pending |
-| SEC-09 | Phase 16 | Pending |
+| SEC-01 | Phase 16 | Complete |
+| SEC-02 | Phase 16 | Complete |
+| SEC-03 | Phase 16 | Complete |
+| SEC-04 | Phase 16 | Complete |
+| SEC-05 | Phase 16 | Complete |
+| SEC-06 | Phase 16 | Complete |
+| SEC-07 | Phase 16 | Complete |
+| SEC-08 | Phase 16 | Complete |
+| SEC-09 | Phase 16 | Complete |
 
 **Coverage:**
 - v1.2 requirements: 80 total (15 INFRA + 16 AUTH + 13 PAY + 9 CURR + 11 FILE + 15 DATA + 9 SEC)
