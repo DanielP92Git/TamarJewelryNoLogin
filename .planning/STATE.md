@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 14 of 16 (File Upload & Image Processing Tests)
-Plan: 1 of ? complete
+Plan: 2 of ? complete
 Status: In progress
-Last activity: 2026-02-05 — Completed 14-01-PLAN.md
+Last activity: 2026-02-05 — Completed 14-02-PLAN.md
 
-Progress: [██████░░░░] 53% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 18/? plans ✓)
+Progress: [██████░░░░] 54% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 19/? plans ✓)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 56 (v1.0: 5, v1.1: 33, v1.2: 18)
-- Average duration: ~12.6 min per plan
-- Total execution time: ~14.3 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~139min)
+- Total plans completed: 57 (v1.0: 5, v1.1: 33, v1.2: 19)
+- Average duration: ~12.3 min per plan
+- Total execution time: ~14.4 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~143min)
 
 **By Phase:**
 
@@ -40,11 +40,11 @@ Progress: [██████░░░░] 53% overall (v1.0: 5/5 plans ✓, v1.
 | 11 (v1.2) | 5 | ~21min | ~4.2min |
 | 12 (v1.2) | 3 | ~56min | ~18.7min |
 | 13 (v1.2) | 2 | ~13min | ~6.5min |
-| 14 (v1.2) | 1 | ~10min | ~10min |
+| 14 (v1.2) | 2 | ~14min | ~7min |
 
 **Recent Trend:**
-- v1.2 momentum: 18 plans completed in 139 min (~7.7 min/plan)
-- Phase 14 velocity: File upload tests at ~10 min/plan (1 plan so far)
+- v1.2 momentum: 19 plans completed in 143 min (~7.5 min/plan)
+- Phase 14 velocity: File upload tests averaging ~7 min/plan
 - Phase 13 velocity: Currency conversion tests averaging ~6.5 min/plan
 - Phase 12 velocity: Payment tests averaging ~18.7 min/plan
 - Phase 11 velocity: Test plans executing quickly (~4.2 min/plan)
@@ -54,7 +54,7 @@ Progress: [██████░░░░] 53% overall (v1.0: 5/5 plans ✓, v1.
 - Testing/verification plans execute fastest (~3-7 min)
 - Migration/integration plans take longer (~35 min)
 
-*Updated after Phase 14-01 completion*
+*Updated after Phase 14-02 completion*
 
 ## Accumulated Context
 
@@ -155,7 +155,7 @@ Recent decisions affecting current work:
 - Modern product recalculation: products with ILS get USD recalculated on rate changes
 - 36 tests covering CURR-03 through CURR-09 requirements (11 unit + 25 integration)
 
-**File Upload Test Patterns (14-01 - Completed):**
+**File Upload Test Patterns (14-01, 14-02 - Completed):**
 - Programmatic image generation: Sharp create API for JPEG/PNG/WebP buffers (no fixture files)
 - Oversized buffer testing: PNG with compressionLevel 0 for predictable 60MB files
 - Supertest .attach() for multipart/form-data file uploads
@@ -164,7 +164,14 @@ Recent decisions affecting current work:
 - File size limit enforcement: Multer LIMIT_FILE_SIZE error with 413 status
 - Authentication requirements: fetchUser + requireAdmin middleware on upload endpoint
 - Users created in beforeEach (not beforeAll) due to global afterEach database clearing
-- 18 tests covering FILE-01 through FILE-04 requirements (auth, MIME, size limits, missing files)
+- Sharp real processing tests: not mocked, verifies actual format conversion and resize behavior
+- Format conversion: JPEG/PNG/WebP → WebP output (FILE-06)
+- Image resizing: desktop (1200px) and mobile (600px) variants (FILE-05)
+- Corrupt image handling: failOnError: false means flexible behavior (200 or 500+) (FILE-07)
+- Dimension handling: tiny (1x1) and large (4000x3000) images process correctly (FILE-10)
+- Local file path fallback: S3 unconfigured in test environment, URLs use /uploads/ prefix (FILE-09)
+- S3 mock verification: mockS3Upload/mockS3Delete/mockS3Error interceptor validation (FILE-08, FILE-11)
+- 41 tests covering FILE-01 through FILE-11 requirements (18 validation + 9 processing + 14 upload flow)
 
 ### Pending Todos
 
@@ -185,8 +192,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 (14-01 execution)
-Stopped at: Completed 14-01-PLAN.md (Image helpers and upload validation tests)
+Last session: 2026-02-05 (14-02 execution)
+Stopped at: Completed 14-02-PLAN.md (Sharp processing and S3 integration tests)
 Resume file: None
 
 **v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
@@ -194,11 +201,11 @@ Resume file: None
 - Product reordering, image gallery, preview modal delivered
 - Ready for production deployment
 
-**v1.2 Milestone:** In progress (18/? plans complete)
+**v1.2 Milestone:** In progress (19/? plans complete)
 - Goal: Establish test infrastructure and cover high-risk areas
 - 7 phases (10-16): Infrastructure, Auth, Payments, Currency, Files, Data, Security
 - 80 requirements mapped to phases (100% coverage)
-- Current test count: 273 tests passing
+- Current test count: 296 tests passing
 
 **Phase 10 Progress:** ✅ COMPLETE
 - ✅ 10-01: Backend test infrastructure (Vitest + mongodb-memory-server + smoke tests)
@@ -230,16 +237,17 @@ Resume file: None
 
 **Phase 14 Progress:** In progress
 - ✅ 14-01: Image test helpers and upload validation tests (18 tests, FILE-01 through FILE-04)
-- Next: Image processing and storage tests
+- ✅ 14-02: Sharp processing and S3 integration tests (23 tests, FILE-05 through FILE-11)
+- Next: Determine if Phase 14 complete or additional file upload tests needed
 
 **Next Steps:**
 1. ✅ Phase 10 complete - test infrastructure foundation established
 2. ✅ Phase 11 complete - Authentication & authorization tested
 3. ✅ Phase 12 complete - Payment processing tested
 4. ✅ Phase 13 complete - Currency conversion tested
-5. ⏳ Phase 14: File storage testing (in progress - 1/? plans complete)
+5. ⏳ Phase 14: File storage testing (in progress - 2/? plans complete)
 6. Phase 15: Data integrity testing
 7. Phase 16: Security testing
 
 ---
-*Last updated: 2026-02-05 after 14-01 completion*
+*Last updated: 2026-02-05 after 14-02 completion*
