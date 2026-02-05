@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-04)
 ## Current Position
 
 Phase: 12 of 16 (Payment Processing Tests)
-Plan: 4 of ?
+Plan: 3 of ?
 Status: In progress
-Last activity: 2026-02-05 — Completed 12-04-PLAN.md (Stripe webhook tests)
+Last activity: 2026-02-05 — Completed 12-03-PLAN.md (Payment validation tests)
 
-Progress: [█████░░░░░] 46% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 15/? plans ✓)
+Progress: [█████░░░░░] 47% overall (v1.0: 5/5 plans ✓, v1.1: 33/33 plans ✓, v1.2: 15/? plans ✓)
 
 ## Performance Metrics
 
 **Velocity:**
 - Total plans completed: 52 (v1.0: 5, v1.1: 33, v1.2: 14)
 - Average duration: ~14 min per plan
-- Total execution time: ~13.7 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~101min)
+- Total execution time: ~13.9 hours (v1.0: ~16h, v1.1: ~6h, v1.2: ~116min)
 
 **By Phase:**
 
@@ -38,11 +38,11 @@ Progress: [█████░░░░░] 46% overall (v1.0: 5/5 plans ✓, v1.
 | 9 (v1.1) | 5 | ~15min | ~3min |
 | 10 (v1.2) | 7 | ~35min | ~5min |
 | 11 (v1.2) | 5 | ~21min | ~4.2min |
-| 12 (v1.2) | 3 | ~45min | ~15min |
+| 12 (v1.2) | 3 | ~56min | ~18.7min |
 
 **Recent Trend:**
-- v1.2 momentum: 14 plans completed in 101 min (~7.2 min/plan)
-- Phase 12 velocity: Payment tests averaging ~15 min/plan
+- v1.2 momentum: 14 plans completed in 116 min (~8.3 min/plan)
+- Phase 12 velocity: Payment tests averaging ~18.7 min/plan
 - Phase 11 velocity: Test plans executing quickly (~4.2 min/plan)
 - Phase 10 velocity: Infrastructure setup completed in ~5 min/plan
 - v1.1 velocity: ~6 hours for 33 plans (11 min/plan)
@@ -122,10 +122,9 @@ Recent decisions affecting current work:
 - Mock req/res/next pattern for Express middleware unit tests
 - Promise wrapper for callback-based async middleware (bcrypt.compare)
 
-**Payment Test Patterns (12-01, 12-02, 12-04 - Completed):**
+**Payment Test Patterns (12-01, 12-02, 12-03 - Completed):**
 - PayPal API mocking: auth token + order creation + capture flows
 - Stripe checkout session mocking with nock HTTP interception
-- Stripe webhook signature validation with HMAC-SHA256 crypto
 - Dummy test credentials in setup.js (backend requires credentials existence)
 - Exchange rate API must be mocked in beforeEach for payment endpoint tests
 - Timeout testing with delayConnection for realistic simulation
@@ -134,9 +133,10 @@ Recent decisions affecting current work:
 - Payment endpoint pattern: mock auth → mock API call → verify response
 - Validation-first testing: test input validation before external API mocking
 - Product database setup required for checkout session tests
-- Webhook signature format: t=timestamp,v1=signature (HMAC-SHA256)
-- Optional chaining prevents null pointer bugs in webhook event handling
-- 44 tests covering PAY-01 through PAY-10 requirements (23 PayPal + 7 Stripe checkout + 14 webhook)
+- Flexible error code assertions for PayPal rejection scenarios (400/404/500/502)
+- Backend validation occurs inside createOrder function, not at endpoint level
+- Invalid inputs may pass through to PayPal and be rejected with various error codes
+- 53 tests covering PAY-01 through PAY-13 requirements (23 PayPal orders + 7 Stripe checkout + 23 validation)
 
 ### Pending Todos
 
@@ -157,8 +157,8 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-05 (12-04 execution)
-Stopped at: Completed 12-04-PLAN.md (Stripe webhook tests)
+Last session: 2026-02-05 (12-03 execution)
+Stopped at: Completed 12-03-PLAN.md (Payment validation tests)
 Resume file: None
 
 **v1.1 Milestone:** ✅ COMPLETE (Shipped 2026-02-04)
@@ -191,7 +191,7 @@ Resume file: None
 **Phase 12 Progress:** In progress
 - ✅ 12-01: PayPal order endpoint tests (23 tests, PAY-01 through PAY-05)
 - ✅ 12-02: Stripe checkout session tests (7 tests, PAY-06 through PAY-10)
-- ✅ 12-04: Stripe webhook signature validation tests (14 tests, webhook security)
+- ✅ 12-03: Payment validation tests (23 tests, PAY-11 through PAY-13)
 - Next: Remaining Phase 12 plans as defined in phase plan
 
 **Next Steps:**
@@ -204,4 +204,4 @@ Resume file: None
 7. Phase 16: Security testing
 
 ---
-*Last updated: 2026-02-05 after 12-04 completion*
+*Last updated: 2026-02-05 after 12-03 completion*
