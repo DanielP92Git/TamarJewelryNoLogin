@@ -277,10 +277,11 @@ Plans:
   3. Product model sorts by displayOrder for drag-and-drop reordering
   4. User model creates users, validates email format, and enforces email uniqueness
   5. Settings model reads and updates site settings (exchange rates, configurations)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD
+- [ ] 15-01-PLAN.md — Product model validation, uniqueness, CRUD, and sorting tests
+- [ ] 15-02-PLAN.md — User model and Settings model tests
 
 ### Phase 16: Security & Middleware Tests
 **Goal**: Test CORS, rate limiting, and input validation for security vulnerabilities
