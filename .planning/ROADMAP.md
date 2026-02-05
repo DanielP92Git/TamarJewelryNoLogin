@@ -244,10 +244,11 @@ Plans:
   3. Fallback chain is tested (API failure falls back to cached rate)
   4. Currency formatting displays correct symbols and decimal places
   5. Edge cases are handled (zero amounts, negative values, stale rates)
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] TBD
+- [ ] 13-01-PLAN.md — Exchange rate service unit tests (fetch, cache, fallback, staleness)
+- [ ] 13-02-PLAN.md — Cron job, admin endpoint, conversion accuracy, and currency symbols
 
 ### Phase 14: File Upload & Image Processing Tests
 **Goal**: Test file upload validation, Sharp image processing, and S3 integration
@@ -314,7 +315,7 @@ Phases execute in numeric order: 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 -> 12 ->
 | 10. Test Infrastructure | v1.2 | 7/7 | Complete | 2026-02-04 |
 | 11. Auth & Authorization | v1.2 | 5/5 | Complete | 2026-02-05 |
 | 12. Payment Processing | v1.2 | 4/4 | Complete | 2026-02-05 |
-| 13. Currency Conversion | v1.2 | 0/0 | Not started | - |
+| 13. Currency Conversion | v1.2 | 0/2 | Not started | - |
 | 14. File Upload & Images | v1.2 | 0/0 | Not started | - |
 | 15. Database & Models | v1.2 | 0/0 | Not started | - |
 | 16. Security & Middleware | v1.2 | 0/0 | Not started | - |
