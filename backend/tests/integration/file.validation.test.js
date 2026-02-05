@@ -290,6 +290,11 @@ describe('File Upload Validation - /upload endpoint', () => {
     });
 
     it('should accept main image with multiple small images', async () => {
+      // Mock S3 with persistence for multiple upload calls
+      cleanAllMocks();
+      const scope = mockS3Upload();
+      scope.persist(); // Allow multiple uploads to succeed
+
       const mainImageBuffer = await createTestJPEG(400, 400);
       const smallImage1 = await createTestJPEG(150, 150);
       const smallImage2 = await createTestPNG(150, 150);
