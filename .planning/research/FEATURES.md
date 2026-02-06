@@ -1,295 +1,249 @@
-# Feature Research
+# Feature Research: Frontend Testing
 
-**Domain:** E-commerce Admin Dashboard - Product Management UX Improvements
-**Researched:** 2026-02-01
+**Domain:** Vanilla JS MVC E-commerce Frontend Testing
+**Researched:** 2026-02-06
 **Confidence:** HIGH
 
 ## Feature Landscape
 
-### Table Stakes (Users Expect These)
+This research identifies WHAT to test in the existing vanilla JavaScript MVC e-commerce frontend for the jewelry store. Focus is on table stakes (must-have tests for confidence), differentiators (tests catching subtle bugs), and anti-features (what NOT to test).
 
-Features users assume exist. Missing these = product feels incomplete.
+### Table Stakes (Users Expect These to Work)
 
-| Feature | Why Expected | Complexity | Notes |
-|---------|--------------|------------|-------|
-| Product preview modal | Standard in modern admin dashboards (Shopify, WooCommerce) to quickly view customer-facing product without leaving list | MEDIUM | Must match customer view exactly; clicking product row is expected trigger |
-| Modal close on Escape key | Universal keyboard pattern; users expect Esc to dismiss modal | LOW | Part of basic accessibility requirements |
-| Modal backdrop click to close | Standard dismissal pattern across all modern UIs | LOW | Clicking outside modal area closes it |
-| Visible modal close button (X) | Triple-redundancy for closing (X, Esc, backdrop) is table stakes | LOW | Position top-right is universal convention |
-| Drag handle visual indicator | Six-dot handle or similar affordance shows item is draggable | LOW | Without handle, users won't know drag is possible |
-| Drop zone visual feedback | Dashed/dotted borders or highlight showing where item can be dropped | MEDIUM | Must show three states: empty, ready (in range), active (hovering) |
-| Loading state during drag save | Visual feedback when "Save Order" persists changes | LOW | Prevents double-clicks and shows progress |
-| Image thumbnail preview in gallery | Show all images with thumbnails before reordering | LOW | Users need to see what they're reordering |
-| First image becomes featured | Industry standard pattern - first in gallery = main product image | LOW | Automatic, no separate "set as featured" needed |
-| Touch-friendly drag on mobile | Alternative to mouse drag for touch devices | HIGH | May require up/down arrows or alternative UI |
+Tests users assume work correctly. Missing these = broken e-commerce experience.
 
-### Differentiators (Competitive Advantage)
+| Feature Category | Why Expected | Complexity | Notes |
+|-----------------|--------------|------------|-------|
+| **Cart Add/Remove Operations** | Core revenue path - users must add/remove items | LOW | Test localStorage sync, cart counter updates, UI reflection |
+| **Cart Persistence Across Sessions** | Users expect cart to survive page reload/browser restart | LOW | Test localStorage read/write, data structure integrity |
+| **Checkout Flow (End-to-End)** | Revenue-critical - broken checkout = lost sales | MEDIUM | Test Stripe/PayPal integration points, price calculation handoff |
+| **Price Display Accuracy** | Wrong prices = lost customer trust + legal issues | MEDIUM | Test currency display (USD/ILS), discount calculations, totals |
+| **Product Modal Open/Close** | Primary product browsing UX - users click to view details | LOW | Test DOM manipulation, image gallery rendering, escape key |
+| **Language Switching (Eng/Heb)** | Multilingual store - users expect language to persist and work | MEDIUM | Test localStorage persistence, UI text updates, RTL layout |
+| **Currency Switching (USD/ILS)** | Multi-currency store - users expect accurate conversion | MEDIUM | Test localStorage persistence, price recalculation, symbol display |
+| **Navigation Routing** | Users navigate between pages - broken routing = broken site | LOW | Test controller hash routing, view instantiation, cleanup |
+| **Cart Counter Visibility** | Users need visual confirmation of cart state | LOW | Test badge display, number updates, zero-state handling |
+| **Form Validation (Contact)** | Users expect immediate feedback on invalid inputs | LOW | Test EmailJS integration, field validation, error messages |
 
-Features that set the product apart. Not required, but valuable.
+### Differentiators (Catch Subtle Bugs)
 
-| Feature | Value Proposition | Complexity | Notes |
-|---------|-------------------|------------|-------|
-| Keyboard shortcuts in modal | Arrow keys to navigate products, 'e' to edit, Esc to close | MEDIUM | Power users love shortcuts; improves admin efficiency |
-| Haptic feedback on mobile drag | Light "bump" (10-20ms) when grab/drop on touch devices | MEDIUM | Premium feel; confirms drag actions on mobile |
-| Inline position numbering | Show/toggle position numbers next to products during reorder | LOW | Helps when moving items across pagination |
-| Undo button after save order | Grace period to undo reorder without reverting manually | MEDIUM | Safety net for accidental reorders |
-| Image zoom in preview modal | Click/hover to zoom product images in preview | MEDIUM | Helps verify image quality from admin side |
-| Quick edit in modal | Edit key fields (name, price, stock) without full edit page | HIGH | Saves navigation for minor tweaks; conflicts with simplicity |
-| Drag image from desktop to gallery | Drag-drop from file explorer directly into image gallery | MEDIUM | Modern pattern but requires careful file handling |
-| Reorder cancel without page reload | "Cancel" button reverts drag changes without losing page state | LOW | Prevents frustration from accidental drags |
+Tests that catch edge cases and bugs unique to this architecture.
+
+| Feature Category | Value Proposition | Complexity | Notes |
+|-----------------|-------------------|------------|-------|
+| **RTL Layout Edge Cases** | Hebrew users see broken layouts if RTL isn't tested | HIGH | Test flex-direction reversals, text alignment, icon flipping, arrow indicators |
+| **Multi-Currency Cart Consistency** | Users add items in ILS, switch to USD - prices must recalculate | HIGH | Test stored USD/ILS prices, conversion accuracy, discount preservation across currency change |
+| **localStorage Corruption Handling** | Malformed cart data causes crashes - graceful fallback needed | MEDIUM | Test JSON parse failures, missing fields, type coercion, migration from old data structures |
+| **View Cleanup on Navigation** | Memory leaks from event listeners not removed on page change | MEDIUM | Test event listener removal, DOM cleanup, no zombie listeners |
+| **MVC Layer Separation** | Model changes should update View without tight coupling | MEDIUM | Test model-view sync via events, controller coordination, no direct DOM manipulation in model |
+| **Currency Change Mid-Checkout** | User switches currency during checkout flow - must recalculate | HIGH | Test cart re-render, summary update, Stripe session price consistency |
+| **Discount Calculation Edge Cases** | Global discounts + per-item discounts + currency switching | HIGH | Test discount stacking, rounding errors (Math.round), original price preservation |
+| **Category Dropdown Mobile vs Desktop** | Different interaction patterns (click vs hover) per viewport | MEDIUM | Test click handlers on mobile, hover on desktop, prevent double-binding |
+| **Sticky Menu Intersection Observer** | Edge cases: rapid scrolling, resize during scroll, multiple observers | LOW | Test sticky state transitions, hidden state on scroll-up, threshold edge cases |
+| **Image Gallery State Management** | Flipping between images in modal maintains state correctly | LOW | Test image index, thumbnail highlighting, keyboard navigation |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that seem good but create problems.
+Features that seem good but create problems or aren't necessary.
 
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| Auto-save on every drag | "Fewer clicks, no save button!" | Prevents undo; accidental drags permanently reorder; no confirmation of intent | Explicit "Save Order" button with cancel option |
-| Modal for everything | Modals feel modern and clean | Modal bombardment annoys users; blocks screen unnecessarily; bad for loading states and errors | Use modals only for preview/confirmation; use inline editing or dedicated pages otherwise |
-| Drag entire product row | "More draggable area = easier" | Conflicts with clicking row to open modal; no clear affordance; accidental drags | Dedicated drag handle (six-dot icon) separates drag from click |
-| Complex multi-select drag | "Reorder multiple products at once" | Adds UI complexity; rare use case; drag-drop UX breaks down with multiple items | Single-item drag; provide bulk actions (move to top/bottom) separately |
-| Real-time preview updates | "See changes instantly as you drag" | Creates visual chaos; performance issues with image reloads; confusing when experimenting | Preview after drop; update on save |
-| Nested modal workflows | "Edit product from preview modal" | Modal inside modal is disorienting; breaks back button; hard to escape | Preview modal has "Edit" button that navigates to edit page |
-| Drag to delete | "Drag to trash zone to delete" | Too easy to accidentally delete; destructive action needs confirmation | Separate delete button with confirmation dialog |
+| **Test Every View Method Individually** | "100% coverage = quality" | Creates brittle tests tied to implementation details, not user behavior | **Integration tests for user flows** - Test "user adds item to cart" not "_addToLocalCart() method" |
+| **Mock localStorage Globally** | "Tests should be isolated" | Breaks realistic testing of persistence layer, hides storage bugs | **Use real localStorage with cleanup** - Clear between tests, test actual browser API |
+| **Test Browser Internals (IntersectionObserver, etc.)** | "Ensure APIs work" | Browser APIs are tested by browser vendors, waste of effort | **Integration tests verify behavior** - Test "menu becomes sticky" not "IntersectionObserver fires" |
+| **Test Third-Party Libraries (PayPal SDK, Stripe)** | "Need to know they work" | Libraries have their own test suites, mocking defeats the purpose | **Integration tests at HTTP boundary** - Test your code's API calls, not library internals |
+| **Snapshot Testing for Entire DOM** | "Catch all UI regressions" | Too brittle, breaks on any markup change, low signal-to-noise | **Targeted assertions on critical elements** - Test cart item exists, not entire HTML structure |
+| **Test CSS Styling Directly** | "Ensure design is correct" | Style is visual, not functional - wrong tool for the job | **Visual regression tests (if needed)** - Use Percy/Chromatic for visual diffs, not unit tests |
+| **Test Base View Class in Isolation** | "Unit test everything" | Base View is abstract - meaningless without page-specific context | **Test via subclasses** - homePageView, cartView tests cover base functionality |
+| **Mock Model in View Tests** | "True unit testing" | Breaks the MVC contract - need to test model-view integration | **Integration tests with real model** - Test actual cart operations, not mocked responses |
+| **Test Every Language String** | "Ensure translations exist" | Content testing, not functionality testing | **Sample critical strings only** - Test language switching mechanism, not every translation |
+| **Test Exchange Rate API Directly** | "Ensure rates are accurate" | External API, not your code - backend responsibility | **Test frontend uses provided rate** - Test price calculation with mocked rate, not API call |
 
 ## Feature Dependencies
 
 ```
-Product Preview Modal
-    └──requires──> Product detail rendering
-                       └──requires──> Image loading
-                       └──requires──> Multi-language support
+[Cart State Testing]
+    └──requires──> [localStorage Testing]
+                       └──requires──> [Model.js cart operations]
 
-Drag-and-Drop Product Reordering
-    └──requires──> Product list with position field
-    └──requires──> Save endpoint for new order
-    └──enhances──> Category filtering (reorder per category)
+[Locale Testing (Language + Currency)]
+    ├──requires──> [localStorage persistence]
+    ├──requires──> [View.js setLanguage()]
+    └──requires──> [Currency conversion display]
 
-Image Gallery Reordering
-    └──requires──> Merge main + gallery images into single array
-    └──requires──> Save endpoint for image order
-    └──requires──> First image = featured image logic
+[MVC Integration Testing]
+    ├──requires──> [Controller routing]
+    ├──requires──> [Model-View sync]
+    └──requires──> [View cleanup on navigation]
 
-Touch-Friendly Drag
-    └──requires──> Touch event handling
-    └──conflicts──> Pure mouse-based drag libraries
-    └──requires──> Alternative controls (up/down arrows)
+[Checkout Flow Testing]
+    ├──requires──> [Cart state]
+    ├──requires──> [Currency handling]
+    └──requires──> [Payment API mocking]
 
-Keyboard Navigation in Modal
-    └──requires──> Focus trap in modal
-    └──requires──> Product navigation logic (prev/next)
-    └──enhances──> Product Preview Modal
+[RTL Layout Testing]
+    └──enhances──> [Language testing]
+
+[Multi-Currency Cart Testing]
+    ├──requires──> [Cart state]
+    └──requires──> [Currency switching]
+
+[View Cleanup Testing]
+    └──requires──> [Navigation/routing]
 ```
 
 ### Dependency Notes
 
-- **Product Preview Modal requires Product detail rendering:** Preview must render customer-facing view exactly; reuses existing product display templates
-- **Drag-and-Drop Product Reordering enhances Category filtering:** Reorder scope should be per-category to maintain category-specific order
-- **Image Gallery Reordering requires Merge main + gallery images:** Current system separates main image from gallery; must combine into single sortable array
-- **Touch-Friendly Drag conflicts with Pure mouse-based drag libraries:** Libraries using only mouse events won't work on touch devices; need library supporting both or custom implementation
-- **Keyboard Navigation in Modal requires Focus trap:** Focus must stay within modal until closed; prevents keyboard users from losing context
+- **Cart State requires localStorage**: Can't test cart operations without testing persistence layer
+- **Locale requires View.js**: Language/currency switching is core View responsibility
+- **MVC Integration requires all layers**: Tests validate separation of concerns and coordination
+- **Checkout requires Cart + Currency**: Can't test payment flow without valid cart and currency state
+- **RTL enhances Language**: RTL testing is subset of language testing but with visual component
+- **Multi-Currency Cart requires both**: Must test cart operations AND currency switching together
+- **View Cleanup requires Routing**: Cleanup only matters when navigating between views
 
-## MVP Definition
+## MVP Definition (v1.3 Milestone)
 
-### Launch With (v1)
+### Launch With (v1.3 - Initial Frontend Testing)
 
-Minimum viable product — what's needed to validate the concept.
+Minimum viable test suite to validate core e-commerce functionality.
 
-- [x] Product Preview Modal with close options (X, Esc, backdrop) — Essential for quick product viewing without navigation
-- [x] Modal displays customer-facing product view — Must match what customers see to verify presentation
-- [x] "Edit" button in modal navigates to edit page — Single path to editing prevents nested modals
-- [x] Drag-and-Drop Product Reordering with drag handle — Core feature for custom product order
-- [x] Drop zone visual feedback (three states) — Users need to know where items can drop
-- [x] "Save Order" and "Cancel" buttons — Explicit confirmation prevents accidental reorders
-- [x] Loading state during save — Prevents confusion and double-clicks
-- [x] Image Gallery Reordering with drag handles — Merges main + gallery for unified management
-- [x] First image auto-set as featured — Industry standard behavior
-- [x] Per-category product reordering — Products reorder within their category
+- [ ] **Cart Operations Testing** - Add, remove, persist, counter updates (revenue-critical)
+- [ ] **localStorage Testing** - Read/write, corruption handling, data integrity
+- [ ] **Currency Display Testing** - Symbol display, price formatting, conversion accuracy
+- [ ] **Language Switching Testing** - localStorage persistence, UI text updates, basic RTL
+- [ ] **Checkout Flow Integration** - Cart → Stripe session creation (HTTP boundary, not full payment)
+- [ ] **Model-View Integration** - Cart operations trigger view updates correctly
+- [ ] **View Cleanup Testing** - Event listeners removed on navigation (prevent memory leaks)
 
-### Add After Validation (v1.x)
+### Add After Validation (v1.x - Enhanced Coverage)
 
-Features to add once core is working.
+Features to add once core is working and patterns are established.
 
-- [ ] Keyboard shortcuts in modal (arrows, 'e' for edit) — Add when users request efficiency improvements
-- [ ] Inline position numbering with toggle — Add if users struggle with cross-page reordering
-- [ ] Undo button after save order — Add if accidental reorders become common issue
-- [ ] Image zoom in preview modal — Add if image quality verification becomes common need
-- [ ] Touch-friendly drag alternatives (arrows) — Add when mobile admin usage data shows need
-- [ ] Haptic feedback on mobile — Polish feature after mobile touch is implemented
-- [ ] Drag image from desktop to gallery — Add if bulk image upload becomes pain point
+- [ ] **RTL Layout Edge Cases** - Comprehensive Hebrew layout testing (flexbox, arrows, alignment)
+- [ ] **Multi-Currency Cart Consistency** - Add ILS, switch to USD, verify recalculation
+- [ ] **Discount Calculation Edge Cases** - Global discount + item discount + currency switching
+- [ ] **Category Dropdown Mobile/Desktop** - Viewport-specific interaction testing
+- [ ] **Image Gallery State** - Modal state management and keyboard navigation
+- [ ] **Form Validation (Contact)** - EmailJS integration and field validation
+- [ ] **Product Modal Testing** - Open/close, image gallery, escape key handling
 
-### Future Consideration (v2+)
+### Future Consideration (v2+ - Nice-to-Have)
 
 Features to defer until product-market fit is established.
 
-- [ ] Quick edit in modal — Adds complexity; wait for clear use cases of which fields are edited frequently
-- [ ] Batch reordering tools (move selected to top/bottom) — Defer until single-item drag proves insufficient
-- [ ] Keyboard-only reordering (no mouse) — Accessibility win but low ROI unless specifically requested
-- [ ] Animation/transition polish — Visual polish after core UX is validated
+- [ ] **Visual Regression Testing** - Automated screenshot comparison (Percy/Chromatic)
+- [ ] **Performance Testing** - Bundle size, load time, LCP/FID/CLS metrics
+- [ ] **Accessibility Testing** - ARIA labels, keyboard navigation, screen reader
+- [ ] **Cross-Browser Testing** - Safari, Firefox, Edge compatibility
+- [ ] **Mobile Device Testing** - Real device testing (not just viewport simulation)
+- [ ] **SEO Testing** - Meta tags, structured data, sitemap validation
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Product preview modal | HIGH | MEDIUM | P1 |
-| Modal close (X, Esc, backdrop) | HIGH | LOW | P1 |
-| "Edit" button in modal | HIGH | LOW | P1 |
-| Drag-and-drop product reorder | HIGH | MEDIUM | P1 |
-| Drag handle visual indicator | HIGH | LOW | P1 |
-| Drop zone feedback | HIGH | MEDIUM | P1 |
-| "Save Order" button | HIGH | LOW | P1 |
-| Loading state during save | MEDIUM | LOW | P1 |
-| Image gallery reorder | HIGH | MEDIUM | P1 |
-| First image = featured | HIGH | LOW | P1 |
-| Per-category reordering | HIGH | MEDIUM | P1 |
-| Keyboard shortcuts | MEDIUM | MEDIUM | P2 |
-| Undo after save | MEDIUM | MEDIUM | P2 |
-| Touch-friendly alternatives | MEDIUM | HIGH | P2 |
-| Image zoom in modal | LOW | MEDIUM | P2 |
-| Inline position numbers | LOW | LOW | P2 |
-| Haptic feedback | LOW | MEDIUM | P3 |
-| Quick edit in modal | MEDIUM | HIGH | P3 |
-| Drag from desktop | LOW | MEDIUM | P3 |
+| Cart Add/Remove Operations | HIGH | LOW | P1 |
+| Cart Persistence | HIGH | LOW | P1 |
+| Checkout Flow | HIGH | MEDIUM | P1 |
+| Price Display Accuracy | HIGH | MEDIUM | P1 |
+| Currency Switching | HIGH | MEDIUM | P1 |
+| Language Switching | HIGH | MEDIUM | P1 |
+| Model-View Integration | HIGH | MEDIUM | P1 |
+| View Cleanup | MEDIUM | LOW | P1 |
+| localStorage Corruption Handling | MEDIUM | MEDIUM | P2 |
+| RTL Layout Edge Cases | MEDIUM | HIGH | P2 |
+| Multi-Currency Cart Consistency | MEDIUM | HIGH | P2 |
+| Discount Calculation Edge Cases | MEDIUM | HIGH | P2 |
+| Product Modal | MEDIUM | LOW | P2 |
+| Category Dropdown Mobile/Desktop | LOW | MEDIUM | P2 |
+| Form Validation | LOW | LOW | P2 |
+| Image Gallery State | LOW | LOW | P3 |
+| Sticky Menu Edge Cases | LOW | LOW | P3 |
+| Visual Regression | LOW | HIGH | P3 |
+| Performance Testing | LOW | MEDIUM | P3 |
+| Accessibility Testing | MEDIUM | HIGH | P3 |
 
 **Priority key:**
-- P1: Must have for launch
-- P2: Should have, add when possible
-- P3: Nice to have, future consideration
+- P1: Must have for v1.3 (core revenue paths and architecture validation)
+- P2: Should have for v1.4+ (enhanced coverage, edge cases)
+- P3: Nice to have for v2+ (polish, optimization)
 
-## Competitor Feature Analysis
+## Testing Strategy Comparison
 
-| Feature | Shopify Admin | WooCommerce | Our Approach |
-|---------|---------------|-------------|--------------|
-| Product Preview | Modal with "View in store" link; admin actions embedded | Quick view modal from product list | Customer-facing view in modal; "Edit" navigates to edit page |
-| Product Reordering | Drag handle (six dots); per-collection sorting | Plugin-based (Rearrange Products); drag handle with product images | Drag handle; save button; per-category scope |
-| Image Reordering | Drag-drop in edit product page; first = featured | Native drag-drop; first = featured | Merge main + gallery; drag to reorder; first = featured |
-| Mobile Drag | Full touch support in native app; web admin limited | Limited; some plugins add up/down arrows | Start with desktop; add touch alternatives (arrows) in v1.x |
-| Keyboard Nav | Full keyboard shortcuts in admin | Limited; relies on browser defaults | Esc for modal close (P1); shortcuts for nav (P2) |
-| Visual Feedback | Subtle highlights; clear drop zones | Varies by plugin; standard dotted borders | Three-state drop zones (empty/ready/active); dragging opacity |
-| Save Behavior | Auto-save on most actions | Explicit save buttons | Explicit "Save Order" button (prevents accidents) |
-| Accessibility | WCAG 2.1 AA compliant; focus traps in modals | Varies; core is accessible | Focus trap in modal; keyboard close; ARIA labels |
+### Unit Testing vs Integration Testing
 
-## UX Patterns Summary
+| Aspect | Unit Testing | Integration Testing |
+|--------|-------------|---------------------|
+| **Scope** | Individual functions (model.addToCart) | User flows (add item → view updates → localStorage syncs) |
+| **Isolation** | Mock dependencies | Real dependencies (real localStorage, real DOM) |
+| **Speed** | Fast (milliseconds) | Slower (seconds) |
+| **Brittleness** | High (breaks on refactor) | Low (breaks on behavior change) |
+| **Confidence** | Low (doesn't test integration) | High (tests real user experience) |
+| **Our Approach** | **Minimize** - Only for complex logic (discount calculations) | **Prioritize** - Focus on user flows and MVC coordination |
 
-### Product Preview Modal
+### DOM Testing Approaches
 
-**Expected User Interactions:**
-- Click product row (anywhere except drag handle) → modal opens
-- Click X button / press Esc / click backdrop → modal closes
-- Click "Edit" button → navigate to edit page
-- Keyboard: Tab through buttons, Enter to activate
+| Approach | Tool | Use Case |
+|----------|------|----------|
+| **JSDOM** | Jest default | Lightweight, fast, good for unit tests |
+| **Happy-DOM** | Vitest default | Faster than JSDOM, modern APIs |
+| **Playwright/Puppeteer** | Real browser | E2E tests, cross-browser, visual regression |
+| **Our Approach** | **Happy-DOM (Vitest)** | Balance speed and realism, matches backend stack |
 
-**Visual Feedback:**
-- Modal animates in (fade + scale)
-- Backdrop dims underlying content
-- Focus trap prevents keyboard escape
-- Close button highlights on hover
+## Complexity Estimation
 
-**Error Handling:**
-- Product fails to load → show error message in modal with "Close" button
-- Images fail to load → show placeholder or broken image icon
-- Slow load → show loading spinner before rendering content
+| Test Category | Test Count | Estimated Effort | Risk |
+|--------------|-----------|------------------|------|
+| **Cart State** | 15-20 tests | 4-6 hours | LOW - Straightforward localStorage operations |
+| **Locale (Language + Currency)** | 20-25 tests | 6-8 hours | MEDIUM - RTL edge cases complex |
+| **MVC Integration** | 10-15 tests | 4-5 hours | MEDIUM - Requires coordination testing |
+| **View Testing (Base + Pages)** | 25-30 tests | 8-10 hours | MEDIUM - Multiple page-specific views |
+| **Checkout Flow** | 5-8 tests | 3-4 hours | LOW - HTTP boundary testing, mocked APIs |
+| **Edge Cases (RTL, Multi-Currency)** | 15-20 tests | 6-8 hours | HIGH - Complex interaction scenarios |
+| **Total Estimated** | **90-118 tests** | **31-41 hours** | - |
 
-**Accessibility:**
-- `role="dialog"` and `aria-modal="true"`
-- Focus moves to modal when opened
-- Focus returns to trigger element when closed
-- Esc key always closes
-- Screen reader announces modal title
+## Testing Anti-Patterns to Avoid
 
-### Drag-and-Drop Product Reordering
+Based on research and vanilla JS MVC architecture:
 
-**Expected User Interactions:**
-- Hover drag handle → cursor changes to move/grab
-- Click and drag handle → item lifts, becomes semi-transparent
-- Drag over valid drop zone → drop zone highlights
-- Release → item drops into new position
-- Click "Save Order" → persist changes
-- Click "Cancel" → revert to original order
-
-**Visual Feedback:**
-- Dragging state: item opacity 50%, slight shadow/elevation
-- Drop zone ready: dashed border appears
-- Drop zone active (hovering): border becomes solid, background tint
-- Items shift down/up as dragged item moves (pushed out of the way)
-- After drop: brief highlight animation on newly positioned item
-- Save button: loading spinner during save
-
-**Error Handling:**
-- Save fails → show error banner, revert to pre-drag state, allow retry
-- Drag outside valid zone → item snaps back to original position
-- Network timeout → show error, preserve unsaved state, offer retry
-
-**Accessibility:**
-- Keyboard alternative: Focus item, press Space to "grab", arrow keys to move, Space to "drop"
-- Screen reader announces: "Product [name], position [X] of [Y], use arrow keys to reorder"
-- High contrast mode: ensure drag handle is visible
-- Touch devices: up/down arrow buttons as alternative
-
-**Mobile/Touch Considerations:**
-- Touch drag may conflict with scrolling (use dedicated drag handle)
-- Long-press to initiate drag (150-200ms)
-- Haptic feedback on grab/drop (10-20ms bump)
-- Larger touch targets (44x44px minimum for drag handle)
-- Alternative: up/down arrow buttons for reordering
-
-### Image Gallery Reordering
-
-**Expected User Interactions:**
-- View merged gallery (main image + all gallery images)
-- Drag image thumbnail to new position
-- First position = featured/main image (automatic)
-- Click "Save" to persist new order
-
-**Visual Feedback:**
-- Same as product reordering (drag state, drop zones, semi-transparent)
-- First position visually distinct (labeled "Main Image" or border)
-- Image being dragged shows larger preview on hover
-
-**Error Handling:**
-- Save fails → revert order, show error, offer retry
-- Duplicate images → show warning, prevent upload
-- Image too large → show size warning before upload
-
-**Accessibility:**
-- Alt text visible during reorder for screen reader users
-- Keyboard reordering (same as product reorder pattern)
-- First position clearly labeled for all users
+1. **Don't test implementation details** - Test "cart counter updates" not "_updateCartNumber() is called"
+2. **Don't mock what you don't own** - Don't mock localStorage, IntersectionObserver, browser APIs
+3. **Don't test third-party libraries** - Don't test PayPal SDK, Stripe.js, EmailJS internals
+4. **Don't snapshot entire DOM trees** - Test specific elements, not entire HTML structure
+5. **Don't test CSS** - Visual appearance is for visual regression tools, not unit tests
+6. **Don't test static content** - Don't test every translation string, only switching mechanism
+7. **Don't test in isolation what only works integrated** - MVC layers must be tested together
+8. **Don't ignore RTL** - Hebrew layout breaks are invisible without explicit RTL testing
+9. **Don't test happy path only** - Test corrupted localStorage, missing prices, invalid currency
+10. **Don't create brittle selectors** - Use data-testid or semantic queries, not .cart-item__content > div:nth-child(2)
 
 ## Sources
 
-**UX Patterns and Best Practices:**
-- [Shopify Admin UI Extensions](https://shopify.dev/docs/apps/build/admin)
-- [Shopify Modal Component](https://shopify.dev/docs/api/app-bridge-library/web-components/ui-modal)
-- [WooCommerce Product Sorting Documentation](https://woocommerce.com/document/product-sorting-re-ordering-for-woocommerce/)
-- [WooCommerce Adding Product Images](https://woocommerce.com/document/adding-product-images-and-galleries/)
-- [Drag and Drop UX Best Practices - Pencil & Paper](https://www.pencilandpaper.io/articles/ux-pattern-drag-and-drop)
-- [Drag and Drop UI Examples - Eleken](https://www.eleken.co/blog-posts/drag-and-drop-ui)
-- [Drag-and-Drop UX Guidelines - Smart Interface Design Patterns](https://smart-interface-design-patterns.com/articles/drag-and-drop-ux/)
+### Vanilla JavaScript Testing
+- [Frontend Unit Testing Best Practices](https://www.meticulous.ai/blog/frontend-unit-testing-best-practices)
+- [How to Unit Test HTML and Vanilla JavaScript](https://dev.to/thawkin3/how-to-unit-test-html-and-vanilla-javascript-without-a-ui-framework-4io)
+- [JavaScript Testing Best Practices (GitHub)](https://github.com/goldbergyoni/javascript-testing-best-practices)
 
-**Accessibility:**
-- [Modal Accessibility with ARIA - A11Y Collective](https://www.a11y-collective.com/blog/modal-accessibility/)
-- [Modal Accessibility - Carbon Design System](https://carbondesignsystem.com/components/modal/accessibility/)
-- [Keyboard Navigation in Modals - DEV Community](https://dev.to/niti_agrawal_1106/enhancing-accessibility-managing-keyboard-navigation-in-modals-and-dropdowns-4fj0)
-- [Accessible Reordering for Touch Devices - Microsoft](https://medium.com/microsoft-mobile-engineering/accessible-reordering-for-touch-devices-e7f7a7ef404)
+### E-commerce Testing
+- [Shopify: Ecommerce Testing Guide 2026](https://www.shopify.com/blog/ecommerce-testing)
+- [BrowserStack: How to Test E-commerce Website](https://www.browserstack.com/guide/how-to-test-ecommerce-website)
+- [BugBug: Ecommerce Testing Guide](https://bugbug.io/blog/software-testing/ecommerce-testing/)
 
-**Mobile and Touch:**
-- [Mobile-First Drag and Drop Alternative - picknplace.js](https://www.cssscript.com/drag-drop-alternative-picknplace/)
-- [Touch-Friendly Drag and Drop - mobiForge](https://mobiforge.com/design-development/touch-friendly-drag-and-drop)
-- [Drag and Drop on Mobile Devices](https://www.tutorialpedia.org/blog/html-drag-and-drop-on-mobile-devices/)
+### MVC Pattern Testing
+- [Stack Overflow: MVC Pattern Maintainability](https://stackoverflow.blog/2023/05/17/keep-em-separated-get-better-maintainability-in-web-projects-using-the-model-view-controller-pattern/)
+- [FreeCodeCamp: MVC Architecture Explained](https://www.freecodecamp.org/news/the-model-view-controller-pattern-mvc-architecture-and-frameworks-explained/)
 
-**Admin Dashboard Anti-Patterns:**
-- [Common Mistakes in React Admin Dashboards](https://dev.to/vaibhavg/common-mistakes-in-react-admin-dashboards-and-how-to-avoid-them-1i70)
-- [Modal UX Best Practices - LogRocket](https://blog.logrocket.com/ux-design/modal-ux-best-practices/)
-- [Modal UX Design Patterns - Userpilot](https://userpilot.com/blog/modal-ux-design/)
-- [Unsaved Changes Pattern - Cloudscape Design System](https://cloudscape.design/patterns/general/unsaved-changes/)
-- [Confirmation Dialog Best Practices - Nielsen Norman Group](https://www.nngroup.com/articles/confirmation-dialog/)
+### Internationalization Testing
+- [Aqua Cloud: Internationalization Testing Best Practices](https://aqua-cloud.io/internationalization-testing/)
+- [BrowserStack: Internationalization Testing Guide](https://www.browserstack.com/guide/internationalization-testing-of-websites-and-apps)
+- [DEV: i18n and RTL for E-commerce](https://dev.to/ash_dubai/i18n-and-rtl-implementation-for-global-e-commerce-mastering-i18n-3jb1)
 
-**E-commerce Specific:**
-- [Product Image Best Practices - Squarespace](https://support.squarespace.com/hc/en-us/articles/115013631487-Product-images)
-- [E-commerce Product Image Strategy - Threekit](https://www.threekit.com/blog/ecommerce-product-image-strategy-tips)
+### localStorage Testing
+- [Medium: Testing localStorage with React (patterns apply)](https://jogilvyt.medium.com/storing-and-testing-state-in-localstorage-with-react-fdf8b8b211a4)
+- [Plain English: Testing Local Storage with Testing Library](https://plainenglish.io/blog/testing-local-storage-with-testing-library-580f74e8805b)
+- [LogRocket: localStorage in JavaScript Complete Guide](https://blog.logrocket.com/localstorage-javascript-complete-guide/)
 
 ---
-*Feature research for: Admin Dashboard Product Management UX Improvements*
-*Researched: 2026-02-01*
-*Confidence: HIGH - Verified across multiple major e-commerce platforms and design systems*
+*Feature research for: Vanilla JS MVC E-commerce Frontend Testing*
+*Researched: 2026-02-06*

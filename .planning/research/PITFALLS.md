@@ -1,649 +1,631 @@
 # Pitfalls Research
 
-**Domain:** E-commerce Admin Dashboard - Drag-and-Drop Product/Image Reordering
-**Researched:** 2026-02-01
+**Domain:** Frontend Testing for Vanilla JavaScript MVC E-commerce Application
+**Researched:** 2026-02-06
 **Confidence:** HIGH
 
 ## Critical Pitfalls
 
-### Pitfall 1: Touch Support Missing or Broken on Mobile Devices
+### Pitfall 1: localStorage State Pollution Between Tests
 
 **What goes wrong:**
-Vanilla HTML5 drag-and-drop API does not support touch events by default. Admin users on tablets/mobile devices cannot reorder products or images, leading to frustration and the need to switch to desktop for basic tasks.
+Tests share localStorage state across test runs, causing false positives/negatives. Cart data from one test affects subsequent tests. Language/currency preferences leak between tests. Storage quota errors when accumulated data exceeds limits.
 
 **Why it happens:**
-Developers test on desktop browsers during development and assume HTML5 drag-and-drop "just works" everywhere. The native `dragstart`, `dragover`, and `drop` events only fire for mouse interactions, not touch events.
+Vitest's jsdom environment doesn't automatically clear localStorage between tests. Developers assume test isolation but localStorage persists across `describe` blocks. Setting up mocks without clearing previous state compounds the problem.
 
 **How to avoid:**
-- Use a library with built-in touch support (SortableJS is the industry standard for vanilla JS)
-- If implementing custom drag-and-drop, add a polyfill like `drag-drop-touch-js/dragdroptouch`
-- Test on actual mobile devices during development, not just Chrome DevTools device emulation
-- Verify touch functionality works on both iOS Safari and Android Chrome
-
-**Warning signs:**
-- Drag functionality works on desktop but fails silently on tablets
-- No `touchstart`, `touchmove`, `touchend` event handlers in codebase
-- Testing plan only includes desktop browsers
-
-**Phase to address:**
-Phase 1 (Library Selection) - Choose library with proven mobile/touch support from day one
-
-**Sources:**
-- [DragDropTouch - Mobile Polyfill](https://github.com/drag-drop-touch-js/dragdroptouch)
-- [Best Drag-and-Drop Libraries 2026](https://www.cssscript.com/best-drag-drop-javascript-libraries/)
-
----
-
-### Pitfall 2: RTL (Hebrew Interface) Coordinate Inversion
-
-**What goes wrong:**
-In RTL mode, dragging right moves elements left and vice versa. The drag ghost appears in wrong positions. Drop zones highlight on the opposite side of where you're dragging. Visual feedback is completely broken, making the feature unusable for Hebrew-speaking admins.
-
-**Why it happens:**
-Drag-and-drop implementations calculate positions using clientX/pageX coordinates without accounting for `direction: rtl` CSS. The X-axis is essentially flipped in RTL layouts, but vanilla event coordinates are always left-to-right. Most drag-and-drop tutorials and libraries were built without RTL testing.
-
-**How to avoid:**
-- Add RTL test cases from Phase 1 - test Hebrew admin interface before building features
-- Use SortableJS which has partial RTL support (though not perfect - needs manual testing)
-- When calculating drop positions, check `document.dir` or `element.dir` and invert X coordinates accordingly
-- Consider using `getBoundingClientRect()` which returns coordinates relative to viewport, not document flow
-- Test with `<html dir="rtl">` enabled during development, not just at the end
-
-**Warning signs:**
-- Drag ghost element positions incorrectly in Hebrew mode
-- Drop zones highlight on wrong side when dragging
-- No `dir="rtl"` tests in test suite
-- Code uses raw `event.clientX` without directional adjustments
-
-**Phase to address:**
-Phase 1 (Foundation/Setup) - RTL testing infrastructure before building drag features
-Phase 2 (Implementation) - RTL-aware coordinate handling
-
-**Sources:**
-- [RTL Drag Direction Issues](https://github.com/orefalo/svelte-splitpanes/issues/3)
-- [Angular Calendar RTL Drag Bug](https://github.com/mattlewis92/angular-calendar/issues/1203)
-- [BigBlueButton RTL Drag-Drop Bug](https://github.com/bigbluebutton/bigbluebutton/issues/12567)
-
----
-
-### Pitfall 3: Race Conditions in Product Order Updates (Multiple Admins)
-
-**What goes wrong:**
-Admin A drags Product 1 to position 3. Admin B simultaneously drags Product 5 to position 2. Both updates hit MongoDB. Final state is corrupted: two products have the same order value, some products are missing order values, or the order sequence has gaps (1, 2, 5, 8, 9 instead of 1, 2, 3, 4, 5).
-
-**Why it happens:**
-Product reordering requires reading current order values, calculating new positions, then updating multiple documents. Between read and write, another admin's changes can complete. MongoDB operations are atomic at the document level, but reordering often touches multiple documents in a single operation. Without optimistic locking or transactions, the last write wins, overwriting concurrent changes.
-
-**How to avoid:**
-**Option 1: Optimistic Concurrency Control**
-- Add `__v` (version) field to Product schema (Mongoose provides this)
-- Include version in update query: `Product.findOneAndUpdate({ _id, __v: currentVersion }, { $set: { order }, $inc: { __v: 1 } })`
-- If version mismatch, retry with fresh data
-- Frontend shows "Order changed by another user, refreshing..." message
-
-**Option 2: Pessimistic Locking**
-- Add `isBeingReordered` flag to category/product
-- Before drag operation, set flag: `Category.updateOne({ name }, { $set: { isBeingReordered: true } })`
-- Perform reorder operations
-- Clear flag when complete
-- Other admins see "Category is being reordered by another admin" message
-
-**Option 3: Atomic Position Swaps (Best for small changes)**
-- Instead of recalculating all positions, use atomic increments
-- Swap only affected products: `$inc: { order: 1 }` or `$inc: { order: -1 }`
-- MongoDB guarantees atomic document updates
-
-**Option 4: Per-Category Reorder Lock**
-- Use MongoDB transactions (requires replica set)
-- Wrap read-calculate-update in transaction
-- MongoDB handles concurrency automatically
-
-**Recommended approach:** Start with Option 3 (atomic swaps) for MVP. Add Option 1 (optimistic locking) for full reordering operations.
-
-**Warning signs:**
-- Products in same category have duplicate order values after concurrent edits
-- Order sequence has gaps (1, 2, 5, 8 instead of 1, 2, 3, 4)
-- No version field or transaction handling in update code
-- Testing only includes single-user scenarios
-
-**Phase to address:**
-Phase 2 (Product Ordering Backend) - Implement atomic operations with optimistic locking
-Phase 4 (Testing) - Multi-user concurrency tests
-
-**Sources:**
-- [MongoDB Race Conditions - Atomic Operations](https://medium.com/tales-from-nimilandia/handling-race-conditions-and-concurrent-resource-updates-in-node-and-mongodb-by-performing-atomic-9f1a902bd5fa)
-- [MongoDB Race Conditions - Optimistic Updates](https://medium.com/@codersauthority/handling-race-conditions-and-concurrent-resource-updates-in-node-and-mongodb-by-performing-f54140da8bc5)
-- [MongoDB Concurrency FAQ](https://www.mongodb.com/docs/manual/faq/concurrency/)
-
----
-
-### Pitfall 4: Image Array Migration Breaks Existing Products
-
-**What goes wrong:**
-Migration script converts `mainImage` + `smallImages` into unified `images` array. Script runs but:
-- Old products lose their main image (desktop/mobile variants)
-- Gallery image ordering is lost or reversed
-- Some products end up with empty arrays
-- Existing products display broken images on frontend
-- Rollback is impossible because data was destructively modified
-
-**Why it happens:**
-Product schema has evolved:
-- Legacy: `image` (string)
-- Current: `mainImage { desktop, mobile, desktopLocal, mobileLocal, publicDesktop, publicMobile }` + `smallImages` array
-- Target: unified `images` array with order field
-
-Each product may have different fields populated based on when it was created. Migration script assumes consistent structure but finds:
-- Some products still use legacy `image` field
-- Some have `mainImage` but no `smallImages`
-- Some have `smallImagesLocal` (legacy array) instead of `smallImages` objects
-- Null/undefined values scattered throughout
-
-**How to avoid:**
-**Pre-migration audit:**
 ```javascript
-// Find all unique image field combinations
-db.products.aggregate([
-  {
-    $project: {
-      hasImage: { $cond: [{ $ifNull: ["$image", false] }, 1, 0] },
-      hasMainImage: { $cond: [{ $ifNull: ["$mainImage", false] }, 1, 0] },
-      hasSmallImages: { $cond: [{ $ifNull: ["$smallImages", false] }, 1, 0] },
-      hasSmallImagesLocal: { $cond: [{ $ifNull: ["$smallImagesLocal", false] }, 1, 0] }
-    }
-  },
-  { $group: { _id: { hasImage: "$hasImage", hasMainImage: "$hasMainImage", hasSmallImages: "$hasSmallImages", hasSmallImagesLocal: "$hasSmallImagesLocal" }, count: { $sum: 1 } } }
-]);
+// In setup.js or beforeEach hooks
+beforeEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
+});
+
+// For specific tests needing clean state
+afterEach(() => {
+  localStorage.removeItem('cart');
+  localStorage.removeItem('language');
+  localStorage.removeItem('currency');
+  localStorage.removeItem('auth-token');
+});
+
+// Mock localStorage with spy to verify calls
+vi.spyOn(Storage.prototype, 'setItem');
+vi.spyOn(Storage.prototype, 'getItem');
 ```
 
-**Safe migration strategy:**
-1. **Add new field, don't remove old** - Add `images` array field alongside existing `mainImage`/`smallImages`
-2. **Dual-write period** - New updates write to both old and new fields for backward compatibility
-3. **Incremental migration** - Process products in batches, verify each batch before continuing
-4. **Rollback plan** - Keep old fields intact; frontend falls back to old fields if `images` array is empty
-5. **Verification** - After migration, query for products with empty `images` array and investigate
+**Warning signs:**
+- Tests pass in isolation but fail when run together
+- Flaky tests that pass/fail randomly
+- Cart count tests show unexpected values
+- Language/currency tests interfere with each other
+- Error: "QuotaExceededError: localStorage is full"
 
-**Migration script safeguards:**
+**Phase to address:**
+Base View Tests (Phase 1) - Establish clean localStorage patterns early before cart and locale testing compounds the issue.
+
+---
+
+### Pitfall 2: querySelector Fragility with Dynamic DOM
+
+**What goes wrong:**
+Tests break when CSS classes or DOM structure changes. querySelector returns null before async rendering completes. View-specific selectors (`.cart-number-mobile`, `.header-utilities`) become brittle. Hebrew vs English DOM differences cause selector mismatches.
+
+**Why it happens:**
+View.js dynamically rewrites menu/header/footer HTML on language change. Tests using direct querySelector don't wait for async DOM updates. Selectors couple tightly to CSS implementation details. RTL layout changes modify DOM structure for Hebrew.
+
+**How to avoid:**
 ```javascript
-// Example safe migration (pseudo-code)
-async function migrateProduct(product) {
-  const images = [];
+// BAD: Direct querySelector without waiting
+const cartBtn = document.querySelector('.add-to-cart-btn');
+expect(cartBtn).toBeTruthy();
 
-  // Priority 1: mainImage (most common)
-  if (product.mainImage?.desktop) {
-    images.push({
-      order: 0,
-      isMain: true,
-      desktop: product.mainImage.desktop,
-      mobile: product.mainImage.mobile,
-      // ... other variants
-    });
-  }
-  // Fallback: legacy image field
-  else if (product.image) {
-    images.push({
-      order: 0,
-      isMain: true,
-      url: product.image
-    });
-  }
+// GOOD: Use vi.waitFor with polling
+await vi.waitFor(() => {
+  const cartBtn = document.querySelector('.add-to-cart-btn');
+  expect(cartBtn).toBeTruthy();
+  return cartBtn;
+}, { timeout: 3000, interval: 100 });
 
-  // Priority 2: smallImages array
-  if (Array.isArray(product.smallImages)) {
-    product.smallImages.forEach((img, index) => {
-      if (img?.desktop) {
-        images.push({
-          order: index + 1,
-          isMain: false,
-          desktop: img.desktop,
-          mobile: img.mobile
-        });
-      }
-    });
-  }
-  // Fallback: legacy smallImagesLocal
-  else if (Array.isArray(product.smallImagesLocal)) {
-    product.smallImagesLocal.forEach((url, index) => {
-      images.push({
-        order: index + 1,
-        isMain: false,
-        url
-      });
-    });
-  }
+// BETTER: Use semantic attributes
+<button data-testid="add-to-cart" class="add-to-cart-btn">
+await vi.waitFor(() => {
+  return document.querySelector('[data-testid="add-to-cart"]');
+});
 
-  // CRITICAL: Don't delete old fields yet
-  await Product.updateOne(
-    { _id: product._id },
-    { $set: { images } }
-    // NOT: { $set: { images }, $unset: { mainImage: '', smallImages: '' } }
+// BEST: Query by role or text (less brittle)
+const cartBtn = await vi.waitFor(() => {
+  return document.querySelector('button[aria-label="Add to cart"]');
+});
+```
+
+**Warning signs:**
+- Tests fail with "Cannot read property of null"
+- Works in one language but fails in Hebrew
+- Passes when running single test, fails in suite
+- Breaks after CSS refactoring despite logic unchanged
+
+**Phase to address:**
+Base View Tests (Phase 1) - Establish robust query patterns before page-specific views multiply the problem.
+
+---
+
+### Pitfall 3: Event Listener Memory Leaks in View Tests
+
+**What goes wrong:**
+Event listeners accumulate across tests causing MaxListenersExceededWarning. Tests slow down progressively as suite runs. Menu toggle listeners stack up (mobile view adds new listener each time). Currency change listeners persist after view cleanup.
+
+**Why it happens:**
+View.js uses event delegation on `document` but tests don't clean up. `setLanguage()` called multiple times adds duplicate listeners (lines 806-830 in View.js). Tests instantiate views without corresponding teardown. cloneNode technique (lines 161-166, 401-406) prevents cleanup but multiplies handlers.
+
+**How to avoid:**
+```javascript
+// Store listener references for cleanup
+let currencyChangeHandler;
+let languageChangeHandler;
+
+beforeEach(() => {
+  // Setup with tracked references
+  currencyChangeHandler = vi.fn();
+  document.addEventListener('change', currencyChangeHandler);
+});
+
+afterEach(() => {
+  // Always cleanup listeners
+  document.removeEventListener('change', currencyChangeHandler);
+  document.removeEventListener('click', languageChangeHandler);
+
+  // Clear any view-added listeners by replacing elements
+  const menu = document.querySelector('.menu');
+  if (menu) {
+    const newMenu = menu.cloneNode(true);
+    menu.replaceWith(newMenu);
+  }
+});
+
+// For testing View.js specifically
+afterEach(() => {
+  // Remove delegation listeners
+  const oldDoc = document.cloneNode(true);
+  // Reset global state flags
+  delete window.__currencyPersistenceInitialized;
+});
+```
+
+**Warning signs:**
+- Console warning: "MaxListenersExceededWarning: Possible EventEmitter memory leak"
+- Test suite runs slower with each added test
+- Memory usage grows during test execution
+- Events fire multiple times from single action
+
+**Phase to address:**
+Base View Tests (Phase 1) - Critical to establish cleanup patterns before cart/locale tests add more listeners.
+
+---
+
+### Pitfall 4: Async API Race Conditions in Model Tests
+
+**What goes wrong:**
+Tests assert before `fetch` completes. Multiple API calls resolve in unpredictable order. Cart update from localStorage races with server sync. Exchange rate fetch races with currency display. Payment intent creation races with order capture.
+
+**Why it happens:**
+model.js mixes localStorage (sync) with API calls (async) without coordination. No loading state between currency change and rate fetch. `handleAddToCart` doesn't await API response before UI update. Tests mock fetch but don't control timing.
+
+**How to avoid:**
+```javascript
+// BAD: Race between localStorage and API
+export const handleAddToCart = function (data) {
+  if (!localStorage.getItem('auth-token')) {
+    addToLocalStorage(data); // sync
+  } else {
+    addToUserStorage(data); // async, no await!
+  }
+};
+
+// GOOD: Control timing in tests
+it('syncs cart after adding item', async () => {
+  const mockFetch = vi.fn(() =>
+    Promise.resolve({ json: () => Promise.resolve({ success: true }) })
   );
-}
-```
+  global.fetch = mockFetch;
 
-**Warning signs:**
-- Migration script has no dry-run mode
-- No backup taken before migration
-- Script uses `$unset` to remove old fields
-- No field existence checks (`if (product.mainImage)`)
-- Testing only covers products with complete field sets
-- No rollback plan documented
+  await model.handleAddToCart(mockData);
+  await vi.waitFor(() => {
+    expect(mockFetch).toHaveBeenCalled();
+  });
+});
 
-**Phase to address:**
-Phase 3 (Image Array Migration) - Dedicated phase with extensive testing
-Phase 4 (Verification) - Post-migration data validation
+// BETTER: Test with controlled promise resolution
+it('handles concurrent cart updates correctly', async () => {
+  let resolveFirst, resolveSecond;
+  const firstPromise = new Promise(r => resolveFirst = r);
+  const secondPromise = new Promise(r => resolveSecond = r);
 
-**Sources:**
-- [MongoDB Schema Migrations with migrate-mongo](https://postulate.us/@samsonzhang/p/2021-03-06-Making-Mongodb-Schema-Changes-with-kL4J3vYUhY9V6SK16TisC7)
-- [MongoDB Schema Migration Best Practices](https://www.mongodb.com/community/forums/t/best-practices-for-schema-management-migrations-and-scaling-in-mongodb/306805)
-- [MongoDB Migration Lessons (2026)](https://medium.com/@coding_with_tech/mongodb-to-postgresql-migration-3-months-2-mental-breakdowns-1-lesson-2980110461a5)
+  global.fetch = vi.fn()
+    .mockReturnValueOnce(firstPromise)
+    .mockReturnValueOnce(secondPromise);
 
----
+  const call1 = model.addToUserStorage(data1);
+  const call2 = model.addToUserStorage(data2);
 
-### Pitfall 5: Modal Z-Index Conflicts with Drag Ghost
+  // Resolve in reverse order to test race
+  resolveSecond({ json: () => ({ success: true }) });
+  resolveFirst({ json: () => ({ success: true }) });
 
-**What goes wrong:**
-Admin opens product preview modal. Modal appears correctly. Admin tries to drag products behind the modal (e.g., to reorder while referencing modal content). The drag ghost element appears **behind** the modal overlay, or the modal blocks drop zones, or the modal closes unexpectedly when dragging starts.
-
-Alternatively: Drag operation starts, ghost element appears, but drop zones under the modal overlay don't respond to drag events because the modal's overlay captures all pointer events.
-
-**Why it happens:**
-Z-index stacking contexts conflict:
-- Modal overlay: `z-index: 1055` (Bootstrap convention)
-- Drag ghost element: `z-index: 9999` (SortableJS default)
-- BUT: If drag container is inside a positioned parent with lower z-index, the ghost inherits that stacking context and can't escape
-
-Additionally, modals often use `pointer-events: all` on overlay to capture clicks outside modal for closing. This blocks drag events from reaching underlying elements.
-
-**How to avoid:**
-**Z-Index Hierarchy (establish upfront):**
-```css
-/* Define clear z-index scale for entire admin dashboard */
-:root {
-  --z-base: 1;
-  --z-dropdown: 1000;
-  --z-sticky: 1020;
-  --z-modal-backdrop: 1040;
-  --z-modal: 1050;
-  --z-popover: 1060;
-  --z-tooltip: 1070;
-  --z-drag-ghost: 1080; /* ABOVE modals */
-}
-
-.sortable-ghost {
-  z-index: var(--z-drag-ghost) !important;
-}
-
-.modal-backdrop {
-  z-index: var(--z-modal-backdrop);
-  pointer-events: none; /* Let drag events pass through */
-}
-
-.modal {
-  z-index: var(--z-modal);
-}
-```
-
-**Prevent modal overlay from blocking drags:**
-```javascript
-// When modal is open, make overlay ignore pointer events
-// EXCEPT on the modal content itself
-modalOverlay.style.pointerEvents = 'none';
-modalContent.style.pointerEvents = 'all';
-```
-
-**SortableJS configuration:**
-```javascript
-new Sortable(el, {
-  ghostClass: 'sortable-ghost',
-  // Force ghost to render at document root to escape stacking contexts
-  fallbackOnBody: true,
-  // Append to body, not parent
-  appendTo: document.body
+  await Promise.all([call1, call2]);
+  // Assert final state is correct despite timing
 });
 ```
 
 **Warning signs:**
-- No z-index scale documented in CSS
-- Drag ghost element parent is positioned (`position: relative/absolute`)
-- Modal overlay uses `pointer-events: all`
-- Testing doesn't include "drag while modal is open" scenario
-- Multiple `z-index: 9999` declarations scattered in CSS
+- Tests flaky when run with `--reporter=verbose`
+- Pass with added `setTimeout`, fail without
+- Different results on fast vs slow machines
+- Occasional "unhandled promise rejection" errors
 
 **Phase to address:**
-Phase 1 (Foundation) - Establish z-index scale and CSS variables
-Phase 3 (Modal Integration) - Test modal + drag interaction
-
-**Sources:**
-- [Z-Index Troubleshooting Guide](https://coder-coder.com/z-index-isnt-working/)
-- [Bootstrap Z-Index Scale](https://getbootstrap.com/docs/5.3/layout/z-index/)
-- [Modal Z-Index Issues - Ant Design](https://github.com/ant-design/ant-design/issues/31513)
+Cart State Tests (Phase 3) - Addresses concurrent cart updates, localStorage/API sync races.
 
 ---
 
-### Pitfall 6: Memory Leaks from Orphaned Event Listeners
+### Pitfall 5: Currency Conversion Floating-Point Errors
 
 **What goes wrong:**
-Admin navigates between product list and other admin pages. After 10-15 page transitions, browser becomes sluggish. Memory usage climbs from 100MB to 800MB+. DevTools heap snapshot shows hundreds of orphaned event listeners and DOM nodes. Eventually browser tab crashes.
+Cart totals don't match sum of items due to rounding. $17.95 becomes 17.950000000000002 in tests. Currency conversion (USD→ILS) accumulates precision errors. Test assertions fail on exact equality: `expect(total).toBe(17.95)` fails with 17.950000000000003.
 
 **Why it happens:**
-Drag-and-drop implementations add event listeners to DOM elements:
-```javascript
-productList.addEventListener('dragstart', handleDragStart);
-productList.addEventListener('dragover', handleDragOver);
-productList.addEventListener('drop', handleDrop);
-```
+JavaScript uses IEEE 754 double-precision floats. Multiple conversions (original price → discount → currency → total) compound errors. `Math.round()` on floats doesn't prevent accumulation (model.js line 362). Tests compare with `toBe()` instead of approximate equality.
 
-When navigating away from product list page, the DOM is cleared BUT:
-- Event listeners remain attached (browser can't garbage collect)
-- If listeners capture variables from outer scope (closure), entire scope is retained
-- Each page view creates NEW listeners without removing old ones
-- Memory accumulates
-
-**Event delegation pitfall:**
-Using event delegation on `document` or `body` seems like a solution (one listener for all elements), but creates worse memory leaks:
+**How to avoid:**
 ```javascript
-// DON'T DO THIS
-document.addEventListener('dragstart', (e) => {
-  // This closure captures 'productList' and entire component scope
-  if (e.target.matches('.product-item')) {
-    handleDragStart(e, productList);
-  }
+// BAD: Direct float comparison
+const total = cart.reduce((sum, item) => sum + item.price * item.amount, 0);
+expect(total).toBe(17.95); // FAILS: 17.950000000000003
+
+// GOOD: Use cents for calculations
+const totalCents = cart.reduce((sum, item) =>
+  sum + Math.round(item.price * 100) * item.amount, 0
+);
+expect(totalCents / 100).toBeCloseTo(17.95, 2);
+
+// BETTER: Test with epsilon tolerance
+expect(total).toBeCloseTo(17.95, 2); // Allows ±0.01 variance
+
+// BEST: Store prices as integers (cents) in cart
+const itemData = {
+  priceCents: Math.round(price * 100), // 1795 instead of 17.95
+  currency: 'usd'
+};
+// Convert for display only
+const displayPrice = (item.priceCents / 100).toFixed(2);
+
+// For currency conversion tests
+it('converts USD to ILS without precision loss', () => {
+  const usdCents = 1995; // $19.95
+  const rate = 3.67;
+  const ilsCents = Math.round(usdCents * rate); // 7322 = ₪73.22
+
+  expect(ilsCents / 100).toBeCloseTo(73.22, 2);
 });
 ```
 
-Now the listener is attached to `document` (which never gets removed), AND it captures component variables, preventing garbage collection.
+**Warning signs:**
+- Cart total tests fail intermittently
+- Errors like "Expected: 17.95, Received: 17.950000000000003"
+- Currency conversion off by 0.01
+- Sum of items ≠ total in test output
+
+**Phase to address:**
+Cart State Tests (Phase 3) - Critical for multi-currency cart calculations and checkout totals.
+
+---
+
+### Pitfall 6: RTL Layout Testing Without Proper Direction Context
+
+**What goes wrong:**
+Hebrew layout tests pass but visual bugs remain. CSS logical properties not tested (`margin-inline-start` vs `margin-left`). Bidirectional text (Hebrew + English product names) renders incorrectly. `dir="rtl"` attribute missing in test DOM causing style mismatches.
+
+**Why it happens:**
+jsdom doesn't apply CSS, so RTL-specific styles aren't tested. Tests check text content but not layout direction. View.js sets `dir="rtl"` (line 559) but tests don't verify. Mixed LTR/RTL content (product SKUs, prices) needs special handling.
 
 **How to avoid:**
-**Pattern 1: Explicit cleanup**
 ```javascript
-class ProductListView {
-  constructor() {
-    this.boundHandleDragStart = this.handleDragStart.bind(this);
-    this.boundHandleDragOver = this.handleDragOver.bind(this);
-    this.boundHandleDrop = this.handleDrop.bind(this);
-  }
+// BAD: Only checks text content
+it('displays Hebrew text', () => {
+  view.changeToHeb();
+  const title = document.querySelector('.item-title');
+  expect(title.textContent).toBe('שרשרת');
+});
 
-  mount() {
-    this.productList = document.querySelector('.product-list');
-    this.productList.addEventListener('dragstart', this.boundHandleDragStart);
-    this.productList.addEventListener('dragover', this.boundHandleDragOver);
-    this.productList.addEventListener('drop', this.boundHandleDrop);
-  }
+// GOOD: Verify direction attribute
+it('sets RTL direction for Hebrew', () => {
+  view.changeToHeb();
+  expect(document.documentElement.dir).toBe('rtl');
+  expect(document.documentElement.lang).toBe('he');
+});
 
-  unmount() {
-    // CRITICAL: Remove listeners on cleanup
-    this.productList.removeEventListener('dragstart', this.boundHandleDragStart);
-    this.productList.removeEventListener('dragover', this.boundHandleDragOver);
-    this.productList.removeEventListener('drop', this.boundHandleDrop);
-    this.productList = null; // Release DOM reference
-  }
-}
+// BETTER: Test bidirectional content handling
+it('handles mixed LTR/RTL content correctly', () => {
+  view.changeToHeb();
+  const sku = document.querySelector('.product-sku');
+
+  // SKU should be LTR even in RTL context
+  expect(sku.style.direction).toBe('ltr');
+  expect(sku.style.unicodeBidi).toBe('embed');
+
+  // Product name should be RTL
+  const title = document.querySelector('.item-title');
+  expect(title.dir).toBe('rtl');
+});
+
+// BEST: Test with actual RTL data
+it('renders Hebrew product with English SKU correctly', () => {
+  const product = {
+    name: 'שרשרת זהב',  // Hebrew: Gold necklace
+    sku: 'NK-001',      // English SKU
+    price: 150
+  };
+
+  view.setLanguage('heb');
+  view.renderProduct(product);
+
+  const container = document.querySelector('.product-card');
+  expect(container.dir).toBe('rtl');
+
+  // SKU should be LTR embedded in RTL
+  const skuEl = container.querySelector('.product-sku');
+  expect(skuEl.textContent).toBe('NK-001'); // Not reversed
+});
+
+// For CSS logical properties (requires snapshot or integration test)
+it('uses logical properties for spacing', () => {
+  // This requires actual CSS rendering - flag for manual testing
+  // or use Playwright/Puppeteer for visual regression
+});
 ```
 
-**Pattern 2: AbortController (modern approach)**
+**Warning signs:**
+- Visual bugs in Hebrew layout despite passing tests
+- SKUs/prices appear reversed in production
+- Margins wrong side in RTL mode
+- Mixed content renders incorrectly
+
+**Phase to address:**
+Locale Switching Tests (Phase 4) - RTL-specific concerns need dedicated test phase after basic language switching works.
+
+---
+
+### Pitfall 7: Hash-Based Router Timing Issues
+
+**What goes wrong:**
+View renders before `hashchange` event fires. Multiple rapid hash changes cause view stacking. Back button breaks state sync between URL and view. Tests navigate but don't wait for view rendering.
+
+**Why it happens:**
+controller.js uses hash routing but tests change hash synchronously. `window.location.hash = '#cart'` doesn't immediately fire `hashchange`. View initialization async but tests assert on DOM immediately. Browser history in tests doesn't behave like real navigation.
+
+**How to avoid:**
 ```javascript
-class ProductListView {
-  mount() {
-    this.abortController = new AbortController();
-    const { signal } = this.abortController;
+// BAD: Set hash and immediately assert
+window.location.hash = '#cart';
+expect(document.querySelector('.cart-view')).toBeTruthy(); // FAILS
 
-    this.productList.addEventListener('dragstart', handleDragStart, { signal });
-    this.productList.addEventListener('dragover', handleDragOver, { signal });
-    this.productList.addEventListener('drop', handleDrop, { signal });
-  }
+// GOOD: Wait for hashchange event
+it('navigates to cart page', async () => {
+  const hashChangePromise = new Promise(resolve => {
+    window.addEventListener('hashchange', resolve, { once: true });
+  });
 
-  unmount() {
-    // Removes ALL listeners registered with this signal
-    this.abortController.abort();
-    this.productList = null;
-  }
+  window.location.hash = '#cart';
+  await hashChangePromise;
+
+  await vi.waitFor(() => {
+    expect(document.querySelector('.cart-view')).toBeTruthy();
+  });
+});
+
+// BETTER: Helper for hash navigation in tests
+async function navigateTo(hash) {
+  const hashChangePromise = new Promise(resolve => {
+    window.addEventListener('hashchange', resolve, { once: true });
+  });
+
+  window.location.hash = hash;
+  await hashChangePromise;
+
+  // Wait for view to render
+  await vi.waitFor(() => {
+    const content = document.querySelector('.page-content');
+    return content && content.children.length > 0;
+  }, { timeout: 2000 });
 }
+
+it('handles back button navigation', async () => {
+  await navigateTo('#products');
+  await navigateTo('#cart');
+
+  // Simulate back button
+  window.history.back();
+
+  await vi.waitFor(() => {
+    expect(window.location.hash).toBe('#products');
+  });
+});
 ```
 
-**Pattern 3: Library cleanup (SortableJS)**
-```javascript
-class ProductListView {
-  mount() {
-    this.sortable = new Sortable(this.productList, { /* options */ });
-  }
+**Warning signs:**
+- Router tests fail with null elements
+- State desync between URL and rendered view
+- Tests pass but manual testing shows navigation bugs
+- Multiple views render simultaneously
 
-  unmount() {
-    // CRITICAL: Call library destroy method
-    this.sortable.destroy();
-    this.sortable = null;
+**Phase to address:**
+MVC Integration Tests (Phase 5) - Router is the glue between controller and views.
+
+---
+
+### Pitfall 8: View Class Inheritance and Method Override Confusion
+
+**What goes wrong:**
+Child views don't call parent methods correctly. `setPageSpecificLanguage` overrides in children not invoked. `super` calls missing causing incomplete initialization. Mock/spy on base View class affects all child views.
+
+**Why it happens:**
+View.js base class has 900+ lines with complex inheritance. Child views (homePageView, cartView) override methods without calling super. Tests mock View.prototype affecting all instances. `setLanguage` calls `setPageSpecificLanguage` (line 945) but child implementation varies.
+
+**How to avoid:**
+```javascript
+// BAD: Test affects all view instances
+vi.spyOn(View.prototype, 'setLanguage').mockImplementation(() => {});
+const cart = new CartView();
+const home = new homePageView();
+// Both views now broken!
+
+// GOOD: Test specific instance
+it('cart view sets page-specific language', () => {
+  const cartView = new CartView();
+  const spy = vi.spyOn(cartView, 'setPageSpecificLanguage');
+
+  cartView.setLanguage('heb', 5);
+
+  expect(spy).toHaveBeenCalledWith('heb', 5);
+});
+
+// BETTER: Test inheritance chain explicitly
+it('calls parent setLanguage then child override', async () => {
+  const cartView = new CartView();
+
+  const parentSpy = vi.spyOn(View.prototype, 'setLanguage');
+  const childSpy = vi.spyOn(cartView, 'setPageSpecificLanguage');
+
+  await cartView.setLanguage('heb', 3);
+
+  expect(parentSpy).toHaveBeenCalled();
+  expect(childSpy).toHaveBeenCalledWith('heb', 3);
+
+  // Verify order
+  const parentCall = parentSpy.mock.invocationCallOrder[0];
+  const childCall = childSpy.mock.invocationCallOrder[0];
+  expect(parentCall).toBeLessThan(childCall);
+});
+
+// Pattern for child views to prevent missing super calls
+class CartView extends View {
+  async setPageSpecificLanguage(lng, cartNum) {
+    // This gets called by parent's setLanguage
+    // No need to call super.setPageSpecificLanguage (it's a hook)
+    this.renderCartInLanguage(lng);
   }
 }
 ```
 
 **Warning signs:**
-- No `unmount()` or `destroy()` method in view/component
-- Event listeners added in `mount()` but never removed
-- No lifecycle management in MVC controller
-- Testing doesn't include multiple page navigations
-- DevTools memory profiler not used during development
-- Event listeners use arrow functions directly (can't be removed without reference)
+- Mocking one view breaks unrelated view tests
+- Child view missing expected functionality
+- "Method not defined" despite being in parent
+- Duplicate code across child views
 
 **Phase to address:**
-Phase 2 (Drag-and-Drop Implementation) - Implement proper lifecycle management from start
-Phase 4 (Testing) - Memory leak testing with multiple navigations
-
-**Sources:**
-- [JavaScript Event Listener Memory Leaks](https://dev.to/alex_aslam/how-to-avoid-memory-leaks-in-javascript-event-listeners-4hna)
-- [Event Delegation and Memory Leaks](https://infinitejs.com/posts/mastering-event-listeners-memory-leaks/)
-- [Causes of Memory Leaks in JavaScript](https://www.ditdot.hr/en/causes-of-memory-leaks-in-javascript-and-how-to-avoid-them)
+Base View Tests (Phase 1) - Establish inheritance testing patterns before child views tested in Phase 2.
 
 ---
 
 ## Technical Debt Patterns
 
+Shortcuts that seem reasonable but create long-term testing problems.
+
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Skip touch support testing | Faster initial development | Unusable on tablets; requires full rewrite | Never - touch is table stakes in 2026 |
-| Use inline `order` recalculation instead of atomic operations | Simpler code, no transaction setup | Race conditions, data corruption with concurrent admins | Only for single-admin systems |
-| Keep old image fields after migration | Safer migration, easier rollback | Database bloat, confusion about source of truth | Acceptable for 1-2 months during migration period, then must clean up |
-| Use global z-index values (9999, 99999) instead of CSS variables | Quick fixes when modals conflict | Unmaintainable z-index wars; impossible to debug | Never - establish scale upfront |
-| Use `querySelectorAll()` + loop for event listeners | Easier to understand than event delegation | Memory leaks, performance issues with large lists | Never - use proper event delegation or library |
-| Drag library without destroy() method | Faster to ship | Memory leaks on navigation; browser crashes | Never - choose libraries with lifecycle methods |
-| Testing only in English/LTR mode | Faster test runs | RTL completely broken; Hebrew users abandoned | Never - RTL is core requirement |
-| Skip optimistic locking "for now" | Simpler backend code | Silent data corruption; admin frustration | Only for MVP with single admin, must add before multi-admin launch |
-
----
+| Using `document.querySelector` without data-testid | No markup changes needed | Brittle tests break on CSS refactor | **Never** - always add test identifiers |
+| Mocking entire View.prototype | Quick test isolation | Breaks all view instances globally | **Never** - mock specific instances |
+| `setTimeout` to "fix" async races | Tests pass quickly | Flaky tests, slow suite, masks real bugs | **Never** - use vi.waitFor or proper async |
+| Skipping localStorage.clear() in afterEach | Faster test writing | State pollution, flaky tests | **Never** - always clean up |
+| Testing only English, assuming Hebrew works | Half the test time | RTL bugs in production | **Only in MVP** - add RTL by Phase 4 |
+| Comparing floats with toBe() | Simple assertions | Precision errors cause failures | **Never** - use toBeCloseTo() |
+| Inline event handlers `onclick="..."` | Easy to add | Can't removeEventListener, memory leaks | **Never** - use addEventListener |
+| Global fetch mock for all tests | One setup for suite | Race conditions hard to reproduce | **Only for happy path** - per-test mocks for edge cases |
 
 ## Integration Gotchas
 
+Common mistakes when testing external service interactions.
+
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| SortableJS + Modal | Drag ghost appears behind modal overlay | Set `fallbackOnBody: true` and `z-index: 1080` on ghost class |
-| SortableJS + RTL | Drag positions inverted in Hebrew mode | Test with `dir="rtl"` early; may need manual position adjustments |
-| Mongoose + Array Reordering | Direct array assignment loses other concurrent changes | Use `$set` with positional operator or atomic array operations |
-| MongoDB + Image Migration | Assume all products have same fields | Audit existing field combinations; handle all legacy formats |
-| Vanilla JS + Touch Devices | Assume HTML5 drag-and-drop works on mobile | Add touch event polyfill or use library with touch support |
-| Event Listeners + SPA Navigation | Add listeners on mount, forget to remove on unmount | Always pair `addEventListener` with `removeEventListener` or use AbortController |
-
----
+| localStorage | Assuming isolation between tests | Clear in beforeEach/afterEach hooks |
+| Fetch API | Mock once globally, can't test timing | Mock per-test with controlled promise resolution |
+| PayPal SDK | Load real SDK in tests (slow, flaky) | Mock window.paypal object with test stubs |
+| Stripe SDK | Use real API keys in test env | Mock stripe.js, never load real SDK |
+| Exchange Rate API | Call real API in tests | Mock response with fixed rate, test staleness separately |
+| DigitalOcean Spaces | Upload real files in tests | Mock S3 client, verify calls not results |
+| EmailJS | Send test emails (quota limits) | Mock emailjs.send(), verify parameters |
+| Microsoft Clarity | Load tracking script in tests | Conditional load based on NODE_ENV, mock in tests |
 
 ## Performance Traps
 
+Patterns that work at small scale but fail as test suite grows.
+
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Dragging 500+ product list without virtualization | Laggy drag ghost, dropped frames | Virtual scrolling or pagination; only render visible products | >200 products in single category |
-| Re-rendering entire product list on every drag event | Flickering, unresponsive UI during drag | Use SortableJS swap/insert mode; update DOM positions without re-render | >50 products |
-| Loading full-size images in draggable product cards | Slow initial render, high memory usage | Use thumbnails (64x64 or 128x128) for drag list; full images only in modal | >20 products with high-res images |
-| Querying database for current order on every drag | Slow drag response, stale data | Cache current order in memory; only query on page load | Any concurrent admin scenario |
-| Updating all product orders in single query | Slow save operation, blocks UI | Only update affected products (swapped items or range) | >100 products in category |
-| No debouncing on drag position updates | Excessive API calls during drag | Debounce position updates; only save final position on drop | Real-time position sync attempts |
-
----
+| Not clearing event listeners | Tests slow down progressively | afterEach cleanup, track listener refs | >50 tests |
+| Accumulating localStorage data | QuotaExceededError in CI | Clear storage in afterEach | >100 tests |
+| Loading full product catalog | Slow test suite, high memory | Mock with minimal data fixtures | >200 products |
+| Re-rendering entire menu each test | DOM operations pile up | Reuse rendered markup, reset state | >30 view tests |
+| Deep cloning cart array | O(n²) for nested cart operations | Shallow clone when possible | >20 items in cart |
+| Synchronous fetch mocks | Tests wait for setTimeout | Use vi.useFakeTimers() and vi.runAllTimers() | >100 async tests |
 
 ## Security Mistakes
 
+Testing-specific security issues to avoid.
+
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| No admin authentication check on reorder endpoint | Any user can reorder products via API | Require `requireAdmin` middleware on all reorder routes |
-| Accepting arbitrary `order` values from client | Client can set order to negative, duplicate, or invalid values | Validate order values on backend; recalculate based on drop position |
-| No rate limiting on reorder endpoint | Malicious user can spam reorder requests, DoS backend | Add rate limiting: max 30 reorders per minute per admin |
-| Exposing product IDs in drag data | Not a security risk, but... | Product IDs are already public; this is fine |
-| No CSRF protection on reorder endpoint | CSRF attack can reorder products | Use CSRF tokens or SameSite cookies (likely already implemented for other admin endpoints) |
-| Allowing reorder across categories without validation | Client could move product to non-existent category | Validate category exists and admin has permission |
-
----
+| Committing test API keys | Real credentials exposed in repo | Use .env.test with dummy values |
+| Using production MongoDB in tests | Data loss, privacy violations | Separate test database, mock in unit tests |
+| Skipping CSRF token validation in test mode | Production code has bypass path | Never conditional security, mock token generation |
+| Test JWTs with weak secrets | If copied to production, vulnerability | Use same crypto strength, different secret |
+| Storing sensitive test data in localStorage | Leaks in test snapshots | Sanitize before snapshots, use generic data |
+| Mocking authentication to always succeed | Security bugs not caught | Test auth failures, expired tokens, role checks |
 
 ## UX Pitfalls
 
+Common testing mistakes that miss user experience issues.
+
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| No visual feedback during drag | User unsure if drag is working | Add semi-transparent ghost, highlight drop zones, cursor change |
-| No loading state after drop | User drags, release, waits... did it work? | Show spinner or "Saving order..." message; disable further drags until save complete |
-| No error handling for failed reorder | Drag succeeds visually but order isn't saved; silent failure | Show error message "Failed to save order, please try again"; revert UI to old order |
-| No undo for accidental drags | User accidentally drags product to wrong position; has to manually fix | Add "Undo" button for 5 seconds after drop; or Ctrl+Z keyboard shortcut |
-| Drag works only with mouse, no keyboard alternative | Keyboard-only users cannot reorder | Add up/down arrow buttons on each product for keyboard reordering |
-| No indication of what's draggable | User doesn't know they can drag | Add drag handle icon; cursor changes to grab on hover |
-| Modal closes when drag starts | User wants to reference modal while dragging; frustrating | Keep modal open during drag; only close on explicit close button click |
-| Long product lists require scrolling while dragging | Dragging to bottom of 100-product list is painful | Auto-scroll when dragging near top/bottom edge; or add "Move to position" input field |
-
----
+| Only testing one language | Hebrew users see broken layout | Test both English and Hebrew in critical flows |
+| Not testing currency switching | Price displays wrong after switch | Test currency change on cart/checkout pages |
+| Ignoring keyboard navigation | Inaccessible to keyboard-only users | Test with tab key navigation, screen reader attributes |
+| Testing empty cart only | "No items" state works, 10+ items overflow | Test cart with 0, 1, 10, 50 items |
+| Fast mocked responses | UI flicker not caught in tests | Test loading states, slow network simulation |
+| Testing desktop viewport only | Mobile menu broken, touch events fail | Test at 320px, 768px, 1920px widths |
 
 ## "Looks Done But Isn't" Checklist
 
-- [ ] **Drag-and-Drop:** Often missing touch support — verify drag works on iPad Safari, not just desktop Chrome
-- [ ] **Drag-and-Drop:** Often missing RTL testing — verify drag positions correctly in Hebrew `dir="rtl"` mode
-- [ ] **Product Reordering:** Often missing concurrent admin handling — verify two admins reordering simultaneously doesn't corrupt data
-- [ ] **Image Migration:** Often missing legacy field handling — verify products created before 2024 still display correctly
-- [ ] **Event Listeners:** Often missing cleanup on unmount — verify DevTools heap snapshot shows no orphaned listeners after 10 page navigations
-- [ ] **Modal Integration:** Often missing z-index testing — verify drag ghost appears above modal overlay
-- [ ] **Error Handling:** Often missing failed save scenarios — verify network failure during drag-save shows error and reverts UI
-- [ ] **Keyboard Accessibility:** Often missing keyboard alternatives — verify products can be reordered via keyboard (not just drag)
-- [ ] **Performance:** Often missing large list testing — verify 200+ products still drag smoothly
-- [ ] **Save Confirmation:** Often missing save feedback — verify admin knows when order is saved vs still saving
+Things that appear complete but are missing critical pieces in testing context.
 
----
+- [ ] **localStorage tests:** Often missing cleanup — verify afterEach clears all keys
+- [ ] **Async API tests:** Often missing race condition tests — verify concurrent calls, verify timeout handling
+- [ ] **Currency tests:** Often missing precision tests — verify floating point rounding, verify conversion both ways (USD→ILS→USD)
+- [ ] **RTL tests:** Often missing bidirectional text — verify Hebrew text with English SKU, verify number formatting in RTL
+- [ ] **Event listener tests:** Often missing cleanup verification — verify listeners removed, verify no memory leaks with many tests
+- [ ] **View inheritance tests:** Often missing super calls — verify child calls parent methods, verify override doesn't break siblings
+- [ ] **Router tests:** Often missing hashchange timing — verify navigation waits for event, verify back button state sync
+- [ ] **Error handling tests:** Often missing network failure — verify fetch rejection, verify timeout scenarios, verify partial response data
 
 ## Recovery Strategies
 
+When pitfalls occur despite prevention, how to recover.
+
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Touch support missing | MEDIUM | Add SortableJS (has built-in touch); replace custom drag code; test on mobile |
-| RTL drag broken | MEDIUM | Add `dir="rtl"` tests; invert X coordinates for RTL; may need library switch if unfixable |
-| Race condition corrupted order | HIGH | Write repair script to detect and fix duplicate/missing order values; add optimistic locking to prevent future corruption |
-| Image migration broke products | HIGH | Rollback migration; write safer incremental migration; add field existence checks; re-run with backups |
-| Modal z-index conflict | LOW | Add CSS variable scale; update modal and ghost z-index; test interactions |
-| Memory leaks | MEDIUM | Add AbortController or explicit cleanup to all views; test with memory profiler; may need refactor if deeply embedded |
-| No concurrent admin handling | MEDIUM | Add optimistic locking to backend; add version field to schema; handle conflicts in UI |
-| Large list performance | MEDIUM | Add virtual scrolling (e.g., react-window port for vanilla JS); or add pagination to product list |
-
----
+| localStorage pollution | LOW | 1. Add `beforeEach(() => localStorage.clear())` to all test files<br>2. Run tests to identify interdependencies<br>3. Fix tests assuming pre-existing state |
+| querySelector brittleness | MEDIUM | 1. Add data-testid to all interactive elements<br>2. Create test helpers: `getByTestId(id)`<br>3. Replace querySelector calls incrementally<br>4. Add ESLint rule against raw querySelector in tests |
+| Event listener leaks | MEDIUM | 1. Identify leaking tests with `--reporter=verbose --logHeapUsage`<br>2. Add afterEach cleanup for each test file<br>3. Use WeakMap/WeakRef for listener tracking<br>4. Replace cloneNode strategy with proper removeEventListener |
+| Async race conditions | HIGH | 1. Identify flaky tests with `--retry=10`<br>2. Add controlled promise mocks with manual resolution<br>3. Refactor code to return promises consistently<br>4. Use vi.waitFor with explicit assertions |
+| Float precision errors | LOW | 1. Change all `toBe()` to `toBeCloseTo()` for currency<br>2. Add helper: `expectCurrency(value, expected)`<br>3. Refactor model to use cents (large change) |
+| RTL layout bugs | MEDIUM | 1. Add visual regression tests with Playwright<br>2. Test Hebrew on all critical pages manually<br>3. Add snapshot tests for RTL markup<br>4. Create RTL-specific test fixtures |
+| Router timing issues | MEDIUM | 1. Create `navigateTo(hash)` test helper<br>2. Add hashchange promise wrapper<br>3. Replace all direct hash assignments<br>4. Add integration tests for full navigation flows |
+| View inheritance confusion | HIGH | 1. Document inheritance contract in View.js<br>2. Create test suite for base View class<br>3. Test each child's override explicitly<br>4. Add TypeScript/JSDoc to clarify expected methods |
 
 ## Pitfall-to-Phase Mapping
 
+How roadmap phases should address these pitfalls.
+
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Touch support missing | Phase 1: Library Selection | Test drag on iPad Safari |
-| RTL drag broken | Phase 1: Foundation + Phase 2: Implementation | Test with `dir="rtl"` in dev environment |
-| Race conditions | Phase 2: Product Ordering Backend | Multi-admin stress test: 2 admins reorder simultaneously |
-| Image migration breaks products | Phase 3: Image Array Migration | Query products with empty `images` array; manual spot-checks on staging |
-| Modal z-index conflicts | Phase 1: Foundation + Phase 3: Modal Integration | Open modal, drag products behind it |
-| Memory leaks | Phase 2: Drag Implementation + Phase 4: Testing | DevTools heap snapshot after 20 navigations |
-| No error handling | Phase 2: Implementation + Phase 4: Testing | Disconnect network during drag-save; verify error shown |
-| Large list performance | Phase 2: Implementation + Phase 5: Performance Testing | Test with 500 products; measure frame rate during drag |
-| Security: missing auth | Phase 2: Backend Implementation | Attempt API call without auth token; verify 401 response |
-| UX: no visual feedback | Phase 2: Frontend Implementation + Phase 4: UX Testing | User testing: can first-time user figure out drag? |
-
----
-
-## Phase-Specific Warnings
-
-### Phase 1: Library Selection & Foundation
-- **Critical:** Choose library with proven touch + mobile support (SortableJS recommended)
-- **Critical:** Establish z-index CSS variable scale before building modals
-- **Important:** Set up RTL testing environment (`dir="rtl"` toggle in admin)
-
-### Phase 2: Product Ordering Implementation
-- **Critical:** Implement atomic operations or optimistic locking from day one
-- **Critical:** Add lifecycle cleanup (unmount/destroy) for all event listeners
-- **Important:** Don't use direct array assignment for order updates
-- **Important:** Test error handling for failed saves
-
-### Phase 3: Image Array Migration
-- **Critical:** Audit existing products before writing migration script
-- **Critical:** Add dry-run mode and rollback plan
-- **Critical:** Keep old image fields during migration period
-- **Important:** Handle all legacy field combinations (image, mainImage, smallImagesLocal)
-- **Important:** Verify migration on staging with production data clone
-
-### Phase 4: Modal Integration
-- **Critical:** Test drag-and-drop with modal open
-- **Critical:** Verify z-index hierarchy (ghost above modal)
-- **Important:** Test modal overlay pointer-events handling
-
-### Phase 5: Testing & Polish
-- **Critical:** Multi-admin concurrency testing
-- **Critical:** Memory leak testing (20+ navigations)
-- **Critical:** Mobile/touch testing on real devices
-- **Critical:** RTL testing in Hebrew mode
-- **Important:** Performance testing with 200+ products
-- **Important:** Keyboard accessibility testing
-
----
+| localStorage pollution | Phase 1: Base View Tests | All tests pass when run with `--reporter=verbose`, no flaky tests |
+| querySelector fragility | Phase 1: Base View Tests | No raw querySelector in test files, all use data-testid or waitFor |
+| Event listener leaks | Phase 1: Base View Tests | Memory stable across 100+ test runs, no MaxListeners warnings |
+| Async API races | Phase 3: Cart State Tests | Concurrent cart operations tests pass 100/100 runs |
+| Float precision | Phase 3: Cart State Tests | All currency tests use toBeCloseTo, cart totals accurate |
+| RTL layout | Phase 4: Locale Switching Tests | Hebrew tests pass, visual snapshots for RTL pages |
+| Router timing | Phase 5: MVC Integration Tests | Navigation tests reliable, back/forward work correctly |
+| View inheritance | Phase 1: Base View Tests | All child views call parent methods, inheritance documented |
 
 ## Sources
 
-### Drag-and-Drop General
-- [Medium: Drag-n-Drop with Vanilla JavaScript](https://medium.com/codex/drag-n-drop-with-vanilla-javascript-75f9c396ecd)
-- [DigitalOcean: Vanilla JavaScript Drag and Drop Tutorial](https://www.digitalocean.com/community/tutorials/js-drag-and-drop-vanilla-js)
-- [Stack Abuse: Drag and Drop in Vanilla JavaScript](https://stackabuse.com/drag-and-drop-in-vanilla-javascript/)
+### localStorage Mocking and Testing
+- [sessionStorage and localStorage are difficult to mock for test purposes - Mozilla Bugzilla](https://bugzilla.mozilla.org/show_bug.cgi?id=1141698)
+- [Local Storage: Testing | CS156](https://ucsb-cs156.github.io/topics/local_storage/local_storage_testing.html)
+- [Mocking browser APIs in Jest (localStorage, fetch and more!)](https://bholmes.dev/blog/mocking-browser-apis-fetch-localstorage-dates-the-easy-way-with-jest/)
+- [Testing local storage with testing library - JavaScript in Plain English](https://medium.com/javascript-in-plain-english/testing-local-storage-with-testing-library-580f74e8805b)
 
-### Touch Support
-- [GitHub: DragDropTouch - Touch Polyfill](https://github.com/drag-drop-touch-js/dragdroptouch)
-- [CSS Script: Best Drag-and-Drop Libraries 2026](https://www.cssscript.com/best-drag-drop-javascript-libraries/)
-- [GitHub: touch-drag-n-drop Library](https://github.com/giorgiogilbert/touch-drag-n-drop)
+### Vitest DOM Testing and querySelector
+- [Locators | Browser Mode | Vitest](https://vitest.dev/api/browser/locators)
+- [Vi | Vitest](https://vitest.dev/api/vi.html)
+- [Custom Vitest matchers to test the state of the DOM](https://github.com/chaance/vitest-dom)
 
-### SortableJS
-- [SortableJS Official Site](https://sortablejs.github.io/Sortable/)
-- [GitHub: SortableJS/Sortable](https://github.com/SortableJS/Sortable)
-- [CSS Script: SortableJS Guide](https://www.cssscript.com/lightweight-js-sorting-library-with-native-html5-drag-and-drop-sortable/)
+### Async Testing and Race Conditions
+- [Beyond Async/Await: Why Your 2026 Apps Still Have Race Conditions - JavaScript in Plain English](https://javascript.plainenglish.io/beyond-async-await-why-your-2026-apps-still-have-race-conditions-dc43af7437dd)
+- [How to test for race conditions in asynchronous JavaScript code? | AnycodeAI](https://www.anycode.ai/tutorial/how-to-test-for-race-conditions-in-asynchronous-javascript-code)
+- [Tackling Asynchronous Bugs in JavaScript: Race Conditions and Unresolved Promises](https://dev.to/alex_aslam/tackling-asynchronous-bugs-in-javascript-race-conditions-and-unresolved-promises-7jo)
 
-### RTL Issues
-- [GitHub: Svelte RTL Drag Direction Issue](https://github.com/orefalo/svelte-splitpanes/issues/3)
-- [GitHub: Angular Calendar RTL Drag Bug](https://github.com/mattlewis92/angular-calendar/issues/1203)
-- [GitHub: BigBlueButton RTL Drag-Drop Issue](https://github.com/bigbluebutton/bigbluebutton/issues/12567)
-- [Drupal: Drag and Drop RTL Awareness](https://www.drupal.org/project/drupal/issues/197641)
+### Event Listener Memory Leaks
+- [Memory management in tests - Mastering Vitest](https://app.studyraid.com/en/read/11292/352307/memory-management-in-tests)
+- [How to Fix \"Memory Leak\" Test Detection](https://oneuptime.com/blog/post/2026-01-24-memory-leak-test-detection/view)
+- [How to Avoid Memory Leaks in JavaScript Event Listeners](https://dev.to/alex_aslam/how-to-avoid-memory-leaks-in-javascript-event-listeners-4hna)
+- [MaxListenersExceededWarning: Possible EventEmitter Memory Leak - Vitest Issue](https://github.com/vitest-dev/vitest/issues/7194)
 
-### MongoDB Race Conditions
-- [Medium: MongoDB Race Conditions - Atomic Operations](https://medium.com/tales-from-nimilandia/handling-race-conditions-and-concurrent-resource-updates-in-node-and-mongodb-by-performing-atomic-9f1a902bd5fa)
-- [Medium: MongoDB Race Conditions - Optimistic Updates](https://medium.com/@codersauthority/handling-race-conditions-and-concurrent-resource-updates-in-node-and-mongodb-by-performing-f54140da8bc5)
-- [MongoDB Docs: Concurrency FAQ](https://www.mongodb.com/docs/manual/faq/concurrency/)
-- [Yarsa Labs: How to Solve MongoDB Race Conditions](https://blog.yarsalabs.com/mongodb-race-conditions-part2/)
+### RTL and Bidirectional Layout Testing
+- [The Complete Guide to RTL (Right-to-Left) Layout Testing: Arabic, Hebrew & More](https://placeholdertext.org/blog/the-complete-guide-to-rtl-right-to-left-layout-testing-arabic-hebrew-more/)
+- [Internationalization Testing: Best Practices Guide for 2026](https://aqua-cloud.io/internationalization-testing/)
+- [January 2026 - RTL Support - shadcn/ui](https://ui.shadcn.com/docs/changelog/2026-01-rtl)
+- [Right to Left Styling 101](https://rtlstyling.com/posts/rtl-styling/)
 
-### MongoDB Schema Migration
-- [Software on the Road: MongoDB Schema Migrations in Node.js](https://softwareontheroad.com/database-migration-node-mongo)
-- [Postulate: MongoDB Schema Changes with migrate-mongo](https://postulate.us/@samsonzhang/p/2021-03-06-Making-Mongodb-Schema-Changes-with-kL4J3vYUhY9V6SK16TisC7)
-- [MongoDB Community: Schema Migration Best Practices](https://www.mongodb.com/community/forums/t/best-practices-for-schema-management-migrations-and-scaling-in-mongodb/306805)
-- [Medium: MongoDB Migration Lessons (Jan 2026)](https://medium.com/@coding_with_tech/mongodb-to-postgresql-migration-3-months-2-mental-breakdowns-1-lesson-2980110461a5)
+### Currency and Floating-Point Precision
+- [Handle Money in JavaScript: Financial Precision Without Losing a Cent](https://dev.to/benjamin_renoux/financial-precision-in-javascript-handle-money-without-losing-a-cent-1chc)
+- [Currency Calculations in JavaScript - Honeybadger Developer Blog](https://www.honeybadger.io/blog/currency-money-calculations-in-javascript/)
+- [JavaScript Rounding Errors (in Financial Applications)](https://www.robinwieruch.de/javascript-rounding-errors/)
 
-### MongoDB Product Catalog
-- [MongoDB Docs: cursor.sort()](https://www.mongodb.com/docs/manual/reference/method/cursor.sort/)
-- [MongoDB Blog: Performance Best Practices - Indexing](https://www.mongodb.com/company/blog/performance-best-practices-indexing)
-- [MongoDB Blog: Retail Architecture - Product Catalog](https://www.mongodb.com/blog/post/retail-reference-architecture-part-1-building-flexible-searchable-low-latency-product)
+### Hash-Based Routing
+- [Routing in Vanilla JavaScript: Hash vs History API](https://medium.com/@RyuotheGreate/routing-in-vanilla-javascript-hash-vs-history-api-a65382121871)
+- [Single Page Application Routing Using Hash or URL](https://dev.to/thedevdrawer/single-page-application-routing-using-hash-or-url-9jh)
+- [How to use window.hashchange event to implement routing in vanilla javascript](https://prahladyeri.github.io/blog/2020/08/how-to-use-windowhashchange-event-to-implement-routing-in-vanilla-javascript.html)
 
-### Z-Index Issues
-- [Coder Coder: 4 Reasons Your Z-Index Isn't Working](https://coder-coder.com/z-index-isnt-working/)
-- [Bootstrap Docs: Z-Index Layout](https://getbootstrap.com/docs/5.3/layout/z-index/)
-- [GitHub: Ant Design Modal Z-Index Issue](https://github.com/ant-design/ant-design/issues/31513)
-
-### Performance
-- [Saeloun Blog: Dropdown Virtualization Performance](https://blog.saeloun.com/2022/03/03/infinite-scroll-with-pagination/)
-- [Puck: Top Drag-and-Drop Libraries for React 2026](https://puckeditor.com/blog/top-5-drag-and-drop-libraries-for-react)
-- [SitePen: Next Generation Virtual Scrolling](https://www.sitepen.com/blog/next-generation-virtual-scrolling)
-
-### Memory Leaks
-- [DEV Community: Avoid Memory Leaks in Event Listeners](https://dev.to/alex_aslam/how-to-avoid-memory-leaks-in-javascript-event-listeners-4hna)
-- [Nobie Tech: Memory Leaks in JavaScript](https://nobietech.com/memory-leaks-javascript-how-to-prevent)
-- [Infinite JS: Mastering Event Listeners - Memory Leaks](https://infinitejs.com/posts/mastering-event-listeners-memory-leaks/)
-- [Dit Dot: Causes of Memory Leaks in JavaScript](https://www.ditdot.hr/en/causes-of-memory-leaks-in-javascript-and-how-to-avoid-them)
+### MVC Pattern Testing
+- [The MVC Design Pattern in Vanilla JavaScript — SitePoint](https://www.sitepoint.com/mvc-design-pattern-javascript/)
+- [Writing a Simple MVC (Model, View, Controller) App in Vanilla Javascript](https://hackernoon.com/writing-a-simple-mvc-model-view-controller-app-in-vanilla-javascript-u65i34lx)
+- [How to Build a Simple MVC App From Scratch in JavaScript](https://www.taniarascia.com/javascript-mvc-todo-app/)
 
 ---
-
-*Pitfalls research for: E-commerce Admin Dashboard - Drag-and-Drop Product/Image Reordering*
-*Researched: 2026-02-01*
-*Confidence: HIGH*
+*Pitfalls research for: Vanilla JavaScript MVC Frontend Testing*
+*Researched: 2026-02-06*
