@@ -1,292 +1,332 @@
 # Project Research Summary
 
-**Project:** Tamar Kfir Jewelry - Test Infrastructure for v1.2
-**Domain:** Retrofitting test coverage to production e-commerce platform (zero baseline)
-**Researched:** 2026-02-04
+**Project:** Frontend Testing Infrastructure (v1.3)
+**Domain:** Vanilla JavaScript MVC E-commerce Application Testing
+**Researched:** 2026-02-06
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This research synthesizes findings on adding test infrastructure to a production e-commerce platform with zero existing test coverage. The platform is a monolithic Express backend (4,233 lines in index.js) with vanilla JS MVC frontend, handling live payments (PayPal/Stripe), authentication (JWT), file uploads (Sharp + DigitalOcean Spaces), and multi-currency operations (USD/ILS).
+This e-commerce jewelry store uses vanilla JavaScript MVC architecture (model.js, View.js base class, page-specific views) with unique complexity from multi-language (English/Hebrew RTL) and multi-currency (USD/ILS) support. Expert testing for this stack prioritizes integration tests over unit tests, uses Happy-DOM for fast DOM simulation, and focuses on localStorage cart operations as the highest-value testing target. The recommended approach is starting with Model cart operations (revenue-critical), then base View tests (language/currency switching), followed by page-specific view integration tests.
 
-**The recommended approach:** Integration-first testing using Vitest + Supertest for the backend monolith, with payment/external API mocking via nock and isolated test databases via mongodb-memory-server. Priority is highest-risk areas: payment flows, authentication, and currency conversion. Frontend testing is deferred until backend reaches 70%+ coverage.
+The critical insight from research: vanilla JS MVC testing must test actual integration between layers, not mock them apart. The model-view coordination is the architecture — testing Model in isolation defeats the purpose. Focus on user flows (add to cart → view updates → localStorage persists) over individual method tests. The biggest risk is localStorage state pollution between tests causing flaky failures; establish cleanup patterns in Phase 1 before other tests compound the problem.
 
-**Key risks and mitigations:** (1) Production database contamination - use dedicated test database with validation; (2) Live payment API calls - enforce sandbox-only testing with environment validation; (3) Over-mocking monolith - test at HTTP boundary level, not internal functions; (4) False confidence from weak tests - behavior-focused naming and assertion density standards.
-
-The monolithic architecture means traditional unit testing is difficult without refactoring. Integration tests via HTTP endpoints provide better ROI and allow safe refactoring later with tests as safety net.
+Key technology decision: switch from jsdom to Happy-DOM (2-3x faster, sufficient API coverage for vanilla JS) and add @testing-library/dom for semantic queries (getByRole, getByText) that make tests resilient to markup changes. Avoid @testing-library/user-event (React-focused, unnecessary for vanilla JS) and use native DOM events instead.
 
 ## Key Findings
 
 ### Recommended Stack
 
-Modern JavaScript testing ecosystem for Node.js 22 with focus on speed and ESM compatibility.
+The backend already has Vitest 4.0.18 configured. Frontend needs minimal additional tooling. The key change is switching from jsdom to Happy-DOM for better performance while adding @testing-library/dom for user-centric queries.
 
 **Core technologies:**
-- **Vitest 4.0.18+:** Test framework for both backend and frontend - 10-20x faster than Jest in watch mode, native ESM support, 30.8M weekly downloads (Jan 2026). Compatible with most Jest APIs for easy adoption.
-- **Supertest 7.0.0+:** HTTP integration testing for Express - tests routes in-memory without spinning up server. Perfect for monolithic backend where unit testing is impractical.
-- **mongodb-memory-server 11.0.1+:** In-memory MongoDB for isolated testing - spins up separate instances per suite, eliminating test pollution. Fast (~7MB per instance) and works in CI without external dependencies.
-- **nock 14.0.0+:** HTTP request mocking - intercepts external API calls (PayPal, Stripe, exchange rate API) at network layer. More comprehensive than simple stubs. Updated Jan 2026.
-- **Happy-DOM 15.0.0+:** DOM simulation for frontend - faster and lighter than JSDOM, sufficient for vanilla JS testing. 2-3x faster for simple DOM operations.
+- **Vitest 4.0.18** (keep existing): Fast test runner with native ESM support, already configured
+- **Happy-DOM 20.0.11** (replace jsdom): 2-3x faster than jsdom, sufficient for vanilla JS DOM testing
+- **@testing-library/dom 10.4.1**: Framework-agnostic DOM queries (getByRole, getByText) for resilient tests
+- **vitest-fetch-mock 0.3.0**: Simple API mocking (start here, migrate to MSW if needed later)
 
-**Supporting tools:**
-- **@vitest/coverage-v8:** Built-in code coverage using Node.js native V8 (faster than Istanbul)
-- **aws-sdk-mock 6.1.0+:** Mock S3-compatible DigitalOcean Spaces uploads
-- **sinon 21.0.1+:** Spies/stubs for complex mocking (cron jobs, timers)
+**Already installed:**
+- @vitest/coverage-v8 4.0.18: Keep for code coverage
+- @testing-library/jest-dom 5.17.0: Keep if using custom matchers (toBeInTheDocument), update to 6.6.3
 
-**Why NOT Jest:** Slower than Vitest (10-20x in watch mode), experimental ESM support, larger footprint. Vitest is Jest-compatible but modern. For a codebase with zero tests, starting with Vitest avoids future migration cost.
+**Remove:**
+- jsdom 28.0.0: Replaced by Happy-DOM
+- @testing-library/user-event 13.5.0: Not needed for vanilla JS, use native events
 
 ### Expected Features
 
-Testing a production e-commerce platform requires different priorities than greenfield development.
+Research identified what to test based on e-commerce user expectations and MVC architecture validation.
 
-**Must have (v1.2 - first coverage):**
-- Payment flow integration tests (PayPal/Stripe mocked) - Highest risk: payment bugs lose money. Test order creation, capture, error handling.
-- Auth security tests (JWT validation, role-based access) - Auth breaches expose customer data. Test token validation, admin vs user boundaries.
-- Currency conversion unit tests (USD/ILS fallback chain) - Wrong currency = wrong charges. Test API failure → stored → env → default fallback.
-- Database operation tests (Product, User, Settings models) - Data integrity risk. Test CRUD, validation, constraints.
-- File upload validation tests (MIME types, size limits) - Security risk: malicious uploads. Test validation logic.
-- Test infrastructure setup - Install test runner, configure, create fixtures. Backend priority over frontend.
+**Must have (table stakes — P1 for v1.3):**
+- Cart add/remove operations with localStorage sync — revenue-critical path
+- Cart persistence across sessions — users expect cart to survive reload
+- Currency display accuracy (USD/ILS conversion) — legal/trust requirement
+- Language switching with localStorage persistence — multilingual store requirement
+- Price display in selected currency — multi-currency support validation
+- Checkout flow integration (HTTP boundary) — validates payment handoff
+- Model-View integration — validates MVC coordination
+- View cleanup on navigation — prevents memory leaks
 
-**Should have (v1.3+):**
-- Payment sandbox integration (real test mode) - Catch SDK changes mocks miss. Run less frequently (nightly).
-- Multi-currency E2E tests (USD and ILS flows) - Verify complete user journey per currency including RTL display.
-- File upload E2E tests (Sharp to Spaces) - Test complete pipeline with test S3 bucket. Complex setup deferred.
-- Exchange rate job tests (cron scheduling) - Verify scheduled updates. Low priority (manual testing sufficient).
+**Should have (differentiators — P2 for v1.4+):**
+- RTL layout edge cases (Hebrew) — catch flex-direction, text alignment bugs
+- Multi-currency cart consistency — add in ILS, switch to USD, verify recalculation
+- localStorage corruption handling — graceful fallback for malformed data
+- Discount calculation edge cases — global + item discounts + currency switching
+- Product modal interactions — image gallery, keyboard navigation
+- Form validation (contact form) — EmailJS integration verification
 
-**Defer (v2+):**
-- Frontend view unit tests - Backend has higher risk and zero coverage. Frontend bugs are cosmetic, backend bugs lose money.
-- Performance regression tests - Need baseline data first. Add after functional tests stable.
-- Security fuzzing tests - Requires specialized tools and expertise. Consider external security audit.
+**Defer (v2+ nice-to-have):**
+- Visual regression testing (Percy/Chromatic) — automate screenshot comparison
+- Performance testing (bundle size, LCP/FID/CLS) — optimization metrics
+- Accessibility testing (ARIA, keyboard nav, screen reader) — a11y audit
+- Cross-browser testing (Safari, Firefox, Edge) — compatibility validation
 
 ### Architecture Approach
 
-HTTP-boundary testing pattern for monolithic backend, with strategic isolation of testable modules.
+Testing architecture mirrors the MVC structure with emphasis on integration over isolation. Test files organized in tests/unit/ and tests/integration/ directories with shared helpers/ for factories, mocks, and DOM setup utilities.
 
-**Testing strategy for 4,233-line monolith:**
-1. **Export app separately from server** - Minimal change to index.js: export app without calling app.listen() for Supertest to consume
-2. **Integration tests as primary pattern** - Test complete HTTP request flows through monolith. Mock only external services (PayPal, Stripe, S3).
-3. **Unit tests for extracted modules** - Test middleware/auth.js functions, services/exchangeRateService.js, config/locale.js in isolation
-4. **Defer monolith refactoring** - Don't extract code just to make it testable. Test what exists, refactor later with tests as safety net.
+**Major components:**
+1. **Model.js testing** — localStorage operations, API calls with fetch mocks, cart state management. Pattern: spy on Storage.prototype methods, mock global fetch, verify state transitions.
+2. **View.js base class testing** — language/currency switching, menu rendering, event delegation. Pattern: minimal DOM setup with Happy-DOM, semantic queries with @testing-library/dom, verify DOM transformations.
+3. **Page-specific views testing** (homePageView, cartView, etc.) — inheritance from View.js, page rendering, event handlers. Pattern: integration tests with real Model + base View, mock only external boundaries (API, payment SDKs).
+4. **Controller routing testing** — hash-based navigation, view instantiation, cleanup. Pattern: wrap hashchange events in promises, use vi.waitFor for async rendering.
+5. **Integration testing** — full user flows across Model + View + Controller. Pattern: minimal mocking (only external APIs), test localStorage → Model → View → DOM updates.
 
-**Test structure:**
-```
-backend/
-├── tests/
-│   ├── setup.js                    # MongoDB memory server + mocks
-│   ├── fixtures/                   # Test data (images, JSON)
-│   ├── integration/                # PRIMARY - Supertest endpoint tests
-│   │   ├── auth.test.js
-│   │   ├── payments.test.js
-│   │   ├── products.test.js
-│   │   └── uploads.test.js
-│   └── unit/                       # SECONDARY - Extracted modules only
-│       ├── middleware/auth.test.js
-│       └── services/exchangeRate.test.js
-├── vitest.config.js
-└── package.json
-```
-
-**Major components to test:**
-1. **Payment processing** (~400 lines) - Test via integration (Supertest + nock mocks), not unit tests
-2. **Authentication middleware** (110 lines) - Unit test pure functions (getTokenFromRequest, requireAdmin)
-3. **Currency conversion service** (223 lines) - Unit test with mocked external API
-4. **File upload validation** (~200 lines) - Integration test with aws-sdk-mock
-5. **Database models** (~150 lines) - Integration test with mongodb-memory-server
-
-**Key pattern:** Test at HTTP boundary (request → response) for monolithic code. Mock external boundaries only (payment APIs, S3, exchange rate API). Use real implementations for internal dependencies (MongoDB, JWT, bcrypt, Sharp).
+**Test utilities layer:**
+- Factories (createProduct, createCartItem, createAddToCartElement) for dynamic test data
+- DOM helpers (setupBasePage, setupCartPage, clickElement) for consistent structure
+- Mocks (mockLocalStorage, mockFetchSuccess, mockFetchError) for external boundaries
 
 ### Critical Pitfalls
 
-Top 5 pitfalls from research that could derail v1.2 testing efforts:
+Research identified 8 critical pitfalls with prevention strategies.
 
-1. **Production database contamination** - Tests execute against production MongoDB, writing test data or deleting real records. **Prevention:** Environment validation in test bootstrap (MONGO_URL must contain "test"), use mongodb-memory-server for isolation, drop test database after suite.
+1. **localStorage state pollution between tests** — Tests share state causing flaky failures. Solution: Clear localStorage in beforeEach/afterEach hooks globally. Critical for Phase 1 (Base View Tests) to establish pattern before cart tests compound the issue.
 
-2. **Live payment API calls during tests** - Tests call real PayPal/Stripe APIs, creating actual payment intents or charging accounts. **Prevention:** Startup validation rejects `sk_live_` Stripe keys, verify PayPal URL contains "sandbox", mock all HTTP calls with nock.
+2. **querySelector fragility with dynamic DOM** — Tests break when CSS changes or before async rendering completes. Solution: Use data-testid attributes, semantic queries (getByRole, getByText), and vi.waitFor for async DOM updates. Establish pattern in Phase 1.
 
-3. **S3/Spaces file upload to production storage** - Tests upload to production DigitalOcean Spaces bucket, filling storage or overwriting product images. **Prevention:** Use SPACES_BUCKET_TEST, prefix test files, cleanup in afterAll, mock S3 SDK in unit tests.
+3. **Event listener memory leaks in View tests** — Listeners accumulate across tests causing MaxListenersExceededWarning. Solution: Track listener references, cleanup in afterEach with removeEventListener, replace cloneNode technique with proper cleanup. Critical for Phase 1 (View.js tests many delegated listeners).
 
-4. **Monolith over-mocking leading to brittle tests** - Tests mock every internal function, tightly coupling to implementation. Refactoring breaks tests even though behavior unchanged. **Prevention:** Test at API boundary (HTTP endpoints), mock only external services, don't mock internal helpers.
+4. **Async API race conditions in Model tests** — Tests assert before fetch completes, multiple calls resolve unpredictably. Solution: Control promise resolution timing with manual mocks, use vi.waitFor with explicit assertions, test concurrent scenarios. Address in Phase 3 (Cart State Tests).
 
-5. **False confidence from high coverage with weak tests** - Team achieves 80% coverage but tests don't validate behavior (just execute code without assertions). **Prevention:** Behavior-focused test naming, assertion density requirements, test quality over quantity.
+5. **Currency conversion floating-point errors** — Cart totals fail equality checks due to JavaScript float precision. Solution: Use toBeCloseTo() for all currency assertions, consider storing prices in cents (integers). Critical for Phase 3 (Cart State Tests with multi-currency).
 
-**Additional concerns:**
-- Environment variable leakage between tests (snapshot/restore process.env)
-- Race conditions in async assertions (await all promises, disable background jobs)
-- Test data cleanup failure causing cascading failures (transaction rollback or explicit cleanup registry)
+6. **RTL layout testing without proper direction context** — Hebrew layout tests pass but visual bugs remain. Solution: Verify dir="rtl" attribute, test bidirectional content (Hebrew text + English SKU), flag CSS logical properties for manual testing. Address in Phase 4 (Locale Switching Tests).
+
+7. **Hash-based router timing issues** — Tests navigate but don't wait for hashchange event and view rendering. Solution: Wrap navigation in promise that waits for hashchange, use vi.waitFor for DOM updates, create navigateTo() test helper. Address in Phase 5 (MVC Integration Tests).
+
+8. **View class inheritance and method override confusion** — Child views don't call parent methods correctly, mocks affect all instances. Solution: Test specific instances not prototypes, verify inheritance chain explicitly, document hook methods. Establish pattern in Phase 1 (Base View Tests).
 
 ## Implications for Roadmap
 
-Based on research, v1.2 should be structured as 3 focused phases prioritizing risk mitigation:
+Based on research, suggested 6-phase structure prioritizing revenue paths, establishing patterns early, and building from unit to integration tests.
 
-### Phase 1: Test Infrastructure Foundation (1-2 days)
-**Rationale:** Cannot write tests without safe infrastructure. Risk of production contamination is catastrophic - must establish isolation first.
+### Phase 1: Test Infrastructure & Base View Tests (Week 1)
 
-**Delivers:**
-- Vitest installed and configured (backend + frontend)
-- mongodb-memory-server setup with environment validation
-- nock mocks for PayPal/Stripe/exchange rate APIs
-- aws-sdk-mock for S3/Spaces uploads
-- .env.test file with safe test credentials
-- Test database isolation verified
-- CI/CD test scripts added
-
-**Addresses:**
-- PITFALL-1: Production database contamination
-- PITFALL-2: Live payment API calls
-- PITFALL-3: S3 upload to production storage
-- PITFALL-4: Environment variable leakage
-
-**Success criteria:**
-- Test can run against test database only
-- Environment validation rejects production credentials
-- Sample integration test passes
-- No production resources touched during test run
-
-### Phase 2: Critical Path Coverage - Auth & Payments (3-4 days)
-**Rationale:** Highest-risk areas first. Auth breaches expose customer data, payment bugs lose money. These areas are security/revenue critical.
+**Rationale:** Establish test environment and patterns before writing tests. Base View is the foundation for all page views — patterns established here (cleanup, queries, async handling) prevent pitfalls in all subsequent phases.
 
 **Delivers:**
-- Auth middleware unit tests (JWT validation, role checks)
-- Payment integration tests (PayPal/Stripe order creation, capture, errors)
-- Currency conversion unit tests (fallback chain, rate staleness)
-- Database model tests (User, Settings basic CRUD)
-- ~60-70% coverage of critical paths
+- Vitest config with Happy-DOM environment
+- Global setup.js with localStorage/DOM cleanup
+- Test helpers (dom.js, factories.js, mocks/)
+- Base View class tests (language switching, cart counter, menu rendering)
 
-**Addresses:**
-- FEATURE-1: Payment flow integration tests
-- FEATURE-2: Auth security tests
-- FEATURE-3: Currency conversion unit tests
-- PITFALL-5: False confidence from weak tests (establish quality standards)
-- PITFALL-6: Monolith over-mocking (establish HTTP-boundary pattern)
+**Addresses features:**
+- Language switching with localStorage persistence (table stakes)
+- Infrastructure for all subsequent testing
 
-**Uses:**
-- Supertest for endpoint testing
-- nock for payment API mocking
-- mongodb-memory-server for auth/user tests
+**Avoids pitfalls:**
+- localStorage state pollution (Pitfall 1) — establish cleanup pattern
+- querySelector fragility (Pitfall 2) — establish semantic query pattern
+- Event listener leaks (Pitfall 3) — establish cleanup verification
+- View inheritance confusion (Pitfall 8) — test base class before children
 
-**Success criteria:**
-- All auth endpoints tested (login, register, token validation)
-- PayPal and Stripe payment flows tested (success + error scenarios)
-- Currency fallback chain verified
-- Tests follow behavior-focused naming convention
-- Code review checklist includes test quality verification
+**Test count:** ~15-20 tests, 4-6 hours estimated
 
-### Phase 3: Data Integrity & File Operations (2-3 days)
-**Rationale:** Second-tier risk areas. File upload vulnerabilities create security issues, database bugs corrupt product catalog.
+**Research flags:** Standard patterns, skip research-phase. Vitest/Happy-DOM well-documented, Testing Library has extensive vanilla JS examples.
+
+### Phase 2: Model Unit Tests (Week 2)
+
+**Rationale:** Cart operations are highest ROI for e-commerce testing. Model is data layer — testing in isolation with mocked fetch is appropriate here (unlike View which needs DOM integration).
 
 **Delivers:**
-- File upload validation tests (MIME types, size limits, malicious files)
-- Product model tests (CRUD, validation, displayOrder for drag-drop)
-- Settings model tests (exchange rate updates, cron job integration)
-- Image processing tests (Sharp resize, WebP conversion)
-- ~70-80% overall backend coverage
+- Cart operations tests (addToLocalStorage, removeFromUserCart, deleteAll)
+- Cart number calculation tests (checkCartNumber)
+- localStorage persistence verification
+- API integration with fetch mocks
 
-**Addresses:**
-- FEATURE-4: File upload validation tests
-- FEATURE-5: Database operation tests
-- ARCHITECTURE-4: File upload validation testing
-- ARCHITECTURE-5: Database model testing
+**Addresses features:**
+- Cart add/remove operations (P1 table stakes)
+- Cart persistence across sessions (P1 table stakes)
+- Model-View integration foundation (P1)
 
-**Uses:**
-- Supertest .attach() for file uploads
-- aws-sdk-mock for S3 operations
-- Sinon for cron job mocking
+**Avoids pitfalls:**
+- Async API race conditions (Pitfall 4) — controlled promise mocks
+- localStorage pollution (Pitfall 1) — apply Phase 1 cleanup patterns
 
-**Success criteria:**
-- Upload endpoints reject invalid files
-- Product catalog operations tested (create, update, reorder)
-- Sharp image processing verified
-- No file leaks to production storage
-- Test cleanup hooks prevent data pollution
+**Test count:** ~20-25 tests, 6-8 hours estimated
+
+**Research flags:** Standard patterns, skip research-phase. localStorage mocking and fetch mocking well-documented in Vitest ecosystem.
+
+### Phase 3: Cart State & Currency Tests (Week 3)
+
+**Rationale:** Revenue-critical path combines cart operations with currency conversion. Phase 2 Model tests + Phase 1 View tests enable integration testing here.
+
+**Delivers:**
+- Currency display tests (symbol, formatting, conversion accuracy)
+- Currency switching with cart re-render tests
+- Discount calculation tests (global + item discounts)
+- Multi-currency cart consistency tests
+
+**Addresses features:**
+- Currency display accuracy (P1 table stakes)
+- Price display in selected currency (P1)
+- Discount calculation edge cases (P2 differentiator)
+- Multi-currency cart consistency (P2 differentiator)
+
+**Avoids pitfalls:**
+- Currency conversion floating-point errors (Pitfall 5) — use toBeCloseTo()
+- Async API race conditions (Pitfall 4) — concurrent cart update tests
+- localStorage state pollution (Pitfall 1) — verify cleanup between currency changes
+
+**Test count:** ~20-25 tests, 6-8 hours estimated
+
+**Research flags:** NEEDS RESEARCH-PHASE. Currency conversion precision testing needs deeper investigation. Potential migration to cents-based pricing (large refactor) needs validation. Exchange rate API mocking patterns need research.
+
+### Phase 4: Locale Switching & RTL Tests (Week 4)
+
+**Rationale:** Language switching builds on Phase 1 View tests. RTL is unique complexity — dedicated phase prevents underestimating effort.
+
+**Delivers:**
+- Language switching tests (English ↔ Hebrew)
+- localStorage persistence for language preference
+- RTL layout verification (dir attribute, bidirectional text)
+- RTL edge cases (flexbox, arrows, alignment)
+
+**Addresses features:**
+- Language switching with persistence (P1 table stakes)
+- RTL layout edge cases (P2 differentiator)
+
+**Avoids pitfalls:**
+- RTL layout testing without direction context (Pitfall 6) — verify dir="rtl", test bidirectional content
+- querySelector fragility (Pitfall 2) — Hebrew DOM structure differs from English
+
+**Test count:** ~20-25 tests, 8-10 hours estimated
+
+**Research flags:** NEEDS RESEARCH-PHASE. RTL testing with Happy-DOM needs validation (jsdom doesn't apply CSS). Bidirectional text handling (Hebrew + English SKUs) needs deeper research. Visual regression tools (Playwright for RTL snapshots) need investigation.
+
+### Phase 5: MVC Integration & Page Views (Week 5)
+
+**Rationale:** Integration tests validate component coordination. Page-specific views (cartView, homePageView, categoriesView) extend base View — test after base patterns established.
+
+**Delivers:**
+- Controller routing tests (hash navigation, view instantiation)
+- Cart flow integration (add → view → update → delete)
+- Page-specific view tests (cartView, homePageView, categoriesView)
+- View cleanup verification (event listener removal)
+
+**Addresses features:**
+- Checkout flow integration (P1 table stakes)
+- Model-View integration (P1)
+- View cleanup on navigation (P1)
+- Product modal interactions (P2 differentiator)
+
+**Avoids pitfalls:**
+- Hash-based router timing issues (Pitfall 7) — navigateTo() helper with hashchange promise
+- Event listener leaks (Pitfall 3) — verify cleanup on navigation
+- View inheritance confusion (Pitfall 8) — test child views call parent methods
+
+**Test count:** ~25-30 tests, 8-10 hours estimated
+
+**Research flags:** Standard patterns, skip research-phase. Hash routing and MVC integration well-documented. Page view patterns established in Phase 1.
+
+### Phase 6: Edge Cases & Polish (Week 6)
+
+**Rationale:** Achieve high confidence coverage after critical paths validated. Error handling and edge cases often reveal production bugs.
+
+**Delivers:**
+- Error handling tests (API failures, invalid data, network timeouts)
+- localStorage corruption handling (malformed JSON, missing fields)
+- Browser compatibility concerns (localStorage quota, fetch polyfill)
+- Documentation of testing patterns for future developers
+
+**Addresses features:**
+- localStorage corruption handling (P2 differentiator)
+- Form validation (contact form) (P2)
+- Category dropdown mobile/desktop (P2)
+
+**Avoids pitfalls:**
+- All pitfalls — comprehensive edge case coverage prevents production bugs
+
+**Test count:** ~15-20 tests, 4-6 hours estimated
+
+**Research flags:** Standard patterns, skip research-phase. Error handling and edge cases follow established patterns from Phases 1-5.
 
 ### Phase Ordering Rationale
 
-1. **Infrastructure before tests** - Cannot safely write tests without database isolation and API mocking. Starting with test code risks catastrophic production contamination.
+- **Phase 1 first:** Test infrastructure and Base View tests establish patterns that prevent pitfalls in all subsequent phases. localStorage cleanup, semantic queries, and event listener cleanup patterns must be established before cart and locale tests multiply the complexity.
 
-2. **Auth + Payments before anything else** - These are the highest-risk areas in e-commerce. Auth breaches expose PII, payment bugs lose revenue. Cover critical paths at 90%+ before touching lower-risk code.
+- **Phase 2 before Phase 3:** Model unit tests in isolation validate cart operations before integration with currency conversion. Pure cart logic (add/remove/persist) separated from currency concerns simplifies debugging.
 
-3. **File operations last** - Important for security but less critical than payments/auth. Complex setup (S3 mocking, Sharp processing) deferred until simpler tests validate infrastructure works.
+- **Phase 3 before Phase 4:** Currency/cart state integration tested before locale (language) concerns. Cart + currency is revenue-critical, language switching is UX-critical. If time constraints, Phase 4 could defer to v1.4.
 
-4. **Frontend deferred to v1.3+** - Backend has zero coverage and higher risk. Frontend bugs are cosmetic (visible immediately), backend bugs lose money silently. Prioritize backend until 70%+ coverage achieved.
+- **Phase 4 dedicated to RTL:** Hebrew RTL layout is unique complexity that shouldn't be underestimated or bundled with other locale testing. Research shows RTL edge cases (bidirectional text, flex-direction, logical properties) need focused attention.
+
+- **Phase 5 after Phases 1-4:** Integration tests require unit test patterns established. Controller routing glues Model + View + pages together — can't test effectively until components validated individually.
+
+- **Phase 6 last:** Edge cases and error handling build on patterns from Phases 1-5. Polish phase catches corner cases after critical paths proven.
 
 ### Research Flags
 
-**Phases needing deeper research during execution:**
-- **Phase 2:** Payment API error scenarios - Research showed many payment bugs come from unexpected API responses. Test declined cards, timeout, network errors beyond basic success case.
-- **Phase 3:** Sharp image processing edge cases - Research noted WebP conversion can fail in non-obvious ways (corrupt images, unsupported formats). May need additional fixture images.
+**Phases likely needing deeper research during planning:**
+- **Phase 3 (Cart State & Currency):** Currency conversion precision testing, potential cents-based pricing migration (large refactor), exchange rate API mocking patterns
+- **Phase 4 (Locale & RTL):** Happy-DOM RTL support validation, bidirectional text handling, visual regression tools for RTL snapshots
 
-**Phases with standard patterns (skip additional research):**
-- **Phase 1:** Database isolation with mongodb-memory-server is well-documented, standard 2026 practice
-- **Phase 2:** JWT testing patterns are mature, auth.js middleware already modular and testable
-- **Phase 3:** Mongoose model testing is straightforward, extensive documentation available
+**Phases with standard patterns (skip research-phase):**
+- **Phase 1 (Test Infrastructure):** Vitest/Happy-DOM setup well-documented, Testing Library vanilla JS examples abundant
+- **Phase 2 (Model Unit Tests):** localStorage mocking and fetch mocking well-documented in Vitest ecosystem
+- **Phase 5 (MVC Integration):** Hash routing and MVC integration patterns established, page view tests follow Phase 1 patterns
+- **Phase 6 (Edge Cases):** Error handling follows established patterns from Phases 1-5
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Vitest/Supertest/mongodb-memory-server are proven 2026 standards with extensive documentation. 30M+ weekly downloads. Compatible with Node.js 22. |
-| Features | HIGH | Payment testing best practices well-documented by Stripe/PayPal. E-commerce testing patterns established. Critical path identification backed by multiple sources. |
-| Architecture | HIGH | HTTP-boundary testing for monoliths is well-researched pattern. Integration-first approach for legacy systems documented across multiple sources (Ayende, Understand Legacy Code). |
-| Pitfalls | HIGH | Production contamination pitfalls documented in multiple testing guides. Payment testing pitfalls from Stripe official docs. Monolith testing anti-patterns from experienced practitioners. |
+| Stack | HIGH | All package versions verified from npm (Feb 2026). Vitest 4.0.18 + Happy-DOM 20.0.11 compatibility confirmed. @testing-library/dom 10.4.1 framework-agnostic. |
+| Features | HIGH | E-commerce table stakes well-documented. Cart operations, currency switching, language persistence are standard patterns. RTL testing less common but documented. |
+| Architecture | HIGH | Vanilla JS MVC testing patterns established. Testing Pyramid (integration > unit) supported by multiple sources. Helpers/mocks/factories architecture standard for test codebases. |
+| Pitfalls | HIGH | All 8 pitfalls sourced from real-world issues (GitHub issues, Stack Overflow, testing guides). localStorage pollution, event listener leaks, async races, float precision all documented problems. |
 
 **Overall confidence:** HIGH
 
-Research drew from official documentation (Stripe, Vitest, MongoDB), recent 2026 best practices articles, and deep legacy testing resources. Stack versions verified against package.json. Patterns tested with Node.js 22 and Express 4.x.
-
 ### Gaps to Address
 
-Minor gaps requiring validation during execution (not blockers):
+**During Phase 3 planning (Currency & Cart State):**
+- **Currency precision handling:** Research shows toBeCloseTo() works, but cents-based pricing (storing integers) is more robust long-term. Need to evaluate refactor scope — model.js stores prices as floats currently, migration to cents affects API contracts, localStorage schema, and View rendering. If refactor too large for v1.3, document technical debt and use toBeCloseTo() as interim solution.
 
-- **Exchange rate API specific mocking:** Research covered general HTTP mocking, but exchangerate-api.com specific endpoints need documentation review. Straightforward - verify API response schema in Phase 1.
+**During Phase 4 planning (RTL & Locale):**
+- **Visual regression for RTL:** Happy-DOM doesn't apply CSS, so layout bugs (flex-direction: row-reverse, margin-inline-start) not caught by unit tests. Research suggests Playwright for visual snapshots, but adds E2E dependency. Need to decide: (1) accept manual RTL testing for v1.3, (2) add Playwright for critical RTL pages, or (3) defer comprehensive RTL testing to v1.4.
 
-- **DigitalOcean Spaces vs AWS S3 compatibility:** Research focused on S3, but Spaces is S3-compatible. May need minor adjustments to aws-sdk-mock configuration. Test in Phase 1 setup.
-
-- **Parcel + Vitest interaction:** Frontend uses Parcel bundler. Vitest doesn't run through Parcel (imports source directly). Should work but needs verification in Phase 1. Backup plan: manual alias configuration.
-
-- **RTL testing considerations:** Hebrew interface testing not deeply covered in research. Frontend testing deferred to v1.3, but may need research phase if cart/display logic requires currency-specific testing.
-
-**Mitigation strategy:** Address gaps during Phase 1 foundation setup. All gaps are infrastructure-level (not domain-specific) and have clear fallback approaches.
+**During implementation (any phase):**
+- **View.js size complexity:** Base View class is 900+ lines with complex inheritance. Tests may reveal tight coupling between menu rendering, language switching, and page-specific hooks. If inheritance issues emerge, consider refactoring View.js into smaller mixins or composition pattern. Document as technical debt if refactor too large for v1.3.
 
 ## Sources
 
 ### Primary (HIGH confidence)
 
-**Testing Frameworks:**
-- [Vitest Official Docs](https://vitest.dev/guide/) - Installation, configuration, API reference
-- [Vitest npm](https://www.npmjs.com/package/vitest) - Version 4.0.18, 30.8M weekly downloads
-- [Supertest npm](https://www.npmjs.com/package/supertest) - Version 7.0.0+, Express testing standard
-- [mongodb-memory-server GitHub](https://github.com/typegoose/mongodb-memory-server) - Version 11.0.1
-- [nock GitHub](https://github.com/nock/nock) - Updated Jan 21, 2026
-- [Sinon.js Official Docs](https://sinonjs.org/) - Version 21.0.1
+**Stack research:**
+- [Vitest Environment Guide](https://vitest.dev/guide/environment) — official docs for Happy-DOM setup
+- [@testing-library/dom - npm](https://www.npmjs.com/package/@testing-library/dom) — version 10.4.1 verified (published Aug 2025)
+- [happy-dom - npm](https://www.npmjs.com/package/happy-dom) — version 20.0.11 verified (published Jan 2026)
+- [vitest-fetch-mock - npm](https://www.npmjs.com/package/vitest-fetch-mock) — version 0.3.0+ for fetch mocking
 
-**Payment Testing:**
-- [Payment gateway testing guide | Stripe](https://stripe.com/resources/more/payment-gateway-testing-a-how-to-guide-for-businesses)
-- [Stripe Automated Testing Docs](https://docs.stripe.com/automated-testing)
-- [Payment Gateway Testing: Complete Guide | TestPapas](https://testpapas.com/payment-gateway-testing)
+**Features research:**
+- [JavaScript Testing Best Practices (GitHub)](https://github.com/goldbergyoni/javascript-testing-best-practices) — comprehensive guide with 50+ best practices
+- [Shopify: Ecommerce Testing Guide 2026](https://www.shopify.com/blog/ecommerce-testing) — table stakes features for e-commerce
+- [Frontend Unit Testing Best Practices](https://www.meticulous.ai/blog/frontend-unit-testing-best-practices) — what to test vs what not to test
 
-**Legacy System Testing:**
-- [Testing against Production Database | Microsoft Learn](https://learn.microsoft.com/en-us/ef/core/testing/testing-with-the-database)
-- [Avoid retrofitting unit tests | Ayende](https://ayende.com/blog/3296/avoid-retrofitting-unit-tests)
-- [Best way to start testing untested code | Understand Legacy Code](https://understandlegacycode.com/blog/best-way-to-start-testing-untested-code/)
+**Architecture research:**
+- [The MVC Design Pattern in Vanilla JavaScript — SitePoint](https://www.sitepoint.com/mvc-design-pattern-javascript/) — MVC testing patterns
+- [Testing the DOM: The Setup | Steve Kinney](https://stevekinney.com/courses/testing/testing-the-dom) — Happy-DOM setup and patterns
+- [jsdom vs happy-dom · vitest-dev/vitest Discussion](https://github.com/vitest-dev/vitest/discussions/1607) — performance comparison, API coverage
+
+**Pitfalls research:**
+- [How to mock and spy on local storage in vitest](https://dylanbritz.dev/writing/mocking-local-storage-vitest/) — localStorage state pollution prevention
+- [MaxListenersExceededWarning: Possible EventEmitter Memory Leak - Vitest Issue](https://github.com/vitest-dev/vitest/issues/7194) — event listener leak patterns
+- [Currency Calculations in JavaScript - Honeybadger](https://www.honeybadger.io/blog/currency-money-calculations-in-javascript/) — floating-point precision issues
+- [The Complete Guide to RTL Layout Testing](https://placeholdertext.org/blog/the-complete-guide-to-rtl-right-to-left-layout-testing-arabic-hebrew-more/) — RTL bidirectional text handling
 
 ### Secondary (MEDIUM confidence)
 
-- [Testing MongoDB with Memory Server | AppSignal Blog](https://blog.appsignal.com/2025/06/18/testing-mongodb-in-node-with-the-mongodb-memory-server.html) - June 2025 tutorial
-- [Vitest vs Jest Comparison | Better Stack](https://betterstack.com/community/guides/scaling-nodejs/vitest-vs-jest/) - Performance benchmarks
-- [JSDOM vs Happy-DOM | Sean Coughlin](https://blog.seancoughlin.me/jsdom-vs-happy-dom-navigating-the-nuances-of-javascript-testing)
-- [Monolithic vs Microservices Testing | BrowserStack](https://www.browserstack.com/guide/testing-strategies-in-microservices-vs-monolithic-applications)
+- [How to Unit Test HTML and Vanilla JavaScript](https://dev.to/thawkin3/how-to-unit-test-html-and-vanilla-javascript-without-a-ui-framework-4io) — vanilla JS testing patterns without frameworks
+- [BrowserStack: How to Test E-commerce Website](https://www.browserstack.com/guide/how-to-test-ecommerce-website) — e-commerce testing checklist
+- [How to Build a Simple MVC App From Scratch in JavaScript](https://www.taniarascia.com/javascript-mvc-todo-app/) — MVC structure patterns
 
-### Tertiary (LOW confidence, needs validation)
+### Tertiary (LOW confidence)
 
-- Adobe S3Mock - Alternative to aws-sdk-mock, more comprehensive but complex setup. Consider only if aws-sdk-mock insufficient.
-
-**Verified from Codebase:**
-- `backend/package.json` - Node.js 22.15.0, Express 4.20.0, Mongoose 8.6.1, aws-sdk 2.1693.0
-- `backend/index.js` - 4,233 lines monolithic structure, payment endpoints at lines 1213+/3253+
-- `CLAUDE.md` - Multi-language (eng/heb with RTL), multi-currency (USD/ILS) requirements
+- Community discussions on Reddit, Stack Overflow for edge cases (localStorage quota, Hebrew layout bugs, currency rounding)
+- Blog posts on vanilla JS MVC patterns (some outdated, pre-Vitest era)
 
 ---
-
-*Research completed: 2026-02-04*
-*Ready for requirements definition: Yes*
-*Next step: Create roadmap with 3-phase structure (Foundation → Critical Path → Data Integrity)*
+*Research completed: 2026-02-06*
+*Ready for roadmap: yes*
