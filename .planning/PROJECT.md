@@ -8,18 +8,25 @@ Professional SKU (Stock Keeping Unit) management for an existing handmade jewelr
 
 Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency.
 
-## Current State (v1.2 Shipped)
+## Current Milestone: v1.3 Frontend Testing
 
-**Latest Release:** v1.2 Test Infrastructure & Critical Coverage (2026-02-06)
+**Goal:** Complete the testing foundation with comprehensive frontend test coverage for the vanilla JS MVC architecture.
 
-**Production Status:**
+**Target features:**
+- Base View class testing (language/currency selectors, header menu, shared functionality)
+- Page-specific view testing (incremental coverage: cart, product modal, checkout, then others)
+- Cart state scenario testing (complete user journeys with localStorage sync and multi-currency)
+- Locale switching testing (RTL layouts, currency display/conversion, GeoIP detection, translations)
+- MVC integration testing (controller routing, model-view sync, API error handling)
+
+## Previous Milestones
+
+**v1.2 Test Infrastructure & Critical Coverage (Shipped: 2026-02-06)**
 - 447 tests passing with comprehensive safety net for future development
 - Zero test coverage → 80 requirements satisfied with risk-based testing approach
 - Critical security vulnerabilities covered (auth, payments, CORS, rate limiting, XSS/injection)
 - CI/CD pipeline operational with automated test execution and coverage reporting
 - Test infrastructure prevents production contamination through environment guards
-
-**Next Milestone:** TBD - Use `/gsd:new-milestone` to plan v1.3
 
 ## Requirements
 
@@ -83,7 +90,13 @@ Clean, professional product information management that matches real-world e-com
 
 ### Active
 
-<!-- Placeholder for v1.3 requirements - use /gsd:new-milestone to define next milestone -->
+<!-- v1.3 Frontend Testing - in progress -->
+
+- [ ] Base View class tests (language/currency selectors, header menu)
+- [ ] Page-specific view tests (cart, product modal, checkout views)
+- [ ] Cart state scenario tests (localStorage sync, multi-currency calculations)
+- [ ] Locale switching tests (RTL layouts, currency display, GeoIP detection, translations)
+- [ ] MVC integration tests (controller routing, model-view sync, API error handling)
 
 ### Out of Scope
 
@@ -115,14 +128,14 @@ Clean, professional product information management that matches real-world e-com
 - Currency service: Scheduled exchange rate updates (USD/ILS)
 
 **Known Issues/Tech Debt:**
-- Monolithic backend remains (3,662 lines) - refactoring deferred to v1.3+
+- Monolithic backend remains (3,662 lines) - refactoring deferred to future
 - 147+ console.log statements not conditional on environment
 - Incomplete error handling in catch blocks (silent failures)
 - Input validation documented but not sanitized (exploratory testing approach)
 - No structured logging (console.log/error scattered throughout)
 - No audit logging for admin actions
-- Frontend testing deferred to v1.3 (Views, cart state, language/currency switching)
-- Payment sandbox integration deferred to v1.3 (real API testing with test mode)
+- Frontend testing in progress (v1.3 milestone)
+- Payment sandbox integration deferred to future (real API testing with test mode)
 
 ## Constraints
 
@@ -147,4 +160,4 @@ Clean, professional product information management that matches real-world e-com
 | SKU value always LTR in RTL mode | Product codes are identifiers, not translatable text | ✓ Good - prevents reversal confusion |
 
 ---
-*Last updated: 2026-02-06 after v1.2 milestone completion*
+*Last updated: 2026-02-06 after starting v1.3 milestone*
