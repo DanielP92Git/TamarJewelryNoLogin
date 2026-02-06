@@ -134,13 +134,89 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (To be filled by roadmapper) | | |
+| INFRA-01 | Phase 17 | Pending |
+| INFRA-02 | Phase 17 | Pending |
+| INFRA-03 | Phase 17 | Pending |
+| INFRA-04 | Phase 17 | Pending |
+| INFRA-05 | Phase 17 | Pending |
+| MODEL-01 | Phase 18 | Pending |
+| MODEL-02 | Phase 18 | Pending |
+| MODEL-03 | Phase 18 | Pending |
+| MODEL-04 | Phase 18 | Pending |
+| MODEL-05 | Phase 18 | Pending |
+| MODEL-06 | Phase 18 | Pending |
+| MODEL-07 | Phase 18 | Pending |
+| MODEL-08 | Phase 18 | Pending |
+| MODEL-09 | Phase 18 | Pending |
+| MODEL-10 | Phase 18 | Pending |
+| MODEL-11 | Phase 18 | Pending |
+| MODEL-12 | Phase 18 | Pending |
+| MODEL-13 | Phase 18 | Pending |
+| MODEL-14 | Phase 18 | Pending |
+| MODEL-15 | Phase 18 | Pending |
+| MODEL-16 | Phase 18 | Pending |
+| VIEW-01 | Phase 19 | Pending |
+| VIEW-02 | Phase 19 | Pending |
+| VIEW-03 | Phase 19 | Pending |
+| VIEW-04 | Phase 19 | Pending |
+| VIEW-05 | Phase 19 | Pending |
+| VIEW-06 | Phase 19 | Pending |
+| VIEW-07 | Phase 19 | Pending |
+| VIEW-08 | Phase 19 | Pending |
+| VIEW-09 | Phase 19 | Pending |
+| VIEW-10 | Phase 19 | Pending |
+| VIEW-11 | Phase 19 | Pending |
+| PAGE-01 | Phase 20 | Pending |
+| PAGE-02 | Phase 20 | Pending |
+| PAGE-03 | Phase 20 | Pending |
+| PAGE-04 | Phase 20 | Pending |
+| PAGE-05 | Phase 20 | Pending |
+| PAGE-06 | Phase 20 | Pending |
+| PAGE-07 | Phase 20 | Pending |
+| PAGE-08 | Phase 20 | Pending |
+| PAGE-09 | Phase 20 | Pending |
+| PAGE-10 | Phase 20 | Pending |
+| PAGE-11 | Phase 20 | Pending |
+| PAGE-12 | Phase 20 | Pending |
+| PAGE-13 | Phase 20 | Pending |
+| LOCALE-01 | Phase 21 | Pending |
+| LOCALE-02 | Phase 21 | Pending |
+| LOCALE-03 | Phase 21 | Pending |
+| LOCALE-04 | Phase 21 | Pending |
+| LOCALE-05 | Phase 21 | Pending |
+| LOCALE-06 | Phase 21 | Pending |
+| LOCALE-07 | Phase 21 | Pending |
+| LOCALE-08 | Phase 21 | Pending |
+| LOCALE-09 | Phase 21 | Pending |
+| LOCALE-10 | Phase 21 | Pending |
+| LOCALE-11 | Phase 21 | Pending |
+| LOCALE-12 | Phase 21 | Pending |
+| LOCALE-13 | Phase 21 | Pending |
+| LOCALE-14 | Phase 21 | Pending |
+| MVC-01 | Phase 22 | Pending |
+| MVC-02 | Phase 22 | Pending |
+| MVC-03 | Phase 22 | Pending |
+| MVC-04 | Phase 22 | Pending |
+| MVC-05 | Phase 22 | Pending |
+| MVC-06 | Phase 22 | Pending |
+| MVC-07 | Phase 22 | Pending |
+| MVC-08 | Phase 22 | Pending |
+| MVC-09 | Phase 22 | Pending |
+| MVC-10 | Phase 22 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 60 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 60 ⚠️
+- Mapped to phases: 60/60 (100% coverage)
+- Unmapped: 0
+
+**Phase distribution:**
+- Phase 17 (Test Infrastructure): 5 requirements
+- Phase 18 (Model Tests): 16 requirements
+- Phase 19 (Base View Tests): 11 requirements
+- Phase 20 (Page View Tests): 13 requirements
+- Phase 21 (Locale & Currency Tests): 14 requirements
+- Phase 22 (MVC Integration Tests): 10 requirements
 
 ---
 *Requirements defined: 2026-02-06*
-*Last updated: 2026-02-06 after initial definition*
+*Last updated: 2026-02-06 after roadmap creation*
