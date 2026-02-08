@@ -253,9 +253,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 20-01-PLAN.md -- Cart view display, totals, empty state, and currency switching tests
-- [ ] 20-02-PLAN.md -- Product modal rendering, close methods, add-to-cart, and categories filtering tests
-- [ ] 20-03-PLAN.md -- Checkout payment flow, home page categories, and contact form validation tests
+- [x] 20-01-PLAN.md -- Cart view display, totals, empty state, and currency switching tests
+- [x] 20-02-PLAN.md -- Product modal rendering, close methods, add-to-cart, and categories filtering tests
+- [x] 20-03-PLAN.md -- Checkout payment flow, home page categories, and contact form validation tests
 
 #### Phase 21: Locale & Currency Tests
 **Goal**: Multi-language RTL layouts and multi-currency display validated
@@ -319,6 +319,6 @@ Phases execute in numeric order: 17 → 18 → 19 → 20 → 21 → 22
 | 17. Test Infrastructure & Utilities | v1.3 | 3/3 | Complete | 2026-02-08 |
 | 18. Model Unit Tests | v1.3 | 4/4 | Complete | 2026-02-08 |
 | 19. Base View Tests | v1.3 | 4/4 | Complete | 2026-02-09 |
-| 20. Page View Tests | v1.3 | 0/3 | Not started | - |
+| 20. Page View Tests | v1.3 | 3/3 | Complete | 2026-02-09 |
 | 21. Locale & Currency Tests | v1.3 | 0/4 | Not started | - |
 | 22. MVC Integration Tests | v1.3 | 0/4 | Not started | - |
