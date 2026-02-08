@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ## Current Position
 
 Phase: 18 of 22 (Model Unit Tests)
-Plan: 2 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-08 — Completed 18-02-PLAN.md (localStorage persistence and corruption handling tests)
+Last activity: 2026-02-08 — Completed 18-03-PLAN.md (API mocking and error handling tests)
 
 Progress: [████████░░░░░░░░░░░░] 77% (17 phases complete, 18 in progress / 22 total)
 
@@ -65,6 +65,9 @@ Recent decisions affecting current work:
 - v1.3: Test dual-price storage rather than currency conversion (View layer concern) (18-04)
 - v1.3: Browser restart simulation uses cart.length = 0 to preserve localStorage (18-02)
 - v1.3: Corruption tests verify try-catch logs errors but doesn't crash (18-02)
+- v1.3: Fetch mock utilities (setupFetchMock, mockFetchSuccess, mockFetchError) for API tests (18-03)
+- v1.3: Network error tests document addToUserStorage lacks error handling (18-03)
+- v1.3: Module-level cache in getGlobalDiscount makes time-based testing complex (18-03)
 
 ### Pending Todos
 
@@ -90,17 +93,20 @@ None yet.
 **Phase 18 (Model Tests): IN PROGRESS**
 - ✓ Cart operations tests complete (18-01) - add/remove/clear with fetch mocks
 - ✓ localStorage persistence tests complete (18-02) - browser restart, corruption handling
+- ✓ API mocking and error handling tests complete (18-03) - fetch mocking, network/HTTP errors
 - ✓ Currency and discount calculation tests complete (18-04)
 - ✓ Floating-point precision handled with toBeCloseTo() (18-04)
-- ✓ Fetch mock utilities and DOM element mocks available for remaining plans (18-01)
+- ✓ Fetch mock utilities and DOM element mocks available (18-01, 18-03)
 - ✓ Browser restart simulation pattern established (cart.length = 0 + handleLoadStorage) (18-02)
 - ✓ Happy-DOM localStorage works perfectly (no mocking needed) (18-02)
-- Next: Additional model test plan (18-03)
+- ✓ Network error handling tested - identified addToUserStorage lacks .catch() (18-03)
+- Next: Phase 18 complete, ready for Phase 19 (Base View Tests)
 - Research flag: potential cents-based pricing migration (large refactor, may defer to v2.0)
+- Known issue: addToUserStorage lacks error handling (unhandled promise rejections on network failure)
 - Known issue: createLocalStorage lacks try-catch for quota errors (will crash if quota exceeded)
 
 ## Session Continuity
 
-Last session: 2026-02-08 20:59:43 UTC
-Stopped at: Completed 18-02-PLAN.md (localStorage persistence and corruption handling tests)
+Last session: 2026-02-08 21:03:39 UTC
+Stopped at: Completed 18-03-PLAN.md (API mocking and error handling tests)
 Resume file: None
