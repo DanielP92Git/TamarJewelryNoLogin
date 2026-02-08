@@ -331,23 +331,30 @@ describe('Model: localStorage Persistence', () => {
   });
 
   describe('localStorage Quota Handling (optional)', () => {
-    it('should verify localStorage.setItem is called (quota handling not implemented)', () => {
-      // Spy on localStorage.setItem to verify it's called without try-catch
-      const setItemSpy = vi.spyOn(localStorage, 'setItem');
+    it('should handle localStorage quota exceeded gracefully', () => {
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const setItemSpy = vi.spyOn(localStorage, 'setItem').mockImplementation(() => {
+        const error = new Error('QuotaExceededError');
+        error.name = 'QuotaExceededError';
+        throw error;
+      });
 
       const product = createProduct();
       const mockElement = createMockProductElement(product);
 
-      handleAddToCart(mockElement);
+      // Should not throw
+      expect(() => {
+        handleAddToCart(mockElement);
+      }).not.toThrow();
 
-      // Verify localStorage.setItem was called
-      expect(setItemSpy).toHaveBeenCalledWith('cart', expect.any(String));
-
-      // Current implementation doesn't have try-catch around createLocalStorage.
-      // If localStorage.setItem throws (quota exceeded), the app will crash.
-      // Future enhancement: wrap createLocalStorage in try-catch to handle QuotaExceededError gracefully
+      // Should log error
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        'localStorage quota exceeded. Cart not saved:',
+        expect.any(Error)
+      );
 
       setItemSpy.mockRestore();
+      consoleErrorSpy.mockRestore();
     });
   });
 });
