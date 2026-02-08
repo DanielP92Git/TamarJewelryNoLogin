@@ -217,10 +217,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 18-01-PLAN.md - Cart operations tests with fetch and DOM mocks
-- [ ] 18-02-PLAN.md - localStorage persistence and corruption handling tests
-- [ ] 18-03-PLAN.md - API mocking and error handling tests
-- [ ] 18-04-PLAN.md - Currency storage and discount calculation tests
+- [x] 18-01-PLAN.md - Cart operations tests with fetch and DOM mocks
+- [x] 18-02-PLAN.md - localStorage persistence and corruption handling tests
+- [x] 18-03-PLAN.md - API mocking and error handling tests
+- [x] 18-04-PLAN.md - Currency storage and discount calculation tests
 
 #### Phase 19: Base View Tests
 **Goal**: Shared View class functionality validated for language/currency switching and header menu
@@ -317,7 +317,7 @@ Phases execute in numeric order: 17 → 18 → 19 → 20 → 21 → 22
 | 15. Database & Model Tests | v1.2 | 4/4 | Complete | 2026-02-06 |
 | 16. Security & Middleware Tests | v1.2 | 4/4 | Complete | 2026-02-06 |
 | 17. Test Infrastructure & Utilities | v1.3 | 3/3 | Complete | 2026-02-08 |
-| 18. Model Unit Tests | v1.3 | 0/4 | Not started | - |
+| 18. Model Unit Tests | v1.3 | 4/4 | Complete | 2026-02-08 |
 | 19. Base View Tests | v1.3 | 0/4 | Not started | - |
 | 20. Page View Tests | v1.3 | 0/3 | Not started | - |
 | 21. Locale & Currency Tests | v1.3 | 0/4 | Not started | - |
