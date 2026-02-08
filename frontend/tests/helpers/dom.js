@@ -1,12 +1,38 @@
 /**
  * DOM testing helper utilities for frontend tests.
  *
- * These helpers simplify common DOM manipulation and testing tasks
- * in the jsdom environment.
+ * Provides both Testing Library semantic queries (recommended)
+ * and legacy DOM manipulation utilities for backward compatibility.
  */
 
+import { getQueriesForElement, screen as tScreen } from '@testing-library/dom';
+
 /**
- * Renders HTML string into document.body
+ * Renders HTML and returns Testing Library queries bound to document.body.
+ * Recommended for new tests - provides semantic queries (getByRole, getByText, etc).
+ *
+ * @param {string} html - HTML string to render
+ * @returns {Object} Object with all query methods bound to document.body
+ *
+ * @example
+ * const { getByRole, getByText } = render('<button>Click Me</button>');
+ * const button = getByRole('button', { name: /click me/i });
+ */
+export function render(html) {
+  document.body.innerHTML = html;
+  return {
+    ...getQueriesForElement(document.body),
+    container: document.body
+  };
+}
+
+// Re-export screen for global queries (convenience)
+export const screen = tScreen;
+
+/**
+ * Renders HTML string into document.body (legacy function).
+ * Use `render()` for new tests - it provides Testing Library queries.
+ *
  * @param {string} html - HTML string to render
  * @returns {Document} The document object for chaining
  */
@@ -20,31 +46,6 @@ export function renderHTML(html) {
  */
 export function clearDOM() {
   document.body.innerHTML = '';
-}
-
-/**
- * Creates a fresh localStorage mock with common methods
- * Useful for isolated tests that need to reset localStorage state
- * @returns {Object} Mock localStorage object with get/set/remove/clear methods
- */
-export function mockLocalStorage() {
-  const store = {};
-
-  return {
-    getItem: (key) => store[key] || null,
-    setItem: (key, value) => { store[key] = String(value); },
-    removeItem: (key) => { delete store[key]; },
-    clear: () => {
-      Object.keys(store).forEach(key => delete store[key]);
-    },
-    get length() {
-      return Object.keys(store).length;
-    },
-    key: (index) => {
-      const keys = Object.keys(store);
-      return keys[index] || null;
-    }
-  };
 }
 
 /**
