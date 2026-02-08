@@ -314,7 +314,7 @@ export default class View {
     }
 
     cartNumberElements.forEach(cartNumEl => {
-      cartNumEl.textContent = num; // Set text content to the actual number
+      cartNumEl.textContent = String(num); // Convert to string explicitly for correct rendering
     });
 
     // Ensure body has show-cart-icon class for visibility
