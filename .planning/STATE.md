@@ -58,6 +58,9 @@ Recent decisions affecting current work:
 - v1.3: Frontend cart format is array of items, backend uses object keyed by ID (17-02)
 - v1.3: Validated all infrastructure with 20 comprehensive tests before phases 18-22 (17-03)
 - v1.3: CI/CD workflow verified for frontend tests with Happy-DOM (17-03)
+- v1.3: Used vi.fn() for fetch mocking instead of additional packages (18-01)
+- v1.3: DOM element mocks match model.js addToLocalStorage structure expectations (18-01)
+- v1.3: Separate describe blocks pattern for guest vs logged-in user paths (18-01)
 - v1.3: Used toBeCloseTo() with 0 decimal places for integer rounding verification (18-04)
 - v1.3: Test dual-price storage rather than currency conversion (View layer concern) (18-04)
 
@@ -83,13 +86,15 @@ None yet.
 - Research flag: bidirectional text handling (Hebrew + English SKUs)
 
 **Phase 18 (Model Tests): IN PROGRESS**
+- ✓ Cart operations tests complete (18-01) - add/remove/clear with fetch mocks
 - ✓ Currency and discount calculation tests complete (18-04)
 - ✓ Floating-point precision handled with toBeCloseTo() (18-04)
-- Next: Additional model test plans (18-01, 18-02, 18-03)
+- ✓ Fetch mock utilities and DOM element mocks available for remaining plans (18-01)
+- Next: Additional model test plans (18-02, 18-03)
 - Research flag: potential cents-based pricing migration (large refactor, may defer to v2.0)
 
 ## Session Continuity
 
-Last session: 2026-02-08 20:49:33 UTC
-Stopped at: Completed 18-04-PLAN.md (Currency and discount calculation tests)
+Last session: 2026-02-08 18:49:59 UTC
+Stopped at: Completed 18-01-PLAN.md (Cart operations with fetch mocks and DOM helpers)
 Resume file: None
