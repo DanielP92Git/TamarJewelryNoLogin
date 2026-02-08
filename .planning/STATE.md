@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ## Current Position
 
 Phase: 17 of 22 (Test Infrastructure & Utilities)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In progress
-Last activity: 2026-02-08 — Completed 17-01-PLAN.md (Happy-DOM environment configured)
+Last activity: 2026-02-08 — Completed 17-02-PLAN.md (Testing Library and factories added)
 
-Progress: [████████░░░░░░░░░░░░] 74% (16.33 phases complete / 22 total)
+Progress: [████████░░░░░░░░░░░░] 74% (16.67 phases complete / 22 total)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 64 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 1)
+- Total plans completed: 65 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 2)
 - Average duration: ~14 min/plan
-- Total execution time: ~25.1 hours
+- Total execution time: ~25.2 hours
 
 **By Phase (v1.2 completed):**
 
@@ -53,6 +53,9 @@ Recent decisions affecting current work:
 - v1.3: Switched to Happy-DOM from jsdom for 2-3x performance improvement (17-01)
 - v1.3: Enhanced window mocks with vi.fn() for test assertions on navigation (17-01)
 - v1.3: Using @testing-library packages compatible with Happy-DOM
+- v1.3: Semantic queries (getByRole, getByText) over querySelector for resilient tests (17-02)
+- v1.3: Factory pattern with counter generates unique test data (17-02)
+- v1.3: Frontend cart format is array of items, backend uses object keyed by ID (17-02)
 
 ### Pending Todos
 
@@ -63,7 +66,10 @@ None yet.
 **Phase 17 (Test Infrastructure):**
 - ✓ Happy-DOM 20.0.11 installed and configured (17-01)
 - ✓ localStorage cleanup pattern established in setup.js (17-01)
-- Next: Install @testing-library/dom 10.4.1 (17-02)
+- ✓ @testing-library/dom 10.4.1 installed (17-02)
+- ✓ Testing Library integration with render() and screen (17-02)
+- ✓ Test data factories for products, cart, users, settings (17-02)
+- Next: Plan 03 (final infrastructure utilities)
 
 **Phase 21 (Locale & Currency Tests):**
 - Happy-DOM doesn't apply CSS - RTL layout bugs may not be caught
@@ -76,6 +82,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-08
-Stopped at: Completed 17-01-PLAN.md (Happy-DOM environment configured)
+Last session: 2026-02-08 09:00:52 UTC
+Stopped at: Completed 17-02-PLAN.md (Testing Library and factories added)
 Resume file: None
