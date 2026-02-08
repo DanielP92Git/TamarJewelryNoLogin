@@ -174,7 +174,10 @@ export const addToUserStorage = data => {
     body: JSON.stringify({ itemId: itemId }),
   })
     .then(response => response.json())
-    .then(idData => idData); // Here 'data' is the item's id number
+    .then(idData => idData) // Here 'data' is the item's id number
+    .catch(error => {
+      console.error('Failed to add item to cart:', error);
+    });
 };
 
 /////////////////////////////////
@@ -182,7 +185,15 @@ export const addToUserStorage = data => {
 /////////////////////////////////
 
 const createLocalStorage = function () {
-  localStorage.setItem('cart', JSON.stringify(cart));
+  try {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  } catch (error) {
+    if (error.name === 'QuotaExceededError' || error.code === 22) {
+      console.error('localStorage quota exceeded. Cart not saved:', error);
+    } else {
+      console.error('Failed to save cart to localStorage:', error);
+    }
+  }
 };
 
 export const addToLocalStorage = async function (data) {
