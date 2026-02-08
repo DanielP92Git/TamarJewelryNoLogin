@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ## Current Position
 
 Phase: 19 of 22 (Base View Tests)
-Plan: 4 of 4 in current phase
-Status: Phase complete
-Last activity: 2026-02-09 — Completed 19-04-PLAN.md (Event listener cleanup tests)
+Plan: 3 of 4 in current phase
+Status: In progress
+Last activity: 2026-02-09 — Completed 19-03-PLAN.md (Header menu tests)
 
 Progress: [████████░░░░░░░░░░░░] 86% (19 phases complete / 22 total)
 
@@ -73,6 +73,9 @@ Recent decisions affecting current work:
 - v1.3: setLanguage() renders menu only; changeToHeb/changeToEng set document attributes (19-01)
 - v1.3: Happy-DOM doesn't apply 'selected' attribute from innerHTML; manual selector.value sync required (19-02)
 - v1.3: Currency persistence initialization preserved across tests (event delegation works) (19-02)
+- v1.3: Use getAllByRole/queryAllByText for elements appearing in multiple places (menu + footer) (19-03)
+- v1.3: Test menu replacement by checking ul-eng/ul-heb classes instead of text content (19-03)
+- v1.3: Explicit String() conversion for numeric textContent handles Happy-DOM quirk with 0 (19-03)
 - v1.3: Use behavioral verification (spy on methods, count events) instead of listener introspection since Happy-DOM lacks getEventListeners API (19-04)
 - v1.3: Spy on view.changeToHeb/changeToEng methods to detect handler accumulation rather than localStorage.setItem (better isolation) (19-04)
 - v1.3: Test observable outcomes (single action per user interaction) to prove cleanup works correctly (19-04)
@@ -109,22 +112,22 @@ None yet.
 - ✓ Browser restart simulation pattern established (18-02)
 - ✓ Error handling fixed via quick-001: addToUserStorage and createLocalStorage (2026-02-08)
 
-**Phase 19 (Base View Tests): COMPLETE**
+**Phase 19 (Base View Tests): IN PROGRESS**
 - ✓ 19-01: Language selector and switching tests (20 tests for VIEW-01 through VIEW-04)
 - ✓ 19-02: Currency selector tests (15 tests for VIEW-05 through VIEW-08)
-- ✓ 19-03: Cart counter tests (15 tests for VIEW-09, VIEW-10)
-- ✓ 19-04: Event listener cleanup tests (15 tests for VIEW-11)
+- ✓ 19-03: Header menu and navigation tests (32 tests for VIEW-09, VIEW-10)
+- ⏳ 19-04: Event listener cleanup tests (pending)
 - ✓ View instantiation pattern with minimal DOM fixture established
 - ✓ Happy-DOM 'selected' attribute workaround documented
 - ✓ Currency persistence event delegation verified across tests
-- ✓ Behavioral verification pattern for listener cleanup (no getEventListeners in Happy-DOM)
-- ✓ 65 total tests covering core View.js functionality
-- Ready for: Phase 20 (View subclass tests)
+- ✓ Cart number rendering bug fixed (String conversion for textContent = 0)
+- ✓ Testing pattern for elements in multiple places (menu + footer)
+- ✓ 67 tests completed (20 + 15 + 32), target 80+ for full phase
 
 ## Session Continuity
 
-Last session: 2026-02-09 00:26:52 UTC
-Stopped at: Completed 19-04-PLAN.md (Event listener cleanup tests)
+Last session: 2026-02-08 22:28:27 UTC
+Stopped at: Completed 19-03-PLAN.md (Header menu tests)
 Resume file: None
 
 ## Quick Tasks Completed
