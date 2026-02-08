@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 
 ## Current Position
 
-Phase: 19 of 22 (Base View Tests)
-Plan: 4 of 4 in current phase
-Status: Phase complete
-Last activity: 2026-02-09 — Completed Phase 19 (Base View Tests) - 82 tests, all verified
+Phase: 20 of 22 (Page View Tests)
+Plan: 1 of 4 in current phase
+Status: In progress
+Last activity: 2026-02-09 — Completed 20-01-PLAN.md (Cart View Tests)
 
-Progress: [█████████░░░░░░░░░░░] 86% (19 phases complete / 22 total)
+Progress: [█████████░░░░░░░░░░░] 87% (19.25 phases complete / 22 total)
 
 ## Performance Metrics
 
@@ -79,6 +79,9 @@ Recent decisions affecting current work:
 - v1.3: Use behavioral verification (spy on methods, count events) instead of listener introspection since Happy-DOM lacks getEventListeners API (19-04)
 - v1.3: Spy on view.changeToHeb/changeToEng methods to detect handler accumulation rather than localStorage.setItem (better isolation) (19-04)
 - v1.3: Test observable outcomes (single action per user interaction) to prove cleanup works correctly (19-04)
+- v1.3: Singleton views need DOM element re-assignment in beforeEach after rendering test fixture (20-01)
+- v1.3: Test currency switching via manual render() calls rather than relying on broken event handlers (20-01)
+- v1.3: Cart item test data must include both usdPrice and ilsPrice fields for dual-currency verification (20-01)
 
 ### Pending Todos
 
@@ -125,11 +128,22 @@ None yet.
 - ✓ Behavioral verification pattern for event cleanup (spy-based approach)
 - Ready for: Phase 20 (Page View Tests)
 
+**Phase 20 (Page View Tests): IN PROGRESS**
+- ✓ 20-01: Cart view display and totals tests (15 tests for PAGE-01 through PAGE-04)
+- ⏳ 20-02: Product page modal tests (pending)
+- ⏳ 20-03: Categories page tests (pending)
+- ⏳ 20-04: Search and filters integration tests (pending)
+- ✓ Singleton view DOM reassignment pattern established (20-01)
+- ✓ Currency switching test strategy via manual render (20-01)
+- ✓ Dual-currency test data structure documented (20-01)
+- ✓ 15 cart view tests all passing (product names, quantities, prices, totals)
+- Note: Potential CartView bug - currency-changed handler calls non-existent _render() method
+
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed Phase 19 (Base View Tests) - all 4 plans executed and verified
-Resume file: None
+Stopped at: Completed 20-01 (Cart View Tests) - 15 tests, all passing
+Resume file: .planning/phases/20-page-view-tests/20-02-PLAN.md (next)
 
 ## Quick Tasks Completed
 
