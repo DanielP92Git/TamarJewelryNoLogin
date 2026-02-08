@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency
-**Current focus:** Phase 18 - Model Unit Tests
+**Current focus:** Phase 19 - Base View Tests
 
 ## Current Position
 
-Phase: 18 of 22 (Model Unit Tests)
-Plan: 4 of 4 in current phase
-Status: Phase complete
-Last activity: 2026-02-08 — Completed Phase 18 (Model Unit Tests) - 77 tests, all verified
+Phase: 19 of 22 (Base View Tests)
+Plan: 1 of 4 in current phase
+Status: In progress
+Last activity: 2026-02-08 — Completed 19-01-PLAN.md (Language selector tests)
 
-Progress: [████████░░░░░░░░░░░░] 82% (18 phases complete / 22 total)
+Progress: [████████░░░░░░░░░░░░] 83% (18 phases complete + 1 of 4 plans / 22 total)
 
 ## Performance Metrics
 
@@ -68,6 +68,9 @@ Recent decisions affecting current work:
 - v1.3: Fetch mock utilities (setupFetchMock, mockFetchSuccess, mockFetchError) for API tests (18-03)
 - v1.3: Network error tests document addToUserStorage lacks error handling (18-03)
 - v1.3: Module-level cache in getGlobalDiscount makes time-based testing complex (18-03)
+- v1.3: View instantiation requires minimal DOM fixture (header, menu, utilities, footer) (19-01)
+- v1.3: Module-level currency persistence flag needs cleanup in afterEach (19-01)
+- v1.3: setLanguage() renders menu only; changeToHeb/changeToEng set document attributes (19-01)
 
 ### Pending Todos
 
@@ -100,12 +103,17 @@ None yet.
 - ✓ Fetch mock utilities and DOM element mocks created (18-01)
 - ✓ Browser restart simulation pattern established (18-02)
 - ✓ Error handling fixed via quick-001: addToUserStorage and createLocalStorage (2026-02-08)
-- Ready for: Phase 19 (Base View Tests)
+
+**Phase 19 (Base View Tests): IN PROGRESS**
+- ✓ 19-01: Language selector and switching tests (20 tests for VIEW-01 through VIEW-04)
+- ✓ View instantiation pattern with minimal DOM fixture established
+- ✓ Module-level currency persistence cleanup pattern documented
+- In progress: 19-02 (Currency selector tests - VIEW-05 through VIEW-08)
 
 ## Session Continuity
 
-Last session: 2026-02-08 22:32:00 UTC
-Stopped at: Completed quick-001 (Error handling fixes in model.js)
+Last session: 2026-02-08 22:17:29 UTC
+Stopped at: Completed 19-01-PLAN.md (Language selector tests)
 Resume file: None
 
 ## Quick Tasks Completed
