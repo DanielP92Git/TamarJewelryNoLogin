@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { renderHTML, clearDOM, mockLocalStorage } from './helpers/dom.js';
+import { renderHTML, clearDOM, render, screen } from './helpers/dom.js';
+import { createProduct, createCartItem, createCart, resetFactoryCounter } from './helpers/factories.js';
 
 describe('Frontend Test Infrastructure', () => {
   beforeEach(() => {
@@ -36,5 +37,61 @@ describe('Frontend Test Infrastructure', () => {
     btn.addEventListener('click', () => { clicked = true; });
     btn.click();
     expect(clicked).toBe(true);
+  });
+
+  describe('Testing Library integration', () => {
+    it('should use semantic queries with render()', () => {
+      const { getByRole, getByText } = render('<button>Add to Cart</button>');
+      const button = getByRole('button', { name: /add to cart/i });
+      expect(button).toBeDefined();
+      expect(getByText(/add to cart/i)).toBe(button);
+    });
+
+    it('should use screen for global queries', () => {
+      render('<h1>Test Page</h1><p>Content here</p>');
+      expect(screen.getByRole('heading', { level: 1 })).toBeDefined();
+      expect(screen.getByText(/content here/i)).toBeDefined();
+    });
+  });
+
+  describe('Test data factories', () => {
+    beforeEach(() => {
+      resetFactoryCounter();
+    });
+
+    it('should create unique products', () => {
+      const p1 = createProduct();
+      const p2 = createProduct();
+      expect(p1.id).not.toBe(p2.id);
+      expect(p1.name).not.toBe(p2.name);
+      expect(p1.sku).not.toBe(p2.sku);
+    });
+
+    it('should apply overrides to products', () => {
+      const product = createProduct({ name: 'Custom Product', category: 'rings' });
+      expect(product.name).toBe('Custom Product');
+      expect(product.category).toBe('rings');
+    });
+
+    it('should create cart items from products', () => {
+      const product = createProduct();
+      const cartItem = createCartItem(product, 2);
+      expect(cartItem.id).toBe(product.id);
+      expect(cartItem.title).toBe(product.name);
+      expect(cartItem.quantity).toBe(2);
+      expect(cartItem.price).toBe(product.ils_price);
+    });
+
+    it('should create full cart with multiple items', () => {
+      const p1 = createProduct();
+      const p2 = createProduct();
+      const cart = createCart([
+        { product: p1, quantity: 1 },
+        { product: p2, quantity: 3 }
+      ]);
+      expect(cart).toHaveLength(2);
+      expect(cart[0].quantity).toBe(1);
+      expect(cart[1].quantity).toBe(3);
+    });
   });
 });
