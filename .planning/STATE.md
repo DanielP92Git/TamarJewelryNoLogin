@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ## Current Position
 
 Phase: 20 of 22 (Page View Tests)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-09 — Completed 20-01-PLAN.md (Cart View Tests)
+Last activity: 2026-02-09 — Completed 20-02-PLAN.md (Modal and Categories Tests)
 
-Progress: [█████████░░░░░░░░░░░] 87% (19.25 phases complete / 22 total)
+Progress: [█████████░░░░░░░░░░░] 87% (19.5 phases complete / 22 total)
 
 ## Performance Metrics
 
@@ -82,6 +82,9 @@ Recent decisions affecting current work:
 - v1.3: Singleton views need DOM element re-assignment in beforeEach after rendering test fixture (20-01)
 - v1.3: Test currency switching via manual render() calls rather than relying on broken event handlers (20-01)
 - v1.3: Cart item test data must include both usdPrice and ilsPrice fields for dual-currency verification (20-01)
+- v1.3: Mock Image constructor to trigger onload synchronously for testing thumbnail click behavior (20-02)
+- v1.3: Suppress CategoriesView auto-init by setting body.id != 'categories', mocking fetch, and using fake timers (20-02)
+- v1.3: Mock process.cwd() for dotenv.config() compatibility in model.js imports (20-02)
 
 ### Pending Todos
 
@@ -130,20 +133,23 @@ None yet.
 
 **Phase 20 (Page View Tests): IN PROGRESS**
 - ✓ 20-01: Cart view display and totals tests (15 tests for PAGE-01 through PAGE-04)
-- ⏳ 20-02: Product page modal tests (pending)
-- ⏳ 20-03: Categories page tests (pending)
-- ⏳ 20-04: Search and filters integration tests (pending)
+- ✓ 20-02: Product modal and categories tests (28 tests for PAGE-05 through PAGE-08, PAGE-11)
+- ⏳ 20-03: Home view tests (pending)
+- ⏳ 20-04: Product and checkout integration tests (pending)
 - ✓ Singleton view DOM reassignment pattern established (20-01)
 - ✓ Currency switching test strategy via manual render (20-01)
 - ✓ Dual-currency test data structure documented (20-01)
-- ✓ 15 cart view tests all passing (product names, quantities, prices, totals)
+- ✓ Image.onload mocking technique for synchronous thumbnail tests (20-02)
+- ✓ CategoriesView auto-init suppression pattern (body.id, fetch mock, fake timers) (20-02)
+- ✓ process.cwd() mock for dotenv compatibility (20-02)
+- ✓ 43 total tests passing (15 cart + 16 modal + 12 categories)
 - Note: Potential CartView bug - currency-changed handler calls non-existent _render() method
 
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 20-01 (Cart View Tests) - 15 tests, all passing
-Resume file: .planning/phases/20-page-view-tests/20-02-PLAN.md (next)
+Stopped at: Completed 20-02 (Modal and Categories Tests) - 28 tests, all passing
+Resume file: .planning/phases/20-page-view-tests/20-03-PLAN.md (next)
 
 ## Quick Tasks Completed
 
