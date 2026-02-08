@@ -17,36 +17,36 @@ Requirements for frontend testing coverage. Each maps to roadmap phases.
 
 ### Model Testing
 
-- [ ] **MODEL-01**: Cart add operation adds product with correct quantity and price
-- [ ] **MODEL-02**: Cart remove operation removes product from cart state
-- [ ] **MODEL-03**: Cart update operation changes product quantity
-- [ ] **MODEL-04**: Cart clear operation removes all items from cart
-- [ ] **MODEL-05**: Cart data persists to localStorage on every change
-- [ ] **MODEL-06**: Cart data loads from localStorage on page reload
-- [ ] **MODEL-07**: Cart survives browser restart (localStorage persistence)
-- [ ] **MODEL-08**: API calls are mocked with vitest-fetch-mock or vi.fn()
-- [ ] **MODEL-09**: Product fetch API calls return mocked data
-- [ ] **MODEL-10**: Order creation API calls are properly mocked
-- [ ] **MODEL-11**: Currency conversion USD → ILS uses correct exchange rate
-- [ ] **MODEL-12**: Currency conversion ILS → USD uses correct exchange rate
-- [ ] **MODEL-13**: Currency conversion handles floating-point precision with toBeCloseTo()
-- [ ] **MODEL-14**: Malformed localStorage data doesn't crash cart (corruption handling)
-- [ ] **MODEL-15**: API network failures are handled gracefully
-- [ ] **MODEL-16**: API 4xx/5xx error responses are handled gracefully
+- [x] **MODEL-01**: Cart add operation adds product with correct quantity and price
+- [x] **MODEL-02**: Cart remove operation removes product from cart state
+- [x] **MODEL-03**: Cart update operation changes product quantity
+- [x] **MODEL-04**: Cart clear operation removes all items from cart
+- [x] **MODEL-05**: Cart data persists to localStorage on every change
+- [x] **MODEL-06**: Cart data loads from localStorage on page reload
+- [x] **MODEL-07**: Cart survives browser restart (localStorage persistence)
+- [x] **MODEL-08**: API calls are mocked with vitest-fetch-mock or vi.fn()
+- [x] **MODEL-09**: Product fetch API calls return mocked data
+- [x] **MODEL-10**: Order creation API calls are properly mocked
+- [x] **MODEL-11**: Currency conversion USD → ILS uses correct exchange rate
+- [x] **MODEL-12**: Currency conversion ILS → USD uses correct exchange rate
+- [x] **MODEL-13**: Currency conversion handles floating-point precision with toBeCloseTo()
+- [x] **MODEL-14**: Malformed localStorage data doesn't crash cart (corruption handling)
+- [x] **MODEL-15**: API network failures are handled gracefully
+- [x] **MODEL-16**: API 4xx/5xx error responses are handled gracefully
 
 ### Base View Testing
 
-- [ ] **VIEW-01**: Language selector renders with English and Hebrew options
-- [ ] **VIEW-02**: Language selector switches from English to Hebrew
-- [ ] **VIEW-03**: Language selector switches from Hebrew to English
-- [ ] **VIEW-04**: Language switch triggers RTL layout changes
-- [ ] **VIEW-05**: Currency selector renders with USD and ILS options
-- [ ] **VIEW-06**: Currency selector switches from USD to ILS
-- [ ] **VIEW-07**: Currency selector switches from ILS to USD
-- [ ] **VIEW-08**: Currency switch triggers price recalculation in views
-- [ ] **VIEW-09**: Header menu renders navigation links
-- [ ] **VIEW-10**: Header menu state updates on navigation
-- [ ] **VIEW-11**: Event listeners are cleaned up on view unmount (memory leak prevention)
+- [x] **VIEW-01**: Language selector renders with English and Hebrew options
+- [x] **VIEW-02**: Language selector switches from English to Hebrew
+- [x] **VIEW-03**: Language selector switches from Hebrew to English
+- [x] **VIEW-04**: Language switch triggers RTL layout changes
+- [x] **VIEW-05**: Currency selector renders with USD and ILS options
+- [x] **VIEW-06**: Currency selector switches from USD to ILS
+- [x] **VIEW-07**: Currency selector switches from ILS to USD
+- [x] **VIEW-08**: Currency switch triggers price recalculation in views
+- [x] **VIEW-09**: Header menu renders navigation links
+- [x] **VIEW-10**: Header menu state updates on navigation
+- [x] **VIEW-11**: Event listeners are cleaned up on view unmount (memory leak prevention)
 
 ### Page View Testing
 
@@ -155,17 +155,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MODEL-14 | Phase 18 | Complete |
 | MODEL-15 | Phase 18 | Complete |
 | MODEL-16 | Phase 18 | Complete |
-| VIEW-01 | Phase 19 | Pending |
-| VIEW-02 | Phase 19 | Pending |
-| VIEW-03 | Phase 19 | Pending |
-| VIEW-04 | Phase 19 | Pending |
-| VIEW-05 | Phase 19 | Pending |
-| VIEW-06 | Phase 19 | Pending |
-| VIEW-07 | Phase 19 | Pending |
-| VIEW-08 | Phase 19 | Pending |
-| VIEW-09 | Phase 19 | Pending |
-| VIEW-10 | Phase 19 | Pending |
-| VIEW-11 | Phase 19 | Pending |
+| VIEW-01 | Phase 19 | Complete |
+| VIEW-02 | Phase 19 | Complete |
+| VIEW-03 | Phase 19 | Complete |
+| VIEW-04 | Phase 19 | Complete |
+| VIEW-05 | Phase 19 | Complete |
+| VIEW-06 | Phase 19 | Complete |
+| VIEW-07 | Phase 19 | Complete |
+| VIEW-08 | Phase 19 | Complete |
+| VIEW-09 | Phase 19 | Complete |
+| VIEW-10 | Phase 19 | Complete |
+| VIEW-11 | Phase 19 | Complete |
 | PAGE-01 | Phase 20 | Pending |
 | PAGE-02 | Phase 20 | Pending |
 | PAGE-03 | Phase 20 | Pending |
