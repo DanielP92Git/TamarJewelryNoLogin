@@ -197,12 +197,12 @@ Plans:
   3. Test utilities and factories are available for common scenarios
   4. CI/CD pipeline runs frontend tests on PR and push events
   5. Tests use semantic DOM queries that are resilient to markup changes
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 17-01: TBD (configure Vitest for Happy-DOM)
-- [ ] 17-02: TBD (create test utilities and factories)
-- [ ] 17-03: TBD (update CI/CD workflow for frontend tests)
+- [ ] 17-01-PLAN.md - Configure Vitest with Happy-DOM environment
+- [ ] 17-02-PLAN.md - Create test utilities with @testing-library/dom and factories
+- [ ] 17-03-PLAN.md - Validate infrastructure and verify CI/CD
 
 #### Phase 18: Model Unit Tests
 **Goal**: Cart operations and API interactions tested in isolation with mocked dependencies
