@@ -183,7 +183,7 @@ Plans:
 
 </details>
 
-### 🚧 v1.3 Frontend Testing (In Progress)
+### v1.3 Frontend Testing (In Progress)
 
 **Milestone Goal:** Complete the testing foundation with comprehensive frontend test coverage for the vanilla JS MVC architecture.
 
@@ -250,12 +250,12 @@ Plans:
   3. Checkout view shows payment methods and order summary with correct totals
   4. Categories view filters products correctly and home page shows featured products
   5. Contact form validates required fields before submission
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 20-01: TBD (cart view tests)
-- [ ] 20-02: TBD (product modal tests)
-- [ ] 20-03: TBD (checkout and other page views tests)
+- [ ] 20-01-PLAN.md -- Cart view display, totals, empty state, and currency switching tests
+- [ ] 20-02-PLAN.md -- Product modal rendering, close methods, add-to-cart, and categories filtering tests
+- [ ] 20-03-PLAN.md -- Checkout payment flow, home page categories, and contact form validation tests
 
 #### Phase 21: Locale & Currency Tests
 **Goal**: Multi-language RTL layouts and multi-currency display validated
