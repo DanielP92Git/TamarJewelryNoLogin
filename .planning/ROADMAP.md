@@ -214,13 +214,13 @@ Plans:
   3. Currency conversion calculations are accurate within floating-point tolerance
   4. API calls are properly mocked and network failures are handled gracefully
   5. Malformed localStorage data doesn't crash the cart (corruption handling)
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 18-01: TBD (cart operations tests)
-- [ ] 18-02: TBD (localStorage persistence tests)
-- [ ] 18-03: TBD (API mocking and error handling tests)
-- [ ] 18-04: TBD (currency conversion tests)
+- [ ] 18-01-PLAN.md - Cart operations tests with fetch and DOM mocks
+- [ ] 18-02-PLAN.md - localStorage persistence and corruption handling tests
+- [ ] 18-03-PLAN.md - API mocking and error handling tests
+- [ ] 18-04-PLAN.md - Currency storage and discount calculation tests
 
 #### Phase 19: Base View Tests
 **Goal**: Shared View class functionality validated for language/currency switching and header menu
