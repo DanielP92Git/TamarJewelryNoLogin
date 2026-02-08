@@ -235,10 +235,10 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 19-01: TBD (language selector tests)
-- [ ] 19-02: TBD (currency selector tests)
-- [ ] 19-03: TBD (header menu tests)
-- [ ] 19-04: TBD (event cleanup tests)
+- [x] 19-01-PLAN.md - Language selector and switching tests (VIEW-01 through VIEW-04)
+- [x] 19-02-PLAN.md - Currency selector tests (VIEW-05 through VIEW-08)
+- [x] 19-03-PLAN.md - Cart counter tests (VIEW-09, VIEW-10)
+- [x] 19-04-PLAN.md - Event listener cleanup tests (VIEW-11)
 
 #### Phase 20: Page View Tests
 **Goal**: Page-specific views render correctly with accurate data display
