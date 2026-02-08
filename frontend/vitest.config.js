@@ -2,8 +2,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    // Use jsdom environment for browser simulation
-    environment: 'jsdom',
+    // Use happy-dom environment for browser simulation (2-3x faster than jsdom)
+    environment: 'happy-dom',
 
     // Test file patterns
     include: [
