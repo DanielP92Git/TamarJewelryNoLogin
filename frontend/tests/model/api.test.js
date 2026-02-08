@@ -210,21 +210,27 @@ describe('API Network Failures', () => {
   });
 
   it('should handle TypeError(Failed to fetch) gracefully (MODEL-15)', async () => {
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     localStorage.setItem('auth-token', 'mock-jwt-token');
     mockFetchNetworkError();
 
     const product = createProduct();
     const mockElement = createMockProductElement(product);
 
-    // NOTE: addToUserStorage lacks error handling - network errors propagate as unhandled rejections
-    // This test validates that the function at least doesn't throw synchronously
-    // In production, this would cause "Unhandled Promise Rejection" warnings
-    // Future improvement: Add .catch() to addToUserStorage in model.js
-    expect(() => {
-      addToUserStorage(mockElement)?.catch(() => {
-        // Silently handle the network error in test
-      });
-    }).not.toThrow();
+    // addToUserStorage now has .catch() to handle network errors
+    // Call the function (it returns a promise that resolves to undefined on error)
+    const result = addToUserStorage(mockElement);
+
+    // Wait for promise to settle and error handler to run
+    await new Promise(resolve => setTimeout(resolve, 0));
+
+    // Verify error was logged
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      'Failed to add item to cart:',
+      expect.any(Error)
+    );
+
+    consoleErrorSpy.mockRestore();
   });
 
   it('should not throw when network request fails (MODEL-15)', async () => {
