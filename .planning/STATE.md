@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ## Current Position
 
 Phase: 19 of 22 (Base View Tests)
-Plan: 1 of 4 in current phase
+Plan: 2 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-08 — Completed 19-01-PLAN.md (Language selector tests)
+Last activity: 2026-02-09 — Completed 19-02-PLAN.md (Currency selector tests)
 
-Progress: [████████░░░░░░░░░░░░] 83% (18 phases complete + 1 of 4 plans / 22 total)
+Progress: [████████░░░░░░░░░░░░] 84% (18 phases complete + 2 of 4 plans / 22 total)
 
 ## Performance Metrics
 
@@ -71,6 +71,8 @@ Recent decisions affecting current work:
 - v1.3: View instantiation requires minimal DOM fixture (header, menu, utilities, footer) (19-01)
 - v1.3: Module-level currency persistence flag needs cleanup in afterEach (19-01)
 - v1.3: setLanguage() renders menu only; changeToHeb/changeToEng set document attributes (19-01)
+- v1.3: Happy-DOM doesn't apply 'selected' attribute from innerHTML; manual selector.value sync required (19-02)
+- v1.3: Currency persistence initialization preserved across tests (event delegation works) (19-02)
 
 ### Pending Todos
 
@@ -106,14 +108,16 @@ None yet.
 
 **Phase 19 (Base View Tests): IN PROGRESS**
 - ✓ 19-01: Language selector and switching tests (20 tests for VIEW-01 through VIEW-04)
+- ✓ 19-02: Currency selector tests (15 tests for VIEW-05 through VIEW-08)
 - ✓ View instantiation pattern with minimal DOM fixture established
-- ✓ Module-level currency persistence cleanup pattern documented
-- In progress: 19-02 (Currency selector tests - VIEW-05 through VIEW-08)
+- ✓ Happy-DOM 'selected' attribute workaround documented
+- ✓ Currency persistence event delegation verified across tests
+- Ready for: 19-03 (Cart counter tests - VIEW-09 through VIEW-11)
 
 ## Session Continuity
 
-Last session: 2026-02-08 22:17:29 UTC
-Stopped at: Completed 19-01-PLAN.md (Language selector tests)
+Last session: 2026-02-08 22:18:36 UTC
+Stopped at: Completed 19-02-PLAN.md (Currency selector tests)
 Resume file: None
 
 ## Quick Tasks Completed
