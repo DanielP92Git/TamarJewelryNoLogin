@@ -9,11 +9,11 @@ Requirements for frontend testing coverage. Each maps to roadmap phases.
 
 ### Test Infrastructure
 
-- [ ] **INFRA-01**: Vitest configured for browser environment with Happy-DOM
-- [ ] **INFRA-02**: localStorage cleanup between tests prevents state pollution
-- [ ] **INFRA-03**: DOM query helpers with semantic selectors (@testing-library/dom)
-- [ ] **INFRA-04**: Test utilities and factories for common scenarios
-- [ ] **INFRA-05**: CI/CD GitHub Actions workflow runs frontend tests on PR/push
+- [x] **INFRA-01**: Vitest configured for browser environment with Happy-DOM
+- [x] **INFRA-02**: localStorage cleanup between tests prevents state pollution
+- [x] **INFRA-03**: DOM query helpers with semantic selectors (@testing-library/dom)
+- [x] **INFRA-04**: Test utilities and factories for common scenarios
+- [x] **INFRA-05**: CI/CD GitHub Actions workflow runs frontend tests on PR/push
 
 ### Model Testing
 
@@ -134,11 +134,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | Phase 17 | Pending |
-| INFRA-02 | Phase 17 | Pending |
-| INFRA-03 | Phase 17 | Pending |
-| INFRA-04 | Phase 17 | Pending |
-| INFRA-05 | Phase 17 | Pending |
+| INFRA-01 | Phase 17 | Complete |
+| INFRA-02 | Phase 17 | Complete |
+| INFRA-03 | Phase 17 | Complete |
+| INFRA-04 | Phase 17 | Complete |
+| INFRA-05 | Phase 17 | Complete |
 | MODEL-01 | Phase 18 | Pending |
 | MODEL-02 | Phase 18 | Pending |
 | MODEL-03 | Phase 18 | Pending |
