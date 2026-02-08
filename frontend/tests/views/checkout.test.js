@@ -264,11 +264,11 @@ describe('Checkout Payment and Order Summary', () => {
       });
 
       // Mock window.location setter
-      delete window.location;
-      window.location = { href: '' };
+      const locationMock = { href: '' };
       Object.defineProperty(window, 'location', {
         writable: true,
-        value: { href: '' }
+        configurable: true,
+        value: locationMock
       });
 
       // Attach checkout handler
@@ -332,8 +332,11 @@ describe('Checkout Payment and Order Summary', () => {
       });
 
       // Mock window.location
-      delete window.location;
-      window.location = { href: '' };
+      Object.defineProperty(window, 'location', {
+        writable: true,
+        configurable: true,
+        value: { href: '' }
+      });
 
       // Attach checkout handler
       cartView._addHandlerCheckout(model.cart);
@@ -382,9 +385,9 @@ describe('Checkout Payment and Order Summary', () => {
 
       // Mock window.location
       const locationMock = { href: '' };
-      delete window.location;
       Object.defineProperty(window, 'location', {
         writable: true,
+        configurable: true,
         value: locationMock
       });
 
