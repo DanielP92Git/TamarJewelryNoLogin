@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency
-**Current focus:** Phase 17 - Test Infrastructure & Utilities
+**Current focus:** Phase 18 - Model Unit Tests
 
 ## Current Position
 
-Phase: 17 of 22 (Test Infrastructure & Utilities)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-08 — Completed 17-03-PLAN.md (Infrastructure validation and CI/CD verification)
+Phase: 18 of 22 (Model Unit Tests)
+Plan: 1 of 4 in current phase
+Status: In progress
+Last activity: 2026-02-08 — Completed 18-04-PLAN.md (Currency and discount calculation tests)
 
-Progress: [████████░░░░░░░░░░░░] 77% (17 phases complete / 22 total)
+Progress: [████████░░░░░░░░░░░░] 77% (17 phases complete, 18 in progress / 22 total)
 
 ## Performance Metrics
 
@@ -58,6 +58,8 @@ Recent decisions affecting current work:
 - v1.3: Frontend cart format is array of items, backend uses object keyed by ID (17-02)
 - v1.3: Validated all infrastructure with 20 comprehensive tests before phases 18-22 (17-03)
 - v1.3: CI/CD workflow verified for frontend tests with Happy-DOM (17-03)
+- v1.3: Used toBeCloseTo() with 0 decimal places for integer rounding verification (18-04)
+- v1.3: Test dual-price storage rather than currency conversion (View layer concern) (18-04)
 
 ### Pending Todos
 
@@ -80,12 +82,14 @@ None yet.
 - Consider manual RTL testing or Playwright visual snapshots for comprehensive coverage
 - Research flag: bidirectional text handling (Hebrew + English SKUs)
 
-**Phase 18 (Model Tests):**
-- Currency conversion floating-point precision needs toBeCloseTo() assertions
+**Phase 18 (Model Tests): IN PROGRESS**
+- ✓ Currency and discount calculation tests complete (18-04)
+- ✓ Floating-point precision handled with toBeCloseTo() (18-04)
+- Next: Additional model test plans (18-01, 18-02, 18-03)
 - Research flag: potential cents-based pricing migration (large refactor, may defer to v2.0)
 
 ## Session Continuity
 
-Last session: 2026-02-08 09:06:33 UTC
-Stopped at: Completed 17-03-PLAN.md (Infrastructure validation and CI/CD verification) - Phase 17 COMPLETE
+Last session: 2026-02-08 20:49:33 UTC
+Stopped at: Completed 18-04-PLAN.md (Currency and discount calculation tests)
 Resume file: None
