@@ -9,6 +9,13 @@
 import { beforeEach, afterEach, vi } from 'vitest';
 
 /**
+ * Set environment variables before any modules are imported
+ * This ensures class field initializers (e.g., _host = process.env.API_URL) work correctly
+ */
+process.env.API_URL = process.env.API_URL || 'http://localhost:4000';
+process.env.USD_ILS_RATE = process.env.USD_ILS_RATE || '3.7';
+
+/**
  * Before each test: Clear the DOM to prevent test pollution
  */
 beforeEach(() => {
