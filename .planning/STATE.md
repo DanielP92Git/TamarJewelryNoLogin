@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ## Current Position
 
 Phase: 22 of 22 (MVC Integration Tests)
-Plan: 2 of 4 in current phase
-Status: In progress
-Last activity: 2026-02-09 — Completed 22-02-PLAN.md (Model-View Synchronization) - 17 tests, all passing
+Plan: 4 of 4 (COMPLETE)
+Status: Phase complete
+Last activity: 2026-02-09 — Completed 22-04-PLAN.md (User Journey Integration Tests) - 12 tests, all passing
 
-Progress: [█████████░░░░░░░░░░] 95% (21 phases complete / 22 total, plan 2 of 4 complete)
+Progress: [██████████░░░░░░░░░░] 100% (22 phases complete / 22 total)
 
 ## Performance Metrics
 
@@ -102,6 +102,10 @@ Recent decisions affecting current work:
 - v1.3: Integration lifecycle tests use behavioral verification to prove no event listener accumulation across re-renders (22-03)
 - v1.3: Stress tests with 10-20 rapid re-renders prove memory leak prevention under extreme conditions (22-03)
 - v1.3: Async lifecycle tests replicate exact controller sequence (handleLoadStorage -> checkCartNumber -> setLanguage) (22-03)
+- v1.3: User journey tests simulate MPA navigation by re-rendering DOM fixtures (22-04)
+- v1.3: Currency switching tested via manual render() calls, not currency-changed event (22-04)
+- v1.3: Mock fetch to return discount settings for all tests (22-04)
+- v1.3: CartView._calculateTotal() fixed to respect current currency (bug fix D22-04-01) (22-04)
 
 ### Pending Todos
 
@@ -169,7 +173,7 @@ None yet.
 - ✓ 21-02: GeoIP hydration and bidirectional text tests (33 tests for LOCALE-10, LOCALE-11, LOCALE-12)
 - ✓ 84 total tests across 4 test files, all 12 LOCALE requirements verified
 
-**Phase 22 (MVC Integration Tests): IN PROGRESS**
+**Phase 22 (MVC Integration Tests): COMPLETE**
 - ✓ 22-01: Controller routing and page dispatch tests (28 tests for MVC-01, MVC-02)
 - ✓ Integration helper module created (createBaseFixture, setupControllerMocks, cleanupIntegrationState)
 - ✓ All 7 page types tested (home, workshop, about, contact, policies, cart, categories)
@@ -181,13 +185,31 @@ None yet.
 - ✓ English and Hebrew menu rendering verified for each page
 - ✓ Cart number persistence tested across pages
 - ✓ External boundary mocking pattern established (only mock fetch/APIs, not MVC wiring)
-- Next: 22-03 (View Lifecycle), 22-04 (Coverage Report)
-- Ready for: 22-03 (View Lifecycle)
+- ✓ 22-03: View lifecycle tests (27 tests for MVC-06, MVC-07, MVC-08)
+- ✓ Mount, update, cleanup lifecycle verified for all views
+- ✓ Memory leak prevention stress tests (10-20 rapid re-renders)
+- ✓ Behavioral verification proves no event listener accumulation
+- ✓ 22-04: User journey integration tests (12 tests for MVC-09, MVC-10)
+- ✓ Complete guest shopping journey (browse → add → cart → currency switch)
+- ✓ Logged-in user API path and auth token persistence
+- ✓ Currency round-trip testing (USD→ILS→USD) without data loss
+- ✓ MPA navigation simulation via DOM re-rendering
+- ✓ CartView._calculateTotal() bug fixed (currency awareness)
+- ✓ All 10 MVC requirements verified with 84 integration tests
+- ✓ Total test count: 419 (315 existing + 104 new from phase 22)
+- Ready for: v1.3 release or future feature development
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 22-02-PLAN.md (Model-View Synchronization) - 17 tests passing, 407 total tests
+Stopped at: Completed 22-04-PLAN.md (User Journey Integration Tests) - 12 tests passing, 419 total tests, Phase 22 COMPLETE
 Resume file: None
+
+**Phase 22 Summary:**
+- 4 integration test files: routing, model-view-sync, lifecycle, user-journeys
+- 84 integration tests across all 4 files
+- All 10 MVC requirements verified (MVC-01 through MVC-10)
+- 1 bug fixed: CartView._calculateTotal() currency awareness
+- Total project tests: 419 (315 existing + 104 new)
 
 ## Quick Tasks Completed
 
