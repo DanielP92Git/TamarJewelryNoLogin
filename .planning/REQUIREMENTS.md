@@ -122,61 +122,65 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| INFRA-01 | TBD | Pending |
-| INFRA-02 | TBD | Pending |
-| INFRA-03 | TBD | Pending |
-| INFRA-04 | TBD | Pending |
-| INFRA-05 | TBD | Pending |
-| INFRA-06 | TBD | Pending |
-| INFRA-07 | TBD | Pending |
-| INFRA-08 | TBD | Pending |
-| SSR-01 | TBD | Pending |
-| SSR-02 | TBD | Pending |
-| SSR-03 | TBD | Pending |
-| SSR-04 | TBD | Pending |
-| SSR-05 | TBD | Pending |
-| SSR-06 | TBD | Pending |
-| SSR-07 | TBD | Pending |
-| URL-01 | TBD | Pending |
-| URL-02 | TBD | Pending |
-| URL-03 | TBD | Pending |
-| URL-04 | TBD | Pending |
-| URL-05 | TBD | Pending |
-| URL-06 | TBD | Pending |
-| LANG-01 | TBD | Pending |
-| LANG-02 | TBD | Pending |
-| LANG-03 | TBD | Pending |
-| LANG-04 | TBD | Pending |
-| LANG-05 | TBD | Pending |
-| META-01 | TBD | Pending |
-| META-02 | TBD | Pending |
-| META-03 | TBD | Pending |
-| META-04 | TBD | Pending |
-| META-05 | TBD | Pending |
-| META-06 | TBD | Pending |
-| META-07 | TBD | Pending |
-| SCHEMA-01 | TBD | Pending |
-| SCHEMA-02 | TBD | Pending |
-| SCHEMA-03 | TBD | Pending |
-| SCHEMA-04 | TBD | Pending |
-| SCHEMA-05 | TBD | Pending |
-| CRAWL-01 | TBD | Pending |
-| CRAWL-02 | TBD | Pending |
-| CRAWL-03 | TBD | Pending |
-| CRAWL-04 | TBD | Pending |
-| CRAWL-05 | TBD | Pending |
-| CRAWL-06 | TBD | Pending |
-| CRAWL-07 | TBD | Pending |
-| PERF-01 | TBD | Pending |
-| PERF-02 | TBD | Pending |
-| PERF-03 | TBD | Pending |
-| PERF-04 | TBD | Pending |
+| INFRA-01 | Phase 23 | Pending |
+| INFRA-02 | Phase 23 | Pending |
+| INFRA-03 | Phase 23 | Pending |
+| INFRA-04 | Phase 23 | Pending |
+| INFRA-05 | Phase 23 | Pending |
+| INFRA-06 | Phase 24 | Pending |
+| INFRA-07 | Phase 26 | Pending |
+| INFRA-08 | Phase 26 | Pending |
+| SSR-01 | Phase 24 | Pending |
+| SSR-02 | Phase 25 | Pending |
+| SSR-03 | Phase 25 | Pending |
+| SSR-04 | Phase 24 | Pending |
+| SSR-05 | Phase 24 | Pending |
+| SSR-06 | Phase 25 | Pending |
+| SSR-07 | Phase 25 | Pending |
+| URL-01 | Phase 25 | Pending |
+| URL-02 | Phase 25 | Pending |
+| URL-03 | Phase 24 | Pending |
+| URL-04 | Phase 24 | Pending |
+| URL-05 | Phase 23 | Pending |
+| URL-06 | Phase 23 | Pending |
+| LANG-01 | Phase 23 | Pending |
+| LANG-02 | Phase 24 | Pending |
+| LANG-03 | Phase 24 | Pending |
+| LANG-04 | Phase 24 | Pending |
+| LANG-05 | Phase 24 | Pending |
+| META-01 | Phase 24 | Pending |
+| META-02 | Phase 24 | Pending |
+| META-03 | Phase 24 | Pending |
+| META-04 | Phase 24 | Pending |
+| META-05 | Phase 24 | Pending |
+| META-06 | Phase 25 | Pending |
+| META-07 | Phase 24 | Pending |
+| SCHEMA-01 | Phase 25 | Pending |
+| SCHEMA-02 | Phase 25 | Pending |
+| SCHEMA-03 | Phase 25 | Pending |
+| SCHEMA-04 | Phase 24 | Pending |
+| SCHEMA-05 | Phase 26 | Pending |
+| CRAWL-01 | Phase 23 | Pending |
+| CRAWL-02 | Phase 25 | Pending |
+| CRAWL-03 | Phase 25 | Pending |
+| CRAWL-04 | Phase 25 | Pending |
+| CRAWL-05 | Phase 25 | Pending |
+| CRAWL-06 | Phase 25 | Pending |
+| CRAWL-07 | Phase 26 | Pending |
+| PERF-01 | Phase 26 | Pending |
+| PERF-02 | Phase 26 | Pending |
+| PERF-03 | Phase 26 | Pending |
+| PERF-04 | Phase 26 | Pending |
 
 **Coverage:**
-- v1 requirements: 47 total
-- Mapped to phases: 0 (pending roadmap creation)
-- Unmapped: 47
+- v1 requirements: 49 total
+- Mapped to phases: 49
+- Unmapped: 0
+- Phase 23: 9 requirements (INFRA-01..05, URL-05..06, LANG-01, CRAWL-01)
+- Phase 24: 17 requirements (INFRA-06, SSR-01/04/05, URL-03..04, LANG-02..05, META-01..05/07, SCHEMA-04)
+- Phase 25: 15 requirements (SSR-02/03/06/07, URL-01..02, META-06, SCHEMA-01..03, CRAWL-02..06)
+- Phase 26: 8 requirements (INFRA-07..08, SCHEMA-05, CRAWL-07, PERF-01..04)
 
 ---
 *Requirements defined: 2026-02-10*
-*Last updated: 2026-02-10 after initial definition*
+*Last updated: 2026-02-10 after roadmap creation — all 49 requirements mapped to phases*
