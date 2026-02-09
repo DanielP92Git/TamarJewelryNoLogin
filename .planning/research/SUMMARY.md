@@ -1,332 +1,251 @@
-# Project Research Summary
+# Project Research Summary: SEO & Marketing Foundation (v1.4)
 
-**Project:** Frontend Testing Infrastructure (v1.3)
-**Domain:** Vanilla JavaScript MVC E-commerce Application Testing
-**Researched:** 2026-02-06
+**Project:** Tamar Kfir Jewelry -- SEO & Marketing Foundation
+**Domain:** E-commerce SEO for existing vanilla JS multi-page application
+**Researched:** 2026-02-10
 **Confidence:** HIGH
+
+---
+
+## Critical Corrections to Initial Assumptions
+
+Before anything else, the research phase uncovered five fundamental misunderstandings in the original milestone description. These corrections reshape the entire approach:
+
+1. **NOT a hash-routing SPA.** The app is a multi-page application (MPA) with separate HTML files per page (`necklaces.html`, `about.html`, etc.). Navigation is full page loads via `<a>` tags. There are no hash routes.
+2. **The SEO problem is client-side content, not routing.** Product data is fetched via `POST /productsByCategory` and injected into empty `<div class="inner-products-container"></div>` elements by JavaScript. Crawlers see empty containers.
+3. **The "clean URL" migration is from file paths, not hashes.** Current URLs are `/html/categories/necklaces.html` -- these need to become `/necklaces`. This is simpler than a hash migration but still requires comprehensive 301 redirects.
+4. **Individual product pages do not exist.** Products are displayed in modal overlays on category pages. There is no `/product/gold-necklace` page. Creating these is new feature work, not a migration.
+5. **Deployment must merge from two components to one.** The frontend is a static site and the backend is an API service on DigitalOcean App Platform. SSR requires the Express server to serve both HTML pages and API endpoints from a single service.
+
+---
 
 ## Executive Summary
 
-This e-commerce jewelry store uses vanilla JavaScript MVC architecture (model.js, View.js base class, page-specific views) with unique complexity from multi-language (English/Hebrew RTL) and multi-currency (USD/ILS) support. Expert testing for this stack prioritizes integration tests over unit tests, uses Happy-DOM for fast DOM simulation, and focuses on localStorage cart operations as the highest-value testing target. The recommended approach is starting with Model cart operations (revenue-critical), then base View tests (language/currency switching), followed by page-specific view integration tests.
+The Tamar Kfir Jewelry site is a vanilla JavaScript multi-page application where each page is a separate HTML file enhanced with client-side JS for interactivity. The core SEO problem is that product content -- names, descriptions, prices, images -- lives only in MongoDB and is rendered client-side via `fetch()` calls. Search engine crawlers see empty product containers, making the entire product catalog invisible to Google. The site also lacks robots.txt, XML sitemap, structured data, Open Graph tags, and canonical URLs.
 
-The critical insight from research: vanilla JS MVC testing must test actual integration between layers, not mock them apart. The model-view coordination is the architecture — testing Model in isolation defeats the purpose. Focus on user flows (add to cart → view updates → localStorage persists) over individual method tests. The biggest risk is localStorage state pollution between tests causing flaky failures; establish cleanup patterns in Phase 1 before other tests compound the problem.
+The recommended approach is to add EJS server-side rendering to the existing Express backend. This requires only 2 new npm packages (`ejs` and `sitemap`), no framework migration, and no frontend rewrite. The existing HTML files become EJS templates by renaming the extension and inserting data tags where dynamic content is needed. The Express server gains SSR routes that query MongoDB directly and render complete HTML with product data, meta tags, and JSON-LD structured data pre-populated. The build architecture shifts from two separate deployments (static frontend + API backend) to a single unified Express server that serves everything.
 
-Key technology decision: switch from jsdom to Happy-DOM (2-3x faster, sufficient API coverage for vanilla JS) and add @testing-library/dom for semantic queries (getByRole, getByText) that make tests resilient to markup changes. Avoid @testing-library/user-event (React-focused, unnecessary for vanilla JS) and use native DOM events instead.
+The key risks are: (1) URL migration breaking existing indexed pages and bookmarks if 301 redirects are incomplete, especially payment return URLs hardcoded in the backend; (2) SSR-rendered HTML conflicting with client-side JS that re-renders the DOM on load, causing content flashing; (3) the deployment topology change from two DigitalOcean App Platform components to one. All three are well-mitigated by the phased approach recommended below, where static pages are migrated first as a low-risk proof of concept before tackling the high-value dynamic product pages.
+
+---
 
 ## Key Findings
 
 ### Recommended Stack
 
-The backend already has Vitest 4.0.18 configured. Frontend needs minimal additional tooling. The key change is switching from jsdom to Happy-DOM for better performance while adding @testing-library/dom for user-centric queries.
+Only 2 new production dependencies are needed. Everything else uses existing Express capabilities or hand-rolled utilities.
 
 **Core technologies:**
-- **Vitest 4.0.18** (keep existing): Fast test runner with native ESM support, already configured
-- **Happy-DOM 20.0.11** (replace jsdom): 2-3x faster than jsdom, sufficient for vanilla JS DOM testing
-- **@testing-library/dom 10.4.1**: Framework-agnostic DOM queries (getByRole, getByText) for resilient tests
-- **vitest-fetch-mock 0.3.0**: Simple API mocking (start here, migrate to MSW if needed later)
+- **EJS (^4.0.1):** Server-side template engine -- existing HTML files can be renamed to `.ejs` with zero syntax translation. This is the decisive advantage over Pug, Handlebars, or Nunjucks. Integration is `app.set('view engine', 'ejs')`.
+- **sitemap (^9.0.0):** Dynamic XML sitemap generation from MongoDB product data. Stream-based API, handles bilingual `xhtml:link` entries for hreflang. Most popular package (~1.2M weekly downloads).
+- **JSON-LD structured data:** No library needed. Plain JavaScript objects serialized as `<script type="application/ld+json">`. The `schema-dts` package is TypeScript-only type definitions with zero runtime value for this plain JS project.
+- **Meta tags / Open Graph:** No library needed. EJS partials render `<head>` directly on the server. Libraries like `react-helmet` exist for client-side SPAs where `<head>` cannot be controlled server-side -- not applicable here.
+- **Express Router (built-in):** No new routing library. Express `app.get()` handles clean URL routes alongside existing API endpoints.
 
-**Already installed:**
-- @vitest/coverage-v8 4.0.18: Keep for code coverage
-- @testing-library/jest-dom 5.17.0: Keep if using custom matchers (toBeInTheDocument), update to 6.6.3
-
-**Remove:**
-- jsdom 28.0.0: Replaced by Happy-DOM
-- @testing-library/user-event 13.5.0: Not needed for vanilla JS, use native events
+**What NOT to add:** No meta-frameworks (Next.js, Nuxt, Astro), no prerendering services (Puppeteer, Prerender.io), no client-side meta libraries, no separate URL router packages. See STACK-seo-ssr.md for detailed rationale on each exclusion.
 
 ### Expected Features
 
-Research identified what to test based on e-commerce user expectations and MVC architecture validation.
+**Must have (table stakes):**
+- TS-1: Unique `<title>` and `<meta description>` on every page
+- TS-2: `robots.txt` (does not exist currently)
+- TS-3: XML sitemap (does not exist currently)
+- TS-4: Open Graph meta tags (none exist -- shared links show no preview)
+- TS-5: Twitter Card meta tags
+- TS-6: Canonical URLs on all pages
+- TS-7: Descriptive image alt text (currently generic or empty)
+- TS-8: Semantic HTML structure (homepage missing `<h1>`, about page has empty `<h1>`)
+- TS-9: Page load performance basics (Google Fonts without `font-display: swap`)
+- TS-10: Correct `<html lang>` and `dir` attributes from server
 
-**Must have (table stakes — P1 for v1.3):**
-- Cart add/remove operations with localStorage sync — revenue-critical path
-- Cart persistence across sessions — users expect cart to survive reload
-- Currency display accuracy (USD/ILS conversion) — legal/trust requirement
-- Language switching with localStorage persistence — multilingual store requirement
-- Price display in selected currency — multi-currency support validation
-- Checkout flow integration (HTTP boundary) — validates payment handoff
-- Model-View integration — validates MVC coordination
-- View cleanup on navigation — prevents memory leaks
+**Should have (differentiators):**
+- D-1: JSON-LD Product structured data (enables Google rich results -- 20-40% higher CTR)
+- D-2: BreadcrumbList structured data (improves SERP appearance)
+- D-4: Organization schema (enables Knowledge Panel)
+- D-5: Image sitemap (jewelry is visual -- Google Images is significant traffic source)
+- D-8: Google Search Console setup and sitemap submission
 
-**Should have (differentiators — P2 for v1.4+):**
-- RTL layout edge cases (Hebrew) — catch flex-direction, text alignment bugs
-- Multi-currency cart consistency — add in ILS, switch to USD, verify recalculation
-- localStorage corruption handling — graceful fallback for malformed data
-- Discount calculation edge cases — global + item discounts + currency switching
-- Product modal interactions — image gallery, keyboard navigation
-- Form validation (contact form) — EmailJS integration verification
-
-**Defer (v2+ nice-to-have):**
-- Visual regression testing (Percy/Chromatic) — automate screenshot comparison
-- Performance testing (bundle size, LCP/FID/CLS) — optimization metrics
-- Accessibility testing (ARIA, keyboard nav, screen reader) — a11y audit
-- Cross-browser testing (Safari, Firefox, Edge) — compatibility validation
+**Defer to future milestones:**
+- D-3: Full hreflang with separate language URL paths (`/en/`, `/he/`) -- major routing change
+- D-6: Individual product deep-link sharing -- depends on product pages existing
+- AF-2: Google Shopping / Merchant Center -- build on D-1 once validated
+- AF-6: Blog / content marketing system
+- AF-8: Separate language URL paths (long-term correct solution for multilingual SEO)
 
 ### Architecture Approach
 
-Testing architecture mirrors the MVC structure with emphasis on integration over isolation. Test files organized in tests/unit/ and tests/integration/ directories with shared helpers/ for factories, mocks, and DOM setup utilities.
+The architecture follows a "progressive enhancement with unified server" pattern. The Express backend gains an EJS view layer alongside its existing API routes. SEO-critical pages are rendered server-side with product data pre-populated from direct MongoDB queries (not self-calling the API). Client-side JavaScript then enhances the already-rendered page with interactivity (add-to-cart, modals, language switching). The frontend Parcel build produces JS/CSS assets only; HTML generation moves to server-side EJS templates. The deployment merges from two App Platform components into one Express service.
 
 **Major components:**
-1. **Model.js testing** — localStorage operations, API calls with fetch mocks, cart state management. Pattern: spy on Storage.prototype methods, mock global fetch, verify state transitions.
-2. **View.js base class testing** — language/currency switching, menu rendering, event delegation. Pattern: minimal DOM setup with Happy-DOM, semantic queries with @testing-library/dom, verify DOM transformations.
-3. **Page-specific views testing** (homePageView, cartView, etc.) — inheritance from View.js, page rendering, event handlers. Pattern: integration tests with real Model + base View, mock only external boundaries (API, payment SDKs).
-4. **Controller routing testing** — hash-based navigation, view instantiation, cleanup. Pattern: wrap hashchange events in promises, use vi.waitFor for async rendering.
-5. **Integration testing** — full user flows across Model + View + Controller. Pattern: minimal mocking (only external APIs), test localStorage → Model → View → DOM updates.
-
-**Test utilities layer:**
-- Factories (createProduct, createCartItem, createAddToCartElement) for dynamic test data
-- DOM helpers (setupBasePage, setupCartPage, clickElement) for consistent structure
-- Mocks (mockLocalStorage, mockFetchSuccess, mockFetchError) for external boundaries
+1. **EJS Template Layer** (`backend/views/`) -- layouts, partials (head, header, footer, product-card, json-ld), and page templates. Must produce the SAME HTML structure as current client-side JS output so progressive enhancement works.
+2. **SSR Route Handlers** (`backend/routes/pages.js`) -- Express GET routes for clean URLs (`/necklaces`, `/product/:slug`, `/about`). Query MongoDB directly via a shared `productService.js`, detect locale, render EJS with full product data + meta tags + structured data.
+3. **SEO Infrastructure** (`backend/routes/seo.js`) -- sitemap.xml endpoint (dynamic from DB), robots.txt, legacy URL redirect middleware (301 from old `.html` paths to new clean URLs).
+4. **SSR Cache Layer** (`backend/middleware/ssrCache.js`) -- In-memory page cache keyed by path + language + currency. Short TTL (5-10 min) for product pages, longer for static pages. Invalidation on product mutations and exchange rate updates.
+5. **Product Slug System** (`backend/services/slugService.js`) -- Adds a `slug` field to the Product schema for SEO-friendly URLs. One-time migration for existing products.
+6. **Build Pipeline Adaptation** -- Parcel continues building JS/CSS assets; a postbuild script copies them to `backend/public/static/`. EJS templates are NOT processed by Parcel.
 
 ### Critical Pitfalls
 
-Research identified 8 critical pitfalls with prevention strategies.
+The top pitfalls, ordered by severity and likelihood:
 
-1. **localStorage state pollution between tests** — Tests share state causing flaky failures. Solution: Clear localStorage in beforeEach/afterEach hooks globally. Critical for Phase 1 (Base View Tests) to establish pattern before cart tests compound the issue.
+1. **URL migration breaks indexed pages and payment flows** (CRITICAL) -- Payment return URLs (`cancel_url`, `success_url`) in PayPal/Stripe are hardcoded to `/html/cart.html` and `/index.html` in `backend/index.js`. These MUST be updated simultaneously with URL migration. All old URLs need permanent 301 redirects. Deploy redirects BEFORE removing old patterns.
 
-2. **querySelector fragility with dynamic DOM** — Tests break when CSS changes or before async rendering completes. Solution: Use data-testid attributes, semantic queries (getByRole, getByText), and vi.waitFor for async DOM updates. Establish pattern in Phase 1.
+2. **SSR/client HTML mismatch causes content flashing** (CRITICAL) -- `View.setLanguage()` does `menu.innerHTML = this.handleMenuLanguage(lng)` which nukes and rebuilds the menu regardless of SSR state. `categoriesView` fetches products and re-renders them, destroying SSR content. Prevention: EJS templates must produce identical HTML structure. Add `data-ssr="true"` flags so client JS skips initial re-render.
 
-3. **Event listener memory leaks in View tests** — Listeners accumulate across tests causing MaxListenersExceededWarning. Solution: Track listener references, cleanup in afterEach with removeEventListener, replace cloneNode technique with proper cleanup. Critical for Phase 1 (View.js tests many delegated listeners).
+3. **Redirect loops between old and new URL patterns** (CRITICAL) -- The project already has HTML rewrite middleware concepts. Adding SSR routes creates a second routing layer. If both handle the same URL, infinite loops result. Solution: single source of truth for URL resolution; redirect middleware converts old->new, SSR handles new only.
 
-4. **Async API race conditions in Model tests** — Tests assert before fetch completes, multiple calls resolve unpredictably. Solution: Control promise resolution timing with manual mocks, use vi.waitFor with explicit assertions, test concurrent scenarios. Address in Phase 3 (Cart State Tests).
+4. **Language/locale caching serves wrong language** (CRITICAL) -- GeoIP-based locale detection means a Hebrew page could be cached and served to English visitors. Cache keys MUST include language. For this milestone (single URL per language), set `Cache-Control: private` on pages that vary by locale.
 
-5. **Currency conversion floating-point errors** — Cart totals fail equality checks due to JavaScript float precision. Solution: Use toBeCloseTo() for all currency assertions, consider storing prices in cents (integers). Critical for Phase 3 (Cart State Tests with multi-currency).
+5. **Duplicate content at multiple URLs** (CRITICAL) -- Same content at `/html/categories/necklaces.html` and `/necklaces` without canonical tags splits ranking signals. Every page needs exactly ONE canonical URL. Old paths must 301 redirect, never serve content.
 
-6. **RTL layout testing without proper direction context** — Hebrew layout tests pass but visual bugs remain. Solution: Verify dir="rtl" attribute, test bidirectional content (Hebrew text + English SKU), flag CSS logical properties for manual testing. Address in Phase 4 (Locale Switching Tests).
+6. **JSON-LD structured data validation failures** (HIGH) -- Dual pricing (USD/ILS) means structured data must match displayed price. Image URLs must be absolute (DigitalOcean Spaces CDN). Validate with Google Rich Results Test before launch.
 
-7. **Hash-based router timing issues** — Tests navigate but don't wait for hashchange event and view rendering. Solution: Wrap navigation in promise that waits for hashchange, use vi.waitFor for DOM updates, create navigateTo() test helper. Address in Phase 5 (MVC Integration Tests).
+7. **Existing test suite breaks** (HIGH) -- 23 frontend + 26 backend test files built around current MPA architecture. SSR changes to routing, DOM structure, and view initialization cascade into test failures. Run full test suite before starting; make SSR changes additive; update tests in same commit as code changes.
 
-8. **View class inheritance and method override confusion** — Child views don't call parent methods correctly, mocks affect all instances. Solution: Test specific instances not prototypes, verify inheritance chain explicitly, document hook methods. Establish pattern in Phase 1 (Base View Tests).
+8. **DigitalOcean App Platform SSR configuration** (MODERATE) -- Merging from static site + API service to single service requires config changes. Health checks, memory, route configuration all need attention. Test in staging first.
+
+---
 
 ## Implications for Roadmap
 
-Based on research, suggested 6-phase structure prioritizing revenue paths, establishing patterns early, and building from unit to integration tests.
+Based on combined research, the milestone should be structured in 4 phases with clear dependency ordering.
 
-### Phase 1: Test Infrastructure & Base View Tests (Week 1)
+### Phase 1: Foundation and Infrastructure
 
-**Rationale:** Establish test environment and patterns before writing tests. Base View is the foundation for all page views — patterns established here (cleanup, queries, async handling) prevent pitfalls in all subsequent phases.
-
-**Delivers:**
-- Vitest config with Happy-DOM environment
-- Global setup.js with localStorage/DOM cleanup
-- Test helpers (dom.js, factories.js, mocks/)
-- Base View class tests (language switching, cart counter, menu rendering)
-
-**Addresses features:**
-- Language switching with localStorage persistence (table stakes)
-- Infrastructure for all subsequent testing
-
-**Avoids pitfalls:**
-- localStorage state pollution (Pitfall 1) — establish cleanup pattern
-- querySelector fragility (Pitfall 2) — establish semantic query pattern
-- Event listener leaks (Pitfall 3) — establish cleanup verification
-- View inheritance confusion (Pitfall 8) — test base class before children
-
-**Test count:** ~15-20 tests, 4-6 hours estimated
-
-**Research flags:** Standard patterns, skip research-phase. Vitest/Happy-DOM well-documented, Testing Library has extensive vanilla JS examples.
-
-### Phase 2: Model Unit Tests (Week 2)
-
-**Rationale:** Cart operations are highest ROI for e-commerce testing. Model is data layer — testing in isolation with mocked fetch is appropriate here (unlike View which needs DOM integration).
+**Rationale:** Everything else depends on the Express server being configured for SSR and the URL/redirect infrastructure being in place. This phase has zero user-facing changes and zero SEO risk -- it is pure foundation work.
 
 **Delivers:**
-- Cart operations tests (addToLocalStorage, removeFromUserCart, deleteAll)
-- Cart number calculation tests (checkCartNumber)
-- localStorage persistence verification
-- API integration with fetch mocks
+- EJS view engine configured on Express
+- Base layout template (head, header, footer partials) extracted from existing HTML
+- Product slug field added to schema + migration script run
+- Legacy URL redirect middleware (301 from old paths to new)
+- `robots.txt` served from Express
+- `express.static()` configured for frontend assets
+- Route module extraction from monolithic `index.js`
 
-**Addresses features:**
-- Cart add/remove operations (P1 table stakes)
-- Cart persistence across sessions (P1 table stakes)
-- Model-View integration foundation (P1)
+**Addresses:** TS-2 (robots.txt), URL infrastructure for all subsequent features
 
-**Avoids pitfalls:**
-- Async API race conditions (Pitfall 4) — controlled promise mocks
-- localStorage pollution (Pitfall 1) — apply Phase 1 cleanup patterns
+**Avoids:** Pitfall 1 (broken URLs) by having redirects ready before any URL changes go live; Pitfall 2 (redirect loops) by establishing clear routing order; Pitfall 13 (robots.txt) by getting crawler directives correct from the start
 
-**Test count:** ~20-25 tests, 6-8 hours estimated
+### Phase 2: Static Page SSR + Meta Tags + Structured Data
 
-**Research flags:** Standard patterns, skip research-phase. localStorage mocking and fetch mocking well-documented in Vitest ecosystem.
-
-### Phase 3: Cart State & Currency Tests (Week 3)
-
-**Rationale:** Revenue-critical path combines cart operations with currency conversion. Phase 2 Model tests + Phase 1 View tests enable integration testing here.
+**Rationale:** Static pages (about, contact, workshop, policies) have no product data dependencies, making them the simplest SSR targets. They validate the entire template pipeline, build process, and deployment merge with minimal risk. Meta tags and structured data for these pages are straightforward.
 
 **Delivers:**
-- Currency display tests (symbol, formatting, conversion accuracy)
-- Currency switching with cart re-render tests
-- Discount calculation tests (global + item discounts)
-- Multi-currency cart consistency tests
+- SSR-rendered static pages (about, contact, workshop, policies, home)
+- Unique `<title>`, `<meta description>`, canonical URLs on all pages
+- Open Graph + Twitter Card tags on all pages
+- Organization schema (JSON-LD on homepage)
+- BreadcrumbList schema on category-level pages
+- Semantic HTML fixes (homepage `<h1>`, proper heading hierarchy)
+- Parcel build pipeline adapted (asset-only output copied to backend)
+- Deployment merged to single Express service
+- Frontend JS updated with new clean URL links
 
-**Addresses features:**
-- Currency display accuracy (P1 table stakes)
-- Price display in selected currency (P1)
-- Discount calculation edge cases (P2 differentiator)
-- Multi-currency cart consistency (P2 differentiator)
+**Addresses:** TS-1, TS-4, TS-5, TS-6, TS-8, TS-10, D-2, D-4
 
-**Avoids pitfalls:**
-- Currency conversion floating-point errors (Pitfall 5) — use toBeCloseTo()
-- Async API race conditions (Pitfall 4) — concurrent cart update tests
-- localStorage state pollution (Pitfall 1) — verify cleanup between currency changes
+**Avoids:** Pitfall 3 (hydration) by starting with static pages that have minimal JS interaction; Pitfall 14 (DO App Platform) by validating the deployment merge on simpler pages first; Pitfall 19 (build pipeline) by adapting Parcel before dynamic pages
 
-**Test count:** ~20-25 tests, 6-8 hours estimated
+### Phase 3: Dynamic SSR (Category + Product Pages)
 
-**Research flags:** NEEDS RESEARCH-PHASE. Currency conversion precision testing needs deeper investigation. Potential migration to cents-based pricing (large refactor) needs validation. Exchange rate API mocking patterns need research.
-
-### Phase 4: Locale Switching & RTL Tests (Week 4)
-
-**Rationale:** Language switching builds on Phase 1 View tests. RTL is unique complexity — dedicated phase prevents underestimating effort.
+**Rationale:** This is the highest-SEO-value phase. Category pages with pre-rendered product data and individual product detail pages (new feature) are what make the product catalog visible to search engines. This phase depends on the EJS pipeline and deployment being validated in Phase 2.
 
 **Delivers:**
-- Language switching tests (English ↔ Hebrew)
-- localStorage persistence for language preference
-- RTL layout verification (dir attribute, bidirectional text)
-- RTL edge cases (flexbox, arrows, alignment)
+- Category pages SSR-rendered with full product grids (names, images, prices, descriptions)
+- Individual product detail pages (NEW -- currently only modals exist)
+- Product JSON-LD structured data on category and product pages
+- Dynamic XML sitemap generated from MongoDB (includes product URLs)
+- Image alt text improvements (composing descriptive alt from product fields)
+- Frontend JS adaptation for SSR awareness (`data-ssr` flag, skip initial re-fetch)
+- Image sitemap extension
 
-**Addresses features:**
-- Language switching with persistence (P1 table stakes)
-- RTL layout edge cases (P2 differentiator)
+**Addresses:** D-1 (Product structured data), D-5 (Image sitemap), TS-3 (XML sitemap), TS-7 (image alt text), TS-9 (performance -- SSR eliminates client-side double-render)
 
-**Avoids pitfalls:**
-- RTL layout testing without direction context (Pitfall 6) — verify dir="rtl", test bidirectional content
-- querySelector fragility (Pitfall 2) — Hebrew DOM structure differs from English
+**Avoids:** Pitfall 3 (hydration) with `data-ssr` flag pattern; Pitfall 7 (JSON-LD validation) by using absolute image URLs and locale-appropriate currency; Pitfall 11 (stale sitemap) by generating dynamically from DB
 
-**Test count:** ~20-25 tests, 8-10 hours estimated
+### Phase 4: Optimization, Caching, and Verification
 
-**Research flags:** NEEDS RESEARCH-PHASE. RTL testing with Happy-DOM needs validation (jsdom doesn't apply CSS). Bidirectional text handling (Hebrew + English SKUs) needs deeper research. Visual regression tools (Playwright for RTL snapshots) need investigation.
-
-### Phase 5: MVC Integration & Page Views (Week 5)
-
-**Rationale:** Integration tests validate component coordination. Page-specific views (cartView, homePageView, categoriesView) extend base View — test after base patterns established.
+**Rationale:** Once SSR pages are live, add the performance and monitoring layer. Caching cannot be properly configured until the SSR output is stable. Google Search Console verification depends on sitemap and structured data being in place.
 
 **Delivers:**
-- Controller routing tests (hash navigation, view instantiation)
-- Cart flow integration (add → view → update → delete)
-- Page-specific view tests (cartView, homePageView, categoriesView)
-- View cleanup verification (event listener removal)
+- In-memory SSR page cache with language/currency-aware keys
+- Cache invalidation on product mutations and exchange rate updates
+- HTTP cache headers (Cache-Control, stale-while-revalidate)
+- Google Search Console verification and sitemap submission
+- Performance quick wins (font-display: swap, preload hints)
+- Monitoring: TTFB tracking, cache hit ratios
+- Full validation pass with Google Rich Results Test, Lighthouse, URL Inspection
 
-**Addresses features:**
-- Checkout flow integration (P1 table stakes)
-- Model-View integration (P1)
-- View cleanup on navigation (P1)
-- Product modal interactions (P2 differentiator)
+**Addresses:** D-8 (Search Console), TS-9 (performance), caching infrastructure
 
-**Avoids pitfalls:**
-- Hash-based router timing issues (Pitfall 7) — navigateTo() helper with hashchange promise
-- Event listener leaks (Pitfall 3) — verify cleanup on navigation
-- View inheritance confusion (Pitfall 8) — test child views call parent methods
-
-**Test count:** ~25-30 tests, 8-10 hours estimated
-
-**Research flags:** Standard patterns, skip research-phase. Hash routing and MVC integration well-documented. Page view patterns established in Phase 1.
-
-### Phase 6: Edge Cases & Polish (Week 6)
-
-**Rationale:** Achieve high confidence coverage after critical paths validated. Error handling and edge cases often reveal production bugs.
-
-**Delivers:**
-- Error handling tests (API failures, invalid data, network timeouts)
-- localStorage corruption handling (malformed JSON, missing fields)
-- Browser compatibility concerns (localStorage quota, fetch polyfill)
-- Documentation of testing patterns for future developers
-
-**Addresses features:**
-- localStorage corruption handling (P2 differentiator)
-- Form validation (contact form) (P2)
-- Category dropdown mobile/desktop (P2)
-
-**Avoids pitfalls:**
-- All pitfalls — comprehensive edge case coverage prevents production bugs
-
-**Test count:** ~15-20 tests, 4-6 hours estimated
-
-**Research flags:** Standard patterns, skip research-phase. Error handling and edge cases follow established patterns from Phases 1-5.
+**Avoids:** Pitfall 5 (wrong language cached) by including language in cache keys; Pitfall 8 (SSR latency) with cache layer; Pitfall 15 (stale data) with mutation-triggered invalidation; Pitfall 9 (OG failures) by validating with Facebook Debugger
 
 ### Phase Ordering Rationale
 
-- **Phase 1 first:** Test infrastructure and Base View tests establish patterns that prevent pitfalls in all subsequent phases. localStorage cleanup, semantic queries, and event listener cleanup patterns must be established before cart and locale tests multiply the complexity.
-
-- **Phase 2 before Phase 3:** Model unit tests in isolation validate cart operations before integration with currency conversion. Pure cart logic (add/remove/persist) separated from currency concerns simplifies debugging.
-
-- **Phase 3 before Phase 4:** Currency/cart state integration tested before locale (language) concerns. Cart + currency is revenue-critical, language switching is UX-critical. If time constraints, Phase 4 could defer to v1.4.
-
-- **Phase 4 dedicated to RTL:** Hebrew RTL layout is unique complexity that shouldn't be underestimated or bundled with other locale testing. Research shows RTL edge cases (bidirectional text, flex-direction, logical properties) need focused attention.
-
-- **Phase 5 after Phases 1-4:** Integration tests require unit test patterns established. Controller routing glues Model + View + pages together — can't test effectively until components validated individually.
-
-- **Phase 6 last:** Edge cases and error handling build on patterns from Phases 1-5. Polish phase catches corner cases after critical paths proven.
+- **Phase 1 before Phase 2:** Cannot render EJS pages without the engine configured, cannot migrate URLs without redirects ready, cannot create product URLs without slug system in place.
+- **Phase 2 before Phase 3:** Static pages validate the entire SSR pipeline (template rendering, build process, deployment merge, frontend JS compatibility) without the complexity of dynamic product data. If the deployment merge fails, it fails on simple pages, not complex ones.
+- **Phase 3 before Phase 4:** Caching requires stable SSR output to cache. Sitemap submission requires product pages to exist. Search Console verification is most valuable after the site has proper structured data.
+- **Testing is continuous across all phases** (Pitfall 10): run the full test suite before and after every change, add SSR-specific tests incrementally.
 
 ### Research Flags
 
 **Phases likely needing deeper research during planning:**
-- **Phase 3 (Cart State & Currency):** Currency conversion precision testing, potential cents-based pricing migration (large refactor), exchange rate API mocking patterns
-- **Phase 4 (Locale & RTL):** Happy-DOM RTL support validation, bidirectional text handling, visual regression tools for RTL snapshots
+- **Phase 2 (deployment merge):** The transition from two DigitalOcean App Platform components to one needs staging validation. Build command, routing configuration, and health checks all change.
+- **Phase 3 (client-side JS adaptation):** How `categoriesView.js`, `View.js`, and `controller.js` interact with SSR-rendered content requires careful code analysis during planning. The `data-ssr` hydration pattern needs prototyping.
 
 **Phases with standard patterns (skip research-phase):**
-- **Phase 1 (Test Infrastructure):** Vitest/Happy-DOM setup well-documented, Testing Library vanilla JS examples abundant
-- **Phase 2 (Model Unit Tests):** localStorage mocking and fetch mocking well-documented in Vitest ecosystem
-- **Phase 5 (MVC Integration):** Hash routing and MVC integration patterns established, page view tests follow Phase 1 patterns
-- **Phase 6 (Edge Cases):** Error handling follows established patterns from Phases 1-5
+- **Phase 1 (foundation):** EJS setup, Express routing, slug generation, redirect middleware -- all well-documented.
+- **Phase 4 (caching and optimization):** node-cache TTL patterns, HTTP cache headers, Google Search Console setup -- all standard.
+
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All package versions verified from npm (Feb 2026). Vitest 4.0.18 + Happy-DOM 20.0.11 compatibility confirmed. @testing-library/dom 10.4.1 framework-agnostic. |
-| Features | HIGH | E-commerce table stakes well-documented. Cart operations, currency switching, language persistence are standard patterns. RTL testing less common but documented. |
-| Architecture | HIGH | Vanilla JS MVC testing patterns established. Testing Pyramid (integration > unit) supported by multiple sources. Helpers/mocks/factories architecture standard for test codebases. |
-| Pitfalls | HIGH | All 8 pitfalls sourced from real-world issues (GitHub issues, Stack Overflow, testing guides). localStorage pollution, event listener leaks, async races, float precision all documented problems. |
+| Stack | HIGH | Only 2 new packages needed. EJS and sitemap are mature, well-documented, verified against npm registry. No speculative technology choices. |
+| Features | HIGH | Feature list verified against Google's official SEO documentation and current codebase state. All "current state" claims confirmed by reading actual HTML/JS files. |
+| Architecture | HIGH | Architecture is additive to existing Express app. Progressive enhancement pattern is well-established. Component boundaries are clear. |
+| Pitfalls | HIGH | All pitfalls derived from actual codebase analysis (specific line numbers, variable names, function references). Prevention strategies are concrete and actionable. |
 
 **Overall confidence:** HIGH
 
 ### Gaps to Address
 
-**During Phase 3 planning (Currency & Cart State):**
-- **Currency precision handling:** Research shows toBeCloseTo() works, but cents-based pricing (storing integers) is more robust long-term. Need to evaluate refactor scope — model.js stores prices as floats currently, migration to cents affects API contracts, localStorage schema, and View rendering. If refactor too large for v1.3, document technical debt and use toBeCloseTo() as interim solution.
+- **Parcel manifest integration:** How to reference content-hashed JS/CSS filenames in EJS templates. Parcel generates a manifest file, but the exact integration pattern needs validation during Phase 2 implementation.
+- **Hebrew product names for slugs:** Products may have Hebrew-only names. The slug system assumes English names exist. Need to verify all products have English names in the database, or design a fallback (e.g., transliteration or ID-based slugs).
+- **DigitalOcean App Platform build command:** The merged deployment needs a build command that installs frontend deps, runs Parcel build, copies assets to backend, then starts Express. The exact `build_command` syntax needs testing.
+- **Multilingual SEO strategy (deferred):** Full hreflang with separate language URL paths is explicitly deferred. This means Hebrew content remains invisible to Google for this milestone. This is an acceptable trade-off -- the English catalog is the priority -- but should be planned as the next SEO milestone.
+- **OG image dimensions:** Product images are jewelry photos unlikely to be 1200x630px. Generating OG-specific crops may require adding a Sharp processing step during image upload. This could be deferred to Phase 4 or a subsequent milestone, using default brand images initially.
 
-**During Phase 4 planning (RTL & Locale):**
-- **Visual regression for RTL:** Happy-DOM doesn't apply CSS, so layout bugs (flex-direction: row-reverse, margin-inline-start) not caught by unit tests. Research suggests Playwright for visual snapshots, but adds E2E dependency. Need to decide: (1) accept manual RTL testing for v1.3, (2) add Playwright for critical RTL pages, or (3) defer comprehensive RTL testing to v1.4.
-
-**During implementation (any phase):**
-- **View.js size complexity:** Base View class is 900+ lines with complex inheritance. Tests may reveal tight coupling between menu rendering, language switching, and page-specific hooks. If inheritance issues emerge, consider refactoring View.js into smaller mixins or composition pattern. Document as technical debt if refactor too large for v1.3.
+---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-
-**Stack research:**
-- [Vitest Environment Guide](https://vitest.dev/guide/environment) — official docs for Happy-DOM setup
-- [@testing-library/dom - npm](https://www.npmjs.com/package/@testing-library/dom) — version 10.4.1 verified (published Aug 2025)
-- [happy-dom - npm](https://www.npmjs.com/package/happy-dom) — version 20.0.11 verified (published Jan 2026)
-- [vitest-fetch-mock - npm](https://www.npmjs.com/package/vitest-fetch-mock) — version 0.3.0+ for fetch mocking
-
-**Features research:**
-- [JavaScript Testing Best Practices (GitHub)](https://github.com/goldbergyoni/javascript-testing-best-practices) — comprehensive guide with 50+ best practices
-- [Shopify: Ecommerce Testing Guide 2026](https://www.shopify.com/blog/ecommerce-testing) — table stakes features for e-commerce
-- [Frontend Unit Testing Best Practices](https://www.meticulous.ai/blog/frontend-unit-testing-best-practices) — what to test vs what not to test
-
-**Architecture research:**
-- [The MVC Design Pattern in Vanilla JavaScript — SitePoint](https://www.sitepoint.com/mvc-design-pattern-javascript/) — MVC testing patterns
-- [Testing the DOM: The Setup | Steve Kinney](https://stevekinney.com/courses/testing/testing-the-dom) — Happy-DOM setup and patterns
-- [jsdom vs happy-dom · vitest-dev/vitest Discussion](https://github.com/vitest-dev/vitest/discussions/1607) — performance comparison, API coverage
-
-**Pitfalls research:**
-- [How to mock and spy on local storage in vitest](https://dylanbritz.dev/writing/mocking-local-storage-vitest/) — localStorage state pollution prevention
-- [MaxListenersExceededWarning: Possible EventEmitter Memory Leak - Vitest Issue](https://github.com/vitest-dev/vitest/issues/7194) — event listener leak patterns
-- [Currency Calculations in JavaScript - Honeybadger](https://www.honeybadger.io/blog/currency-money-calculations-in-javascript/) — floating-point precision issues
-- [The Complete Guide to RTL Layout Testing](https://placeholdertext.org/blog/the-complete-guide-to-rtl-right-to-left-layout-testing-arabic-hebrew-more/) — RTL bidirectional text handling
+- Codebase analysis: `controller.js`, `View.js`, `categoriesView.js`, `locale.js`, `backend/index.js`, `backend/config/locale.js`, `Product.js` schema, all HTML templates, test files, deployment configuration
+- [Google Product Structured Data](https://developers.google.com/search/docs/appearance/structured-data/product)
+- [Google Managing Multi-Regional Sites](https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites)
+- [Google Structured Data Overview](https://developers.google.com/search/docs/appearance/structured-data)
+- [Google Site Moves with URL Changes](https://developers.google.com/search/docs/crawling-indexing/site-move-with-url-changes)
+- [Google Build and Submit a Sitemap](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap)
+- [EJS Official Documentation](https://ejs.co/)
+- [Express Template Engine Guide](https://expressjs.com/en/guide/using-template-engines.html)
+- npm registry -- version verification for EJS (4.0.1), sitemap (9.0.0)
 
 ### Secondary (MEDIUM confidence)
-
-- [How to Unit Test HTML and Vanilla JavaScript](https://dev.to/thawkin3/how-to-unit-test-html-and-vanilla-javascript-without-a-ui-framework-4io) — vanilla JS testing patterns without frameworks
-- [BrowserStack: How to Test E-commerce Website](https://www.browserstack.com/guide/how-to-test-ecommerce-website) — e-commerce testing checklist
-- [How to Build a Simple MVC App From Scratch in JavaScript](https://www.taniarascia.com/javascript-mvc-todo-app/) — MVC structure patterns
+- [Weglot Hreflang Guide](https://www.weglot.com/guides/hreflang-tag)
+- [ResultFirst E-commerce Schema Markups 2026](https://www.resultfirst.com/blog/ecommerce-seo/ecommerce-schema-markups/)
+- [Koanthic E-commerce Schema Guide](https://koanthic.com/en/e-commerce-schema-markup-complete-guide-examples-2026/)
+- [Scale Delight Jewelry SEO Strategies](https://scaledelight.com/blogs/jewelry-ecommerce-websites/)
+- [DigitalOcean EJS Tutorial](https://www.digitalocean.com/community/tutorials/how-to-use-ejs-to-template-your-node-application)
+- [Semrush Canonical URL Guide](https://www.semrush.com/blog/canonical-url-guide/)
 
 ### Tertiary (LOW confidence)
-
-- Community discussions on Reddit, Stack Overflow for edge cases (localStorage quota, Hebrew layout bugs, currency rounding)
-- Blog posts on vanilla JS MVC patterns (some outdated, pre-Vitest era)
+- SSR performance benchmarks (Medium articles) -- numbers vary widely, used directionally only
+- PixelFreeStudio SSR caching patterns -- concepts verified against Node.js documentation
 
 ---
-*Research completed: 2026-02-06*
+
+*Research completed: 2026-02-10*
 *Ready for roadmap: yes*
