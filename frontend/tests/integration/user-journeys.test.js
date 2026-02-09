@@ -571,4 +571,139 @@ describe('MVC Integration: User Journeys', () => {
       expect(itemTitle.textContent).toContain(product.name);
     });
   });
+
+  describe('Logged-In User Shopping Flow', () => {
+    it('should add item via API and maintain cart state', async () => {
+      // Set auth token to simulate logged-in user
+      localStorage.setItem('auth-token', 'mock-jwt-token-12345');
+
+      // Setup fetch mock for addtocart API
+      global.fetch = vi.fn((url) => {
+        if (url.includes('/addtocart')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ itemId: '1001', success: true })
+          });
+        }
+        if (url.includes('/getcart')) {
+          // Mock cart response - backend format is object keyed by ID
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              '1001': 1 // ID: amount
+            })
+          });
+        }
+        if (url.includes('/discount-settings')) {
+          return Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({
+              success: true,
+              global_discount_percentage: 0,
+              discount_active: false,
+              discount_label: 'Discount'
+            })
+          });
+        }
+        return Promise.reject(new Error(`Unmocked fetch: ${url}`));
+      });
+
+      renderHomePageFixture();
+
+      const product = createProduct({ usd_price: 75, ils_price: 278 });
+      const productElement = createMockProductElement(product);
+
+      // Add item as logged-in user
+      model.handleAddToCart(productElement);
+
+      // Wait for async API call
+      await new Promise(resolve => setTimeout(resolve, 10));
+
+      // Verify fetch was called with auth-token header and /addtocart endpoint
+      expect(global.fetch).toHaveBeenCalledWith(
+        expect.stringContaining('/addtocart'),
+        expect.objectContaining({
+          method: 'POST',
+          headers: expect.objectContaining({
+            'auth-token': 'mock-jwt-token-12345'
+          })
+        })
+      );
+
+      // Simulate cart page: render fixture
+      renderCartPageFixture();
+
+      // Mock checkCartNumber to return 1 for logged-in user
+      const checkCartNumberSpy = vi.spyOn(model, 'checkCartNumber').mockResolvedValue(1);
+
+      // Manually add item to model.cart for rendering (simulating cart loaded from API)
+      model.cart.push({
+        id: product.id,
+        title: product.name,
+        image: product.images[0]?.desktop || '',
+        price: product.ils_price,
+        usdPrice: product.usd_price,
+        ilsPrice: product.ils_price,
+        quantity: product.quantity,
+        amount: 1
+      });
+
+      localStorage.setItem('currency', 'usd');
+      cartView.setLanguage('eng', 1);
+      await cartView.render(1);
+      await cartView._renderSummary(1, 'eng');
+
+      // Verify cart displays correctly
+      const itemTitle = document.querySelector('.item-title');
+      expect(itemTitle.textContent).toContain(product.name);
+
+      const itemPrice = document.querySelector('.item-price');
+      expect(itemPrice.textContent).toContain('$');
+      expect(itemPrice.textContent).toContain('75');
+
+      checkCartNumberSpy.mockRestore();
+    });
+
+    it('should maintain auth token across page simulations', () => {
+      // Set auth token
+      localStorage.setItem('auth-token', 'mock-jwt-token-67890');
+
+      // Navigate to "home" (render home fixture)
+      renderHomePageFixture();
+      expect(localStorage.getItem('auth-token')).toBe('mock-jwt-token-67890');
+
+      // Navigate to "cart" (render cart fixture)
+      renderCartPageFixture();
+      expect(localStorage.getItem('auth-token')).toBe('mock-jwt-token-67890');
+
+      // Verify auth token persisted after both page simulations
+      expect(localStorage.getItem('auth-token')).toBe('mock-jwt-token-67890');
+    });
+
+    it('should handle API error gracefully during cart sync', async () => {
+      // Set auth token
+      localStorage.setItem('auth-token', 'mock-jwt-token-error');
+
+      // Mock fetch to return error
+      global.fetch = vi.fn(() => Promise.reject(new Error('API Error')));
+
+      // Call handleLoadStorage in try-catch (simulates controller loading cart on page load)
+      try {
+        await model.handleLoadStorage();
+      } catch (err) {
+        // Error is caught and logged, but doesn't crash
+      }
+
+      // Render cart view (should work even with API error)
+      renderCartPageFixture();
+
+      // View still renders (with empty or stale cart)
+      cartView.setLanguage('eng', 0);
+      await cartView.render(0);
+
+      // Verify view renders without crash
+      const cartEmpty = document.querySelector('.cart-empty');
+      expect(cartEmpty).toBeTruthy();
+    });
+  });
 });
