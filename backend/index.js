@@ -1417,14 +1417,21 @@ const createOrder = async cart => {
               },
             },
           },
-          items: cart.map(item => ({
-            name: item.name,
-            unit_amount: {
-              currency_code: item.unit_amount.currency_code,
-              value: toTwoDecimalString(item.unit_amount.value),
-            },
-            quantity: String(Number.parseInt(item.quantity, 10)),
-          })),
+          items: cart.map(item => {
+            // Use same cent-rounding logic as total calculation to avoid PayPal 422 errors
+            const rawValue = Number(item.unit_amount.value);
+            const centsValue = Math.round(rawValue * 100);
+            const roundedValue = (centsValue / 100).toFixed(2);
+
+            return {
+              name: item.name,
+              unit_amount: {
+                currency_code: item.unit_amount.currency_code,
+                value: roundedValue,
+              },
+              quantity: String(Number.parseInt(item.quantity, 10)),
+            };
+          }),
         },
       ],
       application_context: {
