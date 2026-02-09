@@ -411,37 +411,18 @@ body:not(#home) {
   justify-content: center;
   width: auto;
   height: auto;
-  font-family: var(--font-decorative);
-  font-size: 20px;
-  line-height: 1.1;
-  color: #111;
   text-decoration: none;
-  text-transform: none;
-  white-space: nowrap;
   flex-shrink: 0;
   margin: 0;
-  /* Prevent overlap with left/right icons on narrow screens */
   max-width: calc(100% - 140px);
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .site-logo {
-  height: 36px;
+  height: 42px;
   width: auto;
   object-fit: contain;
   display: block;
-}
-
-.site-logo-text {
-  font-family: 'Raleway', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  color: var(--site-gold-accent);
-  text-transform: none;
-  white-space: nowrap;
-  transition: color 0.3s ease;
 }
 
 .site-header .icons-container {
@@ -764,18 +745,8 @@ html[dir='rtl'] .menu .menu-close-container {
     padding-top: 52px;
   }
 
-  .site-brand {
-    font-size: 16px;
-    margin-right: 4px;
-  }
-
   .site-logo {
-    height: 30px;
-  }
-
-  .site-logo-text {
-    font-size: 15px;
-    letter-spacing: 0.05em;
+    height: 36px;
   }
 
   /* Header selectors removed; side-menu selectors stay visible */

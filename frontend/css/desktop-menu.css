@@ -533,38 +533,20 @@ html[dir='rtl'] .site-header .category-item .attrib {
     justify-content: flex-start;
     width: auto;
     height: auto;
-    font-family: var(--font-decorative);
-    /* Keep brand from overpowering / colliding with nav on medium widths */
-    font-size: clamp(22px, 2.2vw, 32px);
-    line-height: 1;
-    color: #111;
     text-decoration: none;
-    text-transform: none;
-    white-space: nowrap;
     margin-right: 0;
   }
 
   .site-logo {
-    height: clamp(40px, 5vw, 56px);
+    height: clamp(60px, 7vw, 70px);
     width: auto;
     object-fit: contain;
     display: block;
+    transition: opacity 0.3s ease;
   }
 
-  .site-logo-text {
-    font-family: 'Raleway', sans-serif;
-    font-size: clamp(13px, 1.6vw, 20px);
-    font-weight: 400;
-    letter-spacing: 0.08em;
-    color: var(--site-gold-accent);
-    text-transform: none;
-    white-space: nowrap;
-    transition: color 0.3s ease;
-    text-transform: uppercase;
-  }
-
-  .site-brand:hover .site-logo-text {
-    color: #000;
+  .site-brand:hover .site-logo {
+    opacity: 0.8;
   }
 
   /* Hide mobile icons on desktop */
@@ -825,18 +807,8 @@ html[dir='rtl'] .site-header .category-item .attrib {
     flex: 1 1 0;
   }
 
-  .site-brand {
-    font-size: clamp(18px, 2vw, 28px);
-  }
-
   .site-logo {
-    height: clamp(36px, 4.5vw, 48px);
-  }
-
-  .site-logo-text {
-    font-size: clamp(14px, 1.6vw, 20px);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    height: clamp(36px, 4.5vw, 52px);
   }
 
   .site-header .menu__ul {
@@ -881,18 +853,8 @@ html[dir='rtl'] .site-header .category-item .attrib {
     padding: 0 8px;
   }
 
-  .site-brand {
-    font-size: 18px;
-  }
-
   .site-logo {
-    height: 32px;
-  }
-
-  .site-logo-text {
-    font-size: 14px;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
+    height: 36px;
   }
 
   .site-header .menu a.attrib {
