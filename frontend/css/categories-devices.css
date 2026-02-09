@@ -682,7 +682,6 @@ main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
 }
 
 /* SKU Display */
