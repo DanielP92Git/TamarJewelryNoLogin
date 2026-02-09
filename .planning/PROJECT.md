@@ -8,18 +8,14 @@ Professional SKU (Stock Keeping Unit) management for an existing handmade jewelr
 
 Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency.
 
-## Current Milestone: v1.3 Frontend Testing
-
-**Goal:** Complete the testing foundation with comprehensive frontend test coverage for the vanilla JS MVC architecture.
-
-**Target features:**
-- Base View class testing (language/currency selectors, header menu, shared functionality)
-- Page-specific view testing (incremental coverage: cart, product modal, checkout, then others)
-- Cart state scenario testing (complete user journeys with localStorage sync and multi-currency)
-- Locale switching testing (RTL layouts, currency display/conversion, GeoIP detection, translations)
-- MVC integration testing (controller routing, model-view sync, API error handling)
-
 ## Previous Milestones
+
+**v1.3 Frontend Testing (Shipped: 2026-02-09)**
+- 419 tests passing (104 new frontend tests + 315 backend tests)
+- Complete MVC test coverage: model, views, controller, locale switching, user journeys
+- Happy-DOM testing infrastructure (2-3x faster than jsdom)
+- All 60 v1.3 requirements satisfied with 100% traceability
+- 2 bugs discovered and fixed through testing (CartView currency calculation, cart number rendering)
 
 **v1.2 Test Infrastructure & Critical Coverage (Shipped: 2026-02-06)**
 - 447 tests passing with comprehensive safety net for future development
@@ -88,15 +84,18 @@ Clean, professional product information management that matches real-world e-com
 - ✓ Frontend MVC tests cover model/view synchronization and API error handling — v1.2 (deferred to v1.3)
 - ✓ Locale detection tests cover GeoIP-based detection and fallback logic — v1.2 (not applicable, working as designed)
 
+<!-- v1.3 Frontend Testing - shipped 2026-02-09 -->
+
+- ✓ Frontend testing infrastructure with Happy-DOM and @testing-library/dom — v1.3
+- ✓ Model layer tests (cart operations, localStorage, API mocking, currency) — v1.3
+- ✓ Base View class tests (language/currency selectors, header menu, event cleanup) — v1.3
+- ✓ Page-specific view tests (cart, product modal, checkout, categories, home, contact) — v1.3
+- ✓ Locale switching tests (RTL layouts, currency display, GeoIP detection, bidirectional text) — v1.3
+- ✓ MVC integration tests (controller routing, model-view sync, view lifecycle, user journeys) — v1.3
+
 ### Active
 
-<!-- v1.3 Frontend Testing - in progress -->
-
-- [ ] Base View class tests (language/currency selectors, header menu)
-- [ ] Page-specific view tests (cart, product modal, checkout views)
-- [ ] Cart state scenario tests (localStorage sync, multi-currency calculations)
-- [ ] Locale switching tests (RTL layouts, currency display, GeoIP detection, translations)
-- [ ] MVC integration tests (controller routing, model-view sync, API error handling)
+<!-- Future requirements -->
 
 ### Out of Scope
 
@@ -108,13 +107,14 @@ Clean, professional product information management that matches real-world e-com
 
 ## Context
 
-**Current State (v1.2 Shipped):**
+**Current State (v1.3 Shipped):**
 - v1.0 (2026-02-01): SKU Management with ~869 LOC across 3 phases
 - v1.1 (2026-02-04): Admin Product Management UX with 6 phases, 33 plans
 - v1.2 (2026-02-06): Test Infrastructure & Critical Coverage with 7 phases, 25 plans, 447 tests
+- v1.3 (2026-02-09): Frontend Testing with 6 phases, 20 plans, 104 new tests (419 total)
 - Production e-commerce platform handling payments (PayPal & Stripe)
 - ~94 products in catalog with multi-image support
-- Comprehensive test coverage for critical paths (auth, payments, currency, files, data, security)
+- Comprehensive test coverage for backend (auth, payments, security) and frontend (MVC, views, locale)
 - Safety net established for future refactoring and feature development
 
 **Technical Environment:**
@@ -134,7 +134,7 @@ Clean, professional product information management that matches real-world e-com
 - Input validation documented but not sanitized (exploratory testing approach)
 - No structured logging (console.log/error scattered throughout)
 - No audit logging for admin actions
-- Frontend testing in progress (v1.3 milestone)
+- Currency-changed event handler bug (calls non-existent this._render() method)
 - Payment sandbox integration deferred to future (real API testing with test mode)
 
 ## Constraints
@@ -160,4 +160,4 @@ Clean, professional product information management that matches real-world e-com
 | SKU value always LTR in RTL mode | Product codes are identifiers, not translatable text | ✓ Good - prevents reversal confusion |
 
 ---
-*Last updated: 2026-02-06 after starting v1.3 milestone*
+*Last updated: 2026-02-09 after v1.3 milestone completion*
