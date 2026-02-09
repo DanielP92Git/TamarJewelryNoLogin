@@ -66,20 +66,20 @@ Requirements for frontend testing coverage. Each maps to roadmap phases.
 
 ### Locale Testing
 
-- [ ] **LOCALE-01**: RTL layout applies when Hebrew language selected
-- [ ] **LOCALE-02**: LTR layout applies when English language selected
-- [ ] **LOCALE-03**: RTL layout changes flex-direction correctly
-- [ ] **LOCALE-04**: Currency display uses $ symbol for USD
-- [ ] **LOCALE-05**: Currency display uses ₪ symbol for ILS
-- [ ] **LOCALE-06**: Currency formatting shows correct decimal places (2 for both)
-- [ ] **LOCALE-07**: Price recalculation updates all cart items on currency switch
-- [ ] **LOCALE-08**: Price recalculation maintains cart quantity on currency switch
-- [ ] **LOCALE-09**: Translation text updates when language switches
-- [ ] **LOCALE-10**: Bidirectional text handles Hebrew names + English SKUs correctly
-- [ ] **LOCALE-11**: GeoIP detection determines initial locale from headers
-- [ ] **LOCALE-12**: GeoIP fallback chain works when detection fails
-- [ ] **LOCALE-13**: Locale preference persists to localStorage
-- [ ] **LOCALE-14**: Locale preference loads from localStorage on page reload
+- [x] **LOCALE-01**: RTL layout applies when Hebrew language selected
+- [x] **LOCALE-02**: LTR layout applies when English language selected
+- [x] **LOCALE-03**: RTL layout changes flex-direction correctly
+- [x] **LOCALE-04**: Currency display uses $ symbol for USD
+- [x] **LOCALE-05**: Currency display uses ₪ symbol for ILS
+- [x] **LOCALE-06**: Currency formatting shows correct decimal places (2 for both)
+- [x] **LOCALE-07**: Price recalculation updates all cart items on currency switch
+- [x] **LOCALE-08**: Price recalculation maintains cart quantity on currency switch
+- [x] **LOCALE-09**: Translation text updates when language switches
+- [x] **LOCALE-10**: Bidirectional text handles Hebrew names + English SKUs correctly
+- [x] **LOCALE-11**: GeoIP detection determines initial locale from headers
+- [x] **LOCALE-12**: GeoIP fallback chain works when detection fails
+- [x] **LOCALE-13**: Locale preference persists to localStorage
+- [x] **LOCALE-14**: Locale preference loads from localStorage on page reload
 
 ### MVC Integration Testing
 
@@ -179,20 +179,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PAGE-11 | Phase 20 | Complete |
 | PAGE-12 | Phase 20 | Complete |
 | PAGE-13 | Phase 20 | Complete |
-| LOCALE-01 | Phase 21 | Pending |
-| LOCALE-02 | Phase 21 | Pending |
-| LOCALE-03 | Phase 21 | Pending |
-| LOCALE-04 | Phase 21 | Pending |
-| LOCALE-05 | Phase 21 | Pending |
-| LOCALE-06 | Phase 21 | Pending |
-| LOCALE-07 | Phase 21 | Pending |
-| LOCALE-08 | Phase 21 | Pending |
-| LOCALE-09 | Phase 21 | Pending |
-| LOCALE-10 | Phase 21 | Pending |
-| LOCALE-11 | Phase 21 | Pending |
-| LOCALE-12 | Phase 21 | Pending |
-| LOCALE-13 | Phase 21 | Pending |
-| LOCALE-14 | Phase 21 | Pending |
+| LOCALE-01 | Phase 21 | Complete |
+| LOCALE-02 | Phase 21 | Complete |
+| LOCALE-03 | Phase 21 | Complete |
+| LOCALE-04 | Phase 21 | Complete |
+| LOCALE-05 | Phase 21 | Complete |
+| LOCALE-06 | Phase 21 | Complete |
+| LOCALE-07 | Phase 21 | Complete |
+| LOCALE-08 | Phase 21 | Complete |
+| LOCALE-09 | Phase 21 | Complete |
+| LOCALE-10 | Phase 21 | Complete |
+| LOCALE-11 | Phase 21 | Complete |
+| LOCALE-12 | Phase 21 | Complete |
+| LOCALE-13 | Phase 21 | Complete |
+| LOCALE-14 | Phase 21 | Complete |
 | MVC-01 | Phase 22 | Pending |
 | MVC-02 | Phase 22 | Pending |
 | MVC-03 | Phase 22 | Pending |
