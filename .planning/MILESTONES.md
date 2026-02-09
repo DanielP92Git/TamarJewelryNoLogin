@@ -82,6 +82,35 @@
 
 **Git range:** `feat(10-01)` → `docs(16)`
 
+**What's next:** Frontend testing for complete MVC coverage (v1.3)
+
+---
+
+## v1.3 Frontend Testing (Shipped: 2026-02-09)
+
+**Delivered:** Comprehensive frontend test suite with 104 new tests covering vanilla JS MVC architecture, including model layer, views, locale switching, and complete user journey integration tests.
+
+**Phases completed:** 17-22 (20 plans total)
+
+**Key accomplishments:**
+
+- Complete frontend testing infrastructure with Happy-DOM (2-3x faster than jsdom) and @testing-library/dom for semantic queries
+- 77 model layer tests covering cart operations, localStorage persistence, API mocking, and dual-currency calculations
+- 82 base View tests validating language/currency switching, RTL layouts, header menu, and event listener cleanup patterns
+- 72 page view tests for cart, product modal, checkout, categories, home page, and contact form validation
+- 84 locale tests verifying RTL layout transitions, currency symbol display, GeoIP detection, and bidirectional text handling
+- 84 MVC integration tests covering controller routing, model-view synchronization, view lifecycle management, and complete user shopping journeys
+
+**Stats:**
+
+- 23 frontend test files created (~9,232 lines of test code)
+- 104 new frontend tests, 419 total tests passing (including 315 backend tests)
+- 60 requirements, 60/60 satisfied (100% coverage)
+- 6 phases, 20 plans, ~60 tasks
+- 3 days from planning to completion (2026-02-06 → 2026-02-09)
+
+**Git range:** `test(17-01)` → `docs(22)`
+
 **What's next:** TBD - planning next milestone (/gsd:new-milestone)
 
 ---

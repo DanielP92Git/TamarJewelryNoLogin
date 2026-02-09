@@ -2,10 +2,10 @@
 
 ## Milestones
 
-- ✅ **v1.0 SKU Management** - Phases 1-3 (shipped 2026-02-01)
-- ✅ **v1.1 Admin Product Management UX** - Phases 4-9 (shipped 2026-02-04)
-- ✅ **v1.2 Test Infrastructure & Critical Coverage** - Phases 10-16 (shipped 2026-02-06)
-- ✅ **v1.3 Frontend Testing** - Phases 17-22 (shipped 2026-02-09)
+- ✅ **v1.0 SKU Management** — Phases 1-3 (shipped 2026-02-01) — [archive](.planning/milestones/v1.0-ROADMAP.md)
+- ✅ **v1.1 Admin Product Management UX** — Phases 4-9 (shipped 2026-02-04) — [archive](.planning/milestones/v1.1-ROADMAP.md)
+- ✅ **v1.2 Test Infrastructure & Critical Coverage** — Phases 10-16 (shipped 2026-02-06) — [archive](.planning/milestones/v1.2-ROADMAP.md)
+- ✅ **v1.3 Frontend Testing** — Phases 17-22 (shipped 2026-02-09) — [archive](.planning/milestones/v1.3-ROADMAP.md)
 
 ## Phases
 
@@ -183,140 +183,22 @@ Plans:
 
 </details>
 
-### v1.3 Frontend Testing (In Progress)
+<details>
+<summary>✅ v1.3 Frontend Testing (Phases 17-22) — SHIPPED 2026-02-09</summary>
 
-**Milestone Goal:** Complete the testing foundation with comprehensive frontend test coverage for the vanilla JS MVC architecture.
+- [x] Phase 17: Test Infrastructure & Utilities (3/3 plans) — completed 2026-02-08
+- [x] Phase 18: Model Unit Tests (4/4 plans) — completed 2026-02-08
+- [x] Phase 19: Base View Tests (4/4 plans) — completed 2026-02-09
+- [x] Phase 20: Page View Tests (3/3 plans) — completed 2026-02-09
+- [x] Phase 21: Locale & Currency Tests (2/2 plans) — completed 2026-02-09
+- [x] Phase 22: MVC Integration Tests (4/4 plans) — completed 2026-02-09
 
-#### Phase 17: Test Infrastructure & Utilities
-**Goal**: Frontend testing foundation with Happy-DOM environment and reusable test utilities
-**Depends on**: Phase 16
-**Requirements**: INFRA-01, INFRA-02, INFRA-03, INFRA-04, INFRA-05
-**Success Criteria** (what must be TRUE):
-  1. Vitest runs frontend tests in browser environment with Happy-DOM
-  2. localStorage is cleaned between tests preventing state pollution
-  3. Test utilities and factories are available for common scenarios
-  4. CI/CD pipeline runs frontend tests on PR and push events
-  5. Tests use semantic DOM queries that are resilient to markup changes
-**Plans**: 3 plans
+See [v1.3-ROADMAP.md](.planning/milestones/v1.3-ROADMAP.md) for full phase details.
 
-Plans:
-- [x] 17-01-PLAN.md - Configure Vitest with Happy-DOM environment
-- [x] 17-02-PLAN.md - Create test utilities with @testing-library/dom and factories
-- [x] 17-03-PLAN.md - Validate infrastructure and verify CI/CD
-
-#### Phase 18: Model Unit Tests
-**Goal**: Cart operations and API interactions tested in isolation with mocked dependencies
-**Depends on**: Phase 17
-**Requirements**: MODEL-01, MODEL-02, MODEL-03, MODEL-04, MODEL-05, MODEL-06, MODEL-07, MODEL-08, MODEL-09, MODEL-10, MODEL-11, MODEL-12, MODEL-13, MODEL-14, MODEL-15, MODEL-16
-**Success Criteria** (what must be TRUE):
-  1. Cart add/remove/update/clear operations modify state correctly
-  2. Cart data persists to localStorage and survives browser restart
-  3. Currency conversion calculations are accurate within floating-point tolerance
-  4. API calls are properly mocked and network failures are handled gracefully
-  5. Malformed localStorage data doesn't crash the cart (corruption handling)
-**Plans**: 4 plans
-
-Plans:
-- [x] 18-01-PLAN.md - Cart operations tests with fetch and DOM mocks
-- [x] 18-02-PLAN.md - localStorage persistence and corruption handling tests
-- [x] 18-03-PLAN.md - API mocking and error handling tests
-- [x] 18-04-PLAN.md - Currency storage and discount calculation tests
-
-#### Phase 19: Base View Tests
-**Goal**: Shared View class functionality validated for language/currency switching and header menu
-**Depends on**: Phase 17
-**Requirements**: VIEW-01, VIEW-02, VIEW-03, VIEW-04, VIEW-05, VIEW-06, VIEW-07, VIEW-08, VIEW-09, VIEW-10, VIEW-11
-**Success Criteria** (what must be TRUE):
-  1. Language selector switches between English and Hebrew with RTL layout changes
-  2. Currency selector switches between USD and ILS with price recalculation
-  3. Header menu renders correctly and updates on navigation
-  4. Event listeners are cleaned up on view unmount preventing memory leaks
-  5. View base class patterns are established for page-specific views
-**Plans**: 4 plans
-
-Plans:
-- [x] 19-01-PLAN.md - Language selector and switching tests (VIEW-01 through VIEW-04)
-- [x] 19-02-PLAN.md - Currency selector tests (VIEW-05 through VIEW-08)
-- [x] 19-03-PLAN.md - Header menu rendering and navigation tests (VIEW-09, VIEW-10)
-- [x] 19-04-PLAN.md - Event listener cleanup tests (VIEW-11)
-
-#### Phase 20: Page View Tests
-**Goal**: Page-specific views render correctly with accurate data display
-**Depends on**: Phase 19
-**Requirements**: PAGE-01, PAGE-02, PAGE-03, PAGE-04, PAGE-05, PAGE-06, PAGE-07, PAGE-08, PAGE-09, PAGE-10, PAGE-11, PAGE-12, PAGE-13
-**Success Criteria** (what must be TRUE):
-  1. Cart view displays items with correct names, quantities, prices, and totals
-  2. Product modal renders images, description, price, and triggers cart updates
-  3. Checkout view shows payment methods and order summary with correct totals
-  4. Categories view filters products correctly and home page shows featured products
-  5. Contact form validates required fields before submission
-**Plans**: 3 plans
-
-Plans:
-- [x] 20-01-PLAN.md -- Cart view display, totals, empty state, and currency switching tests
-- [x] 20-02-PLAN.md -- Product modal rendering, close methods, add-to-cart, and categories filtering tests
-- [x] 20-03-PLAN.md -- Checkout payment flow, home page categories, and contact form validation tests
-
-#### Phase 21: Locale & Currency Tests
-**Goal**: Multi-language RTL layouts and multi-currency display validated
-**Depends on**: Phase 19
-**Requirements**: LOCALE-01, LOCALE-02, LOCALE-03, LOCALE-04, LOCALE-05, LOCALE-06, LOCALE-07, LOCALE-08, LOCALE-09, LOCALE-10, LOCALE-11, LOCALE-12, LOCALE-13, LOCALE-14
-**Success Criteria** (what must be TRUE):
-  1. RTL layout applies correctly when Hebrew is selected (dir attribute, flex-direction)
-  2. Currency symbols display correctly ($ for USD, ₪ for ILS) with proper formatting
-  3. Price recalculation updates all cart items when currency switches
-  4. Translation text updates when language switches
-  5. Locale preferences persist to localStorage and load on page reload
-**Plans**: 2 plans
-
-Plans:
-- [x] 21-01-PLAN.md -- Locale helper functions, bootstrapLocaleSync, and persistence tests (LOCALE-03, LOCALE-06, LOCALE-13, LOCALE-14)
-- [x] 21-02-PLAN.md -- Hydration GeoIP detection, fallback chain, and bidirectional text tests (LOCALE-10, LOCALE-11, LOCALE-12)
-
-#### Phase 22: MVC Integration Tests
-**Goal**: Full MVC architecture integration validated with controller page dispatch and lifecycle management
-**Depends on**: Phase 18, Phase 19, Phase 20
-**Requirements**: MVC-01, MVC-02, MVC-03, MVC-04, MVC-05, MVC-06, MVC-07, MVC-08, MVC-09, MVC-10
-**Success Criteria** (what must be TRUE):
-  1. Controller dispatches to correct view based on page identity (body.id)
-  2. Model updates trigger view re-renders (cart, currency, language changes)
-  3. View lifecycle methods execute correctly (mount, update, cleanup)
-  4. Cart state remains consistent during navigation and currency changes mid-checkout
-  5. Event listeners are cleaned up on re-renders preventing memory leaks
-**Plans**: 4 plans
-
-Plans:
-- [x] 22-01-PLAN.md -- Controller routing and page dispatch integration tests (MVC-01, MVC-02)
-- [x] 22-02-PLAN.md -- Model-view synchronization tests for currency, language, and cart (MVC-03, MVC-04, MVC-05)
-- [x] 22-03-PLAN.md -- View lifecycle, mount/update/cleanup, and rapid switching tests (MVC-06, MVC-07, MVC-08)
-- [x] 22-04-PLAN.md -- End-to-end user journey tests with guest and logged-in flows (MVC-09, MVC-10)
+</details>
 
 ## Progress
 
-**Execution Order:**
-Phases execute in numeric order: 17 → 18 → 19 → 20 → 21 → 22
+All phases complete. See [MILESTONES.md](MILESTONES.md) for shipped milestones.
 
-| Phase | Milestone | Plans Complete | Status | Completed |
-|-------|-----------|----------------|--------|-----------|
-| 1. Database & Schema | v1.0 | 3/3 | Complete | 2026-02-01 |
-| 2. Admin Dashboard Integration | v1.0 | 1/1 | Complete | 2026-02-01 |
-| 3. Frontend Display | v1.0 | 1/1 | Complete | 2026-02-01 |
-| 4. Product Preview Modal | v1.1 | 5/5 | Complete | 2026-02-04 |
-| 5. Database Schema Migration | v1.1 | 5/5 | Complete | 2026-02-04 |
-| 6. Product List Reordering | v1.1 | 7/7 | Complete | 2026-02-04 |
-| 7. Image Gallery Unification | v1.1 | 6/6 | Complete | 2026-02-04 |
-| 8. Cross-Device Testing | v1.1 | 5/5 | Complete | 2026-02-04 |
-| 9. Documentation & Cleanup | v1.1 | 5/5 | Complete | 2026-02-04 |
-| 10. Test Infrastructure | v1.2 | 3/3 | Complete | 2026-02-06 |
-| 11. Authentication & Authorization Tests | v1.2 | 4/4 | Complete | 2026-02-06 |
-| 12. Payment Processing Tests | v1.2 | 3/3 | Complete | 2026-02-06 |
-| 13. Currency & Exchange Rate Tests | v1.2 | 3/3 | Complete | 2026-02-06 |
-| 14. File Upload & Image Processing Tests | v1.2 | 4/4 | Complete | 2026-02-06 |
-| 15. Database & Model Tests | v1.2 | 4/4 | Complete | 2026-02-06 |
-| 16. Security & Middleware Tests | v1.2 | 4/4 | Complete | 2026-02-06 |
-| 17. Test Infrastructure & Utilities | v1.3 | 3/3 | Complete | 2026-02-08 |
-| 18. Model Unit Tests | v1.3 | 4/4 | Complete | 2026-02-08 |
-| 19. Base View Tests | v1.3 | 4/4 | Complete | 2026-02-09 |
-| 20. Page View Tests | v1.3 | 3/3 | Complete | 2026-02-09 |
-| 21. Locale & Currency Tests | v1.3 | 2/2 | Complete | 2026-02-09 |
-| 22. MVC Integration Tests | v1.3 | 4/4 | Complete | 2026-02-09 |
+Next milestone: TBD - use `/gsd:new-milestone` to begin planning.
