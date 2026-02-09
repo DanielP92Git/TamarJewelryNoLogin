@@ -28,6 +28,9 @@ describe('Checkout Payment and Order Summary', () => {
     process.env.API_URL = 'http://localhost:4000';
     process.env.USD_ILS_RATE = '3.7';
 
+    // Set _host directly since class field was evaluated at import time (before env was set)
+    cartView._host = process.env.API_URL;
+
     // Mock fetch globally
     fetchMock = vi.fn();
     global.fetch = fetchMock;
