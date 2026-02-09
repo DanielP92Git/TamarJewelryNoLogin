@@ -1,12 +1,26 @@
-# Tamar Kfir Jewelry - SKU Management
+# Tamar Kfir Jewelry - E-commerce Platform
 
 ## What This Is
 
-Professional SKU (Stock Keeping Unit) management for an existing handmade jewelry e-commerce platform. Adding proper SKU fields to the admin dashboard and displaying them on the frontend product modals, replacing the current unprofessional practice of embedding SKUs in product descriptions.
+Handmade jewelry e-commerce platform with professional product management, comprehensive testing, and now expanding into SEO & marketing to drive organic traffic. The store serves both English and Hebrew-speaking customers with full RTL support, dual currency (USD/ILS), and integrated payment processing (PayPal & Stripe).
 
 ## Core Value
 
-Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency.
+A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers.
+
+## Current Milestone: v1.4 SEO & Marketing Foundation
+
+**Goal:** Make the store discoverable by search engines and shareable on social platforms through server-side rendering, structured data, and clean URLs.
+
+**Target features:**
+- Server-side rendering for product pages, category pages, and home page
+- Clean URL structure replacing hash routing with real paths
+- Dynamic meta tags (title, description, canonical) per page
+- Open Graph tags for rich social preview cards
+- JSON-LD structured data for Google rich results
+- Auto-generated XML sitemap
+- Bilingual SEO with hreflang tags (English/Hebrew)
+- Robots.txt with proper crawler directives
 
 ## Previous Milestones
 
@@ -95,7 +109,16 @@ Clean, professional product information management that matches real-world e-com
 
 ### Active
 
-<!-- Future requirements -->
+<!-- v1.4 SEO & Marketing Foundation -->
+
+- [ ] Server-side rendering for key pages (product, category, home)
+- [ ] Clean URL structure with real paths instead of hash routing
+- [ ] Dynamic meta tags per page (title, description, canonical)
+- [ ] Open Graph tags for social preview cards
+- [ ] JSON-LD structured data (Product schema) for rich results
+- [ ] XML sitemap auto-generation
+- [ ] Bilingual SEO with hreflang tags
+- [ ] Robots.txt configuration
 
 ### Out of Scope
 
@@ -107,18 +130,18 @@ Clean, professional product information management that matches real-world e-com
 
 ## Context
 
-**Current State (v1.3 Shipped):**
+**Current State (v1.4 Starting):**
 - v1.0 (2026-02-01): SKU Management with ~869 LOC across 3 phases
 - v1.1 (2026-02-04): Admin Product Management UX with 6 phases, 33 plans
 - v1.2 (2026-02-06): Test Infrastructure & Critical Coverage with 7 phases, 25 plans, 447 tests
 - v1.3 (2026-02-09): Frontend Testing with 6 phases, 20 plans, 104 new tests (419 total)
 - Production e-commerce platform handling payments (PayPal & Stripe)
 - ~94 products in catalog with multi-image support
-- Comprehensive test coverage for backend (auth, payments, security) and frontend (MVC, views, locale)
+- 419 tests passing (comprehensive backend + frontend coverage)
 - Safety net established for future refactoring and feature development
 
 **Technical Environment:**
-- MVC frontend architecture (Vanilla JS, Parcel bundler)
+- MVC frontend architecture (Vanilla JS, Parcel bundler) — SPA with hash routing
 - Express/Node.js monolithic backend (3,662 lines in single file)
 - MongoDB with Mongoose ODM
 - Multi-language support (English/Hebrew with RTL)
@@ -126,6 +149,7 @@ Clean, professional product information management that matches real-world e-com
 - Payment integrations: PayPal SDK, Stripe API
 - Image processing: Sharp library with DigitalOcean Spaces (S3-compatible)
 - Currency service: Scheduled exchange rate updates (USD/ILS)
+- Deployed on DigitalOcean (App Platform)
 
 **Known Issues/Tech Debt:**
 - Monolithic backend remains (3,662 lines) - refactoring deferred to future
@@ -141,9 +165,10 @@ Clean, professional product information management that matches real-world e-com
 
 - **Tech Stack**: Vanilla JavaScript frontend (no React/Vue) — must work with existing View pattern
 - **Database**: MongoDB with Mongoose — schema changes must handle existing products gracefully
-- **Multi-language**: SKU label must support English/Hebrew translations — use existing language switching pattern
-- **Uniqueness**: Database-level unique constraint on SKU field — prevent duplicates server-side
-- **Backwards Compatibility**: Existing products without SKUs must continue to work — SKU is optional for existing data, required for new
+- **Multi-language**: All SEO content must support English/Hebrew — use existing language switching pattern
+- **Backwards Compatibility**: Existing bookmarks and admin URLs must continue to work — redirects where needed
+- **Deployment**: DigitalOcean (App Platform) — SSR solution must work within this hosting environment
+- **Performance**: SSR must not degrade page load time for returning visitors — cache aggressively
 
 ## Key Decisions
 
@@ -160,4 +185,4 @@ Clean, professional product information management that matches real-world e-com
 | SKU value always LTR in RTL mode | Product codes are identifiers, not translatable text | ✓ Good - prevents reversal confusion |
 
 ---
-*Last updated: 2026-02-09 after v1.3 milestone completion*
+*Last updated: 2026-02-10 after v1.4 milestone start*
