@@ -48,6 +48,9 @@ describe('Checkout Payment and Order Summary', () => {
       </div>
     `);
 
+    // Ensure _host is set (class field initializer may run before env var is available)
+    cartView._host = process.env.API_URL || 'http://localhost:4000';
+
     // Re-assign CartView DOM element references to the new fixture
     cartView._parentElement = document.querySelector('.cart-items-container');
     cartView._cartEmpty = document.querySelector('.cart-empty');
