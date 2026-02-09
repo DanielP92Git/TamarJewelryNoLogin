@@ -274,22 +274,22 @@ Plans:
 - [x] 21-02-PLAN.md -- Hydration GeoIP detection, fallback chain, and bidirectional text tests (LOCALE-10, LOCALE-11, LOCALE-12)
 
 #### Phase 22: MVC Integration Tests
-**Goal**: Full MVC architecture integration validated with controller routing and lifecycle management
+**Goal**: Full MVC architecture integration validated with controller page dispatch and lifecycle management
 **Depends on**: Phase 18, Phase 19, Phase 20
 **Requirements**: MVC-01, MVC-02, MVC-03, MVC-04, MVC-05, MVC-06, MVC-07, MVC-08, MVC-09, MVC-10
 **Success Criteria** (what must be TRUE):
-  1. Controller routes to correct view based on hash fragment changes
+  1. Controller dispatches to correct view based on page identity (body.id)
   2. Model updates trigger view re-renders (cart, currency, language changes)
-  3. View lifecycle methods execute correctly (mount, update, unmount)
+  3. View lifecycle methods execute correctly (mount, update, cleanup)
   4. Cart state remains consistent during navigation and currency changes mid-checkout
-  5. Event listeners are cleaned up on navigation preventing memory leaks
-**Plans**: TBD
+  5. Event listeners are cleaned up on re-renders preventing memory leaks
+**Plans**: 4 plans
 
 Plans:
-- [ ] 22-01: TBD (controller routing tests)
-- [ ] 22-02: TBD (model-view synchronization tests)
-- [ ] 22-03: TBD (lifecycle and cleanup tests)
-- [ ] 22-04: TBD (integration scenario tests)
+- [ ] 22-01-PLAN.md -- Controller routing and page dispatch integration tests (MVC-01, MVC-02)
+- [ ] 22-02-PLAN.md -- Model-view synchronization tests for currency, language, and cart (MVC-03, MVC-04, MVC-05)
+- [ ] 22-03-PLAN.md -- View lifecycle, mount/update/cleanup, and rapid switching tests (MVC-06, MVC-07, MVC-08)
+- [ ] 22-04-PLAN.md -- End-to-end user journey tests with guest and logged-in flows (MVC-09, MVC-10)
 
 ## Progress
 
