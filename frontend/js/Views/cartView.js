@@ -14,7 +14,7 @@ class CartView extends View {
   _deleteAllBtn = document.querySelector('.delete-all');
   _checkMeOut = document.querySelector('.check-me-out');
   _orderSummaryContainer = document.querySelector('.summary');
-  _host = process.env.API_URL;
+  _host = process.env.API_URL || '';
   _rate = process.env.USD_ILS_RATE || 3.7;
 
   // Get current selected currency
