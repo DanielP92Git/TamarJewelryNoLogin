@@ -8,3 +8,7 @@ coverage/
 backend/coverage/
 frontend/coverage/
 *.lcov
+
+# Uploaded images (stored on DigitalOcean Spaces CDN)
+backend/uploads/
+backend/smallImages/
