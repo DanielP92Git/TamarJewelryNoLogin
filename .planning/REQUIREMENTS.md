@@ -83,16 +83,16 @@ Requirements for frontend testing coverage. Each maps to roadmap phases.
 
 ### MVC Integration Testing
 
-- [ ] **MVC-01**: Controller routes to correct view based on hash fragment
-- [ ] **MVC-02**: Hash change triggers view navigation
-- [ ] **MVC-03**: Cart model updates trigger cart view re-render
-- [ ] **MVC-04**: Currency model change triggers all view updates
-- [ ] **MVC-05**: Language model change triggers all view updates
-- [ ] **MVC-06**: View mount lifecycle initializes event listeners
-- [ ] **MVC-07**: View update lifecycle refreshes DOM with new data
-- [ ] **MVC-08**: View unmount lifecycle cleans up event listeners
-- [ ] **MVC-09**: Currency change mid-checkout maintains cart state consistency
-- [ ] **MVC-10**: Navigation with unsaved cart changes preserves cart data
+- [x] **MVC-01**: Controller routes to correct view based on body.id page identity (MPA dispatch)
+- [x] **MVC-02**: Page load triggers view initialization sequence
+- [x] **MVC-03**: Cart model updates trigger cart view re-render
+- [x] **MVC-04**: Currency model change triggers all view updates
+- [x] **MVC-05**: Language model change triggers all view updates
+- [x] **MVC-06**: View mount lifecycle initializes event listeners
+- [x] **MVC-07**: View update lifecycle refreshes DOM with new data
+- [x] **MVC-08**: View unmount lifecycle cleans up event listeners
+- [x] **MVC-09**: Currency change mid-checkout maintains cart state consistency
+- [x] **MVC-10**: Navigation with unsaved cart changes preserves cart data
 
 ## Future Requirements
 
@@ -193,16 +193,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LOCALE-12 | Phase 21 | Complete |
 | LOCALE-13 | Phase 21 | Complete |
 | LOCALE-14 | Phase 21 | Complete |
-| MVC-01 | Phase 22 | Pending |
-| MVC-02 | Phase 22 | Pending |
-| MVC-03 | Phase 22 | Pending |
-| MVC-04 | Phase 22 | Pending |
-| MVC-05 | Phase 22 | Pending |
-| MVC-06 | Phase 22 | Pending |
-| MVC-07 | Phase 22 | Pending |
-| MVC-08 | Phase 22 | Pending |
-| MVC-09 | Phase 22 | Pending |
-| MVC-10 | Phase 22 | Pending |
+| MVC-01 | Phase 22 | Complete |
+| MVC-02 | Phase 22 | Complete |
+| MVC-03 | Phase 22 | Complete |
+| MVC-04 | Phase 22 | Complete |
+| MVC-05 | Phase 22 | Complete |
+| MVC-06 | Phase 22 | Complete |
+| MVC-07 | Phase 22 | Complete |
+| MVC-08 | Phase 22 | Complete |
+| MVC-09 | Phase 22 | Complete |
+| MVC-10 | Phase 22 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 60 total
@@ -219,4 +219,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-02-06*
-*Last updated: 2026-02-06 after roadmap creation*
+*Last updated: 2026-02-09 after Phase 22 completion*
