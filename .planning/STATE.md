@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ## Current Position
 
 Phase: 21 of 22 (Locale & Currency Tests)
-Plan: 2 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-09 — Completed 21-02-PLAN.md (hydration and bidi tests)
+Plan: 2 of 2 in current phase
+Status: Phase complete
+Last activity: 2026-02-09 — Completed Phase 21 (Locale & Currency Tests) - 84 tests, all verified
 
-Progress: [█████████░░░░░░░░░░] 92% (20.67 phases complete / 22 total)
+Progress: [█████████░░░░░░░░░░] 95% (21 phases complete / 22 total)
 
 ## Performance Metrics
 
@@ -88,6 +88,9 @@ Recent decisions affecting current work:
 - v1.3: Module-level vi.mock() for third-party libraries (emailjs) with vi.clearAllMocks() in beforeEach (20-03)
 - v1.3: Test anti-spam via observable outcomes (alert messages, mock calls, form state) not internal validation results (20-03)
 - v1.3: Checkout is part of CartView, not separate view; tests verify USD conversion for Stripe (20-03)
+- v1.3: Test internal helpers via exported function side effects (not direct exports) (21-01)
+- v1.3: Mock Happy-DOM's default Asia/Jerusalem timezone to ensure consistent test results (21-01)
+- v1.3: Document LOCALE-03 (Happy-DOM cannot verify CSS flex-direction) and LOCALE-06 (integer pricing) as known limitations (21-01)
 - v1.3: Simplified timeout test to abort error simulation (avoid fake timer complexity with async) (21-02)
 - v1.3: Used singleton instance method with .call() for bidi tests (CategoriesView exports instance, not class) (21-02)
 
@@ -107,10 +110,14 @@ None yet.
 - ✓ CI/CD workflow verified for frontend tests (17-03)
 - Ready for: Phase 18 (Model Tests)
 
-**Phase 21 (Locale & Currency Tests):**
-- Happy-DOM doesn't apply CSS - RTL layout bugs may not be caught
-- Consider manual RTL testing or Playwright visual snapshots for comprehensive coverage
-- Research flag: bidirectional text handling (Hebrew + English SKUs)
+**Phase 21 (Locale & Currency Tests): COMPLETE**
+- ✓ 21-01: Locale helper and bootstrap tests (51 tests for LOCALE-03, LOCALE-06, LOCALE-13, LOCALE-14)
+- ✓ 21-02: GeoIP hydration and bidirectional text tests (33 tests for LOCALE-10, LOCALE-11, LOCALE-12)
+- ✓ 84 total tests across 4 test files, all 12 LOCALE requirements verified
+- ✓ Mock Intl and navigator patterns established for locale testing
+- ✓ LOCALE-03 and LOCALE-06 limitations documented (Happy-DOM cannot verify CSS)
+- ✓ Bidirectional text (SKU dir="ltr") verified for Hebrew RTL mode
+- Ready for: Phase 22 (Test Coverage Report)
 
 **Phase 18 (Model Unit Tests): COMPLETE**
 - ✓ 77 comprehensive model tests across 4 test files (18-01 through 18-04)
@@ -147,22 +154,10 @@ None yet.
 - ✓ Anti-spam testing via observable outcomes (20-03)
 - ✓ Stripe USD conversion verification in checkout tests (20-03)
 - Ready for: Phase 21 (Locale & Currency Tests)
-
-**Phase 21 (Locale & Currency Tests): IN PROGRESS**
-- ✓ 21-01: Locale helpers and bootstrap tests (51 tests for LOCALE-01 through LOCALE-09)
-- ✓ 21-02: Hydration and bidi tests (33 tests for LOCALE-10, LOCALE-11, LOCALE-12)
-- 84 total tests across 4 test files so far
-- ✓ GeoIP hydration with fallback chain tested
-- ✓ Bidirectional text (SKU dir="ltr") verified
-- ✓ Fetch mock sequence helper for fallback testing
-- ✓ currency-changed event dispatch verification
-- Remaining: 21-03 (Selector tests)
-- Known limitation: Happy-DOM doesn't apply CSS - RTL layout bugs may not be caught
-
 ## Session Continuity
 
-Last session: 2026-02-09 at 03:26:24Z
-Stopped at: Completed 21-02-PLAN.md (hydration and bidi tests)
+Last session: 2026-02-09
+Stopped at: Completed Phase 21 (Locale & Currency Tests) - both plans executed and verified
 Resume file: None
 
 ## Quick Tasks Completed
