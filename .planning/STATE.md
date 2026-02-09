@@ -5,7 +5,7 @@
 See: .planning/PROJECT.md (updated 2026-02-06)
 
 **Core value:** Clean, professional product information management that matches real-world e-commerce standards and improves admin workflow efficiency
-**Current focus:** Phase 21 - Locale & Currency Tests
+**Current focus:** Phase 22 - MVC Integration Tests
 
 ## Current Position
 

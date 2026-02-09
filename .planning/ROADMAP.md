@@ -270,8 +270,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 21-01-PLAN.md -- Locale helper functions, bootstrapLocaleSync, and persistence tests (LOCALE-03, LOCALE-06, LOCALE-13, LOCALE-14)
-- [ ] 21-02-PLAN.md -- Hydration GeoIP detection, fallback chain, and bidirectional text tests (LOCALE-10, LOCALE-11, LOCALE-12)
+- [x] 21-01-PLAN.md -- Locale helper functions, bootstrapLocaleSync, and persistence tests (LOCALE-03, LOCALE-06, LOCALE-13, LOCALE-14)
+- [x] 21-02-PLAN.md -- Hydration GeoIP detection, fallback chain, and bidirectional text tests (LOCALE-10, LOCALE-11, LOCALE-12)
 
 #### Phase 22: MVC Integration Tests
 **Goal**: Full MVC architecture integration validated with controller routing and lifecycle management
@@ -318,5 +318,5 @@ Phases execute in numeric order: 17 → 18 → 19 → 20 → 21 → 22
 | 18. Model Unit Tests | v1.3 | 4/4 | Complete | 2026-02-08 |
 | 19. Base View Tests | v1.3 | 4/4 | Complete | 2026-02-09 |
 | 20. Page View Tests | v1.3 | 3/3 | Complete | 2026-02-09 |
-| 21. Locale & Currency Tests | v1.3 | 0/2 | Not started | - |
+| 21. Locale & Currency Tests | v1.3 | 2/2 | Complete | 2026-02-09 |
 | 22. MVC Integration Tests | v1.3 | 0/4 | Not started | - |
