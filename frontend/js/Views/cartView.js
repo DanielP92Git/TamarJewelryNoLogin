@@ -412,15 +412,12 @@ class CartView extends View {
       return 0;
     }
 
-    let checkCurrency = model.cart[0].currency;
-
-    // Calculate total using stored prices (already in correct currency)
-    // Prices are stored as whole numbers from the database
+    // Calculate total using current currency (currency-aware like _calculateOriginalTotal)
+    // Use _getItemPrice to respect localStorage currency setting
     const total = model.cart
       .map(itm => {
-        // Use discounted price if available, otherwise use regular price
-        const price = itm.discountedPrice || itm.price;
-        return Math.round(Number(price) || 0);
+        // Get price based on current currency selection
+        return this._getItemPrice(itm, false);
       })
       .reduce((x, y) => x + y, 0);
 
