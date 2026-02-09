@@ -3615,11 +3615,12 @@ app.post('/orders', paymentRateLimiter, async (req, res) => {
     res.status(status).json({
       error: 'Failed to create order.',
       code: error?.code || 'ORDER_CREATE_FAILED',
-      // Include PayPal debug_id in all environments so production issues can be diagnosed.
+      // Include PayPal debug_id and details in all environments for diagnosis.
       ...(error?.paypalDebugId ? { paypalDebugId: error.paypalDebugId } : {}),
+      ...(error?.paypalDetails ? { paypalDetails: error.paypalDetails } : {}),
       ...(isProd
         ? {}
-        : { message: error?.message, paypalDetails: error?.paypalDetails }),
+        : { message: error?.message }),
     });
   }
 });
