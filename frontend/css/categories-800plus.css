@@ -318,8 +318,6 @@ body#categories.crochet-necklaces header {
   scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
   -webkit-overflow-scrolling: touch;
   white-space: pre-wrap;
-  text-indent: -1em;
-  padding-left: 1em;
 }
 
 /* Minimalist scrollbar styling */
@@ -569,7 +567,6 @@ body#categories.crochet-necklaces header {
   flex: 1;
   display: flex;
   flex-direction: column;
-  margin-bottom: 15px;
   overflow: auto;
   width: 100%;
   max-height: calc(100% - 120px); /* Allow more space for description content */
@@ -725,7 +722,7 @@ body#categories.crochet-necklaces header {
 
 .item-specs[dir='rtl'] .item-description_modal {
   padding-left: 0;
-  padding-right: 1em;
+  padding-right: 0;
 }
 
 .item-specs[dir='ltr'] .item-title_modal,
