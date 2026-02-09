@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 ## Current Position
 
 Phase: 22 of 22 (MVC Integration Tests)
-Plan: 3 of 4 in current phase
+Plan: 1 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-09 — Completed 22-03-PLAN.md (Lifecycle and Cleanup Integration Tests) - 27 tests, all passing
+Last activity: 2026-02-09 — Completed 22-01-PLAN.md (Controller Routing & Page Dispatch) - 28 tests, all passing
 
-Progress: [█████████░░░░░░░░░░] 95% (21 phases complete / 22 total, plan 3 of 4 in progress)
+Progress: [█████████░░░░░░░░░░] 95% (21 phases complete / 22 total, plan 1 of 4 complete)
 
 ## Performance Metrics
 
@@ -93,6 +93,10 @@ Recent decisions affecting current work:
 - v1.3: Document LOCALE-03 (Happy-DOM cannot verify CSS flex-direction) and LOCALE-06 (integer pricing) as known limitations (21-01)
 - v1.3: Simplified timeout test to abort error simulation (avoid fake timer complexity with async) (21-02)
 - v1.3: Used singleton instance method with .call() for bidi tests (CategoriesView exports instance, not class) (21-02)
+- v1.3: Integration helper module pattern with createBaseFixture, setupControllerMocks, cleanupIntegrationState (22-01)
+- v1.3: Only mock external boundaries in integration tests (fetch, IntersectionObserver), not internal MVC wiring (22-01)
+- v1.3: Page-specific DOM fixtures via extraDOM parameter for views with unique element requirements (22-01)
+- v1.3: Reset singleton initialization state (categoriesView.initialized) in beforeEach for test isolation (22-01)
 - v1.3: Integration lifecycle tests use behavioral verification to prove no event listener accumulation across re-renders (22-03)
 - v1.3: Stress tests with 10-20 rapid re-renders prove memory leak prevention under extreme conditions (22-03)
 - v1.3: Async lifecycle tests replicate exact controller sequence (handleLoadStorage -> checkCartNumber -> setLanguage) (22-03)
@@ -156,6 +160,7 @@ None yet.
 - ✓ CategoriesView auto-init suppression pattern (20-02)
 - ✓ Anti-spam testing via observable outcomes (20-03)
 - ✓ Stripe USD conversion verification in checkout tests (20-03)
+- Ready for: Phase 21 (Locale & Currency Tests)
 
 **Phase 21 (Locale & Currency Tests): COMPLETE**
 - ✓ 21-01: Locale helper and bootstrap tests (51 tests for LOCALE-03, LOCALE-06, LOCALE-13, LOCALE-14)
@@ -163,15 +168,22 @@ None yet.
 - ✓ 84 total tests across 4 test files, all 12 LOCALE requirements verified
 
 **Phase 22 (MVC Integration Tests): IN PROGRESS**
+- ✓ 22-01: Controller routing and page dispatch tests (28 tests for MVC-01, MVC-02)
+- ✓ Integration helper module created (createBaseFixture, setupControllerMocks, cleanupIntegrationState)
+- ✓ All 7 page types tested (home, workshop, about, contact, policies, cart, categories)
+- ✓ English and Hebrew menu rendering verified for each page
+- ✓ Cart number persistence tested across pages
+- ✓ External boundary mocking pattern established (only mock fetch/APIs, not MVC wiring)
 - ✓ 22-03: Lifecycle and cleanup integration tests (27 tests for MVC-06, MVC-07, MVC-08)
 - ✓ Behavioral verification proves no event listener accumulation (spy call counts)
 - ✓ Stress tests with 10-20 rapid re-renders prove memory leak prevention
 - ✓ Async lifecycle tests verify correct initialization order
+- Next: 22-02 (Model-View Sync), 22-04 (Coverage Report)
 - Ready for: 22-04 (Coverage Report)
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed 22-03-PLAN.md (Lifecycle and Cleanup Integration Tests) - 27 tests passing
+Stopped at: Completed 22-01-PLAN.md (Controller Routing & Page Dispatch) - 28 tests passing, 418 total tests
 Resume file: None
 
 ## Quick Tasks Completed
