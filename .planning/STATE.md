@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 
 ## Current Position
 
-Phase: 21 of 22 (Locale & Currency Tests)
-Plan: 2 of 2 in current phase
-Status: Phase complete
-Last activity: 2026-02-09 — Completed Phase 21 (Locale & Currency Tests) - 84 tests, all verified
+Phase: 22 of 22 (MVC Integration Tests)
+Plan: 3 of 4 in current phase
+Status: In progress
+Last activity: 2026-02-09 — Completed 22-03-PLAN.md (Lifecycle and Cleanup Integration Tests) - 27 tests, all passing
 
-Progress: [█████████░░░░░░░░░░] 95% (21 phases complete / 22 total)
+Progress: [█████████░░░░░░░░░░] 95% (21 phases complete / 22 total, plan 3 of 4 in progress)
 
 ## Performance Metrics
 
@@ -93,6 +93,9 @@ Recent decisions affecting current work:
 - v1.3: Document LOCALE-03 (Happy-DOM cannot verify CSS flex-direction) and LOCALE-06 (integer pricing) as known limitations (21-01)
 - v1.3: Simplified timeout test to abort error simulation (avoid fake timer complexity with async) (21-02)
 - v1.3: Used singleton instance method with .call() for bidi tests (CategoriesView exports instance, not class) (21-02)
+- v1.3: Integration lifecycle tests use behavioral verification to prove no event listener accumulation across re-renders (22-03)
+- v1.3: Stress tests with 10-20 rapid re-renders prove memory leak prevention under extreme conditions (22-03)
+- v1.3: Async lifecycle tests replicate exact controller sequence (handleLoadStorage -> checkCartNumber -> setLanguage) (22-03)
 
 ### Pending Todos
 
@@ -153,11 +156,22 @@ None yet.
 - ✓ CategoriesView auto-init suppression pattern (20-02)
 - ✓ Anti-spam testing via observable outcomes (20-03)
 - ✓ Stripe USD conversion verification in checkout tests (20-03)
-- Ready for: Phase 21 (Locale & Currency Tests)
+
+**Phase 21 (Locale & Currency Tests): COMPLETE**
+- ✓ 21-01: Locale helper and bootstrap tests (51 tests for LOCALE-03, LOCALE-06, LOCALE-13, LOCALE-14)
+- ✓ 21-02: GeoIP hydration and bidirectional text tests (33 tests for LOCALE-10, LOCALE-11, LOCALE-12)
+- ✓ 84 total tests across 4 test files, all 12 LOCALE requirements verified
+
+**Phase 22 (MVC Integration Tests): IN PROGRESS**
+- ✓ 22-03: Lifecycle and cleanup integration tests (27 tests for MVC-06, MVC-07, MVC-08)
+- ✓ Behavioral verification proves no event listener accumulation (spy call counts)
+- ✓ Stress tests with 10-20 rapid re-renders prove memory leak prevention
+- ✓ Async lifecycle tests verify correct initialization order
+- Ready for: 22-04 (Coverage Report)
 ## Session Continuity
 
 Last session: 2026-02-09
-Stopped at: Completed Phase 21 (Locale & Currency Tests) - both plans executed and verified
+Stopped at: Completed 22-03-PLAN.md (Lifecycle and Cleanup Integration Tests) - 27 tests passing
 Resume file: None
 
 ## Quick Tasks Completed
