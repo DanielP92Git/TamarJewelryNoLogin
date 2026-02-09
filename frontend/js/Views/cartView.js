@@ -556,7 +556,7 @@ class CartView extends View {
                     currency_code: item.currency == '$' ? 'USD' : 'ILS',
                     value: item.price,
                   },
-                  quantity: item.quantity,
+                  quantity: item.amount || 1,
                 };
                 return data;
               });
@@ -610,6 +610,14 @@ class CartView extends View {
                   responseData?.error ||
                   responseData?.code;
 
+                // Log PayPal-specific details for debugging
+                if (responseData?.paypalDetails) {
+                  console.error('PayPal rejection details:', responseData.paypalDetails);
+                }
+                if (responseData?.paypalDebugId) {
+                  console.error('PayPal debug ID:', responseData.paypalDebugId);
+                }
+
                 // If we got an HTML error page (e.g. 504 from a gateway), avoid showing it to users.
                 if (!structuredMessage && text && text.trim().startsWith('<')) {
                   const friendly =
@@ -619,13 +627,16 @@ class CartView extends View {
                   throw new Error(`${friendly} (${statusInfo})`);
                 }
 
+                // Include PayPal issue details if available
+                const paypalIssue = responseData?.paypalDetails?.[0]?.issue;
                 const fallbackText =
                   text && text.trim()
                     ? text.trim().slice(0, 300)
                     : 'Unknown error';
                 const errorMessage = structuredMessage || fallbackText;
+                const detail = paypalIssue ? ` [${paypalIssue}]` : '';
                 throw new Error(
-                  `Failed to create order: ${errorMessage} (${statusInfo})`
+                  `Failed to create order: ${errorMessage}${detail} (${statusInfo})`
                 );
               }
 
