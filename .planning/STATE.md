@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-06)
 
 ## Current Position
 
-Phase: 20 of 22 (Page View Tests)
-Plan: 3 of 3 in current phase
-Status: Phase complete
-Last activity: 2026-02-09 — Completed Phase 20 (Page View Tests) - 72 tests, all verified
+Phase: 21 of 22 (Locale & Currency Tests)
+Plan: 2 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-09 — Completed 21-02-PLAN.md (hydration and bidi tests)
 
-Progress: [█████████░░░░░░░░░░] 91% (20 phases complete / 22 total)
+Progress: [█████████░░░░░░░░░░] 92% (20.67 phases complete / 22 total)
 
 ## Performance Metrics
 
@@ -88,6 +88,8 @@ Recent decisions affecting current work:
 - v1.3: Module-level vi.mock() for third-party libraries (emailjs) with vi.clearAllMocks() in beforeEach (20-03)
 - v1.3: Test anti-spam via observable outcomes (alert messages, mock calls, form state) not internal validation results (20-03)
 - v1.3: Checkout is part of CartView, not separate view; tests verify USD conversion for Stripe (20-03)
+- v1.3: Simplified timeout test to abort error simulation (avoid fake timer complexity with async) (21-02)
+- v1.3: Used singleton instance method with .call() for bidi tests (CategoriesView exports instance, not class) (21-02)
 
 ### Pending Todos
 
@@ -146,10 +148,21 @@ None yet.
 - ✓ Stripe USD conversion verification in checkout tests (20-03)
 - Ready for: Phase 21 (Locale & Currency Tests)
 
+**Phase 21 (Locale & Currency Tests): IN PROGRESS**
+- ✓ 21-01: Locale helpers and bootstrap tests (51 tests for LOCALE-01 through LOCALE-09)
+- ✓ 21-02: Hydration and bidi tests (33 tests for LOCALE-10, LOCALE-11, LOCALE-12)
+- 84 total tests across 4 test files so far
+- ✓ GeoIP hydration with fallback chain tested
+- ✓ Bidirectional text (SKU dir="ltr") verified
+- ✓ Fetch mock sequence helper for fallback testing
+- ✓ currency-changed event dispatch verification
+- Remaining: 21-03 (Selector tests)
+- Known limitation: Happy-DOM doesn't apply CSS - RTL layout bugs may not be caught
+
 ## Session Continuity
 
-Last session: 2026-02-09
-Stopped at: Completed Phase 20 (Page View Tests) - all 3 plans executed and verified
+Last session: 2026-02-09 at 03:26:24Z
+Stopped at: Completed 21-02-PLAN.md (hydration and bidi tests)
 Resume file: None
 
 ## Quick Tasks Completed
