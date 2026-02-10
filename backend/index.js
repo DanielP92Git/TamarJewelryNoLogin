@@ -29,6 +29,7 @@ const {
   runExchangeRateUpdate,
 } = require('./jobs/exchangeRateJob');
 const { detectLanguage, languageMiddleware, trailingSlashRedirect } = require('./middleware/language');
+const { legacyRedirectMiddleware } = require('./middleware/legacy');
 
 // #region agent log
 function agentLog(hypothesisId, location, message, data) {
@@ -692,6 +693,10 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(trailingSlashRedirect);
+
+// Legacy .html redirects (must be before SSR routes)
+app.use(legacyRedirectMiddleware);
+
 app.use(express.urlencoded({ extended: false }));
 app.use(
   express.json({

@@ -35,8 +35,8 @@ const legacyUrlMap = {
  * @param {function} next - Express next middleware function
  */
 function legacyRedirectMiddleware(req, res, next) {
-  // Only process paths ending in .html
-  if (!req.path.endsWith('.html')) {
+  // Only process paths ending in .html (case-insensitive)
+  if (!req.path.toLowerCase().endsWith('.html')) {
     return next();
   }
 
