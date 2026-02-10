@@ -1079,6 +1079,35 @@ app.use(
 );
 
 // =============================================
+// Frontend Static Assets
+// =============================================
+// Serve public assets (robots.txt, etc.)
+app.use(express.static(path.join(__dirname, 'public'), {
+  maxAge: '1d',
+  index: false,  // Don't serve index.html from public/
+  setHeaders: (res, filePath) => {
+    // Ensure robots.txt is served with correct content type
+    if (filePath.endsWith('robots.txt')) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    }
+  }
+}));
+
+// Serve frontend dist (Parcel-built JS/CSS bundles)
+app.use('/dist', express.static(path.join(__dirname, '..', 'frontend', 'dist'), {
+  maxAge: '7d',
+  immutable: true  // Parcel uses content hashes in filenames
+}));
+
+// Serve frontend images
+app.use('/imgs', express.static(path.join(__dirname, '..', 'frontend', 'imgs'), {
+  maxAge: '7d'
+}));
+
+// Serve favicon
+app.use('/favicon.ico', express.static(path.join(__dirname, '..', 'frontend', 'favicon.ico')));
+
+// =============================================
 // Health & client config endpoints (dev-friendly)
 // =============================================
 // Used by the admin UI to auto-detect a working API base URL.
