@@ -11,22 +11,22 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 Milestone: v1.4 SEO & Marketing Foundation
 Phase: 23 of 26 (Foundation & Infrastructure)
-Plan: — (phase not yet planned)
-Status: Ready to plan
-Last activity: 2026-02-10 — Roadmap created for v1.4 (4 phases, 49 requirements)
+Plan: 2 of 5 (Product slug infrastructure)
+Status: In progress
+Last activity: 2026-02-10 — Completed 23-02: Product slug schema and migration
 
-Progress: Phases 1-22 complete (v1.0-v1.3). v1.4: [░░░░░░░░░░] 0%
+Progress: Phases 1-22 complete (v1.0-v1.3). v1.4: [██░░░░░░░░] 20%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 77 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14)
-- Average duration: ~4 min/plan (Phase 18)
-- Total execution time: ~25.5 hours
+- Total plans completed: 78 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 1)
+- Average duration: ~4 min/plan
+- Total execution time: ~25.6 hours
 
 **Recent Trend:**
-- Last 5 plans: 28-36 min
-- Trend: Stable (test writing velocity consistent)
+- Last 5 plans: 5-36 min
+- Trend: Fast schema changes (5 min for 23-02)
 
 *Updated after v1.3 milestone completion*
 
@@ -41,6 +41,9 @@ Key decisions for v1.4:
 - Bilingual URLs with /en/ and /he/ prefixes (language determined by URL, not GeoIP for SSR pages)
 - Deployment merge from 2 DigitalOcean components to 1 unified Express service
 - Progressive enhancement: SSR renders complete HTML, client-side JS enhances with interactivity
+- English product names as slug source for global SEO reach (23-02)
+- Counter-based slug collision handling (necklace, necklace-2) for readable URLs (23-02)
+- Slugs are immutable after creation to preserve SEO authority and backlinks (23-02)
 
 ### Pending Todos
 
@@ -57,7 +60,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: v1.4 roadmap created — ready to plan Phase 23
+Stopped at: Completed 23-02-PLAN.md (Product slug infrastructure)
 Resume file: None
 
 ## Quick Tasks Completed
