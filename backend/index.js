@@ -28,6 +28,7 @@ const {
   startExchangeRateJob,
   runExchangeRateUpdate,
 } = require('./jobs/exchangeRateJob');
+const { detectLanguage, languageMiddleware, trailingSlashRedirect } = require('./middleware/language');
 
 // #region agent log
 function agentLog(hypothesisId, location, message, data) {
@@ -690,6 +691,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(cookieParser());
+app.use(trailingSlashRedirect);
 app.use(express.urlencoded({ extended: false }));
 app.use(
   express.json({
@@ -1132,18 +1134,34 @@ app.get('/api/client-config', (req, res) => {
 });
 
 // =============================================
-// SSR test route — validates EJS rendering pipeline
+// Root URL redirect — detect language and redirect to /en or /he
 // =============================================
-app.get('/:lang/test', (req, res) => {
-  const lang = req.params.lang;
-  if (!['en', 'he'].includes(lang)) {
-    return res.redirect(301, '/en/test');
+app.get('/', (req, res) => {
+  const lang = detectLanguage(req);
+  const currency = lang === 'he' ? 'ILS' : 'USD';
+
+  // Set cookie for future visits (stores both lang and currency)
+  if (!req.cookies.locale_pref) {
+    res.cookie('locale_pref', JSON.stringify({ lang, currency }), {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: false,
+      sameSite: 'lax'
+    });
   }
-  const dir = lang === 'he' ? 'rtl' : 'ltr';
+
+  // 302 temporary redirect (user preference may change)
+  res.redirect(302, `/${lang}`);
+});
+
+// =============================================
+// Bilingual SSR routes
+// =============================================
+// SSR test route — validates EJS rendering pipeline
+app.get('/:lang(en|he)/test', languageMiddleware, (req, res) => {
   res.render('pages/test', {
-    lang,
-    dir,
-    title: lang === 'en' ? 'Test Page' : 'עמוד בדיקה',
+    lang: req.lang,
+    dir: req.dir,
+    title: req.lang === 'en' ? 'Test Page' : 'עמוד בדיקה',
     path: '/test',
   });
 });
@@ -3991,6 +4009,17 @@ app.get('/getproduct/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
+});
+
+// =============================================
+// Invalid language prefix redirect (e.g., /fr/about -> /en/about)
+// =============================================
+app.get('/:lang([a-z]{2})/*', (req, res) => {
+  const restOfPath = req.params[0] || '';
+  res.redirect(301, `/en/${restOfPath}`);
+});
+app.get('/:lang([a-z]{2})', (req, res) => {
+  res.redirect(301, '/en');
 });
 
 // =============================================
