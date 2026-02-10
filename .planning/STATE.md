@@ -11,22 +11,22 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 Milestone: v1.4 SEO & Marketing Foundation
 Phase: 23 of 26 (Foundation & Infrastructure)
-Plan: 2 of 5 (2 complete: 23-01, 23-02)
+Plan: 3 of 5 (3 complete: 23-01, 23-02, 23-05)
 Status: In progress
-Last activity: 2026-02-10 — Completed 23-01: EJS view engine and bilingual test routes
+Last activity: 2026-02-10 — Completed 23-05: robots.txt and static asset serving
 
-Progress: Phases 1-22 complete (v1.0-v1.3). v1.4: [████░░░░░░] 40%
+Progress: Phases 1-22 complete (v1.0-v1.3). v1.4: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 79 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 2)
+- Total plans completed: 80 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 3)
 - Average duration: ~4 min/plan
-- Total execution time: ~25.7 hours
+- Total execution time: ~25.8 hours
 
 **Recent Trend:**
 - Last 5 plans: 5-36 min
-- Trend: Infrastructure setup (8 min for 23-01 EJS config, 5 min for 23-02 slug schema)
+- Trend: Infrastructure setup (8 min for 23-01 EJS config, 5 min for 23-02 slug schema, 8 min for 23-05 robots.txt)
 
 *Updated after v1.3 milestone completion*
 
@@ -47,6 +47,9 @@ Key decisions for v1.4:
 - English product names as slug source for global SEO reach (23-02)
 - Counter-based slug collision handling (necklace, necklace-2) for readable URLs (23-02)
 - Slugs are immutable after creation to preserve SEO authority and backlinks (23-02)
+- robots.txt blocks admin and API paths, 7 AI training bots blocked, 2 AI search bots allowed (23-05)
+- robots.txt served with text/plain content type via setHeaders override (23-05)
+- Static middleware placed before SSR routes for efficient asset serving (23-05)
 
 ### Pending Todos
 
@@ -63,7 +66,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 23-01-PLAN.md (EJS view engine and bilingual test routes)
+Stopped at: Completed 23-05-PLAN.md (robots.txt and static asset serving)
 Resume file: None
 
 ## Quick Tasks Completed
