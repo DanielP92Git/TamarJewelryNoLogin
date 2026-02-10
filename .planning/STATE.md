@@ -11,22 +11,22 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 Milestone: v1.4 SEO & Marketing Foundation
 Phase: 23 of 26 (Foundation & Infrastructure)
-Plan: 3 of 5 (3 complete: 23-01, 23-02, 23-05)
+Plan: 4 of 5 (3 complete: 23-01, 23-02, 23-03)
 Status: In progress
-Last activity: 2026-02-10 — Completed 23-05: robots.txt and static asset serving
+Last activity: 2026-02-10 — Completed 23-03: Bilingual URL routing middleware
 
-Progress: Phases 1-22 complete (v1.0-v1.3). v1.4: [█████░░░░░] 50%
+Progress: Phases 1-22 complete (v1.0-v1.3). v1.4: [██████░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 80 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 3)
+- Total plans completed: 81 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 4)
 - Average duration: ~4 min/plan
-- Total execution time: ~25.8 hours
+- Total execution time: ~26.0 hours
 
 **Recent Trend:**
 - Last 5 plans: 5-36 min
-- Trend: Infrastructure setup (8 min for 23-01 EJS config, 5 min for 23-02 slug schema, 8 min for 23-05 robots.txt)
+- Trend: Infrastructure setup (8 min for 23-01 EJS config, 5 min for 23-02 slug schema, 13 min for 23-03 language middleware, 8 min for 23-05 robots.txt)
 
 *Updated after v1.3 milestone completion*
 
@@ -47,6 +47,10 @@ Key decisions for v1.4:
 - English product names as slug source for global SEO reach (23-02)
 - Counter-based slug collision handling (necklace, necklace-2) for readable URLs (23-02)
 - Slugs are immutable after creation to preserve SEO authority and backlinks (23-02)
+- Language detection priority: cookie > CDN headers > GeoIP > Accept-Language > default (23-03)
+- Cookie stores both lang and currency, only updates on language change to preserve manual overrides (23-03)
+- Invalid language prefixes redirect to /en equivalent with 301 for SEO (23-03)
+- Trailing slashes normalized with 301 redirects, root redirects with 302 (temporary) (23-03)
 - robots.txt blocks admin and API paths, 7 AI training bots blocked, 2 AI search bots allowed (23-05)
 - robots.txt served with text/plain content type via setHeaders override (23-05)
 - Static middleware placed before SSR routes for efficient asset serving (23-05)
@@ -66,7 +70,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 23-05-PLAN.md (robots.txt and static asset serving)
+Stopped at: Completed 23-03-PLAN.md (Bilingual URL routing middleware)
 Resume file: None
 
 ## Quick Tasks Completed
