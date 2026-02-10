@@ -198,7 +198,7 @@ See [v1.3-ROADMAP.md](.planning/milestones/v1.3-ROADMAP.md) for full phase detai
 
 </details>
 
-### 🚧 v1.4 SEO & Marketing Foundation (In Progress)
+### v1.4 SEO & Marketing Foundation (In Progress)
 
 **Milestone Goal:** Make the store discoverable by search engines and shareable on social platforms through server-side rendering, structured data, clean URLs, and bilingual SEO.
 
@@ -219,7 +219,14 @@ See [v1.3-ROADMAP.md](.planning/milestones/v1.3-ROADMAP.md) for full phase detai
   3. Visiting any old `.html` path (e.g., `/html/categories/necklaces.html`) returns a 301 redirect to the corresponding new clean URL
   4. Visiting `/` redirects to `/en` or `/he` based on GeoIP or browser Accept-Language
   5. `robots.txt` is served at the site root with appropriate Allow/Disallow rules
-**Plans**: TBD
+**Plans**: 5 plans
+
+Plans:
+- [ ] 23-01-PLAN.md — EJS view engine setup and test page
+- [ ] 23-02-PLAN.md — Product slug schema and migration
+- [ ] 23-03-PLAN.md — Bilingual routing middleware and language detection
+- [ ] 23-04-PLAN.md — Legacy URL redirect middleware
+- [ ] 23-05-PLAN.md — Static asset serving and robots.txt
 
 ### Phase 24: Static Page SSR + Meta Tags + Deployment Merge
 **Goal**: Static pages and the home page render complete HTML from the server with full SEO metadata, the deployment is unified into a single Express service, and every served page has unique title, meta description, canonical URL, Open Graph tags, and hreflang alternates
@@ -263,7 +270,7 @@ See [v1.3-ROADMAP.md](.planning/milestones/v1.3-ROADMAP.md) for full phase detai
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 23. Foundation & Infrastructure | v1.4 | 0/TBD | Not started | - |
+| 23. Foundation & Infrastructure | v1.4 | 0/5 | Not started | - |
 | 24. Static Page SSR + Meta + Deploy | v1.4 | 0/TBD | Not started | - |
 | 25. Dynamic SSR + Schema + Sitemap | v1.4 | 0/TBD | Not started | - |
 | 26. Caching, Perf & Verification | v1.4 | 0/TBD | Not started | - |
