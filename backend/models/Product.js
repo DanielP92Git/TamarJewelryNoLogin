@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const slugify = require('slugify');
 
 const ProductSchema = new mongoose.Schema({
   id: { type: Number, required: true, index: true },
@@ -78,11 +79,29 @@ const ProductSchema = new mongoose.Schema({
     index: true,  // For efficient sorting (compound index handles category-scoped queries)
     default: null,  // Will be set by pre-save hook for new products
     min: [1, 'displayOrder must be positive']
+  },
+  slug: {
+    type: String,
+    trim: true,
+    sparse: true,
+    unique: true,
+    lowercase: true,
+    maxLength: [120, 'Slug must be at most 120 characters'],
+    validate: {
+      validator: function(v) {
+        if (!v) return true;
+        return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(v);
+      },
+      message: 'Slug must contain only lowercase letters, numbers, and hyphens'
+    }
   }
 });
 
 // Add explicit sparse unique index for SKU
 ProductSchema.index({ sku: 1 }, { unique: true, sparse: true });
+
+// Add explicit sparse unique index for slug
+ProductSchema.index({ slug: 1 }, { unique: true, sparse: true, name: 'product_slug_unique_idx' });
 
 // Compound index for category-scoped product ordering (ESR: Equality-Sort-Range)
 // Declared here in addition to migration to ensure persistence across schema changes
@@ -111,6 +130,25 @@ ProductSchema.pre('save', async function(next) {
       console.error('Error assigning displayOrder:', err);
       // Continue without displayOrder if there's an error
     }
+  }
+  next();
+});
+
+// Pre-save hook: Auto-generate slug for new products
+ProductSchema.pre('save', async function(next) {
+  // Only generate slug for new documents without one
+  if (this.isNew && !this.slug && this.name) {
+    const Product = this.constructor;
+    const baseSlug = slugify(this.name, { lower: true, strict: true });
+
+    // Check for collisions and use counter-based approach
+    let finalSlug = baseSlug;
+    let counter = 1;
+    while (await Product.findOne({ slug: finalSlug })) {
+      counter++;
+      finalSlug = `${baseSlug}-${counter}`;
+    }
+    this.slug = finalSlug;
   }
   next();
 });
