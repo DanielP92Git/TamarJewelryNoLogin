@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>" dir="<%= dir %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> | Tamar Kfir Jewelry</title>
+</head>
+<body>
+  <%- include('../partials/header', { lang, dir }) %>
+  <main>
+    <h1><%= title %></h1>
+    <p data-testid="lang-check">Language: <%= lang %></p>
+    <p data-testid="dir-check">Direction: <%= dir %></p>
+    <p>This page verifies the EJS rendering pipeline is working correctly.</p>
+  </main>
+  <%- include('../partials/footer', { lang }) %>
+</body>
+</html>
