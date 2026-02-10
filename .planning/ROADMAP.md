@@ -238,7 +238,13 @@ Plans:
   3. The home page source contains Organization JSON-LD structured data with name, logo, and contact information
   4. The SSR-rendered HTML structure matches what the existing client-side JS produces, and the page functions identically with JavaScript enabled or disabled for static content
   5. The application runs as a single DigitalOcean App Platform service (no separate static site component), serving both pages and API from one Express process
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 24-01-PLAN.md — Meta configuration, meta-tags partial, header/footer rebuild
+- [ ] 24-02-PLAN.md — Static page EJS templates and SSR routes (about, contact, workshop, policies)
+- [ ] 24-03-PLAN.md — Home page SSR with Organization JSON-LD
+- [ ] 24-04-PLAN.md — Deployment merge and final verification
 
 ### Phase 25: Dynamic SSR + Structured Data + Sitemap
 **Goal**: Category pages render with pre-populated product grids, individual product detail pages exist as a new feature with dedicated URLs, all product-related pages carry Product and BreadcrumbList structured data, and a dynamic XML sitemap covers the entire public site in both languages
@@ -271,6 +277,6 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 23. Foundation & Infrastructure | v1.4 | 5/5 | ✓ Complete | 2026-02-10 |
-| 24. Static Page SSR + Meta + Deploy | v1.4 | 0/TBD | Not started | - |
+| 24. Static Page SSR + Meta + Deploy | v1.4 | 0/4 | Not started | - |
 | 25. Dynamic SSR + Schema + Sitemap | v1.4 | 0/TBD | Not started | - |
 | 26. Caching, Perf & Verification | v1.4 | 0/TBD | Not started | - |
