@@ -163,6 +163,13 @@ if (process.env.NODE_ENV !== 'production') {
 // =============================================
 const app = express();
 
+// Configure EJS view engine for server-side rendering
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+if (process.env.NODE_ENV === 'production') {
+  app.set('view cache', true);
+}
+
 // #region agent log
 // Request-level probe for upload/addproduct issues (CORS/network vs route failures)
 app.use((req, res, next) => {
@@ -1092,6 +1099,23 @@ app.get('/api/client-config', (req, res) => {
     apiUrl: process.env.API_URL || null,
     host: process.env.HOST || null,
     env: process.env.NODE_ENV || 'development',
+  });
+});
+
+// =============================================
+// SSR test route — validates EJS rendering pipeline
+// =============================================
+app.get('/:lang/test', (req, res) => {
+  const lang = req.params.lang;
+  if (!['en', 'he'].includes(lang)) {
+    return res.redirect(301, '/en/test');
+  }
+  const dir = lang === 'he' ? 'rtl' : 'ltr';
+  res.render('pages/test', {
+    lang,
+    dir,
+    title: lang === 'en' ? 'Test Page' : 'עמוד בדיקה',
+    path: '/test',
   });
 });
 
