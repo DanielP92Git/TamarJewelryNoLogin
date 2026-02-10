@@ -11,22 +11,22 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 Milestone: v1.4 SEO & Marketing Foundation
 Phase: 23 of 26 (Foundation & Infrastructure)
-Plan: 4 of 5 (3 complete: 23-01, 23-02, 23-03)
+Plan: 5 of 5 (4 complete: 23-01, 23-02, 23-03, 23-04)
 Status: In progress
-Last activity: 2026-02-10 — Completed 23-03: Bilingual URL routing middleware
+Last activity: 2026-02-10 — Completed 23-04: Legacy URL redirect middleware
 
-Progress: Phases 1-22 complete (v1.0-v1.3). v1.4: [██████░░░░] 60%
+Progress: Phases 1-22 complete (v1.0-v1.3). v1.4: [████████░░] 80%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 81 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 4)
+- Total plans completed: 82 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 5)
 - Average duration: ~4 min/plan
-- Total execution time: ~26.0 hours
+- Total execution time: ~26.1 hours
 
 **Recent Trend:**
-- Last 5 plans: 5-36 min
-- Trend: Infrastructure setup (8 min for 23-01 EJS config, 5 min for 23-02 slug schema, 13 min for 23-03 language middleware, 8 min for 23-05 robots.txt)
+- Last 5 plans: 5-13 min
+- Trend: Infrastructure setup (5 min for 23-02 slug schema, 13 min for 23-03 language middleware, 8 min for 23-05 robots.txt, 5 min for 23-04 legacy redirects)
 
 *Updated after v1.3 milestone completion*
 
@@ -54,6 +54,8 @@ Key decisions for v1.4:
 - robots.txt blocks admin and API paths, 7 AI training bots blocked, 2 AI search bots allowed (23-05)
 - robots.txt served with text/plain content type via setHeaders override (23-05)
 - Static middleware placed before SSR routes for efficient asset serving (23-05)
+- [Phase 23]: Legacy .html redirects use 301 status to preserve SEO authority
+- [Phase 23]: Case-insensitive .html extension matching for legacy paths
 
 ### Pending Todos
 
@@ -70,7 +72,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-10
-Stopped at: Completed 23-03-PLAN.md (Bilingual URL routing middleware)
+Stopped at: Completed 23-04-PLAN.md (Legacy URL redirect middleware)
 Resume file: None
 
 ## Quick Tasks Completed
