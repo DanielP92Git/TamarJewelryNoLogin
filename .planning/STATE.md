@@ -11,22 +11,22 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 Milestone: v1.4 SEO & Marketing Foundation
 Phase: 24 of 26 (Static Page SSR + Meta Tags + Deployment Merge)
-Plan: — (phase not yet planned)
-Status: Ready to plan
-Last activity: 2026-02-10 — Phase 23 complete (5/5 plans, verified)
+Plan: 01 of 03 (complete)
+Status: In progress
+Last activity: 2026-02-11 — Plan 24-01 complete (meta config and partials)
 
-Progress: Phases 1-23 complete (v1.0-v1.3 + Phase 23). v1.4: [██░░░░░░░░] 25%
+Progress: Phases 1-23 complete (v1.0-v1.3 + Phase 23). v1.4: [███░░░░░░░] 30%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 82 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 5)
+- Total plans completed: 83 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 6)
 - Average duration: ~4 min/plan
-- Total execution time: ~26.1 hours
+- Total execution time: ~26.2 hours
 
 **Recent Trend:**
 - Last 5 plans: 5-13 min
-- Trend: Infrastructure setup (5 min for 23-02 slug schema, 13 min for 23-03 language middleware, 8 min for 23-05 robots.txt, 5 min for 23-04 legacy redirects)
+- Trend: Infrastructure and foundation (5 min for 23-02 slug schema, 13 min for 23-03 language middleware, 8 min for 23-05 robots.txt, 5 min for 23-04 legacy redirects, 5 min for 24-01 meta config)
 
 *Updated after v1.3 milestone completion*
 
@@ -56,6 +56,10 @@ Key decisions for v1.4:
 - Static middleware placed before SSR routes for efficient asset serving (23-05)
 - [Phase 23]: Legacy .html redirects use 301 status to preserve SEO authority
 - [Phase 23]: Case-insensitive .html extension matching for legacy paths
+- [Phase 24-01]: Home page title without suffix (brand IS the title, other pages get "| Tamar Kfir Jewelry" suffix)
+- [Phase 24-01]: Logo image for English, text brand for Hebrew in header (matches frontend pattern)
+- [Phase 24-01]: Footer uses clean category URLs (/en/necklaces) preparing for Phase 25 SSR
+- [Phase 24-01]: Hreflang x-default points to English version as international fallback
 
 ### Pending Todos
 
@@ -71,8 +75,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-10
-Stopped at: Phase 23 complete — ready to plan Phase 24
+Last session: 2026-02-11
+Stopped at: Completed 24-01-PLAN.md (meta config and shared partials)
 Resume file: None
 
 ## Quick Tasks Completed
