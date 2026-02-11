@@ -204,7 +204,7 @@ See [v1.3-ROADMAP.md](.planning/milestones/v1.3-ROADMAP.md) for full phase detai
 
 - [x] **Phase 23: Foundation & Infrastructure** — EJS engine, slug system, bilingual routing, legacy redirects, robots.txt (completed 2026-02-10)
 - [x] **Phase 24: Static Page SSR + Meta Tags + Deployment Merge** — Home/about/contact SSR, meta/OG tags, hreflang, Organization schema, deployment unification (completed 2026-02-11)
-- [ ] **Phase 25: Dynamic SSR + Structured Data + Sitemap** — Category pages, product detail pages (new), client-side SSR awareness, Product/Breadcrumb schema, XML sitemap
+- [x] **Phase 25: Dynamic SSR + Structured Data + Sitemap** — Category pages, product detail pages (new), client-side SSR awareness, Product/Breadcrumb schema, XML sitemap (completed 2026-02-11)
 - [ ] **Phase 26: Caching, Performance & Verification** — SSR cache layer, HTTP cache headers, Google Search Console, structured data validation, test regression
 
 ## Phase Details
@@ -260,10 +260,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 25-01-PLAN.md — Schema helpers, category page SSR with product grids and structured data
-- [ ] 25-02-PLAN.md — Product detail page SSR with Product JSON-LD and OG price tags
-- [ ] 25-03-PLAN.md — Dynamic XML sitemap with hreflang, images, and lastmod
-- [ ] 25-04-PLAN.md — Client-side SSR awareness and cart page shell
+- [x] 25-01-PLAN.md — Schema helpers, category page SSR with product grids and structured data
+- [x] 25-02-PLAN.md — Product detail page SSR with Product JSON-LD and OG price tags
+- [x] 25-03-PLAN.md — Dynamic XML sitemap with hreflang, images, and lastmod
+- [x] 25-04-PLAN.md — Client-side SSR awareness and cart page shell
 
 ### Phase 26: Caching, Performance & Verification
 **Goal**: SSR pages serve fast through an in-memory cache layer, HTTP cache headers optimize repeat visits, Google Search Console is verified with sitemap submitted, all structured data passes validation, and the existing test suite confirms zero regression
@@ -285,5 +285,5 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 23. Foundation & Infrastructure | v1.4 | 5/5 | ✓ Complete | 2026-02-10 |
 | 24. Static Page SSR + Meta + Deploy | v1.4 | 5/5 | ✓ Complete | 2026-02-11 |
-| 25. Dynamic SSR + Schema + Sitemap | v1.4 | 0/4 | In progress | - |
+| 25. Dynamic SSR + Schema + Sitemap | v1.4 | 4/4 | ✓ Complete | 2026-02-11 |
 | 26. Caching, Perf & Verification | v1.4 | 0/TBD | Not started | - |
