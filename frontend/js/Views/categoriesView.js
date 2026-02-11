@@ -245,7 +245,18 @@ class CategoriesView extends View {
   }
 
   initialSetup() {
-    this.fetchProductsByCategory();
+    // Check if SSR content is already present
+    this.ssrRendered = this.outerProductsContainer?.dataset?.ssr === 'true';
+
+    if (this.ssrRendered) {
+      console.log('[SSR] Category products already rendered, attaching handlers');
+      // SSR content detected - skip fetch but extract product data from DOM
+      this.extractProductsFromDOM();
+    } else {
+      // No SSR content - fetch products normally
+      this.fetchProductsByCategory();
+    }
+
     this.setupScrollListener();
     this.addHandlerAddToCart();
     this.addHandlerPreview();
@@ -983,6 +994,52 @@ class CategoriesView extends View {
     });
   }
 
+
+  /**
+   * Extract product data from SSR-rendered DOM
+   * Populates this.products array with data from existing HTML
+   */
+  extractProductsFromDOM() {
+    const productElements = this.innerProductsContainer?.querySelectorAll('.item-container');
+    if (!productElements || productElements.length === 0) {
+      console.warn('[SSR] No product elements found in DOM');
+      this.products = [];
+      this.totalProducts = 0;
+      return;
+    }
+
+    this.products = Array.from(productElements).map(elem => {
+      const id = elem.dataset.id;
+      const quantity = elem.dataset.quant;
+      const currency = elem.dataset.currency;
+      const usdPrice = elem.dataset.usdPrice;
+      const ilsPrice = elem.dataset.ilsPrice;
+      const originalUsdPrice = elem.dataset.originalUsdPrice || usdPrice;
+      const originalIlsPrice = elem.dataset.originalIlsPrice || ilsPrice;
+
+      const name = elem.querySelector('.item-title')?.textContent || '';
+      const description = elem.querySelector('.item-description')?.innerHTML || '';
+      const imageElement = elem.querySelector('.front-image');
+      const image = imageElement?.src || '';
+
+      return {
+        id,
+        quantity,
+        name,
+        description,
+        image,
+        usd_price: parseFloat(usdPrice) || 0,
+        ils_price: parseFloat(ilsPrice) || 0,
+        original_usd_price: parseFloat(originalUsdPrice) || 0,
+        original_ils_price: parseFloat(originalIlsPrice) || 0,
+        discount_percentage: 0, // Can be derived from price difference if needed
+      };
+    });
+
+    this.totalProducts = this.products.length;
+    this.allProductsFetched = true; // SSR renders limited products, no pagination yet
+    console.log(`[SSR] Extracted ${this.products.length} products from DOM`);
+  }
 
   async fetchProductsByCategory() {
     if (this.isLoading) {
