@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="<%= urlLang %>" dir="<%= dir %>">
+  <head>
+    <%- include('../partials/meta-tags', { title, description, canonical, ogImage: null, lang, urlLang, alternateUrl, baseUrl, pageStyles }) %>
+    <script type="module" defer src="/js/controller.js"></script>
+  </head>
+
+  <body id="error">
+    <%- include('../partials/header', { lang, dir, urlLang }) %>
+
+    <main style="min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem;">
+      <h1 style="font-size: 6rem; color: #d32f2f; margin: 0;">⚠</h1>
+      <h2 style="font-size: 2rem; margin: 1rem 0; color: #333;">
+        <%= lang === 'eng' ? 'Something Went Wrong' : 'משהו השתבש' %>
+      </h2>
+      <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+        <%= lang === 'eng' ? 'An error occurred. Please try again or contact us for assistance.' : 'אירעה שגיאה. אנא נסה שוב או צור קשר לקבלת סיוע.' %>
+      </p>
+      <div style="display: flex; gap: 1rem;">
+        <a href="/<%= urlLang %>" style="padding: 1rem 2rem; background-color: #333; color: #fff; text-decoration: none; border-radius: 4px; font-size: 1.1rem;">
+          <%= lang === 'eng' ? 'Go Home' : 'חזרה לדף הבית' %>
+        </a>
+        <a href="/<%= urlLang %>/contact" style="padding: 1rem 2rem; background-color: #fff; color: #333; text-decoration: none; border-radius: 4px; font-size: 1.1rem; border: 2px solid #333;">
+          <%= lang === 'eng' ? 'Contact Us' : 'צור קשר' %>
+        </a>
+      </div>
+    </main>
+
+    <%- include('../partials/footer', { lang, urlLang }) %>
+  </body>
+</html>

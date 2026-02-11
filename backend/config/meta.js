@@ -131,6 +131,26 @@ module.exports = {
       title: 'פרטי מוצר',
       description: 'צפייה בפרטי המוצר ורכישת תכשיטים בעבודת יד שנוצרו באהבה בירושלים.'
     }
+  },
+  error: {
+    eng: {
+      title: 'Error',
+      description: 'An error occurred. Please try again or contact us for assistance.'
+    },
+    heb: {
+      title: 'שגיאה',
+      description: 'אירעה שגיאה. אנא נסה שוב או צור קשר לקבלת סיוע.'
+    }
+  },
+  '404': {
+    eng: {
+      title: 'Page Not Found',
+      description: 'The page you are looking for could not be found.'
+    },
+    heb: {
+      title: 'דף לא נמצא',
+      description: 'הדף שחיפשת לא נמצא.'
+    }
   }
 };
 
