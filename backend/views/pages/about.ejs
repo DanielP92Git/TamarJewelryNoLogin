@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="<%= urlLang %>" dir="<%= dir %>">
+<head>
+  <%- include('../partials/meta-tags', { title, description, canonical, ogImage, lang, urlLang, alternateUrl, baseUrl, pageStyles }) %>
+  <script type="module" defer src="/js/controller.js"></script>
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function(c,l,a,r,i,t,y){
+        c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+        t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+        y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "urnhsmmp4u");
+  </script>
+</head>
+<body id="about">
+  <%- include('../partials/header', { lang, dir, urlLang }) %>
+  <main>
+    <div class="first-row-container">
+      <div class="title-and-text-container">
+        <h1 id="page-title"><%= lang === 'eng' ? 'ABOUT ME' : 'אודותי' %></h1>
+        <div class="aboutme-description">
+          <% if (lang === 'eng') { %>
+            A bit about me and my jewelry... <br />
+            <br />
+            Each piece is handmade in beautiful, historic Jerusalem and the
+            mountains surrounding it; I draw inspiration from my city and from the
+            many places I've traveled. My favorite technique - and the one I'm
+            best known for - is crocheting with metallic threads. I combine colors
+            to give each piece a new, unique look. <br /><br />My passion for art
+            began at a very young age. By the time I was 12, I was already
+            crafting my own jewelry and then slowly, slowly it grew to making
+            jewelry for family and friends, and when I noticed that my mom's
+            friends liked my jewelry, I started selling it to them. <br /><br />
+            Since then, I've been constantly learning new methods and techniques.
+            Making jewelry serves as a calming and creative activity in my life.
+            As a young girl it helped me deal with my ticks. It was the only thing
+            that could help me stop thinking and stop my twitching. Through art
+            and jewelry designing I can truly express myself and feel the most ME.
+            <br />This is also why I invite you to check out my jewelry workshops
+            and explore your creativity! I have sold my jewelry to appreciative
+            customers from all over the world. My goal is to make every customer
+            feel special, and as beautiful as she really is!
+          <% } else { %>
+            ברוכים הבאים! שמי תמר, אני אמנית ויוצרת ירושלמית. אני מקבלת המון השראה מירושלים ההיסטורית והיפה שבה אני גרה ומההרים שמקיפים עליה. אני שואבת השראה מהעיר שלי ומהמקומות הרבים שבהם טיילתי. הטכניקה האהובה עליי – והייחודית לי – היא סריגה עם חוטים דמויי מתכת, שבאמצעותם אני יוצרת שילובי צבעים ייחודיים שמעניקים לכל תכשיט מראה מיוחד ושונה.
+האהבה שלי לעיצוב ולאמנות החלה בגיל צעיר מאוד. כשהייתי בת 12, כבר יצרתי תכשיטים לעצמי, ובהדרגה התחלתי לעצב עבור משפחתי וחבריי. כשהתחלתי לקבל תגובות נלהבות מחברות של אמא שלי, הבנתי שיש ביקוש לתכשיטים שלי והתחלתי למכור אותם.
+במשך השנים המשכתי ללמוד ולהעמיק בשיטות חדשות, ועבורי, יצירת תכשיטים היא לא רק אומנות אלא גם דרך להירגע ולמצוא שלווה פנימית. כילדה, היא עזרה לי להתמודד עם הטיקים שלי, כשהעבודה עם הידיים גרמה לי להפסיק לחשוב יותר מדי והפחיתה את העוויתות. דרך התכשיטים אני מבטאת את עצמי בצורה הכי אותנטית שיש.
+אני מזמינה אותך לקחת חלק בסדנאות התכשיטים שלי ולגלות את היצירתיות שבך. מכרתי את התכשיטים שלי ללקוחות מכל רחבי העולם, והשאיפה שלי היא שכל אחת תרגיש מיוחדת, ותראה כמה היא יפה באמת!
+          <% } %>
+        </div>
+      </div>
+      <div class="image-container">
+        <img
+          src="/imgs/website-images/preview-images/IMG_5418 (Medium).jpeg"
+          class="description-img"
+          alt="<%= lang === 'eng' ? 'Tamar Kfir jewelry designer' : 'תמר כפיר מעצבת תכשיטים' %>"
+        />
+      </div>
+    </div>
+  </main>
+  <%- include('../partials/footer', { lang, urlLang }) %>
+</body>
+</html>

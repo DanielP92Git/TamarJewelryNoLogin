@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="<%= urlLang %>" dir="<%= dir %>">
+<head>
+  <%- include('../partials/meta-tags', { title, description, canonical, ogImage, lang, urlLang, alternateUrl, baseUrl, pageStyles }) %>
+  <script type="module" defer src="/js/controller.js"></script>
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function (c, l, a, r, i, t, y) {
+      c[a] =
+        c[a] ||
+        function () {
+          (c[a].q = c[a].q || []).push(arguments);
+        };
+      t = l.createElement(r);
+      t.async = 1;
+      t.src = 'https://www.clarity.ms/tag/' + i;
+      y = l.getElementsByTagName(r)[0];
+      y.parentNode.insertBefore(t, y);
+    })(window, document, 'clarity', 'script', 'urnhsmmp4u');
+  </script>
+</head>
+<body id="workshop">
+  <%- include('../partials/header', { lang, dir, urlLang }) %>
+  <main>
+    <h1 id="page-title"><%= lang === 'eng' ? 'MY JEWELRY WORKSHOP' : 'סדנאות התכשיטים שלי' %></h1>
+    <div class="workshop-description-container">
+      <div class="workshop-description">
+        <% if (lang === 'eng') { %>
+          I am delighted to invite you to a jewelry workshop for women and
+          girls. In this workshop you will make your own unique jewelry. From a
+          young age, jewelry design has given me a place for creation, freedom
+          and love of working with my hands and making new things. I want to
+          share this experience with as many women and girls as I can, so they
+          too can create on their own and know that there is no limit to
+          creativity. I work with jewelry from a place of belief in our ability
+          to cure ourselves through our hands. <br />
+          <br /><br />
+          In the workshop I will teach and support you in your process of making
+          jewelry, and I also share how you can continue making new pieces at
+          home. I will teach you which materials you need to buy and how to do
+          so cost-effectively. I will give you the knowledge and tools needed to
+          continue creating unique piece on your own. In the workshop we will
+          create some earrings and a necklace or a bracelet (depends on time),
+          and you will learn some techniques of working with several materials,
+          including beads and metal. <br /><br /><br />This workshop does not
+          require any former knowledge in making jewelry. All materials will be
+          provided by me. You can also make a special surprise for someone and
+          buy the jewelry workshop as a gift card
+        <% } else { %>
+          אני שמחה להזמין אותך לסדנת תכשיטים לנשים ולנערות. בסדנה הזו תכיני תכשיטים ייחודיים משלך. מגיל צעיר, עיצוב תכשיטים נתן לי מקום ליצירה, חופש ואהבה לעבודה עם הידיים וליצירת דברים חדשים. אני רוצה לחלוק את החוויה הזו עם כמה שיותר נשים ונערות, כדי שגם הן יוכלו ליצור בעצמן ולדעת שאין גבול ליצירתיות. אני עובדת עם תכשיטים מתוך אמונה ביכולת שלנו לרפא את עצמנו דרך הידיים.
+<br /><br /><br />
+בסדנה אלמד ואלווה אותך בתהליך יצירת התכשיטים, ואשתף איך תוכלי להמשיך ליצור פריטים חדשים גם בבית. אלמד אותך אילו חומרים כדאי לקנות ואיך לעשות זאת בצורה חסכונית. אתן לך את הידע והכלים הדרושים כדי שתוכלי להמשיך ליצור פריטים ייחודיים משלך. בסדנה נכין עגילים וכמו כן שרשרת או צמיד (תלוי בזמן), ותלמדי כמה טכניקות עבודה עם חומרים שונים, כולל חרוזים ומתכת.
+<br /><br /><br />
+הסדנה אינה דורשת ידע קודם ביצירת תכשיטים. כל החומרים יינתנו על ידי. את גם יכולה להכין הפתעה מיוחדת למישהו ולרכוש את סדנת התכשיטים ככרטיס מתנה.
+        <% } %>
+      </div>
+      <section class="slide-images-container">
+        <!-- Add Slider Buttons -->
+        <button
+          class="slider-btn slider-btn--left"
+          aria-label="<%= lang === 'eng' ? 'Previous image' : 'תמונה קודמת' %>"
+        ></button>
+        <button
+          class="slider-btn slider-btn--right"
+          aria-label="<%= lang === 'eng' ? 'Next image' : 'תמונה הבאה' %>"
+        ></button>
+
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop5(Medium).webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Jewelry workshop session' : 'סדנת תכשיטים' %>"
+          />
+        </div>
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop10.webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Workshop participants creating jewelry' : 'משתתפות סדנה יוצרות תכשיטים' %>"
+          />
+        </div>
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop11.webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Handmade jewelry workshop' : 'סדנת תכשיטים בעבודת יד' %>"
+          />
+        </div>
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop12.webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Workshop materials and tools' : 'חומרים וכלים לסדנה' %>"
+          />
+        </div>
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop13.webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Jewelry making process' : 'תהליך יצירת תכשיטים' %>"
+          />
+        </div>
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop14.webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Workshop finished pieces' : 'יצירות מוגמרות מהסדנה' %>"
+          />
+        </div>
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop15.webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Participants learning techniques' : 'משתתפות לומדות טכניקות' %>"
+          />
+        </div>
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop16.webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Workshop creative session' : 'מפגש יצירתי בסדנה' %>"
+          />
+        </div>
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop17.webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Jewelry workshop experience' : 'חווית סדנת תכשיטים' %>"
+          />
+        </div>
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop18.webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Workshop group activity' : 'פעילות קבוצתית בסדנה' %>"
+          />
+        </div>
+        <div class="slide-image">
+          <img
+            src="/imgs/website-images/workshop/workshop19.webp"
+            class="slide-image-img"
+            alt="<%= lang === 'eng' ? 'Workshop final creations' : 'יצירות סופיות מהסדנה' %>"
+          />
+        </div>
+
+        <div class="logo"></div>
+      </section>
+    </div>
+    <div class="workshop-costs">
+      <span class="workshop-costs-title"><%= lang === 'eng' ? 'Workshop Costs:' : 'מחירי הסדנאות:' %></span> <br /><br />
+      <% if (lang === 'eng') { %>
+        <span class="workshop-cost-item">• One-on-one workshop - 450 NIS</span>
+        <br /><br />
+        <span class="workshop-cost-item">• 2 participants - 220 NIS per participant</span>
+        <br /><br />
+        <span class="workshop-cost-item">• 3 participants and more- 200 NIS per participant</span>
+        <br /><br />
+        <span class="workshop-cost-note">*Each workshop takes an hour and a half. For any questions please don't hesitate to contact me:</span>
+      <% } else { %>
+        <span class="workshop-cost-item">• סדנא אחת על אחת - 450 ש"ח</span>
+        <br /><br />
+        <span class="workshop-cost-item">• 2 משתתפות - 220 ש"ח לכל משתתפת</span>
+        <br /><br />
+        <span class="workshop-cost-item">• 3 משתתפות ומעלה- 200 ש"ח לכל משתתפת</span>
+        <br /><br />
+        <span class="workshop-cost-note">*כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי:</span>
+      <% } %>
+      <div class="contact-container">
+        <div class="contact-block">
+          <span class="contact-label"><%= lang === 'eng' ? 'Whatsapp:' : 'וואטסאפ:' %></span>
+          <a href="https://wa.me/972524484763" class="whatsapp-atr">
+            <img
+              src="/imgs/svgs/whatsapp.svg"
+              class="whatsapp-svg"
+              alt="<%= lang === 'eng' ? 'WhatsApp contact' : 'צור קשר בוואטסאפ' %>"
+            />
+          </a>
+        </div>
+        <div class="contact-block">
+          <span class="contact-label"><%= lang === 'eng' ? ' Tel.:' : ' נייד:' %></span>
+          <p class="contact-value"><%= lang === 'eng' ? '+972-524484763' : '052-4484763' %></p>
+        </div>
+        <div class="contact-block contact-block-last">
+          <span class="contact-label"><%= lang === 'eng' ? ' Email:' : ' דוא"ל:' %></span>
+          <p class="contact-value">tamarkfir91@gmail.com</p>
+        </div>
+      </div>
+    </div>
+
+    <button class="go-to-top">
+      <img
+        src="/imgs/svgs/arrow-up-solid-white.svg"
+        alt="<%= lang === 'eng' ? 'arrow-up' : 'חץ למעלה' %>"
+        class="arrow-up"
+      />
+    </button>
+  </main>
+  <%- include('../partials/footer', { lang, urlLang }) %>
+</body>
+</html>
