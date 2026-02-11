@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="<%= urlLang %>" dir="<%= dir %>">
+  <head>
+    <%- include('../partials/meta-tags', { title, description, canonical, ogImage, lang, urlLang, alternateUrl, baseUrl, pageStyles }) %>
+
+    <script type="module" defer src="/js/controller.js"></script>
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
+      (function (c, l, a, r, i, t, y) {
+        c[a] =
+          c[a] ||
+          function () {
+            (c[a].q = c[a].q || []).push(arguments);
+          };
+        t = l.createElement(r);
+        t.async = 1;
+        t.src = 'https://www.clarity.ms/tag/' + i;
+        y = l.getElementsByTagName(r)[0];
+        y.parentNode.insertBefore(t, y);
+      })(window, document, 'clarity', 'script', 'urnhsmmp4u');
+    </script>
+  </head>
+
+  <body id="cart">
+    <%- include('../partials/header', { lang, dir, urlLang }) %>
+
+    <main>
+      <div class="whatsapp-container">
+        <a href="https://wa.me/972524484763" class="whatsapp-atr"
+          ><img src="/imgs/svgs/whatsapp.svg" class="whatsapp-svg" alt=""
+        /></a>
+      </div>
+
+      <!-- Cart content containers - populated by client-side JavaScript -->
+      <section class="cart-section">
+        <div class="cart-empty"></div>
+        <div class="cart-title"></div>
+        <div class="cart-items-container"></div>
+        <div class="added-items"></div>
+        <div class="summary">
+          <div class="summary-title"></div>
+          <div class="summary-details"></div>
+          <button class="delete-all"></button>
+          <button class="check-me-out"></button>
+          <div id="stripe-checkout-btn"></div>
+          <div id="paypal"></div>
+        </div>
+      </section>
+
+      <button class="go-to-top">
+        <img
+          src="/imgs/svgs/arrow-up-solid-white.svg"
+          alt="arrow-up"
+          class="arrow-up"
+        />
+      </button>
+    </main>
+
+    <%- include('../partials/footer', { lang, urlLang }) %>
+  </body>
+</html>
