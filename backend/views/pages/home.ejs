@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="<%= urlLang %>" dir="<%= dir %>">
+  <head>
+    <%- include('../partials/meta-tags', { title, description, canonical, ogImage, lang, urlLang, alternateUrl, baseUrl, pageStyles }) %>
+
+    <!-- Organization JSON-LD structured data (SCHEMA-04) -->
+    <script type="application/ld+json">
+    <%- JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Tamar Kfir Jewelry",
+      "url": baseUrl,
+      "logo": baseUrl + "/imgs/icons/favicon.png",
+      "description": lang === 'eng' ? "Handmade jewelry crafted with love in Jerusalem" : "תכשיטים בעבודת יד מירושלים",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "Customer Service",
+        "availableLanguage": ["English", "Hebrew"]
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Jerusalem",
+        "addressCountry": "IL"
+      },
+      "sameAs": [
+        "https://www.instagram.com/tamar_kfir_jewelry/",
+        "https://www.facebook.com/tamarkfirjewelry"
+      ]
+    }, null, 2) %>
+    </script>
+
+    <script type="module" defer src="/js/controller.js"></script>
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
+      (function (c, l, a, r, i, t, y) {
+        c[a] =
+          c[a] ||
+          function () {
+            (c[a].q = c[a].q || []).push(arguments);
+          };
+        t = l.createElement(r);
+        t.async = 1;
+        t.src = 'https://www.clarity.ms/tag/' + i;
+        y = l.getElementsByTagName(r)[0];
+        y.parentNode.insertBefore(t, y);
+      })(window, document, 'clarity', 'script', 'urnhsmmp4u');
+    </script>
+  </head>
+
+  <body id="home">
+    <%- include('../partials/header', { lang, dir, urlLang }) %>
+
+    <section class="hero-section">
+      <picture>
+        <source
+          media="(max-width: 799.9px)"
+          srcset="/imgs/Hero-imgs/hero-test2-(small).png"
+        />
+        <img
+          src="/imgs/Hero-imgs/hero-test2.webp"
+          alt="<% if (lang === 'eng') { %>main website image<% } else { %>תמונת אתר ראשית<% } %>"
+          class="hero-background"
+          fetchpriority="high"
+        />
+      </picture>
+      <div class="hero-tagline">
+        <p class="tagline-text"><% if (lang === 'eng') { %>One of a kind in mind<% } else { %>ייחודי בראש<% } %></p>
+      </div>
+    </section>
+
+    <main>
+      <div class="whatsapp-container">
+        <a href="https://wa.me/972524484763" class="whatsapp-atr"
+          ><img src="/imgs/svgs/whatsapp.svg" class="whatsapp-svg" alt=""
+        /></a>
+      </div>
+
+      <div class="categories-container" id="categories">
+        <a href="/<%= urlLang %>/crochet-necklaces" class="category-box">
+          <img
+            class="large-img-item"
+            src="/imgs/Hero-imgs/categories-images/new-hero-imgs/Crochet-Hero.webp"
+            alt="<% if (lang === 'eng') { %>Crochet Necklaces main category image<% } else { %>תמונת קטגוריה ראשית - שרשראות סרוגות<% } %>"
+            loading="lazy"
+          />
+          <span class="category-name category-name_crochet-necklaces"
+            ><% if (lang === 'eng') { %>Crochet Necklaces<% } else { %>שרשראות סרוגות<% } %></span
+          >
+        </a>
+        <a href="/<%= urlLang %>/hoops" class="category-box">
+          <img
+            class="large-img-item"
+            src="/imgs/Hero-imgs/categories-images/new-hero-imgs/Hoop-Hero.webp"
+            alt="<% if (lang === 'eng') { %>Hoop Earrings main category image<% } else { %>תמונת קטגוריה ראשית - עגילי חישוק<% } %>"
+            loading="lazy"
+          />
+          <span class="category-name category-name_hoops"><% if (lang === 'eng') { %>Hoop Earrings<% } else { %>עגילי חישוק<% } %></span>
+        </a>
+        <a href="/<%= urlLang %>/dangle" class="category-box">
+          <img
+            class="large-img-item"
+            src="/imgs/Hero-imgs/categories-images/new-hero-imgs/Dangle-Hero.webp"
+            alt="<% if (lang === 'eng') { %>Dangle Earrings main category image<% } else { %>תמונת קטגוריה ראשית - עגילים תלויים<% } %>"
+            loading="lazy"
+          />
+          <span class="category-name category-name_dangle"
+            ><% if (lang === 'eng') { %>Dangle Earrings<% } else { %>עגילים תלויים<% } %></span
+          >
+        </a>
+        <a href="/<%= urlLang %>/necklaces" class="category-box">
+          <img
+            class="large-img-item"
+            src="/imgs/Hero-imgs/categories-images/new-hero-imgs/Necklaces-Hero.webp"
+            alt="<% if (lang === 'eng') { %>Necklaces main category image<% } else { %>תמונת קטגוריה ראשית - שרשראות<% } %>"
+            loading="lazy"
+          />
+          <span class="category-name category-name_necklaces"><% if (lang === 'eng') { %>Necklaces<% } else { %>שרשראות<% } %></span>
+        </a>
+      </div>
+
+      <button class="go-to-top">
+        <img
+          src="/imgs/svgs/arrow-up-solid-white.svg"
+          alt="arrow-up"
+          class="arrow-up"
+        />
+      </button>
+    </main>
+
+    <%- include('../partials/footer', { lang, urlLang }) %>
+  </body>
+</html>
