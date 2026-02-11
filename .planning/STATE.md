@@ -11,22 +11,22 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 Milestone: v1.4 SEO & Marketing Foundation
 Phase: 25 of 26 (Dynamic SSR, Structured Data, and Sitemap)
-Plan: 04 of 05 (client-side SSR awareness and cart shell complete)
+Plan: 02 of 04 (product detail pages complete)
 Status: In Progress
-Last activity: 2026-02-11 — Phase 25 Plan 04 complete (SSR-aware categoriesView and cart page shell)
+Last activity: 2026-02-11 — Phase 25 Plan 02 complete (Product detail pages with structured data)
 
 Progress: Phases 1-24 complete (v1.0-v1.3 + Phase 23-24). v1.4: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 90 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 13)
+- Total plans completed: 91 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 14)
 - Average duration: ~5 min/plan
-- Total execution time: ~27.5 hours
+- Total execution time: ~27.7 hours
 
 **Recent Trend:**
 - Last 5 plans: 5-15 min
-- Trend: SSR implementation and SEO foundation (6 min for sitemap, 6 min for gap closure, 5 min for deployment config, 9 min for home page SSR, 15 min for static page SSR)
+- Trend: SSR implementation and SEO foundation (6 min for category pages, 9 min for product pages, 6 min for sitemap, 6 min for gap closure, 5 min for deployment config)
 
 *Updated after v1.3 milestone completion*
 
@@ -83,6 +83,10 @@ Key decisions for v1.4:
 - [Phase 25-03]: Image sitemap extension included for product images (Google Image Search visibility)
 - [Phase 25-03]: Lastmod dates use actual product.date field, not current timestamp for accurate change tracking
 - [Phase 25-03]: Sitemap cache-control set to 1 hour for CDN efficiency
+- [Phase 25-02]: Product pages use product name as dynamic title (not static "Product Details")
+- [Phase 25-02]: Manual pageData construction for product-specific meta instead of buildPageData
+- [Phase 25-02]: DB_TO_URL_CATEGORY reverse mapping for breadcrumb category links
+- [Phase 25-02]: Error and 404 pages added with inline styles for minimal dependencies
 - [Phase 25-04]: Client-side JS detects data-ssr flag and skips duplicate product fetching
 - [Phase 25-04]: Product data extracted from SSR DOM to populate products array
 - [Phase 25-04]: Cart page rendered as SSR shell with client-side content population
@@ -93,6 +97,7 @@ None.
 
 ### Blockers/Concerns
 
+- Product slugs not populated in database — product detail pages work but cannot be accessed until slug migration is completed (Phase 23 follow-up needed)
 - Payment return URLs hardcoded to old paths — must update simultaneously with URL migration (future phase)
 - Environment variables must be configured in DigitalOcean dashboard before first deployment
 - First production deployment should go to staging environment for validation
@@ -100,7 +105,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 25-04-PLAN.md (Client-side SSR awareness and cart page shell)
+Stopped at: Completed 25-02-PLAN.md (Product detail pages with structured data)
 Resume file: None
 
 ## Quick Tasks Completed
