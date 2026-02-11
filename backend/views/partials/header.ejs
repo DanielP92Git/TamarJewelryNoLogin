@@ -1,5 +1,40 @@
 <header>
-  <nav>
-    <a href="/<%= lang %>/">Tamar Kfir Jewelry</a>
-  </nav>
+  <div class="site-header" data-purpose="site-header">
+    <div class="site-header__left">
+      <div class="icons-container">
+        <img
+          src="/imgs/svgs/bars-solid.svg"
+          alt=""
+          class="menubars-svg menubars-toggle close"
+        />
+      </div>
+
+      <a class="site-brand" href="/<%= urlLang %>/">
+        <% if (urlLang === 'en') { %>
+        <img src="/imgs/arvin-logo.webp" alt="Tamar Kfir Jewelry" class="site-logo" />
+        <% } else { %>
+        <span class="site-logo-text">Tamar Kfir Jewelry</span>
+        <% } %>
+      </a>
+    </div>
+
+    <div class="site-header__center">
+      <nav class="menu" aria-label="Primary"></nav>
+    </div>
+
+    <div class="site-header__right" data-purpose="header-utilities">
+      <div class="icons-container icons-container-right">
+        <div class="shoppingcart-container">
+          <a href="/<%= urlLang %>/cart">
+            <img
+              src="/imgs/svgs/shopping-bag-outline-black.svg"
+              alt=""
+              class="shoppingcart-mobile"
+            />
+          </a>
+        </div>
+        <span class="cart-number-mobile cart-number-mobile-header">0</span>
+      </div>
+    </div>
+  </div>
 </header>

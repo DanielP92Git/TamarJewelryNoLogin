@@ -1,3 +1,27 @@
-<footer>
-  <p>&copy; <%= new Date().getFullYear() %> Tamar Kfir Jewelry</p>
+<footer class="footer">
+  <div class="columns-container">
+    <div class="footer-left-column">
+      <a class="attrib-footer" href="/<%= urlLang %>"><% if (lang === 'eng') { %>Home<% } else { %>בית<% } %></a>
+      <a class="attrib-footer" href="/<%= urlLang %>/necklaces"><% if (lang === 'eng') { %>Necklaces<% } else { %>שרשראות<% } %></a>
+      <a class="attrib-footer" href="/<%= urlLang %>/crochet-necklaces"><% if (lang === 'eng') { %>Crochet Necklaces<% } else { %>שרשראות סרוגות<% } %></a>
+      <a class="attrib-footer" href="/<%= urlLang %>/hoops"><% if (lang === 'eng') { %>Hoop Earrings<% } else { %>עגילי חישוק<% } %></a>
+      <a class="attrib-footer" href="/<%= urlLang %>/dangle"><% if (lang === 'eng') { %>Dangle Earrings<% } else { %>עגילים תלויים<% } %></a>
+      <a class="attrib-footer" href="/<%= urlLang %>/bracelets"><% if (lang === 'eng') { %>Bracelets<% } else { %>צמידים<% } %></a>
+      <a class="attrib-footer" href="/<%= urlLang %>/unisex"><% if (lang === 'eng') { %>Unisex Jewelry<% } else { %>תכשיטים יוניסקס<% } %></a>
+    </div>
+
+    <div class="footer-middle-column">
+      <a class="attrib-footer" href="/<%= urlLang %>/policies"><% if (lang === 'eng') { %>Shipping & Cancellation Policy<% } else { %>מדיניות משלוח וביטול<% } %></a>
+      <a class="attrib-footer" href="/<%= urlLang %>/contact"><% if (lang === 'eng') { %>Contact Me<% } else { %>צור קשר<% } %></a>
+    </div>
+
+    <div class="footer-right-column">
+      <a class="attrib-footer" href="/<%= urlLang %>/workshop"><% if (lang === 'eng') { %>Jewelry Workshop<% } else { %>סדנת תכשיטים<% } %></a>
+      <a class="attrib-footer" href="/<%= urlLang %>/about"><% if (lang === 'eng') { %>About<% } else { %>אודות<% } %></a>
+    </div>
+  </div>
+
+  <div class="rights-container">
+    <span class="rights-text"><% if (lang === 'eng') { %>&copy; <%= new Date().getFullYear() %> Tamar Kfir Jewelry. All Rights Reserved.<% } else { %>&copy; <%= new Date().getFullYear() %> תכשיטי תמר כפיר. כל הזכויות שמורות.<% } %></span>
+  </div>
 </footer>
