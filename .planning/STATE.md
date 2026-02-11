@@ -5,28 +5,28 @@
 See: .planning/PROJECT.md (updated 2026-02-10)
 
 **Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers
-**Current focus:** v1.4 Phase 24 — Static Page SSR + Meta Tags + Deployment Merge
+**Current focus:** v1.4 Phase 25 — Dynamic SSR, Structured Data, and Sitemap
 
 ## Current Position
 
 Milestone: v1.4 SEO & Marketing Foundation
-Phase: 24 of 26 (Static Page SSR + Meta Tags + Deployment Merge)
-Plan: 05 of 05 (all complete)
-Status: Complete
-Last activity: 2026-02-11 — Phase 24 complete with gap closure (verification false positive resolved)
+Phase: 25 of 26 (Dynamic SSR, Structured Data, and Sitemap)
+Plan: 01 of 04 (category pages complete)
+Status: In Progress
+Last activity: 2026-02-11 — Phase 25 Plan 01 complete (category page SSR with structured data)
 
 Progress: Phases 1-24 complete (v1.0-v1.3 + Phase 23-24). v1.4: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 87 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 10)
+- Total plans completed: 88 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 11)
 - Average duration: ~5 min/plan
-- Total execution time: ~26.8 hours
+- Total execution time: ~27 hours
 
 **Recent Trend:**
 - Last 5 plans: 5-15 min
-- Trend: SSR implementation and gap closure (6 min for gap closure, 5 min for deployment config, 9 min for home page SSR, 15 min for static page SSR)
+- Trend: SSR implementation and SEO foundation (6 min for sitemap, 6 min for gap closure, 5 min for deployment config, 9 min for home page SSR, 15 min for static page SSR)
 
 *Updated after v1.3 milestone completion*
 
@@ -75,6 +75,14 @@ Key decisions for v1.4:
 - [Phase 24-05]: Verification gap resolved as false positive (home page never rendered products in frontend)
 - [Phase 24-05]: Unused Product query removed from home page handler for performance
 - [Phase 24-05]: All static page handlers follow consistent buildPageData pattern
+- [Phase 25-01]: Use English product slugs for both language versions
+- [Phase 25-01]: Map URL slugs with hyphens to camelCase MongoDB category values
+- [Phase 25-01]: Use data-ssr flag to enable client-side SSR detection and prevent re-rendering
+- [Phase 25-03]: XML sitemap at /sitemap.xml with all public pages in both languages (static, category, product)
+- [Phase 25-03]: Hreflang alternates on every URL with x-default pointing to English for international SEO
+- [Phase 25-03]: Image sitemap extension included for product images (Google Image Search visibility)
+- [Phase 25-03]: Lastmod dates use actual product.date field, not current timestamp for accurate change tracking
+- [Phase 25-03]: Sitemap cache-control set to 1 hour for CDN efficiency
 
 ### Pending Todos
 
@@ -89,7 +97,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 24-05-PLAN.md (gap closure - verification false positive resolved)
+Stopped at: Completed 25-01-PLAN.md (category page SSR with structured data)
 Resume file: None
 
 ## Quick Tasks Completed
