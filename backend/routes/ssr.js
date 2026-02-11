@@ -133,4 +133,5 @@ module.exports = {
   renderWorkshopPage,
   renderPoliciesPage,
   renderHomePage,
+  buildPageData,
 };
