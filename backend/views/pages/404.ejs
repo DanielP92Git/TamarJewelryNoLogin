@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="<%= urlLang %>" dir="<%= dir %>">
+  <head>
+    <%- include('../partials/meta-tags', { title, description, canonical, ogImage: null, lang, urlLang, alternateUrl, baseUrl, pageStyles }) %>
+    <script type="module" defer src="/js/controller.js"></script>
+  </head>
+
+  <body id="not-found">
+    <%- include('../partials/header', { lang, dir, urlLang }) %>
+
+    <main style="min-height: 60vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem;">
+      <h1 style="font-size: 6rem; color: #999; margin: 0;">404</h1>
+      <h2 style="font-size: 2rem; margin: 1rem 0; color: #333;">
+        <%= lang === 'eng' ? 'Page Not Found' : 'דף לא נמצא' %>
+      </h2>
+      <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+        <%= lang === 'eng' ? 'The page you are looking for could not be found.' : 'הדף שחיפשת לא נמצא.' %>
+      </p>
+      <a href="/<%= urlLang %>" style="padding: 1rem 2rem; background-color: #333; color: #fff; text-decoration: none; border-radius: 4px; font-size: 1.1rem;">
+        <%= lang === 'eng' ? 'Go Home' : 'חזרה לדף הבית' %>
+      </a>
+    </main>
+
+    <%- include('../partials/footer', { lang, urlLang }) %>
+  </body>
+</html>
