@@ -1,6 +1,7 @@
 const cron = require('node-cron');
 const { Product } = require('../models');
 const exchangeRateService = require('../services/exchangeRateService');
+const { invalidateAll } = require('../cache/invalidation');
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -129,6 +130,14 @@ async function updateExchangeRateAndPrices() {
       } catch (error) {
         errorCount++;
         console.error(`Error updating product ${product.id}:`, error.message);
+      }
+    }
+
+    // Invalidate all cached pages since prices changed globally
+    if (updatedCount > 0) {
+      invalidateAll();
+      if (!isProd) {
+        console.log('Page cache invalidated due to exchange rate update');
       }
     }
 
