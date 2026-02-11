@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="<%= urlLang %>" dir="<%= dir %>">
+<head>
+  <%- include('../partials/meta-tags', { title, description, canonical, ogImage, lang, urlLang, alternateUrl, baseUrl, pageStyles }) %>
+  <!-- Contact page additional fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <script type="module" defer src="/js/controller.js"></script>
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function (c, l, a, r, i, t, y) {
+      c[a] =
+        c[a] ||
+        function () {
+          (c[a].q = c[a].q || []).push(arguments);
+        };
+      t = l.createElement(r);
+      t.async = 1;
+      t.src = 'https://www.clarity.ms/tag/' + i;
+      y = l.getElementsByTagName(r)[0];
+      y.parentNode.insertBefore(t, y);
+    })(window, document, 'clarity', 'script', 'urnhsmmp4u');
+  </script>
+</head>
+<body id="contact-me">
+  <%- include('../partials/header', { lang, dir, urlLang }) %>
+
+  <div class="contact-main">
+    <div class="contact-container">
+      <h1 class="contact-title"><%= lang === 'eng' ? 'Get in Touch' : 'צרו קשר' %></h1>
+      <p class="contact-subtitle">
+        <%= lang === 'eng'
+          ? "Have a question or want to collaborate? I'd love to hear from you."
+          : 'יש לך שאלה או רוצה לשתף פעולה? אשמח לשמוע ממך.'
+        %>
+      </p>
+
+      <form class="contact-form" id="contactForm">
+        <!-- ANTI-SPAM: Honeypot field - hidden from humans, bots will fill it -->
+        <div style="position: absolute; left: -9999px;" aria-hidden="true">
+          <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" />
+        </div>
+        <!-- ANTI-SPAM: Hidden timestamp for time-based validation -->
+        <input type="hidden" name="form_loaded_at" id="formLoadedAt" value="" />
+
+        <% if (lang === 'eng') { %>
+          <div class="form-group">
+            <div class="input-group">
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="First Name"
+                required
+              />
+              <label for="name">First Name</label>
+              <div class="input-highlight"></div>
+            </div>
+
+            <div class="input-group">
+              <input
+                type="text"
+                id="lastname"
+                name="lastname"
+                placeholder="Last Name"
+                required
+              />
+              <label for="lastname">Last Name</label>
+              <div class="input-highlight"></div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <input
+              type="email"
+              id="contact-email"
+              name="email"
+              placeholder="Email Address"
+              required
+            />
+            <label for="contact-email">Email Address</label>
+            <div class="input-highlight"></div>
+          </div>
+
+          <div class="input-group full-width">
+            <textarea
+              id="message"
+              name="message"
+              placeholder="Your Message"
+              required
+            ></textarea>
+            <label for="message">Your Message</label>
+            <div class="input-highlight"></div>
+          </div>
+
+          <button type="submit" class="submit-button" id="submit">
+            Send Message
+            <svg class="button-arrow" viewBox="0 0 24 24">
+              <path
+                d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+              />
+            </svg>
+          </button>
+        <% } else { %>
+          <div class="form-group">
+            <div class="input-group">
+              <input
+                type="text"
+                id="name"
+                name="name"
+                placeholder="שם פרטי"
+                required
+              />
+              <label for="name">שם פרטי</label>
+              <div class="input-highlight"></div>
+            </div>
+
+            <div class="input-group">
+              <input
+                type="text"
+                id="lastname"
+                name="lastname"
+                placeholder="שם משפחה"
+                required
+              />
+              <label for="lastname">שם משפחה</label>
+              <div class="input-highlight"></div>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <input
+              type="email"
+              id="contact-email"
+              name="email"
+              placeholder="כתובת דואר אלקטרוני"
+              required
+            />
+            <label for="contact-email">כתובת דואר אלקטרוני</label>
+            <div class="input-highlight"></div>
+          </div>
+
+          <div class="input-group full-width">
+            <textarea
+              id="message"
+              name="message"
+              placeholder="הודעתך"
+              required
+            ></textarea>
+            <label for="message">הודעתך</label>
+            <div class="input-highlight"></div>
+          </div>
+
+          <button type="submit" class="submit-button submit-heb" id="submit">
+            שלח/י
+            <svg class="button-arrow" viewBox="0 0 24 24">
+              <path
+                d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"
+              />
+            </svg>
+          </button>
+        <% } %>
+
+        <div class="success-message" id="successMessage">
+          <%= lang === 'eng'
+            ? "Thank you for your message! I'll get back to you soon."
+            : 'תודה על הפנייה! אחזור אליך בהקדם.'
+          %>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <%- include('../partials/footer', { lang, urlLang }) %>
+</body>
+</html>
