@@ -275,7 +275,13 @@ Plans:
   3. All Product and Organization structured data on the live site passes the Google Rich Results Test with zero errors
   4. Google Search Console is verified, the sitemap is submitted and shows indexed pages, and the URL Inspection tool confirms SSR pages are crawlable
   5. The full test suite (419+ tests) passes with zero regressions after all SSR changes
-**Plans**: TBD
+**Plans**: 4 plans
+
+Plans:
+- [ ] 26-01-PLAN.md — Cache infrastructure: node-cache, cache keys, cache middleware with HTTP headers
+- [ ] 26-02-PLAN.md — Cache invalidation and SSR route integration
+- [ ] 26-03-PLAN.md — Google Fonts display=swap verification and Search Console meta tag
+- [ ] 26-04-PLAN.md — Test regression verification and human verification checkpoint
 
 ## Progress
 
@@ -286,4 +292,4 @@ Plans:
 | 23. Foundation & Infrastructure | v1.4 | 5/5 | ✓ Complete | 2026-02-10 |
 | 24. Static Page SSR + Meta + Deploy | v1.4 | 5/5 | ✓ Complete | 2026-02-11 |
 | 25. Dynamic SSR + Schema + Sitemap | v1.4 | 4/4 | ✓ Complete | 2026-02-11 |
-| 26. Caching, Perf & Verification | v1.4 | 0/TBD | Not started | - |
+| 26. Caching, Perf & Verification | v1.4 | 0/4 | Not started | - |
