@@ -37,6 +37,8 @@ const {
   renderWorkshopPage,
   renderPoliciesPage,
 } = require('./routes/ssr');
+const { renderCategoryPage } = require('./routes/ssrDynamic');
+const { serveSitemap } = require('./routes/sitemap');
 
 // #region agent log
 function agentLog(hypothesisId, location, message, data) {
@@ -1146,6 +1148,11 @@ app.get('/api/client-config', (req, res) => {
 });
 
 // =============================================
+// XML Sitemap for SEO
+// =============================================
+app.get('/sitemap.xml', serveSitemap);
+
+// =============================================
 // Root URL redirect — detect language and redirect to /en or /he
 // =============================================
 app.get('/', (req, res) => {
@@ -1186,6 +1193,9 @@ app.get('/:lang(en|he)/about', languageMiddleware, renderAboutPage);
 app.get('/:lang(en|he)/contact', languageMiddleware, renderContactPage);
 app.get('/:lang(en|he)/workshop', languageMiddleware, renderWorkshopPage);
 app.get('/:lang(en|he)/policies', languageMiddleware, renderPoliciesPage);
+
+// Category pages (dynamic SSR with product grids)
+app.get('/:lang(en|he)/:category(necklaces|crochet-necklaces|hoops|dangle|bracelets|unisex)', languageMiddleware, renderCategoryPage);
 
 // =============================================
 // Locale auto-detection (Israel => Hebrew/ILS, else English/USD)
