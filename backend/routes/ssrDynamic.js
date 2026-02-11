@@ -253,4 +253,5 @@ module.exports = {
   renderCategoryPage,
   renderProductPage,
   renderCartPage,
+  DB_TO_URL_CATEGORY,
 };
