@@ -203,7 +203,7 @@ See [v1.3-ROADMAP.md](.planning/milestones/v1.3-ROADMAP.md) for full phase detai
 **Milestone Goal:** Make the store discoverable by search engines and shareable on social platforms through server-side rendering, structured data, clean URLs, and bilingual SEO.
 
 - [x] **Phase 23: Foundation & Infrastructure** — EJS engine, slug system, bilingual routing, legacy redirects, robots.txt (completed 2026-02-10)
-- [ ] **Phase 24: Static Page SSR + Meta Tags + Deployment Merge** — Home/about/contact SSR, meta/OG tags, hreflang, Organization schema, deployment unification
+- [x] **Phase 24: Static Page SSR + Meta Tags + Deployment Merge** — Home/about/contact SSR, meta/OG tags, hreflang, Organization schema, deployment unification (completed 2026-02-11)
 - [ ] **Phase 25: Dynamic SSR + Structured Data + Sitemap** — Category pages, product detail pages (new), client-side SSR awareness, Product/Breadcrumb schema, XML sitemap
 - [ ] **Phase 26: Caching, Performance & Verification** — SSR cache layer, HTTP cache headers, Google Search Console, structured data validation, test regression
 
@@ -241,11 +241,11 @@ Plans:
 **Plans**: 5 plans
 
 Plans:
-- [ ] 24-01-PLAN.md — Meta configuration, meta-tags partial, header/footer rebuild
-- [ ] 24-02-PLAN.md — Static page EJS templates and SSR routes (about, contact, workshop, policies)
-- [ ] 24-03-PLAN.md — Home page SSR with Organization JSON-LD
-- [ ] 24-04-PLAN.md — Deployment merge and final verification
-- [ ] 24-05-PLAN.md — Gap closure: resolve false-positive product grid verification gap
+- [x] 24-01-PLAN.md — Meta configuration, meta-tags partial, header/footer rebuild
+- [x] 24-02-PLAN.md — Static page EJS templates and SSR routes (about, contact, workshop, policies)
+- [x] 24-03-PLAN.md — Home page SSR with Organization JSON-LD
+- [x] 24-04-PLAN.md — Deployment merge and final verification
+- [x] 24-05-PLAN.md — Gap closure: resolve false-positive product grid verification gap
 
 ### Phase 25: Dynamic SSR + Structured Data + Sitemap
 **Goal**: Category pages render with pre-populated product grids, individual product detail pages exist as a new feature with dedicated URLs, all product-related pages carry Product and BreadcrumbList structured data, and a dynamic XML sitemap covers the entire public site in both languages
@@ -278,6 +278,6 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 23. Foundation & Infrastructure | v1.4 | 5/5 | ✓ Complete | 2026-02-10 |
-| 24. Static Page SSR + Meta + Deploy | v1.4 | 0/4 | Not started | - |
+| 24. Static Page SSR + Meta + Deploy | v1.4 | 5/5 | ✓ Complete | 2026-02-11 |
 | 25. Dynamic SSR + Schema + Sitemap | v1.4 | 0/TBD | Not started | - |
 | 26. Caching, Perf & Verification | v1.4 | 0/TBD | Not started | - |
