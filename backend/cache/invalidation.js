@@ -1,5 +1,5 @@
 // Cache invalidation utilities for SSR pages
-const pageCache = require('./pageCache');
+const { pageCache } = require('./pageCache');
 
 /**
  * Invalidate category page cache in both languages
