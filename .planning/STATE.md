@@ -11,22 +11,22 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 Milestone: v1.4 SEO & Marketing Foundation
 Phase: 26 of 26 (Caching, Performance & Verification)
-Plan: 01 of 04
+Plan: 03 of 04
 Status: In progress
-Last activity: 2026-02-11 — Plan 26-01 complete (cache infrastructure with node-cache)
+Last activity: 2026-02-11 — Plan 26-03 complete (Google Fonts display=swap and Search Console meta tag)
 
-Progress: Phases 1-25 complete (v1.0-v1.3 + Phase 23-25). v1.4: [████████░░] 75%
+Progress: Phases 1-25 complete (v1.0-v1.3 + Phase 23-25). v1.4: [█████████░] 85%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 92 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 15)
+- Total plans completed: 94 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 17)
 - Average duration: ~5 min/plan
-- Total execution time: ~28.3 hours
+- Total execution time: ~28.4 hours
 
 **Recent Trend:**
-- Last 5 plans: 3-9 min
-- Trend: SSR and caching (6 min for sitemap, 9 min for product pages, 6 min for SSR awareness, 3 min for cache infrastructure)
+- Last 5 plans: 3-6 min
+- Trend: Caching and performance optimization (9 min for product pages, 6 min for SSR awareness, 3 min for cache infrastructure, 6 min for cache headers, 3.5 min for font optimization)
 
 *Updated after v1.3 milestone completion*
 
@@ -90,6 +90,10 @@ Key decisions for v1.4:
 - [Phase 25-04]: Client-side JS detects data-ssr flag and skips duplicate product fetching
 - [Phase 25-04]: Product data extracted from SSR DOM to populate products array
 - [Phase 25-04]: Cart page rendered as SSR shell with client-side content population
+- [Phase 26-01]: In-memory caching with node-cache for product data (5-minute TTL)
+- [Phase 26-02]: Cache-Control headers for static assets (fonts: 1 year, CSS/JS: 1 hour with must-revalidate)
+- [Phase 26-03]: All Google Fonts include display=swap to prevent Flash of Invisible Text (FOIT)
+- [Phase 26-03]: Google Search Console verification via GOOGLE_SITE_VERIFICATION environment variable
 - [Phase 26-01]: Use node-cache for in-memory caching (single-server deployment on DigitalOcean)
 - [Phase 26-01]: Cache key format path:lang:currency for 4 variants (en+USD, en+ILS, he+USD, he+ILS)
 - [Phase 26-01]: stdTTL 3600s (1 hour), maxKeys 500 to prevent memory bloat (~50MB limit)
@@ -110,7 +114,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 26-01-PLAN.md (cache infrastructure with node-cache, language/currency-aware cache keys, cache middleware)
+Stopped at: Completed 26-03-PLAN.md (Google Fonts display=swap and Search Console verification)
 Resume file: None
 
 ## Quick Tasks Completed
