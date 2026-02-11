@@ -19,6 +19,19 @@ const URL_TO_DB_CATEGORY = {
 };
 
 /**
+ * Reverse map: MongoDB category values to URL slugs
+ * Used for breadcrumb links from product detail pages
+ */
+const DB_TO_URL_CATEGORY = {
+  'necklaces': 'necklaces',
+  'crochetNecklaces': 'crochet-necklaces',
+  'hoops': 'hoops',
+  'dangle': 'dangle',
+  'bracelets': 'bracelets',
+  'unisex': 'unisex',
+};
+
+/**
  * Render category page with SSR product grid
  * @param {object} req - Express request object
  * @param {object} res - Express response object
@@ -102,6 +115,142 @@ async function renderCategoryPage(req, res) {
   }
 }
 
+/**
+ * Render product detail page with SSR
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
+async function renderProductPage(req, res) {
+  const { lang, slug } = req.params; // e.g., /en/product/handmade-necklace
+  const langKey = lang === 'he' ? 'heb' : 'eng';
+  const urlLang = lang;
+  const baseUrl = process.env.BASE_URL || 'https://tamarkfir.online';
+
+  try {
+    // Query product by slug
+    const product = await Product.findOne({
+      slug: slug,
+      available: true,
+    }).lean();
+
+    // If product not found, return 404
+    if (!product) {
+      return res.status(404).render('pages/404', buildPageData(req, '404', []));
+    }
+
+    // Determine currency and price
+    const currency = langKey === 'heb' ? 'ILS' : 'USD';
+    const price = langKey === 'heb' ? product.ils_price : product.usd_price;
+    const originalPrice = langKey === 'heb' ? product.original_ils_price : product.original_usd_price;
+
+    // Truncate description for meta tag (max 158 chars)
+    const metaDescription = product.description
+      ? (product.description.length > 158
+          ? product.description.substring(0, 158).trim() + '...'
+          : product.description)
+      : `View ${product.name} at Tamar Kfir Jewelry. Handmade with love in Jerusalem.`;
+
+    // Get product image for OG tags
+    const ogImage = product.images?.[0]?.publicDesktop
+      || product.mainImage?.publicDesktop
+      || null;
+
+    // Build page data manually (not using buildPageData since we need dynamic product title/description)
+    const dir = langKey === 'heb' ? 'rtl' : 'ltr';
+    const canonical = `${baseUrl}/${urlLang}/product/${slug}`;
+    const alternateUrl = {
+      en: `${baseUrl}/en/product/${slug}`,
+      he: `${baseUrl}/he/product/${slug}`,
+    };
+
+    const pageData = {
+      lang: langKey,
+      urlLang: urlLang,
+      dir: dir,
+      title: product.name, // Will get " | Tamar Kfir Jewelry" suffix from meta-tags.ejs
+      description: metaDescription,
+      canonical: canonical,
+      alternateUrl: alternateUrl,
+      ogImage: ogImage,
+      productPrice: price ? price.toFixed(2) : null,
+      productCurrency: currency,
+      baseUrl: baseUrl,
+      pageStyles: [
+        { href: '/css/standard-reset.css' },
+        { href: '/css/desktop-menu.css' },
+        { href: '/css/categories-devices.css', media: '(max-width: 799.9px)' },
+        { href: '/css/categories-800plus.css', media: '(min-width: 800px)' },
+        { href: '/css/footer-desktop.css', media: '(min-width: 800px)' },
+        { href: '/css/footer-mobile.css', media: '(max-width: 799.9px)' },
+        { href: '/css/mobile-menu.css', media: '(max-width: 799.9px)' },
+      ],
+      product: product,
+      price: price,
+      originalPrice: originalPrice,
+      currency: currency,
+      currencySymbol: currency === 'USD' ? '$' : '₪',
+      hasDiscount: product.discount_percentage > 0 && originalPrice > 0 && originalPrice > price,
+      categoryDisplayName: categoryDisplayNames[DB_TO_URL_CATEGORY[product.category]]?.[langKey] || product.category,
+      categorySlug: DB_TO_URL_CATEGORY[product.category] || product.category,
+      ssrFlag: true,
+    };
+
+    // Generate single product schema
+    const schemaItems = [generateProductSchema(product, langKey, baseUrl)];
+    pageData.schemaItems = schemaItems;
+
+    // Generate breadcrumb: Home > Category > Product
+    const breadcrumbItems = [
+      {
+        name: langKey === 'eng' ? 'Home' : 'בית',
+        url: `/${urlLang}`,
+      },
+      {
+        name: pageData.categoryDisplayName,
+        url: `/${urlLang}/${pageData.categorySlug}`,
+      },
+      {
+        name: product.name,
+        // Current page - no URL
+      },
+    ];
+    pageData.breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems, baseUrl);
+
+    res.render('pages/product', pageData);
+  } catch (err) {
+    console.error('Product SSR error:', err);
+    res.status(500).render('pages/error', buildPageData(req, 'error', []));
+  }
+}
+
+/**
+ * Render cart page SSR shell
+ * Content is populated by client-side JavaScript (localStorage/API)
+ * @param {object} req - Express request object
+ * @param {object} res - Express response object
+ */
+function renderCartPage(req, res) {
+  try {
+    // Build page data with cart-specific CSS
+    const pageData = buildPageData(req, 'cart', [
+      { href: '/css/standard-reset.css' },
+      { href: '/css/desktop-menu.css' },
+      { href: '/css/cart-devices.css', media: '(max-width: 799.9px)' },
+      { href: '/css/cart-800plus.css', media: '(min-width: 800px)' },
+      { href: '/css/footer-desktop.css', media: '(min-width: 800px)' },
+      { href: '/css/footer-mobile.css', media: '(max-width: 799.9px)' },
+      { href: '/css/mobile-menu.css', media: '(max-width: 799.9px)' },
+    ]);
+
+    res.render('pages/cart', pageData);
+  } catch (err) {
+    console.error('Cart SSR error:', err);
+    res.status(500).render('pages/error', buildPageData(req, 'error', []));
+  }
+}
+
 module.exports = {
   renderCategoryPage,
+  renderProductPage,
+  renderCartPage,
 };

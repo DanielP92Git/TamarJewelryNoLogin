@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="<%= urlLang %>" dir="<%= dir %>">
+  <head>
+    <%- include('../partials/meta-tags', { title, description, canonical, ogImage, lang, urlLang, alternateUrl, baseUrl, pageStyles, productPrice, productCurrency }) %>
+
+    <!-- Product JSON-LD structured data -->
+    <%- include('../partials/product-schema', { schemaItems }) %>
+
+    <!-- BreadcrumbList JSON-LD structured data -->
+    <%- include('../partials/breadcrumb-schema', { breadcrumbSchema }) %>
+
+    <script type="module" defer src="/js/controller.js"></script>
+    <!-- Microsoft Clarity -->
+    <script type="text/javascript">
+      (function (c, l, a, r, i, t, y) {
+        c[a] =
+          c[a] ||
+          function () {
+            (c[a].q = c[a].q || []).push(arguments);
+          };
+        t = l.createElement(r);
+        t.async = 1;
+        t.src = 'https://www.clarity.ms/tag/' + i;
+        y = l.getElementsByTagName(r)[0];
+        y.parentNode.insertBefore(t, y);
+      })(window, document, 'clarity', 'script', 'urnhsmmp4u');
+    </script>
+  </head>
+
+  <body id="product-detail">
+    <%- include('../partials/header', { lang, dir, urlLang }) %>
+
+    <main>
+      <div class="whatsapp-container">
+        <a href="https://wa.me/972524484763" class="whatsapp-atr"
+          ><img src="/imgs/svgs/whatsapp.svg" class="whatsapp-svg" alt=""
+        /></a>
+      </div>
+
+      <!-- Breadcrumb navigation -->
+      <nav class="breadcrumb" style="padding: 1rem 2rem; font-size: 0.9rem;" dir="<%= dir %>">
+        <a href="/<%= urlLang %>" style="color: #666; text-decoration: none;"><%= lang === 'eng' ? 'Home' : 'בית' %></a>
+        <span style="margin: 0 0.5rem; color: #999;"><%= dir === 'rtl' ? '←' : '→' %></span>
+        <a href="/<%= urlLang %>/<%= categorySlug %>" style="color: #666; text-decoration: none;"><%= categoryDisplayName %></a>
+        <span style="margin: 0 0.5rem; color: #999;"><%= dir === 'rtl' ? '←' : '→' %></span>
+        <span style="color: #333;"><%= product.name %></span>
+      </nav>
+
+      <!-- Product detail container -->
+      <div class="product-detail-container" data-ssr="true" style="max-width: 1200px; margin: 2rem auto; padding: 0 2rem;" data-id="<%= product.id %>" data-quant="<%= product.quantity %>" data-currency="<%= currencySymbol %>" data-usd-price="<%= Math.round(product.usd_price || 0) %>" data-ils-price="<%= Math.round(product.ils_price || 0) %>" data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>" data-original-ils-price="<%= Math.round(product.original_ils_price || product.ils_price || 0) %>">
+
+        <div class="product-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;">
+
+          <!-- Product image gallery -->
+          <div class="product-gallery">
+            <!-- Main image -->
+            <div class="product-main-image" style="margin-bottom: 1rem;">
+              <%
+                const mainImage = product.images?.[0] || product.mainImage || {};
+                const mainDesktop = mainImage.publicDesktop || product.image || '';
+                const mainMobile = mainImage.publicMobile || mainDesktop;
+              %>
+              <picture>
+                <source
+                  media="(min-width: 768px)"
+                  srcset="<%= mainDesktop %>"
+                  type="image/webp"
+                  crossorigin="anonymous"
+                />
+                <source
+                  media="(max-width: 767px)"
+                  srcset="<%= mainMobile %>"
+                  type="image/webp"
+                  crossorigin="anonymous"
+                />
+                <img
+                  class="main-product-image"
+                  src="<%= mainDesktop %>"
+                  alt="<%= product.name %>"
+                  style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
+                  crossorigin="anonymous"
+                />
+              </picture>
+            </div>
+
+            <!-- Thumbnail strip (if multiple images) -->
+            <% if (product.images && product.images.length > 1) { %>
+            <div class="product-thumbnails" style="display: flex; gap: 0.5rem; overflow-x: auto;">
+              <% product.images.forEach(function(img, index) { %>
+                <img
+                  class="product-thumbnail"
+                  src="<%= img.publicDesktop || img.desktop || '' %>"
+                  alt="<%= product.name %> - Image <%= index + 1 %>"
+                  style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 2px solid <%= index === 0 ? '#333' : 'transparent' %>;"
+                  data-index="<%= index %>"
+                  loading="lazy"
+                  crossorigin="anonymous"
+                />
+              <% }); %>
+            </div>
+            <% } %>
+          </div>
+
+          <!-- Product info -->
+          <div class="product-info" dir="<%= dir %>">
+            <h1 class="product-name" style="<%= lang === 'eng' ? 'font-family: Raleway, sans-serif; font-size: 2rem;' : 'font-family: Rubik, sans-serif; font-size: 2.5rem;' %> margin-bottom: 1rem; color: #333;"><%= product.name %></h1>
+
+            <!-- SKU -->
+            <% if (product.sku && product.sku.trim() !== '') { %>
+            <div class="product-sku" style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+              <%= lang === 'eng' ? 'SKU:' : 'מק"ט:' %> <%= product.sku %>
+            </div>
+            <% } %>
+
+            <!-- Price -->
+            <div class="product-price-section" style="margin-bottom: 1.5rem;">
+              <% if (hasDiscount) { %>
+              <div class="product-price-container" style="display: flex; gap: 1rem; align-items: center;">
+                <span class="product-price-original" style="font-size: 1.2rem; color: #999; text-decoration: line-through;"><%= currencySymbol %><%= Math.round(originalPrice) %></span>
+                <span class="product-price-discounted" style="font-size: 1.8rem; color: #d32f2f; font-weight: bold;"><%= currencySymbol %><%= Math.round(price) %></span>
+              </div>
+              <% } else { %>
+              <div class="product-price" style="font-size: 1.8rem; color: #333; font-weight: bold;"><%= currencySymbol %><%= Math.round(price) %></div>
+              <% } %>
+            </div>
+
+            <!-- Availability -->
+            <div class="product-availability" style="margin-bottom: 1.5rem; font-size: 1rem;">
+              <% if (product.quantity > 0) { %>
+              <span style="color: #4caf50; font-weight: 500;">
+                ✓ <%= lang === 'eng' ? 'In Stock' : 'במלאי' %>
+              </span>
+              <% } else { %>
+              <span style="color: #d32f2f; font-weight: 500;">
+                ✗ <%= lang === 'eng' ? 'Out of Stock' : 'אזל מהמלאי' %>
+              </span>
+              <% } %>
+            </div>
+
+            <!-- Description -->
+            <div class="product-description" style="margin-bottom: 2rem; line-height: 1.6; color: #555; white-space: pre-wrap;"><%- product.description || '' %></div>
+
+            <!-- Add to Cart button -->
+            <button class="add-to-cart-btn" style="width: 100%; padding: 1rem 2rem; font-size: 1.1rem; background-color: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;" <%= product.quantity <= 0 ? 'disabled' : '' %>>
+              <%= lang === 'eng' ? 'Add to Cart' : 'הוסף לסל' %>
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <button class="go-to-top">
+        <img
+          src="/imgs/svgs/arrow-up-solid-white.svg"
+          alt="arrow-up"
+          class="arrow-up"
+        />
+      </button>
+    </main>
+
+    <div class="modal"></div>
+
+    <%- include('../partials/footer', { lang, urlLang }) %>
+  </body>
+</html>

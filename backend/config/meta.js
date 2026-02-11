@@ -121,6 +121,16 @@ module.exports = {
       title: 'עגלת קניות',
       description: 'צפייה וניהול עגלת הקניות שלך.'
     }
+  },
+  product: {
+    eng: {
+      title: 'Product Details',
+      description: 'View product details and purchase handmade jewelry crafted with love in Jerusalem.'
+    },
+    heb: {
+      title: 'פרטי מוצר',
+      description: 'צפייה בפרטי המוצר ורכישת תכשיטים בעבודת יד שנוצרו באהבה בירושלים.'
+    }
   }
 };
 
