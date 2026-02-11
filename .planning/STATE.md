@@ -11,22 +11,22 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 Milestone: v1.4 SEO & Marketing Foundation
 Phase: 26 of 26 (Caching, Performance & Verification)
-Plan: 03 of 04
+Plan: 04 of 04
 Status: In progress
-Last activity: 2026-02-11 — Plan 26-03 complete (Google Fonts display=swap and Search Console meta tag)
+Last activity: 2026-02-11 — Plan 26-02 complete (Cache invalidation and route integration)
 
 Progress: Phases 1-25 complete (v1.0-v1.3 + Phase 23-25). v1.4: [█████████░] 85%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 94 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 17)
+- Total plans completed: 95 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 18)
 - Average duration: ~5 min/plan
-- Total execution time: ~28.4 hours
+- Total execution time: ~28.5 hours
 
 **Recent Trend:**
 - Last 5 plans: 3-6 min
-- Trend: Caching and performance optimization (9 min for product pages, 6 min for SSR awareness, 3 min for cache infrastructure, 6 min for cache headers, 3.5 min for font optimization)
+- Trend: Caching and performance optimization (3 min cache infrastructure, 6 min cache headers, 3.5 min font optimization, 5 min cache invalidation)
 
 *Updated after v1.3 milestone completion*
 
@@ -99,6 +99,9 @@ Key decisions for v1.4:
 - [Phase 26-01]: stdTTL 3600s (1 hour), maxKeys 500 to prevent memory bloat (~50MB limit)
 - [Phase 26-01]: Skip cache in test environment to avoid test interference
 - [Phase 26-01]: HTTP Cache-Control with stale-while-revalidate=86400 for browser caching
+- [Phase 26-02]: Product changes invalidate product page, category page, and home page in both languages
+- [Phase 26-02]: Exchange rate updates invalidate all cached pages (prices affect all pages globally)
+- [Phase 26-02]: Cache invalidation only if updatedCount > 0 in exchange rate job
 
 ### Pending Todos
 
@@ -114,7 +117,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 26-03-PLAN.md (Google Fonts display=swap and Search Console verification)
+Stopped at: Completed 26-02-PLAN.md (Cache invalidation and route integration)
 Resume file: None
 
 ## Quick Tasks Completed
