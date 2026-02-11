@@ -1200,6 +1200,9 @@ app.get('/:lang(en|he)/:category(necklaces|crochet-necklaces|hoops|dangle|bracel
 // Product detail pages (dynamic SSR with structured data)
 app.get('/:lang(en|he)/product/:slug', languageMiddleware, renderProductPage);
 
+// Cart page (SSR shell, content populated client-side)
+app.get('/:lang(en|he)/cart', languageMiddleware, renderCartPage);
+
 // =============================================
 // Locale auto-detection (Israel => Hebrew/ILS, else English/USD)
 // =============================================
