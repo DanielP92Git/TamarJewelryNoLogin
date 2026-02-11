@@ -30,6 +30,13 @@ const {
 } = require('./jobs/exchangeRateJob');
 const { detectLanguage, languageMiddleware, trailingSlashRedirect } = require('./middleware/language');
 const { legacyRedirectMiddleware } = require('./middleware/legacy');
+const {
+  renderHomePage,
+  renderAboutPage,
+  renderContactPage,
+  renderWorkshopPage,
+  renderPoliciesPage,
+} = require('./routes/ssr');
 
 // #region agent log
 function agentLog(hypothesisId, location, message, data) {
@@ -1170,6 +1177,15 @@ app.get('/:lang(en|he)/test', languageMiddleware, (req, res) => {
     path: '/test',
   });
 });
+
+// Home page (matches /en and /he exactly)
+app.get('/:lang(en|he)', languageMiddleware, renderHomePage);
+
+// Static pages
+app.get('/:lang(en|he)/about', languageMiddleware, renderAboutPage);
+app.get('/:lang(en|he)/contact', languageMiddleware, renderContactPage);
+app.get('/:lang(en|he)/workshop', languageMiddleware, renderWorkshopPage);
+app.get('/:lang(en|he)/policies', languageMiddleware, renderPoliciesPage);
 
 // =============================================
 // Locale auto-detection (Israel => Hebrew/ILS, else English/USD)
