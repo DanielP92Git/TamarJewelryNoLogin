@@ -37,8 +37,10 @@ const {
   renderWorkshopPage,
   renderPoliciesPage,
 } = require('./routes/ssr');
-const { renderCategoryPage, renderProductPage, renderCartPage } = require('./routes/ssrDynamic');
+const { renderCategoryPage, renderProductPage, renderCartPage, DB_TO_URL_CATEGORY } = require('./routes/ssrDynamic');
 const { serveSitemap } = require('./routes/sitemap');
+const { cacheMiddleware } = require('./middleware/cacheMiddleware');
+const { invalidateProduct, invalidateAll } = require('./cache/invalidation');
 
 // #region agent log
 function agentLog(hypothesisId, location, message, data) {
@@ -1186,22 +1188,22 @@ app.get('/:lang(en|he)/test', languageMiddleware, (req, res) => {
 });
 
 // Home page (matches /en and /he exactly)
-app.get('/:lang(en|he)', languageMiddleware, renderHomePage);
+app.get('/:lang(en|he)', languageMiddleware, cacheMiddleware(), renderHomePage);
 
 // Static pages
-app.get('/:lang(en|he)/about', languageMiddleware, renderAboutPage);
-app.get('/:lang(en|he)/contact', languageMiddleware, renderContactPage);
-app.get('/:lang(en|he)/workshop', languageMiddleware, renderWorkshopPage);
-app.get('/:lang(en|he)/policies', languageMiddleware, renderPoliciesPage);
+app.get('/:lang(en|he)/about', languageMiddleware, cacheMiddleware(), renderAboutPage);
+app.get('/:lang(en|he)/contact', languageMiddleware, cacheMiddleware(), renderContactPage);
+app.get('/:lang(en|he)/workshop', languageMiddleware, cacheMiddleware(), renderWorkshopPage);
+app.get('/:lang(en|he)/policies', languageMiddleware, cacheMiddleware(), renderPoliciesPage);
 
 // Category pages (dynamic SSR with product grids)
-app.get('/:lang(en|he)/:category(necklaces|crochet-necklaces|hoops|dangle|bracelets|unisex)', languageMiddleware, renderCategoryPage);
+app.get('/:lang(en|he)/:category(necklaces|crochet-necklaces|hoops|dangle|bracelets|unisex)', languageMiddleware, cacheMiddleware(), renderCategoryPage);
 
 // Product detail pages (dynamic SSR with structured data)
-app.get('/:lang(en|he)/product/:slug', languageMiddleware, renderProductPage);
+app.get('/:lang(en|he)/product/:slug', languageMiddleware, cacheMiddleware(), renderProductPage);
 
 // Cart page (SSR shell, content populated client-side)
-app.get('/:lang(en|he)/cart', languageMiddleware, renderCartPage);
+app.get('/:lang(en|he)/cart', languageMiddleware, cacheMiddleware(), renderCartPage);
 
 // =============================================
 // Locale auto-detection (Israel => Hebrew/ILS, else English/USD)
@@ -2122,6 +2124,11 @@ app.post(
       });
       // #endregion
 
+      // Invalidate cache for product and its category
+      if (product.slug && DB_TO_URL_CATEGORY[product.category]) {
+        invalidateProduct(product.slug, DB_TO_URL_CATEGORY[product.category]);
+      }
+
       res.json({
         success: true,
         id: nextId,
@@ -2455,6 +2462,11 @@ app.post(
       // Save the updated product
       await product.save();
       console.log('Product updated successfully');
+
+      // Invalidate cache for product and its category
+      if (product.slug && DB_TO_URL_CATEGORY[product.category]) {
+        invalidateProduct(product.slug, DB_TO_URL_CATEGORY[product.category]);
+      }
 
       res.json({
         success: true,
