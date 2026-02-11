@@ -1,0 +1,35 @@
+name: tamar-kfir-jewelry
+region: nyc
+
+services:
+  - name: web
+    # TODO: Update with your actual GitHub repository details
+    # github:
+    #   repo: <your-username>/tamar-kfir-jewelry
+    #   branch: master
+    #   deploy_on_push: true
+
+    # Build frontend static assets, then install backend dependencies
+    build_command: cd frontend && npm ci && npm run build && cd ../backend && npm ci
+
+    # Start the Express server from the backend directory
+    run_command: cd backend && npm start
+
+    environment_slug: node-js
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    http_port: 4000
+
+    routes:
+      - path: /
+
+    envs:
+      - key: NODE_ENV
+        value: "production"
+      - key: BASE_URL
+        value: "${APP_URL}"
+      # NOTE: Sensitive environment variables (MONGODB_URI, JWT_SECRET,
+      # PAYPAL_CLIENT_ID, PAYPAL_CLIENT_SECRET, STRIPE_SECRET_KEY,
+      # SPACES_BUCKET, SPACES_REGION, SPACES_ENDPOINT, SPACES_KEY,
+      # SPACES_SECRET, etc.) should be configured via DigitalOcean Dashboard
+      # under Settings > Environment Variables
