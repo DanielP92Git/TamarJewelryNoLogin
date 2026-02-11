@@ -11,22 +11,22 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 Milestone: v1.4 SEO & Marketing Foundation
 Phase: 24 of 26 (Static Page SSR + Meta Tags + Deployment Merge)
-Plan: 03 of 03 (all complete)
+Plan: 04 of 04 (all complete)
 Status: Complete
-Last activity: 2026-02-11 — Phase 24 complete (SSR templates for all static pages + home page)
+Last activity: 2026-02-11 — Phase 24 complete (SSR templates, DigitalOcean deployment config, all pages verified)
 
-Progress: Phases 1-23 complete (v1.0-v1.3 + Phase 23). v1.4: [███░░░░░░░] 30%
+Progress: Phases 1-24 complete (v1.0-v1.3 + Phase 23-24). v1.4: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 85 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 8)
+- Total plans completed: 86 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 9)
 - Average duration: ~5 min/plan
-- Total execution time: ~26.6 hours
+- Total execution time: ~26.7 hours
 
 **Recent Trend:**
 - Last 5 plans: 5-15 min
-- Trend: SSR template creation (5 min for 24-01 meta config, 9 min for 24-03 home page SSR, 15 min for 24-02 static page SSR)
+- Trend: SSR implementation (5 min for deployment config, 9 min for home page SSR, 15 min for static page SSR)
 
 *Updated after v1.3 milestone completion*
 
@@ -68,6 +68,10 @@ Key decisions for v1.4:
 - [Phase 24-03]: Currency based on language for now (heb→ILS, eng→USD) - cookie-based currency in future phases
 - [Phase 24-03]: Product queries limited to 20 items for performance
 - [Phase 24-03]: Graceful error handling for DB failures (page renders without products rather than 500 error)
+- [Phase 24-04]: Deployment merge from 2 DigitalOcean components to 1 unified Express service
+- [Phase 24-04]: Frontend builds before backend in deployment (chained build_command)
+- [Phase 24-04]: All sensitive env vars configured via DigitalOcean dashboard (not in yaml file)
+- [Phase 24-04]: All 10 SSR pages verified end-to-end with meta tags before phase completion
 
 ### Pending Todos
 
@@ -75,16 +79,14 @@ None.
 
 ### Blockers/Concerns
 
-- Deployment merge (2 components to 1) is a major infrastructure change — validate on static pages first (Phase 24)
-- SSR-rendered HTML must match existing client-side JS output to avoid content flashing
-- Payment return URLs hardcoded to old paths — must update simultaneously with URL migration
-- 419 existing tests must continue passing through the architectural transition
-- Monolithic backend (3,662 lines) may complicate SSR route integration
+- Payment return URLs hardcoded to old paths — must update simultaneously with URL migration (future phase)
+- Environment variables must be configured in DigitalOcean dashboard before first deployment
+- First production deployment should go to staging environment for validation
 
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed Phase 24 (all 3 plans: meta config, static pages SSR, home page SSR)
+Stopped at: Completed Phase 24 (all 4 plans: meta config, static pages SSR, home page SSR, deployment config + verification)
 Resume file: None
 
 ## Quick Tasks Completed
