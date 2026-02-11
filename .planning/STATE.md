@@ -11,18 +11,18 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 
 Milestone: v1.4 SEO & Marketing Foundation
 Phase: 25 of 26 (Dynamic SSR, Structured Data, and Sitemap)
-Plan: 03 of 05 (sitemap complete)
+Plan: 04 of 05 (client-side SSR awareness and cart shell complete)
 Status: In Progress
-Last activity: 2026-02-11 — Phase 25 Plan 03 complete (XML sitemap with hreflang and images)
+Last activity: 2026-02-11 — Phase 25 Plan 04 complete (SSR-aware categoriesView and cart page shell)
 
 Progress: Phases 1-24 complete (v1.0-v1.3 + Phase 23-24). v1.4: [████░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 88 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 11)
+- Total plans completed: 90 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 13)
 - Average duration: ~5 min/plan
-- Total execution time: ~27 hours
+- Total execution time: ~27.5 hours
 
 **Recent Trend:**
 - Last 5 plans: 5-15 min
@@ -83,6 +83,9 @@ Key decisions for v1.4:
 - [Phase 25-03]: Image sitemap extension included for product images (Google Image Search visibility)
 - [Phase 25-03]: Lastmod dates use actual product.date field, not current timestamp for accurate change tracking
 - [Phase 25-03]: Sitemap cache-control set to 1 hour for CDN efficiency
+- [Phase 25-04]: Client-side JS detects data-ssr flag and skips duplicate product fetching
+- [Phase 25-04]: Product data extracted from SSR DOM to populate products array
+- [Phase 25-04]: Cart page rendered as SSR shell with client-side content population
 
 ### Pending Todos
 
@@ -97,7 +100,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed 25-03-PLAN.md (XML sitemap with hreflang and images)
+Stopped at: Completed 25-04-PLAN.md (Client-side SSR awareness and cart page shell)
 Resume file: None
 
 ## Quick Tasks Completed
