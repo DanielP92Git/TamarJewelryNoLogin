@@ -37,7 +37,7 @@ const {
   renderWorkshopPage,
   renderPoliciesPage,
 } = require('./routes/ssr');
-const { renderCategoryPage } = require('./routes/ssrDynamic');
+const { renderCategoryPage, renderProductPage, renderCartPage } = require('./routes/ssrDynamic');
 const { serveSitemap } = require('./routes/sitemap');
 
 // #region agent log
@@ -1196,6 +1196,9 @@ app.get('/:lang(en|he)/policies', languageMiddleware, renderPoliciesPage);
 
 // Category pages (dynamic SSR with product grids)
 app.get('/:lang(en|he)/:category(necklaces|crochet-necklaces|hoops|dangle|bracelets|unisex)', languageMiddleware, renderCategoryPage);
+
+// Product detail pages (dynamic SSR with structured data)
+app.get('/:lang(en|he)/product/:slug', languageMiddleware, renderProductPage);
 
 // =============================================
 // Locale auto-detection (Israel => Hebrew/ILS, else English/USD)
