@@ -1,0 +1,5 @@
+<% if (schemaItems && schemaItems.length > 0) { %>
+<script type="application/ld+json">
+<%- JSON.stringify(schemaItems, null, 2) %>
+</script>
+<% } %>

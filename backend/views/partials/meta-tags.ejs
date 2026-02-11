@@ -44,6 +44,12 @@
 <meta name="twitter:description" content="<%= description %>">
 <meta name="twitter:image" content="<%= ogImage || baseUrl + '/imgs/website-images/og-default.jpg' %>">
 
+<!-- Product Open Graph Tags (for product detail pages) -->
+<% if (typeof productPrice !== 'undefined' && productPrice !== null) { %>
+<meta property="product:price:amount" content="<%= productPrice %>">
+<meta property="product:price:currency" content="<%= productCurrency %>">
+<% } %>
+
 <!-- Hreflang (bidirectional with x-default) -->
 <link rel="alternate" hreflang="en" href="<%= alternateUrl.en %>">
 <link rel="alternate" hreflang="he" href="<%= alternateUrl.he %>">
