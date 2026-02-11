@@ -1,6 +1,5 @@
 // SSR route handlers for static pages
 const metaConfig = require('../config/meta');
-const Product = require('../models/Product');
 
 /**
  * Build common pageData for SSR rendering
@@ -112,64 +111,20 @@ function renderPoliciesPage(req, res) {
 }
 
 /**
- * Render Home page with featured products from database
+ * Render Home page
  */
-async function renderHomePage(req, res) {
-  const urlLang = req.params.lang; // 'en' or 'he' from URL
-  const langKey = urlLang === 'he' ? 'heb' : 'eng'; // 'eng' or 'heb' for content
-  const dir = langKey === 'heb' ? 'rtl' : 'ltr';
-  const baseUrl = process.env.BASE_URL || 'https://tamarkfir.online';
+function renderHomePage(req, res) {
+  const pageData = buildPageData(req, 'home', [
+    { href: '/css/standard-reset.css' },
+    { href: '/css/desktop-menu.css' },
+    { href: '/css/home-mobile.css', media: '(max-width: 799.9px)' },
+    { href: '/css/home-800plus.css', media: '(min-width: 800px)' },
+    { href: '/css/footer-desktop.css', media: '(min-width: 800px)' },
+    { href: '/css/footer-mobile.css', media: '(max-width: 799.9px)' },
+    { href: '/css/mobile-menu.css', media: '(max-width: 799.9px)' },
+  ]);
 
-  const meta = metaConfig.home[langKey];
-  const title = meta.title;
-  const description = meta.description;
-
-  // Build canonical URL (home page)
-  const canonical = `${baseUrl}/${urlLang}`;
-
-  // Build alternate URLs for hreflang
-  const alternateUrl = {
-    en: `${baseUrl}/en`,
-    he: `${baseUrl}/he`,
-  };
-
-  // Fetch featured/visible products from database
-  let products = [];
-  try {
-    products = await Product.find({ available: true })
-      .sort({ displayOrder: 1 })
-      .limit(20)
-      .lean();
-  } catch (err) {
-    console.error('SSR home: failed to load products', err);
-    // Render page without products rather than crash
-  }
-
-  // Determine currency (could be from cookie in future, for now based on language)
-  const currency = langKey === 'heb' ? 'ILS' : 'USD';
-
-  res.render('pages/home', {
-    lang: langKey,
-    urlLang,
-    dir,
-    title,
-    description,
-    canonical,
-    ogImage: null, // Use default from meta-tags partial
-    baseUrl,
-    alternateUrl,
-    pageStyles: [
-      { href: '/css/standard-reset.css' },
-      { href: '/css/desktop-menu.css' },
-      { href: '/css/home-mobile.css', media: '(max-width: 799.9px)' },
-      { href: '/css/home-800plus.css', media: '(min-width: 800px)' },
-      { href: '/css/footer-desktop.css', media: '(min-width: 800px)' },
-      { href: '/css/footer-mobile.css', media: '(max-width: 799.9px)' },
-      { href: '/css/mobile-menu.css', media: '(max-width: 799.9px)' },
-    ],
-    products,
-    currency,
-  });
+  res.render('pages/home', pageData);
 }
 
 module.exports = {
