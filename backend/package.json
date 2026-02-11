@@ -20,6 +20,7 @@
     "path": "^0.12.7",
     "regenerator-runtime": "^0.14.1",
     "sharp": "^0.32.6",
+    "sitemap": "^9.0.0",
     "slugify": "^1.6.6",
     "stripe": "^16.10.0"
   },
