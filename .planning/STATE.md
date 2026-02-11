@@ -10,23 +10,23 @@ See: .planning/PROJECT.md (updated 2026-02-10)
 ## Current Position
 
 Milestone: v1.4 SEO & Marketing Foundation
-Phase: 25 of 26 (Dynamic SSR, Structured Data, and Sitemap)
-Plan: 04 of 04 (all complete)
-Status: Complete
-Last activity: 2026-02-11 — Phase 25 complete (category SSR, product pages, sitemap, SSR awareness)
+Phase: 26 of 26 (Caching, Performance & Verification)
+Plan: 01 of 04
+Status: In progress
+Last activity: 2026-02-11 — Plan 26-01 complete (cache infrastructure with node-cache)
 
-Progress: Phases 1-25 complete (v1.0-v1.3 + Phase 23-25). v1.4: [███████░░░] 70%
+Progress: Phases 1-25 complete (v1.0-v1.3 + Phase 23-25). v1.4: [████████░░] 75%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 91 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 14)
+- Total plans completed: 92 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 15)
 - Average duration: ~5 min/plan
-- Total execution time: ~28.2 hours
+- Total execution time: ~28.3 hours
 
 **Recent Trend:**
-- Last 5 plans: 6-9 min
-- Trend: Dynamic SSR and structured data (6 min for category SSR, 6 min for sitemap, 9 min for product pages, 6 min for SSR awareness)
+- Last 5 plans: 3-9 min
+- Trend: SSR and caching (6 min for sitemap, 9 min for product pages, 6 min for SSR awareness, 3 min for cache infrastructure)
 
 *Updated after v1.3 milestone completion*
 
@@ -90,6 +90,11 @@ Key decisions for v1.4:
 - [Phase 25-04]: Client-side JS detects data-ssr flag and skips duplicate product fetching
 - [Phase 25-04]: Product data extracted from SSR DOM to populate products array
 - [Phase 25-04]: Cart page rendered as SSR shell with client-side content population
+- [Phase 26-01]: Use node-cache for in-memory caching (single-server deployment on DigitalOcean)
+- [Phase 26-01]: Cache key format path:lang:currency for 4 variants (en+USD, en+ILS, he+USD, he+ILS)
+- [Phase 26-01]: stdTTL 3600s (1 hour), maxKeys 500 to prevent memory bloat (~50MB limit)
+- [Phase 26-01]: Skip cache in test environment to avoid test interference
+- [Phase 26-01]: HTTP Cache-Control with stale-while-revalidate=86400 for browser caching
 
 ### Pending Todos
 
@@ -105,7 +110,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-11
-Stopped at: Completed Phase 25 (all 4 plans — category SSR, product pages, sitemap, SSR awareness)
+Stopped at: Completed 26-01-PLAN.md (cache infrastructure with node-cache, language/currency-aware cache keys, cache middleware)
 Resume file: None
 
 ## Quick Tasks Completed
