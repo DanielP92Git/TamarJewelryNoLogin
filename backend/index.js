@@ -1111,20 +1111,21 @@ app.use(express.static(path.join(__dirname, 'public'), {
   }
 }));
 
-// Serve frontend dist (Parcel-built JS/CSS bundles)
+// Serve Parcel-built dist at /dist (legacy references)
 app.use('/dist', express.static(path.join(__dirname, '..', 'frontend', 'dist'), {
   maxAge: '7d',
-  immutable: true  // Parcel uses content hashes in filenames
+  immutable: true
+}));
+
+// Serve Parcel-built dist at root (Parcel outputs root-relative asset URLs)
+app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist'), {
+  maxAge: '7d',
+  index: false  // Don't serve index.html from dist
 }));
 
 // Serve frontend CSS (referenced by EJS templates as /css/...)
 app.use('/css', express.static(path.join(__dirname, '..', 'frontend', 'css'), {
   maxAge: '7d'
-}));
-
-// Serve frontend JS (referenced by EJS templates as /js/...)
-app.use('/js', express.static(path.join(__dirname, '..', 'frontend', 'js'), {
-  maxAge: '1d'
 }));
 
 // Serve frontend images
@@ -1149,22 +1150,6 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Temporary debug endpoint — remove after verifying DO paths
-app.get('/debug-paths', (req, res) => {
-  const fs = require('fs');
-  const dirs = {
-    __dirname,
-    cwd: process.cwd(),
-    parentExists: fs.existsSync(path.join(__dirname, '..')),
-    frontendExists: fs.existsSync(path.join(__dirname, '..', 'frontend')),
-    frontendCssExists: fs.existsSync(path.join(__dirname, '..', 'frontend', 'css')),
-    frontendJsExists: fs.existsSync(path.join(__dirname, '..', 'frontend', 'js')),
-    frontendImgsExists: fs.existsSync(path.join(__dirname, '..', 'frontend', 'imgs')),
-    frontendDistExists: fs.existsSync(path.join(__dirname, '..', 'frontend', 'dist')),
-    parentContents: fs.existsSync(path.join(__dirname, '..')) ? fs.readdirSync(path.join(__dirname, '..')) : [],
-  };
-  res.json(dirs);
-});
 
 // Provide minimal, safe config to clients (no secrets).
 app.get('/api/client-config', (req, res) => {
