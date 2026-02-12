@@ -409,15 +409,11 @@ main {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-/* .rear-image {
-  opacity: 0;
-  z-index: -1;
-} */
-
 .product-image-container {
   width: 100%;
   overflow: hidden;
   border-radius: 8px 8px 0 0;
+  position: relative;
 }
 
 .image-item {
@@ -429,20 +425,8 @@ main {
   border-radius: 8px 8px 0 0;
 }
 
-.rear-image {
-  position: absolute;
-  top: 0;
-
-  transition: all;
-  transition-duration: 800ms;
-  transition-property: all;
-}
-
 .front-image {
   margin-bottom: 1rem;
-  transition: all;
-  transition-duration: 800ms;
-  transition-property: all;
 }
 
 .item-title {

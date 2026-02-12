@@ -154,13 +154,11 @@ body#categories.crochet-necklaces header {
   width: 100%;
   overflow: hidden;
   border-radius: 8px 8px 0 0;
+  position: relative;
 }
 
 .front-image {
   width: 100%;
-  transition: all;
-  transition-duration: 800ms;
-  transition-property: all;
 }
 
 .image-item {
@@ -170,17 +168,6 @@ body#categories.crochet-necklaces header {
   margin: 0;
   display: block;
   border-radius: 8px 8px 0 0;
-}
-
-.rear-image {
-  position: absolute;
-  top: 0;
-  opacity: 0;
-  z-index: -1;
-
-  transition: all;
-  transition-duration: 800ms;
-  transition-property: all;
 }
 
 .item-price {
