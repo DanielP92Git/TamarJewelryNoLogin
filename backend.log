@@ -22015,3 +22015,659 @@ Emitted 'error' event on Server instance at:
 
 Node.js v22.15.0
 [31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:65728) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::4000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:4016:7)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 4000
+}
+
+Node.js v22.15.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:45208) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:45208) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.12
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:29944) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::4000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:4016:7)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 4000
+}
+
+Node.js v22.15.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:60916) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:60916) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:19632) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::4000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:4016:7)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 4000
+}
+
+Node.js v22.15.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:68776) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:68776) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.12
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:39052) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::4000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:4023:7)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 4000
+}
+
+Node.js v22.15.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:77828) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:77828) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.12
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:94300) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::4000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:4040:7)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 4000
+}
+
+Node.js v22.15.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:23436) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:23436) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.12
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:37828) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::4000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:4040:7)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 4000
+}
+
+Node.js v22.15.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:28856) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:28856) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.12
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:88120) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::4000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:4040:7)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 4000
+}
+
+Node.js v22.15.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:62044) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:62044) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.12
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:80392) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::4000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:4040:7)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 4000
+}
+
+Node.js v22.15.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:97232) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:97232) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.12
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:80788) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::4000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:4042:7)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 4000
+}
+
+Node.js v22.15.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:36104) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Server Running on Port 4000
+Environment Variables (dev):
+  API_URL: http://localhost:4000
+  HOST: http://localhost:1234
+  NODE_ENV: development
+(node:36104) NOTE: The AWS SDK for JavaScript (v2) has reached end-of-support.
+It will no longer receive updates or releases.
+
+Please migrate your code to use AWS SDK for JavaScript (v3).
+For more information, check the blog post at https://a.co/cUPnyil
+Initializing exchange rate...
+✓ Using stored exchange rate: 3.12
+✓ Weekly exchange rate job scheduled (runs at 2:00 AM every Sunday)
+[32m[nodemon] restarting due to changes...[39m
+[32m[nodemon] starting `node index.js`[39m
+PayPal Configuration:
+  API URL: https://api-m.sandbox.paypal.com
+  Client ID exists: true
+  Client Secret exists: true
+Allowed origins: [
+  'http://localhost:1234',
+  'http://127.0.0.1:5500',
+  'http://localhost:4000',
+  'http://localhost:5500'
+]
+(node:34288) [MONGOOSE] Warning: Duplicate schema index on {"sku":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+node:events:496
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::4000
+    at Server.setupListenHandle [as _listen2] (node:net:1939:16)
+    at listenInCluster (node:net:1996:12)
+    at Server.listen (node:net:2101:7)
+    at Function.listen (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\node_modules\express\lib\application.js:635:24)
+    at Object.<anonymous> (C:\Users\pagis\OneDrive\WebDev\Projects\Online\backend\index.js:4090:7)
+    at Module._compile (node:internal/modules/cjs/loader:1730:14)
+    at Object..js (node:internal/modules/cjs/loader:1895:10)
+    at Module.load (node:internal/modules/cjs/loader:1465:32)
+    at Function._load (node:internal/modules/cjs/loader:1282:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1975:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  code: 'EADDRINUSE',
+  errno: -4091,
+  syscall: 'listen',
+  address: '::',
+  port: 4000
+}
+
+Node.js v22.15.0
+[31m[nodemon] app crashed - waiting for file changes before starting...[39m

@@ -39,6 +39,7 @@ function buildPageData(req, pageKey, pageStyles) {
     baseUrl,
     alternateUrl,
     pageStyles,
+    googleSiteVerification: process.env.GOOGLE_SITE_VERIFICATION || '',
   };
 }
 
