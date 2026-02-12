@@ -1117,6 +1117,16 @@ app.use('/dist', express.static(path.join(__dirname, '..', 'frontend', 'dist'), 
   immutable: true  // Parcel uses content hashes in filenames
 }));
 
+// Serve frontend CSS (referenced by EJS templates as /css/...)
+app.use('/css', express.static(path.join(__dirname, '..', 'frontend', 'css'), {
+  maxAge: '7d'
+}));
+
+// Serve frontend JS (referenced by EJS templates as /js/...)
+app.use('/js', express.static(path.join(__dirname, '..', 'frontend', 'js'), {
+  maxAge: '1d'
+}));
+
 // Serve frontend images
 app.use('/imgs', express.static(path.join(__dirname, '..', 'frontend', 'imgs'), {
   maxAge: '7d'

@@ -9,7 +9,7 @@ const Product = require('../models/Product');
  */
 async function serveSitemap(req, res) {
   try {
-    const baseUrl = process.env.BASE_URL || 'https://tamarkfir.online';
+    const baseUrl = process.env.BASE_URL || 'https://tamarkfir.com';
 
     // Create sitemap stream with proper XML namespaces
     const stream = new SitemapStream({

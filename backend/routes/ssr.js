@@ -12,7 +12,7 @@ function buildPageData(req, pageKey, pageStyles) {
   const urlLang = req.params.lang; // 'en' or 'he' from URL
   const langKey = urlLang === 'he' ? 'heb' : 'eng'; // 'eng' or 'heb' for content
   const dir = langKey === 'heb' ? 'rtl' : 'ltr';
-  const baseUrl = process.env.BASE_URL || 'https://tamarkfir.online';
+  const baseUrl = process.env.BASE_URL || 'https://tamarkfir.com';
 
   const meta = metaConfig[pageKey][langKey];
   const title = meta.title;
