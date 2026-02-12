@@ -150,7 +150,6 @@ const controlCategoriesPage = async function () {
 
     // Add specific handlers for this page
     categoriesView._moveToTopHandler();
-    categoriesView._imageFlipper();
     categoriesView.stickyMenuFn();
   } catch (err) {
     console.error('Error in controlCategoriesPage:', err);

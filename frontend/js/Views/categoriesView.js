@@ -399,28 +399,6 @@ class CategoriesView extends View {
     window.addEventListener('load', handler);
   };
 
-  /**
-   * * --Image Flipper--
-   */
-  _imageFlipper() {
-    const frontImages = document.querySelectorAll('.front-image');
-    const rearImages = document.querySelectorAll('.rear-image');
-
-    frontImages.forEach(img =>
-      img.addEventListener('mouseover', function () {
-        img.style.opacity = 0;
-        rearImages.forEach(img => (img.style.opacity = 1));
-      })
-    );
-
-    frontImages.forEach(img =>
-      img.addEventListener('mouseleave', function () {
-        img.style.opacity = 1;
-        rearImages.forEach(img => (img.style.opacity = 0));
-      })
-    );
-  }
-
   //////////////////////////////////////////////////
 
   addHandlerAddToCart() {
