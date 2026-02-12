@@ -114,3 +114,34 @@
 **What's next:** TBD - planning next milestone (/gsd:new-milestone)
 
 ---
+
+## v1.4 SEO & Marketing Foundation (Shipped: 2026-02-12)
+
+**Delivered:** Complete SEO foundation with server-side rendering, structured data, clean bilingual URLs, and performance caching — making the store discoverable by search engines and shareable on social platforms.
+
+**Phases completed:** 23-26 (18 plans total)
+
+**Key accomplishments:**
+
+- Server-side rendering for all pages (home, categories, products, about, contact, workshop, policies) with EJS templates producing identical HTML to client-side output
+- Bilingual URL routing (/en/, /he/) with GeoIP-based language detection, cookie persistence, and 301 redirects for legacy .html paths
+- Complete SEO metadata on every page: unique titles, meta descriptions, canonical URLs, Open Graph tags, Twitter Cards, and hreflang alternates (including x-default)
+- JSON-LD structured data (Product, BreadcrumbList, Organization) for Google rich results on all relevant pages
+- Dynamic XML sitemap with hreflang alternates, image entries, and accurate lastmod dates from MongoDB
+- In-memory page caching (node-cache) with language/currency-aware keys, cache invalidation on product changes, and HTTP Cache-Control headers with stale-while-revalidate
+- Deployment merged from 2 DigitalOcean App Platform components to 1 unified Express service
+- 866 tests passing with zero regressions after all SSR changes
+
+**Stats:**
+
+- 59 code files created/modified (~3,857 lines added, ~266 removed)
+- 73 commits
+- 4 phases, 18 plans, 49 requirements (48 fully satisfied, 1 partial)
+- 3 days from planning to completion (2026-02-10 → 2026-02-12)
+
+**Git range:** `chore(23-01)` → `docs(phase-26)`
+
+**What's next:** TBD - planning next milestone (/gsd:new-milestone)
+
+---
+
