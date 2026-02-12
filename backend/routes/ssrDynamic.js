@@ -5,15 +5,24 @@ const { generateProductSchema, generateBreadcrumbSchema } = require('../helpers/
 const metaConfig = require('../config/meta');
 const { categoryDisplayNames } = metaConfig;
 
+// Base CSS for error/404 pages (header + footer styling)
+const ERROR_PAGE_STYLES = [
+  { href: '/css/standard-reset.css' },
+  { href: '/css/desktop-menu.css' },
+  { href: '/css/footer-desktop.css', media: '(min-width: 800px)' },
+  { href: '/css/footer-mobile.css', media: '(max-width: 799.9px)' },
+  { href: '/css/mobile-menu.css', media: '(max-width: 799.9px)' },
+];
+
 /**
  * Map URL slugs to MongoDB category field values
  * URL slugs use hyphens, MongoDB uses camelCase for some categories
  */
 const URL_TO_DB_CATEGORY = {
   'necklaces': 'necklaces',
-  'crochet-necklaces': 'crochetNecklaces',
-  'hoops': 'hoops',
-  'dangle': 'dangle',
+  'crochet-necklaces': 'crochet-necklaces',
+  'hoops': 'hoop-earrings',
+  'dangle': 'dangle-earrings',
   'bracelets': 'bracelets',
   'unisex': 'unisex',
 };
@@ -24,9 +33,9 @@ const URL_TO_DB_CATEGORY = {
  */
 const DB_TO_URL_CATEGORY = {
   'necklaces': 'necklaces',
-  'crochetNecklaces': 'crochet-necklaces',
-  'hoops': 'hoops',
-  'dangle': 'dangle',
+  'crochet-necklaces': 'crochet-necklaces',
+  'hoop-earrings': 'hoops',
+  'dangle-earrings': 'dangle',
   'bracelets': 'bracelets',
   'unisex': 'unisex',
 };
@@ -45,16 +54,17 @@ async function renderCategoryPage(req, res) {
   try {
     // Validate category slug
     if (!URL_TO_DB_CATEGORY[category]) {
-      return res.status(404).render('pages/404', buildPageData(req, '404', []));
+      return res.status(404).render('pages/404', buildPageData(req, '404', ERROR_PAGE_STYLES));
     }
 
     // Map URL slug to MongoDB category value
     const dbCategory = URL_TO_DB_CATEGORY[category];
 
     // Query products for this category
+    // Use $ne: false to match products where available is true OR undefined (matching SPA behavior)
     const products = await Product.find({
       category: dbCategory,
-      available: true,
+      available: { $ne: false },
     })
       .sort({ displayOrder: 1 })
       .limit(20)
@@ -63,7 +73,7 @@ async function renderCategoryPage(req, res) {
 
     // If no products found, return 404
     if (!products || products.length === 0) {
-      return res.status(404).render('pages/404', buildPageData(req, '404', []));
+      return res.status(404).render('pages/404', buildPageData(req, '404', ERROR_PAGE_STYLES));
     }
 
     // Build page data
@@ -86,7 +96,8 @@ async function renderCategoryPage(req, res) {
     };
 
     // Add category-specific data
-    pageData.category = category; // URL slug
+    pageData.category = category; // URL slug (for CSS class targeting)
+    pageData.dbCategory = dbCategory; // DB category value (camelCase, for SPA JS API calls)
     pageData.categoryDisplayName = categoryDisplayNames[category]?.[langKey] || category;
     pageData.products = products;
     pageData.ssrFlag = true;
@@ -111,7 +122,7 @@ async function renderCategoryPage(req, res) {
     res.render('pages/category', pageData);
   } catch (err) {
     console.error('Category SSR error:', err);
-    res.status(500).render('pages/error', buildPageData(req, 'error', []));
+    res.status(500).render('pages/error', buildPageData(req, 'error', ERROR_PAGE_STYLES));
   }
 }
 
@@ -128,14 +139,15 @@ async function renderProductPage(req, res) {
 
   try {
     // Query product by slug
+    // Use $ne: false to match products where available is true OR undefined (matching SPA behavior)
     const product = await Product.findOne({
       slug: slug,
-      available: true,
+      available: { $ne: false },
     }).lean();
 
     // If product not found, return 404
     if (!product) {
-      return res.status(404).render('pages/404', buildPageData(req, '404', []));
+      return res.status(404).render('pages/404', buildPageData(req, '404', ERROR_PAGE_STYLES));
     }
 
     // Determine currency and price
@@ -223,7 +235,7 @@ async function renderProductPage(req, res) {
     res.render('pages/product', pageData);
   } catch (err) {
     console.error('Product SSR error:', err);
-    res.status(500).render('pages/error', buildPageData(req, 'error', []));
+    res.status(500).render('pages/error', buildPageData(req, 'error', ERROR_PAGE_STYLES));
   }
 }
 
@@ -249,7 +261,7 @@ function renderCartPage(req, res) {
     res.render('pages/cart', pageData);
   } catch (err) {
     console.error('Cart SSR error:', err);
-    res.status(500).render('pages/error', buildPageData(req, 'error', []));
+    res.status(500).render('pages/error', buildPageData(req, 'error', ERROR_PAGE_STYLES));
   }
 }
 

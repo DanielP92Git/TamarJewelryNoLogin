@@ -195,7 +195,8 @@ for (const distPath of distIndexPaths) {
     const distHtml = fs.readFileSync(distPath, 'utf-8');
     const importMapMatch = distHtml.match(/<script type="importmap">[\s\S]*?<\/script>/);
     const bundleMatch = distHtml.match(/<script type="module" src="[^"]*" defer(?:="")?\s*><\/script>/);
-    bundleScripts = (importMapMatch ? importMapMatch[0] : '') + (bundleMatch ? bundleMatch[0] : '');
+    const nomoduleMatch = distHtml.match(/<script src="[^"]*" defer(?:="")? nomodule\s*><\/script>/);
+    bundleScripts = (importMapMatch ? importMapMatch[0] : '') + (bundleMatch ? bundleMatch[0] : '') + (nomoduleMatch ? nomoduleMatch[0] : '');
     break;
   }
 }
