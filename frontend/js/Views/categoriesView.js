@@ -186,10 +186,12 @@ class CategoriesView extends View {
     this.initialSetup();
     this.initialized = true;
 
-    // Force a products fetch to be sure
-    setTimeout(() => {
-      this.fetchProductsByCategory();
-    }, 500);
+    // Force a products fetch only if SSR didn't already render them
+    if (!this.ssrRendered) {
+      setTimeout(() => {
+        this.fetchProductsByCategory();
+      }, 500);
+    }
   }
 
   // New method to check if we're on a categories page and initialize if needed
