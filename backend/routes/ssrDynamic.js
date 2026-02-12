@@ -196,6 +196,7 @@ async function renderProductPage(req, res) {
       categoryDisplayName: categoryDisplayNames[DB_TO_URL_CATEGORY[product.category]]?.[langKey] || product.category,
       categorySlug: DB_TO_URL_CATEGORY[product.category] || product.category,
       ssrFlag: true,
+      googleSiteVerification: process.env.GOOGLE_SITE_VERIFICATION || '',
     };
 
     // Generate single product schema
