@@ -251,8 +251,8 @@ function renderCartPage(req, res) {
     const pageData = buildPageData(req, 'cart', [
       { href: '/css/standard-reset.css' },
       { href: '/css/desktop-menu.css' },
-      { href: '/css/cart-devices.css', media: '(max-width: 799.9px)' },
-      { href: '/css/cart-800plus.css', media: '(min-width: 800px)' },
+      { href: '/css/cart-devices.css', media: '(max-width: 699.9px)' },
+      { href: '/css/cart-800plus.css', media: '(min-width: 700px)' },
       { href: '/css/footer-desktop.css', media: '(min-width: 800px)' },
       { href: '/css/footer-mobile.css', media: '(max-width: 799.9px)' },
       { href: '/css/mobile-menu.css', media: '(max-width: 799.9px)' },
