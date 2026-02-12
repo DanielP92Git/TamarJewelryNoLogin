@@ -6,7 +6,7 @@
 - ✅ **v1.1 Admin Product Management UX** — Phases 4-9 (shipped 2026-02-04) — [archive](.planning/milestones/v1.1-ROADMAP.md)
 - ✅ **v1.2 Test Infrastructure & Critical Coverage** — Phases 10-16 (shipped 2026-02-06) — [archive](.planning/milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 Frontend Testing** — Phases 17-22 (shipped 2026-02-09) — [archive](.planning/milestones/v1.3-ROADMAP.md)
-- 🚧 **v1.4 SEO & Marketing Foundation** — Phases 23-26 (in progress)
+- ✅ **v1.4 SEO & Marketing Foundation** — Phases 23-26 (shipped 2026-02-12)
 
 ## Phases
 
@@ -205,7 +205,7 @@ See [v1.3-ROADMAP.md](.planning/milestones/v1.3-ROADMAP.md) for full phase detai
 - [x] **Phase 23: Foundation & Infrastructure** — EJS engine, slug system, bilingual routing, legacy redirects, robots.txt (completed 2026-02-10)
 - [x] **Phase 24: Static Page SSR + Meta Tags + Deployment Merge** — Home/about/contact SSR, meta/OG tags, hreflang, Organization schema, deployment unification (completed 2026-02-11)
 - [x] **Phase 25: Dynamic SSR + Structured Data + Sitemap** — Category pages, product detail pages (new), client-side SSR awareness, Product/Breadcrumb schema, XML sitemap (completed 2026-02-11)
-- [ ] **Phase 26: Caching, Performance & Verification** — SSR cache layer, HTTP cache headers, Google Search Console, structured data validation, test regression
+- [x] **Phase 26: Caching, Performance & Verification** — SSR cache layer, HTTP cache headers, Google Search Console, structured data validation, test regression (completed 2026-02-12)
 
 ## Phase Details
 
@@ -278,10 +278,10 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 26-01-PLAN.md — Cache infrastructure: node-cache, cache keys, cache middleware with HTTP headers
-- [ ] 26-02-PLAN.md — Cache invalidation and SSR route integration
-- [ ] 26-03-PLAN.md — Google Fonts display=swap verification and Search Console meta tag
-- [ ] 26-04-PLAN.md — Test regression verification and human verification checkpoint
+- [x] 26-01-PLAN.md — Cache infrastructure: node-cache, cache keys, cache middleware with HTTP headers
+- [x] 26-02-PLAN.md — Cache invalidation and SSR route integration
+- [x] 26-03-PLAN.md — Google Fonts display=swap verification and Search Console meta tag
+- [x] 26-04-PLAN.md — Test regression verification and human verification checkpoint
 
 ## Progress
 
@@ -292,4 +292,4 @@ Plans:
 | 23. Foundation & Infrastructure | v1.4 | 5/5 | ✓ Complete | 2026-02-10 |
 | 24. Static Page SSR + Meta + Deploy | v1.4 | 5/5 | ✓ Complete | 2026-02-11 |
 | 25. Dynamic SSR + Schema + Sitemap | v1.4 | 4/4 | ✓ Complete | 2026-02-11 |
-| 26. Caching, Perf & Verification | v1.4 | 0/4 | Not started | - |
+| 26. Caching, Perf & Verification | v1.4 | 4/4 | ✓ Complete | 2026-02-12 |
