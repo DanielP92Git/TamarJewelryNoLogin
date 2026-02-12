@@ -117,8 +117,8 @@ const controlPoliciesPage = async function (lng) {
 const controlCategoriesPage = async function () {
   try {
     const body = document.querySelector('body');
-    // Get category from class instead of ID
-    const categoryName = body.className;
+    // Prefer data-category (DB value) for API calls, fall back to className
+    const categoryName = body.dataset.category || body.className;
     const categoryNameHebrew = body.dataset.hebrew;
     const parentElement = document.querySelector('.parent-element');
 
@@ -228,8 +228,8 @@ const init = async function () {
   if (document.body.id.includes('categories')) {
     // Direct initialization approach
     const body = document.querySelector('body');
-    // Get category from class instead of ID parts
-    const categoryName = body.className;
+    // Prefer data-category (DB value) for API calls, fall back to className
+    const categoryName = body.dataset.category || body.className;
     const categoryNameHebrew = body.dataset.hebrew;
 
     // Force immediate initialization regardless of document ready state

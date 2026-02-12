@@ -3,6 +3,9 @@
   <head>
     <%- include('../partials/meta-tags', { title, description, canonical, ogImage, lang, urlLang, alternateUrl, baseUrl, pageStyles }) %>
 
+    <!-- PayPal SDK (must load statically for document.currentScript support) -->
+    <script class="paypal-script" src="https://www.paypal.com/sdk/js?client-id=AQ_Op8cY6HHktDWw0X4y73ydkfGKeN-Tm3T20iWIDPIo4M7OpehX2QYZD0_gpDgtg7RkdRKL51foMNP7&currency=USD&components=buttons"></script>
+
     <%- bundleScripts %>
     <!-- Microsoft Clarity -->
     <script type="text/javascript">

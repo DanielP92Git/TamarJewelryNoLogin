@@ -510,7 +510,7 @@ class CartView extends View {
 
     // Create new script element
     let paypalScript = document.createElement('script');
-    paypalScript.src = `https://www.paypal.com/sdk/js?client-id=AQ_Op8cY6HHktDWw0X4y73ydkfGKeN-Tm3T20iWIDPIo4M7OpehX2QYZD0_gpDgtg7RkdRKL51foMNP7&currency=${currencyVariable}`;
+    paypalScript.src = `https://www.paypal.com/sdk/js?client-id=AQ_Op8cY6HHktDWw0X4y73ydkfGKeN-Tm3T20iWIDPIo4M7OpehX2QYZD0_gpDgtg7RkdRKL51foMNP7&currency=${currencyVariable}&components=buttons`;
     paypalScript.async = true;
     paypalScript.className = 'paypal-script';
 
