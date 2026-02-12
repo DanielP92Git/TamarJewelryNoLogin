@@ -40,7 +40,7 @@ async function renderCategoryPage(req, res) {
   const { lang, category } = req.params; // e.g., /en/necklaces
   const langKey = lang === 'he' ? 'heb' : 'eng';
   const urlLang = lang;
-  const baseUrl = process.env.BASE_URL || 'https://tamarkfir.online';
+  const baseUrl = process.env.BASE_URL || 'https://tamarkfir.com';
 
   try {
     // Validate category slug
@@ -58,7 +58,7 @@ async function renderCategoryPage(req, res) {
     })
       .sort({ displayOrder: 1 })
       .limit(20)
-      .select('id name slug images mainImage description quantity ils_price usd_price category sku discount_percentage original_ils_price original_usd_price')
+      .select('id name slug image publicImage images mainImage description quantity ils_price usd_price category sku discount_percentage original_ils_price original_usd_price')
       .lean();
 
     // If no products found, return 404
@@ -124,7 +124,7 @@ async function renderProductPage(req, res) {
   const { lang, slug } = req.params; // e.g., /en/product/handmade-necklace
   const langKey = lang === 'he' ? 'heb' : 'eng';
   const urlLang = lang;
-  const baseUrl = process.env.BASE_URL || 'https://tamarkfir.online';
+  const baseUrl = process.env.BASE_URL || 'https://tamarkfir.com';
 
   try {
     // Query product by slug
@@ -151,9 +151,12 @@ async function renderProductPage(req, res) {
       : `View ${product.name} at Tamar Kfir Jewelry. Handmade with love in Jerusalem.`;
 
     // Get product image for OG tags
-    const ogImage = product.images?.[0]?.publicDesktop
-      || product.mainImage?.publicDesktop
-      || null;
+    const mainImg = (Array.isArray(product.images) && product.images.length > 0)
+      ? product.images[0]
+      : product.mainImage;
+    const ogImage = (mainImg && typeof mainImg === 'object')
+      ? (mainImg.publicDesktop || mainImg.desktop || mainImg.publicMobile || mainImg.mobile || null)
+      : (product.publicImage || product.image || null);
 
     // Build page data manually (not using buildPageData since we need dynamic product title/description)
     const dir = langKey === 'heb' ? 'rtl' : 'ltr';

@@ -8,7 +8,12 @@
  * @returns {Object} Product schema JSON-LD object
  */
 function generateProductSchema(product, langKey, baseUrl) {
-  const image = product.images?.[0]?.publicDesktop || product.mainImage?.publicDesktop || '';
+  const mainImg = (Array.isArray(product.images) && product.images.length > 0)
+    ? product.images[0]
+    : product.mainImage;
+  const image = (mainImg && typeof mainImg === 'object')
+    ? (mainImg.publicDesktop || mainImg.desktop || mainImg.publicMobile || mainImg.mobile || '')
+    : (product.publicImage || product.image || '');
   const price = langKey === 'heb' ? product.ils_price : product.usd_price;
   const currency = langKey === 'heb' ? 'ILS' : 'USD';
   const urlLang = langKey === 'heb' ? 'he' : 'en';
@@ -20,7 +25,6 @@ function generateProductSchema(product, langKey, baseUrl) {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
-    image: image,
     description: product.description || '',
     offers: {
       '@type': 'Offer',
@@ -30,6 +34,11 @@ function generateProductSchema(product, langKey, baseUrl) {
       availability: availability,
     },
   };
+
+  // Only include image if a valid URL exists
+  if (image) {
+    schema.image = image;
+  }
 
   // Only include SKU if it has a value
   if (product.sku && product.sku.trim() !== '') {
