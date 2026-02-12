@@ -27,28 +27,45 @@
   <body id="cart">
     <%- include('../partials/header', { lang, dir, urlLang }) %>
 
-    <main>
+    <main class="cart-page">
       <div class="whatsapp-container">
         <a href="https://wa.me/972524484763" class="whatsapp-atr"
           ><img src="/imgs/svgs/whatsapp.svg" class="whatsapp-svg" alt=""
         /></a>
       </div>
 
-      <!-- Cart content containers - populated by client-side JavaScript -->
-      <section class="cart-section">
-        <div class="cart-empty"></div>
-        <div class="cart-title"></div>
-        <div class="cart-items-container"></div>
-        <div class="added-items"></div>
-        <div class="summary">
-          <div class="summary-title"></div>
-          <div class="summary-details"></div>
-          <button class="delete-all"></button>
-          <button class="check-me-out"></button>
-          <div id="stripe-checkout-btn"></div>
-          <div id="paypal"></div>
+      <!-- Cart content - populated by client-side JavaScript -->
+      <div class="cart-shell">
+        <h1 class="cart-page-title cart-title"><%= lang === 'heb' ? 'העגלה שלך' : 'Your Cart' %></h1>
+        <h2 class="cart-empty"><%= lang === 'heb' ? 'העגלה שלך ריקה' : 'Your cart is empty' %></h2>
+        <div class="cart-layout">
+          <section class="cart-items-container" aria-label="Cart items">
+            <div class="added-items" data-purpose="cart-items"></div>
+            <button class="delete-all" type="button"><%= lang === 'heb' ? 'מחק הכל' : 'Delete All' %></button>
+          </section>
+          <aside class="summary summary-container" aria-label="Order summary">
+            <div class="summary-title"><%= lang === 'heb' ? 'סיכום הזמנה' : 'Order Summary' %></div>
+            <div class="summary-details"></div>
+            <div class="checkout-btns-container">
+              <p class="check-me-out"><%= lang === 'heb' ? 'לתשלום עם:' : 'Check Me Out With:' %></p>
+              <button type="button" class="stripe-checkout-btn" id="stripe-checkout-btn">
+                <span class="stripe-checkout-main">
+                  <span class="stripe-checkout-text"><%= lang === 'heb' ? 'תשלום מאובטח בכרטיס' : 'Pay securely with card' %></span>
+                </span>
+                <span class="stripe-powered-by" dir="ltr">
+                  <span class="stripe-powered-by-label">Powered by</span>
+                  <span class="stripe-logo-text" aria-label="Stripe">Stripe</span>
+                </span>
+              </button>
+              <p class="stripe-trust-copy">
+                <%= lang === 'heb' ? 'תשלומי כרטיס מעובדים באופן מאובטח על ידי Stripe.' : 'Card payments are processed securely by Stripe.' %>
+              </p>
+              <div id="paypal"></div>
+            </div>
+          </aside>
         </div>
-      </section>
+        <div class="result-message"></div>
+      </div>
 
       <button class="go-to-top">
         <img
