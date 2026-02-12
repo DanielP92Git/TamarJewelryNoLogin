@@ -183,6 +183,25 @@ if (process.env.NODE_ENV === 'production') {
   app.set('view cache', true);
 }
 
+// Extract Parcel bundle script tags from dist/index.html for EJS templates
+// Parcel outputs content-hashed filenames, so we read them dynamically at startup
+let bundleScripts = '';
+const distIndexPaths = [
+  path.join(__dirname, 'public', 'index.html'),      // DO production (copied by build)
+  path.join(__dirname, '..', 'frontend', 'dist', 'index.html'), // Local development
+];
+for (const distPath of distIndexPaths) {
+  if (fs.existsSync(distPath)) {
+    const distHtml = fs.readFileSync(distPath, 'utf-8');
+    const importMapMatch = distHtml.match(/<script type="importmap">[\s\S]*?<\/script>/);
+    const bundleMatch = distHtml.match(/<script type="module" src="[^"]*" defer(?:="")?\s*><\/script>/);
+    bundleScripts = (importMapMatch ? importMapMatch[0] : '') + (bundleMatch ? bundleMatch[0] : '');
+    break;
+  }
+}
+// Make bundleScripts available to all EJS templates
+app.locals.bundleScripts = bundleScripts;
+
 // #region agent log
 // Request-level probe for upload/addproduct issues (CORS/network vs route failures)
 app.use((req, res, next) => {
