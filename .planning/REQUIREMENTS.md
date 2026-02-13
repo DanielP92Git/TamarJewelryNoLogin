@@ -81,37 +81,37 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCHEMA-01 | — | Pending |
-| SCHEMA-02 | — | Pending |
-| SCHEMA-03 | — | Pending |
-| SCHEMA-04 | — | Pending |
-| TRANS-01 | — | Pending |
-| TRANS-02 | — | Pending |
-| TRANS-03 | — | Pending |
-| TRANS-04 | — | Pending |
-| TRANS-05 | — | Pending |
-| ADMIN-01 | — | Pending |
-| ADMIN-02 | — | Pending |
-| ADMIN-03 | — | Pending |
-| ADMIN-04 | — | Pending |
-| ADMIN-05 | — | Pending |
-| ADMIN-06 | — | Pending |
-| DISP-01 | — | Pending |
-| DISP-02 | — | Pending |
-| DISP-03 | — | Pending |
-| DISP-04 | — | Pending |
-| DISP-05 | — | Pending |
-| DISP-06 | — | Pending |
-| DISP-07 | — | Pending |
-| CACHE-01 | — | Pending |
-| CACHE-02 | — | Pending |
-| CACHE-03 | — | Pending |
+| SCHEMA-01 | Phase 27 | Pending |
+| SCHEMA-02 | Phase 27 | Pending |
+| SCHEMA-03 | Phase 27 | Pending |
+| SCHEMA-04 | Phase 27 | Pending |
+| TRANS-01 | Phase 28 | Pending |
+| TRANS-02 | Phase 28 | Pending |
+| TRANS-03 | Phase 28 | Pending |
+| TRANS-04 | Phase 28 | Pending |
+| TRANS-05 | Phase 28 | Pending |
+| ADMIN-01 | Phase 29 | Pending |
+| ADMIN-02 | Phase 29 | Pending |
+| ADMIN-03 | Phase 29 | Pending |
+| ADMIN-04 | Phase 29 | Pending |
+| ADMIN-05 | Phase 32 | Pending |
+| ADMIN-06 | Phase 32 | Pending |
+| DISP-01 | Phase 30 | Pending |
+| DISP-02 | Phase 30 | Pending |
+| DISP-03 | Phase 30 | Pending |
+| DISP-04 | Phase 30 | Pending |
+| DISP-05 | Phase 30 | Pending |
+| DISP-06 | Phase 30 | Pending |
+| DISP-07 | Phase 30 | Pending |
+| CACHE-01 | Phase 31 | Pending |
+| CACHE-02 | Phase 31 | Pending |
+| CACHE-03 | Phase 31 | Pending |
 
 **Coverage:**
 - v1.5 requirements: 25 total
-- Mapped to phases: 0
-- Unmapped: 25
+- Mapped to phases: 25
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-13*
-*Last updated: 2026-02-13 after initial definition*
+*Last updated: 2026-02-13 after roadmap creation*

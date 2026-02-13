@@ -7,6 +7,7 @@
 - ✅ **v1.2 Test Infrastructure & Critical Coverage** — Phases 10-16 (shipped 2026-02-06) — [archive](.planning/milestones/v1.2-ROADMAP.md)
 - ✅ **v1.3 Frontend Testing** — Phases 17-22 (shipped 2026-02-09) — [archive](.planning/milestones/v1.3-ROADMAP.md)
 - ✅ **v1.4 SEO & Marketing Foundation** — Phases 23-26 (shipped 2026-02-12) — [archive](.planning/milestones/v1.4-ROADMAP.md)
+- 🚧 **v1.5 Bilingual Product Content** — Phases 27-32 (in progress)
 
 ## Phases
 
@@ -209,3 +210,127 @@ See [v1.3-ROADMAP.md](.planning/milestones/v1.3-ROADMAP.md) for full phase detai
 See [v1.4-ROADMAP.md](.planning/milestones/v1.4-ROADMAP.md) for full phase details.
 
 </details>
+
+### 🚧 v1.5 Bilingual Product Content (In Progress)
+
+**Milestone Goal:** Enable true bilingual product content with automated Google Cloud Translation, so Hebrew and English visitors each see product names and descriptions in their language.
+
+#### Phase 27: Schema Migration & Foundation
+**Goal**: Product database supports bilingual fields with backward compatibility
+**Depends on**: Phase 26
+**Requirements**: SCHEMA-01, SCHEMA-02, SCHEMA-03, SCHEMA-04
+**Success Criteria** (what must be TRUE):
+  1. Product schema has separate Hebrew and English fields for name and description
+  2. Existing products migrated with English data populating name_en/description_en fields
+  3. Legacy name/description fields still work for backward compatibility
+  4. Cart handles transition from single-language to bilingual product names gracefully
+  5. Migration script is idempotent and can run multiple times safely
+**Plans**: TBD
+
+Plans:
+- [ ] 27-01: TBD
+- [ ] 27-02: TBD
+
+#### Phase 28: Translation Service Integration
+**Goal**: Backend can translate product content on demand using Google Cloud Translation API
+**Depends on**: Phase 27
+**Requirements**: TRANS-01, TRANS-02, TRANS-03, TRANS-04, TRANS-05
+**Success Criteria** (what must be TRUE):
+  1. Translation service integrates Google Cloud Translation API v3 with service account authentication
+  2. Backend endpoint (POST /admin/translate) accepts Hebrew or English text and returns translation
+  3. Translation results cached in memory to reduce API costs
+  4. Translation errors handled gracefully so admin can still save product with manual entry
+  5. Bulk operations use batching with delays to respect API rate limits
+**Plans**: TBD
+
+Plans:
+- [ ] 28-01: TBD
+- [ ] 28-02: TBD
+
+#### Phase 29: Admin UI & Translation Workflow
+**Goal**: Admin can create and edit bilingual products with automated translation assistance
+**Depends on**: Phase 28
+**Requirements**: ADMIN-01, ADMIN-02, ADMIN-03, ADMIN-04
+**Success Criteria** (what must be TRUE):
+  1. Product form shows side-by-side Hebrew and English text fields for name and description
+  2. "Translate" button translates content between languages on demand
+  3. Admin can manually edit translated text before saving
+  4. Product list shows translation status indicators (translated / needs translation)
+  5. Form validation clearly indicates which fields are required
+**Plans**: TBD
+
+Plans:
+- [ ] 29-01: TBD
+- [ ] 29-02: TBD
+
+#### Phase 30: Frontend Display & SSR Updates
+**Goal**: Customers see product content in their language on all pages
+**Depends on**: Phase 29
+**Requirements**: DISP-01, DISP-02, DISP-03, DISP-04, DISP-05, DISP-06, DISP-07
+**Success Criteria** (what must be TRUE):
+  1. SSR product pages show correct language name/description based on URL (/en/ or /he/)
+  2. SSR category pages show correct language for all product cards
+  3. Client-side views display correct language matching SSR logic
+  4. Cart displays product names in user's current language
+  5. Graceful fallback to English when Hebrew translation is missing
+  6. JSON-LD structured data uses language-specific content with inLanguage property
+  7. OG meta tags use localized product descriptions for social sharing
+**Plans**: TBD
+
+Plans:
+- [ ] 30-01: TBD
+- [ ] 30-02: TBD
+- [ ] 30-03: TBD
+
+#### Phase 31: Cache Invalidation & SEO Polish
+**Goal**: Cache system properly handles bilingual content and SEO remains strong
+**Depends on**: Phase 30
+**Requirements**: CACHE-01, CACHE-02, CACHE-03
+**Success Criteria** (what must be TRUE):
+  1. Product update clears cached pages for both /en/ and /he/ variants
+  2. Bulk translation triggers cache invalidation for all affected products
+  3. Category cache cleared when products in that category are translated
+  4. Hreflang tags point to pages with actually different content (verified)
+  5. Performance testing shows cache hit rate remains high after bilingual changes
+**Plans**: TBD
+
+Plans:
+- [ ] 31-01: TBD
+- [ ] 31-02: TBD
+
+#### Phase 32: Bulk Translation & Migration Tooling
+**Goal**: Admin can translate all existing products efficiently in bulk
+**Depends on**: Phase 31
+**Requirements**: ADMIN-05, ADMIN-06
+**Success Criteria** (what must be TRUE):
+  1. Bulk translate tool translates multiple products at once without blocking admin UI
+  2. Progress indicator shows translation status ("Translating 47/94 products...")
+  3. Tool handles API rate limits with batching and delays
+  4. Failed translations can be retried without re-translating successful ones
+  5. Admin notified when bulk translation completes
+**Plans**: TBD
+
+Plans:
+- [ ] 32-01: TBD
+
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 27 → 28 → 29 → 30 → 31 → 32
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1-3. SKU Management | v1.0 | Complete | Complete | 2026-02-01 |
+| 4-9. Admin UX | v1.1 | Complete | Complete | 2026-02-04 |
+| 10-16. Test Infrastructure | v1.2 | Complete | Complete | 2026-02-06 |
+| 17-22. Frontend Testing | v1.3 | Complete | Complete | 2026-02-09 |
+| 23-26. SEO & Marketing | v1.4 | Complete | Complete | 2026-02-12 |
+| 27. Schema Migration | v1.5 | 0/TBD | Not started | - |
+| 28. Translation Service | v1.5 | 0/TBD | Not started | - |
+| 29. Admin UI | v1.5 | 0/TBD | Not started | - |
+| 30. Frontend Display | v1.5 | 0/TBD | Not started | - |
+| 31. Cache & SEO | v1.5 | 0/TBD | Not started | - |
+| 32. Bulk Translation | v1.5 | 0/TBD | Not started | - |
+
+---
+*Last updated: 2026-02-13 after v1.5 roadmap creation*

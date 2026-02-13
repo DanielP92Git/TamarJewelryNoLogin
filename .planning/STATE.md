@@ -2,7 +2,7 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-12)
+See: .planning/PROJECT.md (updated 2026-02-13)
 
 **Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers
 **Current focus:** v1.5 Bilingual Product Content
@@ -10,12 +10,12 @@ See: .planning/PROJECT.md (updated 2026-02-12)
 ## Current Position
 
 Milestone: v1.5 Bilingual Product Content
-Phase: Not started (defining requirements)
+Phase: 27 of 32 (Schema Migration & Foundation)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-02-13 — Milestone v1.5 started
+Status: Ready to plan
+Last activity: 2026-02-13 — v1.5 roadmap created
 
-Progress: v1.0-v1.4 complete. 5 milestones shipped.
+Progress: [████████████░░░░░░░░] 26/32 phases complete (81% of total phases)
 
 ## Performance Metrics
 
@@ -31,7 +31,13 @@ Progress: v1.0-v1.4 complete. 5 milestones shipped.
 
 ### Decisions
 
-All milestone decisions are logged in PROJECT.md Key Decisions table and phase summaries. See milestone archives in `.planning/milestones/` for detailed decision history.
+All milestone decisions are logged in PROJECT.md Key Decisions table and phase summaries. Recent decisions affecting v1.5:
+
+- Google Cloud Translation API v3 for product translation (purpose-built, free tier)
+- Bilingual schema with separate fields per language (cleaner than embedded objects)
+- English-only slugs for both languages (consistent with current v1.4 approach)
+
+See milestone archives in `.planning/milestones/` for detailed decision history.
 
 ### Pending Todos
 
@@ -46,8 +52,8 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-12
-Stopped at: v1.4 milestone completed and archived
+Last session: 2026-02-13
+Stopped at: v1.5 roadmap created (6 phases, 25 requirements)
 Resume file: None
 
 ## Quick Tasks Completed
