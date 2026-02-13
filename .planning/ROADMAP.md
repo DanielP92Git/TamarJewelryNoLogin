@@ -225,11 +225,11 @@ See [v1.4-ROADMAP.md](.planning/milestones/v1.4-ROADMAP.md) for full phase detai
   3. Legacy name/description fields still work for backward compatibility
   4. Cart handles transition from single-language to bilingual product names gracefully
   5. Migration script is idempotent and can run multiple times safely
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 27-01: TBD
-- [ ] 27-02: TBD
+- [ ] 27-01-PLAN.md — Schema update + migration script (bilingual fields, idempotent migration)
+- [ ] 27-02-PLAN.md — Backend API compatibility + cart transition handling
 
 #### Phase 28: Translation Service Integration
 **Goal**: Backend can translate product content on demand using Google Cloud Translation API
@@ -325,7 +325,7 @@ Phases execute in numeric order: 27 → 28 → 29 → 30 → 31 → 32
 | 10-16. Test Infrastructure | v1.2 | Complete | Complete | 2026-02-06 |
 | 17-22. Frontend Testing | v1.3 | Complete | Complete | 2026-02-09 |
 | 23-26. SEO & Marketing | v1.4 | Complete | Complete | 2026-02-12 |
-| 27. Schema Migration | v1.5 | 0/TBD | Not started | - |
+| 27. Schema Migration | v1.5 | 0/2 | Planned | - |
 | 28. Translation Service | v1.5 | 0/TBD | Not started | - |
 | 29. Admin UI | v1.5 | 0/TBD | Not started | - |
 | 30. Frontend Display | v1.5 | 0/TBD | Not started | - |
