@@ -1,555 +1,384 @@
 # Pitfalls Research
 
-**Domain:** Frontend Testing for Vanilla JavaScript MVC E-commerce Application
-**Researched:** 2026-02-06
+**Domain:** Adding bilingual product content (name/description) to existing e-commerce platform
+**Researched:** 2026-02-13
 **Confidence:** HIGH
 
 ## Critical Pitfalls
 
-### Pitfall 1: localStorage State Pollution Between Tests
+### Pitfall 1: Stale Cart Data with Denormalized Product Names
 
 **What goes wrong:**
-Tests share localStorage state across test runs, causing false positives/negatives. Cart data from one test affects subsequent tests. Language/currency preferences leak between tests. Storage quota errors when accumulated data exceeds limits.
+Cart in localStorage stores denormalized product names (lines 236, 256 in `frontend/js/model.js`). After migrating product names to bilingual structure, existing carts contain old single-language strings that can't be localized. Users see English product names in Hebrew checkout or vice versa. Cart becomes inconsistent with catalog language.
 
 **Why it happens:**
-Vitest's jsdom environment doesn't automatically clear localStorage between tests. Developers assume test isolation but localStorage persists across `describe` blocks. Setting up mocks without clearing previous state compounds the problem.
+Frontend stores `cart.push({ title: data.title, ... })` — a snapshot of product state at add-to-cart time. When schema changes from `name` → `name: { eng, heb }`, localStorage carts still reference the old string field. No automatic invalidation mechanism exists for localStorage cart data.
 
 **How to avoid:**
-```javascript
-// In setup.js or beforeEach hooks
-beforeEach(() => {
-  localStorage.clear();
-  sessionStorage.clear();
-});
-
-// For specific tests needing clean state
-afterEach(() => {
-  localStorage.removeItem('cart');
-  localStorage.removeItem('language');
-  localStorage.removeItem('currency');
-  localStorage.removeItem('auth-token');
-});
-
-// Mock localStorage with spy to verify calls
-vi.spyOn(Storage.prototype, 'setItem');
-vi.spyOn(Storage.prototype, 'getItem');
-```
+1. Add cart schema version field to localStorage: `{ version: 2, items: [...] }`
+2. On app load, validate cart version and migrate/discard old carts
+3. Store product ID only in cart, fetch current names from API on display
+4. Add cart invalidation timestamp to Settings collection (server-controlled)
 
 **Warning signs:**
-- Tests pass in isolation but fail when run together
-- Flaky tests that pass/fail randomly
-- Cart count tests show unexpected values
-- Language/currency tests interfere with each other
-- Error: "QuotaExceededError: localStorage is full"
+- Cart displays showing language mismatches after user switches locale
+- Users reporting product names that don't match current language
+- Cart persistence breaking after deployment (users' carts suddenly empty)
 
 **Phase to address:**
-Base View Tests (Phase 1) - Establish clean localStorage patterns early before cart and locale testing compounds the issue.
+Phase 1 (Schema + Data Migration) — Must include cart invalidation strategy before schema changes go live.
 
 ---
 
-### Pitfall 2: querySelector Fragility with Dynamic DOM
+### Pitfall 2: SSR Cache Keys Not Invalidating After Product Translation
 
 **What goes wrong:**
-Tests break when CSS classes or DOM structure changes. querySelector returns null before async rendering completes. View-specific selectors (`.cart-number-mobile`, `.header-utilities`) become brittle. Hebrew vs English DOM differences cause selector mismatches.
+Page cache uses `generateCacheKey(req)` with `normalizedPath:lang:currency` format (lines 10-31 in `backend/cache/cacheKeys.js`). After translating products, cached HTML still shows old untranslated content. Product names/descriptions in category and product pages remain stale for up to 1 hour (TTL 3600s) or 24 hours with stale-while-revalidate.
 
 **Why it happens:**
-View.js dynamically rewrites menu/header/footer HTML on language change. Tests using direct querySelector don't wait for async DOM updates. Selectors couple tightly to CSS implementation details. RTL layout changes modify DOM structure for Hebrew.
+Cache invalidation only exists for product CRUD operations (`invalidateProduct`, `invalidateAll` in `backend/cache/invalidation.js`). Translation updates via admin API don't trigger cache invalidation because:
+1. Translation is a different mutation than standard product update
+2. Invalidation logic doesn't know which cache keys contain product data
+3. No cache warming strategy after bulk translation
 
 **How to avoid:**
-```javascript
-// BAD: Direct querySelector without waiting
-const cartBtn = document.querySelector('.add-to-cart-btn');
-expect(cartBtn).toBeTruthy();
-
-// GOOD: Use vi.waitFor with polling
-await vi.waitFor(() => {
-  const cartBtn = document.querySelector('.add-to-cart-btn');
-  expect(cartBtn).toBeTruthy();
-  return cartBtn;
-}, { timeout: 3000, interval: 100 });
-
-// BETTER: Use semantic attributes
-<button data-testid="add-to-cart" class="add-to-cart-btn">
-await vi.waitFor(() => {
-  return document.querySelector('[data-testid="add-to-cart"]');
-});
-
-// BEST: Query by role or text (less brittle)
-const cartBtn = await vi.waitFor(() => {
-  return document.querySelector('button[aria-label="Add to cart"]');
-});
-```
+1. Extend `invalidateProduct(productId)` to clear both language variants: `/en/product/slug` AND `/he/product/slug`
+2. Add `invalidateCategory(category)` for category pages affected by product translations
+3. Trigger `invalidateAll()` after bulk translation completes
+4. Add translation-aware cache key: `path:lang:currency:translationVersion`
 
 **Warning signs:**
-- Tests fail with "Cannot read property of null"
-- Works in one language but fails in Hebrew
-- Passes when running single test, fails in suite
-- Breaks after CSS refactoring despite logic unchanged
+- Admin sees translated names in dashboard, but frontend shows old English names
+- Language switcher shows identical content in both languages
+- Cache hit rate drops to 0% after translation (indicates broken cache keys)
+- Users report "site looks the same after switching language"
 
 **Phase to address:**
-Base View Tests (Phase 1) - Establish robust query patterns before page-specific views multiply the problem.
+Phase 3 (Translation Integration) — Cache invalidation logic must be implemented alongside translation API integration.
 
 ---
 
-### Pitfall 3: Event Listener Memory Leaks in View Tests
+### Pitfall 3: Test Fixtures Referencing Single-Language Fields
 
 **What goes wrong:**
-Event listeners accumulate across tests causing MaxListenersExceededWarning. Tests slow down progressively as suite runs. Menu toggle listeners stack up (mobile view adds new listener each time). Currency change listeners persist after view cleanup.
+866 existing tests reference `product.name` and `product.description` as strings (found via grep). After schema change to `name: { eng, heb }`, tests fail with undefined or type errors. Test data factories create invalid products. Mock data breaks. Test suite becomes useless during migration.
 
 **Why it happens:**
-View.js uses event delegation on `document` but tests don't clean up. `setLanguage()` called multiple times adds duplicate listeners (lines 806-830 in View.js). Tests instantiate views without corresponding teardown. cloneNode technique (lines 161-166, 401-406) prevents cleanup but multiplies handlers.
+Tests hardcode field access patterns: `expect(product.name).toBe('Ring')` instead of locale-aware access. Mongoose validation rejects test fixtures with old schema. Factories in test setup don't generate bilingual structure. No gradual migration strategy for test data.
 
 **How to avoid:**
-```javascript
-// Store listener references for cleanup
-let currencyChangeHandler;
-let languageChangeHandler;
-
-beforeEach(() => {
-  // Setup with tracked references
-  currencyChangeHandler = vi.fn();
-  document.addEventListener('change', currencyChangeHandler);
-});
-
-afterEach(() => {
-  // Always cleanup listeners
-  document.removeEventListener('change', currencyChangeHandler);
-  document.removeEventListener('click', languageChangeHandler);
-
-  // Clear any view-added listeners by replacing elements
-  const menu = document.querySelector('.menu');
-  if (menu) {
-    const newMenu = menu.cloneNode(true);
-    menu.replaceWith(newMenu);
-  }
-});
-
-// For testing View.js specifically
-afterEach(() => {
-  // Remove delegation listeners
-  const oldDoc = document.cloneNode(true);
-  // Reset global state flags
-  delete window.__currencyPersistenceInitialized;
-});
-```
+1. Create `getLocalizedName(product, lang)` helper used by BOTH app code and tests
+2. Add schema version marker to test fixtures: run migration on old fixtures at test start
+3. Keep backwards-compatible virtual fields during transition: `productSchema.virtual('name').get(function() { return this.name?.eng || this.name; })`
+4. Use feature flags in tests: `if (BILINGUAL_ENABLED) { expect(product.name.eng) } else { expect(product.name) }`
 
 **Warning signs:**
-- Console warning: "MaxListenersExceededWarning: Possible EventEmitter memory leak"
-- Test suite runs slower with each added test
-- Memory usage grows during test execution
-- Events fire multiple times from single action
+- Test failures spiking after schema change PR
+- Tests passing locally but failing in CI (different seed data)
+- Skipped tests accumulating ("temporarily disabled for migration")
+- Manual testing replacing automated tests
 
 **Phase to address:**
-Base View Tests (Phase 1) - Critical to establish cleanup patterns before cart/locale tests add more listeners.
+Phase 1 (Schema + Data Migration) — Test migration must happen BEFORE production schema change.
 
 ---
 
-### Pitfall 4: Async API Race Conditions in Model Tests
+### Pitfall 4: Schema Migration Running Without Data Backfill
 
 **What goes wrong:**
-Tests assert before `fetch` completes. Multiple API calls resolve in unpredictable order. Cart update from localStorage races with server sync. Exchange rate fetch races with currency display. Payment intent creation races with order capture.
+Mongoose schema changes to `name: { type: Object, eng: String, heb: String }` but existing 94 products have `name: String`. Queries return `null` for `product.name.eng` because field structure changed but data didn't. Products disappear from frontend. Category pages show empty. Site appears broken.
 
 **Why it happens:**
-model.js mixes localStorage (sync) with API calls (async) without coordination. No loading state between currency change and rate fetch. `handleAddToCart` doesn't await API response before UI update. Tests mock fetch but don't control timing.
+Developer updates `Product.js` schema, deploys, assumes MongoDB flexible schema handles it. Forgot that field TYPE change (string → object) breaks existing documents. Migration script exists but wasn't run first. Or migration ran but failed silently on some documents.
 
 **How to avoid:**
-```javascript
-// BAD: Race between localStorage and API
-export const handleAddToCart = function (data) {
-  if (!localStorage.getItem('auth-token')) {
-    addToLocalStorage(data); // sync
-  } else {
-    addToUserStorage(data); // async, no await!
-  }
-};
-
-// GOOD: Control timing in tests
-it('syncs cart after adding item', async () => {
-  const mockFetch = vi.fn(() =>
-    Promise.resolve({ json: () => Promise.resolve({ success: true }) })
-  );
-  global.fetch = mockFetch;
-
-  await model.handleAddToCart(mockData);
-  await vi.waitFor(() => {
-    expect(mockFetch).toHaveBeenCalled();
-  });
-});
-
-// BETTER: Test with controlled promise resolution
-it('handles concurrent cart updates correctly', async () => {
-  let resolveFirst, resolveSecond;
-  const firstPromise = new Promise(r => resolveFirst = r);
-  const secondPromise = new Promise(r => resolveSecond = r);
-
-  global.fetch = vi.fn()
-    .mockReturnValueOnce(firstPromise)
-    .mockReturnValueOnce(secondPromise);
-
-  const call1 = model.addToUserStorage(data1);
-  const call2 = model.addToUserStorage(data2);
-
-  // Resolve in reverse order to test race
-  resolveSecond({ json: () => ({ success: true }) });
-  resolveFirst({ json: () => ({ success: true }) });
-
-  await Promise.all([call1, call2]);
-  // Assert final state is correct despite timing
-});
-```
+1. Follow migrate-mongo pattern: ALWAYS write both `up()` and `down()` functions
+2. Test migration on production data dump locally BEFORE deploying
+3. Add migration verification script: `node scripts/verify-migration.js` (already exists in codebase)
+4. Use MongoDB transaction for atomic migration + schema update
+5. Schema should support BOTH formats temporarily: `name: Schema.Types.Mixed` during transition
 
 **Warning signs:**
-- Tests flaky when run with `--reporter=verbose`
-- Pass with added `setTimeout`, fail without
-- Different results on fast vs slow machines
-- Occasional "unhandled promise rejection" errors
+- Products missing from API responses after deployment
+- MongoDB logs showing validation errors on existing products
+- Frontend showing "undefined" or "[object Object]" in product names
+- Admin dashboard can't load product list
 
 **Phase to address:**
-Cart State Tests (Phase 3) - Addresses concurrent cart updates, localStorage/API sync races.
+Phase 1 (Schema + Data Migration) — This is THE critical phase. Migration script + verification + rollback plan required.
 
 ---
 
-### Pitfall 5: Currency Conversion Floating-Point Errors
+### Pitfall 5: Translation API Rate Limiting Breaking Bulk Operations
 
 **What goes wrong:**
-Cart totals don't match sum of items due to rounding. $17.95 becomes 17.950000000000002 in tests. Currency conversion (USD→ILS) accumulates precision errors. Test assertions fail on exact equality: `expect(total).toBe(17.95)` fails with 17.950000000000003.
+Admin translates all 94 products at once. Google Cloud Translation API has per-minute quotas (documented in official quotas). Bulk translation script hits "User Rate Limit Exceeded" error after ~20 products. Partial translation leaves database in inconsistent state: some products bilingual, others English-only. No retry logic. Manual cleanup required.
 
 **Why it happens:**
-JavaScript uses IEEE 754 double-precision floats. Multiple conversions (original price → discount → currency → total) compound errors. `Math.round()` on floats doesn't prevent accumulation (model.js line 362). Tests compare with `toBe()` instead of approximate equality.
+Developer calls Translation API in tight loop without rate limiting. Translation API has:
+- Characters per minute quota (default varies by project)
+- Requests per minute quota (100 per user by default)
+- No automatic retry with exponential backoff
+Script doesn't batch requests or use async batch translation endpoint.
 
 **How to avoid:**
-```javascript
-// BAD: Direct float comparison
-const total = cart.reduce((sum, item) => sum + item.price * item.amount, 0);
-expect(total).toBe(17.95); // FAILS: 17.950000000000003
-
-// GOOD: Use cents for calculations
-const totalCents = cart.reduce((sum, item) =>
-  sum + Math.round(item.price * 100) * item.amount, 0
-);
-expect(totalCents / 100).toBeCloseTo(17.95, 2);
-
-// BETTER: Test with epsilon tolerance
-expect(total).toBeCloseTo(17.95, 2); // Allows ±0.01 variance
-
-// BEST: Store prices as integers (cents) in cart
-const itemData = {
-  priceCents: Math.round(price * 100), // 1795 instead of 17.95
-  currency: 'usd'
-};
-// Convert for display only
-const displayPrice = (item.priceCents / 100).toFixed(2);
-
-// For currency conversion tests
-it('converts USD to ILS without precision loss', () => {
-  const usdCents = 1995; // $19.95
-  const rate = 3.67;
-  const ilsCents = Math.round(usdCents * rate); // 7322 = ₪73.22
-
-  expect(ilsCents / 100).toBeCloseTo(73.22, 2);
-});
-```
+1. Use batch translation API endpoint for >10 products (async operation, no sync rate limits)
+2. Implement client-side rate limiting: `p-queue` with concurrency limit of 2-3 requests/second
+3. Add retry logic with exponential backoff: `retry({ times: 5, delay: 2000 })`
+4. Store translation progress in database: mark each product as `translationStatus: 'pending' | 'completed' | 'failed'`
+5. Use Cloud Translation quota monitoring to alert before limits hit
 
 **Warning signs:**
-- Cart total tests fail intermittently
-- Errors like "Expected: 17.95, Received: 17.950000000000003"
-- Currency conversion off by 0.01
-- Sum of items ≠ total in test output
+- "403 User Rate Limit Exceeded" errors in logs
+- Bulk translation completing in <5 seconds (too fast, likely hitting cached/mock data)
+- Some products showing `heb: null` while others have Hebrew content
+- Admin UI "translate all" button leaves some products untranslated
 
 **Phase to address:**
-Cart State Tests (Phase 3) - Critical for multi-currency cart calculations and checkout totals.
+Phase 2 (Bulk Translation Tooling) — Rate limiting infrastructure must be in place before bulk translation feature ships.
 
 ---
 
-### Pitfall 6: RTL Layout Testing Without Proper Direction Context
+### Pitfall 6: SEO Duplicate Content from Poor Hreflang Implementation
 
 **What goes wrong:**
-Hebrew layout tests pass but visual bugs remain. CSS logical properties not tested (`margin-inline-start` vs `margin-left`). Bidirectional text (Hebrew + English product names) renders incorrectly. `dir="rtl"` attribute missing in test DOM causing style mismatches.
+Product pages in English and Hebrew show identical meta descriptions (untranslated). Google sees duplicate content across `/en/product/ring` and `/he/product/ring`. Without proper hreflang tags, Google can't tell they're language variants of same content. Search ranking drops. English version ranks for Hebrew searches or vice versa.
 
 **Why it happens:**
-jsdom doesn't apply CSS, so RTL-specific styles aren't tested. Tests check text content but not layout direction. View.js sets `dir="rtl"` (line 559) but tests don't verify. Mixed LTR/RTL content (product SKUs, prices) needs special handling.
+Developer translates product name/description but forgets:
+- Meta description tags in `backend/views/partials/meta-tags.ejs`
+- OG tags (Open Graph) for social sharing
+- JSON-LD structured data in `backend/helpers/schemaHelpers.js` (currently uses single `product.name` field)
+- Hreflang tags in sitemap (`backend/routes/sitemap.js` has hreflang but content isn't translated)
 
 **How to avoid:**
-```javascript
-// BAD: Only checks text content
-it('displays Hebrew text', () => {
-  view.changeToHeb();
-  const title = document.querySelector('.item-title');
-  expect(title.textContent).toBe('שרשרת');
-});
-
-// GOOD: Verify direction attribute
-it('sets RTL direction for Hebrew', () => {
-  view.changeToHeb();
-  expect(document.documentElement.dir).toBe('rtl');
-  expect(document.documentElement.lang).toBe('he');
-});
-
-// BETTER: Test bidirectional content handling
-it('handles mixed LTR/RTL content correctly', () => {
-  view.changeToHeb();
-  const sku = document.querySelector('.product-sku');
-
-  // SKU should be LTR even in RTL context
-  expect(sku.style.direction).toBe('ltr');
-  expect(sku.style.unicodeBidi).toBe('embed');
-
-  // Product name should be RTL
-  const title = document.querySelector('.item-title');
-  expect(title.dir).toBe('rtl');
-});
-
-// BEST: Test with actual RTL data
-it('renders Hebrew product with English SKU correctly', () => {
-  const product = {
-    name: 'שרשרת זהב',  // Hebrew: Gold necklace
-    sku: 'NK-001',      // English SKU
-    price: 150
-  };
-
-  view.setLanguage('heb');
-  view.renderProduct(product);
-
-  const container = document.querySelector('.product-card');
-  expect(container.dir).toBe('rtl');
-
-  // SKU should be LTR embedded in RTL
-  const skuEl = container.querySelector('.product-sku');
-  expect(skuEl.textContent).toBe('NK-001'); // Not reversed
-});
-
-// For CSS logical properties (requires snapshot or integration test)
-it('uses logical properties for spacing', () => {
-  // This requires actual CSS rendering - flag for manual testing
-  // or use Playwright/Puppeteer for visual regression
-});
-```
+1. Audit ALL places product.name/description appear: meta tags, OG tags, JSON-LD, breadcrumbs
+2. Update `generateProductSchema()` to use localized name: `name: product.name[langKey]`
+3. Verify hreflang alternates point to actual different-language content
+4. Use "near-duplicate content" detection: don't just machine-translate, adapt content for locale
+5. Test with Google Search Console: check "Index coverage" for duplicate content warnings
 
 **Warning signs:**
-- Visual bugs in Hebrew layout despite passing tests
-- SKUs/prices appear reversed in production
-- Margins wrong side in RTL mode
-- Mixed content renders incorrectly
+- Google Search Console showing "Duplicate without user-selected canonical" warnings
+- Product pages ranking for wrong language searches
+- Social media shares showing English OG image text when shared from Hebrew page
+- Breadcrumbs in sitemap showing English names on Hebrew pages
 
 **Phase to address:**
-Locale Switching Tests (Phase 4) - RTL-specific concerns need dedicated test phase after basic language switching works.
+Phase 3 (Translation Integration) — Must audit and update ALL SEO touchpoints, not just database fields.
 
 ---
 
-### Pitfall 7: Hash-Based Router Timing Issues
+### Pitfall 7: Admin Form Confusion Around Required vs Optional Bilingual Fields
 
 **What goes wrong:**
-View renders before `hashchange` event fires. Multiple rapid hash changes cause view stacking. Back button breaks state sync between URL and view. Tests navigate but don't wait for view rendering.
+Admin adds new product, fills English name, submits. Validation error: "Hebrew name required." Admin doesn't understand which language fields are mandatory. Tries again, leaves Hebrew description empty. Product saves but shows "[No description]" on Hebrew site. Support tickets increase.
 
 **Why it happens:**
-controller.js uses hash routing but tests change hash synchronously. `window.location.hash = '#cart'` doesn't immediately fire `hashchange`. View initialization async but tests assert on DOM immediately. Browser history in tests doesn't behave like real navigation.
+Form doesn't clearly indicate which bilingual fields are required. No inline validation showing "English name: required, Hebrew name: optional (can auto-translate)". Admin doesn't know if they MUST translate everything manually or if auto-translation fills gaps.
+
+Current admin form in `admin/BisliView.js` has no bilingual field handling (lines 1-150 show standard API setup, no form validation visible).
 
 **How to avoid:**
-```javascript
-// BAD: Set hash and immediately assert
-window.location.hash = '#cart';
-expect(document.querySelector('.cart-view')).toBeTruthy(); // FAILS
-
-// GOOD: Wait for hashchange event
-it('navigates to cart page', async () => {
-  const hashChangePromise = new Promise(resolve => {
-    window.addEventListener('hashchange', resolve, { once: true });
-  });
-
-  window.location.hash = '#cart';
-  await hashChangePromise;
-
-  await vi.waitFor(() => {
-    expect(document.querySelector('.cart-view')).toBeTruthy();
-  });
-});
-
-// BETTER: Helper for hash navigation in tests
-async function navigateTo(hash) {
-  const hashChangePromise = new Promise(resolve => {
-    window.addEventListener('hashchange', resolve, { once: true });
-  });
-
-  window.location.hash = hash;
-  await hashChangePromise;
-
-  // Wait for view to render
-  await vi.waitFor(() => {
-    const content = document.querySelector('.page-content');
-    return content && content.children.length > 0;
-  }, { timeout: 2000 });
-}
-
-it('handles back button navigation', async () => {
-  await navigateTo('#products');
-  await navigateTo('#cart');
-
-  // Simulate back button
-  window.history.back();
-
-  await vi.waitFor(() => {
-    expect(window.location.hash).toBe('#products');
-  });
-});
-```
+1. Mark required fields with asterisk AND "(required)" text for accessibility ([NN/g best practices](https://www.nngroup.com/articles/required-fields/))
+2. Add inline hint: "English name required • Hebrew name optional (auto-translate if empty)"
+3. Show real-time validation: field turns red/green as admin types
+4. Add "Auto-translate empty fields" checkbox above submit button
+5. Preview both languages side-by-side before saving
 
 **Warning signs:**
-- Router tests fail with null elements
-- State desync between URL and rendered view
-- Tests pass but manual testing shows navigation bugs
-- Multiple views render simultaneously
+- High form abandonment rate on product add/edit pages
+- Support questions "Do I need to fill both languages?"
+- Products with missing Hebrew content going live unintentionally
+- Admin repeatedly clicking submit without understanding validation errors
 
 **Phase to address:**
-MVC Integration Tests (Phase 5) - Router is the glue between controller and views.
+Phase 4 (Admin UX) — Form validation and UX improvements must launch with bilingual admin features.
 
 ---
 
-### Pitfall 8: View Class Inheritance and Method Override Confusion
+### Pitfall 8: Payment Receipts and Checkout Flow Showing Wrong Language
 
 **What goes wrong:**
-Child views don't call parent methods correctly. `setPageSpecificLanguage` overrides in children not invoked. `super` calls missing causing incomplete initialization. Mock/spy on base View class affects all child views.
+User shops in Hebrew, adds items to cart, proceeds to PayPal/Stripe checkout. Checkout page shows English product names because payment gateway doesn't support Hebrew. Or receipt email shows mixed Hebrew/English product names. Customer confused about what they ordered.
 
 **Why it happens:**
-View.js base class has 900+ lines with complex inheritance. Child views (homePageView, cartView) override methods without calling super. Tests mock View.prototype affecting all instances. `setLanguage` calls `setPageSpecificLanguage` (line 945) but child implementation varies.
+Payment integration passes product names from backend to payment provider. Backend code in `backend/index.js` (PayPal/Stripe integration) likely passes `product.name` directly without localization. Payment providers (PayPal, Stripe) support 34 languages for UI but product data in API calls uses YOUR provided strings.
+
+Current cart data includes both prices (`usdPrice`, `ilsPrice`) but stores title as single string (line 236 in `model.js`).
 
 **How to avoid:**
-```javascript
-// BAD: Test affects all view instances
-vi.spyOn(View.prototype, 'setLanguage').mockImplementation(() => {});
-const cart = new CartView();
-const home = new homePageView();
-// Both views now broken!
-
-// GOOD: Test specific instance
-it('cart view sets page-specific language', () => {
-  const cartView = new CartView();
-  const spy = vi.spyOn(cartView, 'setPageSpecificLanguage');
-
-  cartView.setLanguage('heb', 5);
-
-  expect(spy).toHaveBeenCalledWith('heb', 5);
-});
-
-// BETTER: Test inheritance chain explicitly
-it('calls parent setLanguage then child override', async () => {
-  const cartView = new CartView();
-
-  const parentSpy = vi.spyOn(View.prototype, 'setLanguage');
-  const childSpy = vi.spyOn(cartView, 'setPageSpecificLanguage');
-
-  await cartView.setLanguage('heb', 3);
-
-  expect(parentSpy).toHaveBeenCalled();
-  expect(childSpy).toHaveBeenCalledWith('heb', 3);
-
-  // Verify order
-  const parentCall = parentSpy.mock.invocationCallOrder[0];
-  const childCall = childSpy.mock.invocationCallOrder[0];
-  expect(parentCall).toBeLessThan(childCall);
-});
-
-// Pattern for child views to prevent missing super calls
-class CartView extends View {
-  async setPageSpecificLanguage(lng, cartNum) {
-    // This gets called by parent's setLanguage
-    // No need to call super.setPageSpecificLanguage (it's a hook)
-    this.renderCartInLanguage(lng);
-  }
-}
-```
+1. Cart should store locale when item added: `{ title: { eng, heb }, addedInLocale: 'heb' }`
+2. Checkout flow uses `addedInLocale` to select product name language for payment API
+3. Email receipts render product names in user's preferred language
+4. Add fallback: if Hebrew name missing, use English with language indicator: "(English: Ring)"
 
 **Warning signs:**
-- Mocking one view breaks unrelated view tests
-- Child view missing expected functionality
-- "Method not defined" despite being in parent
-- Duplicate code across child views
+- Users reporting "checkout page is in wrong language"
+- Payment receipts showing English names when user shopped in Hebrew
+- Support questions asking "what is [English product name]?" from Hebrew users
+- Payment disputes due to confusion about product names
 
 **Phase to address:**
-Base View Tests (Phase 1) - Establish inheritance testing patterns before child views tested in Phase 2.
+Phase 5 (Checkout & Payments) — Must be tested before launch. Payment integration is HIGH-RISK area.
+
+---
+
+### Pitfall 9: Missing Fallback Strategy When Translation API Fails
+
+**What goes wrong:**
+Google Translation API goes down or API key quota exhausted. Admin tries to add new product, auto-translation fails silently. Product saves with empty Hebrew name. Or worse: error crashes admin form, product isn't saved at all. Site shows broken products until admin manually fixes data.
+
+**Why it happens:**
+No graceful degradation for translation failures. Code assumes Translation API always succeeds. No fallback to:
+- English content when Hebrew missing
+- Cached translations from previous similar content
+- Manual translation queue
+- User notification that translation failed
+
+**How to avoid:**
+1. Implement fallback chain: Translation API → Cached translations → Copy English content → Show placeholder
+2. Frontend rendering uses: `product.name[lang] || product.name.eng || product.name || 'Untitled Product'`
+3. Admin form shows warning: "⚠ Translation failed, Hebrew name copied from English (edit manually)"
+4. Add translation queue: failed translations go to retry queue, admin notified to review
+5. Monitor API health: alert before quota exhaustion, not after
+
+**Warning signs:**
+- Products appearing with identical English/Hebrew content
+- Random products missing Hebrew names
+- Admin form errors with cryptic "Translation service unavailable" messages
+- Translation API showing 100% success rate (likely false — not catching failures)
+
+**Phase to address:**
+Phase 3 (Translation Integration) — Fallback logic is CORE requirement, not "nice to have."
+
+---
+
+### Pitfall 10: Rollback Plan Missing or Untested
+
+**What goes wrong:**
+Production deployment breaks (cart shows "undefined", tests fail, API errors). Team decides to rollback. Rollback script doesn't exist. Or migration `down()` function was never tested. Rollback fails worse than initial deployment. Database in corrupted state: some products bilingual, some single-language, schema doesn't match either version. Site down for hours.
+
+**Why it happens:**
+Migration tools like migrate-mongo require both `up()` and `down()` functions, but down() often copy-pasted or never tested. Team doesn't practice rollback in staging. No documented rollback procedure. No backup taken before migration.
+
+Codebase has migration examples in `backend/migrations/` directory (found via grep) but unclear if down() functions are tested.
+
+**How to avoid:**
+1. Test migration rollback in staging: up → down → up again, verify data integrity
+2. Take MongoDB backup before production migration: `mongodump` with timestamp
+3. Document rollback procedure step-by-step with exact commands
+4. Add rollback verification script: `node scripts/verify-rollback.js`
+5. Practice disaster recovery drill: "site is broken, you have 15 minutes to rollback"
+6. Use schema versioning pattern: keep both old and new schemas working simultaneously during transition
+
+**Warning signs:**
+- Migration down() function never executed in development
+- No backup automation before deployments
+- Rollback procedure is "undo the migration somehow"
+- Deployment checklist doesn't include rollback plan
+
+**Phase to address:**
+Phase 1 (Schema + Data Migration) — Rollback plan must exist BEFORE first migration runs.
 
 ---
 
 ## Technical Debt Patterns
 
-Shortcuts that seem reasonable but create long-term testing problems.
+Shortcuts that seem reasonable but create long-term problems.
 
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Using `document.querySelector` without data-testid | No markup changes needed | Brittle tests break on CSS refactor | **Never** - always add test identifiers |
-| Mocking entire View.prototype | Quick test isolation | Breaks all view instances globally | **Never** - mock specific instances |
-| `setTimeout` to "fix" async races | Tests pass quickly | Flaky tests, slow suite, masks real bugs | **Never** - use vi.waitFor or proper async |
-| Skipping localStorage.clear() in afterEach | Faster test writing | State pollution, flaky tests | **Never** - always clean up |
-| Testing only English, assuming Hebrew works | Half the test time | RTL bugs in production | **Only in MVP** - add RTL by Phase 4 |
-| Comparing floats with toBe() | Simple assertions | Precision errors cause failures | **Never** - use toBeCloseTo() |
-| Inline event handlers `onclick="..."` | Easy to add | Can't removeEventListener, memory leaks | **Never** - use addEventListener |
-| Global fetch mock for all tests | One setup for suite | Race conditions hard to reproduce | **Only for happy path** - per-test mocks for edge cases |
+| Using `Schema.Types.Mixed` for bilingual fields | No validation, fast to implement | Can't enforce required fields, hard to query, schema drift | Only during transition period, not permanent |
+| Machine-translating ALL content without review | Fast bulk translation, no manual work | Poor quality, cultural insensitivity, brand voice lost | Never for product names, acceptable for initial drafts only |
+| Storing language in cart localStorage | No backend changes needed | Stale data, can't update translations retroactively | Only if cart TTL is <24 hours |
+| Single Translation API key shared across environments | One key to manage | Dev/staging exhausts production quota | Never — always separate keys |
+| Skipping hreflang tags initially | Faster launch | SEO penalty, hard to recover ranking | Never for e-commerce (revenue impact) |
+| Auto-translating on every product load | No caching needed, always fresh | API costs skyrocket, slow page loads | Never — translate once, cache result |
+| Copying English to Hebrew as "placeholder" | Looks complete in admin | Users see English content on Hebrew site | Acceptable if clearly marked "(needs translation)" |
+
+---
 
 ## Integration Gotchas
 
-Common mistakes when testing external service interactions.
+Common mistakes when connecting to external services.
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| localStorage | Assuming isolation between tests | Clear in beforeEach/afterEach hooks |
-| Fetch API | Mock once globally, can't test timing | Mock per-test with controlled promise resolution |
-| PayPal SDK | Load real SDK in tests (slow, flaky) | Mock window.paypal object with test stubs |
-| Stripe SDK | Use real API keys in test env | Mock stripe.js, never load real SDK |
-| Exchange Rate API | Call real API in tests | Mock response with fixed rate, test staleness separately |
-| DigitalOcean Spaces | Upload real files in tests | Mock S3 client, verify calls not results |
-| EmailJS | Send test emails (quota limits) | Mock emailjs.send(), verify parameters |
-| Microsoft Clarity | Load tracking script in tests | Conditional load based on NODE_ENV, mock in tests |
+| Google Cloud Translation API | Assuming unlimited free tier | Check quotas FIRST — free tier is minimal, likely need paid plan for 94 products |
+| Translation API batch endpoint | Using synchronous API for bulk operations | Use `batchTranslateText` (async) for >10 products to avoid rate limits |
+| PayPal/Stripe product names | Passing Hebrew text without encoding | Test with actual Hebrew characters, not transliterated text |
+| MongoDB text indexes | Creating index on `name` field (string) | Update index to `name.eng` and `name.heb` or use wildcard index |
+| DigitalOcean Spaces CDN | Not invalidating CDN cache after image metadata translation | Alt text and filenames may need CDN purge |
+| EmailJS contact form | Hardcoded English email templates | Create Hebrew email templates, select based on form language |
+| Cart localStorage | Assuming unlimited localStorage size | Large product descriptions can hit 5-10MB quota, especially with bilingual data |
+
+---
 
 ## Performance Traps
 
-Patterns that work at small scale but fail as test suite grows.
+Patterns that work at small scale but fail as usage grows.
 
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Not clearing event listeners | Tests slow down progressively | afterEach cleanup, track listener refs | >50 tests |
-| Accumulating localStorage data | QuotaExceededError in CI | Clear storage in afterEach | >100 tests |
-| Loading full product catalog | Slow test suite, high memory | Mock with minimal data fixtures | >200 products |
-| Re-rendering entire menu each test | DOM operations pile up | Reuse rendered markup, reset state | >30 view tests |
-| Deep cloning cart array | O(n²) for nested cart operations | Shallow clone when possible | >20 items in cart |
-| Synchronous fetch mocks | Tests wait for setTimeout | Use vi.useFakeTimers() and vi.runAllTimers() | >100 async tests |
+| Fetching all product translations on page load | Initial page load works fine | Lazy-load translations, cache in localStorage | At ~200 products (50KB+ per page load) |
+| Re-translating same product descriptions | Translation API quota exhausted | Cache translations in database, deduplicate similar content | After first bulk translation (costs add up) |
+| Not using database indexes on bilingual fields | Queries work but slow | Add indexes: `{ 'name.eng': 'text', 'name.heb': 'text' }` | When product catalog grows beyond 100 items |
+| Cache keys not including language | Random language shown to users | Always include lang in cache key: `product:123:en` | When site gets >100 concurrent users |
+| Translation API called in synchronous route handlers | API timeout crashes requests | Use background jobs for translation, return immediately | When translation takes >2 seconds per product |
+| Sitemap regenerating on every request | Works fine for 94 products | Cache sitemap XML, regenerate daily via cron | At 500+ products (XML generation >1 second) |
+
+---
 
 ## Security Mistakes
 
-Testing-specific security issues to avoid.
+Domain-specific security issues beyond general web security.
 
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Committing test API keys | Real credentials exposed in repo | Use .env.test with dummy values |
-| Using production MongoDB in tests | Data loss, privacy violations | Separate test database, mock in unit tests |
-| Skipping CSRF token validation in test mode | Production code has bypass path | Never conditional security, mock token generation |
-| Test JWTs with weak secrets | If copied to production, vulnerability | Use same crypto strength, different secret |
-| Storing sensitive test data in localStorage | Leaks in test snapshots | Sanitize before snapshots, use generic data |
-| Mocking authentication to always succeed | Security bugs not caught | Test auth failures, expired tokens, role checks |
+| Storing Translation API key in frontend code | API key exposed, quota theft, unauthorized usage | ALWAYS call Translation API from backend, never frontend |
+| Not sanitizing translated content before rendering | XSS via Translation API injecting malicious content | Sanitize Translation API response, don't trust external service |
+| Using same MongoDB credentials for dev and prod | Dev migration script accidentally runs on production | Separate credentials, require explicit production flag |
+| Allowing admin to translate without authentication | Anyone can change product content | Protect translation endpoints with `requireAdmin` middleware |
+| Exposing translation queue/status to public | Competitors see unreleased products | Translation status should be admin-only endpoint |
+
+---
 
 ## UX Pitfalls
 
-Common testing mistakes that miss user experience issues.
+Common user experience mistakes in this domain.
 
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Only testing one language | Hebrew users see broken layout | Test both English and Hebrew in critical flows |
-| Not testing currency switching | Price displays wrong after switch | Test currency change on cart/checkout pages |
-| Ignoring keyboard navigation | Inaccessible to keyboard-only users | Test with tab key navigation, screen reader attributes |
-| Testing empty cart only | "No items" state works, 10+ items overflow | Test cart with 0, 1, 10, 50 items |
-| Fast mocked responses | UI flicker not caught in tests | Test loading states, slow network simulation |
-| Testing desktop viewport only | Mobile menu broken, touch events fail | Test at 320px, 768px, 1920px widths |
+| Language switcher doesn't preserve product page | User switches to Hebrew, lands on homepage (loses context) | Keep same product, switch language: `/en/product/ring` → `/he/product/ring` |
+| Product name translated but category not | User sees "שרשראות" (Hebrew) under category heading "Necklaces" (English) | Translate category display names, not just products |
+| Cart shows mixed languages after language switch | Confusing: some products in English, others Hebrew | Re-fetch product names in new language when locale changes |
+| No indication which fields are machine-translated | User assumes perfect translation, trusts incorrect content | Add badge: "🤖 Auto-translated" with option to report issues |
+| Checkout language differs from shopping language | User shops in Hebrew, PayPal shows English | Pass `locale` to payment provider API, match user's language |
+| Translation loading breaks page layout | Skeletons or spinners shift content, user clicks wrong item | Reserve space for translations, show placeholder text of similar length |
+| No way to report translation errors | User sees mistake, can't notify admin | Add "Report translation error" button on product pages |
+
+---
 
 ## "Looks Done But Isn't" Checklist
 
-Things that appear complete but are missing critical pieces in testing context.
+Things that appear complete but are missing critical pieces.
 
-- [ ] **localStorage tests:** Often missing cleanup — verify afterEach clears all keys
-- [ ] **Async API tests:** Often missing race condition tests — verify concurrent calls, verify timeout handling
-- [ ] **Currency tests:** Often missing precision tests — verify floating point rounding, verify conversion both ways (USD→ILS→USD)
-- [ ] **RTL tests:** Often missing bidirectional text — verify Hebrew text with English SKU, verify number formatting in RTL
-- [ ] **Event listener tests:** Often missing cleanup verification — verify listeners removed, verify no memory leaks with many tests
-- [ ] **View inheritance tests:** Often missing super calls — verify child calls parent methods, verify override doesn't break siblings
-- [ ] **Router tests:** Often missing hashchange timing — verify navigation waits for event, verify back button state sync
-- [ ] **Error handling tests:** Often missing network failure — verify fetch rejection, verify timeout scenarios, verify partial response data
+- [ ] **Bilingual schema:** Field exists but not validated — verify BOTH languages have content enforcement
+- [ ] **Admin form:** Fields added but no inline validation — check real-time field validation works
+- [ ] **Translation integration:** API called but errors not handled — test with API disabled, verify fallback
+- [ ] **Cache invalidation:** Products update but cache doesn't clear — manually test cache clearing after translation
+- [ ] **Cart migration:** New cart works but old carts break — test with localStorage cart from pre-migration
+- [ ] **Tests:** New tests pass but old tests skipped — verify ALL 866 tests run and pass
+- [ ] **SEO:** Product names translated but meta tags still English — check view source for each language
+- [ ] **Hreflang tags:** Tags present but point to same content — verify different content in each language
+- [ ] **Sitemap:** Includes both languages but same lastmod — verify product changes update both lang sitemap entries
+- [ ] **Checkout:** Products show in cart but payment receipt shows wrong language — test full payment flow in Hebrew
+- [ ] **Breadcrumbs:** Product page shows localized name but breadcrumb shows English — check all navigation elements
+- [ ] **Search:** Products indexed but search doesn't match Hebrew — verify text indexes on bilingual fields
+- [ ] **Rollback:** Down() function exists but never tested — run rollback in staging, verify data integrity
+
+---
 
 ## Recovery Strategies
 
@@ -557,14 +386,17 @@ When pitfalls occur despite prevention, how to recover.
 
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| localStorage pollution | LOW | 1. Add `beforeEach(() => localStorage.clear())` to all test files<br>2. Run tests to identify interdependencies<br>3. Fix tests assuming pre-existing state |
-| querySelector brittleness | MEDIUM | 1. Add data-testid to all interactive elements<br>2. Create test helpers: `getByTestId(id)`<br>3. Replace querySelector calls incrementally<br>4. Add ESLint rule against raw querySelector in tests |
-| Event listener leaks | MEDIUM | 1. Identify leaking tests with `--reporter=verbose --logHeapUsage`<br>2. Add afterEach cleanup for each test file<br>3. Use WeakMap/WeakRef for listener tracking<br>4. Replace cloneNode strategy with proper removeEventListener |
-| Async race conditions | HIGH | 1. Identify flaky tests with `--retry=10`<br>2. Add controlled promise mocks with manual resolution<br>3. Refactor code to return promises consistently<br>4. Use vi.waitFor with explicit assertions |
-| Float precision errors | LOW | 1. Change all `toBe()` to `toBeCloseTo()` for currency<br>2. Add helper: `expectCurrency(value, expected)`<br>3. Refactor model to use cents (large change) |
-| RTL layout bugs | MEDIUM | 1. Add visual regression tests with Playwright<br>2. Test Hebrew on all critical pages manually<br>3. Add snapshot tests for RTL markup<br>4. Create RTL-specific test fixtures |
-| Router timing issues | MEDIUM | 1. Create `navigateTo(hash)` test helper<br>2. Add hashchange promise wrapper<br>3. Replace all direct hash assignments<br>4. Add integration tests for full navigation flows |
-| View inheritance confusion | HIGH | 1. Document inheritance contract in View.js<br>2. Create test suite for base View class<br>3. Test each child's override explicitly<br>4. Add TypeScript/JSDoc to clarify expected methods |
+| Cart data corrupted by schema change | LOW | Invalidate all carts via localStorage clear script, add notification "Cart updated to new format" |
+| Products missing Hebrew content | MEDIUM | Run bulk translation script on products where `name.heb` is null, verify with admin review queue |
+| Test suite completely broken | HIGH | Revert schema change, update tests first, re-deploy with tests passing |
+| Cache showing stale content | LOW | Run `invalidateAll()` script, reduce TTL temporarily (3600s → 300s) during rollout |
+| Translation API quota exhausted | MEDIUM | Switch to fallback: copy English content, add "needs translation" flag, manual review queue |
+| SEO duplicate content penalty | HIGH | Takes 2-4 weeks to recover — immediately fix hreflang, submit corrected sitemap, request re-index |
+| Payment flow showing wrong language | MEDIUM | Hotfix: detect user locale from cart, pass to payment API, deploy immediately |
+| Database in inconsistent state (partial migration) | HIGH | Restore from backup, write data repair script to fix orphaned records, re-run migration with transaction |
+| Rollback fails leaving corrupted data | CRITICAL | Restore MongoDB backup, revert code deployment, run integrity check script, may need manual data fixes |
+
+---
 
 ## Pitfall-to-Phase Mapping
 
@@ -572,60 +404,70 @@ How roadmap phases should address these pitfalls.
 
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| localStorage pollution | Phase 1: Base View Tests | All tests pass when run with `--reporter=verbose`, no flaky tests |
-| querySelector fragility | Phase 1: Base View Tests | No raw querySelector in test files, all use data-testid or waitFor |
-| Event listener leaks | Phase 1: Base View Tests | Memory stable across 100+ test runs, no MaxListeners warnings |
-| Async API races | Phase 3: Cart State Tests | Concurrent cart operations tests pass 100/100 runs |
-| Float precision | Phase 3: Cart State Tests | All currency tests use toBeCloseTo, cart totals accurate |
-| RTL layout | Phase 4: Locale Switching Tests | Hebrew tests pass, visual snapshots for RTL pages |
-| Router timing | Phase 5: MVC Integration Tests | Navigation tests reliable, back/forward work correctly |
-| View inheritance | Phase 1: Base View Tests | All child views call parent methods, inheritance documented |
+| Stale cart data | Phase 1: Schema Migration | Test with old localStorage cart, verify invalidation triggers |
+| SSR cache not invalidating | Phase 3: Translation Integration | Monitor cache hit rate, manually test translation → cache clear |
+| Test fixtures broken | Phase 1: Schema Migration | CI must run all 866 tests and pass before merge |
+| Schema without data backfill | Phase 1: Schema Migration | Run `verify-migration.js`, check 100% of products have bilingual structure |
+| Translation API rate limiting | Phase 2: Bulk Translation | Test translating 94 products, monitor API quota usage |
+| SEO duplicate content | Phase 3: Translation Integration | Google Search Console check, verify hreflang in source |
+| Admin form confusion | Phase 4: Admin UX | User testing with actual admin staff, measure form completion rate |
+| Checkout wrong language | Phase 5: Checkout & Payments | End-to-end test in both languages, verify PayPal/Stripe receipts |
+| Missing fallback strategy | Phase 3: Translation Integration | Disable Translation API in staging, verify site still works |
+| Rollback plan missing | Phase 1: Schema Migration | Practice rollback drill in staging, time to recovery <15 min |
+
+---
 
 ## Sources
 
-### localStorage Mocking and Testing
-- [sessionStorage and localStorage are difficult to mock for test purposes - Mozilla Bugzilla](https://bugzilla.mozilla.org/show_bug.cgi?id=1141698)
-- [Local Storage: Testing | CS156](https://ucsb-cs156.github.io/topics/local_storage/local_storage_testing.html)
-- [Mocking browser APIs in Jest (localStorage, fetch and more!)](https://bholmes.dev/blog/mocking-browser-apis-fetch-localstorage-dates-the-easy-way-with-jest/)
-- [Testing local storage with testing library - JavaScript in Plain English](https://medium.com/javascript-in-plain-english/testing-local-storage-with-testing-library-580f74e8805b)
+**MongoDB Schema Migration:**
+- [MongoDB schema migration - Liquibase](https://www.liquibase.com/blog/mongodb-schema-migration)
+- [All you need to know about MongoDB schema migrations in node.js](https://softwareontheroad.com/database-migration-node-mongo)
+- [Maintain Different Schema Versions - MongoDB Docs](https://www.mongodb.com/docs/manual/data-modeling/design-patterns/data-versioning/schema-versioning/)
+- [How To Properly Handle Mongoose Schema Migrations - GeeksforGeeks](https://www.geeksforgeeks.org/mongodb/how-to-properly-handle-mongoose-schema-migrations/)
 
-### Vitest DOM Testing and querySelector
-- [Locators | Browser Mode | Vitest](https://vitest.dev/api/browser/locators)
-- [Vi | Vitest](https://vitest.dev/api/vi.html)
-- [Custom Vitest matchers to test the state of the DOM](https://github.com/chaance/vitest-dom)
+**E-commerce Translation Pitfalls:**
+- [5 Common Pitfalls of eCommerce Data Migration](https://www.transcenddigital.com/blog/5-common-pitfalls-of-ecommerce-data-migration-when-re-platforming)
+- [6 eCommerce Translation Pitfalls to Avoid](https://bayan-tech.com/blog/ecommerce-translation/)
+- [Data Migration Strategies: Safely Transitioning E-commerce Databases - Sellbery](https://sellbery.com/blog/data-migration-strategies-safely-transitioning-e-commerce-databases/)
 
-### Async Testing and Race Conditions
-- [Beyond Async/Await: Why Your 2026 Apps Still Have Race Conditions - JavaScript in Plain English](https://javascript.plainenglish.io/beyond-async-await-why-your-2026-apps-still-have-race-conditions-dc43af7437dd)
-- [How to test for race conditions in asynchronous JavaScript code? | AnycodeAI](https://www.anycode.ai/tutorial/how-to-test-for-race-conditions-in-asynchronous-javascript-code)
-- [Tackling Asynchronous Bugs in JavaScript: Race Conditions and Unresolved Promises](https://dev.to/alex_aslam/tackling-asynchronous-bugs-in-javascript-race-conditions-and-unresolved-promises-7jo)
+**Google Cloud Translation API:**
+- [Quotas and limits | Cloud Translation | Google Cloud](https://docs.cloud.google.com/translate/quotas)
+- [Batch requests (Advanced) | Cloud Translation | Google Cloud](https://docs.cloud.google.com/translate/docs/advanced/batch-translation)
+- [Troubleshooting | Cloud Translation | Google Cloud](https://docs.cloud.google.com/translate/troubleshooting)
 
-### Event Listener Memory Leaks
-- [Memory management in tests - Mastering Vitest](https://app.studyraid.com/en/read/11292/352307/memory-management-in-tests)
-- [How to Fix \"Memory Leak\" Test Detection](https://oneuptime.com/blog/post/2026-01-24-memory-leak-test-detection/view)
-- [How to Avoid Memory Leaks in JavaScript Event Listeners](https://dev.to/alex_aslam/how-to-avoid-memory-leaks-in-javascript-event-listeners-4hna)
-- [MaxListenersExceededWarning: Possible EventEmitter Memory Leak - Vitest Issue](https://github.com/vitest-dev/vitest/issues/7194)
+**SEO and Hreflang:**
+- [Hreflang, International SEO & Duplicate Content: How To Fix It](https://thegray.company/blog/duplicate-content-international-seo-hreflang)
+- [SEO Translation: Complete Guide to Multilingual Search Success (2026)](https://geotargetly.com/blog/seo-translation-guide)
+- [Managing Multi-Regional and Multilingual Sites | Google Search Central](https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites)
+- [How to avoid duplicate content SEO punishment with hreflang](https://lingohub.com/blog/how-to-avoid-duplicate-content-seo-punishment-with-hreflang)
 
-### RTL and Bidirectional Layout Testing
-- [The Complete Guide to RTL (Right-to-Left) Layout Testing: Arabic, Hebrew & More](https://placeholdertext.org/blog/the-complete-guide-to-rtl-right-to-left-layout-testing-arabic-hebrew-more/)
-- [Internationalization Testing: Best Practices Guide for 2026](https://aqua-cloud.io/internationalization-testing/)
-- [January 2026 - RTL Support - shadcn/ui](https://ui.shadcn.com/docs/changelog/2026-01-rtl)
-- [Right to Left Styling 101](https://rtlstyling.com/posts/rtl-styling/)
+**Form UX Best Practices:**
+- [Marking Required Fields in Forms - NN/G](https://www.nngroup.com/articles/required-fields/)
+- [Required Fields in Forms: Best Design Practices](https://www.uxtigers.com/post/required-fields)
+- [12 Form UI/UX Design Best Practices to Follow in 2026](https://www.designstudiouiux.com/blog/form-ux-design-best-practices/)
 
-### Currency and Floating-Point Precision
-- [Handle Money in JavaScript: Financial Precision Without Losing a Cent](https://dev.to/benjamin_renoux/financial-precision-in-javascript-handle-money-without-losing-a-cent-1chc)
-- [Currency Calculations in JavaScript - Honeybadger Developer Blog](https://www.honeybadger.io/blog/currency-money-calculations-in-javascript/)
-- [JavaScript Rounding Errors (in Financial Applications)](https://www.robinwieruch.de/javascript-rounding-errors/)
+**Payment Integration:**
+- [Add localization to your Flow integration - Checkout.com](https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website/add-localization-to-your-flow-integration)
+- [Supported languages for Stripe Checkout and Payment Links](https://support.stripe.com/questions/supported-languages-for-stripe-checkout-and-payment-links)
 
-### Hash-Based Routing
-- [Routing in Vanilla JavaScript: Hash vs History API](https://medium.com/@RyuotheGreate/routing-in-vanilla-javascript-hash-vs-history-api-a65382121871)
-- [Single Page Application Routing Using Hash or URL](https://dev.to/thedevdrawer/single-page-application-routing-using-hash-or-url-9jh)
-- [How to use window.hashchange event to implement routing in vanilla javascript](https://prahladyeri.github.io/blog/2020/08/how-to-use-windowhashchange-event-to-implement-routing-in-vanilla-javascript.html)
+**Fallback Strategies:**
+- [Fallback | i18next documentation](https://www.i18next.com/principles/fallback)
+- [Implement Fallback with API Gateway - API7.ai](https://api7.ai/blog/fallback-api-resilience-design-patterns)
 
-### MVC Pattern Testing
-- [The MVC Design Pattern in Vanilla JavaScript — SitePoint](https://www.sitepoint.com/mvc-design-pattern-javascript/)
-- [Writing a Simple MVC (Model, View, Controller) App in Vanilla Javascript](https://hackernoon.com/writing-a-simple-mvc-model-view-controller-app-in-vanilla-javascript-u65i34lx)
-- [How to Build a Simple MVC App From Scratch in JavaScript](https://www.taniarascia.com/javascript-mvc-todo-app/)
+**Data Migration Testing:**
+- [Data Migration Testing in 2026: Strategy and Techniques](https://blog.qasource.com/a-guide-to-data-migration-testing)
+- [Data Migration Test Strategy: Create an Effective Test Plan](https://www.datamigrationpro.com/data-migration-testing-strategy)
+
+**Codebase Analysis:**
+- Product schema: `backend/models/Product.js`
+- Cart implementation: `frontend/js/model.js`
+- SSR cache: `backend/middleware/cacheMiddleware.js`, `backend/cache/cacheKeys.js`
+- Schema helpers: `backend/helpers/schemaHelpers.js`
+- Sitemap generation: `backend/routes/sitemap.js`
+- Admin dashboard: `admin/BisliView.js`
 
 ---
-*Pitfalls research for: Vanilla JavaScript MVC Frontend Testing*
-*Researched: 2026-02-06*
+
+*Pitfalls research for: Adding bilingual product content to existing e-commerce platform*
+*Researched: 2026-02-13*
+*Confidence: HIGH — Based on codebase analysis, official documentation, and 2026-current best practices*
