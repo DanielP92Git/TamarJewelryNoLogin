@@ -587,6 +587,31 @@ function normalizeProductForClient(productDoc) {
   // Remove local-only fields from responses
   omitLocalImageFields(obj);
 
+  // Phase 27: Bilingual field backward compatibility
+  // Ensure legacy fields populated from bilingual fields for SSR templates,
+  // schema helpers, and any code still accessing product.name/product.description
+  if (obj.name_en && !obj.name) {
+    obj.name = obj.name_en;
+  }
+  if (obj.description_en && !obj.description) {
+    obj.description = obj.description_en;
+  }
+  // Ensure bilingual fields populated from legacy fields for gradual migration
+  // (products created before migration still have name but not name_en)
+  if (obj.name && !obj.name_en) {
+    obj.name_en = obj.name;
+  }
+  if (obj.description && !obj.description_en) {
+    obj.description_en = obj.description;
+  }
+  // Ensure Hebrew fields exist in response (empty string, not undefined)
+  if (obj.name_he === undefined || obj.name_he === null) {
+    obj.name_he = '';
+  }
+  if (obj.description_he === undefined || obj.description_he === null) {
+    obj.description_he = '';
+  }
+
   // #region agent log
   agentLog(
     'A',
