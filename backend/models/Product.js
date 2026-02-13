@@ -47,6 +47,14 @@ const ProductSchema = new mongoose.Schema({
   // Product details
   category: { type: String, required: true, index: true },
   description: { type: String },
+  // Bilingual fields (Phase 27 - v1.5 Bilingual Product Content)
+  // name_en/description_en hold English content (populated from legacy fields by migration)
+  // name_he/description_he hold Hebrew content (populated later by translation in Phase 32)
+  // Legacy name/description fields kept for backward compatibility through v1.5 milestone
+  name_en: { type: String, default: '' },
+  name_he: { type: String, default: '' },
+  description_en: { type: String, default: '' },
+  description_he: { type: String, default: '' },
   quantity: { type: Number, default: 0 },
   ils_price: { type: Number },
   usd_price: { type: Number },
