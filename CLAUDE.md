@@ -73,6 +73,20 @@ See `/backend/env.example` for required configuration including:
 - PayPal/Stripe API keys
 - Exchange rate API key
 
+## API Routing (post-SSR migration)
+
+After the SSR migration, the backend serves everything from `/` — there is **no `/api` prefix** on routes. The admin dashboard (`admin/BisliView.js`) uses `https://tamarkfir.com` as its production `API_URL`.
+
+**If admin API calls break (404s on `/api/...`)**, the fallback fix is to add an `/api`-stripping middleware in `backend/index.js` right after `cookieParser()`:
+```js
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    req.url = req.url.replace(/^\/api/, '');
+  }
+  next();
+});
+```
+
 ## Deployment
 
 Target: DigitalOcean (App Platform or Droplets)

@@ -998,7 +998,7 @@ class CategoriesView extends View {
       const originalIlsPrice = elem.dataset.originalIlsPrice || ilsPrice;
 
       const name = elem.querySelector('.item-title')?.textContent || '';
-      const description = elem.querySelector('.item-description')?.innerHTML || '';
+      const description = elem.dataset.fullDescription || elem.querySelector('.item-description')?.innerHTML || '';
       const imageElement = elem.querySelector('.front-image');
       const image = imageElement?.src || '';
 
@@ -1343,7 +1343,7 @@ class CategoriesView extends View {
     const originalIlsPrice = Math.round(Number(item?.original_ils_price) || ilsPrice);
 
     return `
-      <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}" data-usd-price="${usdPrice}" data-ils-price="${ilsPrice}" data-original-usd-price="${originalUsdPrice}" data-original-ils-price="${originalIlsPrice}">
+      <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}" data-usd-price="${usdPrice}" data-ils-price="${ilsPrice}" data-original-usd-price="${originalUsdPrice}" data-original-ils-price="${originalIlsPrice}" data-full-description="${(description || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}">
         <div class="product-image-container">
           <div class="loading-spinner"></div>
           <picture>
