@@ -57,6 +57,16 @@ export const handleLoadStorage = async function () {
     if (!localStorage.getItem('auth-token')) {
       const data = await JSON.parse(localStorage.getItem('cart'));
       if (!data) return;
+      // Phase 27: Silent cart clear if data predates bilingual schema migration
+      // Cart items store product titles from DOM, which may not match new schema.
+      // Per user decision: silently clear old cart data, no user-facing message.
+      const cartTimestamp = localStorage.getItem('cartTimestamp');
+      if (!cartTimestamp) {
+        // Cart was created before timestamp tracking — clear it
+        localStorage.removeItem('cart');
+        localStorage.setItem('cartTimestamp', Date.now().toString());
+        return;
+      }
       cart.push(...data);
     } else {
       const userData = await fetchUserCartAPI();
@@ -187,6 +197,7 @@ export const addToUserStorage = data => {
 const createLocalStorage = function () {
   try {
     localStorage.setItem('cart', JSON.stringify(cart));
+    localStorage.setItem('cartTimestamp', Date.now().toString());
   } catch (error) {
     if (error.name === 'QuotaExceededError' || error.code === 22) {
       console.error('localStorage quota exceeded. Cart not saved:', error);

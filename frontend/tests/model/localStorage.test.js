@@ -89,6 +89,7 @@ describe('Model: localStorage Persistence', () => {
         { id: 1002, title: 'Silver Ring', price: 95, amount: 2 }
       ];
       localStorage.setItem('cart', JSON.stringify(mockCartData));
+      localStorage.setItem('cartTimestamp', Date.now().toString());
 
       // Act: load from localStorage
       await handleLoadStorage();
@@ -115,6 +116,7 @@ describe('Model: localStorage Persistence', () => {
         }
       ];
       localStorage.setItem('cart', JSON.stringify(mockCartData));
+      localStorage.setItem('cartTimestamp', Date.now().toString());
 
       await handleLoadStorage();
 
@@ -255,6 +257,7 @@ describe('Model: localStorage Persistence', () => {
         null,
         { id: 1002, title: 'Another Valid Item' }
       ]));
+      localStorage.setItem('cartTimestamp', Date.now().toString());
 
       await handleLoadStorage();
 
@@ -285,6 +288,7 @@ describe('Model: localStorage Persistence', () => {
         { id: 1001 }, // Missing title
         { id: 1002, title: 'No Price' }
       ]));
+      localStorage.setItem('cartTimestamp', Date.now().toString());
 
       await handleLoadStorage();
 
@@ -303,6 +307,7 @@ describe('Model: localStorage Persistence', () => {
           amount: 1.5 // Float instead of integer
         }
       ]));
+      localStorage.setItem('cartTimestamp', Date.now().toString());
 
       await handleLoadStorage();
 
@@ -321,6 +326,7 @@ describe('Model: localStorage Persistence', () => {
         amount: 1
       }));
       localStorage.setItem('cart', JSON.stringify(largeCart));
+      localStorage.setItem('cartTimestamp', Date.now().toString());
 
       await handleLoadStorage();
 
