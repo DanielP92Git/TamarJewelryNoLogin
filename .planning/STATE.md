@@ -5,14 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-12)
 
 **Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers
-**Current focus:** Planning next milestone
+**Current focus:** v1.5 Bilingual Product Content
 
 ## Current Position
 
-Milestone: v1.4 SEO & Marketing Foundation (COMPLETE)
-Phase: All phases complete
-Status: Milestone archived, ready for next milestone
-Last activity: 2026-02-12 — v1.4 milestone completed and archived
+Milestone: v1.5 Bilingual Product Content
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-13 — Milestone v1.5 started
 
 Progress: v1.0-v1.4 complete. 5 milestones shipped.
 

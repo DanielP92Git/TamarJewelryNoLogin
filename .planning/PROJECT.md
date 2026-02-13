@@ -115,7 +115,26 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 
 ### Active
 
-(No active requirements — run `/gsd:new-milestone` to define next milestone)
+<!-- v1.5 Bilingual Product Content -->
+
+- [ ] Bilingual product schema (separate Hebrew/English fields for name and description)
+- [ ] Admin form with Hebrew/English text areas and on-demand "Translate" button
+- [ ] Google Cloud Translation API integration for Hebrew ↔ English translation
+- [ ] Frontend/SSR language-aware display (correct language based on /en/ or /he/ URL)
+- [ ] Bulk translate tool for existing products (English → Hebrew)
+- [ ] Data migration (move existing name/description to English fields)
+
+## Current Milestone: v1.5 Bilingual Product Content
+
+**Goal:** Enable true bilingual product content with automated Google Cloud Translation, so Hebrew and English visitors each see product names and descriptions in their language.
+
+**Target features:**
+- Bilingual product schema with separate Hebrew/English fields for name and description
+- Admin product forms with language-specific fields and "Translate" button (on-demand)
+- Google Cloud Translation API integration (Hebrew ↔ English)
+- Language-aware display across all customer-facing pages (SSR + client-side)
+- Bulk translation tool to translate all existing English products to Hebrew
+- Data migration to move existing single-language fields to bilingual structure
 
 ### Out of Scope
 
@@ -125,7 +144,7 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 - Barcode generation from SKUs — not needed for digital jewelry sales
 - SKU history or versioning — simple current value only
 - Full framework migration (Next.js/Nuxt) — EJS on Express achieves SSR without rewriting the entire frontend
-- AI-generated product descriptions — handmade jewelry needs authentic artisan descriptions
+- AI-generated product descriptions — handmade jewelry needs authentic artisan descriptions (note: translation is different from generation — v1.5 uses Google Translate for existing admin-written content)
 - Complex analytics setup (GA4, GTM, Facebook Pixel) — Microsoft Clarity already integrated
 
 ## Context
@@ -198,6 +217,8 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 | node-cache for in-memory caching | Single-server deployment, no Redis needed | ✓ Good - sub-50ms cached TTFB |
 | Cache invalidation on product changes | Admin edits immediately visible to next visitor | ✓ Good - no stale content |
 | data-ssr flag for client detection | Client JS skips re-fetch/re-render of SSR content | ✓ Good - prevents content flashing |
+| Google Cloud Translation API for product translation | Purpose-built, free tier, simple integration; admin reviews output | — Pending |
+| Bilingual schema (separate fields per language) | Cleaner than embedded objects, explicit, easy to query per language | — Pending |
 
 ---
-*Last updated: 2026-02-12 after v1.4 milestone completion*
+*Last updated: 2026-02-13 after v1.5 milestone start*
