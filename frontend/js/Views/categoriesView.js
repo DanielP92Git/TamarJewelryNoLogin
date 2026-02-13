@@ -32,7 +32,7 @@ class CategoriesView extends View {
       window.location.hostname !== 'localhost' &&
       window.location.hostname !== '127.0.0.1';
     this.apiUrl = this.isProduction
-      ? 'https://lobster-app-jipru.ondigitalocean.app/api'
+      ? ''
       : 'http://localhost:4000';
 
     // Add resize observer for debugging
@@ -619,7 +619,7 @@ class CategoriesView extends View {
     </div>`;
   }
 
-  generatePreview(item, imageMarkup, hasMultipleImages) {
+  async generatePreview(item, imageMarkup, hasMultipleImages) {
     const data = item;
     if (!data) return;
 
@@ -628,14 +628,36 @@ class CategoriesView extends View {
     const title = data.querySelector('.item-title').textContent;
     const product = this.products.find(prod => prod.id == id);
     const sku = product?.sku || null;
-    const description = (
+    // Prefer full description from data attribute or product data; fall back to card innerHTML (may be truncated)
+    const rawDescription =
+      data.dataset.fullDescription ||
       product?.description ||
       data.querySelector('.item-description')?.innerHTML ||
-      ''
-    )
-      .replace(/\r\n/g, '\n') // Normalize line endings
-      .replace(/\n{3,}/g, '\n\n') // Replace multiple line breaks with double line breaks
-      .trim(); // Remove extra whitespace
+      '';
+    let description = rawDescription
+      .replace(/\r\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    // If description looks truncated (ends with "..."), fetch full product from API
+    if (description.endsWith('...') || description.endsWith('…')) {
+      try {
+        const resp = await fetch(`${this.apiUrl}/getproduct/${id}`);
+        if (resp.ok) {
+          const fullProduct = await resp.json();
+          if (fullProduct?.description) {
+            description = fullProduct.description
+              .replace(/\r\n/g, '\n')
+              .replace(/\n{3,}/g, '\n\n')
+              .trim();
+            // Cache full description for future use
+            if (product) product.description = description;
+          }
+        }
+      } catch (e) {
+        console.warn('[Modal] Could not fetch full description:', e);
+      }
+    }
     // Handle both discount and non-discount price markup
     const priceElement = data.querySelector('.item-price') || 
                          data.querySelector('.item-price-discounted');
@@ -1183,8 +1205,7 @@ class CategoriesView extends View {
         spinner.classList.remove('spinner-hidden');
       }
 
-      const apiUrl = `${process.env.API_URL}`;
-      const fetchUrl = `${apiUrl}/productsByCategory`;
+      const fetchUrl = `${this.apiUrl}/productsByCategory`;
       // console.log('[DEBUG] Fetching more products from:', fetchUrl);
       const response = await fetch(fetchUrl, {
         method: 'POST',

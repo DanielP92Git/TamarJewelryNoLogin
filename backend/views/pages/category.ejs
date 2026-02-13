@@ -60,7 +60,7 @@
               ? description.substring(0, maxDescriptionLength).replace(/\n/g, '<br>') + '...'
               : description.replace(/\n/g, '<br>');
           %>
-          <div class="item-container" data-id="<%= product.id %>" data-quant="<%= product.quantity %>" data-currency="<%= curSign %>" data-usd-price="<%= Math.round(product.usd_price || 0) %>" data-ils-price="<%= Math.round(product.ils_price || 0) %>" data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>" data-original-ils-price="<%= Math.round(product.original_ils_price || product.ils_price || 0) %>">
+          <div class="item-container" data-id="<%= product.id %>" data-quant="<%= product.quantity %>" data-currency="<%= curSign %>" data-usd-price="<%= Math.round(product.usd_price || 0) %>" data-ils-price="<%= Math.round(product.ils_price || 0) %>" data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>" data-original-ils-price="<%= Math.round(product.original_ils_price || product.ils_price || 0) %>" data-full-description="<%= description %>">
             <div class="product-image-container">
               <div class="loading-spinner" style="display: none;"></div>
               <picture>
