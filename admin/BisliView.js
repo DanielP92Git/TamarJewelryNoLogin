@@ -68,7 +68,9 @@ function getDevApiCandidates() {
 let API_URL = (() => {
   // Production remains explicit; dev is auto-resolved at runtime to avoid host/port mismatches.
   if (IS_PRODUCTION) {
-    return normalizeApiBase("https://tamarkfir.com/api");
+    // After SSR migration the backend serves everything from / (no /api prefix).
+    // If this breaks, add an /api-stripping middleware in backend/index.js instead.
+    return normalizeApiBase("https://tamarkfir.com");
   }
   return normalizeApiBase(
     window.location.hostname.includes("127.0.0.1")
