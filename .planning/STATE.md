@@ -11,20 +11,21 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 Milestone: v1.5 Bilingual Product Content
 Phase: 27 of 32 (Schema Migration & Foundation)
-Plan: —
-Status: Ready to plan
-Last activity: 2026-02-13 — v1.5 roadmap created
+Plan: 1 of 2
+Status: In progress
+Last activity: 2026-02-13 — Completed 27-01: Bilingual Product Fields
 
 Progress: [████████████░░░░░░░░] 26/32 phases complete (81% of total phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 96 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 19)
+- Total plans completed: 97 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 19, v1.5: 1)
 - Average duration: ~5 min/plan
 - Total execution time: ~29 hours
 
 **Recent Trend:**
+- v1.5: 1 plan completed (27-01: 3 min)
 - v1.4: 18 plans in 3 days (2026-02-10 to 2026-02-12)
 
 ## Accumulated Context
@@ -36,6 +37,8 @@ All milestone decisions are logged in PROJECT.md Key Decisions table and phase s
 - Google Cloud Translation API v3 for product translation (purpose-built, free tier)
 - Bilingual schema with separate fields per language (cleaner than embedded objects)
 - English-only slugs for both languages (consistent with current v1.4 approach)
+- Bilingual fields use default: '' (not required) to avoid breaking existing product creation until migration runs (27-01)
+- Legacy name/description fields remain required and unchanged for backward compatibility through v1.5 (27-01)
 
 See milestone archives in `.planning/milestones/` for detailed decision history.
 
@@ -53,7 +56,7 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-13
-Stopped at: v1.5 roadmap created (6 phases, 25 requirements)
+Stopped at: Completed 27-01-PLAN.md (Bilingual Product Fields)
 Resume file: None
 
 ## Quick Tasks Completed
