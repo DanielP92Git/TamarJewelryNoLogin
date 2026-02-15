@@ -11,21 +11,21 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 
 Milestone: v1.5 Bilingual Product Content
 Phase: 29 of 32 (Admin UI Translation Workflow)
-Plan: 1 of 2
-Status: In Progress
-Last activity: 2026-02-15 — Completed 29-01: Admin UI Translation Workflow
+Plan: 2 of 2
+Status: Complete
+Last activity: 2026-02-15 — Completed 29-02: Backend Bilingual Field Wiring + Product List Translation Badges
 
-Progress: [█████████████░░░░░░░] 28/32 phases complete (87% of total phases)
+Progress: [█████████████░░░░░░░] 29/32 phases complete (91% of total phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 101 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 19, v1.5: 5)
+- Total plans completed: 102 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 19, v1.5: 6)
 - Average duration: ~5 min/plan
-- Total execution time: ~29 hours 9 min
+- Total execution time: ~29 hours 14 min
 
 **Recent Trend:**
-- v1.5: 5 plans completed (27-01: 3 min, 27-02: 12 min, 28-01: 3 min, 28-02: 3 min, 29-01: 3 min)
+- v1.5: 6 plans completed (27-01: 3 min, 27-02: 12 min, 28-01: 3 min, 28-02: 3 min, 29-01: 3 min, 29-02: 5 min)
 - v1.4: 18 plans in 3 days (2026-02-10 to 2026-02-12)
 
 ## Accumulated Context
@@ -41,6 +41,8 @@ All milestone decisions are logged in PROJECT.md Key Decisions table and phase s
 - Legacy name/description fields remain required and unchanged for backward compatibility through v1.5 (27-01)
 - Side-by-side bilingual field layout using CSS grid (1fr auto 1fr) for clear language separation (29-01)
 - Bidirectional translate buttons (→ and ←) with overwrite confirmation when target field has content (29-01)
+- Fallback to legacy name/description fields for English content ensures backward compatibility (29-02)
+- Translation status badge logic: bilingual (both EN+HE complete), needs translation (partial), no translations (none) (29-02)
 
 See milestone archives in `.planning/milestones/` for detailed decision history.
 
@@ -58,8 +60,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 29-01: Admin UI Translation Workflow
-Resume file: .planning/phases/29-admin-ui-translation-workflow/29-01-SUMMARY.md
+Stopped at: Completed 29-02: Backend Bilingual Field Wiring + Product List Translation Badges
+Resume file: .planning/phases/29-admin-ui-translation-workflow/29-02-SUMMARY.md
 
 ## Quick Tasks Completed
 
