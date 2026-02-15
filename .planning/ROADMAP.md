@@ -257,11 +257,11 @@ Plans:
   3. Admin can manually edit translated text before saving
   4. Product list shows translation status indicators (translated / needs translation)
   5. Form validation clearly indicates which fields are required
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 29-01: TBD
-- [ ] 29-02: TBD
+- [ ] 29-01-PLAN.md — Bilingual form fields with translate buttons (CSS + form UI + translate handler)
+- [ ] 29-02-PLAN.md — Backend bilingual field wiring + product list translation badges
 
 #### Phase 30: Frontend Display & SSR Updates
 **Goal**: Customers see product content in their language on all pages
@@ -327,10 +327,10 @@ Phases execute in numeric order: 27 → 28 → 29 → 30 → 31 → 32
 | 23-26. SEO & Marketing | v1.4 | Complete | Complete | 2026-02-12 |
 | 27. Schema Migration | v1.5 | 0/2 | Planned | - |
 | 28. Translation Service | v1.5 | Complete    | 2026-02-15 | - |
-| 29. Admin UI | v1.5 | 0/TBD | Not started | - |
+| 29. Admin UI | v1.5 | 0/2 | Planned | - |
 | 30. Frontend Display | v1.5 | 0/TBD | Not started | - |
 | 31. Cache & SEO | v1.5 | 0/TBD | Not started | - |
 | 32. Bulk Translation | v1.5 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-13 after v1.5 roadmap creation*
+*Last updated: 2026-02-15 after Phase 29 planning*
