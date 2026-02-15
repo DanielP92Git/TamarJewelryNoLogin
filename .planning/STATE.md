@@ -10,22 +10,22 @@ See: .planning/PROJECT.md (updated 2026-02-13)
 ## Current Position
 
 Milestone: v1.5 Bilingual Product Content
-Phase: 29 of 32 (Admin UI Translation Workflow)
-Plan: 2 of 2
-Status: Complete
-Last activity: 2026-02-15 — Completed 29-02: Backend Bilingual Field Wiring + Product List Translation Badges
+Phase: 30 of 32 (Frontend Display & SSR Updates)
+Plan: 1 of 2
+Status: In Progress
+Last activity: 2026-02-15 — Completed 30-01: SSR Bilingual Display & JSON-LD
 
 Progress: [█████████████░░░░░░░] 29/32 phases complete (91% of total phases)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 102 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 19, v1.5: 6)
+- Total plans completed: 103 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 19, v1.5: 7)
 - Average duration: ~5 min/plan
-- Total execution time: ~29 hours 14 min
+- Total execution time: ~29 hours 17 min
 
 **Recent Trend:**
-- v1.5: 6 plans completed (27-01: 3 min, 27-02: 12 min, 28-01: 3 min, 28-02: 3 min, 29-01: 3 min, 29-02: 5 min)
+- v1.5: 7 plans completed (27-01: 3 min, 27-02: 12 min, 28-01: 3 min, 28-02: 3 min, 29-01: 3 min, 29-02: 5 min, 30-01: 3 min)
 - v1.4: 18 plans in 3 days (2026-02-10 to 2026-02-12)
 
 ## Accumulated Context
@@ -45,6 +45,9 @@ All milestone decisions are logged in PROJECT.md Key Decisions table and phase s
 - Translation status badge logic: bilingual (both EN+HE complete), needs translation (partial), no translations (none) (29-02)
 
 See milestone archives in `.planning/milestones/` for detailed decision history.
+- [Phase 30]: Bilingual field selection uses fallback chain: he || en || legacy for Hebrew, en || legacy for English
+- [Phase 30]: JSON-LD inLanguage property added for search engine language signals
+- [Phase 30]: data-name-en/data-name-he attributes added to product containers for client-side bilingual cart support
 
 ### Pending Todos
 
@@ -60,8 +63,8 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-15
-Stopped at: Completed 29-02: Backend Bilingual Field Wiring + Product List Translation Badges
-Resume file: .planning/phases/29-admin-ui-translation-workflow/29-02-SUMMARY.md
+Stopped at: Completed 30-01: SSR Bilingual Display & JSON-LD
+Resume file: .planning/phases/30-frontend-display-ssr-updates/30-01-SUMMARY.md
 
 ## Quick Tasks Completed
 
