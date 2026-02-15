@@ -327,7 +327,7 @@ Phases execute in numeric order: 27 → 28 → 29 → 30 → 31 → 32
 | 23-26. SEO & Marketing | v1.4 | Complete | Complete | 2026-02-12 |
 | 27. Schema Migration | v1.5 | 0/2 | Planned | - |
 | 28. Translation Service | v1.5 | 2/2 | Complete | 2026-02-15 |
-| 29. Admin UI | v1.5 | 1/2 | In Progress | - |
+| 29. Admin UI | v1.5 | Complete    | 2026-02-15 | - |
 | 30. Frontend Display | v1.5 | 0/TBD | Not started | - |
 | 31. Cache & SEO | v1.5 | 0/TBD | Not started | - |
 | 32. Bulk Translation | v1.5 | 0/TBD | Not started | - |
