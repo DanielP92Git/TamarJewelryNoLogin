@@ -23,6 +23,15 @@ class CartView extends View {
     return saved === 'ils' ? 'ils' : 'usd';
   }
 
+  // Get product name based on current language selection
+  _getItemName(item) {
+    const lng = localStorage.getItem('language') || 'eng';
+    if (lng === 'heb') {
+      return item.name_he || item.name_en || item.title || '';
+    }
+    return item.name_en || item.title || '';
+  }
+
   // Get price for cart item based on current currency (uses stored prices)
   _getItemPrice(item, useOriginal = false) {
     const currency = this._getCurrentCurrency();
@@ -213,17 +222,16 @@ class CartView extends View {
           const itemPrice = this._getItemPrice(item, false);
           const itemOriginalPrice = this._getItemPrice(item, true);
           const hasDiscount = itemOriginalPrice > itemPrice;
+          const itemName = this._getItemName(item);
 
           return `
           <div class="cart-item" id="${item.id}">
             <div class="cart-item__media">
-              <img src='${item.image}' class="item-img" alt="${
-            item.title || ''
-          }" />
+              <img src='${item.image}' class="item-img" alt="${itemName}" />
             </div>
             <div class="cart-item__content">
               <div class="cart-item__title">
-                <h2 class="item-title" dir="auto">${item.title}</h2>
+                <h2 class="item-title" dir="auto">${itemName}</h2>
               </div>
               <div class="cart-item__right">
                 ${
@@ -740,9 +748,11 @@ class CartView extends View {
   // Override the placeholder from View.js
   setPageSpecificLanguage(lng, cartNum) {
     this.setCartLng(lng);
-    // Re-render summary with the new language (now handled correctly)
-    // const cartNum = await model.checkCartNumber(); // No need to fetch again
-    // this._renderSummary(cartNum, lng);
+    // Re-render cart items to show names in new language
+    if (this._itemsBox && model.cart && model.cart.length > 0) {
+      this._itemsBox.innerHTML = '';
+      this.render(model.cart.length);
+    }
   }
 }
 export default new CartView();

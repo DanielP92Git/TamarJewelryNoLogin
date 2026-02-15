@@ -226,6 +226,10 @@ export const addToLocalStorage = async function (data) {
   const titleEl = data.querySelector('.item-title');
   const itemTitle = titleEl ? titleEl.textContent : '';
 
+  // Extract bilingual names for language-switching cart display
+  const nameEn = data.dataset.nameEn || itemTitle || '';
+  const nameHe = data.dataset.nameHe || '';
+
   // Get currency from dataset
   const currencyCheck = data.dataset.currency || 'ils';
 
@@ -257,6 +261,8 @@ export const addToLocalStorage = async function (data) {
     currency: currencyCheck,
     quantity: prodQuantity,
     id: +itemId,
+    name_en: nameEn,
+    name_he: nameHe,
   };
   // 2) Update item to cart
   addToLocalCart(itemData);
@@ -278,6 +284,8 @@ const addToLocalCart = function (data) {
     id: +data.id,
     quantity: data.quantity,
     amount: 1,
+    name_en: data.name_en || data.title || '',
+    name_he: data.name_he || '',
   });
   createLocalStorage();
 };
