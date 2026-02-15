@@ -8,3 +8,7 @@ coverage/
 backend/coverage/
 frontend/coverage/
 *.lcov
+
+# Google Cloud service account keys (NEVER commit these)
+*-service-account*.json
+*-translator-key*.json

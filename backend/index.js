@@ -28,6 +28,7 @@ const {
   startExchangeRateJob,
   runExchangeRateUpdate,
 } = require('./jobs/exchangeRateJob');
+const { translateText, translateProductFields } = require('./services/translationService');
 const { detectLanguage, languageMiddleware, trailingSlashRedirect } = require('./middleware/language');
 const { legacyRedirectMiddleware } = require('./middleware/legacy');
 const {
@@ -3109,6 +3110,235 @@ app.post(
         success: false,
         error: error.message,
       });
+    }
+  }
+);
+
+// Translation Management Endpoints
+// Single-field translation endpoint for admin forms
+app.post(
+  '/admin/translate',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const { text, targetLang, sourceLang } = req.body;
+
+      // Validate text
+      if (!text || typeof text !== 'string' || text.trim() === '') {
+        return res.status(400).json({
+          success: false,
+          error: 'Text is required and must be a non-empty string',
+        });
+      }
+
+      // Validate targetLang
+      if (targetLang !== 'en' && targetLang !== 'he') {
+        return res.status(400).json({
+          success: false,
+          error: 'Target language must be "en" or "he"',
+        });
+      }
+
+      // Validate character limit
+      if (text.length > 30000) {
+        return res.status(400).json({
+          success: false,
+          error: 'Text exceeds maximum 30,000 character limit',
+        });
+      }
+
+      // Warn on large text but proceed
+      if (text.length > 5000 && !isProd) {
+        console.warn(
+          `Translation request with ${text.length} characters (target: ${targetLang})`
+        );
+      }
+
+      // Call translation service
+      const result = await translateText(text, targetLang, sourceLang);
+
+      // Build success response
+      const response = {
+        success: true,
+        translatedText: result.translatedText,
+      };
+
+      // Include detected source language if available
+      if (result.detectedSourceLanguage) {
+        response.detectedSourceLanguage = result.detectedSourceLanguage;
+      }
+
+      res.json(response);
+    } catch (error) {
+      console.error('Translation error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Translation failed. Please try again or enter manually.',
+      });
+    }
+  }
+);
+
+// Bulk translation with SSE progress streaming
+app.post(
+  '/admin/translate/bulk',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      // Set SSE headers
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      res.flushHeaders();
+
+      // SSE helper
+      function sendEvent(event, data) {
+        res.write(`event: ${event}\n`);
+        res.write(`data: ${JSON.stringify(data)}\n\n`);
+      }
+
+      // Handle client disconnect (cancellation support)
+      let cancelled = false;
+      req.on('close', () => {
+        cancelled = true;
+        if (!isProd) console.log('Bulk translation cancelled by client');
+      });
+
+      // Query products needing translation
+      // Simpler approach: load all products and filter in JS (only ~94 products)
+      const allProducts = await Product.find({}).lean();
+      const products = allProducts.filter((p) => {
+        const needsNameHe = p.name_en && !p.name_he;
+        const needsNameEn = p.name_he && !p.name_en;
+        const needsDescHe = p.description_en && !p.description_he;
+        const needsDescEn = p.description_he && !p.description_en;
+        return needsNameHe || needsNameEn || needsDescHe || needsDescEn;
+      });
+
+      const total = products.length;
+
+      // Send initial count
+      sendEvent('start', { total });
+
+      // If no products need translation
+      if (total === 0) {
+        sendEvent('complete', {
+          translated: 0,
+          failed: 0,
+          skipped: 0,
+          failedProducts: [],
+        });
+        res.end();
+        return;
+      }
+
+      // Process products
+      let translated = 0;
+      let failed = 0;
+      let skipped = 0;
+      const failedProducts = [];
+      let lastKeepalive = Date.now();
+
+      for (let i = 0; i < products.length; i++) {
+        // Check for cancellation
+        if (cancelled) {
+          if (!isProd) console.log('Breaking loop due to cancellation');
+          break;
+        }
+
+        const product = products[i];
+        const productName =
+          product.name || product.name_en || product.name_he || 'Unknown';
+
+        // Send progress event
+        sendEvent('progress', {
+          current: i + 1,
+          total,
+          productName,
+          productId: product.id,
+        });
+
+        // Build fields object for translation
+        const fields = {
+          name_en: product.name_en || '',
+          name_he: product.name_he || '',
+          description_en: product.description_en || '',
+          description_he: product.description_he || '',
+        };
+
+        try {
+          // Translate product fields
+          const translations = await translateProductFields(fields);
+
+          // If translations returned, save to DB
+          if (translations && Object.keys(translations).length > 0) {
+            await Product.updateOne({ _id: product._id }, { $set: translations });
+
+            sendEvent('success', {
+              productId: product.id,
+              productName,
+              translations,
+            });
+            translated++;
+          } else {
+            // All fields already filled
+            skipped++;
+          }
+        } catch (error) {
+          // Per-product error: log, track, continue
+          console.error(
+            `Translation failed for product ${product.id} (${productName}):`,
+            error.message
+          );
+          failed++;
+          failedProducts.push({
+            id: product.id,
+            name: productName,
+            error: error.message,
+          });
+          sendEvent('error', {
+            productId: product.id,
+            productName,
+            error: error.message,
+          });
+        }
+
+        // Rate limiting delay (100ms between products)
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        // SSE keepalive every 30 seconds
+        const now = Date.now();
+        if (now - lastKeepalive > 30000) {
+          res.write(': keepalive\n\n');
+          lastKeepalive = now;
+        }
+      }
+
+      // Send completion event
+      sendEvent('complete', {
+        translated,
+        failed,
+        skipped,
+        failedProducts,
+      });
+
+      res.end();
+    } catch (error) {
+      // Outer error handler
+      console.error('Bulk translation error:', error);
+      try {
+        res.write(
+          `event: error\ndata: ${JSON.stringify({ error: error.message })}\n\n`
+        );
+        res.end();
+      } catch (writeError) {
+        // If we can't write to response, just log
+        console.error('Failed to send error event:', writeError);
+      }
     }
   }
 );
