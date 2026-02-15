@@ -882,6 +882,12 @@ code {
   border-color: rgba(239, 68, 68, 0.25);
 }
 
+.badge--muted {
+  color: var(--muted-2);
+  background: rgba(157, 157, 185, 0.08);
+  border-color: rgba(157, 157, 185, 0.15);
+}
+
 .split {
   display: grid;
   grid-template-columns: 1.35fr 0.75fr;

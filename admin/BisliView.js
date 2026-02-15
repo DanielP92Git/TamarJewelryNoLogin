@@ -2200,6 +2200,18 @@ function loadProducts(data) {
       statusText = "Low Stock";
     }
 
+    // Translation status badge (Phase 29)
+    const hasEn = item.name_en && item.description_en;
+    const hasHe = item.name_he && item.description_he;
+    let translationBadge = '';
+    if (hasEn && hasHe) {
+      translationBadge = '<span class="badge badge--translation badge--success">Bilingual</span>';
+    } else if (item.name_en || item.name_he || item.description_en || item.description_he) {
+      translationBadge = '<span class="badge badge--translation badge--warning">Needs translation</span>';
+    } else {
+      translationBadge = '<span class="badge badge--translation badge--muted">No translations</span>';
+    }
+
     productElement.innerHTML = `
       <div class="drag-handle" style="display: none;" title="Drag to reorder">
         <span class="drag-icon">⋮⋮</span>
@@ -2237,6 +2249,7 @@ function loadProducts(data) {
       <div class="mono hide-sm">₪${item.ils_price ?? ""}</div>
       <div>
         <span class="badge ${statusClass}">${statusText}</span>
+        ${translationBadge}
       </div>
       <div class="actions">
         <button class="icon-action icon-action--primary edit-btn" title="Edit Product" data-product-id="${
@@ -3929,9 +3942,17 @@ async function updateProduct(e) {
     }
   }
 
-  const name = document.getElementById("name").value;
+  // Get bilingual field values (Phase 29)
+  const nameEn = document.getElementById("name-en")?.value?.trim() || '';
+  const nameHe = document.getElementById("name-he")?.value?.trim() || '';
+  const descriptionEn = document.getElementById("description-en")?.value?.trim() || '';
+  const descriptionHe = document.getElementById("description-he")?.value?.trim() || '';
+
+  // Legacy fields - populate from bilingual fields for backward compatibility
+  const name = nameEn || nameHe || document.getElementById("name")?.value || '';
+  const description = descriptionEn || descriptionHe || document.getElementById("description")?.value || '';
+
   const ilsPrice = document.getElementById("new-price").value;
-  const description = document.getElementById("description").value;
   const category = document.getElementById("category").value;
   const quantity = document.getElementById("quantity").value;
   const securityMargin = document.getElementById("security-margin").value;
@@ -3950,6 +3971,11 @@ async function updateProduct(e) {
   formData.append("security_margin", securityMargin);
   // Include fields for backward-compatible legacy update endpoints
   formData.append("id", productId);
+  // Bilingual fields (Phase 29)
+  formData.append("name_en", nameEn);
+  formData.append("name_he", nameHe);
+  formData.append("description_en", descriptionEn);
+  formData.append("description_he", descriptionHe);
 
   // Add SKU to update data if changed
   if (newSkuValue !== originalSku) {
@@ -4433,8 +4459,21 @@ async function addProduct(e, data, form) {
   try {
     console.log("[addProduct] Step 1: Getting form values...");
     // 1. Get form values
-    const name = document.getElementById("name").value;
-    const description = document.getElementById("description").value || "";
+    const nameEn = document.getElementById("name-en")?.value?.trim() || '';
+    const nameHe = document.getElementById("name-he")?.value?.trim() || '';
+    const descriptionEn = document.getElementById("description-en")?.value?.trim() || '';
+    const descriptionHe = document.getElementById("description-he")?.value?.trim() || '';
+
+    // Legacy fields - populate from bilingual fields for backward compatibility
+    const name = nameEn || nameHe || '';
+    const description = descriptionEn || descriptionHe || '';
+
+    // Update hidden legacy fields
+    const nameHidden = document.getElementById("name");
+    if (nameHidden) nameHidden.value = name;
+    const descHidden = document.getElementById("description");
+    if (descHidden) descHidden.value = description;
+
     const category = document.getElementById("category").value;
     const quantity = document.getElementById("quantity").value;
     const ilsPrice = document.getElementById("new-price").value;
@@ -4446,10 +4485,10 @@ async function addProduct(e, data, form) {
     const applyGlobalDiscount = !!applyGlobalDiscountCheckbox?.checked;
     const sku = document.getElementById("sku-input")?.value?.trim() || "";
 
-    // Validate required fields
-    if (!name || !ilsPrice) {
+    // Validate required fields - at least one language must have a name
+    if ((!nameEn && !nameHe) || !ilsPrice) {
       console.error("[addProduct] Validation failed: Missing required fields");
-      throw new Error("Please fill in all required fields");
+      throw new Error("Product name is required in at least one language");
     }
 
     if (!sku) {
@@ -4574,6 +4613,11 @@ async function addProduct(e, data, form) {
       ils_price: Math.round(parseFloat(ilsPrice)),
       security_margin: securityMargin,
       apply_global_discount: applyGlobalDiscount,
+      // Bilingual fields (Phase 29)
+      name_en: nameEn,
+      name_he: nameHe,
+      description_en: descriptionEn,
+      description_he: descriptionHe,
       // Include all image data from the upload response
       mainImage: imageData.mainImage,
       smallImages: imageData.smallImages,
