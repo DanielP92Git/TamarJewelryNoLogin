@@ -2134,6 +2134,11 @@ app.post(
         category: req.body.category,
         quantity: Math.max(0, Number(req.body.quantity) || 0),
         description: req.body.description || '',
+        // Bilingual fields (Phase 29 - v1.5 Bilingual Product Content)
+        name_en: req.body.name_en || req.body.name || '',
+        name_he: req.body.name_he || '',
+        description_en: req.body.description_en || req.body.description || '',
+        description_he: req.body.description_he || '',
         ils_price: finalIlsPrice,
         usd_price: finalUsdPrice,
         original_ils_price: originalIlsPrice,
@@ -2273,6 +2278,10 @@ app.post(
         quantity,
         security_margin,
         sku,
+        name_en,
+        name_he,
+        description_en,
+        description_he,
       } = req.body;
 
       // Update basic product information
@@ -2307,6 +2316,12 @@ app.post(
       product.category = category;
       product.quantity = Math.max(0, Number(quantity) || 0);
       product.security_margin = Math.max(0, Number(security_margin) || 5);
+
+      // Update bilingual fields (Phase 29 - v1.5 Bilingual Product Content)
+      if (name_en !== undefined) product.name_en = name_en || '';
+      if (name_he !== undefined) product.name_he = name_he || '';
+      if (description_en !== undefined) product.description_en = description_en || '';
+      if (description_he !== undefined) product.description_he = description_he || '';
 
       // Handle SKU update
       // Only validate if SKU is being changed (not if it's the same or not provided)
