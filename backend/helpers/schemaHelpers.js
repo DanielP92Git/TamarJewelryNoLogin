@@ -5,9 +5,19 @@
  * @param {Object} product - Product document from MongoDB
  * @param {string} langKey - 'eng' or 'heb'
  * @param {string} baseUrl - Site base URL
+ * @param {string} productName - Optional pre-computed bilingual product name
+ * @param {string} productDescription - Optional pre-computed bilingual product description
  * @returns {Object} Product schema JSON-LD object
  */
-function generateProductSchema(product, langKey, baseUrl) {
+function generateProductSchema(product, langKey, baseUrl, productName, productDescription) {
+  // If productName is not passed, compute it from bilingual fields
+  const name = productName || (langKey === 'heb'
+    ? (product.name_he || product.name_en || product.name)
+    : (product.name_en || product.name));
+  const desc = productDescription || (langKey === 'heb'
+    ? (product.description_he || product.description_en || product.description)
+    : (product.description_en || product.description));
+
   const mainImg = (Array.isArray(product.images) && product.images.length > 0)
     ? product.images[0]
     : product.mainImage;
@@ -24,8 +34,9 @@ function generateProductSchema(product, langKey, baseUrl) {
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: product.name,
-    description: product.description || '',
+    inLanguage: urlLang,
+    name: name,
+    description: desc || '',
     offers: {
       '@type': 'Offer',
       url: `${baseUrl}/${urlLang}/product/${product.slug}`,

@@ -68,7 +68,7 @@ async function renderCategoryPage(req, res) {
     })
       .sort({ displayOrder: 1 })
       .limit(20)
-      .select('id name slug image publicImage images mainImage description quantity ils_price usd_price category sku discount_percentage original_ils_price original_usd_price')
+      .select('id name slug image publicImage images mainImage description quantity ils_price usd_price category sku discount_percentage original_ils_price original_usd_price name_en name_he description_en description_he')
       .lean();
 
     // If no products found, return 404
@@ -150,17 +150,25 @@ async function renderProductPage(req, res) {
       return res.status(404).render('pages/404', buildPageData(req, '404', ERROR_PAGE_STYLES));
     }
 
+    // Bilingual field selection with English fallback
+    const productName = langKey === 'heb'
+      ? (product.name_he || product.name_en || product.name)
+      : (product.name_en || product.name);
+    const productDescription = langKey === 'heb'
+      ? (product.description_he || product.description_en || product.description)
+      : (product.description_en || product.description);
+
     // Determine currency and price
     const currency = langKey === 'heb' ? 'ILS' : 'USD';
     const price = langKey === 'heb' ? product.ils_price : product.usd_price;
     const originalPrice = langKey === 'heb' ? product.original_ils_price : product.original_usd_price;
 
     // Truncate description for meta tag (max 158 chars)
-    const metaDescription = product.description
-      ? (product.description.length > 158
-          ? product.description.substring(0, 158).trim() + '...'
-          : product.description)
-      : `View ${product.name} at Tamar Kfir Jewelry. Handmade with love in Jerusalem.`;
+    const metaDescription = productDescription
+      ? (productDescription.length > 158
+          ? productDescription.substring(0, 158).trim() + '...'
+          : productDescription)
+      : `View ${productName} at Tamar Kfir Jewelry. Handmade with love in Jerusalem.`;
 
     // Get product image for OG tags
     const mainImg = (Array.isArray(product.images) && product.images.length > 0)
@@ -182,7 +190,7 @@ async function renderProductPage(req, res) {
       lang: langKey,
       urlLang: urlLang,
       dir: dir,
-      title: product.name, // Will get " | Tamar Kfir Jewelry" suffix from meta-tags.ejs
+      title: productName, // Will get " | Tamar Kfir Jewelry" suffix from meta-tags.ejs
       description: metaDescription,
       canonical: canonical,
       alternateUrl: alternateUrl,
@@ -200,6 +208,8 @@ async function renderProductPage(req, res) {
         { href: '/css/mobile-menu.css', media: '(max-width: 799.9px)' },
       ],
       product: product,
+      productName: productName,
+      productDescription: productDescription,
       price: price,
       originalPrice: originalPrice,
       currency: currency,
@@ -212,7 +222,7 @@ async function renderProductPage(req, res) {
     };
 
     // Generate single product schema
-    const schemaItems = [generateProductSchema(product, langKey, baseUrl)];
+    const schemaItems = [generateProductSchema(product, langKey, baseUrl, productName, productDescription)];
     pageData.schemaItems = schemaItems;
 
     // Generate breadcrumb: Home > Category > Product
@@ -226,7 +236,7 @@ async function renderProductPage(req, res) {
         url: `/${urlLang}/${pageData.categorySlug}`,
       },
       {
-        name: product.name,
+        name: productName,
         // Current page - no URL
       },
     ];
