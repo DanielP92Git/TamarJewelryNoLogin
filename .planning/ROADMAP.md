@@ -211,7 +211,7 @@ See [v1.4-ROADMAP.md](.planning/milestones/v1.4-ROADMAP.md) for full phase detai
 
 </details>
 
-### 🚧 v1.5 Bilingual Product Content (In Progress)
+### v1.5 Bilingual Product Content (In Progress)
 
 **Milestone Goal:** Enable true bilingual product content with automated Google Cloud Translation, so Hebrew and English visitors each see product names and descriptions in their language.
 
@@ -275,12 +275,11 @@ Plans:
   5. Graceful fallback to English when Hebrew translation is missing
   6. JSON-LD structured data uses language-specific content with inLanguage property
   7. OG meta tags use localized product descriptions for social sharing
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 30-01: TBD
-- [ ] 30-02: TBD
-- [ ] 30-03: TBD
+- [ ] 30-01-PLAN.md — SSR bilingual display + JSON-LD inLanguage + OG meta tags
+- [ ] 30-02-PLAN.md — Client-side bilingual display + cart bilingual names
 
 #### Phase 31: Cache Invalidation & SEO Polish
 **Goal**: Cache system properly handles bilingual content and SEO remains strong
@@ -328,9 +327,9 @@ Phases execute in numeric order: 27 → 28 → 29 → 30 → 31 → 32
 | 27. Schema Migration | v1.5 | 0/2 | Planned | - |
 | 28. Translation Service | v1.5 | 2/2 | Complete | 2026-02-15 |
 | 29. Admin UI | v1.5 | Complete    | 2026-02-15 | - |
-| 30. Frontend Display | v1.5 | 0/TBD | Not started | - |
+| 30. Frontend Display | v1.5 | 0/2 | Planned | - |
 | 31. Cache & SEO | v1.5 | 0/TBD | Not started | - |
 | 32. Bulk Translation | v1.5 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-15 after Phase 29-01 execution*
+*Last updated: 2026-02-15 after Phase 30 planning*
