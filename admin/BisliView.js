@@ -233,6 +233,99 @@ function showInfoToast(message) {
   }).showToast();
 }
 
+// Translation handler for bilingual form fields
+async function handleTranslateClick(event) {
+  const button = event.currentTarget;
+  const sourceId = button.dataset.source;
+  const targetId = button.dataset.target;
+  const targetLang = button.dataset.targetLang;
+
+  const sourceInput = document.getElementById(sourceId);
+  const targetInput = document.getElementById(targetId);
+
+  if (!sourceInput || !targetInput) {
+    showErrorToast('Translation fields not found');
+    return;
+  }
+
+  const text = sourceInput.value.trim();
+  if (!text) {
+    showErrorToast('Enter text before translating');
+    return;
+  }
+
+  // Check if target field already has content
+  if (targetInput.value.trim()) {
+    if (!confirm('This field already has content. Overwrite with translation?')) {
+      return;
+    }
+  }
+
+  // Derive field name from source ID (e.g., "name-en" -> "name", "description-en" -> "description")
+  const fieldName = sourceId.split('-')[0];
+  const errorDiv = document.getElementById(`${fieldName}-translate-error`);
+
+  // Disable button and show loading state
+  button.disabled = true;
+  button.classList.add('is-loading');
+
+  // Hide any existing error
+  if (errorDiv) {
+    errorDiv.style.display = 'none';
+    errorDiv.textContent = '';
+  }
+
+  try {
+    const response = await apiFetch('/admin/translate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + localStorage.getItem('auth-token')
+      },
+      body: JSON.stringify({ text, targetLang })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      // Set translated text
+      targetInput.value = data.translatedText;
+
+      // Add field-updated animation
+      targetInput.classList.add('field-updated');
+      setTimeout(() => {
+        targetInput.classList.remove('field-updated');
+      }, 2000);
+
+      showSuccessToast('Translation complete');
+    } else {
+      throw new Error(data.error || 'Translation failed');
+    }
+  } catch (error) {
+    console.error('Translation error:', error);
+
+    // Show inline error
+    if (errorDiv) {
+      errorDiv.textContent = error.message || 'Translation failed. Please try again or enter manually.';
+      errorDiv.style.display = 'block';
+    }
+
+    showErrorToast('Translation failed');
+  } finally {
+    // Always re-enable button and remove loading state
+    button.disabled = false;
+    button.classList.remove('is-loading');
+  }
+}
+
+// Attach translate button handlers to all translate buttons in current DOM
+function attachTranslateHandlers() {
+  const buttons = document.querySelectorAll('.btn-translate');
+  buttons.forEach(button => {
+    button.addEventListener('click', handleTranslateClick);
+  });
+}
+
 // Command pattern for undo/redo (per RESEARCH.md)
 class MoveCommand {
   constructor(fromIndex, toIndex, productId) {
