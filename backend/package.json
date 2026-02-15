@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@google-cloud/translate": "^9.3.0",
     "@paypal/checkout-server-sdk": "^1.0.3",
     "aws-sdk": "^2.1693.0",
     "bcrypt": "^5.1.1",
