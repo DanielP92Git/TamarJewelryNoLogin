@@ -278,8 +278,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 30-01-PLAN.md — SSR bilingual display + JSON-LD inLanguage + OG meta tags
-- [ ] 30-02-PLAN.md — Client-side bilingual display + cart bilingual names
+- [x] 30-01-PLAN.md — SSR bilingual display + JSON-LD inLanguage + OG meta tags
+- [x] 30-02-PLAN.md — Client-side bilingual display + cart bilingual names
 
 #### Phase 31: Cache Invalidation & SEO Polish
 **Goal**: Cache system properly handles bilingual content and SEO remains strong
@@ -326,10 +326,10 @@ Phases execute in numeric order: 27 → 28 → 29 → 30 → 31 → 32
 | 23-26. SEO & Marketing | v1.4 | Complete | Complete | 2026-02-12 |
 | 27. Schema Migration | v1.5 | 0/2 | Planned | - |
 | 28. Translation Service | v1.5 | 2/2 | Complete | 2026-02-15 |
-| 29. Admin UI | v1.5 | Complete    | 2026-02-15 | - |
-| 30. Frontend Display | v1.5 | 0/2 | Planned | - |
+| 29. Admin UI | v1.5 | 2/2 | Complete | 2026-02-15 |
+| 30. Frontend Display | v1.5 | 2/2 | Complete | 2026-02-15 |
 | 31. Cache & SEO | v1.5 | 0/TBD | Not started | - |
 | 32. Bulk Translation | v1.5 | 0/TBD | Not started | - |
 
 ---
-*Last updated: 2026-02-15 after Phase 30 planning*
+*Last updated: 2026-02-15 after Phase 30 completion*
