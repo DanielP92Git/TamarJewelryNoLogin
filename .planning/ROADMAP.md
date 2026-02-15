@@ -241,11 +241,11 @@ Plans:
   3. Translation results cached in memory to reduce API costs
   4. Translation errors handled gracefully so admin can still save product with manual entry
   5. Bulk operations use batching with delays to respect API rate limits
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 28-01: TBD
-- [ ] 28-02: TBD
+- [ ] 28-01-PLAN.md — Translation cache + service with Google Cloud Translation API v3
+- [ ] 28-02-PLAN.md — Admin translation endpoints (single-field + bulk with SSE progress)
 
 #### Phase 29: Admin UI & Translation Workflow
 **Goal**: Admin can create and edit bilingual products with automated translation assistance
