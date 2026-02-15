@@ -3048,7 +3048,7 @@ function editProduct(product) {
       <div class="page__header">
         <div>
           <h2 class="page__title">Edit Product</h2>
-          <p class="page__subtitle">${product.name}</p>
+          <p class="page__subtitle">${product.name_en || product.name}</p>
         </div>
         <div class="page__actions" style="display: flex; align-items: center; gap: 10px;">
           <button type="button" class="btn" id="cancel-edit-product">Cancel</button>
@@ -3065,15 +3065,49 @@ function editProduct(product) {
             <div class="card__body" style="display:flex; flex-direction:column; gap:14px;">
               <div class="field">
                 <div class="label">Product Name</div>
-                <input class="input" type="text" name="name" id="name" value="${
-                  product.name
-                }" />
+                <div class="bilingual-field">
+                  <div class="bilingual-field__item">
+                    <div class="label">English <span class="label-lang">EN</span></div>
+                    <input class="input" type="text" name="name_en" id="name-en" value="${
+                      product.name_en || product.name || ''
+                    }" />
+                  </div>
+                  <div class="bilingual-field__actions">
+                    <button type="button" class="btn-translate" data-source="name-en" data-target="name-he" data-target-lang="he" title="Translate EN → HE">→</button>
+                    <button type="button" class="btn-translate" data-source="name-he" data-target="name-en" data-target-lang="en" title="Translate HE → EN">←</button>
+                  </div>
+                  <div class="bilingual-field__item bilingual-field__item--rtl">
+                    <div class="label">Hebrew <span class="label-lang">HE</span></div>
+                    <input class="input" type="text" name="name_he" id="name-he" value="${
+                      product.name_he || ''
+                    }" dir="rtl" />
+                  </div>
+                </div>
+                <div class="field-error" id="name-translate-error" style="display:none;"></div>
+                <input type="hidden" name="name" id="name" value="${product.name}" />
               </div>
               <div class="field">
                 <div class="label">Description</div>
-                <textarea class="textarea" name="description" id="description">${
-                  product.description || ""
-                }</textarea>
+                <div class="bilingual-field">
+                  <div class="bilingual-field__item">
+                    <div class="label">English <span class="label-lang">EN</span></div>
+                    <textarea class="textarea" name="description_en" id="description-en">${
+                      product.description_en || product.description || ''
+                    }</textarea>
+                  </div>
+                  <div class="bilingual-field__actions">
+                    <button type="button" class="btn-translate" data-source="description-en" data-target="description-he" data-target-lang="he" title="Translate EN → HE">→</button>
+                    <button type="button" class="btn-translate" data-source="description-he" data-target="description-en" data-target-lang="en" title="Translate HE → EN">←</button>
+                  </div>
+                  <div class="bilingual-field__item bilingual-field__item--rtl">
+                    <div class="label">Hebrew <span class="label-lang">HE</span></div>
+                    <textarea class="textarea" name="description_he" id="description-he" dir="rtl">${
+                      product.description_he || ''
+                    }</textarea>
+                  </div>
+                </div>
+                <div class="field-error" id="description-translate-error" style="display:none;"></div>
+                <input type="hidden" name="description" id="description" value="${product.description || ''}" />
               </div>
             </div>
           </div>
@@ -3475,6 +3509,9 @@ function editProduct(product) {
       }
     });
   });
+
+  // Attach translate button handlers
+  attachTranslateHandlers();
 
   form.addEventListener("submit", updateProduct);
 }
@@ -4763,12 +4800,42 @@ async function loadAddProductsPage() {
             <div class="card__body" style="display:flex; flex-direction:column; gap:14px;">
               <div class="field">
                 <div class="label">Product Name</div>
-                <input class="input" type="text" name="name" id="name" placeholder="e.g. 18k Gold Diamond Eternity Ring" />
+                <div class="bilingual-field">
+                  <div class="bilingual-field__item">
+                    <div class="label">English <span class="label-lang">EN</span></div>
+                    <input class="input" type="text" name="name_en" id="name-en" placeholder="e.g. 18k Gold Diamond Ring" />
+                  </div>
+                  <div class="bilingual-field__actions">
+                    <button type="button" class="btn-translate" data-source="name-en" data-target="name-he" data-target-lang="he" title="Translate EN → HE">→</button>
+                    <button type="button" class="btn-translate" data-source="name-he" data-target="name-en" data-target-lang="en" title="Translate HE → EN">←</button>
+                  </div>
+                  <div class="bilingual-field__item bilingual-field__item--rtl">
+                    <div class="label">Hebrew <span class="label-lang">HE</span></div>
+                    <input class="input" type="text" name="name_he" id="name-he" placeholder="e.g. טבעת זהב יהלומים" dir="rtl" />
+                  </div>
+                </div>
+                <div class="field-error" id="name-translate-error" style="display:none;"></div>
+                <input type="hidden" name="name" id="name" />
               </div>
 
               <div class="field">
                 <div class="label">Description</div>
-                <textarea class="textarea" name="description" id="description" placeholder="Describe the product details, materials, and craftsmanship..."></textarea>
+                <div class="bilingual-field">
+                  <div class="bilingual-field__item">
+                    <div class="label">English <span class="label-lang">EN</span></div>
+                    <textarea class="textarea" name="description_en" id="description-en" placeholder="Describe the product details, materials, and craftsmanship..."></textarea>
+                  </div>
+                  <div class="bilingual-field__actions">
+                    <button type="button" class="btn-translate" data-source="description-en" data-target="description-he" data-target-lang="he" title="Translate EN → HE">→</button>
+                    <button type="button" class="btn-translate" data-source="description-he" data-target="description-en" data-target-lang="en" title="Translate HE → EN">←</button>
+                  </div>
+                  <div class="bilingual-field__item bilingual-field__item--rtl">
+                    <div class="label">Hebrew <span class="label-lang">HE</span></div>
+                    <textarea class="textarea" name="description_he" id="description-he" placeholder="תיאור המוצר, חומרים, ואומנות..." dir="rtl"></textarea>
+                  </div>
+                </div>
+                <div class="field-error" id="description-translate-error" style="display:none;"></div>
+                <input type="hidden" name="description" id="description" />
               </div>
             </div>
           </div>
@@ -4921,6 +4988,9 @@ async function loadAddProductsPage() {
   }
 
   addProductHandler();
+
+  // Attach translate button handlers
+  attachTranslateHandlers();
 
   // Cancel -> back to products list
   const cancelBtn = document.getElementById("cancel-add-product");
