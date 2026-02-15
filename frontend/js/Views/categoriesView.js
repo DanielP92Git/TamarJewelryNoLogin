@@ -163,6 +163,21 @@ class CategoriesView extends View {
     return 0;
   }
 
+  // Bilingual field selection helpers
+  getProductName(product) {
+    if (this.lang === 'heb') {
+      return product.name_he || product.name_en || product.name || '';
+    }
+    return product.name_en || product.name || '';
+  }
+
+  getProductDescription(product) {
+    if (this.lang === 'heb') {
+      return product.description_he || product.description_en || product.description || '';
+    }
+    return product.description_en || product.description || '';
+  }
+
   // Direct initialization method that bypasses checks
   directInitialize(category, categoryNameHebrew) {
     if (!category) {
@@ -450,6 +465,8 @@ class CategoriesView extends View {
         ilsPrice: data.dataset.ilsPrice || data.dataset.ils_price || null,
         originalUsdPrice: data.dataset.originalUsdPrice || data.dataset.original_usd_price || null,
         originalIlsPrice: data.dataset.originalIlsPrice || data.dataset.original_ils_price || null,
+        nameEn: data.dataset.nameEn || '',
+        nameHe: data.dataset.nameHe || '',
       },
       getAttribute: function (attr) {
         switch (attr) {
@@ -628,8 +645,11 @@ class CategoriesView extends View {
     const title = data.querySelector('.item-title').textContent;
     const product = this.products.find(prod => prod.id == id);
     const sku = product?.sku || null;
+    // Get bilingual description from product data
+    const bilingualDescription = this.getProductDescription(product);
     // Prefer full description from data attribute or product data; fall back to card innerHTML (may be truncated)
     const rawDescription =
+      bilingualDescription ||
       data.dataset.fullDescription ||
       product?.description ||
       data.querySelector('.item-description')?.innerHTML ||
@@ -1018,6 +1038,8 @@ class CategoriesView extends View {
       const ilsPrice = elem.dataset.ilsPrice;
       const originalUsdPrice = elem.dataset.originalUsdPrice || usdPrice;
       const originalIlsPrice = elem.dataset.originalIlsPrice || ilsPrice;
+      const nameEn = elem.dataset.nameEn || '';
+      const nameHe = elem.dataset.nameHe || '';
 
       const name = elem.querySelector('.item-title')?.textContent || '';
       const description = elem.dataset.fullDescription || elem.querySelector('.item-description')?.innerHTML || '';
@@ -1029,6 +1051,8 @@ class CategoriesView extends View {
         quantity,
         name,
         description,
+        name_en: nameEn,
+        name_he: nameHe,
         image,
         usd_price: parseFloat(usdPrice) || 0,
         ils_price: parseFloat(ilsPrice) || 0,
@@ -1305,7 +1329,9 @@ class CategoriesView extends View {
   }
 
   getProductMarkup(item) {
-    const { id, quantity, image, name, description } = item;
+    const { id, quantity, image } = item;
+    const name = this.getProductName(item);
+    const description = this.getProductDescription(item);
     const curSign = this.selectedCurrency === 'usd' ? '$' : '₪';
     const price = this.getDisplayPrice(item);
     const originalPrice = this.getOriginalPrice(item);
@@ -1364,7 +1390,7 @@ class CategoriesView extends View {
     const originalIlsPrice = Math.round(Number(item?.original_ils_price) || ilsPrice);
 
     return `
-      <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}" data-usd-price="${usdPrice}" data-ils-price="${ilsPrice}" data-original-usd-price="${originalUsdPrice}" data-original-ils-price="${originalIlsPrice}" data-full-description="${(description || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}">
+      <div class="item-container" data-id="${id}" data-quant="${quantity}" data-currency="${curSign}" data-usd-price="${usdPrice}" data-ils-price="${ilsPrice}" data-original-usd-price="${originalUsdPrice}" data-original-ils-price="${originalIlsPrice}" data-full-description="${(description || '').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}" data-name-en="${(item.name_en || item.name || '').replace(/"/g, '&quot;')}" data-name-he="${(item.name_he || '').replace(/"/g, '&quot;')}">
         <div class="product-image-container">
           <div class="loading-spinner"></div>
           <picture>
@@ -1449,6 +1475,31 @@ class CategoriesView extends View {
       const description = product.querySelector('.item-description');
       if (description) {
         description.setAttribute('dir', direction);
+      }
+
+      // Update product name and description based on language
+      const productId = product.dataset.id;
+      const productData = this.products.find(p => p.id == productId);
+
+      if (productData) {
+        const title = product.querySelector('.item-title');
+        if (title) {
+          const newName = lng === 'heb'
+            ? (productData.name_he || productData.name_en || productData.name || '')
+            : (productData.name_en || productData.name || '');
+          title.textContent = newName;
+        }
+        const desc = product.querySelector('.item-description');
+        if (desc) {
+          const newDesc = lng === 'heb'
+            ? (productData.description_he || productData.description_en || productData.description || '')
+            : (productData.description_en || productData.description || '');
+          const maxLen = 150;
+          const formatted = newDesc.length > maxLen
+            ? newDesc.substring(0, maxLen).replace(/\n/g, '<br>') + '...'
+            : newDesc.replace(/\n/g, '<br>');
+          desc.innerHTML = formatted;
+        }
       }
 
       // Update "Add to Cart" button text
@@ -1700,6 +1751,8 @@ class CategoriesView extends View {
     // Add to cart functionality
     if (addToCartBtn) {
       addToCartBtn.addEventListener('click', () => {
+        const productId = addToCartBtn.dataset.id;
+        const productData = this.products.find(p => p.id == productId);
         const dataObj = {
           dataset: {
             id: addToCartBtn.dataset.id,
@@ -1707,6 +1760,8 @@ class CategoriesView extends View {
             price: addToCartBtn.dataset.price,
             currency:
               this.selectedCurrency || addToCartBtn.dataset.currency || 'ils',
+            nameEn: productData?.name_en || productData?.name || '',
+            nameHe: productData?.name_he || '',
           },
         };
         this.addFromPrev(dataObj);
