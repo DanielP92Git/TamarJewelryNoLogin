@@ -43,11 +43,11 @@
         <span style="margin: 0 0.5rem; color: #999;"><%= dir === 'rtl' ? '←' : '→' %></span>
         <a href="/<%= urlLang %>/<%= categorySlug %>" style="color: #666; text-decoration: none;"><%= categoryDisplayName %></a>
         <span style="margin: 0 0.5rem; color: #999;"><%= dir === 'rtl' ? '←' : '→' %></span>
-        <span style="color: #333;"><%= product.name %></span>
+        <span style="color: #333;"><%= productName %></span>
       </nav>
 
       <!-- Product detail container -->
-      <div class="product-detail-container" data-ssr="true" style="max-width: 1200px; margin: 2rem auto; padding: 0 2rem;" data-id="<%= product.id %>" data-quant="<%= product.quantity %>" data-currency="<%= currencySymbol %>" data-usd-price="<%= Math.round(product.usd_price || 0) %>" data-ils-price="<%= Math.round(product.ils_price || 0) %>" data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>" data-original-ils-price="<%= Math.round(product.original_ils_price || product.ils_price || 0) %>">
+      <div class="product-detail-container" data-ssr="true" style="max-width: 1200px; margin: 2rem auto; padding: 0 2rem;" data-id="<%= product.id %>" data-quant="<%= product.quantity %>" data-currency="<%= currencySymbol %>" data-usd-price="<%= Math.round(product.usd_price || 0) %>" data-ils-price="<%= Math.round(product.ils_price || 0) %>" data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>" data-original-ils-price="<%= Math.round(product.original_ils_price || product.ils_price || 0) %>" data-name-en="<%= product.name_en || product.name %>" data-name-he="<%= product.name_he || '' %>">
 
         <div class="product-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start;">
 
@@ -76,7 +76,7 @@
                 <img
                   class="main-product-image"
                   src="<%= mainDesktop %>"
-                  alt="<%= product.name %>"
+                  alt="<%= productName %>"
                   style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
                   crossorigin="anonymous"
                 />
@@ -90,7 +90,7 @@
                 <img
                   class="product-thumbnail"
                   src="<%= img.publicDesktop || img.desktop || '' %>"
-                  alt="<%= product.name %> - Image <%= index + 1 %>"
+                  alt="<%= productName %> - Image <%= index + 1 %>"
                   style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 2px solid <%= index === 0 ? '#333' : 'transparent' %>;"
                   data-index="<%= index %>"
                   loading="lazy"
@@ -103,7 +103,7 @@
 
           <!-- Product info -->
           <div class="product-info" dir="<%= dir %>">
-            <h1 class="product-name" style="<%= lang === 'eng' ? 'font-family: Raleway, sans-serif; font-size: 2rem;' : 'font-family: Rubik, sans-serif; font-size: 2.5rem;' %> margin-bottom: 1rem; color: #333;"><%= product.name %></h1>
+            <h1 class="product-name" style="<%= lang === 'eng' ? 'font-family: Raleway, sans-serif; font-size: 2rem;' : 'font-family: Rubik, sans-serif; font-size: 2.5rem;' %> margin-bottom: 1rem; color: #333;"><%= productName %></h1>
 
             <!-- SKU -->
             <% if (product.sku && product.sku.trim() !== '') { %>
@@ -138,7 +138,7 @@
             </div>
 
             <!-- Description -->
-            <div class="product-description" style="margin-bottom: 2rem; line-height: 1.6; color: #555; white-space: pre-wrap;"><%- product.description || '' %></div>
+            <div class="product-description" style="margin-bottom: 2rem; line-height: 1.6; color: #555; white-space: pre-wrap;"><%- productDescription || '' %></div>
 
             <!-- Add to Cart button -->
             <button class="add-to-cart-btn" style="width: 100%; padding: 1rem 2rem; font-size: 1.1rem; background-color: #333; color: #fff; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.3s;" <%= product.quantity <= 0 ? 'disabled' : '' %>>

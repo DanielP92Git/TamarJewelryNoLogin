@@ -48,19 +48,25 @@
 
         <div class="inner-products-container">
           <% products.forEach(function(product) {
+            const productName = lang === 'heb'
+              ? (product.name_he || product.name_en || product.name)
+              : (product.name_en || product.name);
+            const productDescription = lang === 'heb'
+              ? (product.description_he || product.description_en || product.description)
+              : (product.description_en || product.description);
             const desktopImage = product.images?.[0]?.publicDesktop || product.mainImage?.publicDesktop || product.image || '';
             const mobileImage = product.images?.[0]?.publicMobile || product.mainImage?.publicMobile || product.image || desktopImage;
             const price = lang === 'eng' ? product.usd_price : product.ils_price;
             const originalPrice = lang === 'eng' ? product.original_usd_price : product.original_ils_price;
             const curSign = lang === 'eng' ? '$' : '₪';
             const hasDiscount = product.discount_percentage > 0 && originalPrice > 0 && originalPrice > price;
-            const description = product.description || '';
+            const description = productDescription || '';
             const maxDescriptionLength = 150;
             const formattedDescription = description.length > maxDescriptionLength
               ? description.substring(0, maxDescriptionLength).replace(/\n/g, '<br>') + '...'
               : description.replace(/\n/g, '<br>');
           %>
-          <div class="item-container" data-id="<%= product.id %>" data-quant="<%= product.quantity %>" data-currency="<%= curSign %>" data-usd-price="<%= Math.round(product.usd_price || 0) %>" data-ils-price="<%= Math.round(product.ils_price || 0) %>" data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>" data-original-ils-price="<%= Math.round(product.original_ils_price || product.ils_price || 0) %>" data-full-description="<%= description %>">
+          <div class="item-container" data-id="<%= product.id %>" data-quant="<%= product.quantity %>" data-currency="<%= curSign %>" data-usd-price="<%= Math.round(product.usd_price || 0) %>" data-ils-price="<%= Math.round(product.ils_price || 0) %>" data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>" data-original-ils-price="<%= Math.round(product.original_ils_price || product.ils_price || 0) %>" data-full-description="<%= description %>" data-name-en="<%= product.name_en || product.name %>" data-name-he="<%= product.name_he || '' %>">
             <div class="product-image-container">
               <div class="loading-spinner" style="display: none;"></div>
               <picture>
@@ -79,13 +85,13 @@
                 <img
                   class="image-item front-image loaded"
                   src="<%= desktopImage %>"
-                  alt="<%= product.name %>"
+                  alt="<%= productName %>"
                   loading="lazy"
                   crossorigin="anonymous"
                 />
               </picture>
             </div>
-            <div class="item-title" dir="<%= lang === 'heb' ? 'rtl' : 'ltr' %>"><%= product.name %></div>
+            <div class="item-title" dir="<%= lang === 'heb' ? 'rtl' : 'ltr' %>"><%= productName %></div>
             <div class="item-description" dir="<%= lang === 'heb' ? 'rtl' : 'ltr' %>"><%- formattedDescription %></div>
             <% if (hasDiscount) { %>
             <div class="item-price-container">
