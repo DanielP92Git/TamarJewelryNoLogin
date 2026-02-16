@@ -2141,3 +2141,272 @@ dialog.admin-preview-modal::backdrop {
   font-size: 12px;
   color: var(--muted);
 }
+
+/* =========================
+   Bulk Translation Tool
+   ========================= */
+
+.bulk-translate-container {
+  max-width: 700px;
+  padding: 2rem;
+}
+
+.bulk-translate-container h2 {
+  font-size: 22px;
+  margin: 0 0 0.5rem;
+}
+
+.bulk-translate-container > p {
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.btn-start-bulk {
+  height: 46px;
+  padding: 0 24px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: var(--primary);
+  color: var(--text);
+  font-weight: 850;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.12s ease, transform 0.12s ease;
+  box-shadow: 0 14px 34px rgba(19, 19, 236, 0.28);
+}
+
+.btn-start-bulk:hover {
+  background: rgba(19, 19, 236, 0.92);
+  transform: translateY(-1px);
+}
+
+/* Progress section */
+.bulk-progress {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.bulk-progress h3 {
+  font-size: 16px;
+  margin: 0 0 1rem;
+  color: var(--text);
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 22px;
+  background: var(--surface-2);
+  border-radius: 11px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), var(--success));
+  border-radius: 11px;
+  transition: width 0.3s ease;
+  min-width: 0;
+}
+
+.bulk-progress-text {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0.75rem 0 0.25rem;
+}
+
+.bulk-current-product {
+  font-size: 13px;
+  color: var(--muted-2);
+  font-style: italic;
+  margin: 0.25rem 0;
+  min-height: 1.2em;
+}
+
+.bulk-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1rem 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bulk-stat-success { color: var(--success); }
+.bulk-stat-failed { color: var(--danger); }
+.bulk-stat-skipped { color: var(--muted); }
+
+.btn-cancel-bulk {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.18);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  margin-top: 0.5rem;
+}
+
+.btn-cancel-bulk:hover {
+  background: rgba(239, 68, 68, 0.28);
+}
+
+/* Activity indicator (pulsing dot) */
+.bulk-activity {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  margin-left: 8px;
+  vertical-align: middle;
+  animation: bulk-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes bulk-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+/* Summary section */
+.bulk-summary {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid var(--border-2);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.bulk-summary h3 {
+  font-size: 16px;
+  margin: 0 0 1rem;
+}
+
+.bulk-summary-stats {
+  display: flex;
+  gap: 2rem;
+  margin: 1rem 0;
+  font-size: 15px;
+}
+
+.bulk-summary-stats .stat-label {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.bulk-summary-stats .stat-value {
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.bulk-summary-stats .stat-success .stat-value { color: var(--success); }
+.bulk-summary-stats .stat-failed .stat-value { color: var(--danger); }
+
+/* Failed products list */
+.bulk-failed-list {
+  margin: 1rem 0;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.bulk-failed-item {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.bulk-failed-item:last-child {
+  border-bottom: none;
+}
+
+.bulk-failed-item .failed-name {
+  color: var(--text);
+}
+
+.bulk-failed-item .failed-error {
+  color: var(--danger);
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.bulk-failed-toggle {
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0;
+  text-decoration: underline;
+}
+
+.bulk-failed-toggle:hover {
+  color: var(--text);
+}
+
+/* Summary action buttons */
+.bulk-summary-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 1.5rem;
+}
+
+.btn-retry-bulk {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.btn-retry-bulk:hover {
+  background: rgba(245, 158, 11, 0.3);
+}
+
+.btn-run-again-bulk {
+  height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: rgba(40, 40, 57, 0.55);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.btn-run-again-bulk:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* All-translated message */
+.bulk-all-done {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  border-radius: var(--radius);
+  background: rgba(34, 197, 94, 0.08);
+  color: var(--success);
+  font-size: 15px;
+  font-weight: 600;
+}
