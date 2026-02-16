@@ -3,12 +3,13 @@
 // DOM Elements
 const addProductsBtn = document.querySelector(".sidebar_add-products");
 const productsListBtn = document.querySelector(".sidebar_products-list");
+const bulkTranslateBtn = document.querySelector(".sidebar_bulk-translate");
 const sideBar = document.querySelector(".sidebar");
 const pageContent = document.querySelector(".page-content");
 const breadcrumbEl = document.getElementById("page-breadcrumb");
 
 function setActiveNav(active) {
-  // active: "products-list" | "add-product" | "edit-product"
+  // active: "products-list" | "add-product" | "edit-product" | "bulk-translate"
   const all = document.querySelectorAll(".nav__item");
   all.forEach((el) => el.classList.remove("is-active"));
 
@@ -21,6 +22,9 @@ function setActiveNav(active) {
   } else if (active === "edit-product") {
     addProductsBtn?.classList.add("is-active");
     if (breadcrumbEl) breadcrumbEl.textContent = "Products / Edit Product";
+  } else if (active === "bulk-translate") {
+    bulkTranslateBtn?.classList.add("is-active");
+    if (breadcrumbEl) breadcrumbEl.textContent = "Tools / Bulk Translate";
   }
 }
 
@@ -1167,6 +1171,339 @@ function showLoginPage(errorMessage) {
   });
 }
 
+// ===========================
+// Bulk Translation Tool
+// ===========================
+
+// Bulk translation state
+let bulkEventSource = null;
+let bulkStats = { success: 0, failed: 0, skipped: 0 };
+let bulkFailedProducts = [];
+
+function renderBulkTranslatePage() {
+  clear();
+
+  const markup = `
+    <div class="bulk-translate-container">
+      <h2>Bulk Translation Tool</h2>
+      <p>Translate all products missing Hebrew translations. The tool auto-detects untranslated products and translates them using Google Cloud Translation API.</p>
+
+      <button type="button" class="btn-start-bulk">Start Bulk Translation</button>
+
+      <div class="bulk-progress" style="display: none;">
+        <h3>Translation in Progress</h3>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" style="width: 0%;"></div>
+        </div>
+        <div class="bulk-progress-text">Translating product 0/0...</div>
+        <div class="bulk-current-product"></div>
+        <div class="bulk-stats">
+          <span class="bulk-stat-success">Success: <span class="stat-success-count">0</span></span>
+          <span class="bulk-stat-failed">Failed: <span class="stat-failed-count">0</span></span>
+          <span class="bulk-stat-skipped">Skipped: <span class="stat-skipped-count">0</span></span>
+        </div>
+        <span class="bulk-activity"></span>
+        <button type="button" class="btn-cancel-bulk">Cancel</button>
+      </div>
+
+      <div class="bulk-summary" style="display: none;">
+        <h3 class="summary-heading">Translation Complete</h3>
+        <div class="bulk-summary-stats">
+          <div class="stat-success">
+            <div class="stat-label">Translated</div>
+            <div class="stat-value summary-success-count">0</div>
+          </div>
+          <div class="stat-failed">
+            <div class="stat-label">Failed</div>
+            <div class="stat-value summary-failed-count">0</div>
+          </div>
+        </div>
+        <div class="bulk-failed-list-container" style="display: none;">
+          <h4>Failed Products:</h4>
+          <div class="bulk-failed-list"></div>
+          <button type="button" class="bulk-failed-toggle" style="display: none;">Show all</button>
+        </div>
+        <div class="bulk-summary-actions">
+          <button type="button" class="btn-retry-bulk" style="display: none;">Retry Failed</button>
+          <button type="button" class="btn-run-again-bulk">Run Again</button>
+        </div>
+      </div>
+
+      <div class="bulk-all-done" style="display: none;">
+        All products are already translated!
+      </div>
+    </div>
+  `;
+
+  pageContent.insertAdjacentHTML("afterbegin", markup);
+
+  // Wire up event listeners
+  const startBtn = document.querySelector('.btn-start-bulk');
+  const cancelBtn = document.querySelector('.btn-cancel-bulk');
+  const retryBtn = document.querySelector('.btn-retry-bulk');
+  const runAgainBtn = document.querySelector('.btn-run-again-bulk');
+
+  if (startBtn) startBtn.addEventListener('click', startBulkTranslation);
+  if (cancelBtn) cancelBtn.addEventListener('click', cancelBulkTranslation);
+  if (retryBtn) retryBtn.addEventListener('click', startBulkTranslation);
+  if (runAgainBtn) runAgainBtn.addEventListener('click', startBulkTranslation);
+}
+
+function startBulkTranslation() {
+  // Reset state
+  bulkStats = { success: 0, failed: 0, skipped: 0 };
+  bulkFailedProducts = [];
+
+  // Show progress, hide summary
+  const progressEl = document.querySelector('.bulk-progress');
+  const summaryEl = document.querySelector('.bulk-summary');
+  const startBtn = document.querySelector('.btn-start-bulk');
+  const allDoneEl = document.querySelector('.bulk-all-done');
+
+  if (progressEl) progressEl.style.display = 'block';
+  if (summaryEl) summaryEl.style.display = 'none';
+  if (startBtn) startBtn.style.display = 'none';
+  if (allDoneEl) allDoneEl.style.display = 'none';
+
+  // Reset progress UI
+  updateBulkProgress(0, 0, '');
+  updateBulkStats();
+
+  // Get auth token
+  const authToken = localStorage.getItem('auth-token');
+
+  // Create EventSource with query param auth
+  bulkEventSource = new EventSource(
+    `${API_URL}/admin/translate/bulk?token=${encodeURIComponent(authToken)}`
+  );
+
+  bulkEventSource.addEventListener('start', onBulkStart);
+  bulkEventSource.addEventListener('progress', onBulkProgress);
+  bulkEventSource.addEventListener('success', onBulkSuccess);
+  bulkEventSource.addEventListener('error', onBulkError);
+  bulkEventSource.addEventListener('complete', onBulkComplete);
+  bulkEventSource.onerror = onBulkConnectionError;
+}
+
+function onBulkStart(event) {
+  try {
+    const data = JSON.parse(event.data);
+    updateBulkProgress(0, data.total || 0, '');
+  } catch (err) {
+    console.error('Failed to parse start event:', err);
+  }
+}
+
+function onBulkProgress(event) {
+  try {
+    const data = JSON.parse(event.data);
+    updateBulkProgress(data.current || 0, data.total || 0, data.productName || '');
+  } catch (err) {
+    console.error('Failed to parse progress event:', err);
+  }
+}
+
+function onBulkSuccess(event) {
+  bulkStats.success++;
+  updateBulkStats();
+}
+
+function onBulkError(event) {
+  try {
+    const data = JSON.parse(event.data);
+    bulkFailedProducts.push({
+      name: data.productName || 'Unknown',
+      error: data.error || 'Unknown error'
+    });
+    bulkStats.failed++;
+    updateBulkStats();
+  } catch (err) {
+    console.error('Failed to parse error event:', err);
+    bulkStats.failed++;
+    updateBulkStats();
+  }
+}
+
+function onBulkComplete(event) {
+  if (bulkEventSource) {
+    bulkEventSource.close();
+    bulkEventSource = null;
+  }
+
+  try {
+    const data = JSON.parse(event.data);
+    bulkStats.success = data.translated || bulkStats.success;
+    bulkStats.failed = data.failed || bulkStats.failed;
+  } catch (err) {
+    // Use existing stats
+  }
+
+  showBulkSummary(false);
+
+  if (bulkStats.failed > 0) {
+    showInfoToast(`Translation complete: ${bulkStats.success} succeeded, ${bulkStats.failed} failed`);
+  } else {
+    showSuccessToast(`Translation complete: ${bulkStats.success} products translated`);
+  }
+}
+
+function onBulkConnectionError(err) {
+  console.error('EventSource connection error:', err);
+
+  if (bulkEventSource) {
+    bulkEventSource.close();
+    bulkEventSource = null;
+  }
+
+  showErrorToast('Connection lost. Please retry.');
+  showBulkSummary(true); // Show partial results
+}
+
+function cancelBulkTranslation() {
+  if (bulkEventSource) {
+    bulkEventSource.close();
+    bulkEventSource = null;
+  }
+  showInfoToast('Bulk translation cancelled');
+  showBulkSummary(true); // true = cancelled
+}
+
+function updateBulkProgress(current, total, productName) {
+  const fillEl = document.querySelector('.progress-bar-fill');
+  const textEl = document.querySelector('.bulk-progress-text');
+  const nameEl = document.querySelector('.bulk-current-product');
+
+  if (fillEl && total > 0) {
+    const percent = Math.round((current / total) * 100);
+    fillEl.style.width = percent + '%';
+  }
+
+  if (textEl) {
+    textEl.textContent = `Translating product ${current}/${total}...`;
+  }
+
+  if (nameEl) {
+    nameEl.textContent = productName || '';
+  }
+}
+
+function updateBulkStats() {
+  const successEl = document.querySelector('.stat-success-count');
+  const failedEl = document.querySelector('.stat-failed-count');
+  const skippedEl = document.querySelector('.stat-skipped-count');
+
+  if (successEl) successEl.textContent = bulkStats.success;
+  if (failedEl) failedEl.textContent = bulkStats.failed;
+  if (skippedEl) skippedEl.textContent = bulkStats.skipped;
+}
+
+function showBulkSummary(cancelled = false) {
+  const progressEl = document.querySelector('.bulk-progress');
+  const summaryEl = document.querySelector('.bulk-summary');
+
+  if (progressEl) progressEl.style.display = 'none';
+  if (summaryEl) summaryEl.style.display = 'block';
+
+  // Update heading
+  const headingEl = document.querySelector('.summary-heading');
+  if (headingEl) {
+    headingEl.textContent = cancelled ? 'Translation Cancelled' : 'Translation Complete';
+  }
+
+  // Update stats
+  const successCountEl = document.querySelector('.summary-success-count');
+  const failedCountEl = document.querySelector('.summary-failed-count');
+
+  if (successCountEl) successCountEl.textContent = bulkStats.success;
+  if (failedCountEl) failedCountEl.textContent = bulkStats.failed;
+
+  // Show retry button if there are failures
+  const retryBtn = document.querySelector('.btn-retry-bulk');
+  if (retryBtn) {
+    retryBtn.style.display = bulkStats.failed > 0 ? 'inline-block' : 'none';
+  }
+
+  // Build failed products list
+  const failedListContainer = document.querySelector('.bulk-failed-list-container');
+  const failedList = document.querySelector('.bulk-failed-list');
+
+  if (failedListContainer && failedList && bulkFailedProducts.length > 0) {
+    failedListContainer.style.display = 'block';
+
+    // Show first 10
+    const displayCount = Math.min(10, bulkFailedProducts.length);
+    let listHTML = '';
+
+    for (let i = 0; i < displayCount; i++) {
+      const item = bulkFailedProducts[i];
+      const nameDiv = document.createElement('div');
+      nameDiv.textContent = item.name;
+      const errorDiv = document.createElement('div');
+      errorDiv.textContent = item.error;
+
+      listHTML += `
+        <div class="bulk-failed-item">
+          <div class="failed-name">${nameDiv.textContent}</div>
+          <div class="failed-error">${errorDiv.textContent}</div>
+        </div>
+      `;
+    }
+
+    failedList.innerHTML = listHTML;
+
+    // Show toggle button if more than 10
+    const toggleBtn = document.querySelector('.bulk-failed-toggle');
+    if (toggleBtn && bulkFailedProducts.length > 10) {
+      toggleBtn.style.display = 'block';
+      toggleBtn.textContent = `Show all ${bulkFailedProducts.length}`;
+
+      toggleBtn.onclick = () => {
+        if (failedList.children.length === displayCount) {
+          // Expand
+          let expandedHTML = '';
+          for (let i = 0; i < bulkFailedProducts.length; i++) {
+            const item = bulkFailedProducts[i];
+            const nameDiv = document.createElement('div');
+            nameDiv.textContent = item.name;
+            const errorDiv = document.createElement('div');
+            errorDiv.textContent = item.error;
+
+            expandedHTML += `
+              <div class="bulk-failed-item">
+                <div class="failed-name">${nameDiv.textContent}</div>
+                <div class="failed-error">${errorDiv.textContent}</div>
+              </div>
+            `;
+          }
+          failedList.innerHTML = expandedHTML;
+          toggleBtn.textContent = 'Show less';
+        } else {
+          // Collapse
+          let collapsedHTML = '';
+          for (let i = 0; i < displayCount; i++) {
+            const item = bulkFailedProducts[i];
+            const nameDiv = document.createElement('div');
+            nameDiv.textContent = item.name;
+            const errorDiv = document.createElement('div');
+            errorDiv.textContent = item.error;
+
+            collapsedHTML += `
+              <div class="bulk-failed-item">
+                <div class="failed-name">${nameDiv.textContent}</div>
+                <div class="failed-error">${errorDiv.textContent}</div>
+              </div>
+            `;
+          }
+          failedList.innerHTML = collapsedHTML;
+          toggleBtn.textContent = `Show all ${bulkFailedProducts.length}`;
+        }
+      };
+    }
+  } else if (failedListContainer) {
+    failedListContainer.style.display = 'none';
+  }
+}
+
 // Add a new function to specifically initialize event handlers
 function initializeEventHandlers() {
   // Add event listeners for admin functionality
@@ -1193,6 +1530,15 @@ function initializeEventHandlers() {
       if (state.isReorderMode) exitReorderMode();
       setActiveNav("products-list");
       await fetchInfo();
+    });
+  }
+
+  if (bulkTranslateBtn) {
+    bulkTranslateBtn.addEventListener("click", () => {
+      if (!canExitReorderMode()) return;
+      if (state.isReorderMode) exitReorderMode();
+      setActiveNav("bulk-translate");
+      renderBulkTranslatePage();
     });
   }
 }
