@@ -94,18 +94,27 @@ async function serveSitemap(req, res) {
 
     // Product pages - query available products
     const products = await Product.find({ available: true })
-      .select('slug name images mainImage date')
+      .select('slug name images mainImage date name_he description_he')
       .lean();
 
     for (const product of products) {
       // Get product image URL (prefer images array, fallback to mainImage)
       const imageUrl = product.images?.[0]?.publicDesktop || product.mainImage?.publicDesktop;
 
-      const hreflangLinks = [
-        { lang: 'en', url: `/en/product/${product.slug}` },
-        { lang: 'he', url: `/he/product/${product.slug}` },
-        { lang: 'x-default', url: `/en/product/${product.slug}` }
-      ];
+      // Check if Hebrew translation exists
+      const hasHebrewTranslation = Boolean(product.name_he && product.description_he);
+
+      // Build hreflang links conditionally
+      const hreflangLinks = hasHebrewTranslation
+        ? [
+            { lang: 'en', url: `/en/product/${product.slug}` },
+            { lang: 'he', url: `/he/product/${product.slug}` },
+            { lang: 'x-default', url: `/en/product/${product.slug}` }
+          ]
+        : [
+            { lang: 'en', url: `/en/product/${product.slug}` },
+            { lang: 'x-default', url: `/en/product/${product.slug}` }
+          ];
 
       // Prepare image entry if available
       const img = imageUrl ? [{ url: imageUrl, caption: product.name }] : [];
@@ -113,7 +122,7 @@ async function serveSitemap(req, res) {
       // Prepare lastmod from actual product.date (not current timestamp)
       const lastmod = product.date ? new Date(product.date).toISOString() : undefined;
 
-      // English version
+      // English version (always included)
       links.push({
         url: `/en/product/${product.slug}`,
         changefreq: 'weekly',
@@ -123,15 +132,17 @@ async function serveSitemap(req, res) {
         links: hreflangLinks
       });
 
-      // Hebrew version
-      links.push({
-        url: `/he/product/${product.slug}`,
-        changefreq: 'weekly',
-        priority: 0.7,
-        lastmod,
-        img,
-        links: hreflangLinks
-      });
+      // Hebrew version: only include if translation exists
+      if (hasHebrewTranslation) {
+        links.push({
+          url: `/he/product/${product.slug}`,
+          changefreq: 'weekly',
+          priority: 0.7,
+          lastmod,
+          img,
+          links: hreflangLinks
+        });
+      }
     }
 
     // Generate sitemap XML
