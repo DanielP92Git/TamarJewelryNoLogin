@@ -3197,7 +3197,7 @@ app.post(
 );
 
 // Bulk translation with SSE progress streaming
-app.post(
+app.get(
   '/admin/translate/bulk',
   adminRateLimiter,
   fetchUser,
@@ -3256,6 +3256,8 @@ app.post(
       let failed = 0;
       let skipped = 0;
       const failedProducts = [];
+      const translatedSlugs = [];
+      const translatedCategories = [];
       let lastKeepalive = Date.now();
 
       for (let i = 0; i < products.length; i++) {
@@ -3299,6 +3301,8 @@ app.post(
               translations,
             });
             translated++;
+            if (product.slug) translatedSlugs.push(product.slug);
+            if (product.category) translatedCategories.push(product.category);
           } else {
             // All fields already filled
             skipped++;
@@ -3331,6 +3335,14 @@ app.post(
           res.write(': keepalive\n\n');
           lastKeepalive = now;
         }
+      }
+
+      // Invalidate cache for all translated products
+      if (translatedSlugs.length > 0) {
+        const urlCategories = translatedCategories
+          .map(cat => DB_TO_URL_CATEGORY[cat])
+          .filter(Boolean);
+        invalidateBulkProducts(translatedSlugs, urlCategories);
       }
 
       // Send completion event

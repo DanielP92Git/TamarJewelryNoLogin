@@ -11,6 +11,8 @@ function getTokenFromRequest(req) {
     const parts = auth.split(' ');
     if (parts.length === 2 && /^Bearer$/i.test(parts[0])) return parts[1];
   }
+  // Fallback: query parameter (for EventSource which can't send headers)
+  if (req.query && req.query.token) return req.query.token;
   return null;
 }
 
