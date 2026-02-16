@@ -53,10 +53,17 @@
 <meta property="product:price:currency" content="<%= productCurrency %>">
 <% } %>
 
-<!-- Hreflang (bidirectional with x-default) -->
+<!-- Hreflang -->
+<% if (typeof hasHebrewTranslation !== 'undefined' && hasHebrewTranslation === false) { %>
+<!-- Product without Hebrew translation: canonical to English, no Hebrew alternate -->
+<link rel="alternate" hreflang="en" href="<%= alternateUrl.en %>">
+<link rel="alternate" hreflang="x-default" href="<%= alternateUrl.en %>">
+<% } else { %>
+<!-- Full bidirectional hreflang (translated product, category, or static page) -->
 <link rel="alternate" hreflang="en" href="<%= alternateUrl.en %>">
 <link rel="alternate" hreflang="he" href="<%= alternateUrl.he %>">
 <link rel="alternate" hreflang="x-default" href="<%= alternateUrl.en %>">
+<% } %>
 
 <!-- Page-specific CSS -->
 <% if (pageStyles) { pageStyles.forEach(s => { %>

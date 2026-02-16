@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="<%= urlLang %>" dir="<%= dir %>">
   <head>
-    <%- include('../partials/meta-tags', { title, description, canonical, ogImage, lang, urlLang, alternateUrl, baseUrl, pageStyles, productPrice, productCurrency }) %>
+    <%- include('../partials/meta-tags', { title, description, canonical, ogImage, lang, urlLang, alternateUrl, baseUrl, pageStyles, productPrice, productCurrency, hasHebrewTranslation }) %>
 
     <!-- Product JSON-LD structured data -->
     <%- include('../partials/product-schema', { schemaItems }) %>

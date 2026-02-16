@@ -158,6 +158,9 @@ async function renderProductPage(req, res) {
       ? (product.description_he || product.description_en || product.description)
       : (product.description_en || product.description);
 
+    // Check if Hebrew translation exists (both name AND description required)
+    const hasHebrewTranslation = Boolean(product.name_he && product.description_he);
+
     // Determine currency and price
     const currency = langKey === 'heb' ? 'ILS' : 'USD';
     const price = langKey === 'heb' ? product.ils_price : product.usd_price;
@@ -219,6 +222,7 @@ async function renderProductPage(req, res) {
       categorySlug: DB_TO_URL_CATEGORY[product.category] || product.category,
       ssrFlag: true,
       googleSiteVerification: process.env.GOOGLE_SITE_VERIFICATION || '',
+      hasHebrewTranslation: hasHebrewTranslation,
     };
 
     // Generate single product schema
