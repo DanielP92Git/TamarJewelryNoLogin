@@ -12,3 +12,9 @@ frontend/coverage/
 # Google Cloud service account keys (NEVER commit these)
 *-service-account*.json
 *-translator-key*.json
+
+# Uploaded product images (runtime data, served from CDN)
+backend/uploads/
+backend/smallImages/
+public/uploads/
+public/smallImages/
