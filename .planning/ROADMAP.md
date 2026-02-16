@@ -307,10 +307,11 @@ Plans:
   3. Tool handles API rate limits with batching and delays
   4. Failed translations can be retried without re-translating successful ones
   5. Admin notified when bulk translation completes
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 32-01: TBD
+- [ ] 32-01-PLAN.md — Backend EventSource compatibility + auth query param + cache invalidation wiring
+- [ ] 32-02-PLAN.md — Admin bulk translation UI page with SSE progress, cancel, retry
 
 ## Progress
 
@@ -329,7 +330,7 @@ Phases execute in numeric order: 27 → 28 → 29 → 30 → 31 → 32
 | 29. Admin UI | v1.5 | 2/2 | Complete | 2026-02-15 |
 | 30. Frontend Display | v1.5 | Complete    | 2026-02-15 | 2026-02-15 |
 | 31. Cache & SEO | v1.5 | Complete    | 2026-02-16 | - |
-| 32. Bulk Translation | v1.5 | 0/TBD | Not started | - |
+| 32. Bulk Translation | v1.5 | 0/2 | Not started | - |
 
 ---
-*Last updated: 2026-02-15 after Phase 30 completion*
+*Last updated: 2026-02-16 after Phase 32 planning*
