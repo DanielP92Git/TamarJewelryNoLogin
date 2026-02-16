@@ -291,11 +291,11 @@ Plans:
   3. Category cache cleared when products in that category are translated
   4. Hreflang tags point to pages with actually different content (verified)
   5. Performance testing shows cache hit rate remains high after bilingual changes
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 31-01: TBD
-- [ ] 31-02: TBD
+- [ ] 31-01-PLAN.md — Bulk cache invalidation utility + backend wiring
+- [ ] 31-02-PLAN.md — Conditional hreflang in SSR routes, meta-tags, and sitemap
 
 #### Phase 32: Bulk Translation & Migration Tooling
 **Goal**: Admin can translate all existing products efficiently in bulk
