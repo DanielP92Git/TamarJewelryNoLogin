@@ -1848,6 +1848,27 @@ dialog.admin-preview-modal::backdrop {
   background: #f9fafb;
 }
 
+.modal-footer .btn {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #374151;
+}
+
+.modal-footer .btn:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.modal-footer .btn--danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #dc2626;
+}
+
+.modal-footer .btn--danger:hover {
+  background: rgba(239, 68, 68, 0.18);
+}
+
 /* Preview layout - match customer view */
 .preview-layout {
   display: grid;

@@ -1975,6 +1975,11 @@ async function loadProductsPage(data) {
             Missing SKU (<span id="missing-sku-count">0</span>)
           </button>
         </div>
+        <div class="control" style="margin-left: 20px; padding-left: 20px; border-left: 1px solid rgba(255,255,255,0.1);">
+          <button type="button" id="bilingual-filter" class="badge" style="cursor:pointer; transition: all 0.2s;">
+            Bilingual (<span id="bilingual-count">0</span>)
+          </button>
+        </div>
         <div class="control" style="min-width: 180px; flex: 0 0 auto;">
           <div class="badge" id="resultsBadge">0 items</div>
         </div>
@@ -2189,6 +2194,8 @@ async function loadProductsPage(data) {
 
   // Missing SKU filter state and handler
   let showMissingSku = false;
+  // Bilingual filter state
+  let showBilingual = false;
 
   // Restore filter state from session
   const savedFilters = sessionStorage.getItem("productListFilters");
@@ -2196,12 +2203,21 @@ async function loadProductsPage(data) {
     try {
       const filters = JSON.parse(savedFilters);
       showMissingSku = filters.showMissingSku || false;
+      showBilingual = filters.showBilingual || false;
       if (showMissingSku) {
         const badge = document.getElementById("missing-sku-filter");
         if (badge) {
           badge.style.background = "rgba(239, 68, 68, 0.2)";
           badge.style.color = "#ef4444";
           badge.style.borderColor = "rgba(239, 68, 68, 0.4)";
+        }
+      }
+      if (showBilingual) {
+        const badge = document.getElementById("bilingual-filter");
+        if (badge) {
+          badge.style.background = "rgba(34, 197, 94, 0.2)";
+          badge.style.color = "#22c55e";
+          badge.style.borderColor = "rgba(34, 197, 94, 0.4)";
         }
       }
     } catch (e) {
@@ -2229,6 +2245,7 @@ async function loadProductsPage(data) {
       // Save filter state
       const currentFilters = {
         showMissingSku: showMissingSku,
+        showBilingual: showBilingual,
         category: document.getElementById("categoryFilter")?.value || "all",
         searchTerm: document.getElementById("productSearch")?.value || "",
       };
@@ -2238,6 +2255,37 @@ async function loadProductsPage(data) {
       );
 
       // Re-render
+      loadProducts(data);
+    });
+  }
+
+  // Bilingual filter click handler
+  const bilingualBtn = document.getElementById("bilingual-filter");
+  if (bilingualBtn) {
+    bilingualBtn.addEventListener("click", () => {
+      showBilingual = !showBilingual;
+
+      if (showBilingual) {
+        bilingualBtn.style.background = "rgba(34, 197, 94, 0.2)";
+        bilingualBtn.style.color = "#22c55e";
+        bilingualBtn.style.borderColor = "rgba(34, 197, 94, 0.4)";
+      } else {
+        bilingualBtn.style.background = "";
+        bilingualBtn.style.color = "";
+        bilingualBtn.style.borderColor = "";
+      }
+
+      const currentFilters = {
+        showMissingSku: showMissingSku,
+        showBilingual: showBilingual,
+        category: document.getElementById("categoryFilter")?.value || "all",
+        searchTerm: document.getElementById("productSearch")?.value || "",
+      };
+      sessionStorage.setItem(
+        "productListFilters",
+        JSON.stringify(currentFilters),
+      );
+
       loadProducts(data);
     });
   }
@@ -2437,9 +2485,12 @@ function loadProducts(data) {
   // Apply missing SKU filter
   const savedFilters = sessionStorage.getItem("productListFilters");
   let showMissingSku = false;
+  let showBilingual = false;
   if (savedFilters) {
     try {
-      showMissingSku = JSON.parse(savedFilters).showMissingSku || false;
+      const parsed = JSON.parse(savedFilters);
+      showMissingSku = parsed.showMissingSku || false;
+      showBilingual = parsed.showBilingual || false;
     } catch (e) {
       // Ignore parse errors
     }
@@ -2454,10 +2505,26 @@ function loadProducts(data) {
     countSpan.textContent = missingSkuCount;
   }
 
-  // Apply filter
+  // Count bilingual products (both name_he and description_he populated)
+  const bilingualCount = filteredData.filter(
+    (p) => p.name_he && p.name_he.trim() !== "" && p.description_he && p.description_he.trim() !== "",
+  ).length;
+  const bilingualSpan = document.getElementById("bilingual-count");
+  if (bilingualSpan) {
+    bilingualSpan.textContent = bilingualCount;
+  }
+
+  // Apply missing SKU filter
   if (showMissingSku) {
     filteredData = filteredData.filter(
       (product) => !product.sku || product.sku.trim() === "",
+    );
+  }
+
+  // Apply bilingual filter
+  if (showBilingual) {
+    filteredData = filteredData.filter(
+      (p) => p.name_he && p.name_he.trim() !== "" && p.description_he && p.description_he.trim() !== "",
     );
   }
 
@@ -2553,7 +2620,7 @@ function loadProducts(data) {
     if (hasEn && hasHe) {
       translationBadge = '<span class="badge badge--translation badge--success">Bilingual</span>';
     } else if (item.name_en || item.name_he || item.description_en || item.description_he) {
-      translationBadge = '<span class="badge badge--translation badge--warning">Needs translation</span>';
+      translationBadge = '<span class="badge badge--translation" style="background:rgba(168,85,247,0.2);color:#a855f7;border-color:rgba(168,85,247,0.4);">Needs translation</span>';
     } else {
       translationBadge = '<span class="badge badge--translation badge--muted">No translations</span>';
     }
@@ -2593,7 +2660,7 @@ function loadProducts(data) {
       <div class="mono hide-sm">${item.category ?? ""}</div>
       <div class="mono">${qty}</div>
       <div class="mono hide-sm">₪${item.ils_price ?? ""}</div>
-      <div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
         <span class="badge ${statusClass}">${statusText}</span>
         ${translationBadge}
       </div>
@@ -3963,11 +4030,19 @@ function renderProductPreview(product) {
     </div>
   `).join('');
 
-  // Format description with line breaks
-  const description = (product.description || 'No description available')
+  // Format descriptions with line breaks
+  const descriptionEn = (product.description_en || product.description || 'No description available')
     .replace(/\r\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim();
+  const descriptionHe = (product.description_he || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+
+  const nameEn = product.name_en || product.name || 'Untitled';
+  const nameHe = product.name_he || '';
+  const hasHebrew = nameHe && descriptionHe;
 
   // Format SKU
   const skuHtml = product.sku ? `
@@ -3996,9 +4071,14 @@ function renderProductPreview(product) {
         `}
       </div>
       <div class="preview-details">
-        <h3 class="preview-title">${product.name}</h3>
+        ${hasHebrew ? `
+          <button type="button" class="preview-lang-toggle" data-lang="en" style="margin-bottom:10px; font-size:12px; padding:4px 12px; height:auto; border-radius:6px; border:1px solid #d1d5db; background:#f3f4f6; color:#374151; cursor:pointer; transition:background 0.12s; font-weight:600;" onmouseover="this.style.background='#e5e7eb'" onmouseout="this.style.background='#f3f4f6'">
+            Show Hebrew
+          </button>
+        ` : ''}
+        <h3 class="preview-title" data-name-en="${nameEn.replace(/"/g, '&quot;')}" data-name-he="${nameHe.replace(/"/g, '&quot;')}">${nameEn}</h3>
         ${skuHtml}
-        <div class="preview-description">${description}</div>
+        <div class="preview-description" data-desc-en="${descriptionEn.replace(/"/g, '&quot;')}" data-desc-he="${descriptionHe.replace(/"/g, '&quot;')}">${descriptionEn}</div>
         <div class="preview-price">₪${product.ils_price || '0'}</div>
       </div>
     </div>
@@ -4050,6 +4130,36 @@ function openProductPreview(product, triggerElement) {
       }
     });
   });
+
+  // Language toggle handler
+  const langToggle = dialog.querySelector('.preview-lang-toggle');
+  if (langToggle) {
+    langToggle.addEventListener('click', () => {
+      const titleEl = dialog.querySelector('.preview-title');
+      const descEl = dialog.querySelector('.preview-description');
+      const current = langToggle.dataset.lang;
+
+      if (current === 'en') {
+        titleEl.textContent = titleEl.dataset.nameHe;
+        descEl.textContent = descEl.dataset.descHe;
+        descEl.style.direction = 'rtl';
+        descEl.style.textAlign = 'right';
+        titleEl.style.direction = 'rtl';
+        titleEl.style.textAlign = 'right';
+        langToggle.textContent = 'Show English';
+        langToggle.dataset.lang = 'he';
+      } else {
+        titleEl.textContent = titleEl.dataset.nameEn;
+        descEl.textContent = descEl.dataset.descEn;
+        descEl.style.direction = '';
+        descEl.style.textAlign = '';
+        titleEl.style.direction = '';
+        titleEl.style.textAlign = '';
+        langToggle.textContent = 'Show Hebrew';
+        langToggle.dataset.lang = 'en';
+      }
+    });
+  }
 
   // Footer action button handlers (wired in Plan 02)
   const editBtn = dialog.querySelector('[data-action="edit"]');

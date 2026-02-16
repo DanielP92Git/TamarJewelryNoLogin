@@ -5,11 +5,19 @@ module.exports = {
     const products = db.collection('products');
 
     // 1. Ensure sparse unique index (idempotent: createIndex is a no-op if exists)
-    await products.createIndex(
-      { slug: 1 },
-      { unique: true, sparse: true, name: 'product_slug_unique_idx' }
-    );
-    console.log('Ensured unique sparse index on slug field');
+    try {
+      await products.createIndex(
+        { slug: 1 },
+        { unique: true, sparse: true, name: 'product_slug_unique_idx' }
+      );
+      console.log('Ensured unique sparse index on slug field');
+    } catch (err) {
+      if (err.code === 85 || err.message.includes('already exists')) {
+        console.log('Slug index already exists, skipping index creation');
+      } else {
+        throw err;
+      }
+    }
 
     // 2. Find products without slugs (idempotent: skips already-slugged products)
     const needSlugs = await products.find({
