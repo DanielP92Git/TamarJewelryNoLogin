@@ -41,7 +41,7 @@ const {
 const { renderCategoryPage, renderProductPage, renderCartPage, DB_TO_URL_CATEGORY } = require('./routes/ssrDynamic');
 const { serveSitemap } = require('./routes/sitemap');
 const { cacheMiddleware } = require('./middleware/cacheMiddleware');
-const { invalidateProduct, invalidateAll } = require('./cache/invalidation');
+const { invalidateProduct, invalidateAll, invalidateBulkProducts } = require('./cache/invalidation');
 
 // #region agent log
 function agentLog(hypothesisId, location, message, data) {

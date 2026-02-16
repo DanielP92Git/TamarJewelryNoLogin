@@ -49,6 +49,42 @@ function invalidateProduct(productSlug, categorySlug) {
 }
 
 /**
+ * Invalidate cache for multiple products in a single batch operation
+ * Used by bulk translation operations to efficiently clear all language/currency variants
+ * @param {string[]} productSlugs - Array of product slugs to invalidate
+ * @param {string|string[]} categorySlugs - Category slug(s) to invalidate (optional)
+ */
+function invalidateBulkProducts(productSlugs, categorySlugs) {
+  if (!productSlugs || productSlugs.length === 0) {
+    return;
+  }
+
+  // Build all cache keys: 4 per product (en/he x USD/ILS)
+  const cacheKeys = [];
+  productSlugs.forEach(slug => {
+    cacheKeys.push(
+      `/en/product/${slug}:en:USD`,
+      `/en/product/${slug}:en:ILS`,
+      `/he/product/${slug}:he:USD`,
+      `/he/product/${slug}:he:ILS`
+    );
+  });
+
+  // Batch delete using node-cache array support
+  pageCache.del(cacheKeys);
+  console.log(`Cache invalidated for ${productSlugs.length} products (${cacheKeys.length} keys)`);
+
+  // Invalidate affected category pages
+  if (categorySlugs) {
+    const slugArray = Array.isArray(categorySlugs) ? categorySlugs : [categorySlugs];
+    const uniqueSlugs = [...new Set(slugArray)];
+    uniqueSlugs.forEach(catSlug => {
+      if (catSlug) invalidateCategory(catSlug);
+    });
+  }
+}
+
+/**
  * Invalidate all cached pages
  * Used when changes affect all pages (e.g., exchange rate update changes all prices)
  */
@@ -61,4 +97,5 @@ module.exports = {
   invalidateProduct,
   invalidateCategory,
   invalidateAll,
+  invalidateBulkProducts,
 };
