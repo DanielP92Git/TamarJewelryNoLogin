@@ -182,8 +182,7 @@ describe('MVC Integration: User Journeys', () => {
       // Step d: Simulate navigation to cart page
       renderCartPageFixture();
       localStorage.setItem('currency', 'usd');
-      cartView.setLanguage('eng', 1);
-      await cartView.render(1);
+      await cartView.setLanguage('eng', 1);
       await cartView._renderSummary(1, 'eng');
 
       // Step e: Verify cart displays item in USD
@@ -231,8 +230,7 @@ describe('MVC Integration: User Journeys', () => {
 
       // Step j: Simulate navigation back to cart
       renderCartPageFixture();
-      cartView.setLanguage('eng', 1);
-      await cartView.render(1);
+      await cartView.setLanguage('eng', 1);
       await cartView._renderSummary(1, 'eng');
 
       // Verify item still displayed correctly with ILS prices (currency persisted)
@@ -256,8 +254,7 @@ describe('MVC Integration: User Journeys', () => {
       // Navigate to "cart"
       renderCartPageFixture();
       localStorage.setItem('currency', 'usd');
-      cartView.setLanguage('eng', 2);
-      await cartView.render(2);
+      await cartView.setLanguage('eng', 2);
       await cartView._renderSummary(2, 'eng');
 
       // Verify 2 items displayed
@@ -280,8 +277,7 @@ describe('MVC Integration: User Journeys', () => {
 
       // Navigate back to "cart"
       renderCartPageFixture();
-      cartView.setLanguage('eng', 2);
-      await cartView.render(2);
+      await cartView.setLanguage('eng', 2);
       await cartView._renderSummary(2, 'eng');
 
       // Verify still 2 items via localStorage
@@ -323,8 +319,7 @@ describe('MVC Integration: User Journeys', () => {
 
       // Navigate to "cart"
       renderCartPageFixture();
-      cartView.setLanguage('eng', 1);
-      await cartView.render(1);
+      await cartView.setLanguage('eng', 1);
       await cartView._renderSummary(1, 'eng');
 
       // Verify currency selector shows ILS (via localStorage read)
@@ -353,8 +348,7 @@ describe('MVC Integration: User Journeys', () => {
       // Navigate to cart
       renderCartPageFixture();
       localStorage.setItem('currency', 'usd');
-      cartView.setLanguage('eng', 3);
-      await cartView.render(3);
+      await cartView.setLanguage('eng', 3);
       await cartView._renderSummary(3, 'eng');
 
       // Verify 3 items displayed
@@ -402,8 +396,7 @@ describe('MVC Integration: User Journeys', () => {
       // Navigate to cart, render in USD
       renderCartPageFixture();
       localStorage.setItem('currency', 'usd');
-      cartView.setLanguage('eng', 3);
-      await cartView.render(3);
+      await cartView.setLanguage('eng', 3);
       await cartView._renderSummary(3, 'eng');
 
       let itemTitles = document.querySelectorAll('.item-title');
@@ -487,8 +480,7 @@ describe('MVC Integration: User Journeys', () => {
       // Navigate to cart, render in USD
       renderCartPageFixture();
       localStorage.setItem('currency', 'usd');
-      cartView.setLanguage('eng', 1);
-      await cartView.render(1);
+      await cartView.setLanguage('eng', 1);
       await cartView._renderSummary(1, 'eng');
 
       // Verify discounted price shown in USD
@@ -562,8 +554,7 @@ describe('MVC Integration: User Journeys', () => {
 
       // Render cart view
       localStorage.setItem('currency', 'usd');
-      cartView.setLanguage('eng', 1);
-      await cartView.render(1);
+      await cartView.setLanguage('eng', 1);
       await cartView._renderSummary(1, 'eng');
 
       // Verify item present in DOM
@@ -649,8 +640,7 @@ describe('MVC Integration: User Journeys', () => {
       });
 
       localStorage.setItem('currency', 'usd');
-      cartView.setLanguage('eng', 1);
-      await cartView.render(1);
+      await cartView.setLanguage('eng', 1);
       await cartView._renderSummary(1, 'eng');
 
       // Verify cart displays correctly
