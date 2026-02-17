@@ -2,13 +2,22 @@
 
 ## What This Is
 
-Handmade jewelry e-commerce platform with professional product management, comprehensive testing, and full SEO foundation. The store serves both English and Hebrew-speaking customers with server-side rendered pages, clean bilingual URLs, structured data for search engines, and integrated payment processing (PayPal & Stripe).
+Handmade jewelry e-commerce platform with professional product management, comprehensive testing, full SEO foundation, and bilingual product content. The store serves both English and Hebrew-speaking customers with server-side rendered pages, clean bilingual URLs, structured data for search engines, automated Google Cloud Translation for product content, and integrated payment processing (PayPal & Stripe).
 
 ## Core Value
 
-A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers.
+A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers — with true bilingual content so Hebrew and English visitors each see products in their language.
 
 ## Previous Milestones
+
+**v1.5 Bilingual Product Content (Shipped: 2026-02-17)**
+- Bilingual product schema with separate Hebrew/English fields and runtime normalization for backward compatibility
+- Google Cloud Translation API v3 integration with in-memory caching and graceful error handling
+- Admin bilingual forms with side-by-side layout, bidirectional translate buttons, and translation status badges
+- SSR + client-side bilingual display with fallback chain (he > en > legacy) and JSON-LD inLanguage
+- Conditional hreflang and sitemap filtering — only translated products get Hebrew alternate URLs
+- Bulk translation tool with SSE progress streaming, cancel/retry, and automatic cache invalidation
+- 24/25 requirements satisfied (SCHEMA-02 accepted as tech debt — runtime normalization covers functionality)
 
 **v1.4 SEO & Marketing Foundation (Shipped: 2026-02-12)**
 - Server-side rendering for all pages (home, categories, products, static pages) with EJS templates
@@ -113,28 +122,18 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 - ✓ Bilingual SEO with hreflang tags — v1.4
 - ✓ Robots.txt configuration — v1.4
 
+<!-- v1.5 Bilingual Product Content - shipped 2026-02-17 -->
+
+- ✓ Bilingual product schema (separate Hebrew/English fields for name and description) — v1.5
+- ✓ Admin form with Hebrew/English text areas and on-demand "Translate" button — v1.5
+- ✓ Google Cloud Translation API integration for Hebrew ↔ English translation — v1.5
+- ✓ Frontend/SSR language-aware display (correct language based on /en/ or /he/ URL) — v1.5
+- ✓ Bulk translate tool for existing products (English → Hebrew) — v1.5
+- ✓ Data migration (runtime normalization as functional equivalent) — v1.5 (tech debt: migration script exists but not executed)
+
 ### Active
 
-<!-- v1.5 Bilingual Product Content -->
-
-- [ ] Bilingual product schema (separate Hebrew/English fields for name and description)
-- [ ] Admin form with Hebrew/English text areas and on-demand "Translate" button
-- [ ] Google Cloud Translation API integration for Hebrew ↔ English translation
-- [ ] Frontend/SSR language-aware display (correct language based on /en/ or /he/ URL)
-- [ ] Bulk translate tool for existing products (English → Hebrew)
-- [ ] Data migration (move existing name/description to English fields)
-
-## Current Milestone: v1.5 Bilingual Product Content
-
-**Goal:** Enable true bilingual product content with automated Google Cloud Translation, so Hebrew and English visitors each see product names and descriptions in their language.
-
-**Target features:**
-- Bilingual product schema with separate Hebrew/English fields for name and description
-- Admin product forms with language-specific fields and "Translate" button (on-demand)
-- Google Cloud Translation API integration (Hebrew ↔ English)
-- Language-aware display across all customer-facing pages (SSR + client-side)
-- Bulk translation tool to translate all existing English products to Hebrew
-- Data migration to move existing single-language fields to bilingual structure
+(No active requirements — planning next milestone)
 
 ### Out of Scope
 
@@ -146,30 +145,39 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 - Full framework migration (Next.js/Nuxt) — EJS on Express achieves SSR without rewriting the entire frontend
 - AI-generated product descriptions — handmade jewelry needs authentic artisan descriptions (note: translation is different from generation — v1.5 uses Google Translate for existing admin-written content)
 - Complex analytics setup (GA4, GTM, Facebook Pixel) — Microsoft Clarity already integrated
+- Real-time translation during typing — wastes API quota, admin should write first then translate
+- Auto-translate without admin review — machine translation always needs human review for quality
+- Language-specific slugs (/he/product/hebrew-slug) — English-only slugs simpler for routing
+- Client-side translation (browser-side API calls) — security risk exposing API credentials
 
 ## Context
 
-**Current State (v1.4 Shipped):**
+**Current State (v1.5 Shipped):**
 - v1.0 (2026-02-01): SKU Management with ~869 LOC across 3 phases
 - v1.1 (2026-02-04): Admin Product Management UX with 6 phases, 33 plans
 - v1.2 (2026-02-06): Test Infrastructure & Critical Coverage with 7 phases, 25 plans, 447 tests
 - v1.3 (2026-02-09): Frontend Testing with 6 phases, 20 plans, 104 new tests (419 total)
 - v1.4 (2026-02-12): SEO & Marketing Foundation with 4 phases, 18 plans, 49 requirements
+- v1.5 (2026-02-17): Bilingual Product Content with 6 phases, 12 plans, 25 requirements
 - Production e-commerce platform handling payments (PayPal & Stripe)
 - ~94 products in catalog with multi-image support
 - 866 tests passing (comprehensive backend + frontend coverage)
 - Full SSR with EJS templates, bilingual URLs, structured data, XML sitemap
+- Google Cloud Translation API integration for bilingual product content
+- Admin bilingual forms with translate buttons and bulk translation tool
 
 **Technical Environment:**
 - MVC frontend architecture (Vanilla JS, Parcel bundler) — progressive enhancement over SSR
 - Express/Node.js backend with EJS server-side rendering
 - MongoDB with Mongoose ODM
 - Multi-language support (English/Hebrew with RTL) via bilingual URL routing (/en/, /he/)
-- Admin dashboard with product management, drag-and-drop reordering
+- Bilingual product content with separate Hebrew/English fields and language-aware fallback chains
+- Admin dashboard with product management, drag-and-drop reordering, translation workflow
 - Payment integrations: PayPal SDK, Stripe API
 - Image processing: Sharp library with DigitalOcean Spaces (S3-compatible)
 - Currency service: Scheduled exchange rate updates (USD/ILS)
-- In-memory page caching (node-cache) with cache invalidation
+- Translation service: Google Cloud Translation API v3 with in-memory caching
+- In-memory page caching (node-cache) with cache invalidation and conditional hreflang
 - Deployed on DigitalOcean (App Platform) — single unified Express service
 
 **Known Issues/Tech Debt:**
@@ -185,6 +193,8 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 - Payment return URLs hardcoded to old paths (update needed)
 - CRAWL-07 partial: Google Search Console requires post-deployment manual setup
 - robots.txt missing Sitemap: directive (minor SEO best practice)
+- SCHEMA-02: Migration script not executed (runtime normalization covers functionality)
+- normalizeProductForClient performance overhead (field copy on every API response)
 
 ## Constraints
 
@@ -217,8 +227,20 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 | node-cache for in-memory caching | Single-server deployment, no Redis needed | ✓ Good - sub-50ms cached TTFB |
 | Cache invalidation on product changes | Admin edits immediately visible to next visitor | ✓ Good - no stale content |
 | data-ssr flag for client detection | Client JS skips re-fetch/re-render of SSR content | ✓ Good - prevents content flashing |
-| Google Cloud Translation API for product translation | Purpose-built, free tier, simple integration; admin reviews output | — Pending |
-| Bilingual schema (separate fields per language) | Cleaner than embedded objects, explicit, easy to query per language | — Pending |
+| Google Cloud Translation API v3 | Purpose-built for translation, free tier, simple service account auth | ✓ Good - reliable, cost-effective |
+| Bilingual schema (separate fields per language) | Cleaner than embedded objects, explicit, easy to query per language | ✓ Good - straightforward schema |
+| Runtime normalization instead of migration | normalizeProductForClient populates bilingual fields on every API response | ⚠️ Revisit - works but adds overhead |
+| Bilingual fields default: '' (not required) | Avoids breaking existing product creation until migration runs | ✓ Good - backward compatible |
+| Legacy name/description fields unchanged | Required fields remain for backward compatibility through v1.5+ | ✓ Good - zero breakage |
+| CSS grid (1fr auto 1fr) for bilingual layout | Clear language separation in admin forms | ✓ Good - clean responsive layout |
+| Bidirectional translate buttons (→ ←) | Admin controls translation direction explicitly | ✓ Good - intuitive UX |
+| Overwrite confirmation for translations | Prevents accidental loss of manually edited translations | ✓ Good - safe workflow |
+| Fallback chain: he > en > legacy | Graceful degradation when translations missing | ✓ Good - no blank content |
+| Conditional hreflang per product | Only translated products get Hebrew alternate URLs | ✓ Good - accurate SEO signals |
+| Sitemap excludes untranslated /he/ URLs | Prevents indexing pages with English fallback content | ✓ Good - clean sitemap |
+| Query param auth for EventSource | SSE API cannot send headers; JWT validated from URL param | ✓ Good - works with browser limitations |
+| SSE for bulk translation progress | Real-time streaming vs polling; cancel/retry support | ✓ Good - responsive admin UX |
+| textContent for product names | XSS-safe rendering of server-provided content | ✓ Good - security best practice |
 
 ---
-*Last updated: 2026-02-13 after v1.5 milestone start*
+*Last updated: 2026-02-17 after v1.5 milestone*

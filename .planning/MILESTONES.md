@@ -145,3 +145,35 @@
 
 ---
 
+
+## v1.5 Bilingual Product Content (Shipped: 2026-02-17)
+
+**Delivered:** True bilingual product content with automated Google Cloud Translation, enabling Hebrew and English visitors to see product names and descriptions in their language.
+
+**Phases completed:** 27-32 (12 plans total)
+
+**Key accomplishments:**
+
+- Bilingual product schema with separate Hebrew/English fields (name_en, name_he, description_en, description_he) and backward-compatible runtime normalization
+- Google Cloud Translation API v3 integration with in-memory caching (node-cache, 1hr TTL) and graceful error handling
+- Admin bilingual product forms with side-by-side CSS grid layout, bidirectional translate buttons, and overwrite confirmation
+- Translation status badges on product list (bilingual / needs translation / no translations)
+- SSR + client-side bilingual display with fallback chain (he > en > legacy) and JSON-LD inLanguage property
+- Conditional hreflang tags and sitemap filtering — only translated products get Hebrew alternate URLs
+- Bulk translation tool with SSE progress streaming, cancel/retry, rate-limited batching, and automatic cache invalidation
+
+**Stats:**
+
+- 57 files created/modified (~12,409 lines added, ~115 removed)
+- 20 feat/fix commits
+- 6 phases, 12 plans, 25 requirements (24 satisfied, 1 accepted as tech debt)
+- 3 days from planning to completion (2026-02-14 → 2026-02-16)
+
+**Git range:** `feat(27-01)` → `feat(32-02)`
+
+**Tech debt accepted:** SCHEMA-02 (migration script not executed — runtime normalization via `normalizeProductForClient` provides functional equivalent)
+
+**What's next:** TBD - planning next milestone (/gsd:new-milestone)
+
+---
+

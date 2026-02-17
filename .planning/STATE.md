@@ -2,18 +2,17 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-13)
+See: .planning/PROJECT.md (updated 2026-02-17)
 
-**Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers
-**Current focus:** v1.5 Bilingual Product Content
+**Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers — with true bilingual content so Hebrew and English visitors each see products in their language
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Milestone: v1.5 Bilingual Product Content
-Phase: 32 of 32 (Bulk Translation Migration Tooling)
-Plan: 2 of 2
-Status: Complete
-Last activity: 2026-02-16 — Completed 32-02: Bulk Translation Admin UI
+Milestone: v1.5 Bilingual Product Content (SHIPPED)
+Phase: 32 of 32 (all complete)
+Status: Milestone Complete
+Last activity: 2026-02-17 — Milestone v1.5 archived
 
 Progress: [████████████████████] 32/32 phases complete (100% of total phases)
 
@@ -25,36 +24,16 @@ Progress: [████████████████████] 32/32 p
 - Total execution time: ~29 hours 37 min
 
 **Recent Trend:**
-- v1.5: 12 plans completed (27-01: 3 min, 27-02: 12 min, 28-01: 3 min, 28-02: 3 min, 29-01: 3 min, 29-02: 5 min, 30-01: 3 min, 30-02: 4 min, 31-01: 1 min, 31-02: 2 min, 32-01: 2 min, 32-02: 11 min)
-- v1.4: 18 plans in 3 days (2026-02-10 to 2026-02-12)
+- v1.5: 12 plans completed in 3 days (2026-02-14 → 2026-02-16)
+- v1.4: 18 plans in 3 days (2026-02-10 → 2026-02-12)
 
 ## Accumulated Context
 
 ### Decisions
 
-All milestone decisions are logged in PROJECT.md Key Decisions table and phase summaries. Recent decisions affecting v1.5:
-
-- Google Cloud Translation API v3 for product translation (purpose-built, free tier)
-- Bilingual schema with separate fields per language (cleaner than embedded objects)
-- English-only slugs for both languages (consistent with current v1.4 approach)
-- Bilingual fields use default: '' (not required) to avoid breaking existing product creation until migration runs (27-01)
-- Legacy name/description fields remain required and unchanged for backward compatibility through v1.5 (27-01)
-- Side-by-side bilingual field layout using CSS grid (1fr auto 1fr) for clear language separation (29-01)
-- Bidirectional translate buttons (→ and ←) with overwrite confirmation when target field has content (29-01)
-- Fallback to legacy name/description fields for English content ensures backward compatibility (29-02)
-- Translation status badge logic: bilingual (both EN+HE complete), needs translation (partial), no translations (none) (29-02)
+All milestone decisions are logged in PROJECT.md Key Decisions table and phase summaries.
 
 See milestone archives in `.planning/milestones/` for detailed decision history.
-- [Phase 30]: Bilingual field selection uses fallback chain: he || en || legacy for Hebrew, en || legacy for English
-- [Phase 30]: JSON-LD inLanguage property added for search engine language signals
-- [Phase 30]: data-name-en/data-name-he attributes added to product containers for client-side bilingual cart support
-- [Phase 30]: Cart stores bilingual name fields (name_en, name_he) and displays based on current language setting (30-02)
-- [Phase 30]: Language switch re-renders cart items to update product names dynamically without API calls (30-02)
-- [Phase 31]: hreflang tags conditional on Hebrew translation existence (both name_he AND description_he required)
-- [Phase 31]: Untranslated products: English hreflang + x-default only, no Hebrew alternate
-- [Phase 31]: Sitemap excludes /he/product/slug URLs when translations missing (31-02)
-- [Phase 32-01]: Query parameter token authentication for EventSource SSE connections (header-based auth priority maintained)
-- [Phase 32-02]: XSS-safe product name rendering using textContent instead of innerHTML for server-provided content
 
 ### Pending Todos
 
@@ -66,12 +45,13 @@ None.
 - Payment return URLs hardcoded to old paths (update needed)
 - CRAWL-07: Google Search Console requires post-deployment manual setup
 - robots.txt missing Sitemap: directive (minor)
+- SCHEMA-02: Migration script not executed (runtime normalization covers functionality)
 
 ## Session Continuity
 
-Last session: 2026-02-16
-Stopped at: Completed 32-02: Bulk Translation Admin UI (Phase 32 Complete)
-Resume file: .planning/phases/32-bulk-translation-migration-tooling/32-02-SUMMARY.md
+Last session: 2026-02-17
+Stopped at: Milestone v1.5 archived
+Resume: `/gsd:new-milestone` to start next milestone
 
 ## Quick Tasks Completed
 
