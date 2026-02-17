@@ -708,9 +708,7 @@ const allowedOriginList = [
 
 const allowedOriginsSet = new Set(allowedOriginList);
 
-if (!isProd) {
-  console.log('Allowed origins:', [...allowedOriginsSet]);
-}
+console.log('Allowed origins:', [...allowedOriginsSet]);
 
 const corsOptions = {
   origin(origin, callback) {

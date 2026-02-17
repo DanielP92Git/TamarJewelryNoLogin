@@ -8,13 +8,19 @@ const { v3 } = require('@google-cloud/translate');
 const { translationCache } = require('../cache/translationCache');
 
 // Initialize Google Cloud Translation API v3 client
-// SDK auto-reads GOOGLE_APPLICATION_CREDENTIALS env var
-const translationClient = new v3.TranslationServiceClient();
+// Production (App Platform): reads JSON from GOOGLE_CREDENTIALS_JSON env var
+// Local dev: reads file path from GOOGLE_APPLICATION_CREDENTIALS env var
+const clientOptions = {};
+if (process.env.GOOGLE_CREDENTIALS_JSON) {
+  const credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+  clientOptions.credentials = credentials;
+}
+const translationClient = new v3.TranslationServiceClient(clientOptions);
 const projectId = process.env.GOOGLE_CLOUD_PROJECT_ID;
 
 // Graceful degradation: warn if credentials are not set, but don't crash at load time
-if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
-  console.warn('WARNING: GOOGLE_APPLICATION_CREDENTIALS not set. Translation API calls will fail.');
+if (!process.env.GOOGLE_APPLICATION_CREDENTIALS && !process.env.GOOGLE_CREDENTIALS_JSON) {
+  console.warn('WARNING: No Google credentials configured. Translation API calls will fail.');
 }
 if (!projectId) {
   console.warn('WARNING: GOOGLE_CLOUD_PROJECT_ID not set. Translation API calls will fail.');
