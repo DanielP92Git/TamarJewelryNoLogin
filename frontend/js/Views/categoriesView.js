@@ -1040,6 +1040,7 @@ class CategoriesView extends View {
       const originalIlsPrice = elem.dataset.originalIlsPrice || ilsPrice;
       const nameEn = elem.dataset.nameEn || '';
       const nameHe = elem.dataset.nameHe || '';
+      const sku = elem.dataset.sku || '';
 
       const name = elem.querySelector('.item-title')?.textContent || '';
       const description = elem.dataset.fullDescription || elem.querySelector('.item-description')?.innerHTML || '';
@@ -1053,6 +1054,7 @@ class CategoriesView extends View {
         description,
         name_en: nameEn,
         name_he: nameHe,
+        sku,
         image,
         usd_price: parseFloat(usdPrice) || 0,
         ils_price: parseFloat(ilsPrice) || 0,
