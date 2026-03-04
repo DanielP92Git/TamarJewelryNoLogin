@@ -564,6 +564,9 @@ export default class View {
       // console.log('[View.js] changeToHeb: About to call setLanguage');
       this.setLanguage('heb', 0);
 
+      // Update URL from /en/... to /he/... if on an SSR route
+      this._updateUrlLang('he');
+
       // console.log('[View.js] changeToHeb: Completed successfully');
     } catch (err) {
       console.error('[View.js] changeToHeb ERROR:', err);
@@ -587,6 +590,9 @@ export default class View {
       // console.log('[View.js] changeToEng: About to call setLanguage');
       this.setLanguage('eng', 0);
 
+      // Update URL from /he/... to /en/... if on an SSR route
+      this._updateUrlLang('en');
+
       // console.log('[View.js] changeToEng: Completed successfully');
     } catch (err) {
       console.error('[View.js] changeToEng ERROR:', err);
@@ -594,6 +600,21 @@ export default class View {
       throw err; // Re-throw to see in console
     }
   };
+
+  // Update the URL language prefix (/en/ <-> /he/) without a page reload
+  _updateUrlLang(newUrlLang) {
+    const path = window.location.pathname;
+    const match = path.match(/^\/(en|he)(\/|$)/);
+    if (match && match[1] !== newUrlLang) {
+      const newPath = path.replace(/^\/(en|he)/, '/' + newUrlLang);
+      window.history.replaceState(null, '', newPath + window.location.search);
+
+      // Update SSR-rendered links that contain the old language prefix
+      document.querySelectorAll('a[href^="/' + match[1] + '/"], a[href="/' + match[1] + '"]').forEach(a => {
+        a.href = a.getAttribute('href').replace(new RegExp('^/' + match[1]), '/' + newUrlLang);
+      });
+    }
+  }
 
   // Placeholder for page-specific language updates - to be overridden by subclasses
   setPageSpecificLanguage(lng, cartNum) {

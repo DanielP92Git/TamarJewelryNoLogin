@@ -5,7 +5,7 @@ const { generateCacheKey } = require('../cache/cacheKeys');
 /**
  * Cache middleware factory function
  * Serves cached HTML on hit, stores rendered HTML on miss
- * Sets HTTP Cache-Control headers with stale-while-revalidate
+ * Sets HTTP Cache-Control: no-cache so browsers always revalidate
  *
  * @param {object} options - Configuration options
  * @param {number} options.ttl - TTL in seconds (default: 3600 = 1 hour)
@@ -42,7 +42,7 @@ function cacheMiddleware(options = {}) {
     if (cached) {
       // Cache HIT: serve cached HTML immediately (sub-50ms TTFB typical)
       res.set('X-Cache', 'HIT');
-      res.set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+      res.set('Cache-Control', 'public, no-cache');
       return res.send(cached);
     }
 
@@ -57,7 +57,7 @@ function cacheMiddleware(options = {}) {
 
       // Set cache headers
       res.set('X-Cache', 'MISS');
-      res.set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+      res.set('Cache-Control', 'public, no-cache');
 
       // Call original send with preserved context
       return originalSend.call(this, body);
