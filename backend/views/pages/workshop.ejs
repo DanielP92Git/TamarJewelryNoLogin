@@ -152,27 +152,39 @@
       </div>
     </div>
     <div class="workshop-costs">
-      <span class="workshop-costs-title"><%= lang === 'eng' ? 'Workshop Costs:' : 'מחירי הסדנאות:' %></span> <br /><br />
-      <% if (lang === 'eng') { %>
-        <span class="workshop-cost-item">• One-on-one workshop - 450 NIS</span>
-        <br /><br />
-        <span class="workshop-cost-item">• 2 participants - 220 NIS per participant</span>
-        <br /><br />
-        <span class="workshop-cost-item">• 3 participants and more- 200 NIS per participant</span>
-        <br /><br />
-        <span class="workshop-cost-note">*Each workshop takes an hour and a half. For any questions please don't hesitate to contact me:</span>
-      <% } else { %>
-        <span class="workshop-cost-item">• סדנא אחת על אחת - 450 ש"ח</span>
-        <br /><br />
-        <span class="workshop-cost-item">• 2 משתתפות - 220 ש"ח לכל משתתפת</span>
-        <br /><br />
-        <span class="workshop-cost-item">• 3 משתתפות ומעלה- 200 ש"ח לכל משתתפת</span>
-        <br /><br />
-        <span class="workshop-cost-note">*כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי:</span>
-      <% } %>
+      <div class="pricing-cards-section">
+        <div class="pricing-cards">
+          <div class="pricing-card">
+            <div class="pricing-card-top">
+              <h3 class="pricing-card-title"><%= lang === 'eng' ? 'One-on-One Workshop' : 'סדנא אחת על אחת' %></h3>
+              <span class="pricing-card-price"><%= lang === 'eng' ? '450 NIS' : '450 ש"ח' %></span>
+            </div>
+            <div class="pricing-card-bottom">
+              <p class="pricing-card-desc"><%= lang === 'eng' ? 'A personal and focused experience. All attention is dedicated to you.' : 'חוויה אישית וממוקדת. כל תשומת הלב מוקדשת לך.' %></p>
+            </div>
+          </div>
+          <div class="pricing-card">
+            <div class="pricing-card-top">
+              <h3 class="pricing-card-title"><%= lang === 'eng' ? '2 Participants' : '2 משתתפות' %></h3>
+              <span class="pricing-card-price"><%= lang === 'eng' ? '220 NIS' : '220 ש"ח' %></span>
+            </div>
+            <div class="pricing-card-bottom">
+              <p class="pricing-card-desc"><%= lang === 'eng' ? 'A couples or friends workshop. Per participant.' : 'סדנא זוגית או עם חברה. לכל משתתפת.' %></p>
+            </div>
+          </div>
+          <div class="pricing-card">
+            <div class="pricing-card-top">
+              <h3 class="pricing-card-title"><%= lang === 'eng' ? '3+ Participants' : '3 משתתפות ומעלה' %></h3>
+              <span class="pricing-card-price"><%= lang === 'eng' ? '200 NIS' : '200 ש"ח' %></span>
+            </div>
+            <div class="pricing-card-bottom">
+              <p class="pricing-card-desc"><%= lang === 'eng' ? 'A group workshop, festive and fun. Per participant.' : 'סדנא קבוצתית, חגיגית וכיפית. לכל משתתפת.' %></p>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="contact-container">
         <div class="contact-block">
-          <span class="contact-label"><%= lang === 'eng' ? 'Whatsapp:' : 'וואטסאפ:' %></span>
           <a href="https://wa.me/972524484763" class="whatsapp-atr">
             <img
               src="/imgs/svgs/whatsapp.svg"
@@ -180,17 +192,26 @@
               alt="<%= lang === 'eng' ? 'WhatsApp contact' : 'צור קשר בוואטסאפ' %>"
             />
           </a>
+          <span class="contact-label"><%= lang === 'eng' ? 'Whatsapp:' : 'וואטסאפ:' %></span>
+          <p class="contact-value"><%= lang === 'eng' ? '+972-524484763' : '052-4484763' %></p>
         </div>
         <div class="contact-block">
-          <span class="contact-label"><%= lang === 'eng' ? ' Tel.:' : ' נייד:' %></span>
+          <svg class="contact-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+          <span class="contact-label"><%= lang === 'eng' ? 'Tel.:' : 'נייד:' %></span>
           <p class="contact-value"><%= lang === 'eng' ? '+972-524484763' : '052-4484763' %></p>
         </div>
         <div class="contact-block contact-block-last">
-          <span class="contact-label"><%= lang === 'eng' ? ' Email:' : ' דוא"ל:' %></span>
+          <svg class="contact-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+            <path d="M22 4l-10 8L2 4"></path>
+          </svg>
+          <span class="contact-label"><%= lang === 'eng' ? 'Email:' : 'דוא"ל:' %></span>
           <p class="contact-value">tamarkfir91@gmail.com</p>
         </div>
       </div>
-    </div>
+      <span class="workshop-cost-note"><%= lang === 'eng' ? "*Each workshop takes an hour and a half. For any questions please don't hesitate to contact me." : '*כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי.' %></span>    </div>
 
     <button class="go-to-top">
       <img

@@ -1097,7 +1097,7 @@ export default class View {
 
         <div class="footer-middle-column">
           <a class="attrib-footer-heb" href="/he/policies"
-            >מדיניות משלוח וביטול</a
+            >מדיניות משלוחים וביטולים</a
           >
           <a class="attrib-footer-heb" href="/he/contact">צרו קשר</a>
         </div>

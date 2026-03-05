@@ -202,9 +202,10 @@ html[dir='rtl'] .return-policy {
   direction: rtl;
 }
 
+html[dir='rtl'] h1,
 html[dir='rtl'] h2,
 html[dir='rtl'] h3 {
-  font-family: 'Amatic SC', sans-serif;
+  font-family: var(--font-accent);
   font-weight: 700;
 }
 
@@ -214,6 +215,12 @@ html[dir='rtl'] h2 {
 
 html[dir='rtl'] h3 {
   font-size: clamp(1.3rem, 1.6vw, 1.5rem);
+}
+
+html[dir='rtl'] .column-box,
+html[dir='rtl'] .shipping-policy,
+html[dir='rtl'] .return-policy {
+  font-family: var(--font-accent);
 }
 
 /* Smooth scroll behavior */

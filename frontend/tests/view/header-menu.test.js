@@ -338,7 +338,7 @@ describe('Header Menu Rendering and Navigation', () => {
       await view.setLanguage('heb', 0);
 
       const footer = document.querySelector('.footer');
-      expect(footer.textContent).toContain('מדיניות משלוח וביטול');
+      expect(footer.textContent).toContain('מדיניות משלוחים וביטולים');
       expect(footer.textContent).toContain('תמר כפיר תכשיטים. כל הזכויות שמורות');
     });
 
@@ -349,19 +349,19 @@ describe('Header Menu Rendering and Navigation', () => {
 
       await view.setLanguage('heb', 0);
       footer = document.querySelector('.footer');
-      expect(footer.textContent).toContain('מדיניות משלוח וביטול');
+      expect(footer.textContent).toContain('מדיניות משלוחים וביטולים');
       expect(footer.textContent).not.toContain('Shipping & Cancellation Policy');
     });
 
     it('should update footer when language changes from Hebrew to English', async () => {
       await view.setLanguage('heb', 0);
       let footer = document.querySelector('.footer');
-      expect(footer.textContent).toContain('מדיניות משלוח וביטול');
+      expect(footer.textContent).toContain('מדיניות משלוחים וביטולים');
 
       await view.setLanguage('eng', 0);
       footer = document.querySelector('.footer');
       expect(footer.textContent).toContain('Shipping & Cancellation Policy');
-      expect(footer.textContent).not.toContain('מדיניות משלוח וביטול');
+      expect(footer.textContent).not.toContain('מדיניות משלוחים וביטולים');
     });
   });
 });

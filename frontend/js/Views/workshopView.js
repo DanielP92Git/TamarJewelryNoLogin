@@ -82,39 +82,39 @@ class WorkshopView extends View {
     }
   }
 
-  async changeToHeb() {
+  changeToHeb = async () => {
     try {
-      // First store the language preference
       localStorage.setItem('language', 'heb');
+      document.documentElement.lang = 'he';
+      document.documentElement.dir = 'rtl';
 
-      // Update all the workshop-specific content
-      this.setFooterLng('heb');
+      await this.setLanguage('heb', 0);
+
       this.setWorkshopLng('heb');
       this.setCostsLng('heb');
 
-      // Call the base View's setLanguage method to update the menu
-      await this.setLanguage('heb', 0);
+      this._updateUrlLang('he');
     } catch (error) {
       console.error('[WorkshopView] Error in changeToHeb:', error);
     }
-  }
+  };
 
-  async changeToEng() {
+  changeToEng = async () => {
     try {
-      // First store the language preference
       localStorage.setItem('language', 'eng');
+      document.documentElement.lang = 'en';
+      document.documentElement.dir = 'ltr';
 
-      // Update all the workshop-specific content
-      this.setFooterLng('eng');
+      await this.setLanguage('eng', 0);
+
       this.setWorkshopLng('eng');
       this.setCostsLng('eng');
 
-      // Call the base View's setLanguage method to update the menu
-      await this.setLanguage('eng', 0);
+      this._updateUrlLang('en');
     } catch (error) {
       console.error('[WorkshopView] Error in changeToEng:', error);
     }
-  }
+  };
 
   handleWorkshopLng(lng) {
     const descriptionContainer = document.querySelector(
@@ -196,126 +196,61 @@ class WorkshopView extends View {
     }
   }
 
-  handleCostsLng(lng) {
-    const costsContainer = document.querySelector('.workshop-costs');
-    // Use the same relative path pattern as all other images on the workshop page
-    // All workshop images use ../imgs/... so this should work consistently
-    const whatsappPath = '../imgs/svgs/whatsapp.svg';
-
-    if (lng === 'eng') {
-      return ` Workshop Costs: <br /><br />• One-on-one workshop - 450 NIS <br /><br />
-        • 2 participants - 220 NIS per participant <br /><br />• 3 participants
-        and more- 200 NIS per participant <br /><br />
-        *Each workshop takes an hour and a half. For any questions please don't
-        hesitate to contact me:
-        <div class="contact-container">
-          <div class="contact-block">
-            <span>Whatsapp:</span>
-            <a href="https://wa.me/972524484763" class="whatsapp-atr">
-              <br /><br />
-              &nbsp;&nbsp;<img
-                src="${whatsappPath}"
-                class="whatsapp-svg"
-                alt=""
-              />
-            </a>
-          </div>
-          <div class="contact-block">
-            <span> Tel.:</span>
-            <p>+972-524484763</p>
-          </div>
-          <div class="contact-block contact-block-last">
-            <span> Email:</span>
-            <p>tamarkfir91@gmail.com</p>
-          </div>
-        </div>`;
-    } else if (lng === 'heb') {
-      costsContainer.style.direction = 'rtl';
-      return ` מחירי הסדנאות: <br /><br />• סדנא אחת על אחת - 450 ש"ח <br /><br />
-        • 2 משתתפות - 220 ש"ח לכל משתתפת <br /><br />• 3 משתתפות
-        ומעלה- 200 ש"ח לכל משתתפת <br /><br />
-        *כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי:
-        <div class="contact-container">
-          <div class="contact-block">
-            <span>וואטסאפ:</span>
-            <a href="https://wa.me/972524484763" class="whatsapp-atr">
-              <br /><br />
-              &nbsp;&nbsp;<img
-                src="${whatsappPath}"
-                class="whatsapp-svg"
-                alt=""
-              />
-            </a>
-          </div>
-          <div class="contact-block">
-            <span> נייד:</span>
-            <p>052-4484763</p>
-          </div>
-          <div class="contact-block contact-block-last">
-            <span> דוא"ל:</span>
-            <p>tamarkfir91@gmail.com</p>
-          </div>
-        </div>`;
-    }
-  }
-
   setCostsLng(lng) {
     const costsContainer = document.querySelector('.workshop-costs');
     if (!costsContainer) return;
 
-    // Update text content only, don't replace HTML structure
-    const titleEl = costsContainer.querySelector('.workshop-costs-title');
-    const costItems = costsContainer.querySelectorAll('.workshop-cost-item');
+    const cards = costsContainer.querySelectorAll('.pricing-card');
     const noteEl = costsContainer.querySelector('.workshop-cost-note');
-    const whatsappLabel = costsContainer.querySelector(
-      '.contact-block .contact-label',
-    );
-    const telLabel = costsContainer.querySelectorAll(
-      '.contact-block .contact-label',
-    )[1];
-    const emailLabel = costsContainer.querySelectorAll(
-      '.contact-block .contact-label',
-    )[2];
-    const telValue = costsContainer.querySelectorAll('.contact-value')[0];
-    const emailValue = costsContainer.querySelectorAll('.contact-value')[1];
+    const contactLabels = costsContainer.querySelectorAll('.contact-label');
+    const contactValues = costsContainer.querySelectorAll('.contact-value');
 
     if (lng === 'eng') {
-      costsContainer.style.direction = 'ltr';
-      costsContainer.style.textAlign = 'left';
-      if (titleEl) titleEl.textContent = 'Workshop Costs:';
-      if (costItems[0])
-        costItems[0].textContent = '• One-on-one workshop - 450 NIS';
-      if (costItems[1])
-        costItems[1].textContent = '• 2 participants - 220 NIS per participant';
-      if (costItems[2])
-        costItems[2].textContent =
-          '• 3 participants and more- 200 NIS per participant';
-      if (noteEl)
-        noteEl.textContent =
-          "*Each workshop takes an hour and a half. For any questions please don't hesitate to contact me:";
-      if (whatsappLabel) whatsappLabel.textContent = 'Whatsapp:';
-      if (telLabel) telLabel.textContent = ' Tel.:';
-      if (emailLabel) emailLabel.textContent = ' Email:';
-      if (telValue) telValue.textContent = '+972-524484763';
-      if (emailValue) emailValue.textContent = 'tamarkfir91@gmail.com';
+      if (cards[0]) {
+        cards[0].querySelector('.pricing-card-title').textContent = 'One-on-One Workshop';
+        cards[0].querySelector('.pricing-card-price').textContent = '450 NIS';
+        cards[0].querySelector('.pricing-card-desc').textContent = 'A personal and focused experience. All attention is dedicated to you.';
+      }
+      if (cards[1]) {
+        cards[1].querySelector('.pricing-card-title').textContent = '2 Participants';
+        cards[1].querySelector('.pricing-card-price').textContent = '220 NIS';
+        cards[1].querySelector('.pricing-card-desc').textContent = 'A couples or friends workshop. Per participant.';
+      }
+      if (cards[2]) {
+        cards[2].querySelector('.pricing-card-title').textContent = '3+ Participants';
+        cards[2].querySelector('.pricing-card-price').textContent = '200 NIS';
+        cards[2].querySelector('.pricing-card-desc').textContent = 'A group workshop, festive and fun. Per participant.';
+      }
+      if (noteEl) noteEl.textContent = "*Each workshop takes an hour and a half. For any questions please don't hesitate to contact me.";
+      if (contactLabels[0]) contactLabels[0].textContent = 'Whatsapp:';
+      if (contactLabels[1]) contactLabels[1].textContent = 'Tel.:';
+      if (contactLabels[2]) contactLabels[2].textContent = 'Email:';
+      if (contactValues[0]) contactValues[0].textContent = '+972-524484763';
+      if (contactValues[1]) contactValues[1].textContent = '+972-524484763';
+      if (contactValues[2]) contactValues[2].textContent = 'tamarkfir91@gmail.com';
     } else if (lng === 'heb') {
-      costsContainer.style.direction = 'rtl';
-      costsContainer.style.textAlign = 'right';
-      if (titleEl) titleEl.textContent = 'מחירי הסדנאות:';
-      if (costItems[0])
-        costItems[0].textContent = '• סדנא אחת על אחת - 450 ש"ח';
-      if (costItems[1])
-        costItems[1].textContent = '• 2 משתתפות - 220 ש"ח לכל משתתפת';
-      if (costItems[2])
-        costItems[2].textContent = '• 3 משתתפות ומעלה- 200 ש"ח לכל משתתפת';
-      if (noteEl)
-        noteEl.textContent =
-          '*כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי:';
-      if (whatsappLabel) whatsappLabel.textContent = 'וואטסאפ:';
-      if (telLabel) telLabel.textContent = ' נייד:';
-      if (emailLabel) emailLabel.textContent = ' דוא"ל:';
-      if (telValue) telValue.textContent = '052-4484763';
-      if (emailValue) emailValue.textContent = 'tamarkfir91@gmail.com';
+      if (cards[0]) {
+        cards[0].querySelector('.pricing-card-title').textContent = 'סדנא אחת על אחת';
+        cards[0].querySelector('.pricing-card-price').textContent = '450 ש"ח';
+        cards[0].querySelector('.pricing-card-desc').textContent = 'חוויה אישית וממוקדת. כל תשומת הלב מוקדשת לך.';
+      }
+      if (cards[1]) {
+        cards[1].querySelector('.pricing-card-title').textContent = '2 משתתפות';
+        cards[1].querySelector('.pricing-card-price').textContent = '220 ש"ח';
+        cards[1].querySelector('.pricing-card-desc').textContent = 'סדנא זוגית או עם חברה. לכל משתתפת.';
+      }
+      if (cards[2]) {
+        cards[2].querySelector('.pricing-card-title').textContent = '3 משתתפות ומעלה';
+        cards[2].querySelector('.pricing-card-price').textContent = '200 ש"ח';
+        cards[2].querySelector('.pricing-card-desc').textContent = 'סדנא קבוצתית, חגיגית וכיפית. לכל משתתפת.';
+      }
+      if (noteEl) noteEl.textContent = '*כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי.';
+      if (contactLabels[0]) contactLabels[0].textContent = 'וואטסאפ:';
+      if (contactLabels[1]) contactLabels[1].textContent = 'נייד:';
+      if (contactLabels[2]) contactLabels[2].textContent = 'דוא"ל:';
+      if (contactValues[0]) contactValues[0].textContent = '052-4484763';
+      if (contactValues[1]) contactValues[1].textContent = '052-4484763';
+      if (contactValues[2]) contactValues[2].textContent = 'tamarkfir91@gmail.com';
     }
   }
 

@@ -189,21 +189,27 @@ html[dir='rtl'] .return-policy {
 }
 
 html[dir='rtl'] h1 {
-  font-family: 'Amatic SC', sans-serif;
+  font-family: var(--font-accent);
   font-weight: 700;
   font-size: clamp(2rem, 7vw, 2.5rem);
 }
 
 html[dir='rtl'] h2 {
-  font-family: 'Amatic SC', sans-serif;
+  font-family: var(--font-accent);
   font-weight: 700;
   font-size: clamp(1.6rem, 6vw, 2rem);
 }
 
 html[dir='rtl'] h3 {
-  font-family: 'Amatic SC', sans-serif;
+  font-family: var(--font-accent);
   font-weight: 700;
   font-size: clamp(1.3rem, 5vw, 1.6rem);
+}
+
+html[dir='rtl'] .column-box,
+html[dir='rtl'] .shipping-policy,
+html[dir='rtl'] .return-policy {
+  font-family: var(--font-accent);
 }
 
 /* Smooth scroll behavior */
