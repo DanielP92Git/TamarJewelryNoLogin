@@ -90,12 +90,12 @@ class AboutView extends View {
     const pageTitle = document.getElementById('page-title');
 
     if (lng === 'eng') {
-      pageTitle.style.fontFamily = 'Raleway, sans-serif';
+      pageTitle.style.fontFamily = 'var(--font-secondary)';
       pageTitle.style.textAlign = 'left';
       pageTitle.textContent = 'ABOUT ME';
     }
     if (lng === 'heb') {
-      pageTitle.style.fontFamily = 'Raleway, sans-serif';
+      pageTitle.style.fontFamily = 'var(--font-secondary)';
       pageTitle.style.textAlign = 'right';
       pageTitle.textContent = 'אודותי';
     }

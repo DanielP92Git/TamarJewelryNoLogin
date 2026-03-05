@@ -1028,39 +1028,39 @@ export default class View {
       return ` 
       <div class="columns-container">
         <div class="footer-left-column">
-          <a class="attrib-footer" href="/">Home</a>
-          <a class="attrib-footer" href="/html/categories/necklaces.html"
+          <a class="attrib-footer" href="/en">Home</a>
+          <a class="attrib-footer" href="/en/necklaces"
             >Necklaces</a
           >
           <a
             class="attrib-footer"
-            href="/html/categories/crochetNecklaces.html"
+            href="/en/crochet-necklaces"
             >Crochet Necklaces</a
           >
-          <a class="attrib-footer" href="/html/categories/hoops.html"
+          <a class="attrib-footer" href="/en/hoops"
             >Hoop Earrings</a
           >
-          <a class="attrib-footer" href="/html/categories/dangle.html"
+          <a class="attrib-footer" href="/en/dangle"
             >Dangle Earrings</a
           >
           <!-- HIDDEN: Shalom Club - uncomment to restore
-          <a class="attrib-footer" href="/html/categories/shalom-club.html"
+          <a class="attrib-footer" href="/en/shalom-club"
             >Shalom Club</a
           >
           -->
         </div>
 
         <div class="footer-middle-column">
-          <a class="attrib-footer" href="/html/policies.html"
+          <a class="attrib-footer" href="/en/policies"
             >Shipping & Cancellation Policy</a
           >
-          <a class="attrib-footer" href="/html/contact-me.html">Contact Me</a>
+          <a class="attrib-footer" href="/en/contact">Contact Me</a>
         </div>
         <div class="footer-right-column">
-          <a class="attrib-footer" href="/html/jewelry-workshop.html"
+          <a class="attrib-footer" href="/en/workshop"
             >Jewelry Workshop</a
           >
-          <a class="attrib-footer" href="/html/about.html">About</a>
+          <a class="attrib-footer" href="/en/about">About</a>
         </div>
       </div>
       <div class="rights-container">
@@ -1073,39 +1073,39 @@ export default class View {
       return `
       <div class="columns-container columns-container_heb" style=" direction: rtl;">
         <div class="footer-left-column">
-          <a class="attrib-footer-heb" href="/">בית</a>
-          <a class="attrib-footer-heb" href="/html/categories/necklaces.html"
+          <a class="attrib-footer-heb" href="/he">בית</a>
+          <a class="attrib-footer-heb" href="/he/necklaces"
             >שרשראות</a
           >
           <a
             class="attrib-footer-heb"
-            href="/html/categories/crochetNecklaces.html"
+            href="/he/crochet-necklaces"
             >שרשראות סרוגות</a
           >
-          <a class="attrib-footer-heb" href="/html/categories/hoops.html"
+          <a class="attrib-footer-heb" href="/he/hoops"
             >עגילי חישוק</a
           >
-          <a class="attrib-footer-heb" href="/html/categories/dangle.html"
+          <a class="attrib-footer-heb" href="/he/dangle"
             >עגילים תלויים</a
           >
           <!-- HIDDEN: Shalom Club - uncomment to restore
-          <a class="attrib-footer-heb" href="/html/categories/shalom-club.html"
+          <a class="attrib-footer-heb" href="/he/shalom-club"
             >מועדון "שלום"</a
           >
           -->
         </div>
 
         <div class="footer-middle-column">
-          <a class="attrib-footer-heb" href="/html/policies.html"
+          <a class="attrib-footer-heb" href="/he/policies"
             >מדיניות משלוח וביטול</a
           >
-          <a class="attrib-footer-heb" href="/html/contact-me.html">צרו קשר</a>
+          <a class="attrib-footer-heb" href="/he/contact">צרו קשר</a>
         </div>
         <div class="footer-right-column">
-          <a class="attrib-footer-heb" href="/html/jewelry-workshop.html"
+          <a class="attrib-footer-heb" href="/he/workshop"
             >סדנאות תכשיטים</a
           >
-          <a class="attrib-footer-heb" href="/html/about.html">אודות</a>
+          <a class="attrib-footer-heb" href="/he/about">אודות</a>
         </div>
       </div>
       <div class="rights-container">

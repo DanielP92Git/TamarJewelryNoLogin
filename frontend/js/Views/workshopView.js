@@ -26,9 +26,10 @@ class WorkshopView extends View {
     const images = sliderContainer.querySelectorAll('.slide-image-img');
     if (!images || images.length === 0) return;
 
-    // Get existing buttons
-    const btnLeft = sliderContainer.querySelector('.slider-btn--left');
-    const btnRight = sliderContainer.querySelector('.slider-btn--right');
+    // Get existing buttons (in .slider-nav below the image container)
+    const sliderNav = document.querySelector('.slider-nav');
+    const btnLeft = sliderNav?.querySelector('.slider-btn--left');
+    const btnRight = sliderNav?.querySelector('.slider-btn--right');
 
     if (!btnLeft || !btnRight) {
       console.error('Slider buttons not found in the HTML');
@@ -169,7 +170,7 @@ class WorkshopView extends View {
     if (lng === 'heb') {
       descriptionContainer.style.direction = 'rtl';
       descriptionContainer.style.textAlign = 'right';
-      containerParent?.classList.add('rtl-layout');
+      // containerParent?.classList.add('rtl-layout');
     } else {
       descriptionContainer.style.direction = 'ltr';
       descriptionContainer.style.textAlign = 'left';
@@ -186,11 +187,11 @@ class WorkshopView extends View {
   setHeaderLng(lng) {
     const pageTitle = document.getElementById('page-title');
     if (lng === 'eng') {
-      pageTitle.style.fontFamily = 'Raleway, sans-serif';
+      pageTitle.style.fontFamily = 'var(--font-secondary)';
       pageTitle.textContent = 'MY JEWELRY WORKSHOP';
     }
     if (lng === 'heb') {
-      pageTitle.style.fontFamily = 'Raleway, sans-serif';
+      pageTitle.style.fontFamily = 'var(--font-secondary)';
       pageTitle.textContent = 'סדנאות התכשיטים שלי';
     }
   }

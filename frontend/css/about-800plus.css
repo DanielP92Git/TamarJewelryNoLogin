@@ -20,10 +20,6 @@ header {
 
 /* Menu styles centralized in desktop-menu.css */
 
-#page-title {
-  font-family: Raleway, sans-serif;
-}
-
 main {
   display: flex;
   flex-flow: column;
@@ -41,7 +37,7 @@ main {
 
 h1 {
   font-weight: 100;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-secondary);
 
   width: 100%;
   margin-top: 0;
@@ -93,18 +89,17 @@ h1 {
   object-position: center 20%;
   /* box-shadow: 1px 3px 30px 2px rgba(133, 143, 143, 0.646); */
   border-radius: 8px;
-
 }
 
 .aboutme-description {
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   padding: 0 3rem 3rem 3rem;
   box-sizing: border-box;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-secondary);
   color: rgba(68, 68, 68, 0.9);
   letter-spacing: 0.5px;
   word-spacing: 0.5rem;
-  line-height: 1.6em;
+  line-height: 1.8rem;
   border-radius: 8px;
 
   width: 100%;
@@ -165,7 +160,7 @@ h1 {
 }
 
 #page-title {
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-secondary);
 }
 
 .go-to-top {

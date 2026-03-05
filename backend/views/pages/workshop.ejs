@@ -54,16 +54,10 @@
 הסדנה אינה דורשת ידע קודם ביצירת תכשיטים. כל החומרים יינתנו על ידי. את גם יכולה להכין הפתעה מיוחדת למישהו ולרכוש את סדנת התכשיטים ככרטיס מתנה.
         <% } %>
       </div>
+      <div class="slides-area">
       <section class="slide-images-container">
         <!-- Add Slider Buttons -->
-        <button
-          class="slider-btn slider-btn--left"
-          aria-label="<%= lang === 'eng' ? 'Previous image' : 'תמונה קודמת' %>"
-        ></button>
-        <button
-          class="slider-btn slider-btn--right"
-          aria-label="<%= lang === 'eng' ? 'Next image' : 'תמונה הבאה' %>"
-        ></button>
+        
 
         <div class="slide-image">
           <img
@@ -145,6 +139,17 @@
 
         <div class="logo"></div>
       </section>
+      <div class="slider-nav"> 
+        <button
+        class="slider-btn slider-btn--right"
+        aria-label="<%= lang === 'eng' ? 'Next image' : 'תמונה הבאה' %>"
+        ></button>
+        <button
+        class="slider-btn slider-btn--left"
+        aria-label="<%= lang === 'eng' ? 'Previous image' : 'תמונה קודמת' %>"
+        ></button>
+      </div>
+      </div>
     </div>
     <div class="workshop-costs">
       <span class="workshop-costs-title"><%= lang === 'eng' ? 'Workshop Costs:' : 'מחירי הסדנאות:' %></span> <br /><br />

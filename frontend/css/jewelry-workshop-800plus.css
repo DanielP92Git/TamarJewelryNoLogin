@@ -16,7 +16,7 @@ body {
 }
 
 #page-title {
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-secondary);
 }
 
 .contact-container {
@@ -69,21 +69,35 @@ header {
   /* border: 4px solid rgb(20, 177, 75); */
 }
 
+.slides-area {
+  display: flex;
+  flex-flow: column;
+  position: relative;
+  width: 35%;
+  height: 35%;
+  overflow: hidden;
+  border-radius: 12px;
+  /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); */
+  margin-top: 2rem;
+
+  /* border: 2px solid rgba(68, 68, 68, 0.2); */
+  /* DEBUG - remove after testing */
+}
+
 .slide-images-container {
   display: flex;
   overflow: hidden;
   position: relative;
-  width: 35%;
+  width: 100%;
   max-width: 500px;
   height: auto;
   max-height: 60vh;
   aspect-ratio: 4 / 5;
-  margin-top: 2rem;
   border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); */
 
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(177, 20, 143); */
+  /* border: 3px solid green;  */
+  /* DEBUG - remove after testing */
 }
 
 .slide-image {
@@ -100,6 +114,17 @@ header {
   transition: none;
   /* Hide all images except first one initially */
   transform: translateX(100%);
+}
+
+.slider-nav {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 20px 10px 20px;
+  direction: ltr;
+
+  /* border: 2px solid yellow;  */
+  /* DEBUG - remove after testing */
 }
 
 .slide-image:first-child {
@@ -151,7 +176,7 @@ main {
 
 h1 {
   font-weight: 100;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-secondary);
   text-align: center;
 
   align-self: center;
@@ -191,12 +216,12 @@ h1 {
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 12px;
-  font-size: 1.3vw;
+  font-size: 0.9rem;
   padding: 2.5rem;
   word-spacing: 0.5rem;
   line-height: 1.8rem;
   box-sizing: border-box;
-  font-family: Raleway, sans-serif;
+  font-family: var(--font-secondary);
   color: rgba(68, 68, 68, 0.9);
   letter-spacing: 0.5px;
   text-align: left; /* Default for English/LTR */
@@ -362,31 +387,17 @@ h1 {
 
 /* Styles removed, buttons will now be visible by default */
 
-/* Desktop Slider Button Styles */
 .slider-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 100;
+  border: none;
 
-  /* Modern glassmorphism design */
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-
-  width: 40px;
-  height: 40px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   cursor: pointer;
 
   display: flex;
   justify-content: center;
   align-items: center;
-
-  /* Modern shadow */
-  box-shadow:
-    0 4px 12px rgba(0, 0, 0, 0.15),
-    0 2px 4px rgba(0, 0, 0, 0.1);
 
   /* Smooth transitions */
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -405,49 +416,34 @@ h1 {
   content: '';
   width: 10px;
   height: 10px;
-  border-right: 2px solid rgba(50, 50, 50, 0.9);
-  border-bottom: 2px solid rgba(50, 50, 50, 0.9);
+  border-right: 2.5px solid #000000;
+  border-bottom: 2.5px solid #000000;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slider-btn--left::before {
-  transform: rotate(135deg);
-  margin-left: 3px;
+  transform: rotate(-45deg);
+  margin-left: -3px;
 }
 
 .slider-btn--right::before {
-  transform: rotate(-45deg);
-  margin-right: 3px;
+  transform: rotate(135deg);
+  margin-right: -3px;
 }
 
 /* Hover state */
 .slider-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-50%) scale(1.1);
-  box-shadow:
-    0 6px 16px rgba(0, 0, 0, 0.2),
-    0 3px 6px rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
 }
 
 .slider-btn:hover::before {
-  border-color: rgba(20, 20, 20, 1);
+  border-color: #fff;
 }
 
 /* Active state */
 .slider-btn:active {
-  transform: translateY(-50%) scale(1.05);
-}
-
-/* Positioning - adjusted for smaller container */
-.slider-btn--left {
-  left: 12px !important;
-  right: auto !important;
-}
-
-.slider-btn--right {
-  right: 12px !important;
-  left: auto !important;
+  transform: scale(1.05);
 }
 
 /* Hide Mobile-specific buttons on desktop */
@@ -455,7 +451,7 @@ h1 {
   display: none;
 }
 
-/* Ensure Desktop buttons are visible and positioned */
-.slide-images-container .slider-btn--desktop {
+/* Ensure Desktop buttons are visible */
+.slider-nav .slider-btn--desktop {
   display: flex;
 }

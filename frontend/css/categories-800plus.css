@@ -451,7 +451,7 @@ body#categories.crochet-necklaces header {
 .small-image-thumb {
   width: 90px;
   height: 90px;
-  border: 1px solid #e5e5e5;
+  border: none;
   border-radius: 0;
   overflow: hidden;
   cursor: pointer;
@@ -472,12 +472,12 @@ body#categories.crochet-necklaces header {
 }
 
 .small-image-thumb.active {
-  border-color: #1f2937;
-  box-shadow: 0 0 0 1px #1f2937;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .small-image-thumb:hover:not(.active) {
-  border-color: #999;
+  border-color: transparent;
 }
 
 .images-container {

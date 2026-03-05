@@ -357,7 +357,7 @@ class CategoriesView extends View {
   setHeaderLng(lng) {
     const categoryTitle = document.querySelector('.category-title');
     if (lng === 'eng') {
-      categoryTitle.style.fontFamily = 'Raleway, sans-serif';
+      categoryTitle.style.fontFamily = 'var(--font-secondary)';
       categoryTitle.style.fontSize = '1.5rem';
       categoryTitle.textContent = this.category.replace(/-/g, ' ').toUpperCase();
     }

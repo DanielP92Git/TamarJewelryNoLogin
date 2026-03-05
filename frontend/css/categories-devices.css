@@ -929,7 +929,7 @@ main {
   flex: 0 0 auto;
   width: 70px;
   height: 70px;
-  border: 1px solid #e5e5e5;
+  border: none;
   border-radius: 0;
   overflow: hidden;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
@@ -940,8 +940,8 @@ main {
 }
 
 .small-image-div.active {
-  border-color: #1f2937;
-  box-shadow: 0 0 0 1px #1f2937;
+  border-color: transparent;
+  box-shadow: none;
 }
 
 .small-image {
@@ -1172,7 +1172,7 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #e5e5e5;
+    border: none;
     border-radius: 0;
     background-color: #fafafa;
   }
