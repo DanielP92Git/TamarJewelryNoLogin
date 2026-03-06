@@ -5640,12 +5640,14 @@ function addProductHandler() {
       return;
     }
 
-    // Validate form data
-    const prodName = document.getElementById("name").value.trim();
+    // Validate form data - check bilingual name fields (hidden "name" field is only populated later in addProduct)
+    const prodNameEn = document.getElementById("name-en")?.value?.trim() || "";
+    const prodNameHe = document.getElementById("name-he")?.value?.trim() || "";
+    const prodName = prodNameEn || prodNameHe;
     console.log("[runSubmit] prodName:", prodName);
     if (!prodName) {
       console.error("[runSubmit] Validation failed: Product name is required");
-      alert("Product name is required");
+      alert("Product name is required in at least one language");
       return;
     }
 
