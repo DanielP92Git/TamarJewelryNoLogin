@@ -41,7 +41,7 @@ const {
 const { renderCategoryPage, renderProductPage, renderCartPage, DB_TO_URL_CATEGORY } = require('./routes/ssrDynamic');
 const { serveSitemap } = require('./routes/sitemap');
 const { cacheMiddleware } = require('./middleware/cacheMiddleware');
-const { invalidateProduct, invalidateAll, invalidateBulkProducts } = require('./cache/invalidation');
+const { invalidateProduct, invalidateCategory, invalidateAll, invalidateBulkProducts } = require('./cache/invalidation');
 
 // #region agent log
 function agentLog(hypothesisId, location, message, data) {
@@ -2186,8 +2186,12 @@ app.post(
       // #endregion
 
       // Invalidate cache for product and its category
-      if (product.slug && DB_TO_URL_CATEGORY[product.category]) {
-        invalidateProduct(product.slug, DB_TO_URL_CATEGORY[product.category]);
+      const urlCategory = DB_TO_URL_CATEGORY[product.category];
+      if (product.slug && urlCategory) {
+        invalidateProduct(product.slug, urlCategory);
+      } else if (urlCategory) {
+        // Slug may be empty (e.g. Hebrew-only names) — still invalidate category
+        invalidateCategory(urlCategory);
       }
 
       res.json({
@@ -2535,8 +2539,11 @@ app.post(
       console.log('Product updated successfully');
 
       // Invalidate cache for product and its category
-      if (product.slug && DB_TO_URL_CATEGORY[product.category]) {
-        invalidateProduct(product.slug, DB_TO_URL_CATEGORY[product.category]);
+      const urlCategory = DB_TO_URL_CATEGORY[product.category];
+      if (product.slug && urlCategory) {
+        invalidateProduct(product.slug, urlCategory);
+      } else if (urlCategory) {
+        invalidateCategory(urlCategory);
       }
 
       res.json({
