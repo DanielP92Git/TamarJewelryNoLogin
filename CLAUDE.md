@@ -87,6 +87,22 @@ app.use((req, res, next) => {
 });
 ```
 
+## SSR Caching
+
+- **In-memory page cache** via `node-cache` (1-hour TTL) in `backend/cache/pageCache.js`
+- **Cache middleware** (`backend/middleware/cacheMiddleware.js`): caches GET requests for public pages, sets `Cache-Control: public, no-cache`
+- **Cache invalidation** (`backend/cache/invalidation.js`): `invalidateProduct(slug, categorySlug)` and `invalidateCategory(categorySlug)` clear cached pages when products are added/updated
+- SSR category pages (`backend/routes/ssrDynamic.js`) render **all products** (no limit) sorted by `displayOrder`
+- The frontend (`categoriesView.js`) sets `allProductsFetched = true` for SSR pages, so no additional API fetching occurs
+
+## Admin Dashboard
+
+- **`admin/BisliView.js`**: Single-file SPA for all admin functionality
+- Product forms use bilingual fields (`id="name-en"`, `id="name-he"`); the hidden `id="name"` field is populated inside `addProduct()`, not before
+- Validation in `runSubmit()` checks bilingual name fields directly (not the hidden field)
+- `addProduct()` reads all form values from DOM independently of the `data` parameter passed to it
+- **Slug generation**: Mongoose pre-save hook in `Product.js` auto-generates slugs using `slugify` from `this.name`; Hebrew-only names may produce empty slugs
+
 ## Deployment
 
 Target: DigitalOcean (App Platform or Droplets)
