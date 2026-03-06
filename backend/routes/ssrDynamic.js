@@ -67,7 +67,6 @@ async function renderCategoryPage(req, res) {
       available: { $ne: false },
     })
       .sort({ displayOrder: 1 })
-      .limit(20)
       .select('id name slug image publicImage images mainImage description quantity ils_price usd_price category sku discount_percentage original_ils_price original_usd_price name_en name_he description_en description_he')
       .lean();
 
