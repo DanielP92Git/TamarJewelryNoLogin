@@ -57,8 +57,8 @@
             <div class="product-main-image" style="margin-bottom: 1rem;">
               <%
                 const mainImage = product.images?.[0] || product.mainImage || {};
-                const mainDesktop = mainImage.publicDesktop || product.image || '';
-                const mainMobile = mainImage.publicMobile || mainDesktop;
+                const mainDesktop = mainImage.publicDesktop || mainImage.desktop || product.publicImage || product.image || '';
+                const mainMobile = mainImage.publicMobile || mainImage.mobile || mainDesktop;
               %>
               <picture>
                 <source

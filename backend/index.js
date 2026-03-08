@@ -2010,10 +2010,14 @@ app.post(
         ? smallImageInput.filter(Boolean).map(img => {
             if (typeof img === 'string') return maybeRelative(img);
             if (img && typeof img === 'object' && !Array.isArray(img)) {
-              return {
+              const result = {
                 desktop: maybeRelative(img.desktop),
                 mobile: maybeRelative(img.mobile),
               };
+              // Include public URL variants if provided (consistent with main image)
+              if (img.publicDesktop) result.publicDesktop = maybeRelative(img.publicDesktop);
+              if (img.publicMobile) result.publicMobile = maybeRelative(img.publicMobile);
+              return result;
             }
             return img;
           })
@@ -2456,6 +2460,12 @@ app.post(
                 mobile:
                   result?.mobile?.spacesUrl ||
                   `/smallImages/${result.mobile.filename}`,
+                publicDesktop:
+                  result?.desktop?.spacesUrl ||
+                  `/public/smallImages/${result.desktop.filename}`,
+                publicMobile:
+                  result?.mobile?.spacesUrl ||
+                  `/public/smallImages/${result.mobile.filename}`,
               }));
 
           // Append new small images to existing ones (old format)
@@ -2695,6 +2705,12 @@ app.post(
           success: false,
           errors: 'Concurrency conflict detected. Another admin modified product order. Please refresh and try again.'
         });
+      }
+
+      // Invalidate cached category pages so the new order is visible
+      const urlCategory = DB_TO_URL_CATEGORY[category];
+      if (urlCategory) {
+        invalidateCategory(urlCategory);
       }
 
       // Success response
@@ -3602,13 +3618,19 @@ app.post(
           `/public/uploads/${mainImageResults.mobile.filename}`,
       };
 
-      // Construct URLs for small images
+      // Construct URLs for small images (include public variants for consistency with main image)
       const smallImageUrlSets = smallImagesResults.map(result => ({
         desktop:
           result?.desktop?.spacesUrl ||
           `/smallImages/${result.desktop.filename}`,
         mobile:
           result?.mobile?.spacesUrl || `/smallImages/${result.mobile.filename}`,
+        publicDesktop:
+          result?.desktop?.spacesUrl ||
+          `/public/smallImages/${result.desktop.filename}`,
+        publicMobile:
+          result?.mobile?.spacesUrl ||
+          `/public/smallImages/${result.mobile.filename}`,
       }));
 
       // Send response with all URL formats

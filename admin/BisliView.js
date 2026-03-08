@@ -3601,7 +3601,7 @@ function editProduct(product) {
               <div class="field" style="margin-top:12px;">
                 <div class="label">Security Margin (%)</div>
                 <input class="input" type="number" name="security_margin" id="security-margin" value="${
-                  product.security_margin || 5
+                  product.security_margin || 0
                 }" min="0" max="100" />
               </div>
             </div>
@@ -4304,7 +4304,7 @@ function buildDuplicateDraftFromProduct(product) {
     product?.security_margin ??
     product?.securityMargin ??
     product?.security ??
-    5;
+    0;
 
   return {
     sourceId: product?.id ?? null,
@@ -4330,7 +4330,7 @@ function prefillAddProductFormFromDraft(draft) {
   if (descEl) descEl.value = String(draft?.description ?? "");
   if (categoryEl && draft?.category) categoryEl.value = String(draft.category);
   if (qtyEl) qtyEl.value = String(Number(draft?.quantity ?? 0));
-  if (marginEl) marginEl.value = String(draft?.security_margin ?? 5);
+  if (marginEl) marginEl.value = String(draft?.security_margin ?? 0);
   if (ilsEl) ilsEl.value = String(draft?.ils_price ?? "");
 
   // Clear any selected images; duplicates do NOT copy images
@@ -4934,7 +4934,7 @@ async function addProduct(e, data, form) {
     const quantity = document.getElementById("quantity").value;
     const ilsPrice = document.getElementById("new-price").value;
     const securityMargin =
-      document.getElementById("security-margin").value || "5";
+      document.getElementById("security-margin").value || "0";
     const applyGlobalDiscountCheckbox = document.getElementById(
       "apply-global-discount",
     );
@@ -5383,7 +5383,7 @@ async function loadAddProductsPage() {
               </div>
               <div class="field" style="margin-top:12px;">
                 <div class="label">Security Margin (%)</div>
-                <input class="input" type="number" name="security_margin" id="security-margin" placeholder="5" value="5" min="0" max="100" />
+                <input class="input" type="number" name="security_margin" id="security-margin" placeholder="0" value="0" min="0" max="100" />
               </div>
               <div class="field" style="margin-top:12px; display:flex; align-items:center; gap:8px;">
                 <input type="checkbox" id="apply-global-discount" name="apply_global_discount" />
@@ -5666,7 +5666,7 @@ function addProductHandler() {
     const prodCategory = document.getElementById("category").value;
     const quantity = document.getElementById("quantity").value;
     const securityMargin =
-      document.getElementById("security-margin").value || "5";
+      document.getElementById("security-margin").value || "0";
 
     const prodImage = document.getElementById("mainImage").files[0];
     if (!prodImage) {

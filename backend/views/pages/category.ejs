@@ -54,8 +54,8 @@
             const productDescription = lang === 'heb'
               ? (product.description_he || product.description_en || product.description)
               : (product.description_en || product.description);
-            const desktopImage = product.images?.[0]?.publicDesktop || product.mainImage?.publicDesktop || product.image || '';
-            const mobileImage = product.images?.[0]?.publicMobile || product.mainImage?.publicMobile || product.image || desktopImage;
+            const desktopImage = product.images?.[0]?.publicDesktop || product.images?.[0]?.desktop || product.mainImage?.publicDesktop || product.mainImage?.desktop || product.publicImage || product.image || '';
+            const mobileImage = product.images?.[0]?.publicMobile || product.images?.[0]?.mobile || product.mainImage?.publicMobile || product.mainImage?.mobile || product.publicImage || product.image || desktopImage;
             const price = lang === 'eng' ? product.usd_price : product.ils_price;
             const originalPrice = lang === 'eng' ? product.original_usd_price : product.original_ils_price;
             const curSign = lang === 'eng' ? '$' : '₪';

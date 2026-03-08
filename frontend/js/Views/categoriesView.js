@@ -765,8 +765,9 @@ class CategoriesView extends View {
     const apiBaseUrl = this.apiUrl;
 
     // NEW: Prefer unified images array (Phase 7 migration)
-    if (Array.isArray(product?.images) && product.images.length > 0) {
-      smallImagesArray = product.images
+    // Use images.slice(1) for gallery — images[0] is the main/featured image
+    if (Array.isArray(product?.images) && product.images.length > 1) {
+      smallImagesArray = product.images.slice(1)
         .filter(img => img && typeof img === 'object')
         .map(img => {
           // Get best URL: prefer public, then regular, then local
