@@ -75,6 +75,33 @@ class CategoriesView extends View {
         }
       }
     }, 1000);
+
+    // Override View's changeToHeb/changeToEng class field properties
+    // so category-specific language switching (product title/desc updates) runs
+    this.changeToHeb = async () => {
+      try {
+        localStorage.setItem('language', 'heb');
+        try { document.documentElement.lang = 'he'; document.documentElement.dir = 'rtl'; } catch {}
+        await this.setLanguage('heb', 0);
+        this.setPageSpecificLanguage('heb', 0);
+        this.updateExistingProductText('heb');
+        this._updateUrlLang('he');
+      } catch (error) {
+        console.error('[CategoriesView] Error in changeToHeb:', error);
+      }
+    };
+    this.changeToEng = async () => {
+      try {
+        localStorage.setItem('language', 'eng');
+        try { document.documentElement.lang = 'en'; document.documentElement.dir = 'ltr'; } catch {}
+        await this.setLanguage('eng', 0);
+        this.setPageSpecificLanguage('eng', 0);
+        this.updateExistingProductText('eng');
+        this._updateUrlLang('en');
+      } catch (error) {
+        console.error('[CategoriesView] Error in changeToEng:', error);
+      }
+    };
   }
 
   // Use stored prices from database (no conversions needed)
@@ -1435,33 +1462,6 @@ class CategoriesView extends View {
       </div>`;
   }
 
-  async changeToHeb() {
-    try {
-      localStorage.setItem('language', 'heb');
-      // First call the base class setLanguage
-      await super.setLanguage('heb', 0);
-      // Then handle category-specific language changes
-      this.setPageSpecificLanguage('heb', 0);
-      // Update existing product text without refetching
-      this.updateExistingProductText('heb');
-    } catch (error) {
-      console.error('[CategoriesView] Error in changeToHeb:', error);
-    }
-  }
-
-  async changeToEng() {
-    try {
-      localStorage.setItem('language', 'eng');
-      // First call the base class setLanguage
-      await super.setLanguage('eng', 0);
-      // Then handle category-specific language changes
-      this.setPageSpecificLanguage('eng', 0);
-      // Update existing product text without refetching
-      this.updateExistingProductText('eng');
-    } catch (error) {
-      console.error('[CategoriesView] Error in changeToEng:', error);
-    }
-  }
 
   // New method to update text content of existing products
   updateExistingProductText(lng) {
