@@ -1,0 +1,10 @@
+{
+  "liveServer.settings.ignoreFiles": [
+    "backend/uploads/**",
+    "backend/public/**",
+    "backend/smallImages/**",
+    "frontend/dist/**",
+    "**/*.webp",
+    "**/*.tmp"
+  ]
+}

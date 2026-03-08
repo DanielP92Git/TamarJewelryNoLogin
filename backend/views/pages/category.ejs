@@ -66,7 +66,41 @@
               ? description.substring(0, maxDescriptionLength).replace(/\n/g, '<br>') + '...'
               : description.replace(/\n/g, '<br>');
           %>
-          <div class="item-container" data-id="<%= product.id %>" data-quant="<%= product.quantity %>" data-currency="<%= curSign %>" data-usd-price="<%= Math.round(product.usd_price || 0) %>" data-ils-price="<%= Math.round(product.ils_price || 0) %>" data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>" data-original-ils-price="<%= Math.round(product.original_ils_price || product.ils_price || 0) %>" data-full-description="<%= description %>" data-name-en="<%= product.name_en || product.name %>" data-name-he="<%= product.name_he || '' %>" data-description-en="<%= product.description_en || product.description || '' %>" data-description-he="<%= product.description_he || '' %>" data-sku="<%= product.sku || '' %>">
+          <%
+            let galleryImages = [];
+            if (Array.isArray(product.images) && product.images.length > 0) {
+              galleryImages = product.images.map(function(img) {
+                return {
+                  desktop: img.desktop || '',
+                  mobile: img.mobile || '',
+                  publicDesktop: img.publicDesktop || '',
+                  publicMobile: img.publicMobile || ''
+                };
+              });
+            } else {
+              if (product.mainImage && typeof product.mainImage === 'object') {
+                galleryImages.push({
+                  desktop: product.mainImage.desktop || '',
+                  mobile: product.mainImage.mobile || '',
+                  publicDesktop: product.mainImage.publicDesktop || '',
+                  publicMobile: product.mainImage.publicMobile || ''
+                });
+              }
+              if (Array.isArray(product.smallImages)) {
+                product.smallImages.forEach(function(si) {
+                  if (si && typeof si === 'object') {
+                    galleryImages.push({
+                      desktop: si.desktop || '',
+                      mobile: si.mobile || '',
+                      publicDesktop: si.publicDesktop || '',
+                      publicMobile: si.publicMobile || ''
+                    });
+                  }
+                });
+              }
+            }
+          %>
+          <div class="item-container" data-id="<%= product.id %>" data-quant="<%= product.quantity %>" data-currency="<%= curSign %>" data-usd-price="<%= Math.round(product.usd_price || 0) %>" data-ils-price="<%= Math.round(product.ils_price || 0) %>" data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>" data-original-ils-price="<%= Math.round(product.original_ils_price || product.ils_price || 0) %>" data-full-description="<%= description %>" data-name-en="<%= product.name_en || product.name %>" data-name-he="<%= product.name_he || '' %>" data-description-en="<%= product.description_en || product.description || '' %>" data-description-he="<%= product.description_he || '' %>" data-sku="<%= product.sku || '' %>" data-images="<%= JSON.stringify(galleryImages) %>">
             <div class="product-image-container">
               <div class="loading-spinner" style="display: none;"></div>
               <picture>
@@ -74,20 +108,17 @@
                   media="(min-width: 768px)"
                   srcset="<%= desktopImage %>"
                   type="image/webp"
-                  crossorigin="anonymous"
                 />
                 <source
                   media="(max-width: 767px)"
                   srcset="<%= mobileImage %>"
                   type="image/webp"
-                  crossorigin="anonymous"
                 />
                 <img
                   class="image-item front-image loaded"
                   src="<%= desktopImage %>"
                   alt="<%= productName %>"
                   loading="lazy"
-                  crossorigin="anonymous"
                 />
               </picture>
             </div>

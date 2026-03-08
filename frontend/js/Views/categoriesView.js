@@ -882,12 +882,10 @@ class CategoriesView extends View {
                   <div class="small-image-thumb${
                     index === 0 ? ' active' : ''
                   }" data-index="${index}">
-                    <img 
-                      src="${imgUrl}" 
+                    <img
+                      src="${imgUrl}"
                       alt="Product view ${index + 1}"
                       loading="lazy"
-                      crossorigin="anonymous"
-                      onerror="this.onerror=null; this.crossOrigin=''; this.src='${imgUrl}';"
                     />
                   </div>
                 `
@@ -902,13 +900,11 @@ class CategoriesView extends View {
               ${
                 hasValidImage
                   ? `<div class="magnifier-container">
-                  <img 
-                    class="big-image" 
+                  <img
+                    class="big-image"
                     src="${mainDesktopImage}"
                     alt="${title}"
                     loading="lazy"
-                    crossorigin="anonymous"
-                    onerror="this.onerror=null; this.crossOrigin=''; this.src='${mainDesktopImage}';"
                   />
                   <div class="loading-indicator">Loading...</div>
                 </div>`
@@ -955,12 +951,10 @@ class CategoriesView extends View {
         <button class="prev-image">❮</button>
         <button class="next-image">❯</button>
         <div class="gallery-container">
-          <img 
-            class="gallery-image" 
-            src="${mainDesktopImage}" 
+          <img
+            class="gallery-image"
+            src="${mainDesktopImage}"
             alt="${title}"
-            crossorigin="anonymous"
-            onerror="this.onerror=null; this.crossOrigin=''; this.src='${mainDesktopImage}';"
           />
         </div>
       </div>
@@ -1050,6 +1044,17 @@ class CategoriesView extends View {
       const imageElement = elem.querySelector('.front-image');
       const image = imageElement?.src || '';
 
+      // Parse gallery images from SSR data attribute
+      let images = [];
+      try {
+        const imagesJson = elem.dataset.images;
+        if (imagesJson) {
+          images = JSON.parse(imagesJson);
+        }
+      } catch (e) {
+        console.warn('[SSR] Failed to parse images data for product', id, e);
+      }
+
       return {
         id,
         quantity,
@@ -1061,6 +1066,7 @@ class CategoriesView extends View {
         description_he: descriptionHe,
         sku,
         image,
+        images,
         usd_price: parseFloat(usdPrice) || 0,
         ils_price: parseFloat(ilsPrice) || 0,
         original_usd_price: parseFloat(originalUsdPrice) || 0,
@@ -1405,22 +1411,18 @@ class CategoriesView extends View {
               media="(min-width: 768px)"
               srcset="${desktopImage}"
               type="image/webp"
-              crossorigin="anonymous"
             />
             <source
               media="(max-width: 767px)"
               srcset="${mobileImage}"
               type="image/webp"
-              crossorigin="anonymous"
             />
             <img
               class="image-item front-image"
               src="${desktopImage}"
               alt="${name}"
               loading="lazy"
-              crossorigin="anonymous"
               onload="this.parentElement.parentElement.querySelector('.loading-spinner').style.display = 'none'; this.classList.add('loaded');"
-              onerror="this.onerror=null; this.crossOrigin=''; this.src='${desktopImage}';"
             />
           </picture>
         </div>

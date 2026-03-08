@@ -65,36 +65,49 @@
                   media="(min-width: 768px)"
                   srcset="<%= mainDesktop %>"
                   type="image/webp"
-                  crossorigin="anonymous"
                 />
                 <source
                   media="(max-width: 767px)"
                   srcset="<%= mainMobile %>"
                   type="image/webp"
-                  crossorigin="anonymous"
                 />
                 <img
                   class="main-product-image"
                   src="<%= mainDesktop %>"
                   alt="<%= productName %>"
                   style="width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"
-                  crossorigin="anonymous"
                 />
               </picture>
             </div>
 
             <!-- Thumbnail strip (if multiple images) -->
-            <% if (product.images && product.images.length > 1) { %>
+            <%
+              let allImages = [];
+              if (Array.isArray(product.images) && product.images.length > 0) {
+                allImages = product.images;
+              } else {
+                if (product.mainImage && typeof product.mainImage === 'object') {
+                  allImages.push(product.mainImage);
+                }
+                if (Array.isArray(product.smallImages)) {
+                  product.smallImages.forEach(function(si) {
+                    if (si && typeof si === 'object') allImages.push(si);
+                  });
+                }
+              }
+            %>
+            <% if (allImages.length > 1) { %>
             <div class="product-thumbnails" style="display: flex; gap: 0.5rem; overflow-x: auto;">
-              <% product.images.forEach(function(img, index) { %>
+              <% allImages.forEach(function(img, index) { %>
                 <img
                   class="product-thumbnail"
-                  src="<%= img.publicDesktop || img.desktop || '' %>"
+                  src="<%= img.publicDesktop || img.desktop || img.publicMobile || img.mobile || '' %>"
                   alt="<%= productName %> - Image <%= index + 1 %>"
                   style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 2px solid <%= index === 0 ? '#333' : 'transparent' %>;"
                   data-index="<%= index %>"
+                  data-desktop="<%= img.publicDesktop || img.desktop || '' %>"
+                  data-mobile="<%= img.publicMobile || img.mobile || '' %>"
                   loading="lazy"
-                  crossorigin="anonymous"
                 />
               <% }); %>
             </div>
@@ -161,5 +174,43 @@
     <div class="modal"></div>
 
     <%- include('../partials/footer', { lang, urlLang }) %>
+
+    <script>
+      // Product detail page: thumbnail gallery interaction
+      (function() {
+        var thumbnails = document.querySelectorAll('.product-thumbnail');
+        var mainImg = document.querySelector('.main-product-image');
+        var mainPicture = mainImg ? mainImg.closest('picture') : null;
+        if (!thumbnails.length || !mainImg) return;
+
+        thumbnails.forEach(function(thumb) {
+          thumb.addEventListener('click', function() {
+            var desktopSrc = this.dataset.desktop || this.src;
+            var mobileSrc = this.dataset.mobile || desktopSrc;
+
+            // Update main image
+            mainImg.src = desktopSrc;
+
+            // Update picture sources if present
+            if (mainPicture) {
+              var sources = mainPicture.querySelectorAll('source');
+              sources.forEach(function(source) {
+                if (source.media && source.media.includes('min-width')) {
+                  source.srcset = desktopSrc;
+                } else {
+                  source.srcset = mobileSrc;
+                }
+              });
+            }
+
+            // Update active border
+            thumbnails.forEach(function(t) {
+              t.style.borderColor = 'transparent';
+            });
+            this.style.borderColor = '#333';
+          });
+        });
+      })();
+    </script>
   </body>
 </html>
