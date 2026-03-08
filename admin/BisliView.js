@@ -4900,17 +4900,16 @@ async function addProduct(e, data, form) {
     }
   };
 
-  // Show loading spinner in button
-  const submitBtn =
-    form?.querySelector?.("#submit-add-product") ||
-    form?.querySelector?.('button[type="submit"]') ||
-    document.getElementById("submit-add-product") ||
-    document.querySelector("#uploadForm button[type='submit']");
+  // Show loading spinner in both submit buttons
+  const submitBtns = [
+    document.getElementById("submit-add-product"),
+    document.getElementById("submit-add-product-inventory"),
+  ].filter(Boolean);
 
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span class="button-spinner"></span>';
-  }
+  submitBtns.forEach(btn => {
+    btn.disabled = true;
+    btn.innerHTML = '<span class="button-spinner"></span>';
+  });
 
   try {
     console.log("[addProduct] Step 1: Getting form values...");
@@ -4987,7 +4986,7 @@ async function addProduct(e, data, form) {
     }
     console.log("[addProduct] All images appended to FormData");
 
-    if (submitBtn) submitBtn.innerHTML = '<span class="button-spinner"></span>';
+    submitBtns.forEach(btn => { btn.innerHTML = '<span class="button-spinner"></span>'; });
 
     console.log("[addProduct] Step 3: Uploading images to /upload...");
     console.log("[addProduct] FormData prepared, about to call fetchWithRetry");
@@ -5056,7 +5055,7 @@ async function addProduct(e, data, form) {
       throw new Error(imageData.error || "Image upload failed");
     }
 
-    if (submitBtn) submitBtn.innerHTML = '<span class="button-spinner"></span>';
+    submitBtns.forEach(btn => { btn.innerHTML = '<span class="button-spinner"></span>'; });
 
     console.log("[addProduct] Step 4: Creating product with image data...");
     // 3. Add product data with correct image structure
@@ -5179,8 +5178,10 @@ async function addProduct(e, data, form) {
     state.selectedCategory = targetCategory;
 
     // Reset button state
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = "Submit";
+    submitBtns.forEach(btn => {
+      btn.disabled = false;
+      btn.innerHTML = "Add Product";
+    });
 
     console.log("[addProduct] About to clear content...");
     // Clear current content
@@ -5265,10 +5266,10 @@ async function addProduct(e, data, form) {
     window.removeEventListener("beforeunload", beforeUnloadHandler);
     window._productUploadInProgress = false;
 
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = "Add Product";
-    }
+    submitBtns.forEach(btn => {
+      btn.disabled = false;
+      btn.innerHTML = "Add Product";
+    });
   }
 }
 
