@@ -95,6 +95,29 @@ app.use((req, res, next) => {
 - SSR category pages (`backend/routes/ssrDynamic.js`) render **all products** (no limit) sorted by `displayOrder`
 - The frontend (`categoriesView.js`) sets `allProductsFetched = true` for SSR pages, so no additional API fetching occurs
 
+## Product Images
+
+### Storage & URL Structure
+- Images are processed by `processImage()` in `backend/index.js` using Sharp (desktop 1200px, mobile 600px WebP)
+- Stored locally in `backend/uploads/` + `backend/public/uploads/` (main) and `backend/smallImages/` + `backend/public/smallImages/` (gallery)
+- Uploaded to DigitalOcean Spaces CDN for durable storage (`tamar-jewelry-images.fra1.cdn.digitaloceanspaces.com`)
+- Product schema has multiple image formats: unified `images` array (Phase 7, preferred), legacy `mainImage` object, legacy `smallImages` array
+
+### Image URL Normalization
+- `normalizeProductForClient()` in `backend/index.js` converts relative paths to absolute URLs, applies `localAssetExistsForUrl` checks, and derives legacy fields from the `images` array — used for **API responses only**, NOT for SSR rendering
+- SSR templates (`category.ejs`, `product.ejs`) receive raw DB data; image URLs must work as-is (CDN absolute URLs or relative paths)
+
+### CORS — Do NOT use `crossorigin="anonymous"` on product images
+- The DigitalOcean Spaces CDN does not send CORS headers for `localhost`, so `crossorigin="anonymous"` on `<img>`/`<source>` tags breaks images in local dev
+- This attribute was removed from all SSR EJS templates and frontend JS (`categoriesView.js` modal/gallery/product card rendering)
+- Regular `<img>` tags without `crossorigin` load cross-origin images fine — CORS is only enforced when the attribute is present or images are used in canvas
+
+### SSR Gallery Images
+- Category page (`category.ejs`) embeds gallery images as JSON in `data-images` attribute on each product card
+- `extractProductsFromDOM()` in `categoriesView.js` parses this JSON to populate `product.images` for modal/preview use
+- Product detail page (`product.ejs`) renders thumbnail strip server-side with click-to-swap inline JS
+- Both templates handle legacy fallback: `product.images` array → `product.mainImage` + `product.smallImages`
+
 ## Admin Dashboard
 
 - **`admin/BisliView.js`**: Single-file SPA for all admin functionality
@@ -102,6 +125,14 @@ app.use((req, res, next) => {
 - Validation in `runSubmit()` checks bilingual name fields directly (not the hidden field)
 - `addProduct()` reads all form values from DOM independently of the `data` parameter passed to it
 - **Slug generation**: Mongoose pre-save hook in `Product.js` auto-generates slugs using `slugify` from `this.name`; Hebrew-only names may produce empty slugs
+- **Live Server reload issue**: Image uploads trigger file writes that cause VS Code Live Server to auto-reload. Configured in `.vscode/settings.json` with `liveServer.settings.ignoreFiles` to exclude `backend/uploads/`, `backend/public/`, `backend/smallImages/`, and `frontend/dist/`
+
+## Frontend Build
+
+- Parcel bundles frontend JS/CSS into `frontend/dist/` with content-hashed filenames
+- Backend reads `dist/index.html` at startup to extract `<script>` tags (`bundleScripts` variable) for EJS templates
+- **After rebuilding frontend, the backend must be restarted** to pick up new bundle hashes
+- **Clean builds**: Old hashed files linger in `dist/`; use `rm -rf dist && npm run build` to ensure stale files don't get served
 
 ## Deployment
 

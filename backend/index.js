@@ -2955,6 +2955,14 @@ app.post(
         .json({ success: false, message: 'Product not found' });
     }
 
+    // Invalidate cache for deleted product and its category
+    const urlCategory = DB_TO_URL_CATEGORY[deleted.category];
+    if (deleted.slug && urlCategory) {
+      invalidateProduct(deleted.slug, urlCategory);
+    } else if (urlCategory) {
+      invalidateCategory(urlCategory);
+    }
+
     if (!isProd) console.log('Removed');
     res.json({
       success: true,
