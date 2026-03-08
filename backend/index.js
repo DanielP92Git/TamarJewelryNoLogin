@@ -1958,7 +1958,7 @@ app.post(
       const usdPrice = Math.round(ilsPrice / exchangeRate);
 
       // Security margin is stored but not used in price calculation anymore
-      const securityMargin = parseFloat(req.body.security_margin) || 5;
+      const securityMargin = parseFloat(req.body.security_margin) || 0;
 
       // Determine if we should apply the current global store discount
       const applyGlobalDiscountFlag =
@@ -2321,7 +2321,7 @@ app.post(
       product.description = description || '';
       product.category = category;
       product.quantity = Math.max(0, Number(quantity) || 0);
-      product.security_margin = Math.max(0, Number(security_margin) || 5);
+      product.security_margin = Math.max(0, Number(security_margin) || 0);
 
       // Update bilingual fields (Phase 29 - v1.5 Bilingual Product Content)
       if (name_en !== undefined) product.name_en = name_en || '';
@@ -2763,7 +2763,7 @@ app.post(
         name: req.body.name,
         ils_price: ilsPrice,
         usd_price: usdPrice,
-        security_margin: parseFloat(req.body.security_margin) || 5,
+        security_margin: parseFloat(req.body.security_margin) || 0,
         description: req.body.description,
         quantity: Math.max(0, Number(req.body.quantity) || 0),
         category: req.body.category,
