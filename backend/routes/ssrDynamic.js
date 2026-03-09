@@ -65,6 +65,7 @@ async function renderCategoryPage(req, res) {
     const products = await Product.find({
       category: dbCategory,
       available: { $ne: false },
+      quantity: { $gt: 0 },
     })
       .sort({ displayOrder: 1 })
       .select('id name slug image publicImage images mainImage smallImages description quantity ils_price usd_price category sku discount_percentage original_ils_price original_usd_price name_en name_he description_en description_he')
@@ -142,6 +143,7 @@ async function renderProductPage(req, res) {
     const product = await Product.findOne({
       slug: slug,
       available: { $ne: false },
+      quantity: { $gt: 0 },
     }).lean();
 
     // If product not found, return 404
