@@ -345,6 +345,7 @@ class CartView extends View {
   }
 
   render(cartNum) {
+    this._itemsBox.innerHTML = '';
     const markup = this._generateMarkup(cartNum);
     this._itemsBox.insertAdjacentHTML('beforeend', markup);
 
@@ -386,7 +387,6 @@ class CartView extends View {
 
   _removeItem(cartNum) {
     if (cartNum !== 0) {
-      this._itemsBox.innerHTML = '';
       this.render(cartNum);
     } else {
       // cartNum is now 0
@@ -750,7 +750,6 @@ class CartView extends View {
     this.setCartLng(lng);
     // Re-render cart items to show names in new language
     if (this._itemsBox && model.cart && model.cart.length > 0) {
-      this._itemsBox.innerHTML = '';
       this.render(model.cart.length);
     }
   }
