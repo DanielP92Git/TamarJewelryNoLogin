@@ -747,6 +747,15 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 app.use(cookieParser());
+
+// Strip /api prefix so frontend calls like /api/orders hit /orders
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    req.url = req.url.replace(/^\/api/, '');
+  }
+  next();
+});
+
 app.use(trailingSlashRedirect);
 
 // Legacy .html redirects (must be before SSR routes)
