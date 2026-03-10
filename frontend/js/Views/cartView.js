@@ -14,6 +14,8 @@ class CartView extends View {
   _deleteAllBtn = document.querySelector('.delete-all');
   _checkMeOut = document.querySelector('.check-me-out');
   _orderSummaryContainer = document.querySelector('.summary');
+  _stripeText = document.querySelector('.stripe-checkout-text');
+  _stripeTrust = document.querySelector('.stripe-trust-copy');
   _host = process.env.API_URL || '';
   _rate = process.env.USD_ILS_RATE || 3.7;
 
@@ -107,18 +109,16 @@ class CartView extends View {
   setCartLng(lng) {
     // this.setLanguage(lng); // REMOVED: Base setLanguage is called by controller
 
-    const stripeText = document.querySelector('.stripe-checkout-text');
-    const stripeTrust = document.querySelector('.stripe-trust-copy');
-
     if (lng === 'eng') {
       this._cartTitle.textContent = 'Your Cart';
       this._cartEmpty.textContent = 'Your Cart Is Empty';
       this._deleteAllBtn.textContent = 'Delete All';
       this._summaryTitle.textContent = 'Order Summary';
       this._checkMeOut.textContent = 'Check Me Out With:';
-      if (stripeText) stripeText.textContent = 'Pay securely with card';
-      if (stripeTrust)
-        stripeTrust.textContent =
+      if (this._stripeText)
+        this._stripeText.textContent = 'Pay securely with card';
+      if (this._stripeTrust)
+        this._stripeTrust.textContent =
           'Card payments are processed securely by Stripe.';
     }
     if (lng === 'heb') {
@@ -127,9 +127,10 @@ class CartView extends View {
       this._deleteAllBtn.textContent = 'מחק הכל';
       this._summaryTitle.textContent = 'סיכום הזמנה';
       this._checkMeOut.textContent = 'שלם באמצעות:';
-      if (stripeText) stripeText.textContent = 'תשלום מאובטח בכרטיס';
-      if (stripeTrust)
-        stripeTrust.textContent =
+      if (this._stripeText)
+        this._stripeText.textContent = 'תשלום מאובטח בכרטיס';
+      if (this._stripeTrust)
+        this._stripeTrust.textContent =
           'תשלומי כרטיס מעובדים באופן מאובטח על ידי Stripe.';
     }
   }
@@ -754,7 +755,13 @@ class CartView extends View {
     if (this._itemsBox && model.cart && model.cart.length > 0) {
       const count = model.cart.length;
       this.render(count);
-      await this._renderSummary(count, lng);
+      try {
+        await this._renderSummary(count, lng);
+      } catch (err) {
+        console.error('[CartView] _renderSummary failed during language switch:', err);
+      }
+      // Re-apply static text after async render to guarantee correct language
+      this.setCartLng(lng);
     }
   }
 }
