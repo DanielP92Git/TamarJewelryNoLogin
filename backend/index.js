@@ -2484,9 +2484,8 @@ app.post(
 
           product.smallImages = [...product.smallImages, ...newSmallImages];
 
-          // Update images array: replace images[1..n] with new gallery images
-          // Keep images[0] (main image), append new small images
-          images = [images[0], ...newSmallImages].filter(Boolean);
+          // Append new gallery images after existing ones
+          images = [...images, ...newSmallImages].filter(Boolean);
 
           smallImagesUpdated = true;
           console.log('Small images updated');
