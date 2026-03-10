@@ -292,7 +292,7 @@ describe('Checkout Payment and Order Summary', () => {
       );
     });
 
-    it('should send items with USD prices to Stripe regardless of display currency', async () => {
+    it('should send items with prices matching the selected display currency to Stripe', async () => {
       // Add items to cart with ILS as display currency
       model.cart.push(
         {
@@ -351,15 +351,15 @@ describe('Checkout Payment and Order Summary', () => {
       const fetchCall = fetchMock.mock.calls[0];
       const requestBody = JSON.parse(fetchCall[1].body);
 
-      // Check that currency is always '$' for Stripe
-      expect(requestBody.currency).toBe('$');
+      // Check that currency matches selected currency (ILS in this case)
+      expect(requestBody.currency).toBe('ils');
 
-      // Check that items have USD prices
+      // Check that items have ILS prices matching selected currency
       expect(requestBody.items).toHaveLength(2);
-      expect(requestBody.items[0].price).toBe(50); // USD price
-      expect(requestBody.items[0].currency).toBe('$');
-      expect(requestBody.items[1].price).toBe(40); // USD price
-      expect(requestBody.items[1].currency).toBe('$');
+      expect(requestBody.items[0].price).toBe(185); // ILS price
+      expect(requestBody.items[0].currency).toBe('ils');
+      expect(requestBody.items[1].price).toBe(148); // ILS price
+      expect(requestBody.items[1].currency).toBe('ils');
     });
 
     it('should redirect to Stripe URL on successful response', async () => {

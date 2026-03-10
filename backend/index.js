@@ -2602,7 +2602,7 @@ app.post(
 
 // Product reordering endpoint
 app.post(
-  '/api/admin/products/reorder',
+  '/admin/products/reorder',
   adminRateLimiter,
   fetchUser,
   requireAdmin,
