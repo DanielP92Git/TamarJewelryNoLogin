@@ -107,20 +107,30 @@ class CartView extends View {
   setCartLng(lng) {
     // this.setLanguage(lng); // REMOVED: Base setLanguage is called by controller
 
+    const stripeText = document.querySelector('.stripe-checkout-text');
+    const stripeTrust = document.querySelector('.stripe-trust-copy');
+
     if (lng === 'eng') {
       this._cartTitle.textContent = 'Your Cart';
       this._cartEmpty.textContent = 'Your Cart Is Empty';
       this._deleteAllBtn.textContent = 'Delete All';
       this._summaryTitle.textContent = 'Order Summary';
       this._checkMeOut.textContent = 'Check Me Out With:';
+      if (stripeText) stripeText.textContent = 'Pay securely with card';
+      if (stripeTrust)
+        stripeTrust.textContent =
+          'Card payments are processed securely by Stripe.';
     }
     if (lng === 'heb') {
       this._cartTitle.textContent = 'העגלה שלי';
       this._cartEmpty.textContent = 'עגלת הקניות שלך ריקה';
       this._deleteAllBtn.textContent = 'מחק הכל';
       this._summaryTitle.textContent = 'סיכום הזמנה';
-      this._checkMeOut.style.direction = 'rtl';
       this._checkMeOut.textContent = 'שלם באמצעות:';
+      if (stripeText) stripeText.textContent = 'תשלום מאובטח בכרטיס';
+      if (stripeTrust)
+        stripeTrust.textContent =
+          'תשלומי כרטיס מעובדים באופן מאובטח על ידי Stripe.';
     }
   }
 
@@ -146,28 +156,20 @@ class CartView extends View {
     this._checkoutBtn.addEventListener('click', async e => {
       e.preventDefault();
 
-      // Prepare items for checkout - always use USD prices for Stripe
-      // Map cart items to include USD prices (from stored usdPrice or calculated)
+      // Send the user's selected currency so Stripe charges in that currency
+      const selectedCurrency = this._getCurrentCurrency(); // 'usd' or 'ils'
+
       const checkoutItems = data.map(item => {
-        // Use stored USD price if available, otherwise use current price if already USD
-        const usdPrice =
-          item.usdPrice || (item.currency === '$' ? item.price : null);
-        const usdOriginalPrice =
-          item.originalUsdPrice ||
-          (item.currency === '$' ? item.originalPrice : null);
-        const usdDiscountedPrice =
-          item.discountedPrice && item.currency === '$'
-            ? item.discountedPrice
-            : item.discountedPrice
-            ? null
-            : null; // If discounted but not USD, we'll use usdPrice
+        // Pick the price matching the selected currency
+        const price =
+          selectedCurrency === 'ils'
+            ? item.ilsPrice || item.price
+            : item.usdPrice || item.price;
 
         return {
           ...item,
-          price: usdPrice || item.price, // Fallback to current price if no USD price stored
-          originalPrice: usdOriginalPrice || item.originalPrice,
-          discountedPrice: usdDiscountedPrice,
-          currency: '$', // Always send as USD for Stripe
+          price,
+          currency: selectedCurrency,
         };
       });
 
@@ -178,7 +180,7 @@ class CartView extends View {
         },
         body: JSON.stringify({
           items: checkoutItems,
-          currency: '$', // Stripe always uses USD
+          currency: selectedCurrency,
         }),
       })
         .then(async res => {
@@ -746,11 +748,13 @@ class CartView extends View {
   }
 
   // Override the placeholder from View.js
-  setPageSpecificLanguage(lng, cartNum) {
+  async setPageSpecificLanguage(lng, cartNum) {
     this.setCartLng(lng);
-    // Re-render cart items to show names in new language
+    // Re-render cart items and summary to show names/labels in new language
     if (this._itemsBox && model.cart && model.cart.length > 0) {
-      this.render(model.cart.length);
+      const count = model.cart.length;
+      this.render(count);
+      await this._renderSummary(count, lng);
     }
   }
 }

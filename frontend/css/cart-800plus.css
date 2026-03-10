@@ -584,4 +584,25 @@ html[dir='rtl'] .cart-page-title {
   z-index: 0;
 }
 
+/* RTL support for order summary */
+html[dir='rtl'] .summary-container {
+  direction: rtl;
+}
+
+html[dir='rtl'] .summary-title {
+  text-align: right;
+}
+
+html[dir='rtl'] .shipping-text {
+  text-align: right;
+}
+
+html[dir='rtl'] .check-me-out {
+  text-align: right;
+}
+
+html[dir='rtl'] .stripe-trust-copy {
+  text-align: right;
+}
+
 /* Footer styles moved to footer-desktop.css */

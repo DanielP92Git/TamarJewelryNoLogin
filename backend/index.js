@@ -3799,11 +3799,13 @@ app.post('/create-checkout-session', async (req, res) => {
     }
 
     const reqCurrency = req.body.currency;
+    const stripeCurrency = reqCurrency === 'ils' ? 'ils' : 'usd';
+    const currencySymbol = stripeCurrency === 'ils' ? '₪' : '$';
 
     // Debug logging: Log incoming cart items
     if (!isProd) {
       console.log('=== Stripe Checkout Debug ===');
-      console.log('Request currency:', reqCurrency);
+      console.log('Request currency:', reqCurrency, '→ Stripe currency:', stripeCurrency);
       console.log('Cart items received:', JSON.stringify(items, null, 2));
     }
 
@@ -3812,107 +3814,59 @@ app.post('/create-checkout-session', async (req, res) => {
       mode: 'payment',
       line_items: await Promise.all(
         items.map(async item => {
-          // Debug logging: Log price fields for each item
-          if (!isProd) {
-            console.log(`\nProcessing item ${item.id} (${item.title}):`);
-            console.log(
-              '  - item.price:',
-              item.price,
-              'type:',
-              typeof item.price
-            );
-            console.log(
-              '  - item.discountedPrice:',
-              item.discountedPrice,
-              'type:',
-              typeof item.discountedPrice
-            );
-            console.log(
-              '  - item.originalPrice:',
-              item.originalPrice,
-              'type:',
-              typeof item.originalPrice
-            );
-            console.log(
-              '  - item.usdPrice:',
-              item.usdPrice,
-              'type:',
-              typeof item.usdPrice
-            );
-            console.log('  - item.currency:', item.currency);
-          }
-
-          // Fetch product from database to get stored USD price
+          // Fetch product from database to get the authoritative price
           const dbProduct = await Product.findOne({ id: item.id });
           if (!dbProduct) {
             throw new Error(`Product ${item.id} not found in database`);
           }
 
-          // Use stored USD price from database (always use USD for Stripe)
-          // The database already has the correct USD price (discounted if discount is active)
-          let itemPriceUSD = Math.round(Number(dbProduct.usd_price) || 0);
-
-          if (!isProd) {
-            console.log('  - Product USD price from database:', itemPriceUSD);
-            console.log(
-              '  - Product discount_percentage:',
-              dbProduct.discount_percentage
-            );
-            if (dbProduct.original_usd_price) {
-              console.log(
-                '  - Product original USD price:',
-                dbProduct.original_usd_price
+          // Select the correct price field based on the requested currency
+          let itemPrice;
+          if (stripeCurrency === 'ils') {
+            itemPrice = Math.round(Number(dbProduct.ils_price) || 0);
+            if (!itemPrice || itemPrice <= 0) {
+              throw new Error(
+                `Product ${item.id} does not have a valid ILS price`
               );
             }
+          } else {
+            itemPrice = Math.round(Number(dbProduct.usd_price) || 0);
           }
 
-          // Validate the price is a valid number
+          if (!isProd) {
+            console.log(`\nProcessing item ${item.id} (${item.title}):`);
+            console.log(`  - DB ${stripeCurrency.toUpperCase()} price: ${currencySymbol}${itemPrice}`);
+            console.log('  - discount_percentage:', dbProduct.discount_percentage);
+          }
+
+          // Validate the price
           if (
-            !Number.isFinite(itemPriceUSD) ||
-            itemPriceUSD <= 0 ||
-            itemPriceUSD > 1000000
+            !Number.isFinite(itemPrice) ||
+            itemPrice <= 0 ||
+            itemPrice > 1000000
           ) {
-            const errorMsg = `Invalid USD price for item ${item.id}: usd_price=${dbProduct.usd_price}, parsed=${itemPriceUSD}`;
+            const errorMsg = `Invalid ${stripeCurrency.toUpperCase()} price for item ${item.id}: ${itemPrice}`;
             console.error('Price validation failed:', errorMsg);
             throw new Error(errorMsg);
           }
 
-          // Convert USD price to cents (Stripe uses cents)
-          const inCents = Math.round(itemPriceUSD * 100);
+          // Convert to smallest currency unit (cents for USD, agorot for ILS)
+          const inSmallestUnit = Math.round(itemPrice * 100);
 
           if (!isProd) {
-            console.log(`  - Price in USD: $${itemPriceUSD}`);
-            console.log(
-              `  - Converted to cents: ${inCents} ($${(inCents / 100).toFixed(
-                2
-              )})`
-            );
-          }
-
-          const myItem = {
-            name: item.title,
-            price: inCents,
-            quantity: item.amount,
-            productId: item.id,
-          };
-
-          if (!isProd) {
-            console.log(
-              `  - Final Stripe amount: ${inCents} cents ($${(
-                inCents / 100
-              ).toFixed(2)}) for quantity ${item.amount}`
-            );
+            console.log(`  - Price: ${currencySymbol}${itemPrice}`);
+            console.log(`  - Smallest unit: ${inSmallestUnit} for quantity ${item.amount}`);
           }
 
           return {
             price_data: {
-              currency: 'usd',
+              currency: stripeCurrency,
               product_data: {
-                name: myItem.name,
+                name: item.title,
               },
-              unit_amount: myItem.price,
+              unit_amount: inSmallestUnit,
             },
-            quantity: myItem.quantity,
+            quantity: item.amount,
           };
         })
       ),
@@ -3924,8 +3878,8 @@ app.post('/create-checkout-session', async (req, res) => {
           shipping_rate_data: {
             type: 'fixed_amount',
             fixed_amount: {
-              amount: 1500,
-              currency: 'usd',
+              amount: stripeCurrency === 'ils' ? 5500 : 1500,
+              currency: stripeCurrency,
             },
             display_name: 'Standard Shipping',
             delivery_estimate: {
@@ -3944,8 +3898,8 @@ app.post('/create-checkout-session', async (req, res) => {
           shipping_rate_data: {
             type: 'fixed_amount',
             fixed_amount: {
-              amount: 2000,
-              currency: 'usd',
+              amount: stripeCurrency === 'ils' ? 7500 : 2000,
+              currency: stripeCurrency,
             },
             display_name: 'Expedited Shipping',
             delivery_estimate: {
@@ -3961,89 +3915,22 @@ app.post('/create-checkout-session', async (req, res) => {
           },
         },
       ],
-      success_url: `${process.env.HOST}/index.html`,
-      cancel_url: `${process.env.HOST}/html/cart.html`,
+      success_url: `${req.protocol}://${req.get('host')}/`,
+      cancel_url: `${req.protocol}://${req.get('host')}/en/cart`,
       metadata: {
         productId: requestedProductId.toString(),
+        currency: stripeCurrency,
       },
     });
 
-    // Debug logging: Log the actual session data sent to Stripe
+    // Debug logging
     if (!isProd) {
       console.log('\n=== Stripe Session Created ===');
       console.log('Session ID:', session.id);
-      console.log('Session URL:', session.url);
       console.log('Currency:', session.currency);
       console.log(
-        'Amount total (from session):',
-        session.amount_total,
-        'cents = $' + ((session.amount_total || 0) / 100).toFixed(2)
+        `Amount total: ${(session.amount_total || 0)} (${currencySymbol}${((session.amount_total || 0) / 100).toFixed(2)})`
       );
-      console.log(
-        'Amount subtotal (from session):',
-        session.amount_subtotal,
-        'cents = $' + ((session.amount_subtotal || 0) / 100).toFixed(2)
-      );
-
-      // Try to retrieve the session with line items expanded
-      try {
-        const expandedSession = await stripe.checkout.sessions.retrieve(
-          session.id,
-          {
-            expand: ['line_items', 'line_items.data.price'],
-          }
-        );
-        console.log('\n=== Expanded Session Details ===');
-        console.log('Currency:', expandedSession.currency);
-        console.log(
-          'Amount total:',
-          expandedSession.amount_total,
-          'cents = $' + (expandedSession.amount_total / 100).toFixed(2)
-        );
-        console.log(
-          'Amount subtotal:',
-          expandedSession.amount_subtotal,
-          'cents = $' + (expandedSession.amount_subtotal / 100).toFixed(2)
-        );
-        console.log('Display items:', expandedSession.display_items);
-
-        if (expandedSession.line_items && expandedSession.line_items.data) {
-          expandedSession.line_items.data.forEach((lineItem, index) => {
-            console.log(`\nLine Item ${index + 1}:`);
-            console.log('  - Description:', lineItem.description);
-            console.log(
-              '  - Amount total:',
-              lineItem.amount_total,
-              'cents = $' + (lineItem.amount_total / 100).toFixed(2)
-            );
-            console.log('  - Quantity:', lineItem.quantity);
-            if (lineItem.price) {
-              console.log(
-                '  - Unit amount:',
-                lineItem.price.unit_amount,
-                'cents = $' +
-                  ((lineItem.price.unit_amount || 0) / 100).toFixed(2)
-              );
-              console.log('  - Currency:', lineItem.price.currency);
-              console.log('  - Product:', lineItem.price.product);
-            }
-          });
-        }
-
-        // Calculate what it should be in ILS (for debug purposes)
-        const totalUSD = expandedSession.amount_subtotal / 100;
-        const exchangeRate = await exchangeRateService.getExchangeRate();
-        const totalILS = Math.round(totalUSD * exchangeRate);
-        console.log(`\n=== Currency Conversion Check ===`);
-        console.log(`Total in USD: $${totalUSD.toFixed(2)}`);
-        console.log(`Exchange rate: ${exchangeRate}`);
-        console.log(`Expected in ILS: ₪${totalILS.toFixed(2)}`);
-        console.log(`You're seeing on Stripe: ₪95.86`);
-        console.log(`Difference: ₪${(totalILS - 95.86).toFixed(2)}`);
-      } catch (expandError) {
-        console.log('Could not expand session:', expandError.message);
-        console.log('Error details:', expandError);
-      }
     }
 
     res.json({ sessionId: session.id, url: session.url });
