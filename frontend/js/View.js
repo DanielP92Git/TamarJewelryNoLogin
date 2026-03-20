@@ -232,6 +232,7 @@ export default class View {
     const menu = document.querySelector('.menu');
     const stickyMenu = function (entries) {
       const [entry] = entries;
+      if (window.innerWidth < 800) return;
       if (!entry.isIntersecting)
         menu.classList.add('sticky') + menu.classList.remove('hidden');
       else menu.classList.remove('sticky');
@@ -252,7 +253,7 @@ export default class View {
     //////////////////////////////////////////////////
     const hideMenu = function (entries) {
       const [entry] = entries;
-
+      if (window.innerWidth < 800) return;
       if (!entry.isIntersecting)
         menu.classList.add('hidden') + menu.classList.remove('sticky');
     };

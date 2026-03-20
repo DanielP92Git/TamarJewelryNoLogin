@@ -212,20 +212,22 @@ html[dir='rtl'] .site-header .category-item .attrib {
   transform: translateY(0) scale(1);
 }
 
-/* Sticky menu behavior */
-.menu.sticky {
-  z-index: 15;
-  background-color: #ffffff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: all;
-  transition-duration: 500ms;
-  transition-timing-function: ease;
-  position: fixed;
-}
+/* Sticky menu behavior - desktop only */
+@media (min-width: 800px) {
+  .menu.sticky {
+    z-index: 15;
+    background-color: #ffffff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: all;
+    transition-duration: 500ms;
+    transition-timing-function: ease;
+    position: fixed;
+  }
 
-.menu.hidden {
-  opacity: 0;
-  transform: translateY(8rem);
+  .menu.hidden {
+    opacity: 0;
+    transform: translateY(8rem);
+  }
 }
 
 /* Language selector */
