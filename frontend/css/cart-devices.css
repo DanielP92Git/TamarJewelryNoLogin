@@ -797,4 +797,9 @@ html[dir='rtl'] .stripe-trust-copy {
   text-align: right;
 }
 
+html[dir='rtl'] .total-text {
+  margin-right: 0;
+  margin-left: auto;
+}
+
 /* Footer styles moved to footer-mobile.css */

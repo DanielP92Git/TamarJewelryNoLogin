@@ -312,34 +312,32 @@ class CartView extends View {
               '(Shipping costs may apply. Please proceed to checkout for options)',
           };
 
-    const rtlWrap = lng === 'heb' ? 'style="direction: rtl;"' : '';
-
     return `
     <div class="price-summary-container">
           ${
             hasDiscount
               ? `
-          <div class="total-container subtotal" ${rtlWrap}>
+          <div class="total-container subtotal">
             <span class="total-text">${labels.subtotal}</span>
             <span class="total-price">${currency}${originalTotal}</span>
           </div>
-          <div class="total-container discount-line" ${rtlWrap}>
+          <div class="total-container discount-line">
             <span class="total-text">${labels.discount} -${discountSettings.percentage}%</span>
             <span class="total-price discount-amount">-${currency}${discountAmount}</span>
           </div>
-          <div class="total-container after-discount" ${rtlWrap}>
+          <div class="total-container after-discount">
             <span class="total-text">${labels.total}</span>
             <span class="total-price discounted-price">${currency}${discountedTotal}</span>
           </div>
           `
               : `
-          <div class="total-container subtotal" ${rtlWrap}>
+          <div class="total-container subtotal">
             <span class="total-text">${labels.subtotal}</span>
             <span class="total-price">${currency}${discountedTotal}</span>
           </div>
           `
           }
-          <div class="total-container shipping" ${rtlWrap}>
+          <div class="total-container shipping">
             <span class="total-text">${labels.shipping}</span>
             <span class="total-price">${labels.shippingValue}</span>
           </div>

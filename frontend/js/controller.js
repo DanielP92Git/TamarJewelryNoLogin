@@ -162,10 +162,9 @@ const controlCartPage = async function (lng) {
     const cartNum = await model.checkCartNumber();
 
     // Set language (which now handles persistCartNumber)
-    CartView.setLanguage(lng, cartNum);
+    await CartView.setLanguage(lng, cartNum);
 
     CartView.render(cartNum);
-    await CartView._renderSummary(cartNum, lng);
 
     const cartData = model.cart;
     CartView._addHandlerCheckout(cartData);
