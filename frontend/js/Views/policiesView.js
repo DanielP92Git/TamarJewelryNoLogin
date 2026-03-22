@@ -117,8 +117,7 @@ class PoliciesView extends View {
         </div>
         <div class="column-box">
           <h3>Rush Order</h3>
-          If you need an order to be delivered quickly, please be sure to
-            choose the expedited shipping option. If you need to receive it by a
+           If you need to receive it by a
             specific date, please let me know at tamarkfir91@gmail.com, and I
             will do my best to accommodate your needs.
         </div>
@@ -134,16 +133,10 @@ class PoliciesView extends View {
     </div>
     <div class="shipping-policy">
       <h2>Shipping</h2>
-      All orders are shipped via Israel Post. If you
-        wish to expedite your order please be sure to choose the expedited
-        shipping option at checkout. <br /><br />
+      All orders are shipped via Israel Post.
         <span class="underline-bold">Standard Shipping:</span>
         <br /><br />
         Israel Post / about 1 week.
-        <br /><br />
-        <span class="underline-bold">Expedited Shipping:</span>
-        <br /><br />
-        Courier service to your doorstep / 24 hours to most locations.
     </div>
     <div class="return-policy">
       <h2>Returns</h2>
