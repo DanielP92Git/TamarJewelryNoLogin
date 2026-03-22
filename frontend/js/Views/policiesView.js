@@ -54,7 +54,7 @@ class PoliciesView extends View {
   getPoliciesMarkup(lng) {
     if (lng === 'heb') {
       return `
-    <h1>מדיניות עיבוד, משלוחים והחזרות</h1>
+    <h1>מדיניות עיבוד הזמנות, משלוחים והחזרות</h1>
     <div class="first-row-container">
       <div class="columns-wrap">
         <div class="column-box">

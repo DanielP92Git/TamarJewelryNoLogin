@@ -210,7 +210,7 @@ All 10 SSR pages verified by user with full content and meta tags:
    - Same pricing in Hebrew (ש"ח)
 
 10. **http://localhost:4000/he/policies** (Policies - Hebrew)
-    - H1: "מדיניות עיבוד, משלוחים והחזרות"
+    - H1: "מדיניות עיבוד הזמנות, משלוחים והחזרות"
     - Hebrew policies text
     - RTL layout
 

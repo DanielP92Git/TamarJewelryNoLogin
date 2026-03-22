@@ -135,7 +135,7 @@ Slider buttons have aria-label for accessibility.
 - Returns section: 14-day policy, return address (9 HaTsfira St., Jerusalem), phone required on package
 
 **Hebrew content:**
-- H1: "מדיניות עיבוד, משלוחים והחזרות"
+- H1: "מדיניות עיבוד הזמנות, משלוחים והחזרות"
 - Same 3-column structure with translated headings
 - Translated shipping times and policies
 - Return address in Hebrew with same contact details
