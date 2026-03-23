@@ -477,6 +477,19 @@ h1 {
   margin-bottom: 0.4rem;
 }
 
+.contact-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.contact-link .contact-icon {
+  pointer-events: none;
+}
+
 .whatsapp-atr {
   display: flex;
   align-items: center;
