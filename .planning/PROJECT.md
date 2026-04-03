@@ -131,9 +131,26 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 - ✓ Bulk translate tool for existing products (English → Hebrew) — v1.5
 - ✓ Data migration (runtime normalization as functional equivalent) — v1.5 (tech debt: migration script exists but not executed)
 
+## Current Milestone: v1.6 MongoDB Backup & Recovery System
+
+**Goal:** Prevent permanent data loss with automated off-region backups and quick recovery capability (RTO < 2 hours).
+
+**Target features:**
+- Daily automated MongoDB backup (mongodump + gzip)
+- Manual backup trigger capability
+- Cloud storage upload (outside primary region)
+- Database restore from backup (mongorestore)
+- Backup success/failure logging
+- Retention policy (auto-delete old backups, keep last 7-14)
+
 ### Active
 
-(No active requirements — planning next milestone)
+- [ ] Automated daily MongoDB backup
+- [ ] Manual backup trigger
+- [ ] Cloud storage upload (off-region)
+- [ ] Database restore capability
+- [ ] Backup logging (success/failure)
+- [ ] Retention policy with auto-cleanup
 
 ### Out of Scope
 
@@ -242,5 +259,22 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 | SSE for bulk translation progress | Real-time streaming vs polling; cancel/retry support | ✓ Good - responsive admin UX |
 | textContent for product names | XSS-safe rendering of server-provided content | ✓ Good - security best practice |
 
+## Evolution
+
+This document evolves at phase transitions and milestone boundaries.
+
+**After each phase transition** (via `/gsd:transition`):
+1. Requirements invalidated? → Move to Out of Scope with reason
+2. Requirements validated? → Move to Validated with phase reference
+3. New requirements emerged? → Add to Active
+4. Decisions to log? → Add to Key Decisions
+5. "What This Is" still accurate? → Update if drifted
+
+**After each milestone** (via `/gsd:complete-milestone`):
+1. Full review of all sections
+2. Core Value check — still the right priority?
+3. Audit Out of Scope — reasons still valid?
+4. Update Context with current state
+
 ---
-*Last updated: 2026-02-17 after v1.5 milestone*
+*Last updated: 2026-04-04 after v1.6 milestone started*
