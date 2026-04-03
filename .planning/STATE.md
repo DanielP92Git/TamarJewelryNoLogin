@@ -2,17 +2,17 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-17)
+See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers — with true bilingual content so Hebrew and English visitors each see products in their language
-**Current focus:** Planning next milestone
+**Current focus:** v1.6 MongoDB Backup & Recovery System — Phase 33: Environment Setup & Binary Verification
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 33 — Environment Setup & Binary Verification
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-04 — Milestone v1.6 started
+Status: Roadmap created, ready to plan Phase 33
+Last activity: 2026-04-04 — v1.6 roadmap created
 
 ## Performance Metrics
 
@@ -35,7 +35,11 @@ See milestone archives in `.planning/milestones/` for detailed decision history.
 
 ### Pending Todos
 
-None.
+- Phase 33: Decide between App Platform Scheduled Jobs vs. in-process node-cron with distributed lock before writing scheduler
+- Phase 33: Provision dedicated BACKUP_BUCKET in a different DO region before Phase 34 uploads begin
+- Phase 34: `backupService.js` must create its own S3 client (monolithic index.js does not export its s3 instance)
+- Phase 34: Never log spawn args containing the MongoDB URI — redact before any logging
+- Phase 36: Run end-to-end restore test against real Atlas cluster before marking Phase 36 complete
 
 ### Blockers/Concerns
 
@@ -44,12 +48,13 @@ None.
 - CRAWL-07: Google Search Console requires post-deployment manual setup
 - robots.txt missing Sitemap: directive (minor)
 - SCHEMA-02: Migration script not executed (runtime normalization covers functionality)
+- **NEW (v1.6):** Aptfile binary PATH on App Platform is MEDIUM confidence — Phase 33 must log `which mongodump` from a deployed container to confirm actual path before hardcoding
 
 ## Session Continuity
 
-Last session: 2026-02-17
-Stopped at: Milestone v1.5 archived
-Resume: `/gsd:new-milestone` to start next milestone
+Last session: 2026-04-04
+Stopped at: v1.6 roadmap created
+Resume: `/gsd:plan-phase 33` to plan Phase 33 (Environment Setup & Binary Verification)
 
 ## Quick Tasks Completed
 

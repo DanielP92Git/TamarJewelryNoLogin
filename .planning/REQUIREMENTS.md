@@ -61,26 +61,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BKUP-01 | — | Pending |
-| BKUP-02 | — | Pending |
-| BKUP-03 | — | Pending |
-| BKUP-04 | — | Pending |
-| MON-01 | — | Pending |
-| MON-02 | — | Pending |
-| MON-03 | — | Pending |
-| ADM-01 | — | Pending |
-| ADM-02 | — | Pending |
-| ADM-03 | — | Pending |
-| REST-01 | — | Pending |
-| REST-02 | — | Pending |
-| REST-03 | — | Pending |
-| RET-01 | — | Pending |
+| BKUP-01 | Phase 34 | Pending |
+| BKUP-02 | Phase 34 | Pending |
+| BKUP-03 | Phase 34 | Pending |
+| BKUP-04 | Phase 33 | Pending |
+| MON-01 | Phase 34 | Pending |
+| MON-02 | Phase 35 | Pending |
+| MON-03 | Phase 35 | Pending |
+| ADM-01 | Phase 35 | Pending |
+| ADM-02 | Phase 37 | Pending |
+| ADM-03 | Phase 34 | Pending |
+| REST-01 | Phase 36 | Pending |
+| REST-02 | Phase 36 | Pending |
+| REST-03 | Phase 35 | Pending |
+| RET-01 | Phase 34 | Pending |
 
 **Coverage:**
 - v1.6 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 after initial definition*
+*Last updated: 2026-04-04 after roadmap creation (traceability filled)*
