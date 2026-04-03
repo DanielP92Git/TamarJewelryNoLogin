@@ -1,249 +1,202 @@
-# Feature Research: Frontend Testing
+# Feature Research
 
-**Domain:** Vanilla JS MVC E-commerce Frontend Testing
-**Researched:** 2026-02-06
-**Confidence:** HIGH
+**Domain:** MongoDB Backup & Recovery System for Node.js/Express E-commerce (DigitalOcean App Platform)
+**Researched:** 2026-04-04
+**Confidence:** HIGH (core backup mechanics, platform constraints), MEDIUM (UI patterns, restore UX)
+
+---
 
 ## Feature Landscape
 
-This research identifies WHAT to test in the existing vanilla JavaScript MVC e-commerce frontend for the jewelry store. Focus is on table stakes (must-have tests for confidence), differentiators (tests catching subtle bugs), and anti-features (what NOT to test).
+### Table Stakes (Users Expect These)
 
-### Table Stakes (Users Expect These to Work)
+Features that any production backup system must have. Missing these means the system cannot be trusted for real data protection.
 
-Tests users assume work correctly. Missing these = broken e-commerce experience.
+| Feature | Why Expected | Complexity | Notes |
+|---------|--------------|------------|-------|
+| Automated daily backup via mongodump | Without automation, backups will be skipped; manual-only is not a safety net | LOW | node-cron already installed (exchange rate job); `mongodump --archive --gzip` is the standard invocation |
+| Gzip compression of backup archives | Raw mongodump output is large; compression universally expected in production | LOW | `--gzip` flag on mongodump; reduces Spaces storage cost significantly |
+| Upload to DigitalOcean Spaces (off-region) | App Platform filesystem is ephemeral — resets on every deploy; local storage cannot persist backups | MEDIUM | Reuse existing `@aws-sdk/client-s3` and Spaces credentials already configured for image uploads; pipe mongodump stdout directly to Spaces to skip local disk entirely |
+| Retention policy — auto-delete old backups | Without cleanup, Spaces storage grows unbounded and costs increase | LOW | List objects in Spaces by date prefix, delete objects older than N days; keep last 7-14 backups |
+| Backup success/failure logging | Operators need to know if last night's backup ran; silent failure is worse than no backup | LOW | Structured log entry per run: timestamp, status (success/failure), file size, duration, error message; write to existing console logging pattern or dedicated log |
+| Manual backup trigger (admin endpoint) | Admin needs on-demand backup before a risky migration or bulk data change | LOW | POST /backups/trigger behind existing JWT admin middleware; executes the same function as scheduled job |
+| Database restore from a specific backup | Backups are worthless without a tested restore path | HIGH | `mongorestore --archive --gzip`; download archive from Spaces, stream to mongorestore; require application-level write guard during restore to prevent partial state |
 
-| Feature Category | Why Expected | Complexity | Notes |
-|-----------------|--------------|------------|-------|
-| **Cart Add/Remove Operations** | Core revenue path - users must add/remove items | LOW | Test localStorage sync, cart counter updates, UI reflection |
-| **Cart Persistence Across Sessions** | Users expect cart to survive page reload/browser restart | LOW | Test localStorage read/write, data structure integrity |
-| **Checkout Flow (End-to-End)** | Revenue-critical - broken checkout = lost sales | MEDIUM | Test Stripe/PayPal integration points, price calculation handoff |
-| **Price Display Accuracy** | Wrong prices = lost customer trust + legal issues | MEDIUM | Test currency display (USD/ILS), discount calculations, totals |
-| **Product Modal Open/Close** | Primary product browsing UX - users click to view details | LOW | Test DOM manipulation, image gallery rendering, escape key |
-| **Language Switching (Eng/Heb)** | Multilingual store - users expect language to persist and work | MEDIUM | Test localStorage persistence, UI text updates, RTL layout |
-| **Currency Switching (USD/ILS)** | Multi-currency store - users expect accurate conversion | MEDIUM | Test localStorage persistence, price recalculation, symbol display |
-| **Navigation Routing** | Users navigate between pages - broken routing = broken site | LOW | Test controller hash routing, view instantiation, cleanup |
-| **Cart Counter Visibility** | Users need visual confirmation of cart state | LOW | Test badge display, number updates, zero-state handling |
-| **Form Validation (Contact)** | Users expect immediate feedback on invalid inputs | LOW | Test EmailJS integration, field validation, error messages |
+### Differentiators (Competitive Advantage)
 
-### Differentiators (Catch Subtle Bugs)
+Features beyond the minimum — valuable for this specific app, not universally expected in a small-scale backup system.
 
-Tests that catch edge cases and bugs unique to this architecture.
-
-| Feature Category | Value Proposition | Complexity | Notes |
-|-----------------|-------------------|------------|-------|
-| **RTL Layout Edge Cases** | Hebrew users see broken layouts if RTL isn't tested | HIGH | Test flex-direction reversals, text alignment, icon flipping, arrow indicators |
-| **Multi-Currency Cart Consistency** | Users add items in ILS, switch to USD - prices must recalculate | HIGH | Test stored USD/ILS prices, conversion accuracy, discount preservation across currency change |
-| **localStorage Corruption Handling** | Malformed cart data causes crashes - graceful fallback needed | MEDIUM | Test JSON parse failures, missing fields, type coercion, migration from old data structures |
-| **View Cleanup on Navigation** | Memory leaks from event listeners not removed on page change | MEDIUM | Test event listener removal, DOM cleanup, no zombie listeners |
-| **MVC Layer Separation** | Model changes should update View without tight coupling | MEDIUM | Test model-view sync via events, controller coordination, no direct DOM manipulation in model |
-| **Currency Change Mid-Checkout** | User switches currency during checkout flow - must recalculate | HIGH | Test cart re-render, summary update, Stripe session price consistency |
-| **Discount Calculation Edge Cases** | Global discounts + per-item discounts + currency switching | HIGH | Test discount stacking, rounding errors (Math.round), original price preservation |
-| **Category Dropdown Mobile vs Desktop** | Different interaction patterns (click vs hover) per viewport | MEDIUM | Test click handlers on mobile, hover on desktop, prevent double-binding |
-| **Sticky Menu Intersection Observer** | Edge cases: rapid scrolling, resize during scroll, multiple observers | LOW | Test sticky state transitions, hidden state on scroll-up, threshold edge cases |
-| **Image Gallery State Management** | Flipping between images in modal maintains state correctly | LOW | Test image index, thumbnail highlighting, keyboard navigation |
+| Feature | Value Proposition | Complexity | Notes |
+|---------|-------------------|------------|-------|
+| Admin dashboard backup panel | Ops visibility without SSH access; list available backups, trigger manual backup, see last-run status from admin UI | MEDIUM | New section in existing `admin/BisliView.js`; calls GET /backups (list from Spaces) and POST /backups/trigger; shows filename, timestamp, size for each stored backup |
+| Backup history log in MongoDB | Admin can review run history (last 7-30 days, success/fail/size) without reading server logs | MEDIUM | Small `backup_logs` collection; 5-8 fields per entry (timestamp, status, filename, bytes, duration_ms, error); low write volume (1 entry/day) |
+| Pre-restore confirmation gate | Restore overwrites live data — require explicit confirmation to prevent accidental triggers | LOW | Frontend confirm dialog + backend validates `{ confirm: "RESTORE" }` in request body; returns 400 if missing |
+| Timestamped backup filenames | Human-readable, lexicographically sortable filenames simplify debugging and retention logic | LOW | ISO timestamp in filename: `backup-2026-04-04T02-00-00Z.archive.gz`; sortable without parsing metadata |
+| Configurable retention via environment variable | Different environments can use different retention windows without code changes | LOW | `BACKUP_RETENTION_DAYS=14` env var with sensible default of 14; read at job runtime |
 
 ### Anti-Features (Commonly Requested, Often Problematic)
 
-Features that seem good but create problems or aren't necessary.
-
 | Feature | Why Requested | Why Problematic | Alternative |
 |---------|---------------|-----------------|-------------|
-| **Test Every View Method Individually** | "100% coverage = quality" | Creates brittle tests tied to implementation details, not user behavior | **Integration tests for user flows** - Test "user adds item to cart" not "_addToLocalCart() method" |
-| **Mock localStorage Globally** | "Tests should be isolated" | Breaks realistic testing of persistence layer, hides storage bugs | **Use real localStorage with cleanup** - Clear between tests, test actual browser API |
-| **Test Browser Internals (IntersectionObserver, etc.)** | "Ensure APIs work" | Browser APIs are tested by browser vendors, waste of effort | **Integration tests verify behavior** - Test "menu becomes sticky" not "IntersectionObserver fires" |
-| **Test Third-Party Libraries (PayPal SDK, Stripe)** | "Need to know they work" | Libraries have their own test suites, mocking defeats the purpose | **Integration tests at HTTP boundary** - Test your code's API calls, not library internals |
-| **Snapshot Testing for Entire DOM** | "Catch all UI regressions" | Too brittle, breaks on any markup change, low signal-to-noise | **Targeted assertions on critical elements** - Test cart item exists, not entire HTML structure |
-| **Test CSS Styling Directly** | "Ensure design is correct" | Style is visual, not functional - wrong tool for the job | **Visual regression tests (if needed)** - Use Percy/Chromatic for visual diffs, not unit tests |
-| **Test Base View Class in Isolation** | "Unit test everything" | Base View is abstract - meaningless without page-specific context | **Test via subclasses** - homePageView, cartView tests cover base functionality |
-| **Mock Model in View Tests** | "True unit testing" | Breaks the MVC contract - need to test model-view integration | **Integration tests with real model** - Test actual cart operations, not mocked responses |
-| **Test Every Language String** | "Ensure translations exist" | Content testing, not functionality testing | **Sample critical strings only** - Test language switching mechanism, not every translation |
-| **Test Exchange Rate API Directly** | "Ensure rates are accurate" | External API, not your code - backend responsibility | **Test frontend uses provided rate** - Test price calculation with mocked rate, not API call |
+| Store backup files on local App Platform disk | Simplicity — no S3 integration needed | App Platform filesystem is ephemeral; files destroyed on every deploy or container replacement; 4 GiB hard cap | Pipe mongodump stdout directly to Spaces — no local file written; clean and safe |
+| Point-in-time recovery (PITR) with oplog capture | Finer-grained recovery window | Requires MongoDB replica set with oplog access — not available on Atlas M0 or self-managed single-node; significant operational complexity | Daily mongodump is sufficient for a low-write jewelry catalog (~94 products); RPO ~24h and RTO < 2h satisfies stated goal |
+| Encrypt backup files before upload | Security hardening | Adds key management complexity (store and rotate encryption keys); DigitalOcean Spaces already provides server-side AES-256 encryption at rest; double encryption adds operational overhead with no meaningful benefit for this threat model | Rely on Spaces server-side encryption; restrict bucket access via Spaces IAM policies |
+| Backup to a second cloud provider (AWS S3, GCS) | True 3-2-1 redundancy | Adds second set of credentials, IAM policies, and billing; not needed at current catalog scale | Use a different Spaces region (e.g., NYC vs FRA) as secondary if 3-2-1 is required — same API and SDK |
+| Auto-restore on backup failure | Seems defensive | Restore is destructive and overwrites current live data; auto-triggering on failure can cascade a partial failure into total data loss | Alert/log on failure; require explicit human decision to restore |
+| Incremental backups (changed documents only) | Storage efficiency | mongodump does not support true incremental backups without replica set oplog access; partial dumps require manual collection-level logic | Full daily dump with gzip is small for ~94 products (estimated < 10 MB compressed); incremental adds complexity without proportional benefit |
+| Backup verification via automatic test restore | Best practice | Requires a second MongoDB instance to restore into; over-engineered for current project scale | Log backup file size and mongodump exit code as proxy for backup health; quarterly manual restore test is sufficient |
+
+---
 
 ## Feature Dependencies
 
 ```
-[Cart State Testing]
-    └──requires──> [localStorage Testing]
-                       └──requires──> [Model.js cart operations]
+[Automated daily backup]
+    └──requires──> [mongodump binary available in App Platform runtime]
+    └──requires──> [Spaces credentials in environment variables] (already exist for images)
+    └──requires──> [node-cron scheduler] (already installed)
 
-[Locale Testing (Language + Currency)]
-    ├──requires──> [localStorage persistence]
-    ├──requires──> [View.js setLanguage()]
-    └──requires──> [Currency conversion display]
+[Direct Spaces upload (no local disk)]
+    └──requires──> [AWS SDK / Spaces-compatible S3 client] (already configured)
+    └──requires──> [mongodump --archive flag] (stdout piping mode)
 
-[MVC Integration Testing]
-    ├──requires──> [Controller routing]
-    ├──requires──> [Model-View sync]
-    └──requires──> [View cleanup on navigation]
+[Retention policy]
+    └──requires──> [Consistent timestamped backup filenames]
+    └──requires──> [Spaces list + delete object operations]
 
-[Checkout Flow Testing]
-    ├──requires──> [Cart state]
-    ├──requires──> [Currency handling]
-    └──requires──> [Payment API mocking]
+[Database restore]
+    └──requires──> [mongorestore binary available in App Platform runtime]
+    └──requires──> [Spaces download operation] (reverse of upload)
+    └──requires──> [Admin authentication middleware] (already exists)
+    └──enhances──> [Pre-restore confirmation gate]
 
-[RTL Layout Testing]
-    └──enhances──> [Language testing]
+[Manual backup trigger]
+    └──requires──> [Same backup job function as automated backup]
+    └──requires──> [Admin authentication middleware] (already exists)
 
-[Multi-Currency Cart Testing]
-    ├──requires──> [Cart state]
-    └──requires──> [Currency switching]
+[Admin dashboard backup panel]
+    └──requires──> [GET /backups endpoint] (lists backups from Spaces)
+    └──requires──> [POST /backups/trigger endpoint]
+    └──enhances──> [Backup history log]
 
-[View Cleanup Testing]
-    └──requires──> [Navigation/routing]
+[Backup history log]
+    └──requires──> [Backup success/failure logging]
+    └──enhances──> [Admin dashboard backup panel]
+
+[Pre-restore confirmation gate]
+    └──enhances──> [Database restore]
+    └──conflicts──> [Auto-restore on backup failure] (anti-feature)
 ```
 
 ### Dependency Notes
 
-- **Cart State requires localStorage**: Can't test cart operations without testing persistence layer
-- **Locale requires View.js**: Language/currency switching is core View responsibility
-- **MVC Integration requires all layers**: Tests validate separation of concerns and coordination
-- **Checkout requires Cart + Currency**: Can't test payment flow without valid cart and currency state
-- **RTL enhances Language**: RTL testing is subset of language testing but with visual component
-- **Multi-Currency Cart requires both**: Must test cart operations AND currency switching together
-- **View Cleanup requires Routing**: Cleanup only matters when navigating between views
+- **mongodump/mongorestore binary availability is the critical unknown**: App Platform runs containers; MongoDB Database Tools must be installable via `apt-get` in a Dockerfile or available pre-installed in the runtime image. This must be verified before implementation begins — it gates every other feature.
+- **Spaces credentials already exist**: The app already uploads images to DigitalOcean Spaces. `DO_SPACES_KEY`, `DO_SPACES_SECRET`, `DO_SPACES_BUCKET`, and `DO_SPACES_ENDPOINT` are already configured. A `backups/` prefix within the same or a separate bucket reuses existing infrastructure without new credentials.
+- **node-cron already installed**: The exchange rate job (`backend/jobs/exchangeRateJob.js`) uses node-cron already. The backup scheduler follows the identical pattern with zero new dependencies.
+- **Retention policy requires consistent naming**: If backup filenames are not consistently date-prefixed and lexicographically sortable, listing and deleting by age becomes fragile. ISO timestamps in filenames are the standard pattern.
+- **Restore requires write guard**: Restoring while the application is accepting writes can produce partial state. A simple in-memory flag or environment variable can block incoming write requests during the restore window.
 
-## MVP Definition (v1.3 Milestone)
+---
 
-### Launch With (v1.3 - Initial Frontend Testing)
+## MVP Definition
 
-Minimum viable test suite to validate core e-commerce functionality.
+### Launch With (v1.6 — this milestone)
 
-- [ ] **Cart Operations Testing** - Add, remove, persist, counter updates (revenue-critical)
-- [ ] **localStorage Testing** - Read/write, corruption handling, data integrity
-- [ ] **Currency Display Testing** - Symbol display, price formatting, conversion accuracy
-- [ ] **Language Switching Testing** - localStorage persistence, UI text updates, basic RTL
-- [ ] **Checkout Flow Integration** - Cart → Stripe session creation (HTTP boundary, not full payment)
-- [ ] **Model-View Integration** - Cart operations trigger view updates correctly
-- [ ] **View Cleanup Testing** - Event listeners removed on navigation (prevent memory leaks)
+Minimum set to achieve the milestone goal: RTO < 2 hours, automated off-region backups, no permanent data loss.
 
-### Add After Validation (v1.x - Enhanced Coverage)
+- [ ] Automated daily backup scheduled via node-cron — core data protection
+- [ ] mongodump with --archive --gzip piped directly to DigitalOcean Spaces — required given ephemeral App Platform filesystem
+- [ ] Timestamped backup filenames in Spaces — prerequisite for retention policy and restore selection
+- [ ] Retention policy: auto-delete backups older than configurable N days (default 14) — prevents unbounded storage growth
+- [ ] Backup success/failure log entry per run — operators must know if backup ran
+- [ ] Manual backup trigger via admin-authenticated POST endpoint — needed before risky bulk operations
+- [ ] Database restore via admin-authenticated POST endpoint with confirmation gate — without this, the backup is unproven
 
-Features to add once core is working and patterns are established.
+### Add After Validation (v1.x)
 
-- [ ] **RTL Layout Edge Cases** - Comprehensive Hebrew layout testing (flexbox, arrows, alignment)
-- [ ] **Multi-Currency Cart Consistency** - Add ILS, switch to USD, verify recalculation
-- [ ] **Discount Calculation Edge Cases** - Global discount + item discount + currency switching
-- [ ] **Category Dropdown Mobile/Desktop** - Viewport-specific interaction testing
-- [ ] **Image Gallery State** - Modal state management and keyboard navigation
-- [ ] **Form Validation (Contact)** - EmailJS integration and field validation
-- [ ] **Product Modal Testing** - Open/close, image gallery, escape key handling
+Features to add once the core backup/restore path is confirmed working in production.
 
-### Future Consideration (v2+ - Nice-to-Have)
+- [ ] Admin dashboard backup panel (list backups, trigger, see status) — useful for operational visibility; not required for data protection itself
+- [ ] Persistent backup history log in MongoDB collection — adds auditability; depends on confirmed backup writing successfully
 
-Features to defer until product-market fit is established.
+### Future Consideration (v2+)
 
-- [ ] **Visual Regression Testing** - Automated screenshot comparison (Percy/Chromatic)
-- [ ] **Performance Testing** - Bundle size, load time, LCP/FID/CLS metrics
-- [ ] **Accessibility Testing** - ARIA labels, keyboard navigation, screen reader
-- [ ] **Cross-Browser Testing** - Safari, Firefox, Edge compatibility
-- [ ] **Mobile Device Testing** - Real device testing (not just viewport simulation)
-- [ ] **SEO Testing** - Meta tags, structured data, sitemap validation
+- [ ] Automated restore verification to staging MongoDB — requires a second database instance
+- [ ] Second Spaces region for 3-2-1 redundancy — meaningful only once primary backup is reliably running for 30+ days
+- [ ] Email/webhook alert on backup failure — useful operational monitoring; build after structured logging is in place
+
+---
 
 ## Feature Prioritization Matrix
 
 | Feature | User Value | Implementation Cost | Priority |
 |---------|------------|---------------------|----------|
-| Cart Add/Remove Operations | HIGH | LOW | P1 |
-| Cart Persistence | HIGH | LOW | P1 |
-| Checkout Flow | HIGH | MEDIUM | P1 |
-| Price Display Accuracy | HIGH | MEDIUM | P1 |
-| Currency Switching | HIGH | MEDIUM | P1 |
-| Language Switching | HIGH | MEDIUM | P1 |
-| Model-View Integration | HIGH | MEDIUM | P1 |
-| View Cleanup | MEDIUM | LOW | P1 |
-| localStorage Corruption Handling | MEDIUM | MEDIUM | P2 |
-| RTL Layout Edge Cases | MEDIUM | HIGH | P2 |
-| Multi-Currency Cart Consistency | MEDIUM | HIGH | P2 |
-| Discount Calculation Edge Cases | MEDIUM | HIGH | P2 |
-| Product Modal | MEDIUM | LOW | P2 |
-| Category Dropdown Mobile/Desktop | LOW | MEDIUM | P2 |
-| Form Validation | LOW | LOW | P2 |
-| Image Gallery State | LOW | LOW | P3 |
-| Sticky Menu Edge Cases | LOW | LOW | P3 |
-| Visual Regression | LOW | HIGH | P3 |
-| Performance Testing | LOW | MEDIUM | P3 |
-| Accessibility Testing | MEDIUM | HIGH | P3 |
+| Automated daily backup (mongodump + gzip + Spaces upload) | HIGH | LOW | P1 |
+| Direct Spaces upload via stdout pipe (no local disk) | HIGH | LOW | P1 |
+| Timestamped backup filenames | HIGH | LOW | P1 |
+| Retention policy (auto-delete old backups) | HIGH | LOW | P1 |
+| Backup success/failure logging | HIGH | LOW | P1 |
+| Manual backup trigger endpoint | HIGH | LOW | P1 |
+| Database restore endpoint with confirmation gate | HIGH | MEDIUM | P1 |
+| Admin dashboard backup panel | MEDIUM | MEDIUM | P2 |
+| Persistent backup history log (MongoDB collection) | MEDIUM | LOW | P2 |
+| Email/webhook alert on backup failure | MEDIUM | LOW | P2 |
+| Automated restore verification to staging | HIGH | HIGH | P3 |
+| Second Spaces region (3-2-1 redundancy) | MEDIUM | LOW | P3 |
 
 **Priority key:**
-- P1: Must have for v1.3 (core revenue paths and architecture validation)
-- P2: Should have for v1.4+ (enhanced coverage, edge cases)
-- P3: Nice to have for v2+ (polish, optimization)
+- P1: Must have for v1.6 — directly achieves RTO < 2h goal and data protection guarantee
+- P2: Should have once P1 is stable and confirmed working in production
+- P3: Future milestone — meaningful only after operational baseline established
 
-## Testing Strategy Comparison
+---
 
-### Unit Testing vs Integration Testing
+## Existing Integrations That Reduce Implementation Effort
 
-| Aspect | Unit Testing | Integration Testing |
-|--------|-------------|---------------------|
-| **Scope** | Individual functions (model.addToCart) | User flows (add item → view updates → localStorage syncs) |
-| **Isolation** | Mock dependencies | Real dependencies (real localStorage, real DOM) |
-| **Speed** | Fast (milliseconds) | Slower (seconds) |
-| **Brittleness** | High (breaks on refactor) | Low (breaks on behavior change) |
-| **Confidence** | Low (doesn't test integration) | High (tests real user experience) |
-| **Our Approach** | **Minimize** - Only for complex logic (discount calculations) | **Prioritize** - Focus on user flows and MVC coordination |
+These are already present in the codebase and lower the effort for backup features directly.
 
-### DOM Testing Approaches
+| Existing Capability | How It Helps the Backup Feature |
+|--------------------|--------------------------------|
+| `@aws-sdk/client-s3` (or equivalent) for DigitalOcean Spaces image uploads | Reuse same SDK, credentials, and bucket configuration for backup uploads — already integrated and tested |
+| `node-cron` (exchange rate job in `backend/jobs/exchangeRateJob.js`) | Copy the scheduling pattern verbatim; no new scheduler dependency |
+| JWT admin middleware (`backend/middleware/auth.js`) | Protect backup trigger and restore endpoints without new auth logic |
+| Environment variable pattern (`backend/env.example`) | Add `BACKUP_RETENTION_DAYS` and `BACKUP_SPACES_PREFIX` following established pattern |
+| `child_process` (Node.js built-in) | Run mongodump/mongorestore as subprocesses; spawn with stdout piping to S3 upload stream |
 
-| Approach | Tool | Use Case |
-|----------|------|----------|
-| **JSDOM** | Jest default | Lightweight, fast, good for unit tests |
-| **Happy-DOM** | Vitest default | Faster than JSDOM, modern APIs |
-| **Playwright/Puppeteer** | Real browser | E2E tests, cross-browser, visual regression |
-| **Our Approach** | **Happy-DOM (Vitest)** | Balance speed and realism, matches backend stack |
+---
 
-## Complexity Estimation
+## Competitor Feature Analysis
 
-| Test Category | Test Count | Estimated Effort | Risk |
-|--------------|-----------|------------------|------|
-| **Cart State** | 15-20 tests | 4-6 hours | LOW - Straightforward localStorage operations |
-| **Locale (Language + Currency)** | 20-25 tests | 6-8 hours | MEDIUM - RTL edge cases complex |
-| **MVC Integration** | 10-15 tests | 4-5 hours | MEDIUM - Requires coordination testing |
-| **View Testing (Base + Pages)** | 25-30 tests | 8-10 hours | MEDIUM - Multiple page-specific views |
-| **Checkout Flow** | 5-8 tests | 3-4 hours | LOW - HTTP boundary testing, mocked APIs |
-| **Edge Cases (RTL, Multi-Currency)** | 15-20 tests | 6-8 hours | HIGH - Complex interaction scenarios |
-| **Total Estimated** | **90-118 tests** | **31-41 hours** | - |
+For the backup domain, "competitors" are managed backup services and common DIY patterns used at similar scale.
 
-## Testing Anti-Patterns to Avoid
+| Feature | MongoDB Atlas Backup | DIY Cron + S3 Pattern | Our Approach (v1.6) |
+|---------|----------------------|----------------------|---------------------|
+| Backup scheduling | Atlas-managed, UI-configured | node-cron in app code | node-cron (already installed) |
+| Storage destination | Atlas-managed cloud snapshots | AWS S3 or S3-compatible bucket | DigitalOcean Spaces (existing credentials) |
+| Retention policy | Atlas UI (hourly/daily/weekly/monthly tiers) | S3 lifecycle rules or custom list+delete | Custom code listing Spaces objects by date prefix |
+| Restore capability | Atlas one-click UI restore | Download + mongorestore CLI | Admin endpoint + mongorestore subprocess |
+| Monitoring | Atlas Alerts + email | Custom logging | Structured log entry per run |
+| PITR | Atlas paid feature (replica set only) | Not available self-managed | Out of scope |
+| Cost | ~$57/month (Atlas M10+ required for backups) | ~$0.02/GB/month Spaces storage | Negligible for ~94-product jewelry catalog |
 
-Based on research and vanilla JS MVC architecture:
+**Rationale for DIY approach over Atlas managed backup**: Atlas M0 (free tier) does not include continuous cloud backup. Upgrading to Atlas M10+ (~$57/month) solely for backup would cost more than the current entire infrastructure. The DIY node-cron + Spaces approach achieves equivalent RPO/RTO for near-zero additional cost, using tools already present in the codebase.
 
-1. **Don't test implementation details** - Test "cart counter updates" not "_updateCartNumber() is called"
-2. **Don't mock what you don't own** - Don't mock localStorage, IntersectionObserver, browser APIs
-3. **Don't test third-party libraries** - Don't test PayPal SDK, Stripe.js, EmailJS internals
-4. **Don't snapshot entire DOM trees** - Test specific elements, not entire HTML structure
-5. **Don't test CSS** - Visual appearance is for visual regression tools, not unit tests
-6. **Don't test static content** - Don't test every translation string, only switching mechanism
-7. **Don't test in isolation what only works integrated** - MVC layers must be tested together
-8. **Don't ignore RTL** - Hebrew layout breaks are invisible without explicit RTL testing
-9. **Don't test happy path only** - Test corrupted localStorage, missing prices, invalid currency
-10. **Don't create brittle selectors** - Use data-testid or semantic queries, not .cart-item__content > div:nth-child(2)
+---
 
 ## Sources
 
-### Vanilla JavaScript Testing
-- [Frontend Unit Testing Best Practices](https://www.meticulous.ai/blog/frontend-unit-testing-best-practices)
-- [How to Unit Test HTML and Vanilla JavaScript](https://dev.to/thawkin3/how-to-unit-test-html-and-vanilla-javascript-without-a-ui-framework-4io)
-- [JavaScript Testing Best Practices (GitHub)](https://github.com/goldbergyoni/javascript-testing-best-practices)
-
-### E-commerce Testing
-- [Shopify: Ecommerce Testing Guide 2026](https://www.shopify.com/blog/ecommerce-testing)
-- [BrowserStack: How to Test E-commerce Website](https://www.browserstack.com/guide/how-to-test-ecommerce-website)
-- [BugBug: Ecommerce Testing Guide](https://bugbug.io/blog/software-testing/ecommerce-testing/)
-
-### MVC Pattern Testing
-- [Stack Overflow: MVC Pattern Maintainability](https://stackoverflow.blog/2023/05/17/keep-em-separated-get-better-maintainability-in-web-projects-using-the-model-view-controller-pattern/)
-- [FreeCodeCamp: MVC Architecture Explained](https://www.freecodecamp.org/news/the-model-view-controller-pattern-mvc-architecture-and-frameworks-explained/)
-
-### Internationalization Testing
-- [Aqua Cloud: Internationalization Testing Best Practices](https://aqua-cloud.io/internationalization-testing/)
-- [BrowserStack: Internationalization Testing Guide](https://www.browserstack.com/guide/internationalization-testing-of-websites-and-apps)
-- [DEV: i18n and RTL for E-commerce](https://dev.to/ash_dubai/i18n-and-rtl-implementation-for-global-e-commerce-mastering-i18n-3jb1)
-
-### localStorage Testing
-- [Medium: Testing localStorage with React (patterns apply)](https://jogilvyt.medium.com/storing-and-testing-state-in-localstorage-with-react-fdf8b8b211a4)
-- [Plain English: Testing Local Storage with Testing Library](https://plainenglish.io/blog/testing-local-storage-with-testing-library-580f74e8805b)
-- [LogRocket: localStorage in JavaScript Complete Guide](https://blog.logrocket.com/localstorage-javascript-complete-guide/)
+- [DigitalOcean: How To Set Up Scheduled MongoDB Backups to DigitalOcean Spaces](https://www.digitalocean.com/community/tutorials/how-to-set-up-scheduled-logical-mongodb-backups-to-digitalocean-spaces)
+- [DigitalOcean App Platform: Persistent Storage Limitations](https://docs.digitalocean.com/products/app-platform/how-to/store-data/)
+- [MongoDB Docs: Back Up and Restore with MongoDB Tools](https://www.mongodb.com/docs/manual/tutorial/backup-and-restore-tools/)
+- [MongoDB Docs: mongodump reference](https://www.mongodb.com/docs/database-tools/mongodump/)
+- [Percona: MongoDB Backup Best Practices](https://www.percona.com/blog/mongodb-backup-best-practices/)
+- [Percona: Streaming MongoDB Backups Directly to S3](https://www.percona.com/blog/streaming-mongodb-backups-directly-to-s3/)
+- [MongoDB Backup and Recovery: How to Not Lose Your Data — Medium, Feb 2026](https://medium.com/@manisuec/mongodb-backup-and-recovery-how-to-not-lose-your-data-d6ece4e1fcf6)
+- [CircleCI: Schedule Database Backups for MongoDB in a Node.js Application](https://circleci.com/blog/schedule-mongo-db-cleanup/)
+- [DEV: How to Backup MongoDB Every Night in NodeJS](https://dev.to/yasseryka/how-to-backup-mongodb-every-night-in-nodejs-257o)
+- [GitHub: dumpstr — mongodump directly to S3 without local disk](https://github.com/timisbusy/dumpstr)
 
 ---
-*Feature research for: Vanilla JS MVC E-commerce Frontend Testing*
-*Researched: 2026-02-06*
+
+*Feature research for: MongoDB Backup & Recovery System (v1.6)*
+*Researched: 2026-04-04*

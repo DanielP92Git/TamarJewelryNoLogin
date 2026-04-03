@@ -1,306 +1,220 @@
 # Project Research Summary
 
-**Project:** Bilingual Product Content with Google Cloud Translation API
-**Domain:** E-commerce multilingual content management (Hebrew/English)
-**Researched:** 2026-02-13
+**Project:** Tamar Kfir Jewelry — MongoDB Backup & Recovery System (v1.6)
+**Domain:** Automated database backup/restore for Node.js/Express on DigitalOcean App Platform
+**Researched:** 2026-04-04
 **Confidence:** HIGH
 
 ## Executive Summary
 
-This milestone adds bilingual product content (name and description) to an existing e-commerce platform with 94 products. The system currently stores product information in English only, with Hebrew users seeing the same English content. Research shows the recommended approach is embedded bilingual fields in MongoDB (`name_en`, `name_he`, `description_en`, `description_he`) rather than nested documents or separate collections, using Google Cloud Translation API v3 for automated translation with human review capability.
+This milestone (v1.6) adds a production-grade automated backup and restore system to an existing e-commerce backend without introducing any new npm packages. The entire system is built on already-installed dependencies: `node-cron` (already running the exchange rate job), `aws-sdk` v2 (already uploading product images to DigitalOcean Spaces), and Node.js built-ins (`child_process`, `fs`). The only external dependency that must be added is the `mongodump`/`mongorestore` binary from MongoDB Database Tools, installed on DigitalOcean App Platform via an `Aptfile` at the repo root. The core architecture mirrors the existing `exchangeRateJob.js` + `exchangeRateService.js` pattern: a new `backupJob.js` schedules the work and a new `backupService.js` contains all backup/restore/retention logic.
 
-The implementation touches 7 architectural layers: database schema, translation service, admin UI, product API routes, SSR templates, JSON-LD structured data, and client-side rendering. The critical path is schema migration first (with idempotent migration script), then translation API integration, then admin UI updates, followed by SSR/API/client updates. The primary risks are non-idempotent migrations corrupting data, stale cart data with denormalized product names, and cache invalidation failures showing old untranslated content.
+The recommended approach is a temp-file backup flow: `mongodump --archive --gzip` writes a single compressed archive to a local `/tmp` path, which is uploaded to a dedicated DigitalOcean Spaces bucket under a `backups/` prefix using the existing S3 client, then deleted locally. A count-based retention policy (default: keep last 14 backups) runs after every successful backup. Three admin API routes (`POST /backup`, `GET /backups`, `POST /restore/:key`) are added to `backend/index.js` behind the existing `requireAdmin` middleware. An admin dashboard panel in `admin/BisliView.js` surfaces backup status and manual controls. The streaming alternative (piping `mongodump` stdout directly to S3 with no temp file) is more elegant but harder to debug; the temp-file approach makes each step independently verifiable and is the recommended starting point.
 
-Success requires coordinated deployment: migrate database with backward compatibility (keep legacy fields), update backend API to return both old and new fields, then update frontend to use bilingual fields with fallbacks. The estimated API cost is negligible ($0.19 for initial 94-product migration, ~$0.002 per new product), making this a low-risk, high-value feature addition.
+The two highest risks are environment setup concerns, not logic concerns. First, the `mongodump` binary installs to a non-standard layer path on App Platform after Aptfile installation and requires explicit `PATH` configuration — this must be verified in a deployed container before any backup logic is written. Second, silent failure is the most dangerous long-term risk: a backup job that catches errors and logs only to `console.error` will go undetected until the moment a restore is needed. Failure alerting — admin dashboard status row and email notification via the existing EmailJS integration — must ship as a first-class feature with the backup system, not as a follow-on task.
+
+---
 
 ## Key Findings
 
 ### Recommended Stack
 
-The stack additions are minimal and focused on translation capability without introducing complex i18n frameworks. Google Cloud Translation API v3 is the clear choice over v2 (same pricing, better features) or unofficial packages (security/support concerns). The embedded bilingual field pattern avoids the complexity of mongoose-intl plugins while maintaining query simplicity.
+All required capability exists in the current `backend/package.json`. Zero new npm packages are needed. The `aws-sdk` v2 `s3.upload()` method handles streaming multipart uploads to DigitalOcean Spaces using the same configuration already used for product image uploads. The `node-cron` scheduler is already running in `backend/jobs/exchangeRateJob.js` and the identical API applies. `child_process.spawn` (preferred over `exec` for large subprocess output) runs `mongodump` and `mongorestore`.
 
 **Core technologies:**
-- **@google-cloud/translate ^9.3.0**: Official Google SDK supporting v3 API — same pricing as v2 ($20/million chars) with better IAM integration, glossary support, and batch translation capabilities for future needs
-- **migrate-mongo ^14.0.7**: Already in devDependencies — proven migration pattern in codebase (3 existing migrations), supports idempotent migrations with up/down rollback essential for safe schema changes
-- **Flat embedded fields pattern**: Store as `name_en`/`name_he` rather than `name: { en, he }` — maximizes compatibility with existing validation, indexing, and query patterns while avoiding breaking API changes
+- `child_process.spawn` (Node built-in): Execute `mongodump`/`mongorestore` subprocesses — streams stdout/stderr without memory buffering; exit code signals success/failure cleanly; avoids `exec`'s 200 KB buffer ceiling
+- `mongodump` / `mongorestore` (MongoDB Database Tools 100.15.0): Create and restore BSON archive backups — `--archive --gzip` produces a single compressed file; BSON preserves all MongoDB types (ObjectId, Date); `--drop` flag enables clean restore
+- `aws-sdk` v2 `s3.upload()` (already installed `^2.1693.0`): Upload backup archives to DigitalOcean Spaces — already configured with `SPACES_ENDPOINT`, `SPACES_KEY`, `SPACES_SECRET`; handles multipart for large files; identical usage to existing image uploads
+- `node-cron` (already installed `^3.0.3`): Schedule daily backup at 03:00 AM — same `cron.schedule()` API the exchange rate job uses; zero new dependency
+- `fs.createReadStream` / `fs.unlink` (Node built-in): Read temp backup file for S3 upload; delete immediately after upload completes
 
-**Environment additions:**
-- `GOOGLE_APPLICATION_CREDENTIALS`: Path to service account JSON (v3 API requires service accounts, not API keys)
-- `GOOGLE_CLOUD_PROJECT`: Project ID for Translation API calls
+**Critical installation note:** Create `backend/Aptfile` (single line: `mongodb-database-tools`) and add `/layers/digitalocean_apt/apt/usr/bin` to `PATH` in App Platform environment variables. No changes to `backend/package.json`.
+
+**New environment variables required:**
+- `BACKUP_RETENTION_DAYS=14` — days to retain backups before deletion
+- `BACKUP_SPACES_PREFIX=backups/` — S3 key prefix for all backup objects
+- `BACKUP_BUCKET=` — separate Spaces bucket in a different DO region for off-region isolation; defaults to `SPACES_BUCKET` in development
+- `MONGODUMP_PATH=` — optional binary path override if PATH resolution fails
 
 ### Expected Features
 
-Research reveals a clear three-tier feature classification that informs phase prioritization. Table stakes focus on basic bilingual storage and editing, differentiators add translation automation to save admin time, and anti-features warn against common pitfalls like auto-translate without review.
+**Must have (v1.6 table stakes):**
+- Automated daily backup via `node-cron` at 03:00 AM — without automation, backups will be skipped; manual-only is not a safety net
+- `mongodump --archive --gzip` to temp file + upload to DigitalOcean Spaces — App Platform ephemeral filesystem requires off-region persistence for every backup
+- Timestamped backup filenames (`backup-2026-04-04T02-00-00Z.archive.gz`) — ISO format is both human-readable and lexicographically sortable; prerequisite for retention and restore selection
+- Retention policy: auto-delete backups beyond configurable count (default: 14) — prevents unbounded Spaces storage growth and cost
+- Structured backup success/failure log entry per run — operators must know if last night's backup ran; silent failure is worse than no backup
+- Manual backup trigger: `POST /backup` (admin-auth required) — needed before risky migrations or bulk data operations
+- Database restore: `POST /restore/:key` with explicit confirmation gate (admin-auth required) — backup has no value without a proven, tested restore path
 
-**Must have (table stakes):**
-- Bilingual database schema with migration for 94 existing products — essential foundation, blocks all other work
-- Side-by-side fields in admin forms (Hebrew source + English translation) — established industry pattern, admins expect context when reviewing translations
-- Manual translation editing — machine translation always needs human review for quality control, never lock auto-translated fields
-- Frontend display logic — SSR renders `name_${lang}` based on `/en/` or `/he/` route with graceful fallback to legacy fields
-- Translation status indicators — visual badges showing "Needs Translation", "Translated", or "Source Changed" per product in list view
-
-**Should have (competitive):**
-- One-click "Translate" button — eliminates manual copy-paste to Google Translate, saves 2-3 minutes per product
-- API error handling with fallback — if translation fails, admin can still save with manual translation (site doesn't break on API downtime)
-- Character count warnings — Hebrew expands ~50% when translated to English, warn if exceeds UI limits
-- Bulk translation interface — migrate 94 existing products without clicking 94 times (add after single-product translate validates)
+**Should have (add after v1.6 is validated in production):**
+- Admin dashboard backup panel in `BisliView.js` — list backups with human-readable dates/sizes, trigger manual run, display last-run status without requiring SSH access to App Platform logs
+- Persistent backup history log in a `backup_logs` MongoDB collection — 5-8 fields per entry (timestamp, status, filename, bytes, duration_ms, error); enables "last backup" timestamp display
 
 **Defer (v2+):**
-- Translation memory/glossary — Google Cloud Translation glossaries for consistent jewelry terminology (defer until seeing actual consistency issues)
-- Translation quality indicators — display confidence scores from API to flag low-quality translations (requires research into metrics)
-- Preview translated content — modal showing how product appears in English (complex due to SSR routing architecture)
-- Translation cost tracking — dashboard widget showing API usage and monthly costs (only if budget concerns arise)
+- Automated restore verification to a staging MongoDB instance — requires a second database; meaningful only after primary backup runs reliably for 30+ days
+- Second Spaces region for 3-2-1 redundancy — same SDK and credentials, just a second bucket in NYC vs FRA; build after primary is proven
+- Email/webhook alert on backup failure — valuable operational monitoring; build after structured logging is confirmed stable
 
 ### Architecture Approach
 
-The architecture uses a layered approach with clear component boundaries and backward compatibility during migration. Flat embedded fields (`name_en`, `name_he`) in the Product schema provide direct field access without nested path complexity. The translation service abstracts Google Cloud Translation API with in-memory caching (NodeCache, 1-hour TTL) to reduce API costs 50-80%. Admin UI adds Hebrew text inputs alongside English with auto-translate button calling backend endpoint. SSR templates use dynamic field access (`product[\`name_${lang}\`]`) with fallback to legacy fields. Cache invalidation clears both `/en/` and `/he/` keys since SSR cache includes language in key format.
+The backup system follows the established service-layer pattern already in this codebase. A new `backupJob.js` in `backend/jobs/` mirrors `exchangeRateJob.js` exactly: exports `startBackupJob()` and `runBackupNow()`, registered in `index.js` inside the `connectDb().then()` block alongside the existing exchange rate job. All I/O-heavy logic (spawn, S3 upload, S3 list, S3 delete) lives in `backupService.js` in `backend/services/`, keeping it testable in isolation. Because the monolithic `index.js` does not export its `s3` client, `backupService.js` creates its own S3 instance using the same environment variables — acceptable duplication that avoids out-of-scope refactoring of the monolith. Three admin routes are added directly to `index.js`, consistent with the existing monolithic route pattern.
 
 **Major components:**
-1. **Product Schema (backend/models/Product.js)** — Add bilingual fields, maintain legacy fields during transition, pre-save hook auto-populates legacy from bilingual for backward compatibility
-2. **Translation Service (backend/services/translationService.js)** — New service wrapping Google Cloud Translation API v3 with in-memory caching and error handling, separate endpoint for admin-triggered translations
-3. **Admin Form (admin/BisliView.js)** — Add Hebrew text inputs with dir="rtl", auto-translate button, inline validation showing which fields are required vs optional
-4. **SSR Templates (backend/views/pages/)** — Update product.ejs and category.ejs to use `product[\`name_${lang}\`] || product.name` pattern, language already detected from route params
-5. **JSON-LD Schema (backend/index.js)** — Update schema generation in `renderProductPage` to use language-specific fields with `inLanguage` property for SEO
-6. **Cache Invalidation (backend/cache/invalidation.js)** — Extend to clear both language variants on product update, add `invalidateCategory` for bulk changes
-7. **Client Views (frontend/js/Views/)** — Update categoriesView.js to use bilingual fields with same fallback pattern as SSR (secondary to SSR, most users see SSR)
+1. `backend/jobs/backupJob.js` (NEW) — node-cron schedule wiring; exports `startBackupJob()` and `runBackupNow()`; delegates all logic to `backupService`; mirrors `exchangeRateJob.js` structure exactly
+2. `backend/services/backupService.js` (NEW) — all backup/restore/retention logic: `runBackup()`, `runRestore()`, `listBackups()`, `applyRetention()`; owns its own S3 client instance and child_process spawning
+3. Admin routes in `backend/index.js` (MODIFIED) — `POST /backup`, `GET /backups`, `POST /restore/:key`; all protected by existing `requireAdmin` middleware; route handlers contain only request parsing and response sending
+4. `backend/Aptfile` (NEW) — single line `mongodb-database-tools`; installs `mongodump`/`mongorestore` at App Platform build time via heroku-buildpack-apt mechanism
+5. Admin dashboard backup panel in `admin/BisliView.js` (MODIFIED) — backup list with human-readable formatting, manual trigger button, last-run status row, restore UI with confirmation phrase requirement
+
+**Backup data flow:** cron trigger or admin POST → `backupService.runBackup()` → `spawn('mongodump', ['--uri', ..., '--archive=/tmp/backup-{ts}.gz', '--gzip'])` → wait for exit code 0 → `s3.upload()` to Spaces `backups/` prefix → `fs.unlink()` temp file → `applyRetention()` (list, sort, delete beyond retention count) → return result.
+
+**Restore data flow:** admin POST with `{ confirm: "RESTORE" }` → validate backup key against known Spaces objects → `s3.getObject()` download to temp file → `spawn('mongorestore', ['--uri', ..., '--archive=...', '--gzip', '--drop'])` → `fs.unlink()` temp file → return result.
 
 ### Critical Pitfalls
 
-Research identified 10 critical pitfalls, with the top 5 requiring specific prevention strategies built into phase execution. The most dangerous are migration-related (non-idempotent scripts, missing rollback plans) and cache-related (stale data after translation, cart denormalization issues).
+1. **`mongodump` binary missing in production container** — `spawn('mongodump')` throws `ENOENT`; backups fail silently from day one. Prevention: create `Aptfile` with `mongodb-database-tools`; add `/layers/digitalocean_apt/apt/usr/bin` to `PATH` in App Platform environment; log `mongodump --version` at startup; verify in a deployed container before writing any backup logic. Do not advance past Phase 1 until this is confirmed.
 
-1. **Non-Idempotent Migration Script** — Migration runs twice (deployment error, rollback) and corrupts data by re-translating already-migrated products or throwing errors on existing bilingual fields. Prevention: Check field type/existence before migrating, test locally 2-3 times, use transactional migration pattern from existing codebase.
+2. **Silent backup failure — no alerting** — `try/catch` catches errors, `console.error` is the only signal, App Platform logs rotate, failures go undetected for weeks until a restore is needed. Prevention: write a structured log entry to MongoDB `backup_logs` per run; expose "last successful backup" timestamp on admin health endpoint; send failure alert via existing EmailJS integration. Treat backup failure as a production incident.
 
-2. **Stale Cart Data with Denormalized Product Names** — Cart stores `title` as string in localStorage (lines 236, 256 in model.js). After schema change, carts contain old single-language strings that can't be localized. Prevention: Add cart schema version to localStorage, invalidate old carts on version mismatch, add timestamp-based invalidation via Settings collection.
+3. **node-cron fires N times with N App Platform instances** — duplicate `mongodump` operations race on the same Spaces key during rolling deploys; retention cleanup deletes files just created by the parallel job. Prevention: use App Platform native Scheduled Jobs component (runs exactly once per schedule, isolated process), or implement MongoDB-backed distributed lock with TTL index; at minimum use unique timestamped filenames to prevent overwriting.
 
-3. **SSR Cache Keys Not Invalidating After Translation** — Cache uses `path:lang:currency` format but invalidation doesn't clear both language variants. Translation updates show stale content for 1 hour (TTL 3600s). Prevention: Extend `invalidateProduct` to clear both `/en/product/slug` and `/he/product/slug`, add `invalidateCategory` for bulk operations, trigger `invalidateAll` after bulk translation.
+4. **`mongorestore --drop` targets wrong database** — under incident pressure a misconfigured namespace drops the wrong collections permanently. Prevention: require explicit confirmation string in request body; validate backup key against known Spaces objects (never accept user-supplied filenames directly); log target database name before executing; treat restore as a privileged, documented operation.
 
-4. **Schema Migration Without Data Backfill** — Schema changes to nested object but data remains string, queries return null, products disappear. Prevention: Write and test both up/down migration functions, test on production data dump locally first, use `Schema.Types.Mixed` during transition, add verification script.
+5. **MongoDB credentials exposed in logs** — `spawn('mongodump', ['--uri', MONGO_URL, ...])` puts the full connection string including password in process list and any `console.log(args)` debug line. Prevention: never log `args.join(' ')` when args contains the URI; redact before any logging: `uri.replace(/:\/\/([^@]+)@/, '://***@')`; grep App Platform logs for the Atlas cluster hostname after first deployment.
 
-5. **Translation API Rate Limiting Breaking Bulk Operations** — Bulk translating 94 products hits Google Cloud Translation quotas (characters/minute, requests/second), partial translation leaves inconsistent database state. Prevention: Batch with delays (10 products per batch, 2-second delay), use async batch translation endpoint for >10 products, implement exponential backoff retry, store translation progress in database.
-
-**Additional moderate pitfalls:** Translation quality issues (machine translation errors), missing translation validation (products saved with empty Hebrew), cache invalidation for bilingual content, SEO duplicate content from poor hreflang implementation, admin form confusion around required vs optional fields, payment receipts showing wrong language, missing fallback when Translation API fails, and untested rollback plans.
+---
 
 ## Implications for Roadmap
 
-Based on research, suggested phase structure follows dependency order: schema foundation first, then translation capability, then admin tooling, then SSR/client rendering, then cache/SEO polish. This order ensures each phase has required foundation from previous phases while delivering incremental value.
+The pitfall-to-phase mapping from PITFALLS.md directly drives the phase order. Environment constraints (binary availability, Atlas connectivity, scheduler architecture) must be resolved before any service logic is written. Core backup ships before restore because restore requires real backups to test against. Failure alerting ships in the same phase as manual trigger — not as a follow-on — because a backup system without observable failure status is not a backup system.
 
-### Phase 1: Schema Migration & Foundation
-**Rationale:** Database schema is the foundation—blocks all other work. Must be bulletproof with backward compatibility, idempotent migration, and verified data integrity before proceeding. Migration pattern already established in codebase (3 existing migrations), so this is low-risk if following existing patterns.
+### Phase 1: Environment Setup and Binary Verification
 
-**Delivers:**
-- Product schema with bilingual fields (`name_en`, `name_he`, `description_en`, `description_he`)
-- Legacy fields maintained for backward compatibility (`name`, `description` aliased to `_en` versions)
-- Migration script populating bilingual fields from existing English-only data
-- Verification script confirming 100% of products have bilingual structure
-- Cart version handling to invalidate old localStorage carts
+**Rationale:** The single most dangerous risk is discovering that `mongodump` is unavailable in production after the full backup system is built. Pitfalls 1, 3, and 4 (binary missing, duplicate cron runs, Atlas IP allowlist) are all environment-level and must be resolved before writing any service code. This phase has zero backup business logic — only infrastructure.
 
-**Addresses:**
-- Table stakes: Bilingual database schema (FEATURES.md line 92)
-- Pitfall 1: Non-idempotent migration (PITFALLS-bilingual.md lines 10-34)
-- Pitfall 3: Schema without data backfill (PITFALLS.md lines 86-109)
-- Pitfall 4: Stale cart data (PITFALLS.md lines 9-30)
+**Delivers:** Confirmed `mongodump --version` output logged from a deployed App Platform container; `Aptfile` committed and `PATH` configured in App Platform environment; new env vars documented in `backend/env.example`; Atlas IP allowlist verified for `mongodump` connection at job runtime (not just Mongoose startup); explicit decision documented on App Platform Jobs vs. in-process node-cron with distributed lock.
 
-**Avoids:** Breaking existing API/frontend by maintaining legacy fields, corruption from non-idempotent migrations by checking existing state, test failures by updating fixtures alongside schema.
+**Avoids:** Building backup logic on an unverified platform assumption; discovering binary is absent at the moment of first production backup
 
-**Research flag:** SKIP RESEARCH — Migration pattern well-documented in codebase (backend/migrations/20260210000000-add-product-slugs.js), no new research needed.
+### Phase 2: Core Backup Service
 
-### Phase 2: Translation Service Integration
-**Rationale:** Translation capability needed before admin UI can call it. Isolate API integration risk from admin UI changes. Caching and error handling critical to prevent API quota issues and ensure graceful degradation.
+**Rationale:** With environment verified, implement the full backup data path end-to-end. This is the highest-value deliverable — a running daily automated backup. Follows the `exchangeRateService`/`exchangeRateJob` pattern exactly, so there are no novel architectural decisions.
 
-**Delivers:**
-- Translation service (backend/services/translationService.js) wrapping Google Cloud Translation API v3
-- In-memory caching (NodeCache, 1-hour TTL) reducing API costs 50-80%
-- Backend endpoint POST /translate (admin-only) for on-demand translation
-- Error handling with fallback (copy English content if translation fails, don't block product save)
-- Rate limiting and batch processing logic for bulk operations
+**Delivers:** `backend/services/backupService.js` with `runBackup()` and `applyRetention()`; `backend/jobs/backupJob.js` registered in `index.js`; daily backups landing in a dedicated Spaces bucket with timestamped filenames; count-based retention cleaning up old archives; structured log entry written per backup run.
 
-**Uses:**
-- @google-cloud/translate ^9.3.0 (STACK-bilingual.md lines 13)
-- Service account authentication with GOOGLE_APPLICATION_CREDENTIALS (STACK-bilingual.md lines 139-149)
+**Uses:** `child_process.spawn`, `mongodump --archive --gzip`, `aws-sdk` v2 `s3.upload()`, `node-cron`, `fs.unlink`
 
-**Addresses:**
-- Differentiator: One-click translate button foundation (FEATURES-bilingual.md line 128)
-- Pitfall 5: Translation API rate limiting (PITFALLS-bilingual.md lines 110-146, PITFALLS.md lines 50-70)
-- Pitfall 9: Missing fallback strategy (PITFALLS.md lines 228-254)
+**Implements:** `backupService.js` and `backupJob.js` components (Architecture components 1 and 2)
 
-**Avoids:** Rate limit issues by implementing batch processing with delays, API downtime breaking admin workflow by providing fallback to manual entry.
+**Avoids:** Credentials in logs (Pitfall 5); `execSync` blocking event loop (anti-pattern from ARCHITECTURE.md); temp file persisting after upload; using same Spaces bucket as product images (retention cleanup must never touch image objects)
 
-**Research flag:** SKIP RESEARCH — Google Cloud Translation API well-documented, rate limits and best practices clear from official docs.
+### Phase 3: Manual Trigger and Failure Alerting
 
-### Phase 3: Admin UI & Translation Workflow
-**Rationale:** Admin must be able to create bilingual products before frontend can display them. Inline validation prevents incomplete products. Auto-translate button eliminates manual copy-paste workflow (saves 2-3 min/product).
+**Rationale:** Manual trigger is needed before risky production operations. Failure alerting must ship with the backup system because PITFALLS.md classifies silent failure as a critical risk requiring Phase 3 treatment — not a follow-on. Both features share the same code path as Phase 2.
 
-**Delivers:**
-- Hebrew text inputs in admin form (admin/BisliView.js) with dir="rtl" for proper RTL display
-- Auto-translate button calling /translate endpoint, populating Hebrew fields for review
-- Inline validation showing required vs optional fields with clear labels
-- Manual editing always enabled (never lock auto-translated fields)
-- Preview both languages side-by-side before saving
-- Translation status indicators in product list view
+**Delivers:** `POST /backup` admin route returning job result synchronously (size acceptable for current ~94-product catalog); `backup_logs` MongoDB collection with structured entries (timestamp, status, filename, bytes, duration_ms, error); "last successful backup" timestamp on an admin health endpoint; EmailJS failure notification triggered when backup job throws.
 
-**Implements:**
-- Admin form component (ARCHITECTURE-bilingual.md lines 262-308)
-- Form validation pattern (FEATURES-bilingual.md lines 160-165)
+**Uses:** Existing `requireAdmin` middleware; existing EmailJS integration; `backupService.runBackup()` from Phase 2
 
-**Addresses:**
-- Table stakes: Side-by-side fields, manual editing, translation status (FEATURES-bilingual.md lines 14-20)
-- Differentiator: One-click translate button (FEATURES-bilingual.md line 28)
-- Pitfall 7: Admin form confusion (PITFALLS.md lines 172-196)
+**Avoids:** Silent failure going undetected for weeks (Pitfall 8); `console.error` as the only failure signal
 
-**Avoids:** Confusion about required fields by clear inline hints, bad translations going live by always allowing manual editing, incomplete products by validation requiring both languages.
+### Phase 4: Database Restore
 
-**Research flag:** SKIP RESEARCH — Standard form validation patterns, no special research needed.
+**Rationale:** Restore is the proof that backups have value. It ships after backup is proven reliable so there are real Spaces archives to test restore against. It is also the highest-risk operation — permanent data loss if misconfigured — so it requires the most defensive implementation.
 
-### Phase 4: Frontend Display & SSR Updates
-**Rationale:** Customers need to see translations on live site. SSR templates are primary rendering path (most users), client-side views are fallback. Must maintain graceful fallback to legacy fields during transition.
+**Delivers:** `backupService.runRestore(key)` with `mongorestore --drop`; `GET /backups` route listing Spaces objects as human-readable entries (date, size, status); `POST /restore/:key` route requiring `{ confirm: "RESTORE" }` in request body and validating key against known Spaces objects; filename sanitization against strict regex pattern; runbook comment in code near restore logic; end-to-end restore test documented and confirmed working.
 
-**Delivers:**
-- SSR templates (product.ejs, category.ejs) using `product[\`name_${lang}\`]` with fallback
-- Backend route logic in renderProductPage/renderCategoryPage selecting language from URL params
-- JSON-LD structured data with language-specific content and `inLanguage` property
-- OG meta tags using localized descriptions for social sharing
-- Client-side views (categoriesView.js) matching SSR patterns with same fallback logic
-- Language detection already exists from bilingual routing (`/en/`, `/he/`)
+**Implements:** Admin routes component (Architecture component 3); `listBackups()` and `runRestore()` in `backupService.js`
 
-**Implements:**
-- SSR template component (ARCHITECTURE-bilingual.md lines 310-366)
-- JSON-LD schema component (ARCHITECTURE-bilingual.md lines 368-401)
-- Client views component (ARCHITECTURE-bilingual.md lines 446-472)
+**Avoids:** `mongorestore` on wrong database (Pitfall 6); path traversal from user-supplied filenames (security mistake from PITFALLS.md); one-click restore with no confirmation
 
-**Addresses:**
-- Table stakes: Frontend display logic (FEATURES-bilingual.md line 98)
-- Graceful degradation pattern (ARCHITECTURE-bilingual.md lines 642-653)
-- SEO structured data (ARCHITECTURE-bilingual.md lines 368-401)
+### Phase 5: Admin Dashboard Backup Panel
 
-**Avoids:** Breaking SSR for users on legacy products by fallback to English, SEO issues by updating JSON-LD and meta tags alongside content, client-side rendering mismatches by using same logic as SSR.
+**Rationale:** Admin visibility without SSH access. Ships last because it depends on all API routes from Phases 2-4 existing and confirmed working in production. UI work is decoupled from data protection logic and adds no new risk to the core backup path.
 
-**Research flag:** SKIP RESEARCH — EJS template patterns well-known, language detection already implemented in routes.
+**Delivers:** New section in `admin/BisliView.js` showing backup list with human-readable formatting ("April 4, 2026 — 03:00 AM — 4.2 MB — Success"), manual trigger button with confirmation dialog, "last backup" status row visible at a glance, restore UI with explicit confirmation phrase requirement before execution.
 
-### Phase 5: Cache Invalidation & SEO Polish
-**Rationale:** Cache invalidation prevents stale content after translation. SEO updates ensure Google recognizes different-language versions. These are polish items that don't block functionality but are critical for production quality.
+**Implements:** Admin dashboard panel component (Architecture component 5)
 
-**Delivers:**
-- Cache invalidation utility (backend/cache/invalidation.js) clearing both language variants
-- Product update hooks calling invalidation for both `/en/` and `/he/` cache keys
-- Category cache invalidation after bulk translation
-- Hreflang verification (already implemented in sitemap, verify content actually differs)
-- Google Search Console monitoring for duplicate content warnings
-- Performance testing with cache hit rate monitoring
+**Avoids:** Admin having no visibility into backup health without navigating App Platform logs; undiscoverable restore capability during an incident; one-click restore with no safeguard
 
-**Implements:**
-- Cache invalidation component (ARCHITECTURE-bilingual.md lines 475-517)
-- Bidirectional cache invalidation pattern (ARCHITECTURE-bilingual.md lines 655-671)
-
-**Addresses:**
-- Pitfall 2: SSR cache not invalidating (PITFALLS.md lines 33-58)
-- Pitfall 6: SEO duplicate content (PITFALLS.md lines 143-169)
-- Cache invalidation (PITFALLS-bilingual.md lines 137-150)
-
-**Avoids:** Stale content served to users by clearing both languages, SEO penalties by ensuring hreflang points to actually different content, performance degradation by monitoring cache effectiveness.
-
-**Research flag:** SKIP RESEARCH — Cache invalidation patterns established in codebase (backend/cache/invalidation.js exists), hreflang implementation already complete.
-
-### Phase 6: Bulk Translation & Migration Tooling
-**Rationale:** After validating single-product translation workflow works reliably, provide bulk tooling to migrate existing 94 products. Background job prevents blocking admin UI. Progress tracking and retry logic handle API failures gracefully.
-
-**Delivers:**
-- Bulk translation interface in admin dashboard (select multiple products, "Translate Selected" button)
-- Background job processing with progress indicator ("Translating 47/94 products...")
-- Batch processing with delays (10 products per batch, 2-second delay) to respect API quotas
-- Translation progress stored in database (translationStatus: pending/completed/failed)
-- Retry logic with exponential backoff for failed translations
-- Admin notification (toast + email) when bulk translation completes
-- Review queue for products needing manual review after auto-translation
-
-**Addresses:**
-- Differentiator: Bulk translation for catalog migration (FEATURES-bilingual.md line 29)
-- Pitfall 5: Translation API rate limiting (PITFALLS-bilingual.md lines 50-70)
-- Translation quality issues (PITFALLS-bilingual.md lines 99-110)
-
-**Avoids:** Rate limiting by batching with delays, blocking UI by background job, incomplete migrations by storing progress, poor quality by marking for review.
-
-**Research flag:** NEEDS RESEARCH — Background job system not yet in codebase. Need to research: Node.js background job patterns (bull/bee-queue vs simple cron), progress tracking UI patterns, retry/exponential backoff strategies.
+---
 
 ### Phase Ordering Rationale
 
-- **Schema first** because all other work depends on bilingual fields existing in database — architecture research shows flat embedded fields maximize compatibility with existing code
-- **Translation service before admin UI** to isolate API integration risk and ensure endpoint is stable before admin starts using it — allows testing translation quality independently
-- **Admin UI before frontend** because admins must create bilingual content before customers can see it — features research confirms admin workflow is source-then-translate pattern
-- **SSR/frontend together** because they share same rendering logic, just server vs client — architecture shows both use `product[\`name_${lang}\`]` pattern
-- **Cache/SEO polish after functionality** because these are quality improvements that don't block basic workflow — but critical for production launch to avoid pitfalls
-- **Bulk translation last** because it builds on validated single-product workflow — features research shows bulk is "add after validation" tier, not MVP
+- **Environment before service logic:** PITFALLS.md explicitly maps binary availability and Atlas connectivity to Phase 1. Building a service module on top of an unverified binary assumption wastes the entire Phase 2 implementation if the binary is absent or misconfigured.
+- **Backup before restore:** Restore depends on real backups existing in Spaces. Testing restore without confirmed Phase 2 output means testing with manually uploaded files, which masks real integration issues with the production restore path.
+- **Alerting in Phase 3 alongside manual trigger (not later):** PITFALLS.md classifies silent failure as a critical risk and explicitly requires Phase 3 treatment. Grouping alerting with manual trigger keeps both observability features together and prevents shipping a backup system that fails silently.
+- **Admin UI last:** Dashboard depends on stable API contracts from all prior phases. Building UI against unstable or unconfirmed API responses leads to rework.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 6 (Bulk Translation):** Background job system not in codebase, need research on Node.js job queues (bull/bee-queue), progress tracking UI, retry strategies
+
+- **Phase 1 (Aptfile PATH):** The exact path where Aptfile-installed binaries land (`/layers/digitalocean_apt/apt/usr/bin/`) is rated MEDIUM confidence — documented in community sources, not in a canonical DO doc. Also, the decision between App Platform Scheduled Jobs and in-process node-cron with a MongoDB distributed lock has architectural implications that should be validated against the actual App Platform plan and instance configuration before committing to an approach.
+
+- **Phase 4 (mongorestore + Atlas SRV flags):** Several Atlas-specific flags (`--numParallelCollections=1`, `--timeoutMS=60000`, `--readPreference=secondaryPreferred`, `?authSource=admin`) are recommended in community sources but not all are confirmed against this specific Atlas tier. A test restore against the actual Atlas cluster in a non-production context should happen before Phase 4 implementation begins.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 1 (Schema Migration):** Established pattern in codebase (3 existing migrations), migrate-mongo documentation comprehensive
-- **Phase 2 (Translation Service):** Google Cloud Translation API well-documented, official SDK with examples, caching patterns established
-- **Phase 3 (Admin UI):** Standard form patterns, HTML5 validation sufficient, no complex UI libraries needed
-- **Phase 4 (Frontend Display):** EJS templates, language detection already implemented, straightforward field access changes
-- **Phase 5 (Cache/SEO):** Cache invalidation patterns exist in codebase, hreflang already implemented, standard monitoring tools
+
+- **Phase 2 (Core Backup Service):** Directly modeled on existing codebase patterns (`exchangeRateJob.js`, existing S3 image upload in `index.js`). No novel patterns. Well-documented and proven in this repo.
+- **Phase 3 (Manual Trigger + Alerting):** Standard Express route pattern + EmailJS alert. EmailJS already integrated. No novel integration required.
+- **Phase 5 (Admin Dashboard):** New section in existing single-file `BisliView.js` SPA. Standard DOM + fetch pattern used throughout that file.
+
+---
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | Official Google SDK, migrate-mongo already in devDependencies, flat field pattern verified against MongoDB docs and codebase patterns |
-| Features | HIGH | Industry research confirms table stakes (side-by-side editing, manual review), competitive analysis validates differentiators (auto-translate button saves 2-3 min/product), anti-features well-documented in localization guides |
-| Architecture | HIGH | All 7 layers mapped to existing codebase files with line numbers, embedded field pattern matches existing Product schema structure, dependency order derived from actual component boundaries |
-| Pitfalls | HIGH | All 10 critical pitfalls verified against codebase (e.g., cart denormalization in model.js lines 236/256, cache format in cacheKeys.js lines 10-31), migration risks drawn from 2026-current MongoDB best practices |
+| Stack | HIGH | All technologies confirmed present in `backend/package.json`; zero new packages; version compatibility verified from existing active usage in codebase |
+| Features | HIGH (core), MEDIUM (UI patterns) | Core backup/restore mechanics well-documented in official MongoDB docs and DigitalOcean tutorials; admin UI patterns inferred from existing `BisliView.js` structure |
+| Architecture | HIGH | Integration points derived directly from existing codebase source files; component pattern mirrors existing `exchangeRateJob` + `exchangeRateService` with line-level specificity |
+| Pitfalls | HIGH (critical pitfalls), MEDIUM (Aptfile PATH specifics) | Critical pitfalls verified with official docs and multiple independent sources; Aptfile binary PATH location rated MEDIUM from community sources only |
 
 **Overall confidence:** HIGH
 
-All research areas reached HIGH confidence through combination of official documentation (Google Cloud Translation API, MongoDB schema patterns), verified codebase analysis (existing migration patterns, cache implementation, SSR routing), and 2026-current e-commerce localization best practices. Stack recommendations based on official SDKs and packages already in project. Feature classifications validated against competitor analysis (Shopify, Weglot). Architecture patterns mapped to actual codebase files with line-level specificity. Pitfalls derived from both authoritative sources (Google quotas documentation, MongoDB migration guides) and codebase inspection (cart implementation, cache keys).
-
 ### Gaps to Address
 
-- **Background job system selection:** Phase 6 requires research into Node.js job queue libraries. Current codebase uses node-cron for scheduled tasks (backend/jobs/exchangeRateJob.js) but no queue system for async operations. Options: bull (Redis-backed, production-ready), bee-queue (simpler Redis queue), or DIY with MongoDB and cron. Decision needed: lightweight for 94 products (DIY sufficient) vs scalable for future (bull better long-term).
+- **Aptfile binary PATH on App Platform:** The exact non-standard install path (`/layers/digitalocean_apt/apt/usr/bin/`) comes from community sources. Phase 1 must log `which mongodump` from a deployed container to confirm the actual path before hardcoding it or setting `MONGODUMP_PATH`. Fallback: switch to Dockerfile-based deploy with `RUN apt-get install -y mongodb-database-tools` for predictable standard PATH.
 
-- **Translation quality metrics:** Features research mentions "translation quality indicators" (confidence scores) but Google Cloud Translation API v3 documentation doesn't clearly expose per-request quality metrics. Need to validate: does API return confidence scores? If not, defer this feature or use alternative quality signals (e.g., flag very short/long translations for review, detect unchanged text after translation).
+- **Atlas connection from App Platform container at job runtime:** The Mongoose connection pool was established from a container IP already on the Atlas allowlist. A new `mongodump` subprocess connection at 03:00 AM may originate from the same container (same IP, fine) or from a replacement container after a rolling deploy (different IP, blocked). This must be verified with a real test backup run from the deployed environment in Phase 1 — do not assume the connection works because the app serves MongoDB-backed requests successfully.
 
-- **Cart schema version migration timing:** Pitfall research identifies cart localStorage invalidation need but unclear when to trigger. Options: (1) Invalidate all carts at deployment via Settings timestamp, (2) Progressive invalidation as users load site (version check), (3) Keep old cart structure working alongside new. Decision impacts Phase 1 execution—needs validation during planning.
+- **App Platform Jobs vs. in-process node-cron with locking:** PITFALLS.md flags duplicate job execution during rolling deploys as a confirmed risk with real production consequences. The architectural decision — App Platform Scheduled Jobs (isolated, runs once per schedule) vs. in-process node-cron with a MongoDB TTL-index distributed lock — should be finalized in Phase 1 before writing the scheduler. App Platform Jobs is the safer default if the App Platform plan supports it; in-process cron is acceptable only if instance count is confirmed and locked at 1.
 
-- **Hebrew text direction edge cases:** Research covers basic RTL handling (dir="rtl" on textareas, existing Hebrew page RTL CSS) but mixed-direction text (e.g., "Gold צמיד 14K") handling unclear. Do product names mix English/Hebrew commonly? If yes, need unicode-bidi CSS rules. Validate during Phase 3 admin testing with actual jewelry terminology.
+- **Dedicated BACKUP_BUCKET vs. prefix isolation within SPACES_BUCKET:** PITFALLS.md flags mixing backup files and image files in the same Spaces bucket as a retention logic hazard. A dedicated bucket in a different DO region is the recommended approach for true off-region isolation. This requires provisioning a new Spaces bucket and adding `BACKUP_BUCKET` to App Platform config before Phase 2 uploads begin.
 
-- **Slug generation strategy:** Architecture research recommends English-only slugs for consistency but pitfall research notes potential SEO benefit of language-specific slugs (`/he/product/עגילי-זהב` vs `/he/product/gold-earrings`). Current slug generation (Product.js lines 138-154 per architecture research) uses `name` field. After migration: keep using `name_en` for slugs (simpler) or support bilingual slugs (better SEO, complex routing)? Decision doesn't block MVP but affects Phase 1 migration script.
+---
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [Google Cloud Translation API Official Documentation](https://docs.cloud.google.com/translate/docs/api-overview) — v2 vs v3 comparison, pricing verification ($20/million chars NMT), quotas and rate limits
-- [@google-cloud/translate npm package](https://www.npmjs.com/package/@google-cloud/translate) — Latest version 9.3.0, Node.js >=18 requirement, SDK examples
-- [Google Cloud Translation Authentication](https://docs.cloud.google.com/translate/docs/authentication) — Service account requirement for v3, GOOGLE_APPLICATION_CREDENTIALS setup
-- [migrate-mongo npm package](https://www.npmjs.com/package/migrate-mongo) — Migration tool best practices, idempotent pattern examples, up/down functions
-- [MongoDB Multilanguage Schema Patterns](http://learnmongodbthehardway.com/schema/multilanguage/) — Embedded vs separate collection tradeoffs for 2 vs 5+ languages
-- [Mongoose Subdocuments Documentation](https://mongoosejs.com/docs/subdocs.html) — Nested vs flat field schema design patterns, validation
-- [JSON-LD for SEO structured data guide](https://www.gtechme.com/insights/json-ld-for-seo-structured-data-guide/) — Language-specific structured data, inLanguage property
-- [Google structured data policies](https://developers.google.com/search/docs/appearance/structured-data/sd-policies) — Hreflang vs structured data for multilingual content
+
+- `backend/package.json` (local codebase) — confirmed: `aws-sdk` v2 `^2.1693.0`, `node-cron` `^3.0.3`, `mongoose` `^8.6.1`, `vitest` `^4.0.18` all present and active
+- `backend/jobs/exchangeRateJob.js` (local codebase) — node-cron v3 scheduling pattern; confirmed reference for `backupJob.js` structure
+- `backend/services/exchangeRateService.js` (local codebase) — service layer pattern; confirmed reference for `backupService.js` structure
+- `backend/index.js` (local codebase) — S3 client construction (lines 131-160); `s3.upload()` usage; admin route middleware; confirmed env var names (`SPACES_ENDPOINT`, `SPACES_KEY`, `SPACES_SECRET`)
+- [DigitalOcean App Platform Aptfile Buildpack](https://docs.digitalocean.com/products/app-platform/reference/buildpacks/aptfile/) — Aptfile package installation mechanism confirmed
+- [DigitalOcean App Platform — How to Store Data](https://docs.digitalocean.com/products/app-platform/how-to/store-data/) — ephemeral filesystem and 4 GiB limit confirmed
+- [DigitalOcean App Platform Jobs](https://docs.digitalocean.com/products/app-platform/how-to/manage-jobs/) — Scheduled Jobs component; minimum 15-minute interval confirmed
+- [MongoDB Database Tools — mongodump/mongorestore docs](https://www.mongodb.com/docs/database-tools/mongodump/) — `--archive`, `--gzip`, `--drop` flags; BSON type fidelity
+- [AWS SDK v2 Managed Upload](https://aws.amazon.com/blogs/developer/announcing-the-amazon-s3-managed-uploader-in-the-aws-sdk-for-javascript/) — `s3.upload()` stream support and multipart handling confirmed
+- [MongoDB JIRA TOOLS-1020, TOOLS-1782](https://jira.mongodb.org/browse/TOOLS-1020) — credentials visible in process list; confirmed long-standing issue
+- [MongoDB mongorestore behavior and --drop](https://www.mongodb.com/docs/database-tools/mongorestore/mongorestore-behavior-access-usage/) — inserts-only default; `--drop` drops before restore
+- [node-cron GitHub issue #393](https://github.com/node-cron/node-cron/issues/393) — duplicate cron jobs in multi-instance/cluster mode confirmed
 
 ### Secondary (MEDIUM confidence)
-- [How to Build a Multilingual Ecommerce Website](https://www.bigcommerce.com/articles/ecommerce/multilingual-ecommerce/) — Industry best practices, side-by-side editing patterns
-- [Translation Workflow Management](https://centus.com/blog/translation-workflow-guide) — Admin review workflows, never lock translated fields principle
-- [Localizing Right-to-Left Languages: 6 Expert Tips](https://www.ecinnovations.com/blog/right-to-left-languages-localization/) — Hebrew text expansion (~50%), RTL UI patterns
-- [Hreflang, International SEO & Duplicate Content](https://thegray.company/blog/duplicate-content-international-seo-hreflang) — SEO pitfalls for bilingual content
-- [Google Cloud Translation API best practices](https://cloud.google.com/blog/products/ai-machine-learning/four-best-practices-for-translating-your-website) — Caching recommendations (50-80% API call reduction)
-- [Marking Required Fields in Forms - NN/G](https://www.nngroup.com/articles/required-fields/) — Accessibility patterns for required bilingual fields
 
-### Codebase Verification (HIGH confidence)
-- backend/models/Product.js — Current schema (name/description as String), slug generation pattern (lines 138-154)
-- backend/migrations/20260210000000-add-product-slugs.js — Existing migration pattern, idempotent structure
-- backend/middleware/cacheMiddleware.js — TTL 3600s, node-cache implementation
-- backend/cache/cacheKeys.js — Cache key format `path:lang:currency` (lines 10-31)
-- backend/cache/invalidation.js — Existing invalidation utilities (invalidateProduct, invalidateAll)
-- backend/routes/sitemap.js — Hreflang implementation (lines 104-108)
-- frontend/js/model.js — Cart localStorage with denormalized title (lines 236, 256)
-- admin/BisliView.js — Admin form structure, vanilla JS patterns (lines 1-150)
-- backend/views/pages/product.ejs — Current SSR template structure (lines 106, 141)
-- backend/views/pages/category.ejs — Category page rendering (lines 88, 89, 57-62)
-- backend/helpers/schemaHelpers.js — JSON-LD schema generation
-- backend/views/partials/meta-tags.ejs — OG tag templates (line 34)
+- [DigitalOcean Community: Scheduled MongoDB Backups to Spaces](https://www.digitalocean.com/community/tutorials/how-to-set-up-scheduled-logical-mongodb-backups-to-digitalocean-spaces) — reference architecture for this integration
+- [DigitalOcean Community: Aptfile PATH issues](https://www.digitalocean.com/community/questions/app-platform-installing-packages-using-aptfile) — non-standard layer path; explicit PATH addition required
+- [Percona: Streaming MongoDB Backups Directly to S3](https://www.percona.com/blog/streaming-mongodb-backups-directly-to-s3/) — stream-to-S3 without temp file pattern and tradeoffs
+- [Fixing mongodump on Atlas Free Cluster (2025)](https://www.ganesshkumar.com/articles/2025-10-11-fixing-mongodump-on-atlas-free-cluster/) — Atlas-specific recommended flags for reliable connection
+- [Cloudron forum: retention pagination limit](https://forum.cloudron.io/topic/9789/backups-before-retention-policy-not-being-deleted-bug) — S3 `listObjectsV2` 1000-object pagination limit as real-world issue
+- [MongoDB community forum: accidentally overwrote collection](https://www.mongodb.com/community/forums/t/accidentally-overwrote-collection/275471) — real production incident motivating restore confirmation gate
+- [DEV: How to Backup MongoDB Every Night in NodeJS](https://dev.to/yasseryka/how-to-backup-mongodb-every-night-in-nodejs-257o) — node-cron + mongodump pattern
+- [GitHub: mongodb-backup-digitalocean-spaces](https://github.com/reddimohan/mongodb-backup-digitalocean-spaces) — reference implementation
 
 ---
-*Research completed: 2026-02-13*
+*Research completed: 2026-04-04*
 *Ready for roadmap: yes*

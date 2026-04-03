@@ -1,473 +1,306 @@
 # Pitfalls Research
 
-**Domain:** Adding bilingual product content (name/description) to existing e-commerce platform
-**Researched:** 2026-02-13
-**Confidence:** HIGH
+**Domain:** MongoDB Backup & Recovery System — Node.js/Express on DigitalOcean App Platform
+**Researched:** 2026-04-04
+**Confidence:** HIGH (critical pitfalls verified with official docs and multiple independent sources)
+
+---
 
 ## Critical Pitfalls
 
-### Pitfall 1: Stale Cart Data with Denormalized Product Names
+### Pitfall 1: mongodump Binary Not Available in Production Container
 
 **What goes wrong:**
-Cart in localStorage stores denormalized product names (lines 236, 256 in `frontend/js/model.js`). After migrating product names to bilingual structure, existing carts contain old single-language strings that can't be localized. Users see English product names in Hebrew checkout or vice versa. Cart becomes inconsistent with catalog language.
+The backup job fires on schedule, spawns `child_process.spawn('mongodump', ...)`, and gets `ENOENT: spawn mongodump`. The binary is missing from the production container. Backups silently fail or the job crashes. No data loss yet — but you have zero backups, and the system falsely appears to be running.
 
 **Why it happens:**
-Frontend stores `cart.push({ title: data.title, ... })` — a snapshot of product state at add-to-cart time. When schema changes from `name` → `name: { eng, heb }`, localStorage carts still reference the old string field. No automatic invalidation mechanism exists for localStorage cart data.
+Since MongoDB 4.4, the MongoDB Database Tools (mongodump, mongorestore) ship **separately** from the MongoDB Server. They are not automatically included in any Node.js deployment. The DigitalOcean App Platform Node.js buildpack does not include them. The developer tests locally where MongoDB Tools happen to be installed globally, deploys to App Platform, and the binary is absent. This is a confirmed real-world issue: when GitHub Actions' `ubuntu-latest` image updated from 20.04 to 22.04, many pipelines using `spawn('mongodump')` broke for exactly this reason.
 
 **How to avoid:**
-1. Add cart schema version field to localStorage: `{ version: 2, items: [...] }`
-2. On app load, validate cart version and migrate/discard old carts
-3. Store product ID only in cart, fetch current names from API on display
-4. Add cart invalidation timestamp to Settings collection (server-controlled)
+Install `mongodb-database-tools` via an `Aptfile` in the project root (App Platform supports the heroku-buildpack-apt approach for system packages). Critical caveat: Aptfile packages install to `/layers/digitalocean_apt/apt/usr/bin/`, not the standard `/usr/bin/`. You must resolve the actual binary path at startup — either by executing `which mongodump` as part of a startup probe, adding the layers path to `PATH` in your App Platform environment variables, or testing the path after first deployment. The safest fallback is a Dockerfile-based deploy that uses `RUN apt-get install -y mongodb-database-tools` for a predictable, standard install path.
 
 **Warning signs:**
-- Cart displays showing language mismatches after user switches locale
-- Users reporting product names that don't match current language
-- Cart persistence breaking after deployment (users' carts suddenly empty)
+- `spawn mongodump ENOENT` errors in App Platform logs
+- Backup schedule fires but no files appear in Spaces bucket
+- `mongodump --version` not printed in startup diagnostic logs
 
 **Phase to address:**
-Phase 1 (Schema + Data Migration) — Must include cart invalidation strategy before schema changes go live.
+Phase 1 (Environment Setup). Verify binary availability in a deployed container before writing any backup logic. Do not proceed to Phase 2 until `mongodump --version` succeeds in production.
 
 ---
 
-### Pitfall 2: SSR Cache Keys Not Invalidating After Product Translation
+### Pitfall 2: Ephemeral Filesystem Loses Backup File Before Upload Completes
 
 **What goes wrong:**
-Page cache uses `generateCacheKey(req)` with `normalizedPath:lang:currency` format (lines 10-31 in `backend/cache/cacheKeys.js`). After translating products, cached HTML still shows old untranslated content. Product names/descriptions in category and product pages remain stale for up to 1 hour (TTL 3600s) or 24 hours with stale-while-revalidate.
+The backup writes a dump to `/tmp/backup-2026-04-04.gz`, then the upload to Spaces starts. If the container is replaced mid-operation — due to a deploy, health check failure, or scaling event — the temp file is gone. The upload either never starts or is abandoned mid-stream. The next backup job runs the following day with no error, and there is still no backup in Spaces.
 
 **Why it happens:**
-Cache invalidation only exists for product CRUD operations (`invalidateProduct`, `invalidateAll` in `backend/cache/invalidation.js`). Translation updates via admin API don't trigger cache invalidation because:
-1. Translation is a different mutation than standard product update
-2. Invalidation logic doesn't know which cache keys contain product data
-3. No cache warming strategy after bulk translation
+DigitalOcean App Platform instances are explicitly ephemeral. The documentation states: "Instances are being continuously created and destroyed as the app is scaled, redeployed, etc, and any changes to the filesystem will be destroyed with the instance." The local filesystem is also limited to 4 GiB — if it fills (for example, from accumulated temp files or log output), the container is detected as unhealthy and replaced, potentially mid-backup. Developers are accustomed to persistent filesystems and don't anticipate this behavior.
 
 **How to avoid:**
-1. Extend `invalidateProduct(productId)` to clear both language variants: `/en/product/slug` AND `/he/product/slug`
-2. Add `invalidateCategory(category)` for category pages affected by product translations
-3. Trigger `invalidateAll()` after bulk translation completes
-4. Add translation-aware cache key: `path:lang:currency:translationVersion`
+Use `mongodump --archive --gzip` piped directly to stdout, then stream that output to DigitalOcean Spaces using the AWS SDK v3's streaming upload (`Body: childProcess.stdout`). This eliminates the local filesystem entirely as a dependency — no temp file is written, no upload-from-disk step exists. If a temp file is unavoidable during development/testing, always clean it up in a `finally` block and treat its existence as ephemeral by design. Never assume a file written to disk survives past the current request or job execution.
 
 **Warning signs:**
-- Admin sees translated names in dashboard, but frontend shows old English names
-- Language switcher shows identical content in both languages
-- Cache hit rate drops to 0% after translation (indicates broken cache keys)
-- Users report "site looks the same after switching language"
+- Backup job logs "complete" but Spaces bucket is empty
+- Spaces bucket shows zero-byte files
+- Container replacement events in App Platform runtime logs occurring around scheduled backup time
 
 **Phase to address:**
-Phase 3 (Translation Integration) — Cache invalidation logic must be implemented alongside translation API integration.
+Phase 2 (Core Backup Implementation). Design the Spaces upload as a stream from the first implementation — not as write-then-upload. This is a foundational architectural decision.
 
 ---
 
-### Pitfall 3: Test Fixtures Referencing Single-Language Fields
+### Pitfall 3: node-cron Fires Backup N Times When App Has N Instances
 
 **What goes wrong:**
-866 existing tests reference `product.name` and `product.description` as strings (found via grep). After schema change to `name: { eng, heb }`, tests fail with undefined or type errors. Test data factories create invalid products. Mock data breaks. Test suite becomes useless during migration.
+If App Platform runs 2 instances (during a rolling deploy, brief scale-up, or manual scaling), node-cron fires inside every process simultaneously. Two mongodump operations hit Atlas at the same time. Two upload tasks race to write the same filename to Spaces, with one potentially overwriting the other mid-upload. Two retention cleanup jobs run in parallel and may delete files the other job just created. The net result: corrupted or incomplete backups, with each job believing it succeeded.
 
 **Why it happens:**
-Tests hardcode field access patterns: `expect(product.name).toBe('Ring')` instead of locale-aware access. Mongoose validation rejects test fixtures with old schema. Factories in test setup don't generate bilingual structure. No gradual migration strategy for test data.
+node-cron (and any in-process scheduler) runs independently inside each Node.js process. There is no built-in coordination between processes. This is a documented known issue — the node-cron GitHub issue tracker has explicit reports of duplicate execution in PM2 cluster mode and multi-instance deployments. The project already uses node-cron for exchange rate scheduling, so the pattern is familiar, but backup is more destructive when duplicated: duplicate exchange rate fetches are harmless, duplicate backup runs are not.
 
 **How to avoid:**
-1. Create `getLocalizedName(product, lang)` helper used by BOTH app code and tests
-2. Add schema version marker to test fixtures: run migration on old fixtures at test start
-3. Keep backwards-compatible virtual fields during transition: `productSchema.virtual('name').get(function() { return this.name?.eng || this.name; })`
-4. Use feature flags in tests: `if (BILINGUAL_ENABLED) { expect(product.name.eng) } else { expect(product.name) }`
+For the current single-instance App Platform deploy this risk is LOW day-to-day, but it activates during every rolling deploy (brief overlap of old and new instance). Three prevention strategies in order of preference: (1) Use App Platform's native **Scheduled Jobs** component (a separate job service, runs exactly once per schedule, no application code needed for scheduling). (2) Implement a MongoDB-backed distributed lock: attempt to write `{_id: 'backup-lock', lockedAt: new Date(), ttl: 10 minutes}` as an upsert with a TTL index — the second instance sees the existing document and skips. (3) At minimum, use timestamp-based filenames so duplicate runs produce distinct files rather than overwriting each other.
 
 **Warning signs:**
-- Test failures spiking after schema change PR
-- Tests passing locally but failing in CI (different seed data)
-- Skipped tests accumulating ("temporarily disabled for migration")
-- Manual testing replacing automated tests
+- Two nearly-identical backup files in Spaces within seconds of each other
+- Atlas connection count spikes at the scheduled backup time
+- Retention job deletes a file that was just successfully uploaded
 
 **Phase to address:**
-Phase 1 (Schema + Data Migration) — Test migration must happen BEFORE production schema change.
+Phase 1 (Scheduler Design). Decide on App Platform Jobs vs. in-process cron with locking before writing the scheduler. This affects the architecture of the entire backup system.
 
 ---
 
-### Pitfall 4: Schema Migration Running Without Data Backfill
+### Pitfall 4: Atlas IP Allowlist Blocks mongodump Connection at Runtime
 
 **What goes wrong:**
-Mongoose schema changes to `name: { type: Object, eng: String, heb: String }` but existing 94 products have `name: String`. Queries return `null` for `product.name.eng` because field structure changed but data didn't. Products disappear from frontend. Category pages show empty. Site appears broken.
+The backup job connects to Atlas using the same `MONGODB_URI` the app uses. The job gets a "server selection timeout" error. The app itself connects to MongoDB fine because Mongoose established its connection pool at startup from the original container IP — but mongodump initiates a new connection at job runtime, potentially from a different IP after a deploy or scale event. Backups silently fail.
 
 **Why it happens:**
-Developer updates `Product.js` schema, deploys, assumes MongoDB flexible schema handles it. Forgot that field TYPE change (string → object) breaks existing documents. Migration script exists but wasn't run first. Or migration ran but failed silently on some documents.
+MongoDB Atlas enforces IP-based network access. App Platform instances do not have fixed outbound IPs — IPs can change across deploys and scaling events. The developer may have configured Atlas to allow a specific IP (their dev machine, or the original deployment IP) rather than the broader range. The Mongoose connection works because it was established earlier from an allowed IP; mongodump connecting later from a new IP fails. The error message "server selection timeout" is generic and does not clearly indicate an IP allowlist rejection.
 
 **How to avoid:**
-1. Follow migrate-mongo pattern: ALWAYS write both `up()` and `down()` functions
-2. Test migration on production data dump locally BEFORE deploying
-3. Add migration verification script: `node scripts/verify-migration.js` (already exists in codebase)
-4. Use MongoDB transaction for atomic migration + schema update
-5. Schema should support BOTH formats temporarily: `name: Schema.Types.Mixed` during transition
+If the existing Mongoose connection to Atlas works from the App Platform container, mongodump using the same `MONGODB_URI` from the same container also works — both originate from the same outbound IP. The risk is specifically when the allowlist was manually restricted or when the container IP changes between the Mongoose startup and the first backup job run. Verify Atlas Network Access settings: for App Platform, either allow `0.0.0.0/0` (accept the security tradeoff, protect with strong credentials) or configure VPC peering between DigitalOcean and Atlas for IP-stable access. Do not hard-code a specific IP as a "fix" — App Platform IPs change on every deploy.
 
 **Warning signs:**
-- Products missing from API responses after deployment
-- MongoDB logs showing validation errors on existing products
-- Frontend showing "undefined" or "[object Object]" in product names
-- Admin dashboard can't load product list
+- `server selection timeout` in backup logs while the app itself serves MongoDB-backed requests successfully
+- Backup failures correlated with recent deployments (IP change)
+- Atlas Network Access logs show rejected connections from unfamiliar IPs
 
 **Phase to address:**
-Phase 1 (Schema + Data Migration) — This is THE critical phase. Migration script + verification + rollback plan required.
+Phase 1 (Environment Verification). Perform a test backup from the deployed container before building the full scheduler. Do not assume the connection works because the app runs.
 
 ---
 
-### Pitfall 5: Translation API Rate Limiting Breaking Bulk Operations
+### Pitfall 5: MongoDB Credentials Exposed in Process List and Logs
 
 **What goes wrong:**
-Admin translates all 94 products at once. Google Cloud Translation API has per-minute quotas (documented in official quotas). Bulk translation script hits "User Rate Limit Exceeded" error after ~20 products. Partial translation leaves database in inconsistent state: some products bilingual, others English-only. No retry logic. Manual cleanup required.
+The backup job spawns: `mongodump --uri="mongodb+srv://user:PASSWORD@cluster.mongodb.net/dbname"`. On many systems, running `ps aux` shows the full command line including the password in plaintext. Additionally, if the code logs the spawn command for debugging (`console.log('Running:', cmd, args.join(' '))`), the full credentials appear in App Platform logs — which may be accessible to all team members. This is a documented, long-standing issue in MongoDB's own bug tracker (TOOLS-1020, TOOLS-1782).
 
 **Why it happens:**
-Developer calls Translation API in tight loop without rate limiting. Translation API has:
-- Characters per minute quota (default varies by project)
-- Requests per minute quota (100 per user by default)
-- No automatic retry with exponential backoff
-Script doesn't batch requests or use async batch translation endpoint.
+`--uri` passes the connection string as a CLI argument. CLI arguments are visible in `/proc/<pid>/cmdline` on Linux and in `ps` output. Developers use `--uri` because it is the simplest approach and directly mirrors how the Mongoose connection string is used. The logging pattern comes from natural debugging instinct.
 
 **How to avoid:**
-1. Use batch translation API endpoint for >10 products (async operation, no sync rate limits)
-2. Implement client-side rate limiting: `p-queue` with concurrency limit of 2-3 requests/second
-3. Add retry logic with exponential backoff: `retry({ times: 5, delay: 2000 })`
-4. Store translation progress in database: mark each product as `translationStatus: 'pending' | 'completed' | 'failed'`
-5. Use Cloud Translation quota monitoring to alert before limits hit
+The connection string is already available as `process.env.MONGODB_URI`. Pass it to the spawned child process via the `env` option rather than as a CLI argument. Use mongodump's `--uri` but source it from environment rather than hardcoding it in the argument array. Critically: never log `args.join(' ')` when args contains the URI. If you must log the backup command, redact the credentials: `uri.replace(/:\/\/([^@]+)@/, '://***@')`. In the App Platform environment, use the existing `MONGODB_URI` environment variable — it is already set for the app and will be inherited by child processes.
 
 **Warning signs:**
-- "403 User Rate Limit Exceeded" errors in logs
-- Bulk translation completing in <5 seconds (too fast, likely hitting cached/mock data)
-- Some products showing `heb: null` while others have Hebrew content
-- Admin UI "translate all" button leaves some products untranslated
+- Full Atlas connection string visible in App Platform deployment logs
+- `console.log('Spawning:', cmd, ...args)` debug line left in production code
+- Grep of logs finds the Atlas cluster hostname followed by credentials
 
 **Phase to address:**
-Phase 2 (Bulk Translation Tooling) — Rate limiting infrastructure must be in place before bulk translation feature ships.
+Phase 2 (Core Implementation). Security review before merging any backup job code. Check that no log line contains the Atlas cluster hostname followed by a password.
 
 ---
 
-### Pitfall 6: SEO Duplicate Content from Poor Hreflang Implementation
+### Pitfall 6: mongorestore with --drop Targets Wrong Database or Destroys More Than Expected
 
 **What goes wrong:**
-Product pages in English and Hebrew show identical meta descriptions (untranslated). Google sees duplicate content across `/en/product/ring` and `/he/product/ring`. Without proper hreflang tags, Google can't tell they're language variants of same content. Search ranking drops. English version ranks for Hebrew searches or vice versa.
+Admin triggers a restore from a backup to fix corrupted data. The mongorestore command uses `--drop` (necessary to replace existing documents cleanly). If the target URI, `--db` parameter, or namespace mapping is misconfigured, mongorestore drops and replaces the wrong database — or drops collections not present in the backup, leaving permanent gaps in production data. There are also documented cases where `--drop` unexpectedly dropped admin users and roles (fixed in 2.6.4, but the broader category of "more was dropped than expected" remains a real risk).
 
 **Why it happens:**
-Developer translates product name/description but forgets:
-- Meta description tags in `backend/views/partials/meta-tags.ejs`
-- OG tags (Open Graph) for social sharing
-- JSON-LD structured data in `backend/helpers/schemaHelpers.js` (currently uses single `product.name` field)
-- Hreflang tags in sitemap (`backend/routes/sitemap.js` has hreflang but content isn't translated)
+Without `--drop`, mongorestore inserts only: documents with existing `_id` values are skipped rather than replaced, leaving a mixed state that is often worse than the original problem. So `--drop` is necessary for a clean restore. But `--drop` drops each collection before restoring it. Under incident pressure — data corruption, production down, adrenaline — operators rush and misconfigure the target. A restore endpoint that accepts a user-supplied filename and immediately runs mongorestore is also a security and correctness hazard.
 
 **How to avoid:**
-1. Audit ALL places product.name/description appear: meta tags, OG tags, JSON-LD, breadcrumbs
-2. Update `generateProductSchema()` to use localized name: `name: product.name[langKey]`
-3. Verify hreflang alternates point to actual different-language content
-4. Use "near-duplicate content" detection: don't just machine-translate, adapt content for locale
-5. Test with Google Search Console: check "Index coverage" for duplicate content warnings
+Restore must never be a single-click operation. Require explicit confirmation: echo back the backup date, filename, and target database name, and require the operator to type a confirmation string (similar to GitHub's repository deletion confirmation pattern). Use `--nsFrom` and `--nsTo` with explicit namespace patterns rather than implicit database targeting. Always restore to a shadow or staging database first; verify document counts and spot-check data, then rename/swap if correct. Never build an HTTP endpoint that accepts an arbitrary filename and immediately calls mongorestore — this combines production data destruction risk with path traversal vulnerability.
 
 **Warning signs:**
-- Google Search Console showing "Duplicate without user-selected canonical" warnings
-- Product pages ranking for wrong language searches
-- Social media shares showing English OG image text when shared from Hebrew page
-- Breadcrumbs in sitemap showing English names on Hebrew pages
+- Restore endpoint accepts a user-supplied filename parameter without sanitization
+- No dry-run or confirmation step before mongorestore executes
+- Restore triggered under incident pressure without a documented procedure
 
 **Phase to address:**
-Phase 3 (Translation Integration) — Must audit and update ALL SEO touchpoints, not just database fields.
+Phase 3 or 4 (Restore Implementation). Treat restore as a privileged, confirmation-required, manually-executed operation with a written runbook. Do not build a "restore with one click" feature.
 
 ---
 
-### Pitfall 7: Admin Form Confusion Around Required vs Optional Bilingual Fields
+### Pitfall 7: Retention Cleanup Silently Fails to Delete Old Backups (S3 Pagination Limit)
 
 **What goes wrong:**
-Admin adds new product, fills English name, submits. Validation error: "Hebrew name required." Admin doesn't understand which language fields are mandatory. Tries again, leaves Hebrew description empty. Product saves but shows "[No description]" on Hebrew site. Support tickets increase.
+The retention job lists objects in the Spaces bucket to find files older than N days and deletes them. It works correctly for months. After a year of daily backups, there are 365+ objects in the bucket. The AWS SDK's `listObjectsV2` returns a maximum of 1000 objects per call and sets `IsTruncated: true` for larger sets. If the code does not paginate, it processes only the first page. The oldest backups (the ones most overdue for deletion) are never removed. Storage costs grow unbounded, and the discovery happens via an unexpectedly large bill.
 
 **Why it happens:**
-Form doesn't clearly indicate which bilingual fields are required. No inline validation showing "English name: required, Hebrew name: optional (can auto-translate)". Admin doesn't know if they MUST translate everything manually or if auto-translation fills gaps.
-
-Current admin form in `admin/BisliView.js` has no bilingual field handling (lines 1-150 show standard API setup, no form validation visible).
+Most retention examples online use a single `listObjectsV2` call without pagination because they assume small buckets. The AWS S3 API (and DigitalOcean Spaces, which is S3-compatible) silently truncates the response — it does not error, it just returns a partial list with a flag indicating more data exists. The code appears correct and works for the first year before the bucket size exceeds the page limit.
 
 **How to avoid:**
-1. Mark required fields with asterisk AND "(required)" text for accessibility ([NN/g best practices](https://www.nngroup.com/articles/required-fields/))
-2. Add inline hint: "English name required • Hebrew name optional (auto-translate if empty)"
-3. Show real-time validation: field turns red/green as admin types
-4. Add "Auto-translate empty fields" checkbox above submit button
-5. Preview both languages side-by-side before saving
+Implement retention using the `@aws-sdk/client-s3` paginator helper `paginateListObjectsV2`, which automatically handles `NextContinuationToken` iteration. For this project's 7-14 day retention window, the bucket will never hold more than ~20 objects in steady state, making this a low near-term risk — but the implementation should be correct regardless. The pagination pattern costs nothing extra and prevents a class of bugs entirely.
 
 **Warning signs:**
-- High form abandonment rate on product add/edit pages
-- Support questions "Do I need to fill both languages?"
-- Products with missing Hebrew content going live unintentionally
-- Admin repeatedly clicking submit without understanding validation errors
+- Spaces bucket object count keeps growing past `retention_days + 5` objects
+- Retention log reports "deleted 0 files" despite files older than the retention window existing
+- Code uses a single `listObjectsV2` call without checking `NextContinuationToken` or `IsTruncated`
 
 **Phase to address:**
-Phase 4 (Admin UX) — Form validation and UX improvements must launch with bilingual admin features.
+Phase 4 or 5 (Retention Implementation). Use the paginator from the start — the AWS SDK v3 already used by the project for image uploads supports this directly.
 
 ---
 
-### Pitfall 8: Payment Receipts and Checkout Flow Showing Wrong Language
+### Pitfall 8: Silent Backup Failure — No Alerting, Failure Discovered Only When Restore Is Needed
 
 **What goes wrong:**
-User shops in Hebrew, adds items to cart, proceeds to PayPal/Stripe checkout. Checkout page shows English product names because payment gateway doesn't support Hebrew. Or receipt email shows mixed Hebrew/English product names. Customer confused about what they ordered.
+The backup cron fires daily. It fails on day 3 due to a transient Atlas connection issue. The error is caught by a `try/catch`, logged to `console.error`, and the process continues normally. No notification is sent. App Platform runtime logs rotate. Three weeks later, a product catalog corruption event occurs. The team discovers that the last good backup is 23 days old, not 1 day old.
 
 **Why it happens:**
-Payment integration passes product names from backend to payment provider. Backend code in `backend/index.js` (PayPal/Stripe integration) likely passes `product.name` directly without localization. Payment providers (PayPal, Stripe) support 34 languages for UI but product data in API calls uses YOUR provided strings.
-
-Current cart data includes both prices (`usdPrice`, `ilsPrice`) but stores title as single string (line 236 in `model.js`).
+The project's codebase explicitly has this pattern: "Incomplete error handling in catch blocks (silent failures)" is listed as known tech debt. Adding a backup job to this codebase without explicit failure alerting reproduces the established pattern. Backup success suffers from survivorship bias — you only notice failure when you need the backup, which is the worst possible time to discover it.
 
 **How to avoid:**
-1. Cart should store locale when item added: `{ title: { eng, heb }, addedInLocale: 'heb' }`
-2. Checkout flow uses `addedInLocale` to select product name language for payment API
-3. Email receipts render product names in user's preferred language
-4. Add fallback: if Hebrew name missing, use English with language indicator: "(English: Ring)"
+Treat backup failure as a production incident. At minimum, implement three layers: (1) Write a structured log entry to MongoDB (or a dedicated Spaces file) for each backup attempt — filename, compressed size, duration, status, error if any. (2) Expose a "last successful backup" timestamp on an admin health endpoint that the admin dashboard can poll. (3) Send an email or webhook notification on failure — EmailJS is already integrated in the project and can send failure alerts without additional infrastructure. Backup status should be visible in the admin dashboard without requiring anyone to open App Platform logs.
 
 **Warning signs:**
-- Users reporting "checkout page is in wrong language"
-- Payment receipts showing English names when user shopped in Hebrew
-- Support questions asking "what is [English product name]?" from Hebrew users
-- Payment disputes due to confusion about product names
+- No backup status row anywhere in the admin dashboard
+- Backup failures only appear in App Platform logs (which rotate and are not monitored)
+- No notification mechanism fires when the backup job throws an error
+- "Last backup" date is not tracked anywhere in the system
 
 **Phase to address:**
-Phase 5 (Checkout & Payments) — Must be tested before launch. Payment integration is HIGH-RISK area.
-
----
-
-### Pitfall 9: Missing Fallback Strategy When Translation API Fails
-
-**What goes wrong:**
-Google Translation API goes down or API key quota exhausted. Admin tries to add new product, auto-translation fails silently. Product saves with empty Hebrew name. Or worse: error crashes admin form, product isn't saved at all. Site shows broken products until admin manually fixes data.
-
-**Why it happens:**
-No graceful degradation for translation failures. Code assumes Translation API always succeeds. No fallback to:
-- English content when Hebrew missing
-- Cached translations from previous similar content
-- Manual translation queue
-- User notification that translation failed
-
-**How to avoid:**
-1. Implement fallback chain: Translation API → Cached translations → Copy English content → Show placeholder
-2. Frontend rendering uses: `product.name[lang] || product.name.eng || product.name || 'Untitled Product'`
-3. Admin form shows warning: "⚠ Translation failed, Hebrew name copied from English (edit manually)"
-4. Add translation queue: failed translations go to retry queue, admin notified to review
-5. Monitor API health: alert before quota exhaustion, not after
-
-**Warning signs:**
-- Products appearing with identical English/Hebrew content
-- Random products missing Hebrew names
-- Admin form errors with cryptic "Translation service unavailable" messages
-- Translation API showing 100% success rate (likely false — not catching failures)
-
-**Phase to address:**
-Phase 3 (Translation Integration) — Fallback logic is CORE requirement, not "nice to have."
-
----
-
-### Pitfall 10: Rollback Plan Missing or Untested
-
-**What goes wrong:**
-Production deployment breaks (cart shows "undefined", tests fail, API errors). Team decides to rollback. Rollback script doesn't exist. Or migration `down()` function was never tested. Rollback fails worse than initial deployment. Database in corrupted state: some products bilingual, some single-language, schema doesn't match either version. Site down for hours.
-
-**Why it happens:**
-Migration tools like migrate-mongo require both `up()` and `down()` functions, but down() often copy-pasted or never tested. Team doesn't practice rollback in staging. No documented rollback procedure. No backup taken before migration.
-
-Codebase has migration examples in `backend/migrations/` directory (found via grep) but unclear if down() functions are tested.
-
-**How to avoid:**
-1. Test migration rollback in staging: up → down → up again, verify data integrity
-2. Take MongoDB backup before production migration: `mongodump` with timestamp
-3. Document rollback procedure step-by-step with exact commands
-4. Add rollback verification script: `node scripts/verify-rollback.js`
-5. Practice disaster recovery drill: "site is broken, you have 15 minutes to rollback"
-6. Use schema versioning pattern: keep both old and new schemas working simultaneously during transition
-
-**Warning signs:**
-- Migration down() function never executed in development
-- No backup automation before deployments
-- Rollback procedure is "undo the migration somehow"
-- Deployment checklist doesn't include rollback plan
-
-**Phase to address:**
-Phase 1 (Schema + Data Migration) — Rollback plan must exist BEFORE first migration runs.
+Phase 3 (Logging and Alerting). Alerting must ship with the backup system as a first-class feature, not as a follow-on task. A backup system without failure notification is not a backup system.
 
 ---
 
 ## Technical Debt Patterns
 
-Shortcuts that seem reasonable but create long-term problems.
-
 | Shortcut | Immediate Benefit | Long-term Cost | When Acceptable |
 |----------|-------------------|----------------|-----------------|
-| Using `Schema.Types.Mixed` for bilingual fields | No validation, fast to implement | Can't enforce required fields, hard to query, schema drift | Only during transition period, not permanent |
-| Machine-translating ALL content without review | Fast bulk translation, no manual work | Poor quality, cultural insensitivity, brand voice lost | Never for product names, acceptable for initial drafts only |
-| Storing language in cart localStorage | No backend changes needed | Stale data, can't update translations retroactively | Only if cart TTL is <24 hours |
-| Single Translation API key shared across environments | One key to manage | Dev/staging exhausts production quota | Never — always separate keys |
-| Skipping hreflang tags initially | Faster launch | SEO penalty, hard to recover ranking | Never for e-commerce (revenue impact) |
-| Auto-translating on every product load | No caching needed, always fresh | API costs skyrocket, slow page loads | Never — translate once, cache result |
-| Copying English to Hebrew as "placeholder" | Looks complete in admin | Users see English content on Hebrew site | Acceptable if clearly marked "(needs translation)" |
+| Write backup to `/tmp`, then upload | Simpler code, easier to debug | File lost if container restarts between write and upload | Never on App Platform — stream directly to Spaces instead |
+| Pass `--uri` with password in CLI args | One-line mongodump invocation | Credentials visible in `ps`, CI logs, App Platform logs | Never — read from env var, don't pass as CLI arg |
+| `listObjectsV2` without pagination | Less code, works for small buckets | Retention silently breaks when bucket grows past 1000 objects | Never — paginator is trivial to add |
+| `console.error` as the only failure signal | Fast to implement | Silent failures go undetected until a restore is needed | Never for a production backup system |
+| Restore endpoint with no confirmation gate | Simpler admin UI | One misclick drops production data | Never |
+| In-process node-cron without locking | No new infrastructure | Duplicate runs on scale; backup competes with request serving | Acceptable only if App Platform instance count is confirmed and locked at 1 |
+| Skip integrity verification after backup | Faster to ship | Backup is corrupt; discovered only during a restore incident | Never — verify at minimum with a file size check and metadata log |
 
 ---
 
 ## Integration Gotchas
 
-Common mistakes when connecting to external services.
-
 | Integration | Common Mistake | Correct Approach |
 |-------------|----------------|------------------|
-| Google Cloud Translation API | Assuming unlimited free tier | Check quotas FIRST — free tier is minimal, likely need paid plan for 94 products |
-| Translation API batch endpoint | Using synchronous API for bulk operations | Use `batchTranslateText` (async) for >10 products to avoid rate limits |
-| PayPal/Stripe product names | Passing Hebrew text without encoding | Test with actual Hebrew characters, not transliterated text |
-| MongoDB text indexes | Creating index on `name` field (string) | Update index to `name.eng` and `name.heb` or use wildcard index |
-| DigitalOcean Spaces CDN | Not invalidating CDN cache after image metadata translation | Alt text and filenames may need CDN purge |
-| EmailJS contact form | Hardcoded English email templates | Create Hebrew email templates, select based on form language |
-| Cart localStorage | Assuming unlimited localStorage size | Large product descriptions can hit 5-10MB quota, especially with bilingual data |
+| mongodump + Atlas SRV string | SRV DNS resolution fails on some container OS versions | Add `--numParallelCollections=1 --timeoutMS=60000 --readPreference=secondaryPreferred`; test from the deployed container, not just locally |
+| DigitalOcean Spaces + AWS SDK v3 | Use default S3 region (`us-east-1`) and get endpoint errors | Set `endpoint: 'https://fra1.digitaloceanspaces.com'` and `region: 'fra1'` explicitly; project already does this for image uploads — reuse the same config |
+| node-cron + App Platform scaling | Works on single instance; fires N times with N instances | Use App Platform Scheduled Jobs component, or implement MongoDB-backed distributed lock |
+| mongorestore + authSource | Restore to non-Atlas MongoDB (local/staging) fails auth | Always pass `?authSource=admin` in the restore URI when targeting a non-Atlas instance |
+| Aptfile + mongodump PATH | Binary installs successfully but `spawn('mongodump')` fails at runtime | Manually add the Aptfile layers path to PATH in App Platform environment config, or resolve the full binary path at startup with `execSync('which mongodump')` |
+| Spaces backup bucket vs. image bucket | Retention cleanup runs against wrong bucket, deletes product images | Use a dedicated bucket (`tamar-jewelry-backups`) or an isolated prefix with prefix-scoped listing — never mix backup files with image files |
 
 ---
 
 ## Performance Traps
 
-Patterns that work at small scale but fail as usage grows.
-
 | Trap | Symptoms | Prevention | When It Breaks |
 |------|----------|------------|----------------|
-| Fetching all product translations on page load | Initial page load works fine | Lazy-load translations, cache in localStorage | At ~200 products (50KB+ per page load) |
-| Re-translating same product descriptions | Translation API quota exhausted | Cache translations in database, deduplicate similar content | After first bulk translation (costs add up) |
-| Not using database indexes on bilingual fields | Queries work but slow | Add indexes: `{ 'name.eng': 'text', 'name.heb': 'text' }` | When product catalog grows beyond 100 items |
-| Cache keys not including language | Random language shown to users | Always include lang in cache key: `product:123:en` | When site gets >100 concurrent users |
-| Translation API called in synchronous route handlers | API timeout crashes requests | Use background jobs for translation, return immediately | When translation takes >2 seconds per product |
-| Sitemap regenerating on every request | Works fine for 94 products | Cache sitemap XML, regenerate daily via cron | At 500+ products (XML generation >1 second) |
+| mongodump reading from Atlas primary | Backup adds read load to the same node handling writes; request latency increases during backup window | Pass `--readPreference=secondaryPreferred` to redirect dump reads to a replica node | Any time backup runs during business hours; schedule at 02:00–04:00 UTC |
+| Manual backup endpoint as synchronous HTTP response | Endpoint holds the connection open for the full dump duration; DO/Nginx proxy times out (typically 30–60s) | Make manual backup async: return a job ID immediately, poll for status | When database exceeds ~50 MB (current 94-product catalog is small — low near-term risk, but build async from the start) |
+| Blocking event loop with `execSync` for mongodump | All HTTP requests stall while backup runs; site appears down during backup | Use `child_process.spawn` (async, non-blocking); never `execSync` for long operations | Immediately — the first backup run will block the e-commerce site |
+| Backup and exchange rate jobs scheduled at same time | Both jobs fire simultaneously; Atlas connection pool saturated | Stagger schedules — backup at 02:00, exchange rate update at 03:00 | Low risk at current scale; avoidable by design with zero cost |
 
 ---
 
 ## Security Mistakes
 
-Domain-specific security issues beyond general web security.
-
 | Mistake | Risk | Prevention |
 |---------|------|------------|
-| Storing Translation API key in frontend code | API key exposed, quota theft, unauthorized usage | ALWAYS call Translation API from backend, never frontend |
-| Not sanitizing translated content before rendering | XSS via Translation API injecting malicious content | Sanitize Translation API response, don't trust external service |
-| Using same MongoDB credentials for dev and prod | Dev migration script accidentally runs on production | Separate credentials, require explicit production flag |
-| Allowing admin to translate without authentication | Anyone can change product content | Protect translation endpoints with `requireAdmin` middleware |
-| Exposing translation queue/status to public | Competitors see unreleased products | Translation status should be admin-only endpoint |
+| Backup filename from user input in restore endpoint | Path traversal — attacker crafts a filename to trigger restore of a weaponized backup or overwrite production data | Validate filename against a strict pattern (`/^backup-\d{4}-\d{2}-\d{2}T[\d-]+\.gz$/`); enumerate valid files from Spaces and only accept known filenames |
+| Backup Spaces bucket publicly readable | Anyone can download a full database dump containing customer data and order history | Set bucket ACL to private; generate pre-signed URLs for admin download only, never expose public URLs |
+| Restore endpoint without admin JWT guard | Any unauthenticated request can trigger a database wipe | Protect restore endpoint with the existing `requireAdmin` middleware — treat it as the highest-privilege endpoint in the system |
+| Spaces credentials stored in code | Credentials committed to repository; Spaces accessible to anyone with repo access | Use App Platform environment variables; reuse the existing `SPACES_KEY` / `SPACES_SECRET` already configured for image uploads |
+| Full MongoDB URI appearing in any log output | Atlas hostname + credentials visible in App Platform logs accessible to all team members | Redact before logging: `uri.replace(/:\/\/([^@]+)@/, '://***@')`; grep logs after each backup run to confirm no credentials are visible |
 
 ---
 
 ## UX Pitfalls
 
-Common user experience mistakes in this domain.
-
 | Pitfall | User Impact | Better Approach |
 |---------|-------------|-----------------|
-| Language switcher doesn't preserve product page | User switches to Hebrew, lands on homepage (loses context) | Keep same product, switch language: `/en/product/ring` → `/he/product/ring` |
-| Product name translated but category not | User sees "שרשראות" (Hebrew) under category heading "Necklaces" (English) | Translate category display names, not just products |
-| Cart shows mixed languages after language switch | Confusing: some products in English, others Hebrew | Re-fetch product names in new language when locale changes |
-| No indication which fields are machine-translated | User assumes perfect translation, trusts incorrect content | Add badge: "🤖 Auto-translated" with option to report issues |
-| Checkout language differs from shopping language | User shops in Hebrew, PayPal shows English | Pass `locale` to payment provider API, match user's language |
-| Translation loading breaks page layout | Skeletons or spinners shift content, user clicks wrong item | Reserve space for translations, show placeholder text of similar length |
-| No way to report translation errors | User sees mistake, can't notify admin | Add "Report translation error" button on product pages |
+| No backup status in admin dashboard | Admin has no visibility into whether backups are working without navigating to App Platform logs | Add a "Last backup" status row to admin settings or a dedicated backup management page showing date, size, duration, and status |
+| Manual restore is undiscoverable | Admin cannot find the restore capability during an incident — high stress, limited time | Place restore UI prominently in the admin dashboard with clear warning language; document the restore procedure in a comment near the code and in a runbook |
+| Backup list displays raw Spaces object keys | Filenames like `backup-2026-04-04T02-00-00.gz` are hard to parse under incident pressure | Format as human-readable: "April 4, 2026 — 2:00 AM — 4.2 MB — Success" with a download link |
+| One-click restore with no confirmation | Admin accidentally triggers restore, drops production data | Require typing the backup date or a confirmation phrase (e.g., "restore 2026-04-03") before the restore executes |
 
 ---
 
 ## "Looks Done But Isn't" Checklist
 
-Things that appear complete but are missing critical pieces.
-
-- [ ] **Bilingual schema:** Field exists but not validated — verify BOTH languages have content enforcement
-- [ ] **Admin form:** Fields added but no inline validation — check real-time field validation works
-- [ ] **Translation integration:** API called but errors not handled — test with API disabled, verify fallback
-- [ ] **Cache invalidation:** Products update but cache doesn't clear — manually test cache clearing after translation
-- [ ] **Cart migration:** New cart works but old carts break — test with localStorage cart from pre-migration
-- [ ] **Tests:** New tests pass but old tests skipped — verify ALL 866 tests run and pass
-- [ ] **SEO:** Product names translated but meta tags still English — check view source for each language
-- [ ] **Hreflang tags:** Tags present but point to same content — verify different content in each language
-- [ ] **Sitemap:** Includes both languages but same lastmod — verify product changes update both lang sitemap entries
-- [ ] **Checkout:** Products show in cart but payment receipt shows wrong language — test full payment flow in Hebrew
-- [ ] **Breadcrumbs:** Product page shows localized name but breadcrumb shows English — check all navigation elements
-- [ ] **Search:** Products indexed but search doesn't match Hebrew — verify text indexes on bilingual fields
-- [ ] **Rollback:** Down() function exists but never tested — run rollback in staging, verify data integrity
+- [ ] **Binary availability:** `mongodump --version` runs successfully in the deployed container — not just locally. Verify in a startup diagnostic log before enabling the scheduler.
+- [ ] **Stream upload:** Backup uploads directly to Spaces as a stream with no temp file written to disk. Verify no file exists in `/tmp` after a successful backup run.
+- [ ] **Atlas connectivity:** mongodump can establish a new connection from the deployed container at job runtime — not just at app startup. Run a test backup from the deployed container and confirm the file appears in Spaces.
+- [ ] **Retention pagination:** Retention cleanup uses paginated listing. Verify by testing with a mock that returns `IsTruncated: true` and confirms the second page is fetched.
+- [ ] **Failure alerting:** A backup failure sends a visible alert within 24 hours. Verify by intentionally breaking the Atlas URI and confirming an email or dashboard alert fires.
+- [ ] **Restore confirmation gate:** The restore endpoint requires explicit confirmation and is protected by admin JWT. Verify an unauthenticated request returns 401, and an authenticated request without the confirmation token returns an error.
+- [ ] **Backup integrity:** At least one full restore-to-staging-database test completes successfully, with document counts verified against the source. Do not ship restore capability that has never been tested end-to-end.
+- [ ] **Credentials not in logs:** Full MongoDB URI never appears in any App Platform log entry. After a backup run, grep the logs for the Atlas cluster hostname and confirm no password follows it.
+- [ ] **Duplicate run protection:** Only one backup runs per schedule window. Verify by checking App Platform instance count and testing behavior during a rolling deploy.
+- [ ] **Correct bucket/prefix isolation:** Backup files land in a dedicated bucket or prefix, confirmed by checking that no image files share the same listing scope as the retention cleanup.
 
 ---
 
 ## Recovery Strategies
 
-When pitfalls occur despite prevention, how to recover.
-
 | Pitfall | Recovery Cost | Recovery Steps |
 |---------|---------------|----------------|
-| Cart data corrupted by schema change | LOW | Invalidate all carts via localStorage clear script, add notification "Cart updated to new format" |
-| Products missing Hebrew content | MEDIUM | Run bulk translation script on products where `name.heb` is null, verify with admin review queue |
-| Test suite completely broken | HIGH | Revert schema change, update tests first, re-deploy with tests passing |
-| Cache showing stale content | LOW | Run `invalidateAll()` script, reduce TTL temporarily (3600s → 300s) during rollout |
-| Translation API quota exhausted | MEDIUM | Switch to fallback: copy English content, add "needs translation" flag, manual review queue |
-| SEO duplicate content penalty | HIGH | Takes 2-4 weeks to recover — immediately fix hreflang, submit corrected sitemap, request re-index |
-| Payment flow showing wrong language | MEDIUM | Hotfix: detect user locale from cart, pass to payment API, deploy immediately |
-| Database in inconsistent state (partial migration) | HIGH | Restore from backup, write data repair script to fix orphaned records, re-run migration with transaction |
-| Rollback fails leaving corrupted data | CRITICAL | Restore MongoDB backup, revert code deployment, run integrity check script, may need manual data fixes |
+| Binary missing in production | LOW | Add `Aptfile` with `mongodb-database-tools`, configure PATH in App Platform env vars, redeploy. No data loss. |
+| Backup failures undetected for weeks | HIGH | Assess how many days of backups are missing. Restore from the oldest available backup. Accept the data gap. Implement alerting before re-enabling the scheduler. |
+| Temp file fills ephemeral disk, container killed | LOW | App recovers automatically via container replacement. Fix the code to use stream upload before the next backup window. |
+| Duplicate backup runs race-condition corrupted a Spaces file | MEDIUM | List bucket objects, identify the corrupted/incomplete file (size anomaly), delete it, trigger a manual backup to replace it. |
+| Retention pagination bug — bucket unbounded growth | LOW | Fix the pagination code, manually delete stale files from the Spaces console or via a one-off script. No data loss; only a storage cost issue. |
+| mongorestore targets wrong database with --drop | CRITICAL | Requires a prior valid backup to restore from. If no valid backup exists, data loss is permanent — this is the justification for the entire backup system. Run restore targeting the correct database name with explicit namespace mapping. |
+| Atlas credentials visible in logs | MEDIUM | Immediately rotate the Atlas database user password and the Spaces access keys. Audit who has had access to the App Platform logs. Redeploy with credential redaction in place. |
 
 ---
 
 ## Pitfall-to-Phase Mapping
 
-How roadmap phases should address these pitfalls.
-
 | Pitfall | Prevention Phase | Verification |
 |---------|------------------|--------------|
-| Stale cart data | Phase 1: Schema Migration | Test with old localStorage cart, verify invalidation triggers |
-| SSR cache not invalidating | Phase 3: Translation Integration | Monitor cache hit rate, manually test translation → cache clear |
-| Test fixtures broken | Phase 1: Schema Migration | CI must run all 866 tests and pass before merge |
-| Schema without data backfill | Phase 1: Schema Migration | Run `verify-migration.js`, check 100% of products have bilingual structure |
-| Translation API rate limiting | Phase 2: Bulk Translation | Test translating 94 products, monitor API quota usage |
-| SEO duplicate content | Phase 3: Translation Integration | Google Search Console check, verify hreflang in source |
-| Admin form confusion | Phase 4: Admin UX | User testing with actual admin staff, measure form completion rate |
-| Checkout wrong language | Phase 5: Checkout & Payments | End-to-end test in both languages, verify PayPal/Stripe receipts |
-| Missing fallback strategy | Phase 3: Translation Integration | Disable Translation API in staging, verify site still works |
-| Rollback plan missing | Phase 1: Schema Migration | Practice rollback drill in staging, time to recovery <15 min |
+| mongodump binary missing | Phase 1: Environment Setup | `mongodump --version` logged successfully from deployed container |
+| Ephemeral filesystem dependency | Phase 2: Core Backup | No `/tmp` writes; confirm stream-to-Spaces end-to-end in deployed environment |
+| node-cron duplicate on scaling | Phase 1: Scheduler Design | Document instance count constraint; implement locking or use App Platform Jobs |
+| Atlas IP allowlist blocking backup | Phase 1: Environment Verification | Successful test backup run from deployed container using production URI |
+| Credentials in process list / logs | Phase 2: Core Implementation | Code review; grep App Platform logs for Atlas cluster hostname after a run |
+| mongorestore on wrong database | Phase 3: Restore Implementation | Confirmation gate in restore endpoint; namespace explicit via `--nsFrom`/`--nsTo` |
+| Retention pagination bug | Phase 4: Retention | Test with mock paginator returning `IsTruncated: true`; verify second page is processed |
+| Silent failure / no alerting | Phase 3: Logging | Intentionally break Atlas URI; confirm alert fires within 24 hours |
+| Backup bucket publicly readable | Phase 2: Spaces Integration | Attempt unauthenticated download of a backup file; confirm 403 |
+| No restore status in admin UI | Phase 5: Admin Dashboard | Verify backup status row visible; verify restore requires confirmation before executing |
 
 ---
 
 ## Sources
 
-**MongoDB Schema Migration:**
-- [MongoDB schema migration - Liquibase](https://www.liquibase.com/blog/mongodb-schema-migration)
-- [All you need to know about MongoDB schema migrations in node.js](https://softwareontheroad.com/database-migration-node-mongo)
-- [Maintain Different Schema Versions - MongoDB Docs](https://www.mongodb.com/docs/manual/data-modeling/design-patterns/data-versioning/schema-versioning/)
-- [How To Properly Handle Mongoose Schema Migrations - GeeksforGeeks](https://www.geeksforgeeks.org/mongodb/how-to-properly-handle-mongoose-schema-migrations/)
-
-**E-commerce Translation Pitfalls:**
-- [5 Common Pitfalls of eCommerce Data Migration](https://www.transcenddigital.com/blog/5-common-pitfalls-of-ecommerce-data-migration-when-re-platforming)
-- [6 eCommerce Translation Pitfalls to Avoid](https://bayan-tech.com/blog/ecommerce-translation/)
-- [Data Migration Strategies: Safely Transitioning E-commerce Databases - Sellbery](https://sellbery.com/blog/data-migration-strategies-safely-transitioning-e-commerce-databases/)
-
-**Google Cloud Translation API:**
-- [Quotas and limits | Cloud Translation | Google Cloud](https://docs.cloud.google.com/translate/quotas)
-- [Batch requests (Advanced) | Cloud Translation | Google Cloud](https://docs.cloud.google.com/translate/docs/advanced/batch-translation)
-- [Troubleshooting | Cloud Translation | Google Cloud](https://docs.cloud.google.com/translate/troubleshooting)
-
-**SEO and Hreflang:**
-- [Hreflang, International SEO & Duplicate Content: How To Fix It](https://thegray.company/blog/duplicate-content-international-seo-hreflang)
-- [SEO Translation: Complete Guide to Multilingual Search Success (2026)](https://geotargetly.com/blog/seo-translation-guide)
-- [Managing Multi-Regional and Multilingual Sites | Google Search Central](https://developers.google.com/search/docs/specialty/international/managing-multi-regional-sites)
-- [How to avoid duplicate content SEO punishment with hreflang](https://lingohub.com/blog/how-to-avoid-duplicate-content-seo-punishment-with-hreflang)
-
-**Form UX Best Practices:**
-- [Marking Required Fields in Forms - NN/G](https://www.nngroup.com/articles/required-fields/)
-- [Required Fields in Forms: Best Design Practices](https://www.uxtigers.com/post/required-fields)
-- [12 Form UI/UX Design Best Practices to Follow in 2026](https://www.designstudiouiux.com/blog/form-ux-design-best-practices/)
-
-**Payment Integration:**
-- [Add localization to your Flow integration - Checkout.com](https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website/add-localization-to-your-flow-integration)
-- [Supported languages for Stripe Checkout and Payment Links](https://support.stripe.com/questions/supported-languages-for-stripe-checkout-and-payment-links)
-
-**Fallback Strategies:**
-- [Fallback | i18next documentation](https://www.i18next.com/principles/fallback)
-- [Implement Fallback with API Gateway - API7.ai](https://api7.ai/blog/fallback-api-resilience-design-patterns)
-
-**Data Migration Testing:**
-- [Data Migration Testing in 2026: Strategy and Techniques](https://blog.qasource.com/a-guide-to-data-migration-testing)
-- [Data Migration Test Strategy: Create an Effective Test Plan](https://www.datamigrationpro.com/data-migration-testing-strategy)
-
-**Codebase Analysis:**
-- Product schema: `backend/models/Product.js`
-- Cart implementation: `frontend/js/model.js`
-- SSR cache: `backend/middleware/cacheMiddleware.js`, `backend/cache/cacheKeys.js`
-- Schema helpers: `backend/helpers/schemaHelpers.js`
-- Sitemap generation: `backend/routes/sitemap.js`
-- Admin dashboard: `admin/BisliView.js`
+- [DigitalOcean App Platform — How to Store Data](https://docs.digitalocean.com/products/app-platform/how-to/store-data/) — confirms ephemeral filesystem, 4 GiB limit, Spaces as the persistent alternative (HIGH confidence)
+- [DigitalOcean App Platform — Aptfile Buildpack](https://docs.digitalocean.com/products/app-platform/reference/buildpacks/aptfile/) — Aptfile package installation, PATH caveat for non-standard install locations (HIGH confidence)
+- [DigitalOcean — Scheduled MongoDB Backups to Spaces](https://www.digitalocean.com/community/tutorials/how-to-set-up-scheduled-logical-mongodb-backups-to-digitalocean-spaces) — reference architecture for this integration (HIGH confidence)
+- [Fixing mongodump on Atlas Free Cluster (2025)](https://www.ganesshkumar.com/articles/2025-10-11-fixing-mongodump-on-atlas-free-cluster/) — server selection timeout, authSource, recommended flags (MEDIUM confidence)
+- [MongoDB Database Tools Installation Guide](https://www.mongodb.com/docs/database-tools/mongodump/mongodump-compatibility-and-installation/) — tools ship separately from MongoDB Server since 4.4 (HIGH confidence)
+- [MongoDB JIRA TOOLS-1020](https://jira.mongodb.org/browse/TOOLS-1020) — credentials visible in process list; [TOOLS-1782](https://jira.mongodb.org/browse/TOOLS-1782) — mitigation via config file (HIGH confidence)
+- [node-cron GitHub issue #393 — duplicate cron jobs in cluster mode](https://github.com/node-cron/node-cron/issues/393) — multiple instances fire the same job (HIGH confidence)
+- [GitHub — spawn mongodump ENOENT in actions/setup-node](https://github.com/actions/setup-node/issues/632) — real-world binary missing after OS version change (HIGH confidence)
+- [Percona — Streaming MongoDB Backups Directly to S3](https://www.percona.com/blog/streaming-mongodb-backups-directly-to-s3/) — stream-to-S3 without temp file pattern (MEDIUM confidence)
+- [MongoDB mongorestore docs — behavior and --drop](https://www.mongodb.com/docs/database-tools/mongorestore/mongorestore-behavior-access-usage/) — inserts only by default; --drop drops before restore (HIGH confidence)
+- [MongoDB community forum — accidentally overwrote collection](https://www.mongodb.com/community/forums/t/accidentally-overwrote-collection/275471) — real production incident report (MEDIUM confidence)
+- [Cloudron forum — retention policy not deleting old backups](https://forum.cloudron.io/topic/9789/backups-before-retention-policy-not-being-deleted-bug) — first 1000 objects pagination limit (MEDIUM confidence)
+- [QuotaGuard blog — 0.0.0.0/0 dynamic IP trap for Atlas](https://www.quotaguard.com/blog/serverless-static-ip-mongodb-atlas-whitelist) — IP allowlist issue with dynamic cloud IPs (MEDIUM confidence)
+- [Medium — Silent Corruption: Backup Integrity Validation](https://medium.com/@sabithvm/the-silent-corruption-why-backup-integrity-validation-cant-wait-until-you-need-to-restore-dca5e8b65137) — untested backups are not backups (MEDIUM confidence)
 
 ---
-
-*Pitfalls research for: Adding bilingual product content to existing e-commerce platform*
-*Researched: 2026-02-13*
-*Confidence: HIGH — Based on codebase analysis, official documentation, and 2026-current best practices*
+*Pitfalls research for: MongoDB Backup & Recovery System on DigitalOcean App Platform*
+*Researched: 2026-04-04*
