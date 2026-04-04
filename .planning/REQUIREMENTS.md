@@ -12,7 +12,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 - [ ] **BKUP-01**: System runs automated daily MongoDB backup using mongodump with gzip compression
 - [ ] **BKUP-02**: Backup archives are uploaded directly to DigitalOcean Spaces (off-region bucket)
 - [ ] **BKUP-03**: Backup files use timestamped naming convention (ISO format, sortable)
-- [ ] **BKUP-04**: mongodump/mongorestore binaries are available in the App Platform runtime (via Aptfile)
+- [x] **BKUP-04**: mongodump/mongorestore binaries are available in the App Platform runtime (via Aptfile)
 
 ### Monitoring & Logging
 
@@ -64,7 +64,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BKUP-01 | Phase 34 | Pending |
 | BKUP-02 | Phase 34 | Pending |
 | BKUP-03 | Phase 34 | Pending |
-| BKUP-04 | Phase 33 | Pending |
+| BKUP-04 | Phase 33 | Complete |
 | MON-01 | Phase 34 | Pending |
 | MON-02 | Phase 35 | Pending |
 | MON-03 | Phase 35 | Pending |
