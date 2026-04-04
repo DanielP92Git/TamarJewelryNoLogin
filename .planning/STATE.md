@@ -1,29 +1,44 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: verifying
+stopped_at: Completed 33-02-PLAN.md
+last_updated: "2026-04-04T18:46:56.376Z"
+last_activity: 2026-04-04
+progress:
+  total_phases: 33
+  completed_phases: 33
+  total_plans: 104
+  completed_plans: 105
+---
+
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-17)
+See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers — with true bilingual content so Hebrew and English visitors each see products in their language
-**Current focus:** Planning next milestone
+**Current focus:** Phase 33 — environment-setup-binary-verification
 
 ## Current Position
 
-Milestone: v1.5 Bilingual Product Content (SHIPPED)
-Phase: 32 of 32 (all complete)
-Status: Milestone Complete
-Last activity: 2026-02-17 — Milestone v1.5 archived
-
-Progress: [████████████████████] 32/32 phases complete (100% of total phases)
+Phase: 33 (environment-setup-binary-verification) — EXECUTING
+Plan: 2 of 2
+Status: Phase complete — ready for verification
+Last activity: 2026-04-04
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 108 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 19, v1.5: 12)
 - Average duration: ~5 min/plan
 - Total execution time: ~29 hours 37 min
 
 **Recent Trend:**
+
 - v1.5: 12 plans completed in 3 days (2026-02-14 → 2026-02-16)
 - v1.4: 18 plans in 3 days (2026-02-10 → 2026-02-12)
 
@@ -35,9 +50,18 @@ All milestone decisions are logged in PROJECT.md Key Decisions table and phase s
 
 See milestone archives in `.planning/milestones/` for detailed decision history.
 
+- [Phase 33]: Use execFileSync for binary check — no shell spawning, throws cleanly on non-zero exit
+- [Phase 33]: Fail loud (throw) in production for missing binary, warn in dev — D-06
+- [Phase 33]: node-cron for backup scheduling (D-01), no distributed lock (D-02) — single App Platform instance
+- [Phase 33]: Extracted verifyMongodumpBinary to utils/backupBinaryCheck.js for testability — dependency injection pattern for execFileSync
+
 ### Pending Todos
 
-None.
+- Phase 33: Decide between App Platform Scheduled Jobs vs. in-process node-cron with distributed lock before writing scheduler
+- Phase 33: Provision dedicated BACKUP_BUCKET in a different DO region before Phase 34 uploads begin
+- Phase 34: `backupService.js` must create its own S3 client (monolithic index.js does not export its s3 instance)
+- Phase 34: Never log spawn args containing the MongoDB URI — redact before any logging
+- Phase 36: Run end-to-end restore test against real Atlas cluster before marking Phase 36 complete
 
 ### Blockers/Concerns
 
@@ -46,12 +70,13 @@ None.
 - CRAWL-07: Google Search Console requires post-deployment manual setup
 - robots.txt missing Sitemap: directive (minor)
 - SCHEMA-02: Migration script not executed (runtime normalization covers functionality)
+- **NEW (v1.6):** Aptfile binary PATH on App Platform is MEDIUM confidence — Phase 33 must log `which mongodump` from a deployed container to confirm actual path before hardcoding
 
 ## Session Continuity
 
-Last session: 2026-02-17
-Stopped at: Milestone v1.5 archived
-Resume: `/gsd:new-milestone` to start next milestone
+Last session: 2026-04-04T18:46:56.363Z
+Stopped at: Completed 33-02-PLAN.md
+Resume: `/gsd:plan-phase 33` to plan Phase 33 (Environment Setup & Binary Verification)
 
 ## Quick Tasks Completed
 
