@@ -817,12 +817,72 @@ async function initializeExchangeRate() {
   }
 }
 
+// =============================================
+// Backup Binary Verification (Phase 33)
+// =============================================
+// Scheduling decision (D-01): Use in-process node-cron for backup scheduling,
+// consistent with exchangeRateJob.js pattern. No separate worker or App Platform
+// Scheduled Job needed.
+// Concurrency (D-02): No distributed lock needed — single App Platform instance.
+
+/**
+ * Verify mongodump binary is available at startup.
+ * Logs resolved path and version. In production, throws if binary is missing (D-06: fail loud).
+ * In non-production, logs a warning and continues (binary may not be installed locally).
+ */
+function verifyMongodumpBinary() {
+  const { execFileSync } = require('child_process');
+  const mongodumpPath = process.env.MONGODUMP_PATH || 'mongodump';
+  const mongorestorePath = process.env.MONGORESTORE_PATH || 'mongorestore';
+
+  // Check mongodump
+  try {
+    // Log resolved path — critical for confirming /layers path on App Platform
+    try {
+      const whichResult = execFileSync('which', [mongodumpPath], { encoding: 'utf8', timeout: 5000 }).trim();
+      console.log(`[backup] mongodump resolved path: ${whichResult}`);
+    } catch {
+      // 'which' may not be available in all environments (Windows)
+      console.log(`[backup] mongodump PATH lookup: ${mongodumpPath}`);
+    }
+
+    const version = execFileSync(mongodumpPath, ['--version'], { encoding: 'utf8', timeout: 5000 }).trim();
+    // Only log the first line (version string), not full output
+    const versionLine = version.split('\n')[0];
+    console.log(`[backup] mongodump binary OK: ${versionLine}`);
+  } catch (err) {
+    if (process.env.NODE_ENV === 'production') {
+      // D-06: fail loud in production
+      console.error(`[backup] FATAL: mongodump binary not found at "${mongodumpPath}"`, err.message);
+      throw new Error('mongodump binary unavailable. Check Aptfile and MONGODUMP_PATH env var.');
+    } else {
+      console.warn(`[backup] WARNING: mongodump not found at "${mongodumpPath}" — backup features will not work. This is expected in local dev.`);
+    }
+  }
+
+  // Check mongorestore (log only, same pattern)
+  try {
+    const restoreVersion = execFileSync(mongorestorePath, ['--version'], { encoding: 'utf8', timeout: 5000 }).trim();
+    const restoreVersionLine = restoreVersion.split('\n')[0];
+    console.log(`[backup] mongorestore binary OK: ${restoreVersionLine}`);
+  } catch (err) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error(`[backup] FATAL: mongorestore binary not found at "${mongorestorePath}"`, err.message);
+      throw new Error('mongorestore binary unavailable. Check Aptfile and MONGORESTORE_PATH env var.');
+    } else {
+      console.warn(`[backup] WARNING: mongorestore not found at "${mongorestorePath}" — restore features will not work.`);
+    }
+  }
+}
+
 // Skip database connection in test environment (setup.js handles it)
 if (process.env.NODE_ENV !== 'test') {
   connectDb()
     .then(() => {
       // Initialize exchange rate after database connection
       initializeExchangeRate();
+      // Verify backup binaries are available (Phase 33, D-06)
+      verifyMongodumpBinary();
     })
     .catch(err => {
       console.error('MongoDB connection failed:', err?.message || err);
@@ -3407,11 +3467,184 @@ app.get(
   }
 );
 
+// Admin endpoint to check backup binary availability and configuration (D-07)
+app.get(
+  '/admin/backup-status',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  (req, res) => {
+    const { execFileSync } = require('child_process');
+    const mongodumpPath = process.env.MONGODUMP_PATH || 'mongodump';
+    const mongorestorePath = process.env.MONGORESTORE_PATH || 'mongorestore';
+
+    let mongodumpVersion = null;
+    let mongodumpFound = false;
+    let mongodumpResolved = null;
+    let mongodumpError = null;
+
+    let mongorestoreVersion = null;
+    let mongorestoreFound = false;
+    let mongorestoreResolved = null;
+    let mongorestoreError = null;
+
+    // Check mongodump
+    try {
+      const versionOutput = execFileSync(mongodumpPath, ['--version'], { encoding: 'utf8', timeout: 5000 }).trim();
+      mongodumpVersion = versionOutput.split('\n')[0];
+      mongodumpFound = true;
+      try {
+        mongodumpResolved = execFileSync('which', [mongodumpPath], { encoding: 'utf8', timeout: 5000 }).trim();
+      } catch {
+        mongodumpResolved = mongodumpPath;
+      }
+    } catch (err) {
+      mongodumpError = err.message;
+    }
+
+    // Check mongorestore
+    try {
+      const restoreOutput = execFileSync(mongorestorePath, ['--version'], { encoding: 'utf8', timeout: 5000 }).trim();
+      mongorestoreVersion = restoreOutput.split('\n')[0];
+      mongorestoreFound = true;
+      try {
+        mongorestoreResolved = execFileSync('which', [mongorestorePath], { encoding: 'utf8', timeout: 5000 }).trim();
+      } catch {
+        mongorestoreResolved = mongorestorePath;
+      }
+    } catch (err) {
+      mongorestoreError = err.message;
+    }
+
+    res.json({
+      mongodump: {
+        found: mongodumpFound,
+        path: mongodumpPath,
+        resolvedPath: mongodumpResolved,
+        version: mongodumpVersion,
+        error: mongodumpError,
+      },
+      mongorestore: {
+        found: mongorestoreFound,
+        path: mongorestorePath,
+        resolvedPath: mongorestoreResolved,
+        version: mongorestoreVersion,
+        error: mongorestoreError,
+      },
+      scheduling: {
+        strategy: 'in-process node-cron',
+        distributedLock: false,
+        note: 'Single App Platform instance — no concurrent backup risk (D-01, D-02)',
+      },
+      envConfig: {
+        BACKUP_BUCKET: process.env.BACKUP_BUCKET ? '[SET]' : '[NOT SET]',
+        BACKUP_SPACES_KEY: process.env.BACKUP_SPACES_KEY ? '[SET]' : '[NOT SET]',
+        BACKUP_SPACES_SECRET: process.env.BACKUP_SPACES_SECRET ? '[SET]' : '[NOT SET]',
+        BACKUP_SPACES_ENDPOINT: process.env.BACKUP_SPACES_ENDPOINT || '[NOT SET]',
+        BACKUP_SPACES_REGION: process.env.BACKUP_SPACES_REGION || '[NOT SET]',
+        BACKUP_SPACES_PREFIX: process.env.BACKUP_SPACES_PREFIX || 'backups/',
+        BACKUP_RETENTION_COUNT: process.env.BACKUP_RETENTION_COUNT || '14',
+        MONGODUMP_PATH: process.env.MONGODUMP_PATH || '(default: mongodump)',
+        MONGORESTORE_PATH: process.env.MONGORESTORE_PATH || '(default: mongorestore)',
+      },
+    });
+  }
+);
+
 app.get('/allproducts', async (req, res) => {
   let products = await Product.find({}).sort({ category: 1, displayOrder: 1 }).lean();
   if (!isProd) console.log('All Products Fetched');
   res.send(products.map(normalizeProductForClient));
 });
+
+// Full raw export for data migration (no normalizeProductForClient)
+app.get(
+  '/export-products',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const products = await Product.find({})
+        .sort({ category: 1, displayOrder: 1 })
+        .lean();
+      const dateStr = new Date().toISOString().slice(0, 10);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename=products-export-${dateStr}.json`
+      );
+      res.json(products);
+    } catch (err) {
+      console.error('Export error:', err);
+      res.status(500).json({ success: false, error: 'Export failed' });
+    }
+  }
+);
+
+// Bulk import for data migration (bypasses pre-save hooks to preserve original values)
+app.post(
+  '/import-products',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const { products } = req.body;
+      if (!Array.isArray(products) || products.length === 0) {
+        return res
+          .status(400)
+          .json({ success: false, error: 'Expected a non-empty products array' });
+      }
+      if (products.length > 500) {
+        return res
+          .status(400)
+          .json({ success: false, error: 'Maximum 500 products per import' });
+      }
+
+      // Strip __v (Mongoose manages versioning)
+      const cleaned = products.map((p) => {
+        const { __v, ...rest } = p;
+        return rest;
+      });
+
+      const result = await Product.insertMany(cleaned, { ordered: false })
+        .catch((err) => {
+          // With ordered:false, some docs may succeed even if others fail
+          if (err.insertedDocs) {
+            return {
+              partial: true,
+              inserted: err.insertedDocs.length,
+              errors: err.writeErrors?.map((e) => ({
+                index: e.index,
+                message: e.errmsg,
+              })),
+            };
+          }
+          throw err;
+        });
+
+      if (result.partial) {
+        return res.status(207).json({
+          success: false,
+          inserted: result.inserted,
+          failed: products.length - result.inserted,
+          errors: result.errors,
+        });
+      }
+
+      res.json({
+        success: true,
+        inserted: result.length,
+        failed: 0,
+      });
+    } catch (err) {
+      console.error('Import error:', err);
+      res
+        .status(500)
+        .json({ success: false, error: 'Import failed: ' + err.message });
+    }
+  }
+);
 
 app.post('/productsByCategory', async (req, res) => {
   const category = req.body.category;
