@@ -96,7 +96,7 @@ See [v1.5-ROADMAP.md](.planning/milestones/v1.5-ROADMAP.md) for full phase detai
 
 **Milestone Goal:** Prevent permanent data loss with automated off-region backups and quick recovery capability (RTO < 2 hours).
 
-- [ ] **Phase 33: Environment Setup & Binary Verification** — Confirm mongodump/mongorestore available in App Platform runtime
+- [x] **Phase 33: Environment Setup & Binary Verification** — Confirm mongodump/mongorestore available in App Platform runtime (completed 2026-04-04)
 - [ ] **Phase 34: Core Backup Service** — Automated daily backups landing in off-region Spaces with retention
 - [ ] **Phase 35: Manual Trigger, Backup Listing & Failure Alerting** — Admin can trigger backups, view history, and receive failure notifications
 - [ ] **Phase 36: Database Restore** — Admin can restore database from a specific backup with confirmation gate
@@ -114,10 +114,10 @@ See [v1.5-ROADMAP.md](.planning/milestones/v1.5-ROADMAP.md) for full phase detai
   3. New environment variables (`BACKUP_BUCKET`, `BACKUP_SPACES_PREFIX`, `BACKUP_RETENTION_COUNT`, `MONGODUMP_PATH`) are documented in `backend/env.example`
   4. Atlas IP allowlist is confirmed to allow connections from App Platform container IPs at job runtime
   5. Decision is documented: App Platform Scheduled Jobs vs. in-process node-cron with distributed lock
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 33-01-PLAN.md — Aptfile, env.example, startup binary check, admin backup-status endpoint
-- [ ] 33-02-PLAN.md — Unit tests for binary verification, integration tests for backup-status endpoint
+- [x] 33-02-PLAN.md — Unit tests for binary verification, integration tests for backup-status endpoint
 
 ### Phase 34: Core Backup Service
 **Goal**: The system automatically creates a compressed, timestamped MongoDB backup every day and uploads it to an off-region Spaces bucket, cleaning up old archives by retention count
@@ -179,7 +179,7 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 17-22. Frontend Testing | v1.3 | Complete | Complete | 2026-02-09 |
 | 23-26. SEO & Marketing | v1.4 | Complete | Complete | 2026-02-12 |
 | 27-32. Bilingual Content | v1.5 | Complete | Complete | 2026-02-17 |
-| 33. Environment & Binary Verification | v1.6 | 1/2 | In Progress|  |
+| 33. Environment & Binary Verification | v1.6 | 2/2 | Complete   | 2026-04-04 |
 | 34. Core Backup Service | v1.6 | 0/? | Not started | - |
 | 35. Manual Trigger & Alerting | v1.6 | 0/? | Not started | - |
 | 36. Database Restore | v1.6 | 0/? | Not started | - |
