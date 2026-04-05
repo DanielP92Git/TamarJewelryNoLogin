@@ -16,7 +16,7 @@
 'use strict';
 
 const AWS = require('aws-sdk');
-const { spawn } = require('child_process');
+const childProcess = require('child_process');
 
 /**
  * Creates and returns an AWS S3 instance configured with backup-specific credentials.
@@ -61,7 +61,7 @@ function spawnMongodump(mongoUri) {
   return new Promise((resolve, reject) => {
     const mongodumpPath = process.env.MONGODUMP_PATH || 'mongodump';
 
-    const child = spawn(
+    const child = childProcess.spawn(
       mongodumpPath,
       ['--uri', mongoUri, '--archive', '--gzip'],
       { stdio: ['ignore', 'pipe', 'pipe'] }
