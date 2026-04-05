@@ -129,9 +129,9 @@ Plans:
   3. After each successful backup, backups exceeding the retention count are deleted from Spaces automatically
   4. Retention count defaults to 14 and is overridable via `BACKUP_RETENTION_COUNT` environment variable
   5. Each backup run produces a structured log entry with timestamp, status, file size, duration, and any error message
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
-- [ ] 34-01-PLAN.md — Backup service (mongodump spawn, S3 upload, retention cleanup, structured logging) + cron job + index.js wiring
+- [x] 34-01-PLAN.md — Backup service (mongodump spawn, S3 upload, retention cleanup, structured logging) + cron job + index.js wiring
 - [ ] 34-02-PLAN.md — Unit tests for backupService and backupJob
 
 ### Phase 35: Manual Trigger, Backup Listing & Failure Alerting
@@ -183,7 +183,7 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 23-26. SEO & Marketing | v1.4 | Complete | Complete | 2026-02-12 |
 | 27-32. Bilingual Content | v1.5 | Complete | Complete | 2026-02-17 |
 | 33. Environment & Binary Verification | v1.6 | 2/2 | Complete   | 2026-04-04 |
-| 34. Core Backup Service | v1.6 | 0/2 | Planned | - |
+| 34. Core Backup Service | v1.6 | 1/2 | In Progress|  |
 | 35. Manual Trigger & Alerting | v1.6 | 0/? | Not started | - |
 | 36. Database Restore | v1.6 | 0/? | Not started | - |
 | 37. Admin Dashboard Panel | v1.6 | 0/? | Not started | - |

@@ -9,14 +9,14 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Backup Core
 
-- [ ] **BKUP-01**: System runs automated daily MongoDB backup using mongodump with gzip compression
-- [ ] **BKUP-02**: Backup archives are uploaded directly to DigitalOcean Spaces (off-region bucket)
-- [ ] **BKUP-03**: Backup files use timestamped naming convention (ISO format, sortable)
+- [x] **BKUP-01**: System runs automated daily MongoDB backup using mongodump with gzip compression
+- [x] **BKUP-02**: Backup archives are uploaded directly to DigitalOcean Spaces (off-region bucket)
+- [x] **BKUP-03**: Backup files use timestamped naming convention (ISO format, sortable)
 - [x] **BKUP-04**: mongodump/mongorestore binaries are available in the App Platform runtime (via Aptfile)
 
 ### Monitoring & Logging
 
-- [ ] **MON-01**: Each backup run produces a structured log entry (timestamp, status, size, duration, error)
+- [x] **MON-01**: Each backup run produces a structured log entry (timestamp, status, size, duration, error)
 - [ ] **MON-02**: Failed backups trigger an email alert via EmailJS
 - [ ] **MON-03**: Backup run history is persisted in a MongoDB `backup_logs` collection
 
@@ -24,7 +24,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 - [ ] **ADM-01**: Admin can trigger a manual backup via authenticated POST endpoint
 - [ ] **ADM-02**: Admin dashboard displays backup panel (list backups, trigger, view status)
-- [ ] **ADM-03**: Retention count is configurable via `BACKUP_RETENTION_COUNT` env var (default 14)
+- [x] **ADM-03**: Retention count is configurable via `BACKUP_RETENTION_COUNT` env var (default 14)
 
 ### Restore & Recovery
 
@@ -34,7 +34,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Retention
 
-- [ ] **RET-01**: System auto-deletes backups exceeding the retention count after each successful backup
+- [x] **RET-01**: System auto-deletes backups exceeding the retention count after each successful backup
 
 ## Future Requirements
 
@@ -61,20 +61,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BKUP-01 | Phase 34 | Pending |
-| BKUP-02 | Phase 34 | Pending |
-| BKUP-03 | Phase 34 | Pending |
+| BKUP-01 | Phase 34 | Complete |
+| BKUP-02 | Phase 34 | Complete |
+| BKUP-03 | Phase 34 | Complete |
 | BKUP-04 | Phase 33 | Complete |
-| MON-01 | Phase 34 | Pending |
+| MON-01 | Phase 34 | Complete |
 | MON-02 | Phase 35 | Pending |
 | MON-03 | Phase 35 | Pending |
 | ADM-01 | Phase 35 | Pending |
 | ADM-02 | Phase 37 | Pending |
-| ADM-03 | Phase 34 | Pending |
+| ADM-03 | Phase 34 | Complete |
 | REST-01 | Phase 36 | Pending |
 | REST-02 | Phase 36 | Pending |
 | REST-03 | Phase 35 | Pending |
-| RET-01 | Phase 34 | Pending |
+| RET-01 | Phase 34 | Complete |
 
 **Coverage:**
 - v1.6 requirements: 14 total
