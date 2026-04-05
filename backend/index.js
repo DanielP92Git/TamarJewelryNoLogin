@@ -28,6 +28,7 @@ const {
   startExchangeRateJob,
   runExchangeRateUpdate,
 } = require('./jobs/exchangeRateJob');
+const { startBackupJob } = require('./jobs/backupJob');
 const { translateText, translateProductFields } = require('./services/translationService');
 const { detectLanguage, languageMiddleware, trailingSlashRedirect } = require('./middleware/language');
 const { legacyRedirectMiddleware } = require('./middleware/legacy');
@@ -836,6 +837,8 @@ if (process.env.NODE_ENV !== 'test') {
       initializeExchangeRate();
       // Verify backup binaries are available (Phase 33, D-06)
       verifyMongodumpBinary();
+      // Start daily backup cron job (Phase 34, D-04)
+      startBackupJob();
     })
     .catch(err => {
       console.error('MongoDB connection failed:', err?.message || err);
