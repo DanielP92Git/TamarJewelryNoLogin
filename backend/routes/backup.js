@@ -25,6 +25,8 @@ const router = Router();
 const adminRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: Number(process.env.RATE_LIMIT_ADMIN_MAX || 120),
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
 });
 
 // D-17: In-memory concurrency lock (single-instance App Platform)
