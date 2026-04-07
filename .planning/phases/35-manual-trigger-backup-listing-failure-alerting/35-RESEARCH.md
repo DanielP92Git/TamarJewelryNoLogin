@@ -509,17 +509,15 @@ describe('POST /admin/backup', () => {
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
-1. **EmailJS API version: v1.6 vs v1.0**
+1. **EmailJS API version: v1.6 vs v1.0** — RESOLVED: Use v1.6 per locked decision D-01. D-05 silent failure handles gracefully if endpoint returns 404. User can update code post-deploy if needed.
    - What we know: Official docs consistently show `https://api.emailjs.com/api/v1.0/email/send` [CITED: emailjs.com/docs/rest-api/send]. CONTEXT.md D-01 specifies v1.6.
-   - What's unclear: Whether v1.6 is a newer endpoint not documented on the public /send page, or a transcription error from the discussion.
-   - Recommendation: Implement with v1.0 (documented) OR implement exactly as D-01 states (v1.6). Since D-01 is a locked decision, use v1.6. The D-05 silent failure handling means this is safe — if the endpoint doesn't exist, alert fails gracefully and logs a warning. User can update the env var or code post-deploy.
+   - Resolution: Locked decision D-01 takes precedence. Implemented as v1.6. If the endpoint doesn't exist, alert fails gracefully per D-05 and logs a warning.
 
-2. **AdminRateLimiter sharing between index.js and backup.js**
+2. **AdminRateLimiter sharing between index.js and backup.js** — RESOLVED: Recreate in backup.js with same config. Extraction to shared module deferred to Phase 36/37.
    - What we know: `adminRateLimiter` is defined at line 280 in index.js; index.js exports only `{ app }`.
-   - What's unclear: Should Phase 35 extract rate limiters to a shared module (future-proofing for Phase 36/37)?
-   - Recommendation: Recreate in backup.js now. Document intent to extract to `middleware/rateLimiters.js` as a future Phase 36/37 task. Avoids scope creep here.
+   - Resolution: Recreate rate limiter in backup.js using `express-rate-limit` with same parameters (`windowMs: 15 * 60 * 1000`, `limit: Number(process.env.RATE_LIMIT_ADMIN_MAX || 120)`). Avoids scope creep. Future phases can extract to `middleware/rateLimiters.js`.
 
 ---
 
