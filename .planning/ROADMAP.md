@@ -8,7 +8,7 @@
 - ✅ **v1.3 Frontend Testing** — Phases 17-22 (shipped 2026-02-09) — [archive](.planning/milestones/v1.3-ROADMAP.md)
 - ✅ **v1.4 SEO & Marketing Foundation** — Phases 23-26 (shipped 2026-02-12) — [archive](.planning/milestones/v1.4-ROADMAP.md)
 - ✅ **v1.5 Bilingual Product Content** — Phases 27-32 (shipped 2026-02-17) — [archive](.planning/milestones/v1.5-ROADMAP.md)
-- 🚧 **v1.6 MongoDB Backup & Recovery System** — Phases 33-37 (in progress)
+- 🚧 **v1.6 MongoDB Backup & Recovery System** — Phases 33-38 (in progress)
 
 ## Phases
 
@@ -101,6 +101,7 @@ See [v1.5-ROADMAP.md](.planning/milestones/v1.5-ROADMAP.md) for full phase detai
 - [x] **Phase 35: Manual Trigger, Backup Listing & Failure Alerting** — Admin can trigger backups, view history, and receive failure notifications (completed 2026-04-07)
 - [ ] **Phase 36: Database Restore** — Admin can restore database from a specific backup with confirmation gate
 - [ ] **Phase 37: Admin Dashboard Panel** — Admin can manage backups without SSH access
+- [ ] **Phase 38: Phase 35 Verification & Audit Cleanup** — Verify Phase 35 code, fix rate limiter inconsistency, update requirements checkboxes (gap closure)
 
 ## Phase Details
 
@@ -169,6 +170,18 @@ Plans:
 **Plans**: TBD
 **UI hint**: yes
 
+### Phase 38: Phase 35 Verification & Audit Cleanup
+**Goal**: Verify that Phase 35 code (manual backup, backup listing, failure alerting, backup logs) works correctly, fix rate limiter header inconsistency, and update requirements tracking
+**Depends on**: Phase 35
+**Requirements**: MON-02, MON-03, ADM-01, REST-03
+**Gap Closure**: Closes verification gaps from v1.6 milestone audit
+**Success Criteria** (what must be TRUE):
+  1. Phase 35 VERIFICATION.md exists confirming all 4 requirements (MON-02, MON-03, ADM-01, REST-03) are satisfied
+  2. Rate limiter in `routes/backup.js` uses identical header options (`standardHeaders: 'draft-7'`, `legacyHeaders: false`) as `index.js`
+  3. REQUIREMENTS.md checkboxes are checked for all verified Phase 35 requirements
+  4. All 4 requirements move from "partial" to "satisfied" status
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
@@ -187,6 +200,7 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 35. Manual Trigger & Alerting | v1.6 | 2/2 | Complete   | 2026-04-07 |
 | 36. Database Restore | v1.6 | 0/? | Not started | - |
 | 37. Admin Dashboard Panel | v1.6 | 0/? | Not started | - |
+| 38. Phase 35 Verification & Audit Cleanup | v1.6 | 0/? | Not started | - |
 
 ---
 *Last updated: 2026-04-05 after Phase 34 planning*

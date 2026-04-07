@@ -66,14 +66,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BKUP-03 | Phase 34 | Complete |
 | BKUP-04 | Phase 33 | Complete |
 | MON-01 | Phase 34 | Complete |
-| MON-02 | Phase 35 | Pending |
-| MON-03 | Phase 35 | Pending |
-| ADM-01 | Phase 35 | Pending |
+| MON-02 | Phase 35 → 38 | Pending |
+| MON-03 | Phase 35 → 38 | Pending |
+| ADM-01 | Phase 35 → 38 | Pending |
 | ADM-02 | Phase 37 | Pending |
 | ADM-03 | Phase 34 | Complete |
 | REST-01 | Phase 36 | Pending |
 | REST-02 | Phase 36 | Pending |
-| REST-03 | Phase 35 | Pending |
+| REST-03 | Phase 35 → 38 | Pending |
 | RET-01 | Phase 34 | Complete |
 
 **Coverage:**
@@ -83,4 +83,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-04 after roadmap creation (traceability filled)*
+*Last updated: 2026-04-07 after gap closure phase creation (Phase 38 added)*
