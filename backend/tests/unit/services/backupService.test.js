@@ -325,6 +325,31 @@ describe('spawnMongodump', () => {
     expect(errorMsg).not.toContain('pass');
     expect(errorMsg).toContain('[REDACTED]');
   });
+
+  it('redacts mongodb+srv:// credentials from stderr (CR-01 fix)', async () => {
+    const mockChild = createMockChild();
+    spawnSpy.mockReturnValue(mockChild);
+
+    const promise = spawnMongodump('mongodb+srv://admin:s3cret@cluster0.abc.mongodb.net/prod');
+
+    setImmediate(() => {
+      mockChild.stderr.emit(
+        'data',
+        Buffer.from('Error: failed for mongodb+srv://admin:s3cret@cluster0.abc.mongodb.net/prod')
+      );
+      mockChild.emit('close', 1);
+    });
+
+    let errorMsg = '';
+    try {
+      await promise;
+    } catch (err) {
+      errorMsg = err.message;
+    }
+
+    expect(errorMsg).not.toContain('s3cret');
+    expect(errorMsg).toContain('[REDACTED]');
+  });
 });
 
 // ---------------------------------------------------------------------------

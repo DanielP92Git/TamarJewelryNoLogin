@@ -77,7 +77,7 @@ function spawnMongodump(mongoUri) {
       if (code !== 0) {
         const stderr = Buffer.concat(stderrChunks).toString('utf8');
         // Redact MongoDB URI credentials from stderr before surfacing in error message
-        const redacted = stderr.replace(/(mongodb[^s]?:\/\/)[^\s@]+@/g, '$1[REDACTED]@');
+        const redacted = stderr.replace(/(mongodb(?:\+srv)?:\/\/)[^\s@]+@/g, '$1[REDACTED]@');
         return reject(new Error(`mongodump exited ${code}: ${redacted}`));
       }
       resolve(Buffer.concat(chunks));
