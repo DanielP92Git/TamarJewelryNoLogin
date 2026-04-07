@@ -1,10 +1,11 @@
 ---
 phase: 35
 slug: manual-trigger-backup-listing-failure-alerting
-status: draft
+status: approved
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-07
+audited: 2026-04-07
 ---
 
 # Phase 35 — Validation Strategy
@@ -38,10 +39,11 @@ created: 2026-04-07
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 35-01-01 | 01 | 1 | MON-03 | — | N/A | unit | `npx vitest run --testNamePattern="BackupLog"` | W0 | pending |
-| 35-01-02 | 01 | 1 | MON-02 | — | N/A | unit | `npx vitest run --testNamePattern="backupAlertService"` | W0 | pending |
-| 35-01-03 | 01 | 1 | ADM-01 | T-35-01 | Admin-only access enforced | integration | `npx vitest run --testNamePattern="POST /admin/backup"` | W0 | pending |
-| 35-01-04 | 01 | 1 | REST-03 | — | N/A | integration | `npx vitest run --testNamePattern="GET /admin/backups"` | W0 | pending |
+| 35-01-01 | 01 | 1 | MON-03 | — | N/A | unit | `npx vitest run --testNamePattern="BackupLog"` | YES | green |
+| 35-01-02 | 01 | 1 | MON-02 | — | N/A | unit | `npx vitest run --testNamePattern="backupAlertService"` | YES | green |
+| 35-01-03 | 01 | 1 | ADM-01 | T-35-01 | Admin-only access enforced | integration | `npx vitest run --testNamePattern="POST /admin/backup"` | YES | green |
+| 35-01-04 | 01 | 1 | REST-03 | — | N/A | integration | `npx vitest run --testNamePattern="GET /admin/backups"` | YES | green |
+| 35-02-01 | 02 | 2 | MON-02/MON-03 | — | N/A | unit | `npx vitest run --testNamePattern="backupJob"` | YES | green |
 
 *Status: pending / green / red / flaky*
 
@@ -49,11 +51,11 @@ created: 2026-04-07
 
 ## Wave 0 Requirements
 
-- [ ] `backend/tests/unit/models/backupLog.test.js` — stubs for MON-03 (BackupLog model validation)
-- [ ] `backend/tests/unit/services/backupAlertService.test.js` — stubs for MON-02 (alert sending)
-- [ ] `backend/tests/integration/backup.trigger.test.js` — stubs for ADM-01 (POST /admin/backup)
-- [ ] `backend/tests/integration/backup.listing.test.js` — stubs for REST-03 (GET /admin/backups)
-- [ ] `backend/tests/unit/jobs/backupJob.test.js` — update existing for BackupLog persistence
+- [x] `backend/tests/unit/models/backupLog.test.js` — 31 tests for MON-03 (BackupLog model validation, enums, defaults, index)
+- [x] `backend/tests/unit/services/backupAlertService.test.js` — 15 tests for MON-02 (env guard, HTTP request shape, failure handling)
+- [x] `backend/tests/integration/backup.trigger.test.js` — 19 tests for ADM-01 (auth gating, success/failure paths, 409 concurrency lock)
+- [x] `backend/tests/integration/backup.listing.test.js` — 17 tests for REST-03 (merged listing, sort order, failed-only entries, S3 failure)
+- [x] `backend/tests/unit/jobs/backupJob.test.js` — 13 tests (7 new) for BackupLog persistence + failure alerting in cron callback
 
 *Existing test infrastructure covers framework and fixtures.*
 
@@ -77,4 +79,25 @@ created: 2026-04-07
 - [x] Feedback latency < 15s
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** approved (corrected from draft — framework updated from Jest to Vitest, paths aligned with Plan 02)
+**Approval:** approved — all 95 automated tests green across 5 test files
+
+---
+
+## Validation Audit 2026-04-07
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+**Coverage Summary:**
+
+| Test File | Tests | Requirement | Status |
+|-----------|-------|-------------|--------|
+| backupLog.test.js | 31 | MON-03 | COVERED |
+| backupAlertService.test.js | 15 | MON-02 | COVERED |
+| backup.trigger.test.js | 19 | ADM-01 | COVERED |
+| backup.listing.test.js | 17 | REST-03 | COVERED |
+| backupJob.test.js | 13 | MON-02/MON-03 | COVERED |
+| **Total** | **95** | | **ALL COVERED** |
