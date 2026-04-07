@@ -41,7 +41,7 @@ Source: `admin/bambaYafa-desktop.css` CSS custom properties — verified from li
 
 ## Spacing Scale
 
-Source: existing admin CSS — 4/8/12/14/16/22/24 pattern observed. Aligned to 4-point base.
+Source: existing admin CSS — 4/8/12/14/16/24 pattern observed. Aligned to 4-point base.
 
 | Token | Value | Usage |
 |-------|-------|-------|
@@ -53,7 +53,12 @@ Source: existing admin CSS — 4/8/12/14/16/22/24 pattern observed. Aligned to 4
 | 2xl | 48px | Not currently used — reserved |
 | 3xl | 64px | Not currently used — reserved |
 
-Exceptions: Topbar height is 64px (fixed shell constraint). Sidebar width is 280px (fixed shell constraint). Page content padding is 22px (matches existing `.page-content { padding: 22px }`).
+Shell constraints (inherited layout dimensions — not spacing tokens):
+- Topbar height: 64px (fixed shell constraint)
+- Sidebar width: 280px (fixed shell constraint)
+- Page content padding: 22px (existing `.page-content { padding: 22px }` — inherited shell dimension, not a design token; do not alter)
+
+No spacing exceptions. All spacing tokens are multiples of 4.
 
 ---
 
@@ -61,12 +66,20 @@ Exceptions: Topbar height is 64px (fixed shell constraint). Sidebar width is 280
 
 Source: `admin/bambaYafa-desktop.css` — all sizes verified from existing class declarations.
 
-| Role | Size | Weight | Line Height |
-|------|------|--------|-------------|
-| Body / table cell | 13px | 600–700 | 1.5 |
-| Label / meta / badge | 12px | 800–850 | 1.4 |
-| Card title | 14px | 900 | 1.3 |
-| Page title | 28px | 900 | 1.15 |
+Two weight bands only. The existing CSS uses a range of numeric weights (600–900); this contract normalises to 2 declared bands so implementations make unambiguous choices.
+
+| Role | Size | Weight band | Weight value | Line Height |
+|------|------|-------------|-------------|-------------|
+| Body / table cell | 13px | regular | 600 | 1.5 |
+| Label / meta / badge | 12px | regular | 600 | 1.4 |
+| Card title | 14px | bold | 900 | 1.3 |
+| Page title | 28px | bold | 900 | 1.15 |
+
+Weight bands:
+- **regular** — 600 (body copy, table cells, labels, meta text, badges)
+- **bold** — 900 (card titles, page titles, headings)
+
+Note: The existing CSS declares weights in the 600–900 range. This contract consolidates them to exactly 2 bands. Phase 37 implementations must use 600 for regular roles and 900 for heading roles. No third band is permitted.
 
 Font: Inter (loaded via system stack — no external font load in this phase).
 
