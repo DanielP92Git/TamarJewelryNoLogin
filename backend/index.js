@@ -41,6 +41,7 @@ const {
 } = require('./routes/ssr');
 const { renderCategoryPage, renderProductPage, renderCartPage, DB_TO_URL_CATEGORY } = require('./routes/ssrDynamic');
 const { serveSitemap } = require('./routes/sitemap');
+const backupRoutes = require('./routes/backup');
 const { cacheMiddleware } = require('./middleware/cacheMiddleware');
 const { invalidateProduct, invalidateCategory, invalidateAll, invalidateBulkProducts } = require('./cache/invalidation');
 
@@ -4503,6 +4504,9 @@ app.get('/:lang([a-z]{2})/*', (req, res) => {
 app.get('/:lang([a-z]{2})', (req, res) => {
   res.redirect(301, '/en');
 });
+
+// Phase 35: Backup management routes (manual trigger, listing)
+app.use('/admin', backupRoutes);
 
 // =============================================
 // Error handling (must be after all routes)
