@@ -17,12 +17,12 @@ Requirements for this milestone. Each maps to roadmap phases.
 ### Monitoring & Logging
 
 - [x] **MON-01**: Each backup run produces a structured log entry (timestamp, status, size, duration, error)
-- [ ] **MON-02**: Failed backups trigger an email alert via EmailJS
-- [ ] **MON-03**: Backup run history is persisted in a MongoDB `backup_logs` collection
+- [x] **MON-02**: Failed backups trigger an email alert via EmailJS
+- [x] **MON-03**: Backup run history is persisted in a MongoDB `backup_logs` collection
 
 ### Admin Operations
 
-- [ ] **ADM-01**: Admin can trigger a manual backup via authenticated POST endpoint
+- [x] **ADM-01**: Admin can trigger a manual backup via authenticated POST endpoint
 - [ ] **ADM-02**: Admin dashboard displays backup panel (list backups, trigger, view status)
 - [x] **ADM-03**: Retention count is configurable via `BACKUP_RETENTION_COUNT` env var (default 14)
 
@@ -30,7 +30,7 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 - [ ] **REST-01**: Admin can restore database from a specific backup via authenticated POST endpoint
 - [ ] **REST-02**: Restore requires explicit confirmation to prevent accidental data overwrite
-- [ ] **REST-03**: Admin can view list of available backups (GET endpoint)
+- [x] **REST-03**: Admin can view list of available backups (GET endpoint)
 
 ### Retention
 
@@ -66,14 +66,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | BKUP-03 | Phase 34 | Complete |
 | BKUP-04 | Phase 33 | Complete |
 | MON-01 | Phase 34 | Complete |
-| MON-02 | Phase 35 → 38 | Pending |
-| MON-03 | Phase 35 → 38 | Pending |
-| ADM-01 | Phase 35 → 38 | Pending |
+| MON-02 | Phase 35 | Complete |
+| MON-03 | Phase 35 | Complete |
+| ADM-01 | Phase 35 | Complete |
 | ADM-02 | Phase 37 | Pending |
 | ADM-03 | Phase 34 | Complete |
 | REST-01 | Phase 36 | Pending |
 | REST-02 | Phase 36 | Pending |
-| REST-03 | Phase 35 → 38 | Pending |
+| REST-03 | Phase 35 | Complete |
 | RET-01 | Phase 34 | Complete |
 
 **Coverage:**
@@ -83,4 +83,4 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-04-04*
-*Last updated: 2026-04-07 after gap closure phase creation (Phase 38 added)*
+*Last updated: 2026-04-08 after Phase 38 gap closure (MON-02, MON-03, ADM-01, REST-03 verified)*
