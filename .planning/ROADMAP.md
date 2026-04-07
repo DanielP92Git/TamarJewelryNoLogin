@@ -98,7 +98,7 @@ See [v1.5-ROADMAP.md](.planning/milestones/v1.5-ROADMAP.md) for full phase detai
 
 - [x] **Phase 33: Environment Setup & Binary Verification** — Confirm mongodump/mongorestore available in App Platform runtime (completed 2026-04-04)
 - [ ] **Phase 34: Core Backup Service** — Automated daily backups landing in off-region Spaces with retention
-- [ ] **Phase 35: Manual Trigger, Backup Listing & Failure Alerting** — Admin can trigger backups, view history, and receive failure notifications
+- [x] **Phase 35: Manual Trigger, Backup Listing & Failure Alerting** — Admin can trigger backups, view history, and receive failure notifications (completed 2026-04-07)
 - [ ] **Phase 36: Database Restore** — Admin can restore database from a specific backup with confirmation gate
 - [ ] **Phase 37: Admin Dashboard Panel** — Admin can manage backups without SSH access
 
@@ -184,7 +184,7 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 27-32. Bilingual Content | v1.5 | Complete | Complete | 2026-02-17 |
 | 33. Environment & Binary Verification | v1.6 | 2/2 | Complete   | 2026-04-04 |
 | 34. Core Backup Service | v1.6 | 1/2 | In Progress|  |
-| 35. Manual Trigger & Alerting | v1.6 | 0/? | Not started | - |
+| 35. Manual Trigger & Alerting | v1.6 | 2/2 | Complete   | 2026-04-07 |
 | 36. Database Restore | v1.6 | 0/? | Not started | - |
 | 37. Admin Dashboard Panel | v1.6 | 0/? | Not started | - |
 
