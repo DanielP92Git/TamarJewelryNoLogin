@@ -101,7 +101,7 @@ See [v1.5-ROADMAP.md](.planning/milestones/v1.5-ROADMAP.md) for full phase detai
 - [x] **Phase 35: Manual Trigger, Backup Listing & Failure Alerting** — Admin can trigger backups, view history, and receive failure notifications (completed 2026-04-07)
 - [ ] **Phase 36: Database Restore** — Admin can restore database from a specific backup with confirmation gate
 - [ ] **Phase 37: Admin Dashboard Panel** — Admin can manage backups without SSH access
-- [ ] **Phase 38: Phase 35 Verification & Audit Cleanup** — Verify Phase 35 code, fix rate limiter inconsistency, update requirements checkboxes (gap closure)
+- [x] **Phase 38: Phase 35 Verification & Audit Cleanup** — Verify Phase 35 code, fix rate limiter inconsistency, update requirements checkboxes (gap closure) (completed 2026-04-07)
 
 ## Phase Details
 
@@ -144,8 +144,10 @@ Plans:
   2. Authenticated admin can GET `/backups` and receive a list of all available Spaces backup objects with their dates and sizes
   3. Backup run history is persisted in a `backup_logs` MongoDB collection with at least timestamp, status, filename, bytes, duration_ms, and error fields
   4. When a backup fails, an email alert is sent via the existing EmailJS integration with error details
-**Plans**: TBD
-**UI hint**: yes
+**Plans**: 2/2 plans complete
+Plans:
+- [x] 35-01-PLAN.md — BackupLog model, alert service, backup routes, backupJob persistence, index.js wiring
+- [x] 35-02-PLAN.md — Unit + integration tests for all Phase 35 code (95 tests)
 
 ### Phase 36: Database Restore
 **Goal**: Admin can restore the database from any available backup, with an explicit confirmation gate preventing accidental data overwrite
@@ -180,7 +182,9 @@ Plans:
   2. Rate limiter in `routes/backup.js` uses identical header options (`standardHeaders: 'draft-7'`, `legacyHeaders: false`) as `index.js`
   3. REQUIREMENTS.md checkboxes are checked for all verified Phase 35 requirements
   4. All 4 requirements move from "partial" to "satisfied" status
-**Plans**: TBD
+**Plans:** 1/1 plans complete
+Plans:
+- [x] 38-01-PLAN.md — Fix rate limiter headers, create 35-VERIFICATION.md, update REQUIREMENTS.md checkboxes
 
 ## Progress
 
@@ -200,7 +204,6 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 35. Manual Trigger & Alerting | v1.6 | 2/2 | Complete   | 2026-04-07 |
 | 36. Database Restore | v1.6 | 0/? | Not started | - |
 | 37. Admin Dashboard Panel | v1.6 | 0/? | Not started | - |
-| 38. Phase 35 Verification & Audit Cleanup | v1.6 | 0/? | Not started | - |
+| 38. Phase 35 Verification & Audit Cleanup | v1.6 | 1/1 | Complete    | 2026-04-07 |
 
----
-*Last updated: 2026-04-05 after Phase 34 planning*
+*Last updated: 2026-04-07 after Phase 38 planning*
