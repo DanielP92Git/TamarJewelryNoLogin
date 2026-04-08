@@ -149,7 +149,7 @@ class ContactMeView extends View {
 
     try {
       await emailjs.send('service_t4qcx4j', 'template_kwezl8a', params, {
-        publicKey: 'dyz9UzngEOQUHFgv3',
+        publicKey: process.env.EMAILJS_PUBLIC_KEY,
       });
       document.getElementById('name').value = '';
       document.getElementById('lastname').value = '';
