@@ -172,8 +172,11 @@ Plans:
   2. Backup panel shows a "last successful backup" status row visible at a glance without scrolling
   3. Admin can trigger a manual backup from the dashboard with a button and see the result inline
   4. Admin can initiate a restore from the dashboard with a confirmation phrase requirement before execution proceeds
-**Plans**: TBD
+**Plans:** 2 plans
 **UI hint**: yes
+Plans:
+- [ ] 37-01-PLAN.md — Sidebar nav, backup summary card, history table, manual backup trigger, all CSS
+- [ ] 37-02-PLAN.md — Restore modal with confirmation phrase gate and state machine (confirm/in-progress/success/error)
 
 ### Phase 38: Phase 35 Verification & Audit Cleanup
 **Goal**: Verify that Phase 35 code (manual backup, backup listing, failure alerting, backup logs) works correctly, fix rate limiter header inconsistency, and update requirements tracking
@@ -206,7 +209,7 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 34. Core Backup Service | v1.6 | 2/2 | Complete   | 2026-04-07 |
 | 35. Manual Trigger & Alerting | v1.6 | 2/2 | Complete   | 2026-04-07 |
 | 36. Database Restore | v1.6 | 2/2 | Complete    | 2026-04-08 |
-| 37. Admin Dashboard Panel | v1.6 | 0/? | Not started | - |
+| 37. Admin Dashboard Panel | v1.6 | 0/2 | Planning complete | - |
 | 38. Phase 35 Verification & Audit Cleanup | v1.6 | 1/1 | Complete    | 2026-04-07 |
 
-*Last updated: 2026-04-08 after Phase 36 planning*
+*Last updated: 2026-04-08 after Phase 37 planning*
