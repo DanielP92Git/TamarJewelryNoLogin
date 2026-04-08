@@ -100,7 +100,7 @@ See [v1.5-ROADMAP.md](.planning/milestones/v1.5-ROADMAP.md) for full phase detai
 - [x] **Phase 34: Core Backup Service** — Automated daily backups landing in off-region Spaces with retention (completed 2026-04-07)
 - [x] **Phase 35: Manual Trigger, Backup Listing & Failure Alerting** — Admin can trigger backups, view history, and receive failure notifications (completed 2026-04-07)
 - [x] **Phase 36: Database Restore** — Admin can restore database from a specific backup with confirmation gate (completed 2026-04-08)
-- [ ] **Phase 37: Admin Dashboard Panel** — Admin can manage backups without SSH access
+- [x] **Phase 37: Admin Dashboard Panel** — Admin can manage backups without SSH access (completed 2026-04-08)
 - [x] **Phase 38: Phase 35 Verification & Audit Cleanup** — Verify Phase 35 code, fix rate limiter inconsistency, update requirements checkboxes (gap closure) (completed 2026-04-07)
 
 ## Phase Details
@@ -172,11 +172,11 @@ Plans:
   2. Backup panel shows a "last successful backup" status row visible at a glance without scrolling
   3. Admin can trigger a manual backup from the dashboard with a button and see the result inline
   4. Admin can initiate a restore from the dashboard with a confirmation phrase requirement before execution proceeds
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 **UI hint**: yes
 Plans:
-- [ ] 37-01-PLAN.md — Sidebar nav, backup summary card, history table, manual backup trigger, all CSS
-- [ ] 37-02-PLAN.md — Restore modal with confirmation phrase gate and state machine (confirm/in-progress/success/error)
+- [x] 37-01-PLAN.md — Sidebar nav, backup summary card, history table, manual backup trigger, all CSS
+- [x] 37-02-PLAN.md — Restore modal with confirmation phrase gate and state machine (confirm/in-progress/success/error)
 
 ### Phase 38: Phase 35 Verification & Audit Cleanup
 **Goal**: Verify that Phase 35 code (manual backup, backup listing, failure alerting, backup logs) works correctly, fix rate limiter header inconsistency, and update requirements tracking
@@ -209,7 +209,7 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 34. Core Backup Service | v1.6 | 2/2 | Complete   | 2026-04-07 |
 | 35. Manual Trigger & Alerting | v1.6 | 2/2 | Complete   | 2026-04-07 |
 | 36. Database Restore | v1.6 | 2/2 | Complete    | 2026-04-08 |
-| 37. Admin Dashboard Panel | v1.6 | 0/2 | Planning complete | - |
+| 37. Admin Dashboard Panel | v1.6 | 2/2 | Complete    | 2026-04-08 |
 | 38. Phase 35 Verification & Audit Cleanup | v1.6 | 1/1 | Complete    | 2026-04-07 |
 
 *Last updated: 2026-04-08 after Phase 37 planning*
