@@ -183,7 +183,7 @@ router.get(
 // POST /admin/restore/:key — Database restore (REST-01, REST-02, D-09, D-10)
 // =============================================
 router.post(
-  '/restore/:key',
+  '/restore/:key(*)',
   adminRateLimiter,
   fetchUser,
   requireAdmin,
