@@ -135,7 +135,7 @@ async function runRetentionCleanup(s3, bucket, prefix, retentionCount) {
  *
  * @returns {Promise<Object>} Result object with MON-01 fields
  */
-async function runBackup() {
+async function runBackup(options = {}) {
   const startedAt = Date.now();
   const filename = buildBackupFilename();
 
@@ -172,7 +172,7 @@ async function runBackup() {
 
     // Upload to DigitalOcean Spaces (BKUP-02)
     const s3 = createBackupS3Client();
-    const prefix = process.env.BACKUP_SPACES_PREFIX || 'backups/';
+    const prefix = options.prefix || process.env.BACKUP_SPACES_PREFIX || 'backups/';
     const key = prefix + filename;
 
     await s3.putObject({
@@ -209,10 +209,182 @@ async function runBackup() {
   return result;
 }
 
+/**
+ * Spawns mongorestore and writes the archive buffer to stdin (D-05, D-06).
+ *
+ * Mirrors spawnMongodump exactly but in reverse:
+ * - stdin is piped IN (write buffer then end)
+ * - stdout is ignored (mongorestore outputs to database, not stdout)
+ * - stderr is piped for error reporting
+ * - Uses --drop flag for clean state (D-06)
+ *
+ * MongoDB URI is NEVER logged — redacted in error messages.
+ *
+ * @param {string} mongoUri - MongoDB connection URI
+ * @param {Buffer} archiveBuffer - gzip archive from Spaces
+ * @returns {Promise<void>} Resolves on success
+ */
+function spawnMongorestore(mongoUri, archiveBuffer) {
+  return new Promise((resolve, reject) => {
+    const mongorestorePath = process.env.MONGORESTORE_PATH || 'mongorestore';
+
+    const child = childProcess.spawn(
+      mongorestorePath,
+      ['--uri', mongoUri, '--archive', '--gzip', '--drop'],
+      { stdio: ['pipe', 'ignore', 'pipe'] }
+    );
+
+    const stderrChunks = [];
+    child.stderr.on('data', chunk => stderrChunks.push(chunk));
+
+    child.on('close', code => {
+      if (code !== 0) {
+        const stderr = Buffer.concat(stderrChunks).toString('utf8');
+        const redacted = stderr.replace(/(mongodb(?:\+srv)?:\/\/)[^\s@]+@/g, '$1[REDACTED]@');
+        return reject(new Error(`mongorestore exited ${code}: ${redacted}`));
+      }
+      resolve();
+    });
+
+    child.on('error', err => reject(err));
+
+    // Write archive to stdin, then signal EOF (Pitfall 1: MUST call end)
+    child.stdin.write(archiveBuffer);
+    child.stdin.end();
+  });
+}
+
+/**
+ * Checks whether a key exists in the Spaces bucket via headObject (D-11).
+ *
+ * Uses headObject (lightweight HEAD request) rather than listing all objects.
+ * Handles both 'NotFound' and statusCode 404 for Spaces compatibility (Pitfall 5).
+ *
+ * @param {AWS.S3} s3 - Configured S3 client
+ * @param {string} bucket - Bucket name
+ * @param {string} key - Full object key to check
+ * @returns {Promise<boolean>} true if object exists
+ */
+async function keyExistsInSpaces(s3, bucket, key) {
+  try {
+    await s3.headObject({ Bucket: bucket, Key: key }).promise();
+    return true;
+  } catch (err) {
+    if (err.code === 'NotFound' || err.statusCode === 404) return false;
+    throw err;
+  }
+}
+
+/**
+ * Restore orchestrator (D-08).
+ *
+ * Steps:
+ *   1. Guard: required env vars present
+ *   2. Validate key against Spaces objects (D-11) — return failedStep:'validation' if not found
+ *   3. Pre-restore safety backup via runBackup with pre-restore/ prefix (D-01, D-02, D-03)
+ *   4. Download archive buffer from Spaces (D-05) — measure downloadMs
+ *   5. Spawn mongorestore with --archive --gzip --drop (D-06) — measure restoreMs
+ *
+ * Returns result object with step timing (D-20) and preRestoreBackup filename (D-04).
+ * No auto-rollback on failure (D-19) — result includes preRestoreBackup for manual recovery.
+ *
+ * @param {string} key - Full S3 key of the backup object to restore from
+ * @returns {Promise<Object>} Result object with status, timing, error details
+ */
+async function runRestore(key) {
+  const startedAt = Date.now();
+
+  const result = {
+    timestamp: new Date().toISOString(),
+    status: 'success',
+    preRestoreBackup: null,
+    failedStep: null,
+    downloadMs: null,
+    preBackupMs: null,
+    restoreMs: null,
+    totalMs: null,
+    error: null,
+  };
+
+  try {
+    // Guard: Spaces credentials present
+    if (
+      !process.env.BACKUP_BUCKET ||
+      !process.env.BACKUP_SPACES_ENDPOINT ||
+      !process.env.BACKUP_SPACES_KEY ||
+      !process.env.BACKUP_SPACES_SECRET
+    ) {
+      throw new Error('Missing BACKUP_SPACES_* credentials or BACKUP_BUCKET');
+    }
+
+    // Guard: MongoDB URI present
+    if (!process.env.MONGO_URL) {
+      throw new Error('MONGO_URL is not set');
+    }
+
+    const s3 = createBackupS3Client();
+    const bucket = process.env.BACKUP_BUCKET;
+
+    // D-11: Validate key against actual Spaces objects
+    const exists = await keyExistsInSpaces(s3, bucket, key);
+    if (!exists) {
+      result.status = 'failed';
+      result.failedStep = 'validation';
+      result.error = `Backup key not found: ${key}`;
+      result.totalMs = Date.now() - startedAt;
+      console.log('[backup] restore ' + JSON.stringify(result));
+      return result;
+    }
+
+    // D-01/D-02/D-03: Pre-restore safety backup with separate prefix
+    const preBackupStart = Date.now();
+    const preRestorePrefix = process.env.BACKUP_PRE_RESTORE_PREFIX || 'pre-restore/';
+    const preBackupResult = await runBackup({ prefix: preRestorePrefix });
+    result.preBackupMs = Date.now() - preBackupStart;
+
+    if (preBackupResult.status === 'failed') {
+      result.status = 'failed';
+      result.failedStep = 'pre-backup';
+      result.error = `Pre-restore backup failed: ${preBackupResult.error}`;
+      result.totalMs = Date.now() - startedAt;
+      console.log('[backup] restore ' + JSON.stringify(result));
+      return result;
+    }
+    // D-04: Store pre-restore backup filename for audit and manual recovery
+    result.preRestoreBackup = preBackupResult.filename;
+
+    // D-05: Download archive into memory
+    const downloadStart = Date.now();
+    const response = await s3.getObject({ Bucket: bucket, Key: key }).promise();
+    const archiveBuffer = response.Body;
+    result.downloadMs = Date.now() - downloadStart;
+
+    // D-06: Run mongorestore --archive --gzip --drop
+    const restoreStart = Date.now();
+    await spawnMongorestore(process.env.MONGO_URL, archiveBuffer);
+    result.restoreMs = Date.now() - restoreStart;
+
+  } catch (err) {
+    result.status = 'failed';
+    result.error = err.message;
+    if (!result.failedStep) result.failedStep = 'restore';
+  } finally {
+    result.totalMs = Date.now() - startedAt;
+  }
+
+  // Structured log line — same pattern as runBackup
+  console.log('[backup] restore ' + JSON.stringify(result));
+
+  return result;
+}
+
 module.exports = {
   runBackup,
+  runRestore,
   createBackupS3Client,
   spawnMongodump,
+  spawnMongorestore,
   buildBackupFilename,
   runRetentionCleanup,
+  keyExistsInSpaces,
 };
