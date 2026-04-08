@@ -9,9 +9,10 @@ const BackupLogSchema = new mongoose.Schema({
   bytes:       { type: Number, default: null },
   duration_ms: { type: Number, default: null },
   error:       { type: String, default: null },
-  trigger:     { type: String, required: true, enum: ['cron', 'manual'] },
+  trigger:     { type: String, required: true, enum: ['cron', 'manual', 'restore'] },
   retention_deleted: { type: Number, default: 0 },
   retention_error:   { type: String, default: null },
+  preRestoreBackup:  { type: String, default: null },
 });
 
 // Index on timestamp descending for newest-first listing queries (D-14)

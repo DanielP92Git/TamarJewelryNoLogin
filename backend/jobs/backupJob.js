@@ -18,6 +18,7 @@ const cron = require('node-cron');
 const { runBackup } = require('../services/backupService');
 const BackupLog = require('../models/BackupLog');
 const { sendBackupFailureAlert } = require('../services/backupAlertService');
+const { getActiveOperation } = require('../utils/backupLock');
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -30,6 +31,11 @@ function startBackupJob() {
   cron.schedule(
     '0 3 * * *',
     async () => {
+      if (getActiveOperation() !== null) {
+        console.warn('[backup] Cron backup skipped — operation in progress:', getActiveOperation());
+        return;
+      }
+
       const result = await runBackup();
 
       // D-08, D-09: Persist to BackupLog (caller persists, not backupService)
