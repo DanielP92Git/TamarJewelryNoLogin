@@ -99,7 +99,7 @@ See [v1.5-ROADMAP.md](.planning/milestones/v1.5-ROADMAP.md) for full phase detai
 - [x] **Phase 33: Environment Setup & Binary Verification** — Confirm mongodump/mongorestore available in App Platform runtime (completed 2026-04-04)
 - [x] **Phase 34: Core Backup Service** — Automated daily backups landing in off-region Spaces with retention (completed 2026-04-07)
 - [x] **Phase 35: Manual Trigger, Backup Listing & Failure Alerting** — Admin can trigger backups, view history, and receive failure notifications (completed 2026-04-07)
-- [ ] **Phase 36: Database Restore** — Admin can restore database from a specific backup with confirmation gate
+- [x] **Phase 36: Database Restore** — Admin can restore database from a specific backup with confirmation gate (completed 2026-04-08)
 - [ ] **Phase 37: Admin Dashboard Panel** — Admin can manage backups without SSH access
 - [x] **Phase 38: Phase 35 Verification & Audit Cleanup** — Verify Phase 35 code, fix rate limiter inconsistency, update requirements checkboxes (gap closure) (completed 2026-04-07)
 
@@ -160,8 +160,8 @@ Plans:
   4. End-to-end restore test is completed against the real Atlas cluster and confirmed working (documented in code comment or plan summary)
 **Plans**: 2 plans
 Plans:
-- [ ] 36-01-PLAN.md — Shared lock, BackupLog schema extension, backupService restore functions, restore route, backupJob lock check
-- [ ] 36-02-PLAN.md — Unit tests for restore functions + integration tests for restore endpoint
+- [x] 36-01-PLAN.md — Shared lock, BackupLog schema extension, backupService restore functions, restore route, backupJob lock check
+- [x] 36-02-PLAN.md — Unit tests for restore functions + integration tests for restore endpoint
 
 ### Phase 37: Admin Dashboard Panel
 **Goal**: Admin can view backup status, trigger backups, and initiate a restore from the admin dashboard without needing SSH access or App Platform log inspection
@@ -185,7 +185,7 @@ Plans:
   2. Rate limiter in `routes/backup.js` uses identical header options (`standardHeaders: 'draft-7'`, `legacyHeaders: false`) as `index.js`
   3. REQUIREMENTS.md checkboxes are checked for all verified Phase 35 requirements
   4. All 4 requirements move from "partial" to "satisfied" status
-**Plans:** 1/1 plans complete
+**Plans:** 2/2 plans complete
 Plans:
 - [x] 38-01-PLAN.md — Fix rate limiter headers, create 35-VERIFICATION.md, update REQUIREMENTS.md checkboxes
 
@@ -205,7 +205,7 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 33. Environment & Binary Verification | v1.6 | 2/2 | Complete   | 2026-04-04 |
 | 34. Core Backup Service | v1.6 | 2/2 | Complete   | 2026-04-07 |
 | 35. Manual Trigger & Alerting | v1.6 | 2/2 | Complete   | 2026-04-07 |
-| 36. Database Restore | v1.6 | 0/2 | Not started | - |
+| 36. Database Restore | v1.6 | 2/2 | Complete   | 2026-04-08 |
 | 37. Admin Dashboard Panel | v1.6 | 0/? | Not started | - |
 | 38. Phase 35 Verification & Audit Cleanup | v1.6 | 1/1 | Complete    | 2026-04-07 |
 
