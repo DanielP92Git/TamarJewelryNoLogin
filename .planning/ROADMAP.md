@@ -205,7 +205,7 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 33. Environment & Binary Verification | v1.6 | 2/2 | Complete   | 2026-04-04 |
 | 34. Core Backup Service | v1.6 | 2/2 | Complete   | 2026-04-07 |
 | 35. Manual Trigger & Alerting | v1.6 | 2/2 | Complete   | 2026-04-07 |
-| 36. Database Restore | v1.6 | 2/2 | Complete   | 2026-04-08 |
+| 36. Database Restore | v1.6 | 2/2 | Complete    | 2026-04-08 |
 | 37. Admin Dashboard Panel | v1.6 | 0/? | Not started | - |
 | 38. Phase 35 Verification & Audit Cleanup | v1.6 | 1/1 | Complete    | 2026-04-07 |
 
