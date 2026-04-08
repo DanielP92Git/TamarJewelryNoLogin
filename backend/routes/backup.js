@@ -15,7 +15,8 @@
 const { Router } = require('express');
 const rateLimit = require('express-rate-limit');
 const { fetchUser, requireAdmin } = require('../middleware/auth');
-const { runBackup, createBackupS3Client } = require('../services/backupService');
+const { runBackup, runRestore, createBackupS3Client } = require('../services/backupService');
+const { getActiveOperation, setActiveOperation, clearActiveOperation } = require('../utils/backupLock');
 const BackupLog = require('../models/BackupLog');
 const { sendBackupFailureAlert } = require('../services/backupAlertService');
 
@@ -29,9 +30,6 @@ const adminRateLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-// D-17: In-memory concurrency lock (single-instance App Platform)
-let isBackupRunning = false;
-
 // =============================================
 // POST /admin/backup — Manual trigger (ADM-01, D-15, D-16, D-17)
 // =============================================
@@ -41,15 +39,15 @@ router.post(
   fetchUser,
   requireAdmin,
   async (req, res) => {
-    // D-17: Reject if backup already in progress
-    if (isBackupRunning) {
-      return res.status(409).json({
-        success: false,
-        error: 'Backup already in progress',
-      });
+    // D-17/D-12: Reject if any operation already in progress
+    if (getActiveOperation() !== null) {
+      const msg = getActiveOperation() === 'restore'
+        ? 'Restore in progress'
+        : 'Backup already in progress';
+      return res.status(409).json({ success: false, error: msg });
     }
 
-    isBackupRunning = true;
+    setActiveOperation('backup');
     try {
       // D-16: Synchronous — await runBackup and return result directly
       const result = await runBackup();
@@ -96,8 +94,8 @@ router.post(
         error: 'Unexpected backup error',
       });
     } finally {
-      // D-17: Always release lock
-      isBackupRunning = false;
+      // D-17/D-12: Always release lock
+      clearActiveOperation();
     }
   }
 );
@@ -177,6 +175,89 @@ router.get(
         success: false,
         error: 'Failed to retrieve backup listing',
       });
+    }
+  }
+);
+
+// =============================================
+// POST /admin/restore/:key — Database restore (REST-01, REST-02, D-09, D-10)
+// =============================================
+router.post(
+  '/restore/:key',
+  adminRateLimiter,
+  fetchUser,
+  requireAdmin,
+  async (req, res) => {
+    // D-10/REST-02: Confirmation gate — strict equality required (Pitfall 6)
+    if (req.body.confirm !== 'RESTORE') {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing or invalid confirmation. Send { "confirm": "RESTORE" } to proceed.',
+      });
+    }
+
+    // D-12: Unified concurrency lock
+    if (getActiveOperation() !== null) {
+      const msg = getActiveOperation() === 'backup'
+        ? 'Backup in progress — cannot restore while backup is running'
+        : 'Restore already in progress';
+      return res.status(409).json({ success: false, error: msg });
+    }
+
+    setActiveOperation('restore');
+    try {
+      // D-07: Synchronous — await runRestore and return result directly
+      const result = await runRestore(req.params.key);
+
+      // D-15/D-16: Persist to BackupLog with trigger:'restore' and preRestoreBackup
+      try {
+        await BackupLog.create({
+          timestamp: new Date(result.timestamp),
+          status: result.status,
+          filename: req.params.key,
+          bytes: null,
+          duration_ms: result.totalMs,
+          error: result.error,
+          trigger: 'restore',
+          preRestoreBackup: result.preRestoreBackup,
+        });
+      } catch (dbErr) {
+        console.warn('[backup] failed to persist restore BackupLog:', dbErr.message);
+      }
+
+      // D-17: Alert on restore failure
+      if (result.status === 'failed') {
+        try {
+          await sendBackupFailureAlert({
+            error: result.error,
+            timestamp: result.timestamp,
+            filename: req.params.key,
+            durationMs: result.totalMs,
+          });
+        } catch (alertErr) {
+          console.warn('[backup] restore alert failed:', alertErr.message);
+        }
+      }
+
+      // D-18/D-19: Return full result with timing and preRestoreBackup.
+      // failedStep === 'validation' means key not found (D-11) — return 404.
+      // Other failures return 500.
+      if (result.status === 'failed') {
+        const httpStatus = result.failedStep === 'validation' ? 404 : 500;
+        return res.status(httpStatus).json({ success: false, ...result });
+      }
+
+      return res.json({ success: true, ...result });
+    } catch (err) {
+      // Unexpected error (runRestore should not throw — it catches internally)
+      console.error('[backup] unexpected error in restore:', err.message);
+      return res.status(500).json({
+        success: false,
+        error: 'Unexpected restore error',
+      });
+    } finally {
+      // D-12: Always release lock
+      clearActiveOperation();
     }
   }
 );
