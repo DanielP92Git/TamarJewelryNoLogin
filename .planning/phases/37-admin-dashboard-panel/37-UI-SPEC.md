@@ -30,7 +30,7 @@ Source: `admin/bambaYafa-desktop.css` `:root` block and `body` font-family decla
 
 ## Spacing Scale
 
-Declared values (must be multiples of 4). Sourced from `bambaYafa-desktop.css` existing usage patterns.
+Scope: this table covers only NEW spacing values introduced by Phase 37. Existing component spacing (`.nav__item`, `.row`, etc.) is not part of this phase's work and is left unchanged.
 
 | Token | Value | Usage |
 |-------|-------|-------|
@@ -42,29 +42,33 @@ Declared values (must be multiples of 4). Sourced from `bambaYafa-desktop.css` e
 | 2xl | 48px | Not in use for this phase |
 | 3xl | 64px | Topbar height (64px) — structural constant, not spacing token |
 
-Exceptions:
-- `.row` padding: 12px vertical / 16px horizontal — maintain for consistency with existing product table rows
-- `.nav__item` padding: 10px / 12px — follow exactly; do not change
-- Touch target minimums do not apply (admin dashboard is desktop-only)
+Notes:
+- Touch target minimums do not apply (admin dashboard is desktop-only).
+- Do not modify existing spacing on `.nav__item`, `.row`, or other pre-existing components.
 
 ---
 
 ## Typography
 
-All values sourced directly from `admin/bambaYafa-desktop.css`.
+Scope: two canonical weights are defined for NEW elements introduced in this phase. Additional weights (650, 750, 800, 850, 900) exist in `bambaYafa-desktop.css` for pre-existing components and are not introduced by this phase.
 
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
-| Body / table cell content | 13px | 700–850 | 1.5 (inherited) |
-| Label / meta / badge | 12px | 850 | 1.2 |
-| Input / select | 14px | 650 | 1.5 |
-| Card title / section heading | 14px | 900 | 1.2 |
+| Body / table cell content | 13px | 700 | 1.5 (inherited) |
+| Label / meta / badge / card sub-label | 12px | 700 | 1.2 |
+| Input / select | 14px | 700 | 1.5 |
+| Card title / section heading | 14px | 800 | 1.2 |
+| Table header row | 11px | 800 | 1.2 |
+
+Canonical weights for this phase:
+- **700** — body text, table cell content, inputs, dates, sizes, badge text
+- **800** — labels, headings, table column headers, card sub-labels
 
 Notes:
-- Font weights use numeric values as declared in the CSS (850, 900 are valid in variable-weight font axes for Inter)
-- Monospace content (filenames, backup keys): `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace` at 12px / weight 750 — use `.mono` class
-- Date/time values displayed in table: 13px, weight 700, `var(--muted)` color — consistent with `.mono` or standard row text
-- No new font sizes. All new text falls into one of the four roles above.
+- Weights 650, 750, 850, 900 appear in the existing stylesheet for pre-existing components. Do not introduce them in any new CSS rules written for this phase.
+- Monospace content (filenames, backup keys): `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace` at 12px / weight 700 — use `.mono` class.
+- Date/time values displayed in table: 13px, weight 700, `var(--muted)` color — consistent with standard row text.
+- No new font sizes beyond those listed. All new text falls into one of the five roles above.
 
 ---
 
@@ -128,16 +132,16 @@ All copy sourced from `37-CONTEXT.md` decisions (D-03, D-06, D-10, D-11, D-12, D
 | Restore modal input placeholder | "RESTORE" |
 | Restore modal submit (disabled) | "Restore Database" |
 | Restore modal submit (enabled) | "Restore Database" |
-| Restore modal cancel | "Cancel" |
+| Restore modal cancel | "Don't Restore" |
 | Restore modal — in-progress heading | "Restoring database..." |
 | Restore modal — in-progress body | "Please wait, do not close this page." |
 | Restore modal — success heading | "Restore Complete" |
 | Restore modal — success body | "Safety backup created: {preRestoreBackup filename}. Duration: {totalMs / 1000}s" |
-| Restore modal — success close | "Done" |
+| Restore modal — success close | "View Backups" |
 | Restore modal — error heading | "Restore Failed" |
 | Restore modal — error body (failed before restore) | "Your database was not changed. Error: {error}. Step: {failedStep}." |
 | Restore modal — error body (safety backup created) | "Safety backup created before failure: {preRestoreBackup}. Error: {error}." |
-| Restore modal — error close | "Close" |
+| Restore modal — error close | "Close Details" |
 
 ---
 
@@ -146,6 +150,8 @@ All copy sourced from `37-CONTEXT.md` decisions (D-03, D-06, D-10, D-11, D-12, D
 Components to add. All are CSS-only additions to `bambaYafa-desktop.css` with JS wired in `BisliView.js`.
 
 ### 1. Summary Status Card (`.backup-summary-card`)
+
+Focal point: the "Run Backup Now" button on the right side of the card is the primary focal point. It is the single actionable element on the page above the table and must be visually prominent using `.btn--primary` (accent blue). The status badge serves as secondary information. The timestamp and size values are tertiary.
 
 Layout: horizontal flex row, full width, `padding: 16px`, `border-radius: var(--radius)`, `border: 1px solid var(--border)`, `background: rgba(30, 30, 45, 0.76)`.
 
@@ -205,10 +211,10 @@ State machine visual summary:
 
 | State | Header bg | Body | Footer |
 |-------|-----------|------|--------|
-| Confirm | `--surface-2` with danger top border | Warning text + backup info + phrase input | Cancel (`.btn`) + Restore Database (`.btn.btn--danger`, disabled until phrase match) |
+| Confirm | `--surface-2` with danger top border | Warning text + backup info + phrase input | "Don't Restore" (`.btn`) + "Restore Database" (`.btn.btn--danger`, disabled until phrase match) |
 | In-progress | `--surface-2` | Centered `.button-spinner` (large: 36px) + "Restoring database..." | No footer; no close button |
-| Success | `--surface-2` | "Restore Complete" heading + pre-restore filename + duration | "Done" (`.btn.btn--primary`) |
-| Error | `--surface-2` with danger top border | Error heading + message + failed step + context | "Close" (`.btn`) |
+| Success | `--surface-2` | "Restore Complete" heading + pre-restore filename + duration | "View Backups" (`.btn.btn--primary`) |
+| Error | `--surface-2` with danger top border | Error heading + message + failed step + context | "Close Details" (`.btn`) |
 
 ### 4. Sidebar Section Addition
 
@@ -246,7 +252,7 @@ Icon: inline SVG database cylinder — 3 concentric horizontal ellipses with a v
 | Modal ESC key | Confirm state | Closes modal |
 | Modal ESC key | In-progress state | `e.preventDefault()` on `cancel` event — ESC suppressed |
 | Modal ESC key | Success/Error state | Listener removed — ESC works again |
-| Table "Done" button | Success state | Closes dialog + calls `refreshBackupTable()` |
+| "View Backups" button | Success state | Closes dialog + calls `refreshBackupTable()` |
 
 ---
 
@@ -291,7 +297,7 @@ Formatting functions to implement (no external libraries):
 | Restore button only on success non-restore rows | CONTEXT.md D-13 |
 | Restore modal confirm state (phrase gate) | CONTEXT.md D-14 |
 | In-progress lock (no X, no backdrop dismiss) | CONTEXT.md D-15 |
-| Success state with pre-restore filename + "Done" refresh | CONTEXT.md D-16 |
+| Success state with pre-restore filename + "View Backups" refresh | CONTEXT.md D-16 |
 | Error state with context, no auto-dismiss | CONTEXT.md D-17 |
 | All CSS variables and class patterns | Codebase scan: `admin/bambaYafa-desktop.css` |
 | Font family, font sizes, weights | Codebase scan: `admin/bambaYafa-desktop.css` |
