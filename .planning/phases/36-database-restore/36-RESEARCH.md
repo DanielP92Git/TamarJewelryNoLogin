@@ -690,7 +690,7 @@ both `backup.js` and `backupJob.js` import. This avoids circular dependency conc
 
 ---
 
-## Open Questions
+## Open Questions (RESOLVED)
 
 1. **How exactly should pre-restore backup prefix be passed to runBackup()?**
    - What we know: `runBackup()` currently derives prefix from `BACKUP_SPACES_PREFIX` env var

@@ -17,18 +17,18 @@ created: 2026-04-08
 
 | Property | Value |
 |----------|-------|
-| **Framework** | jest 29.x |
-| **Config file** | backend/jest.config.js |
-| **Quick run command** | `cd backend && npx jest --testPathPattern="backup\|restore" --no-coverage` |
-| **Full suite command** | `cd backend && npx jest --no-coverage` |
+| **Framework** | vitest ^4.0.18 |
+| **Config file** | backend/vitest.config.js |
+| **Quick run command** | `cd backend && npx vitest run --reporter=verbose -- restore` |
+| **Full suite command** | `cd backend && npx vitest run --reporter=verbose` |
 | **Estimated runtime** | ~15 seconds |
 
 ---
 
 ## Sampling Rate
 
-- **After every task commit:** Run `cd backend && npx jest --testPathPattern="backup\|restore" --no-coverage`
-- **After every plan wave:** Run `cd backend && npx jest --no-coverage`
+- **After every task commit:** Run `cd backend && npx vitest run --reporter=verbose -- restore`
+- **After every plan wave:** Run `cd backend && npx vitest run --reporter=verbose`
 - **Before `/gsd-verify-work`:** Full suite must be green
 - **Max feedback latency:** 15 seconds
 
@@ -38,9 +38,9 @@ created: 2026-04-08
 
 | Task ID | Plan | Wave | Requirement | Threat Ref | Secure Behavior | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|------------|-----------------|-----------|-------------------|-------------|--------|
-| 36-01-01 | 01 | 1 | REST-01 | T-36-01 | Auth required for restore | unit | `npx jest --testPathPattern="restore"` | ❌ W0 | ⬜ pending |
-| 36-01-02 | 01 | 1 | REST-02 | T-36-02 | Confirmation gate rejects bad input | unit | `npx jest --testPathPattern="restore"` | ❌ W0 | ⬜ pending |
-| 36-01-03 | 01 | 1 | REST-01 | T-36-03 | Key validated against Spaces objects | unit | `npx jest --testPathPattern="restore"` | ❌ W0 | ⬜ pending |
+| 36-01-01 | 01 | 1 | REST-01 | T-36-01 | Auth required for restore | unit | `npx vitest run -- restore` | ❌ W0 | ⬜ pending |
+| 36-01-02 | 01 | 1 | REST-02 | T-36-02 | Confirmation gate rejects bad input | unit | `npx vitest run -- restore` | ❌ W0 | ⬜ pending |
+| 36-01-03 | 01 | 1 | REST-01 | T-36-03 | Key validated against Spaces objects | unit | `npx vitest run -- restore` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
