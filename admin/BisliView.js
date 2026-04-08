@@ -466,6 +466,208 @@ async function renderBackupsPage() {
   }
 }
 
+// ===== Restore Modal (Phase 37, D-13 through D-17) =====
+
+function escapeHtml(str) {
+  if (!str) return '';
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function openRestoreModal(filename) {
+  // Remove existing restore modal if present (prevent stacking — Pitfall from RESEARCH.md)
+  document.getElementById('restoreConfirmModal')?.remove();
+
+  const dialog = document.createElement('dialog');
+  dialog.id = 'restoreConfirmModal';
+  dialog.className = 'restore-confirm-modal';
+  dialog.setAttribute('role', 'dialog');
+  dialog.setAttribute('aria-modal', 'true');
+  dialog.setAttribute('aria-labelledby', 'restore-modal-title');
+  document.body.appendChild(dialog);
+
+  let isOperationInProgress = false;
+  const preventCancel = (e) => e.preventDefault();
+
+  // Backdrop click handler — only dismiss when not in progress
+  function handleBackdropClick(e) {
+    if (e.target === dialog && !isOperationInProgress) {
+      dialog.close();
+    }
+  }
+  dialog.addEventListener('click', handleBackdropClick);
+
+  // Clean up on dialog close
+  dialog.addEventListener('close', () => {
+    dialog.remove();
+  });
+
+  // --- STATE 1: CONFIRM (D-14) ---
+  renderConfirmState();
+
+  function renderConfirmState() {
+    dialog.innerHTML = `
+      <div class="restore-modal-header">
+        <h3 id="restore-modal-title">Restore Database</h3>
+        <button type="button" class="restore-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="restore-modal-body">
+        <p class="restore-warning">This will overwrite all current data. A safety backup will be created first.</p>
+        <p>Restoring from: <span class="mono">${escapeHtml(filename)}</span></p>
+        <label for="restore-confirm-input">Type RESTORE to confirm</label>
+        <input id="restore-confirm-input" type="text" placeholder="RESTORE" autocomplete="off" spellcheck="false" />
+      </div>
+      <div class="restore-modal-footer">
+        <button type="button" class="btn restore-cancel-btn">Don't Restore</button>
+        <button type="button" class="btn btn--danger restore-submit-btn" disabled>Restore Database</button>
+      </div>
+    `;
+
+    const closeBtn = dialog.querySelector('.restore-modal-close');
+    const cancelBtn = dialog.querySelector('.restore-cancel-btn');
+    const submitBtn = dialog.querySelector('.restore-submit-btn');
+    const confirmInput = dialog.querySelector('#restore-confirm-input');
+
+    closeBtn.addEventListener('click', () => dialog.close());
+    cancelBtn.addEventListener('click', () => dialog.close());
+
+    // D-14: Enable submit only when input exactly matches "RESTORE"
+    confirmInput.addEventListener('input', () => {
+      submitBtn.disabled = confirmInput.value !== 'RESTORE';
+    });
+
+    submitBtn.addEventListener('click', () => {
+      if (confirmInput.value === 'RESTORE') {
+        executeRestore();
+      }
+    });
+
+    // Allow Enter key to submit when input matches
+    confirmInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && confirmInput.value === 'RESTORE') {
+        executeRestore();
+      }
+    });
+  }
+
+  // --- STATE 2: IN-PROGRESS (D-15) ---
+  function renderInProgressState() {
+    isOperationInProgress = true;
+
+    // D-15: Prevent ESC closing during restore (Pitfall 1 from RESEARCH.md)
+    dialog.addEventListener('cancel', preventCancel);
+
+    dialog.innerHTML = `
+      <div class="restore-in-progress">
+        <span class="button-spinner"></span>
+        <p>Restoring database...</p>
+        <p class="restore-sub">Please wait, do not close this page.</p>
+      </div>
+    `;
+  }
+
+  // --- STATE 3a: SUCCESS (D-16) ---
+  function renderSuccessState(data) {
+    isOperationInProgress = false;
+    dialog.removeEventListener('cancel', preventCancel);
+
+    // Remove danger top border for success state
+    dialog.style.borderTopColor = 'rgba(34, 197, 94, 0.95)';
+
+    const durationSec = Math.round((data.totalMs || 0) / 1000);
+    const preBackupName = data.preRestoreBackup || 'unknown';
+
+    dialog.innerHTML = `
+      <div class="restore-success">
+        <h3>Restore Complete</h3>
+        <p>Safety backup created: <span class="mono">${escapeHtml(preBackupName)}</span></p>
+        <p>Duration: ${durationSec}s</p>
+      </div>
+      <div class="restore-modal-footer">
+        <button type="button" class="btn btn--primary restore-done-btn">View Backups</button>
+      </div>
+    `;
+
+    dialog.querySelector('.restore-done-btn').addEventListener('click', async () => {
+      dialog.close();
+      // D-16: Refresh table to show pre-restore backup entry and restore log entry
+      await refreshBackupTable();
+    });
+  }
+
+  // --- STATE 3b: ERROR (D-17) ---
+  function renderErrorState(data) {
+    isOperationInProgress = false;
+    dialog.removeEventListener('cancel', preventCancel);
+
+    const errorMsg = data.error || 'Unknown error';
+    const failedStep = data.failedStep || 'unknown';
+    const preBackupName = data.preRestoreBackup;
+
+    // D-17: Context about database state based on failedStep
+    let contextHtml = '';
+    if (failedStep === 'validation' || failedStep === 'pre-backup') {
+      contextHtml = '<p>Your database was not changed.</p>';
+    }
+    if (preBackupName) {
+      contextHtml += `<p>Safety backup created before failure: <span class="mono">${escapeHtml(preBackupName)}</span></p>`;
+    }
+
+    dialog.innerHTML = `
+      <div class="restore-error">
+        <h3>Restore Failed</h3>
+        <p class="error-message">Error: ${escapeHtml(errorMsg)}</p>
+        <p>Step: ${escapeHtml(failedStep)}</p>
+        ${contextHtml}
+      </div>
+      <div class="restore-modal-footer">
+        <button type="button" class="btn restore-close-btn">Close Details</button>
+      </div>
+    `;
+
+    dialog.querySelector('.restore-close-btn').addEventListener('click', () => {
+      dialog.close();
+    });
+  }
+
+  // --- Execute restore API call ---
+  async function executeRestore() {
+    renderInProgressState();
+
+    try {
+      const token = localStorage.getItem('auth-token');
+      const res = await apiFetch('/admin/restore/' + filename, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token,
+        },
+        body: JSON.stringify({ confirm: 'RESTORE' }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 409) {
+        // Another operation in progress — show as error state
+        renderErrorState({ error: data.error || 'Another operation is in progress', failedStep: 'concurrency' });
+        return;
+      }
+
+      if (!res.ok || data.status === 'failed') {
+        renderErrorState(data);
+        return;
+      }
+
+      renderSuccessState(data);
+    } catch (err) {
+      renderErrorState({ error: err.message, failedStep: 'network' });
+    }
+  }
+
+  dialog.showModal();
+}
+
 // Translation handler for bilingual form fields
 async function handleTranslateClick(event) {
   const button = event.currentTarget;
