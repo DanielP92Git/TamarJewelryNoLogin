@@ -158,7 +158,10 @@ Plans:
   2. Restore request is rejected unless the request body includes `{ "confirm": "RESTORE" }` — missing or wrong confirmation string returns an error, not a restore
   3. Backup key is validated against the actual list of Spaces objects before restore begins — user-supplied keys that don't match a known object are rejected
   4. End-to-end restore test is completed against the real Atlas cluster and confirmed working (documented in code comment or plan summary)
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 36-01-PLAN.md — Shared lock, BackupLog schema extension, backupService restore functions, restore route, backupJob lock check
+- [ ] 36-02-PLAN.md — Unit tests for restore functions + integration tests for restore endpoint
 
 ### Phase 37: Admin Dashboard Panel
 **Goal**: Admin can view backup status, trigger backups, and initiate a restore from the admin dashboard without needing SSH access or App Platform log inspection
@@ -202,8 +205,8 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 33. Environment & Binary Verification | v1.6 | 2/2 | Complete   | 2026-04-04 |
 | 34. Core Backup Service | v1.6 | 2/2 | Complete   | 2026-04-07 |
 | 35. Manual Trigger & Alerting | v1.6 | 2/2 | Complete   | 2026-04-07 |
-| 36. Database Restore | v1.6 | 0/? | Not started | - |
+| 36. Database Restore | v1.6 | 0/2 | Not started | - |
 | 37. Admin Dashboard Panel | v1.6 | 0/? | Not started | - |
 | 38. Phase 35 Verification & Audit Cleanup | v1.6 | 1/1 | Complete    | 2026-04-07 |
 
-*Last updated: 2026-04-07 after Phase 38 planning*
+*Last updated: 2026-04-08 after Phase 36 planning*
