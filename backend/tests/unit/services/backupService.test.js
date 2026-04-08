@@ -749,4 +749,599 @@ describe('runBackup', () => {
     expect(result.retentionDeleted).toBe(0);
     expect(mockDeleteObjects).not.toHaveBeenCalled();
   });
+
+  // ------ options.prefix override tests ------
+
+  it('uses options.prefix when provided instead of BACKUP_SPACES_PREFIX', async () => {
+    let capturedPutArgs;
+    s3MockInstanceQueue[0] = {
+      putObject: vi.fn().mockImplementation(args => {
+        capturedPutArgs = args;
+        return { promise: vi.fn().mockResolvedValue({}) };
+      }),
+      listObjectsV2: vi.fn().mockReturnValue({
+        promise: vi.fn().mockResolvedValue({ Contents: [] }),
+      }),
+      deleteObjects: vi.fn(),
+    };
+
+    await runBackup({ prefix: 'pre-restore/' });
+
+    expect(capturedPutArgs).toBeDefined();
+    expect(capturedPutArgs.Key).toMatch(/^pre-restore\/backup-.+\.archive\.gz$/);
+  });
+
+  it('falls back to BACKUP_SPACES_PREFIX when options.prefix not provided', async () => {
+    let capturedPutArgs;
+    process.env.BACKUP_SPACES_PREFIX = 'custom-prefix/';
+    s3MockInstanceQueue[0] = {
+      putObject: vi.fn().mockImplementation(args => {
+        capturedPutArgs = args;
+        return { promise: vi.fn().mockResolvedValue({}) };
+      }),
+      listObjectsV2: vi.fn().mockReturnValue({
+        promise: vi.fn().mockResolvedValue({ Contents: [] }),
+      }),
+      deleteObjects: vi.fn(),
+    };
+
+    await runBackup();
+
+    expect(capturedPutArgs).toBeDefined();
+    expect(capturedPutArgs.Key).toMatch(/^custom-prefix\/backup-.+\.archive\.gz$/);
+
+    process.env.BACKUP_SPACES_PREFIX = DEFAULT_ENV.BACKUP_SPACES_PREFIX;
+  });
+});
+
+// ---------------------------------------------------------------------------
+// describe: spawnMongorestore (Phase 36, D-05, D-06)
+// ---------------------------------------------------------------------------
+
+describe('spawnMongorestore', () => {
+  const { spawnMongorestore } = backupService;
+  let spawnSpy;
+  let savedMongorestorePath;
+
+  /**
+   * Creates a mock child process for mongorestore:
+   * - stdin: mock writable with write/end vi.fn()
+   * - stderr: EventEmitter for error output
+   * No stdout needed (mongorestore stdout is ignored).
+   */
+  function createMockRestoreChild() {
+    const child = new EventEmitter();
+    child.stdin = { write: vi.fn(), end: vi.fn() };
+    child.stderr = new EventEmitter();
+    return child;
+  }
+
+  beforeEach(() => {
+    savedMongorestorePath = process.env.MONGORESTORE_PATH;
+    delete process.env.MONGORESTORE_PATH;
+    spawnSpy = vi.spyOn(childProcess, 'spawn');
+  });
+
+  afterEach(() => {
+    spawnSpy.mockRestore();
+    if (savedMongorestorePath === undefined) {
+      delete process.env.MONGORESTORE_PATH;
+    } else {
+      process.env.MONGORESTORE_PATH = savedMongorestorePath;
+    }
+  });
+
+  it('spawns with correct args: --uri, mongoUri, --archive, --gzip, --drop', async () => {
+    const child = createMockRestoreChild();
+    spawnSpy.mockReturnValue(child);
+
+    const uri = 'mongodb://localhost:27017/test';
+    const buf = Buffer.from('archive-data');
+    const promise = spawnMongorestore(uri, buf);
+
+    setImmediate(() => child.emit('close', 0));
+
+    await promise;
+
+    expect(spawnSpy).toHaveBeenCalledWith(
+      'mongorestore',
+      ['--uri', uri, '--archive', '--gzip', '--drop'],
+      expect.objectContaining({ stdio: ['pipe', 'ignore', 'pipe'] })
+    );
+  });
+
+  it('uses stdio: [pipe, ignore, pipe]', async () => {
+    const child = createMockRestoreChild();
+    spawnSpy.mockReturnValue(child);
+
+    const promise = spawnMongorestore('mongodb://localhost/test', Buffer.from('data'));
+    setImmediate(() => child.emit('close', 0));
+    await promise;
+
+    const spawnOptions = spawnSpy.mock.calls[0][2];
+    expect(spawnOptions.stdio).toEqual(['pipe', 'ignore', 'pipe']);
+  });
+
+  it('calls child.stdin.write with archiveBuffer', async () => {
+    const child = createMockRestoreChild();
+    spawnSpy.mockReturnValue(child);
+
+    const archiveBuffer = Buffer.from('archive-content-bytes');
+    const promise = spawnMongorestore('mongodb://localhost/test', archiveBuffer);
+    setImmediate(() => child.emit('close', 0));
+    await promise;
+
+    expect(child.stdin.write).toHaveBeenCalledWith(archiveBuffer);
+  });
+
+  it('calls child.stdin.end() after writing the buffer', async () => {
+    const child = createMockRestoreChild();
+    spawnSpy.mockReturnValue(child);
+
+    const promise = spawnMongorestore('mongodb://localhost/test', Buffer.from('data'));
+    setImmediate(() => child.emit('close', 0));
+    await promise;
+
+    expect(child.stdin.end).toHaveBeenCalled();
+  });
+
+  it('resolves when child exits with code 0', async () => {
+    const child = createMockRestoreChild();
+    spawnSpy.mockReturnValue(child);
+
+    const promise = spawnMongorestore('mongodb://localhost/test', Buffer.from('data'));
+    setImmediate(() => child.emit('close', 0));
+
+    await expect(promise).resolves.toBeUndefined();
+  });
+
+  it('rejects with error message when child exits with non-zero code (includes stderr)', async () => {
+    const child = createMockRestoreChild();
+    spawnSpy.mockReturnValue(child);
+
+    const promise = spawnMongorestore('mongodb://localhost/test', Buffer.from('data'));
+    setImmediate(() => {
+      child.stderr.emit('data', Buffer.from('connection refused'));
+      child.emit('close', 1);
+    });
+
+    let error;
+    try { await promise; } catch (err) { error = err; }
+
+    expect(error).toBeDefined();
+    expect(error.message).toContain('mongorestore exited 1');
+    expect(error.message).toContain('connection refused');
+  });
+
+  it('redacts MongoDB URI credentials in error messages', async () => {
+    const child = createMockRestoreChild();
+    spawnSpy.mockReturnValue(child);
+
+    const promise = spawnMongorestore(
+      'mongodb://user:secret@cluster.example.com/db',
+      Buffer.from('data')
+    );
+    setImmediate(() => {
+      child.stderr.emit(
+        'data',
+        Buffer.from('Error: mongodb://user:secret@cluster.example.com/db failed')
+      );
+      child.emit('close', 1);
+    });
+
+    let errorMsg = '';
+    try { await promise; } catch (err) { errorMsg = err.message; }
+
+    expect(errorMsg).not.toContain('secret');
+    expect(errorMsg).toContain('[REDACTED]');
+  });
+
+  it('rejects on spawn error event (e.g. ENOENT — binary not found)', async () => {
+    const child = createMockRestoreChild();
+    spawnSpy.mockReturnValue(child);
+
+    const promise = spawnMongorestore('mongodb://localhost/test', Buffer.from('data'));
+    setImmediate(() => {
+      const err = new Error('spawn mongorestore ENOENT');
+      err.code = 'ENOENT';
+      child.emit('error', err);
+    });
+
+    await expect(promise).rejects.toThrow('ENOENT');
+  });
+
+  it('uses MONGORESTORE_PATH env var when set, falls back to mongorestore', async () => {
+    process.env.MONGORESTORE_PATH = '/custom/bin/mongorestore';
+    const child = createMockRestoreChild();
+    spawnSpy.mockReturnValue(child);
+
+    const promise = spawnMongorestore('mongodb://localhost/test', Buffer.from('data'));
+    setImmediate(() => child.emit('close', 0));
+    await promise;
+
+    expect(spawnSpy).toHaveBeenCalledWith(
+      '/custom/bin/mongorestore',
+      expect.any(Array),
+      expect.any(Object)
+    );
+  });
+});
+
+// ---------------------------------------------------------------------------
+// describe: keyExistsInSpaces (Phase 36, D-11)
+// ---------------------------------------------------------------------------
+
+describe('keyExistsInSpaces', () => {
+  const { keyExistsInSpaces } = backupService;
+
+  it('returns true when headObject resolves successfully', async () => {
+    const mockS3 = {
+      headObject: vi.fn().mockReturnValue({
+        promise: vi.fn().mockResolvedValue({ ContentLength: 1234 }),
+      }),
+    };
+
+    const result = await keyExistsInSpaces(mockS3, 'my-bucket', 'backups/file.archive.gz');
+
+    expect(result).toBe(true);
+    expect(mockS3.headObject).toHaveBeenCalledWith({
+      Bucket: 'my-bucket',
+      Key: 'backups/file.archive.gz',
+    });
+  });
+
+  it('returns false when headObject throws err.code === NotFound', async () => {
+    const notFoundErr = new Error('Not Found');
+    notFoundErr.code = 'NotFound';
+
+    const mockS3 = {
+      headObject: vi.fn().mockReturnValue({
+        promise: vi.fn().mockRejectedValue(notFoundErr),
+      }),
+    };
+
+    const result = await keyExistsInSpaces(mockS3, 'my-bucket', 'backups/nonexistent.archive.gz');
+
+    expect(result).toBe(false);
+  });
+
+  it('returns false when headObject throws err.statusCode === 404', async () => {
+    const notFoundErr = new Error('Not Found');
+    notFoundErr.statusCode = 404;
+
+    const mockS3 = {
+      headObject: vi.fn().mockReturnValue({
+        promise: vi.fn().mockRejectedValue(notFoundErr),
+      }),
+    };
+
+    const result = await keyExistsInSpaces(mockS3, 'my-bucket', 'backups/nonexistent.archive.gz');
+
+    expect(result).toBe(false);
+  });
+
+  it('re-throws unexpected errors (e.g. network error)', async () => {
+    const networkErr = new Error('Network timeout');
+    networkErr.code = 'ETIMEDOUT';
+
+    const mockS3 = {
+      headObject: vi.fn().mockReturnValue({
+        promise: vi.fn().mockRejectedValue(networkErr),
+      }),
+    };
+
+    await expect(
+      keyExistsInSpaces(mockS3, 'my-bucket', 'backups/file.archive.gz')
+    ).rejects.toThrow('Network timeout');
+  });
+});
+
+// ---------------------------------------------------------------------------
+// describe: runRestore (Phase 36, D-08)
+// ---------------------------------------------------------------------------
+
+describe('runRestore', () => {
+  const { runRestore } = backupService;
+  let spawnSpy;
+  let consoleLogSpy;
+  let savedEnv;
+
+  // Spawn call counter — first call is mongodump (pre-restore backup), second is mongorestore
+  let spawnCallCount;
+
+  beforeEach(() => {
+    savedEnv = {};
+    const envKeys = [
+      'BACKUP_BUCKET', 'BACKUP_SPACES_ENDPOINT', 'BACKUP_SPACES_KEY',
+      'BACKUP_SPACES_SECRET', 'BACKUP_SPACES_REGION', 'BACKUP_SPACES_PREFIX',
+      'BACKUP_RETENTION_COUNT', 'MONGO_URL',
+    ];
+    for (const key of envKeys) {
+      savedEnv[key] = process.env[key];
+    }
+    process.env.BACKUP_BUCKET = 'test-bucket';
+    process.env.BACKUP_SPACES_ENDPOINT = 'https://ams3.digitaloceanspaces.com';
+    process.env.BACKUP_SPACES_KEY = 'test-key';
+    process.env.BACKUP_SPACES_SECRET = 'test-secret';
+    process.env.BACKUP_SPACES_REGION = 'ams3';
+    process.env.BACKUP_SPACES_PREFIX = 'backups/';
+    process.env.BACKUP_RETENTION_COUNT = '14';
+    process.env.MONGO_URL = 'mongodb+srv://user:pass@cluster.example.com/testdb';
+
+    installAwsMock();
+    consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    spawnCallCount = 0;
+
+    // Default spawn behavior:
+    // Call 0: mongodump (pre-restore backup) → succeeds with archive data
+    // Call 1: mongorestore → succeeds
+    spawnSpy = vi.spyOn(childProcess, 'spawn').mockImplementation(() => {
+      const callIndex = spawnCallCount++;
+      if (callIndex === 0) {
+        // mongodump call (pre-restore backup)
+        const child = new EventEmitter();
+        child.stdout = new EventEmitter();
+        child.stderr = new EventEmitter();
+        setImmediate(() => {
+          child.stdout.emit('data', Buffer.from('backup-archive-bytes'));
+          child.emit('close', 0);
+        });
+        return child;
+      } else {
+        // mongorestore call
+        const child = new EventEmitter();
+        child.stdin = { write: vi.fn(), end: vi.fn() };
+        child.stderr = new EventEmitter();
+        setImmediate(() => child.emit('close', 0));
+        return child;
+      }
+    });
+  });
+
+  afterEach(() => {
+    spawnSpy.mockRestore();
+    consoleLogSpy.mockRestore();
+    uninstallAwsMock();
+
+    for (const [key, val] of Object.entries(savedEnv)) {
+      if (val === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = val;
+      }
+    }
+  });
+
+  /**
+   * Queue S3 instances for a successful runRestore:
+   * - Instance 1: For runRestore's createBackupS3Client (headObject returns found, getObject returns archive)
+   * - Instance 2: For runBackup's internal createBackupS3Client (putObject + listObjectsV2)
+   *
+   * Note: runRestore calls createBackupS3Client first (for headObject/getObject),
+   * then runBackup calls it again internally (for putObject). The queue processes
+   * them in order, but we need to know which call comes first.
+   *
+   * Actually: runRestore calls createBackupS3Client for the key existence check,
+   * then calls runBackup which also calls createBackupS3Client. So:
+   * Queue[0] = runRestore's S3 (headObject + getObject)
+   * Queue[1] = runBackup's S3 (putObject + listObjectsV2)
+   * Queue[2] = runRestore calls createBackupS3Client again for getObject? No.
+   *
+   * Looking at the code: runRestore creates ONE s3 instance (line: const s3 = createBackupS3Client())
+   * and uses it for both headObject and getObject. runBackup creates its own S3 instance.
+   * So Queue[0] for runRestore, Queue[1] for runBackup.
+   */
+  function queueSuccessfulRestoreS3Instances(archiveBody = Buffer.from('restored-archive')) {
+    // runRestore's S3 instance: headObject (found) + getObject (returns archive)
+    const restoreS3 = {
+      headObject: vi.fn().mockReturnValue({
+        promise: vi.fn().mockResolvedValue({ ContentLength: 1000 }),
+      }),
+      getObject: vi.fn().mockReturnValue({
+        promise: vi.fn().mockResolvedValue({ Body: archiveBody }),
+      }),
+      putObject: vi.fn().mockReturnValue({ promise: vi.fn().mockResolvedValue({}) }),
+      listObjectsV2: vi.fn().mockReturnValue({
+        promise: vi.fn().mockResolvedValue({ Contents: [] }),
+      }),
+    };
+    s3MockInstanceQueue.push(restoreS3);
+
+    // runBackup's S3 instance (pre-restore backup)
+    const backupS3 = {
+      putObject: vi.fn().mockReturnValue({ promise: vi.fn().mockResolvedValue({}) }),
+      listObjectsV2: vi.fn().mockReturnValue({
+        promise: vi.fn().mockResolvedValue({ Contents: [] }),
+      }),
+      deleteObjects: vi.fn().mockReturnValue({ promise: vi.fn().mockResolvedValue({ Errors: [] }) }),
+    };
+    s3MockInstanceQueue.push(backupS3);
+
+    return { restoreS3, backupS3 };
+  }
+
+  it('returns result with status:success and all timing fields when restore completes', async () => {
+    queueSuccessfulRestoreS3Instances();
+
+    const result = await runRestore('backups/backup-2026-04-08T03-00-00.000Z.archive.gz');
+
+    expect(result.status).toBe('success');
+    expect(typeof result.downloadMs).toBe('number');
+    expect(result.downloadMs).toBeGreaterThanOrEqual(0);
+    expect(typeof result.preBackupMs).toBe('number');
+    expect(result.preBackupMs).toBeGreaterThanOrEqual(0);
+    expect(typeof result.restoreMs).toBe('number');
+    expect(result.restoreMs).toBeGreaterThanOrEqual(0);
+    expect(typeof result.totalMs).toBe('number');
+    expect(result.totalMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it('returns failedStep:validation when key does not exist in Spaces', async () => {
+    // Queue a single S3 instance where headObject returns NotFound
+    const notFoundErr = new Error('Not Found');
+    notFoundErr.code = 'NotFound';
+    s3MockInstanceQueue.push({
+      headObject: vi.fn().mockReturnValue({
+        promise: vi.fn().mockRejectedValue(notFoundErr),
+      }),
+    });
+
+    const result = await runRestore('backups/nonexistent.archive.gz');
+
+    expect(result.status).toBe('failed');
+    expect(result.failedStep).toBe('validation');
+    expect(result.error).toContain('backups/nonexistent.archive.gz');
+  });
+
+  it('returns failedStep:pre-backup when pre-restore backup fails (D-02 abort)', async () => {
+    // Queue S3 instance for runRestore (headObject succeeds)
+    s3MockInstanceQueue.push({
+      headObject: vi.fn().mockReturnValue({
+        promise: vi.fn().mockResolvedValue({ ContentLength: 1000 }),
+      }),
+    });
+
+    // Queue S3 instance for runBackup (putObject fails)
+    s3MockInstanceQueue.push({
+      putObject: vi.fn().mockReturnValue({
+        promise: vi.fn().mockRejectedValue(new Error('S3 upload failed')),
+      }),
+      listObjectsV2: vi.fn().mockReturnValue({
+        promise: vi.fn().mockResolvedValue({ Contents: [] }),
+      }),
+      deleteObjects: vi.fn(),
+    });
+
+    const result = await runRestore('backups/backup-2026-04-08.archive.gz');
+
+    expect(result.status).toBe('failed');
+    expect(result.failedStep).toBe('pre-backup');
+    expect(result.error).toContain('Pre-restore backup failed');
+  });
+
+  it('calls runBackup with prefix:pre-restore/ for pre-restore backup (D-03)', async () => {
+    const { backupS3 } = queueSuccessfulRestoreS3Instances();
+
+    await runRestore('backups/backup-2026-04-08T03-00-00.000Z.archive.gz');
+
+    // The pre-restore backup should upload to pre-restore/ prefix
+    const putCall = backupS3.putObject.mock.calls[0];
+    expect(putCall).toBeDefined();
+    expect(putCall[0].Key).toMatch(/^pre-restore\/backup-.+\.archive\.gz$/);
+  });
+
+  it('sets result.preRestoreBackup to pre-backup filename (D-04)', async () => {
+    queueSuccessfulRestoreS3Instances();
+
+    const result = await runRestore('backups/backup-2026-04-08T03-00-00.000Z.archive.gz');
+
+    expect(result.preRestoreBackup).toBeTruthy();
+    expect(result.preRestoreBackup).toMatch(/^backup-.+\.archive\.gz$/);
+  });
+
+  it('returns failedStep:restore when spawnMongorestore rejects', async () => {
+    queueSuccessfulRestoreS3Instances();
+
+    // Override spawn: call 0 = mongodump (success), call 1 = mongorestore (fail)
+    spawnSpy.mockRestore();
+    spawnCallCount = 0;
+    spawnSpy = vi.spyOn(childProcess, 'spawn').mockImplementation(() => {
+      const callIndex = spawnCallCount++;
+      if (callIndex === 0) {
+        // mongodump succeeds
+        const child = new EventEmitter();
+        child.stdout = new EventEmitter();
+        child.stderr = new EventEmitter();
+        setImmediate(() => {
+          child.stdout.emit('data', Buffer.from('backup-data'));
+          child.emit('close', 0);
+        });
+        return child;
+      } else {
+        // mongorestore fails
+        const child = new EventEmitter();
+        child.stdin = { write: vi.fn(), end: vi.fn() };
+        child.stderr = new EventEmitter();
+        setImmediate(() => {
+          child.stderr.emit('data', Buffer.from('restore error'));
+          child.emit('close', 1);
+        });
+        return child;
+      }
+    });
+
+    const result = await runRestore('backups/backup-2026-04-08T03-00-00.000Z.archive.gz');
+
+    expect(result.status).toBe('failed');
+    expect(result.failedStep).toBe('restore');
+  });
+
+  it('includes downloadMs, preBackupMs, restoreMs, totalMs in result (D-20)', async () => {
+    queueSuccessfulRestoreS3Instances();
+
+    const result = await runRestore('backups/backup-2026-04-08T03-00-00.000Z.archive.gz');
+
+    expect(result).toHaveProperty('downloadMs');
+    expect(result).toHaveProperty('preBackupMs');
+    expect(result).toHaveProperty('restoreMs');
+    expect(result).toHaveProperty('totalMs');
+    expect(result.downloadMs).not.toBeNull();
+    expect(result.preBackupMs).not.toBeNull();
+    expect(result.restoreMs).not.toBeNull();
+    expect(result.totalMs).not.toBeNull();
+  });
+
+  it('returns error for missing BACKUP_SPACES_* credentials', async () => {
+    delete process.env.BACKUP_BUCKET;
+
+    const result = await runRestore('backups/backup-2026-04-08.archive.gz');
+
+    expect(result.status).toBe('failed');
+    expect(result.error).toContain('Missing BACKUP_SPACES_* credentials or BACKUP_BUCKET');
+  });
+
+  it('returns error for missing MONGO_URL', async () => {
+    delete process.env.MONGO_URL;
+
+    const result = await runRestore('backups/backup-2026-04-08.archive.gz');
+
+    expect(result.status).toBe('failed');
+    expect(result.error).toContain('MONGO_URL is not set');
+  });
+
+  it('logs [backup] restore + JSON.stringify(result) on success', async () => {
+    queueSuccessfulRestoreS3Instances();
+
+    await runRestore('backups/backup-2026-04-08T03-00-00.000Z.archive.gz');
+
+    const logCalls = consoleLogSpy.mock.calls.map(c => c[0]);
+    const restoreLogs = logCalls.filter(
+      msg => typeof msg === 'string' && msg.startsWith('[backup] restore ')
+    );
+    expect(restoreLogs.length).toBeGreaterThanOrEqual(1);
+    const lastLog = restoreLogs[restoreLogs.length - 1];
+    const parsed = JSON.parse(lastLog.slice('[backup] restore '.length));
+    expect(parsed.status).toBe('success');
+  });
+
+  it('logs [backup] restore + JSON.stringify(result) on failure', async () => {
+    const notFoundErr = new Error('Not Found');
+    notFoundErr.code = 'NotFound';
+    s3MockInstanceQueue.push({
+      headObject: vi.fn().mockReturnValue({
+        promise: vi.fn().mockRejectedValue(notFoundErr),
+      }),
+    });
+
+    await runRestore('backups/nonexistent.archive.gz');
+
+    const logCalls = consoleLogSpy.mock.calls.map(c => c[0]);
+    const restoreLogs = logCalls.filter(
+      msg => typeof msg === 'string' && msg.startsWith('[backup] restore ')
+    );
+    expect(restoreLogs.length).toBeGreaterThanOrEqual(1);
+    const lastLog = restoreLogs[restoreLogs.length - 1];
+    const parsed = JSON.parse(lastLog.slice('[backup] restore '.length));
+    expect(parsed.status).toBe('failed');
+  });
 });
