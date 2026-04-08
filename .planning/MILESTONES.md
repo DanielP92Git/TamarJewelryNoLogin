@@ -1,5 +1,23 @@
 # Project Milestones: Tamar Kfir Jewelry - SKU Management
 
+## v1.6 MongoDB Backup & Recovery System (Shipped: 2026-04-08)
+
+**Phases completed:** 6 phases, 11 plans, 13 tasks
+
+**Key accomplishments:**
+
+- Aptfile with mongodb-database-tools .deb URL, startup execFileSync binary gate (fail-loud in prod), and admin /backup-status diagnostic endpoint with env config inspection
+- Unit + integration tests for backup binary check and admin status endpoint, using dependency injection to avoid requiring mongodump in test environment.
+- One-liner:
+- 31 unit tests covering all 6 backup requirements (BKUP-01/02/03, MON-01, RET-01, ADM-03) with mocked child_process.spawn and aws-sdk S3
+- BackupLog Mongoose model, EmailJS failure alert service, POST /admin/backup manual trigger with 409 concurrency lock, GET /admin/backups merged Spaces+MongoDB listing, and cron job persistence/alerting — all wired into index.js
+- Comprehensive test suite for all Phase 35 production code: 95 new tests across 5 files covering BackupLog schema validation, EmailJS alert service behavior, POST /admin/backup endpoint, GET /admin/backups endpoint, and cron job BackupLog+alert integration.
+- One-liner:
+- One-liner:
+- Fixed rate limiter header inconsistency in routes/backup.js, created missing 35-VERIFICATION.md confirming all 4 Phase 35 requirements satisfied, and updated REQUIREMENTS.md checkboxes — closing all 3 gaps from the v1.6 milestone audit
+
+---
+
 ## v1.0 SKU Management (Shipped: 2026-02-01)
 
 **Delivered:** Professional SKU (Stock Keeping Unit) management replacing unprofessional description-embedded SKUs with proper database fields, admin workflow, and customer display.
@@ -145,7 +163,6 @@
 
 ---
 
-
 ## v1.5 Bilingual Product Content (Shipped: 2026-02-17)
 
 **Delivered:** True bilingual product content with automated Google Cloud Translation, enabling Hebrew and English visitors to see product names and descriptions in their language.
@@ -176,4 +193,3 @@
 **What's next:** TBD - planning next milestone (/gsd:new-milestone)
 
 ---
-

@@ -2,13 +2,23 @@
 
 ## What This Is
 
-Handmade jewelry e-commerce platform with professional product management, comprehensive testing, full SEO foundation, and bilingual product content. The store serves both English and Hebrew-speaking customers with server-side rendered pages, clean bilingual URLs, structured data for search engines, automated Google Cloud Translation for product content, and integrated payment processing (PayPal & Stripe).
+Handmade jewelry e-commerce platform with professional product management, comprehensive testing, full SEO foundation, bilingual product content, and automated database backup & recovery. The store serves both English and Hebrew-speaking customers with server-side rendered pages, clean bilingual URLs, structured data for search engines, automated Google Cloud Translation for product content, and integrated payment processing (PayPal & Stripe). Production data is protected by daily automated MongoDB backups to off-region cloud storage with admin-accessible restore capability.
 
 ## Core Value
 
 A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers — with true bilingual content so Hebrew and English visitors each see products in their language.
 
 ## Previous Milestones
+
+**v1.6 MongoDB Backup & Recovery System (Shipped: 2026-04-08)**
+- Daily automated MongoDB backups (mongodump + gzip) via node-cron with off-region DigitalOcean Spaces upload
+- Admin manual backup trigger via authenticated POST endpoint with concurrency lock
+- Backup listing API merging Spaces objects with MongoDB BackupLog entries
+- Database restore from any backup with explicit "RESTORE" confirmation gate
+- Failure alerting via EmailJS with structured BackupLog persistence
+- Admin dashboard backup panel: sidebar navigation, summary card, history table, manual trigger, restore modal with 4-state machine
+- Retention policy auto-deleting backups exceeding configurable count (default 14)
+- 14/14 requirements satisfied across 6 phases, 11 plans
 
 **v1.5 Bilingual Product Content (Shipped: 2026-02-17)**
 - Bilingual product schema with separate Hebrew/English fields and runtime normalization for backward compatibility
@@ -131,26 +141,26 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 - ✓ Bulk translate tool for existing products (English → Hebrew) — v1.5
 - ✓ Data migration (runtime normalization as functional equivalent) — v1.5 (tech debt: migration script exists but not executed)
 
-## Current Milestone: v1.6 MongoDB Backup & Recovery System
+<!-- v1.6 MongoDB Backup & Recovery System - shipped 2026-04-08 -->
 
-**Goal:** Prevent permanent data loss with automated off-region backups and quick recovery capability (RTO < 2 hours).
+- ✓ Automated daily MongoDB backup with mongodump + gzip compression — v1.6
+- ✓ Backup uploads to off-region DigitalOcean Spaces bucket — v1.6
+- ✓ Timestamped backup naming (ISO format, sortable) — v1.6
+- ✓ mongodump/mongorestore binaries available via Aptfile — v1.6
+- ✓ Structured backup logging (timestamp, status, size, duration, error) — v1.6
+- ✓ Failed backup email alerts via EmailJS — v1.6
+- ✓ Backup history persisted in MongoDB backup_logs collection — v1.6
+- ✓ Admin manual backup trigger via POST endpoint — v1.6
+- ✓ Admin dashboard backup panel (list, trigger, status, restore) — v1.6
+- ✓ Configurable retention count (default 14) — v1.6
+- ✓ Database restore from specific backup via POST endpoint — v1.6
+- ✓ Restore requires explicit "RESTORE" confirmation phrase — v1.6
+- ✓ Admin backup listing via GET endpoint — v1.6
+- ✓ Auto-delete backups exceeding retention count — v1.6
 
-**Target features:**
-- Daily automated MongoDB backup (mongodump + gzip)
-- Manual backup trigger capability
-- Cloud storage upload (outside primary region)
-- Database restore from backup (mongorestore)
-- Backup success/failure logging
-- Retention policy (auto-delete old backups, keep last 7-14)
+## Current Milestone
 
-### Active
-
-- [ ] Automated daily MongoDB backup
-- [ ] Manual backup trigger
-- [ ] Cloud storage upload (off-region)
-- [ ] Database restore capability
-- [ ] Backup logging (success/failure)
-- [ ] Retention policy with auto-cleanup
+Planning next milestone. Run `/gsd-new-milestone` to define v1.7.
 
 ### Out of Scope
 
@@ -169,19 +179,21 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 
 ## Context
 
-**Current State (v1.5 Shipped):**
+**Current State (v1.6 Shipped):**
 - v1.0 (2026-02-01): SKU Management with ~869 LOC across 3 phases
 - v1.1 (2026-02-04): Admin Product Management UX with 6 phases, 33 plans
 - v1.2 (2026-02-06): Test Infrastructure & Critical Coverage with 7 phases, 25 plans, 447 tests
 - v1.3 (2026-02-09): Frontend Testing with 6 phases, 20 plans, 104 new tests (419 total)
 - v1.4 (2026-02-12): SEO & Marketing Foundation with 4 phases, 18 plans, 49 requirements
 - v1.5 (2026-02-17): Bilingual Product Content with 6 phases, 12 plans, 25 requirements
+- v1.6 (2026-04-08): MongoDB Backup & Recovery System with 6 phases, 11 plans, 14 requirements
 - Production e-commerce platform handling payments (PayPal & Stripe)
 - ~94 products in catalog with multi-image support
-- 866 tests passing (comprehensive backend + frontend coverage)
+- 866+ tests passing (comprehensive backend + frontend coverage)
 - Full SSR with EJS templates, bilingual URLs, structured data, XML sitemap
 - Google Cloud Translation API integration for bilingual product content
 - Admin bilingual forms with translate buttons and bulk translation tool
+- Automated daily MongoDB backups to off-region Spaces with admin dashboard panel
 
 **Technical Environment:**
 - MVC frontend architecture (Vanilla JS, Parcel bundler) — progressive enhancement over SSR
@@ -258,6 +270,14 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 | Query param auth for EventSource | SSE API cannot send headers; JWT validated from URL param | ✓ Good - works with browser limitations |
 | SSE for bulk translation progress | Real-time streaming vs polling; cancel/retry support | ✓ Good - responsive admin UX |
 | textContent for product names | XSS-safe rendering of server-provided content | ✓ Good - security best practice |
+| Aptfile for mongodump/mongorestore | App Platform installs binaries at build time via .deb URL | ✓ Good - no Docker required |
+| node-cron for backup scheduling | In-process scheduler vs App Platform Scheduled Jobs | ✓ Good - simpler, no extra config |
+| DigitalOcean Spaces for backup storage | Off-region S3-compatible bucket for geographic redundancy | ✓ Good - cost-effective, reliable |
+| Unified concurrency lock (backup/restore) | Shared in-memory lock prevents simultaneous backup+restore | ✓ Good - prevents data corruption |
+| BackupLog MongoDB collection | Persistent audit trail vs ephemeral file-based logs | ✓ Good - survives restarts, queryable |
+| "RESTORE" confirmation phrase gate | Server-side validation prevents accidental restores | ✓ Good - defense in depth |
+| Admin dashboard backup panel in BisliView.js | Single-file SPA extension vs separate admin module | ✓ Good - follows existing pattern |
+| DOM-based escapeHtml for modal XSS | textContent assignment + innerHTML readback for safe escaping | ✓ Good - standard approach |
 
 ## Evolution
 
@@ -277,4 +297,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after Phase 38 complete (Phase 35 verification & audit cleanup — all v1.6 gap closure done)*
+*Last updated: 2026-04-09 after v1.6 milestone complete (MongoDB Backup & Recovery System — 6 phases, 11 plans, 14/14 requirements)*
