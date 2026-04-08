@@ -33,6 +33,7 @@ import cron from 'node-cron';
 const nodeCron = require('node-cron');
 const backupServiceModule = require('../../../services/backupService');
 const backupAlertServiceModule = require('../../../services/backupAlertService');
+const backupLockModule = require('../../../utils/backupLock');
 
 // BackupLog is a Mongoose Model class (default export). We mock its create() static.
 const BackupLogModel = require('../../../models/BackupLog');
@@ -42,6 +43,7 @@ const originalCronSchedule = nodeCron.schedule;
 const originalRunBackup = backupServiceModule.runBackup;
 const originalSendAlert = backupAlertServiceModule.sendBackupFailureAlert;
 const originalBackupLogCreate = BackupLogModel.create;
+const originalGetActiveOperation = backupLockModule.getActiveOperation;
 
 // ---------------------------------------------------------------------------
 // Load module under test
@@ -99,6 +101,7 @@ describe('backupJob', () => {
       backupServiceModule.runBackup = originalRunBackup;
       BackupLogModel.create = originalBackupLogCreate;
       backupAlertServiceModule.sendBackupFailureAlert = originalSendAlert;
+      backupLockModule.getActiveOperation = originalGetActiveOperation;
       consoleLogSpy.mockRestore();
 
       if (savedNodeEnv === undefined) {
@@ -180,6 +183,47 @@ describe('backupJob', () => {
 
       // Restore original module cache entry
       delete require.cache[require.resolve('../../../jobs/backupJob')];
+    });
+
+    // =============================================
+    // Phase 36: Cron lock check (D-14)
+    // =============================================
+
+    describe('cron lock check (D-14)', () => {
+      // Helper: reload backupJob so destructured references pick up current mocks
+      function reloadBackupJob() {
+        delete require.cache[require.resolve('../../../jobs/backupJob')];
+        const { startBackupJob: freshStart } = require('../../../jobs/backupJob');
+        freshStart();
+        return scheduleCallArgs;
+      }
+
+      afterEach(() => {
+        delete require.cache[require.resolve('../../../jobs/backupJob')];
+        backupLockModule.getActiveOperation = originalGetActiveOperation;
+      });
+
+      it('should skip backup (not call runBackup) when getActiveOperation() returns non-null', async () => {
+        // Replace getActiveOperation on the module BEFORE reload so backupJob.js
+        // destructures the mock: const { getActiveOperation } = require('../utils/backupLock')
+        backupLockModule.getActiveOperation = vi.fn().mockReturnValue('restore');
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        process.env.NODE_ENV = 'test';
+        reloadBackupJob();
+
+        // Invoke the captured cron callback
+        await scheduleCallArgs.callback();
+
+        // runBackup must NOT have been called
+        expect(backupServiceModule.runBackup).not.toHaveBeenCalled();
+
+        // A warning should have been logged
+        const warnMessages = warnSpy.mock.calls.map(c => c[0]);
+        expect(warnMessages.some(m => typeof m === 'string' && m.includes('skipped'))).toBe(true);
+
+        warnSpy.mockRestore();
+      });
     });
 
     // =============================================
