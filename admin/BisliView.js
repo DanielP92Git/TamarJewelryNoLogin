@@ -282,7 +282,9 @@ async function fetchBackups() {
 }
 
 function buildSummaryCardHtml(backups) {
-  const lastSuccess = backups.find(b => b.status === 'success');
+  // Prefer non-restore successful backups (they have file sizes)
+  const lastSuccess = backups.find(b => b.status === 'success' && b.trigger !== 'restore')
+    || backups.find(b => b.status === 'success');
   if (!lastSuccess) {
     return `
       <div class="backup-summary-card">
@@ -295,14 +297,18 @@ function buildSummaryCardHtml(backups) {
         </div>
       </div>`;
   }
+  const sizeHtml = lastSuccess.sizeBytes != null
+    ? `<div class="backup-summary-size">${formatBytes(lastSuccess.sizeBytes)}</div>`
+    : '';
   return `
     <div class="backup-summary-card">
       <div class="backup-summary-info">
         <div class="backup-summary-label">Last successful backup</div>
         <div class="backup-summary-value">${formatBackupDate(lastSuccess.lastModified)}</div>
-        <div class="backup-summary-size">${formatBytes(lastSuccess.sizeBytes)}</div>
+        ${sizeHtml}
       </div>
       ${statusBadgeHtml(lastSuccess.status)}
+      ${triggerBadgeHtml(lastSuccess.trigger)}
       <div class="backup-summary-actions">
         <button type="button" class="btn btn--primary backup-trigger-btn">Run Backup Now</button>
       </div>
