@@ -324,6 +324,12 @@ async function runRestore(key) {
 
     const s3 = createBackupS3Client();
     const bucket = process.env.BACKUP_BUCKET;
+    const prefix = process.env.BACKUP_SPACES_PREFIX || 'backups/';
+
+    // Prepend prefix if not already present (UI sends bare filename)
+    if (!key.startsWith(prefix)) {
+      key = prefix + key;
+    }
 
     // D-11: Validate key against actual Spaces objects
     const exists = await keyExistsInSpaces(s3, bucket, key);
