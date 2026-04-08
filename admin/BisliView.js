@@ -4,12 +4,13 @@
 const addProductsBtn = document.querySelector(".sidebar_add-products");
 const productsListBtn = document.querySelector(".sidebar_products-list");
 const bulkTranslateBtn = document.querySelector(".sidebar_bulk-translate");
+const backupsBtn = document.querySelector(".sidebar_backups");
 const sideBar = document.querySelector(".sidebar");
 const pageContent = document.querySelector(".page-content");
 const breadcrumbEl = document.getElementById("page-breadcrumb");
 
 function setActiveNav(active) {
-  // active: "products-list" | "add-product" | "edit-product" | "bulk-translate"
+  // active: "products-list" | "add-product" | "edit-product" | "bulk-translate" | "backups"
   const all = document.querySelectorAll(".nav__item");
   all.forEach((el) => el.classList.remove("is-active"));
 
@@ -25,6 +26,9 @@ function setActiveNav(active) {
   } else if (active === "bulk-translate") {
     bulkTranslateBtn?.classList.add("is-active");
     if (breadcrumbEl) breadcrumbEl.textContent = "Tools / Bulk Translate";
+  } else if (active === "backups") {
+    backupsBtn?.classList.add("is-active");
+    if (breadcrumbEl) breadcrumbEl.textContent = "System / Backups";
   }
 }
 
@@ -235,6 +239,231 @@ function showInfoToast(message) {
       zIndex: "2000",
     },
   }).showToast();
+}
+
+// ===== Backup Panel Utilities (Phase 37) =====
+
+function formatBackupDate(isoString) {
+  if (!isoString) return '\u2014';
+  const date = new Date(isoString);
+  return new Intl.DateTimeFormat(navigator.language, {
+    year: 'numeric', month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  }).format(date);
+}
+
+function formatBytes(bytes) {
+  if (bytes == null) return '\u2014';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+function statusBadgeHtml(status) {
+  if (status === 'success') return '<span class="badge badge--success">Success</span>';
+  if (status === 'failed') return '<span class="badge badge--danger">Failed</span>';
+  return '<span class="badge badge--muted">Unknown</span>';
+}
+
+function triggerBadgeHtml(trigger) {
+  if (trigger === 'cron') return '<span class="badge badge--muted">Cron</span>';
+  if (trigger === 'manual') return '<span class="badge badge--muted">Manual</span>';
+  if (trigger === 'restore') return '<span class="badge badge--warning">Restore</span>';
+  return '<span class="badge badge--muted">\u2014</span>';
+}
+
+async function fetchBackups() {
+  const token = localStorage.getItem('auth-token');
+  const res = await apiFetch('/admin/backups', {
+    headers: { 'Authorization': 'Bearer ' + token },
+  });
+  if (!res.ok) throw new Error('Failed to load backups');
+  return res.json();
+}
+
+function buildSummaryCardHtml(backups) {
+  const lastSuccess = backups.find(b => b.status === 'success');
+  if (!lastSuccess) {
+    return `
+      <div class="backup-summary-card">
+        <div class="backup-summary-info">
+          <div class="backup-summary-label">Last successful backup</div>
+          <div class="backup-summary-value">No successful backups yet</div>
+        </div>
+        <div class="backup-summary-actions">
+          <button type="button" class="btn btn--primary backup-trigger-btn">Run Backup Now</button>
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="backup-summary-card">
+      <div class="backup-summary-info">
+        <div class="backup-summary-label">Last successful backup</div>
+        <div class="backup-summary-value">${formatBackupDate(lastSuccess.lastModified)}</div>
+        <div class="backup-summary-size">${formatBytes(lastSuccess.sizeBytes)}</div>
+      </div>
+      ${statusBadgeHtml(lastSuccess.status)}
+      <div class="backup-summary-actions">
+        <button type="button" class="btn btn--primary backup-trigger-btn">Run Backup Now</button>
+      </div>
+    </div>`;
+}
+
+function buildBackupTableHtml(backups) {
+  if (!backups || backups.length === 0) {
+    return `
+      <div class="backups-empty">
+        <h3>No backups yet</h3>
+        <p>Run your first backup to begin protecting your data.</p>
+      </div>`;
+  }
+
+  const headerHtml = `
+    <div class="backups-table-header">
+      <span>Date / Time</span>
+      <span>Size</span>
+      <span>Status</span>
+      <span>Type</span>
+      <span>Actions</span>
+    </div>`;
+
+  const rowsHtml = backups.map(b => {
+    // D-13: Restore button only for status=success AND trigger !== 'restore'
+    const showRestore = b.status === 'success' && b.trigger !== 'restore';
+    const actionsHtml = showRestore
+      ? `<button type="button" class="btn backup-restore-btn" data-filename="${b.filename}">Restore</button>`
+      : '';
+
+    // D-07: Failed entries get error tooltip via title attribute on badge
+    const statusHtml = b.status === 'failed' && b.error
+      ? `<span class="badge badge--danger" title="${b.error.replace(/"/g, '&quot;')}">Failed</span>`
+      : statusBadgeHtml(b.status);
+
+    return `
+      <div class="backups-table-row">
+        <span>${formatBackupDate(b.lastModified)}</span>
+        <span class="muted-cell">${formatBytes(b.sizeBytes)}</span>
+        <span>${statusHtml}</span>
+        <span>${triggerBadgeHtml(b.trigger)}</span>
+        <span>${actionsHtml}</span>
+      </div>`;
+  }).join('');
+
+  return `<div class="backups-table">${headerHtml}${rowsHtml}</div>`;
+}
+
+async function handleBackupTrigger() {
+  const btn = document.querySelector('.backup-trigger-btn');
+  if (!btn || btn.disabled) return;
+
+  // D-10: Disable button, show spinner
+  btn.disabled = true;
+  btn.innerHTML = '<span class="button-spinner"></span> Running...';
+
+  try {
+    const token = localStorage.getItem('auth-token');
+    const res = await apiFetch('/admin/backup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+      },
+    });
+
+    const data = await res.json();
+
+    if (res.status === 409) {
+      // D-12: 409 conflict — show info toast, re-enable after 5s
+      showInfoToast('Another operation is already in progress. Please wait.');
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = 'Run Backup Now';
+      }, 5000);
+      return;
+    }
+
+    if (!res.ok || data.status === 'failed') {
+      // D-11: Failure toast, re-enable button
+      showErrorToast('Backup failed: ' + (data.error || 'Unknown error'));
+      btn.disabled = false;
+      btn.innerHTML = 'Run Backup Now';
+      return;
+    }
+
+    // D-10: Success toast with size and duration, refresh table
+    const sizeMb = (data.sizeBytes / 1048576).toFixed(1);
+    const durationSec = Math.round(data.durationMs / 1000);
+    showSuccessToast(`Backup completed (${sizeMb} MB, ${durationSec}s)`);
+    await refreshBackupTable();
+  } catch (err) {
+    showErrorToast('Backup failed: ' + err.message);
+    btn.disabled = false;
+    btn.innerHTML = 'Run Backup Now';
+  }
+}
+
+async function refreshBackupTable() {
+  try {
+    const data = await fetchBackups();
+    const summaryEl = document.querySelector('.backup-summary-card');
+    const tableSection = document.querySelector('.backups-table-section');
+
+    if (summaryEl) {
+      summaryEl.outerHTML = buildSummaryCardHtml(data.backups);
+    }
+    if (tableSection) {
+      tableSection.innerHTML = buildBackupTableHtml(data.backups);
+    }
+
+    wireBackupsPageEvents();
+  } catch (err) {
+    showErrorToast('Failed to refresh backup list: ' + err.message);
+  }
+}
+
+function wireBackupsPageEvents() {
+  const triggerBtn = document.querySelector('.backup-trigger-btn');
+  if (triggerBtn) {
+    triggerBtn.addEventListener('click', handleBackupTrigger);
+  }
+
+  // Wire restore buttons (D-13) — handled by Plan 02 openRestoreModal
+  const restoreBtns = document.querySelectorAll('.backup-restore-btn');
+  restoreBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filename = btn.dataset.filename;
+      if (typeof openRestoreModal === 'function') {
+        openRestoreModal(filename);
+      }
+    });
+  });
+}
+
+async function renderBackupsPage() {
+  if (!(await checkAuth())) return;
+  clear();
+  setActiveNav('backups');
+
+  // Show loading state
+  pageContent.innerHTML = '<div class="backups-loading">Loading backup history...</div>';
+
+  try {
+    const data = await fetchBackups();
+    pageContent.innerHTML = `
+      ${buildSummaryCardHtml(data.backups)}
+      <div class="backups-table-section">
+        ${buildBackupTableHtml(data.backups)}
+      </div>
+    `;
+    wireBackupsPageEvents();
+  } catch (err) {
+    pageContent.innerHTML = `
+      <div class="backups-empty">
+        <h3>Failed to load backups</h3>
+        <p>${err.message}</p>
+      </div>
+    `;
+  }
 }
 
 // Translation handler for bilingual form fields
@@ -1539,6 +1768,14 @@ function initializeEventHandlers() {
       if (state.isReorderMode) exitReorderMode();
       setActiveNav("bulk-translate");
       renderBulkTranslatePage();
+    });
+  }
+
+  if (backupsBtn) {
+    backupsBtn.addEventListener("click", () => {
+      if (!canExitReorderMode()) return;
+      if (state.isReorderMode) exitReorderMode();
+      renderBackupsPage();
     });
   }
 }
