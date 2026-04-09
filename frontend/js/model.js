@@ -157,14 +157,14 @@ export const setPreviewItem = async function (data) {
  * * ADD TO CART FUNCTIONS
  */
 
-export const handleAddToCart = function (data) {
+export const handleAddToCart = async function (data) {
   // If NOT logged in:
   if (!localStorage.getItem('auth-token')) {
     addToLocalStorage(data);
   }
   // If logged in and there is a token:
   else {
-    addToUserStorage(data);
+    await addToUserStorage(data);
   }
 };
 
@@ -172,9 +172,9 @@ export const handleAddToCart = function (data) {
 // Add to cart if USER LOGGED
 ///////////////////////////
 
-export const addToUserStorage = data => {
+export const addToUserStorage = async data => {
   const itemId = data.dataset.id;
-  fetch(`${host}/addtocart`, {
+  const response = await fetch(`${host}/addtocart`, {
     method: 'POST',
     headers: {
       Accept: 'application/form-data',
@@ -182,12 +182,11 @@ export const addToUserStorage = data => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ itemId: itemId }),
-  })
-    .then(response => response.json())
-    .then(idData => idData) // Here 'data' is the item's id number
-    .catch(error => {
-      console.error('Failed to add item to cart:', error);
-    });
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to add item to cart (status ${response.status})`);
+  }
+  return response.json();
 };
 
 /////////////////////////////////

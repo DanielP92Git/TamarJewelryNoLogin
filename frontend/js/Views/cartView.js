@@ -91,6 +91,7 @@ class CartView extends View {
           await this._renderSummary(cartNum, lng);
         } catch (err) {
           console.error('[CartView] Error handling currency change:', err);
+          window.location.reload();
         }
       });
     }
@@ -174,27 +175,31 @@ class CartView extends View {
         };
       });
 
-      await fetch(`${this._host}/create-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: checkoutItems,
-          currency: selectedCurrency,
-        }),
-      })
-        .then(async res => {
-          if (res.ok) return res.json();
-          const json = await res.json();
-          return await Promise.reject(json);
-        })
-        .then(({ url }) => {
-          window.location = url;
-        })
-        .catch(e => {
-          console.error(e);
+      try {
+        const res = await fetch(`${this._host}/create-checkout-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            items: checkoutItems,
+            currency: selectedCurrency,
+          }),
         });
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.message || `Checkout failed (status ${res.status})`);
+        }
+        const { url } = await res.json();
+        window.location = url;
+      } catch (err) {
+        console.error('Checkout error:', err);
+        const lng = localStorage.getItem('language') || 'eng';
+        const msg = lng === 'heb'
+          ? 'שגיאה בתהליך התשלום. אנא נסה שנית.'
+          : 'Checkout failed. Please try again.';
+        alert(msg);
+      }
     });
   }
 

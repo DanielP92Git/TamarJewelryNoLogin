@@ -88,6 +88,7 @@ class CategoriesView extends View {
         this._updateUrlLang('he');
       } catch (error) {
         console.error('[CategoriesView] Error in changeToHeb:', error);
+        window.location.reload();
       }
     };
     this.changeToEng = async () => {
@@ -100,6 +101,7 @@ class CategoriesView extends View {
         this._updateUrlLang('en');
       } catch (error) {
         console.error('[CategoriesView] Error in changeToEng:', error);
+        window.location.reload();
       }
     };
   }
@@ -447,7 +449,7 @@ class CategoriesView extends View {
     document.addEventListener('click', this.addToCart.bind(this));
   }
 
-  addToCart(e) {
+  async addToCart(e) {
     let btn = e.target.closest('.add-to-cart-btn');
 
     if (!btn) return;
@@ -463,15 +465,23 @@ class CategoriesView extends View {
     btn.textContent =
       this.lang === 'eng' ? 'Added to Your Cart!' : 'המוצר נוסף לסל הקניות';
 
+    try {
+      await model.handleAddToCart(item);
+    } catch (err) {
+      console.error('Failed to add item to cart:', err);
+      this.decreaseCartNumber();
+      btn.textContent =
+        this.lang === 'eng' ? 'Failed to Add' : 'שגיאה בהוספה';
+      btn.style.backgroundColor = '#dc2626';
+    }
+
     setTimeout(() => {
       btn.textContent = this.lang === 'eng' ? 'Added to Cart' : 'הוסף לסל';
       btn.style.backgroundColor = '#1f2937';
     }, 2000);
-
-    model.handleAddToCart(item);
   }
 
-  addFromPrev(data) {
+  async addFromPrev(data) {
     // Select cart number elements before increasing
     this._cartNumber = document.querySelectorAll(
       '.cart-number, .cart-number-mobile'
@@ -560,10 +570,28 @@ class CategoriesView extends View {
       },
     };
 
-    model.handleAddToCart(mockElement);
-
-    // Update button text
     const addToCartBtn = document.querySelector('.add-to-cart-btn_modal');
+    try {
+      await model.handleAddToCart(mockElement);
+    } catch (err) {
+      console.error('Failed to add item to cart:', err);
+      this.decreaseCartNumber();
+      if (addToCartBtn) {
+        addToCartBtn.textContent =
+          this.lang === 'eng' ? 'Failed to Add' : 'שגיאה בהוספה';
+        addToCartBtn.style.backgroundColor = '#dc2626';
+      }
+      setTimeout(() => {
+        if (addToCartBtn) {
+          addToCartBtn.textContent =
+            this.lang === 'eng' ? 'Add to Cart' : 'הוסף לסל';
+          addToCartBtn.style.backgroundColor = '#1f2937';
+        }
+      }, 2000);
+      return;
+    }
+
+    // Update button text on success
     if (addToCartBtn) {
       const originalText = addToCartBtn.textContent;
       addToCartBtn.textContent =

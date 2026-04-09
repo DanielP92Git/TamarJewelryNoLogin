@@ -811,6 +811,7 @@ if (process.env.NODE_ENV !== 'test') {
     })
     .catch(err => {
       console.error('MongoDB connection failed:', err?.message || err);
+      process.exit(1);
     });
 }
 
@@ -2351,6 +2352,8 @@ app.post(
       // Handle file uploads if present
       let mainImageUpdated = false;
       let smallImagesUpdated = false;
+      let mainImageError = null;
+      let smallImagesError = null;
 
       // Start with existing images array or empty
       let images = Array.isArray(product.images) ? [...product.images] : [];
@@ -2416,7 +2419,7 @@ app.post(
           if (!isProd) console.log('Main image updated');
         } catch (error) {
           console.error('Error processing main image:', error);
-          // Continue without updating image if processing fails
+          mainImageError = error.message || 'Unknown error processing main image';
         }
       }
 
@@ -2476,7 +2479,7 @@ app.post(
           if (!isProd) console.log('Small images updated');
         } catch (error) {
           console.error('Error processing small images:', error);
-          // Continue without updating small images if processing fails
+          smallImagesError = error.message || 'Unknown error processing gallery images';
         }
       }
 
@@ -2549,11 +2552,18 @@ app.post(
         invalidateCategory(urlCategory);
       }
 
+      const warnings = [];
+      if (mainImageError) warnings.push(`Main image: ${mainImageError}`);
+      if (smallImagesError) warnings.push(`Gallery images: ${smallImagesError}`);
+
       res.json({
         success: true,
-        message: 'Product updated successfully',
+        message: warnings.length
+          ? 'Product updated with warnings'
+          : 'Product updated successfully',
         mainImageUpdated,
         smallImagesUpdated,
+        ...(warnings.length && { warnings }),
       });
     } catch (error) {
       // Handle duplicate SKU error
@@ -3926,7 +3936,10 @@ app.post('/webhook', (request, response) => {
       console.log('2. From webhook:', session.metadata?.productId);
     }
     void handleCheckoutSession(session).catch(err => {
-      console.error('Error handling checkout.session.completed:', err);
+      console.error(
+        `Error handling checkout.session.completed (session=${session?.id}, product=${session?.metadata?.productId}):`,
+        err
+      );
     });
   }
 

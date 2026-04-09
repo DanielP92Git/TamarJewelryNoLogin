@@ -48,6 +48,7 @@ router.post(
     }
 
     setActiveOperation('backup');
+    let logWarning = null;
     try {
       // D-16: Synchronous — await runBackup and return result directly
       const result = await runBackup();
@@ -68,6 +69,7 @@ router.post(
       } catch (dbErr) {
         // DB write failure must not block API response
         console.warn('[backup] failed to persist BackupLog:', dbErr.message);
+        logWarning = 'Backup succeeded but log entry could not be saved to database';
       }
 
       // D-04, MON-02: Send alert on failure (both cron and manual)
@@ -85,6 +87,7 @@ router.post(
         timestamp: result.timestamp,
         retentionDeleted: result.retentionDeleted,
         error: result.error,
+        ...(logWarning && { warning: logWarning }),
       });
     } catch (err) {
       // Unexpected error (runBackup should not throw — it catches internally)

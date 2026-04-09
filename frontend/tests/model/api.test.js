@@ -209,28 +209,15 @@ describe('API Network Failures', () => {
     teardownFetchMock();
   });
 
-  it('should handle TypeError(Failed to fetch) gracefully (MODEL-15)', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+  it('should throw on network failure so callers can handle it (MODEL-15)', async () => {
     localStorage.setItem('auth-token', 'mock-jwt-token');
     mockFetchNetworkError();
 
     const product = createProduct();
     const mockElement = createMockProductElement(product);
 
-    // addToUserStorage now has .catch() to handle network errors
-    // Call the function (it returns a promise that resolves to undefined on error)
-    const result = addToUserStorage(mockElement);
-
-    // Wait for promise to settle and error handler to run
-    await new Promise(resolve => setTimeout(resolve, 0));
-
-    // Verify error was logged
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      'Failed to add item to cart:',
-      expect.any(Error)
-    );
-
-    consoleErrorSpy.mockRestore();
+    // addToUserStorage now throws on failure so callers (UI) can show feedback
+    await expect(addToUserStorage(mockElement)).rejects.toThrow('Failed to fetch');
   });
 
   it('should not throw when network request fails (MODEL-15)', async () => {
@@ -297,26 +284,22 @@ describe('API HTTP Error Responses', () => {
     teardownFetchMock();
   });
 
-  it('should handle 400 Bad Request gracefully (MODEL-16)', async () => {
+  it('should reject with error on 400 Bad Request (MODEL-16)', async () => {
     mockFetchError(400, 'Bad Request');
 
     const product = createProduct();
     const mockElement = createMockProductElement(product);
 
-    expect(() => {
-      addToUserStorage(mockElement);
-    }).not.toThrow();
+    await expect(addToUserStorage(mockElement)).rejects.toThrow('status 400');
   });
 
-  it('should handle 401 Unauthorized gracefully (MODEL-16)', async () => {
+  it('should reject with error on 401 Unauthorized (MODEL-16)', async () => {
     mockFetchError(401, 'Unauthorized');
 
     const product = createProduct();
     const mockElement = createMockProductElement(product);
 
-    expect(() => {
-      addToUserStorage(mockElement);
-    }).not.toThrow();
+    await expect(addToUserStorage(mockElement)).rejects.toThrow('status 401');
   });
 
   it('should handle 404 Not Found gracefully (MODEL-16)', async () => {
@@ -340,7 +323,7 @@ describe('API HTTP Error Responses', () => {
     await expect(removeFromUserCart(product.id)).resolves.not.toThrow();
   });
 
-  it('should not throw on any HTTP error status (MODEL-16)', async () => {
+  it('should reject on any HTTP error status (MODEL-16)', async () => {
     const errorCodes = [400, 401, 403, 404, 500, 502, 503];
 
     for (const code of errorCodes) {
@@ -349,9 +332,7 @@ describe('API HTTP Error Responses', () => {
       const product = createProduct();
       const mockElement = createMockProductElement(product);
 
-      expect(() => {
-        addToUserStorage(mockElement);
-      }).not.toThrow();
+      await expect(addToUserStorage(mockElement)).rejects.toThrow(`status ${code}`);
     }
   });
 
@@ -362,7 +343,7 @@ describe('API HTTP Error Responses', () => {
     const mockElement = createMockProductElement(product);
 
     // First operation fails with 500
-    addToUserStorage(mockElement);
+    await expect(addToUserStorage(mockElement)).rejects.toThrow();
 
     // Cart should still accept local operations
     const localProduct = createProduct();

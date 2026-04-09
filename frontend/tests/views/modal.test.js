@@ -384,8 +384,8 @@ describe('Product Modal Rendering and Interactions', () => {
       expect(handleAddToCartSpy).toHaveBeenCalled();
     });
 
-    it('should show "Added to Cart!" feedback after click', () => {
-      vi.spyOn(model, 'handleAddToCart');
+    it('should show "Added to Cart!" feedback after click', async () => {
+      vi.spyOn(model, 'handleAddToCart').mockResolvedValue();
 
       const mockItem = document.createElement('div');
       mockItem.classList.add('item-container');
@@ -419,8 +419,10 @@ describe('Product Modal Rendering and Interactions', () => {
       const addToCartBtn = document.querySelector('.add-to-cart-btn_modal');
       addToCartBtn.click();
 
-      // Check button text changed
-      expect(addToCartBtn.textContent).toContain('Added to Cart!');
+      // Wait for async addFromPrev to complete (flush microtask queue)
+      await vi.waitFor(() => {
+        expect(addToCartBtn.textContent).toContain('Added to Cart!');
+      });
     });
 
     it('should increment cart number after adding to cart', () => {

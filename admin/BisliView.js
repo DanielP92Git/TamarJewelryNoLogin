@@ -1268,6 +1268,7 @@ async function init() {
     })
     .catch((error) => {
       console.error("Authentication check failed:", error);
+      showLoginPage("Unable to verify authentication. Please try again.");
     });
 }
 
@@ -5011,6 +5012,9 @@ async function updateProduct(e) {
     const result = await response.json();
 
     if (result.success) {
+      if (result.warnings && result.warnings.length) {
+        alert("Product saved with warnings:\n" + result.warnings.join("\n"));
+      }
       // Save the updated product's category
       const targetCategory = category;
       console.log("Target category for redirect:", targetCategory);
