@@ -34,3 +34,6 @@ Allow: /
 
 User-agent: ChatGPT-User
 Allow: /
+
+# Sitemap location
+Sitemap: https://tamarkfir.com/sitemap.xml
