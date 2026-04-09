@@ -437,7 +437,7 @@ describe('Contact Form View', () => {
           message: testData.message
         }),
         expect.objectContaining({
-          publicKey: 'dyz9UzngEOQUHFgv3'
+          publicKey: 'test-emailjs-public-key'
         })
       );
     });

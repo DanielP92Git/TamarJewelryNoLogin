@@ -14,6 +14,7 @@ import { beforeEach, afterEach, vi } from 'vitest';
  */
 process.env.API_URL = process.env.API_URL || 'http://localhost:4000';
 process.env.USD_ILS_RATE = process.env.USD_ILS_RATE || '3.7';
+process.env.EMAILJS_PUBLIC_KEY = process.env.EMAILJS_PUBLIC_KEY || 'test-emailjs-public-key';
 
 /**
  * Before each test: Clear the DOM to prevent test pollution
