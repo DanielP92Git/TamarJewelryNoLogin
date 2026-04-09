@@ -957,26 +957,14 @@ function setupDragAndDrop(dropzone, fileInput, isMultiple = false) {
       return;
     }
 
+    // Set dropped files on input — the change handler handles accumulation
+    const dataTransfer = new DataTransfer();
     if (isMultiple) {
-      // For multiple files, append to existing files
-      const dataTransfer = new DataTransfer();
-      // Add existing files
-      if (fileInput.files) {
-        Array.from(fileInput.files).forEach((file) => {
-          dataTransfer.items.add(file);
-        });
-      }
-      // Add new dropped files
-      files.forEach((file) => {
-        dataTransfer.items.add(file);
-      });
-      fileInput.files = dataTransfer.files;
+      files.forEach((file) => dataTransfer.items.add(file));
     } else {
-      // For single file, replace existing
-      const dataTransfer = new DataTransfer();
       dataTransfer.items.add(files[0]);
-      fileInput.files = dataTransfer.files;
     }
+    fileInput.files = dataTransfer.files;
 
     // Trigger change event to update thumbnails
     fileInput.dispatchEvent(new Event("change", { bubbles: true }));
@@ -984,6 +972,100 @@ function setupDragAndDrop(dropzone, fileInput, isMultiple = false) {
 }
 
 // Function removed - ILS price is now entered directly, USD is calculated on backend
+
+/**
+ * Renders accumulated file thumbnails with drag handles and remove buttons.
+ * Initializes SortableJS for reordering. Updates accArray on reorder/remove.
+ *
+ * @param {File[]} accArray - Mutable array of accumulated File objects
+ * @param {HTMLElement} container - The .thumbs container element
+ * @param {number} max - Maximum number of files to display
+ * @param {Function|null} onChange - Callback after reorder/remove (e.g. updateMediaCount)
+ */
+function renderAccumulatedThumbs(accArray, container, max, onChange) {
+  if (!container) return;
+
+  // Revoke old blob URLs to prevent memory leaks
+  container.querySelectorAll('img[src^="blob:"]').forEach(function(img) {
+    URL.revokeObjectURL(img.src);
+  });
+  container.innerHTML = "";
+
+  var dragHandleSvg = '<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">'
+    + '<circle cx="4" cy="4" r="1.5"/><circle cx="4" cy="8" r="1.5"/>'
+    + '<circle cx="4" cy="12" r="1.5"/><circle cx="12" cy="4" r="1.5"/>'
+    + '<circle cx="12" cy="8" r="1.5"/><circle cx="12" cy="12" r="1.5"/></svg>';
+
+  accArray.slice(0, max).forEach(function(file, idx) {
+    var wrap = document.createElement("div");
+    wrap.className = "thumb";
+    wrap.setAttribute("data-index", idx);
+
+    var img = document.createElement("img");
+    img.alt = file.name;
+    img.loading = "lazy";
+    img.src = URL.createObjectURL(file);
+    wrap.appendChild(img);
+
+    // Drag handle (only show if more than 1 image)
+    if (accArray.length > 1) {
+      var handle = document.createElement("div");
+      handle.className = "image-drag-handle";
+      handle.setAttribute("aria-label", "Drag to reorder");
+      handle.innerHTML = dragHandleSvg;
+      wrap.appendChild(handle);
+    }
+
+    // Remove button
+    var removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "thumb-remove-btn";
+    removeBtn.setAttribute("aria-label", "Remove image");
+    removeBtn.textContent = "\u00d7";
+    removeBtn.setAttribute("data-index", idx);
+    wrap.appendChild(removeBtn);
+
+    container.appendChild(wrap);
+  });
+
+  // Destroy previous SortableJS instance
+  if (container._sortableInstance) {
+    container._sortableInstance.destroy();
+    container._sortableInstance = null;
+  }
+
+  // Init SortableJS if more than 1 item
+  if (accArray.length > 1) {
+    container._sortableInstance = Sortable.create(container, {
+      handle: '.image-drag-handle',
+      animation: 150,
+      delay: 50,
+      delayOnTouchOnly: true,
+      ghostClass: 'gallery-sortable-ghost',
+      chosenClass: 'gallery-sortable-chosen',
+      dragClass: 'gallery-sortable-drag',
+      onEnd: function(evt) {
+        if (evt.oldIndex === evt.newIndex) return;
+        // Reorder the accumulated array to match new DOM order
+        var moved = accArray.splice(evt.oldIndex, 1)[0];
+        accArray.splice(evt.newIndex, 0, moved);
+        if (onChange) onChange();
+      }
+    });
+  }
+
+  // Wire remove buttons
+  container.querySelectorAll('.thumb-remove-btn').forEach(function(btn) {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var removeIdx = parseInt(btn.getAttribute('data-index'), 10);
+      accArray.splice(removeIdx, 1);
+      renderAccumulatedThumbs(accArray, container, max, onChange);
+      if (onChange) onChange();
+    });
+  });
+}
 
 function getImageUrl(image, imageLocal, publicImage, mainImage) {
   // Extract the filename from the image URL
@@ -4219,28 +4301,29 @@ function editProduct(product) {
   const editMainThumbs = document.getElementById("editMainThumbs");
   const editSmallThumbs = document.getElementById("editSmallThumbs");
 
-  const renderThumbs = (files, container, max = 5) => {
-    if (!container) return;
-    container.innerHTML = "";
-    const list = Array.from(files || []).slice(0, max);
-    list.forEach((file) => {
-      const wrap = document.createElement("div");
-      wrap.className = "thumb";
-      const img = document.createElement("img");
-      img.alt = file.name;
-      img.loading = "lazy";
-      img.src = URL.createObjectURL(file);
-      wrap.appendChild(img);
-      container.appendChild(wrap);
-    });
-  };
+  // Accumulated file arrays for image accumulation + reordering
+  const editAccumulatedMainImages = [];
+  const editAccumulatedSmallImages = [];
+  state._editFormAccumulatedMain = editAccumulatedMainImages;
+  state._editFormAccumulatedSmall = editAccumulatedSmallImages;
 
   editMainInput?.addEventListener("change", () => {
-    renderThumbs(editMainInput.files, editMainThumbs, 1);
+    const newFiles = Array.from(editMainInput.files || []);
+    if (newFiles.length > 0) {
+      editAccumulatedMainImages.length = 0;
+      editAccumulatedMainImages.push(newFiles[0]);
+    }
+    renderAccumulatedThumbs(editAccumulatedMainImages, editMainThumbs, 1, null);
   });
 
   editSmallInput?.addEventListener("change", () => {
-    renderThumbs(editSmallInput.files, editSmallThumbs, 5);
+    const newFiles = Array.from(editSmallInput.files || []);
+    newFiles.forEach(function(f) {
+      if (editAccumulatedSmallImages.length < 5) {
+        editAccumulatedSmallImages.push(f);
+      }
+    });
+    renderAccumulatedThumbs(editAccumulatedSmallImages, editSmallThumbs, 5, null);
   });
 
   // Setup drag and drop for main image in edit form
@@ -4784,6 +4867,10 @@ function prefillAddProductFormFromDraft(draft) {
   if (mainInput) mainInput.value = "";
   if (smallInput) smallInput.value = "";
 
+  // Clear accumulated image arrays
+  if (state._addFormAccumulatedMain) state._addFormAccumulatedMain.length = 0;
+  if (state._addFormAccumulatedSmall) state._addFormAccumulatedSmall.length = 0;
+
   const mainThumbs = document.getElementById("mainImageThumbs");
   const smallThumbs = document.getElementById("smallImageThumbs");
   if (mainThumbs) mainThumbs.innerHTML = "";
@@ -4858,9 +4945,12 @@ async function updateProduct(e) {
   const quantity = document.getElementById("quantity").value;
   const securityMargin = document.getElementById("security-margin").value;
 
-  // Get new image files
-  const mainImageFile = document.getElementById("mainImage").files[0];
-  const smallImageFiles = document.getElementById("smallImages").files;
+  // Get new image files (prefer accumulated arrays, fallback to input.files)
+  const mainImageFile = state._editFormAccumulatedMain?.[0]
+    || document.getElementById("mainImage").files[0];
+  const smallImageFiles = state._editFormAccumulatedSmall?.length > 0
+    ? state._editFormAccumulatedSmall
+    : Array.from(document.getElementById("smallImages").files || []);
 
   // Create FormData object for multipart/form-data
   const formData = new FormData();
@@ -5408,8 +5498,10 @@ async function addProduct(e, data, form) {
     console.log("[addProduct] Main image input:", mainImageInput);
     console.log("[addProduct] Small images input:", smallImagesInput);
 
-    const mainImage = mainImageInput?.files[0];
-    const smallImages = smallImagesInput?.files;
+    const mainImage = state._addFormAccumulatedMain?.[0] || mainImageInput?.files[0];
+    const smallImages = state._addFormAccumulatedSmall?.length > 0
+      ? state._addFormAccumulatedSmall
+      : Array.from(smallImagesInput?.files || []);
     console.log("[addProduct] Main image file:", mainImage);
     console.log(
       "[addProduct] Small images files count:",
@@ -5613,6 +5705,13 @@ async function addProduct(e, data, form) {
     console.log("[addProduct] About to reset form...");
     // Reset form
     form.reset();
+    // Clear accumulated image arrays and thumb previews
+    if (state._addFormAccumulatedMain) state._addFormAccumulatedMain.length = 0;
+    if (state._addFormAccumulatedSmall) state._addFormAccumulatedSmall.length = 0;
+    var mainThumbs = document.getElementById("mainImageThumbs");
+    var smallThumbs = document.getElementById("smallImageThumbs");
+    if (mainThumbs) mainThumbs.innerHTML = "";
+    if (smallThumbs) smallThumbs.innerHTML = "";
     console.log("[addProduct] Form reset complete");
 
     // Remember the category we want to filter by
@@ -5985,39 +6084,40 @@ async function loadAddProductsPage() {
   const smallThumbs = document.getElementById("smallImageThumbs");
   const mediaCount = document.getElementById("media-count");
 
-  const renderThumbs = (files, container, max = 5) => {
-    if (!container) return;
-    container.innerHTML = "";
-    const list = Array.from(files || []).slice(0, max);
-    list.forEach((file) => {
-      const wrap = document.createElement("div");
-      wrap.className = "thumb";
-      const img = document.createElement("img");
-      img.alt = file.name;
-      img.loading = "lazy";
-      img.src = URL.createObjectURL(file);
-      wrap.appendChild(img);
-      container.appendChild(wrap);
-    });
-  };
+  // Accumulated file arrays for image accumulation + reordering
+  const accumulatedMainImages = [];
+  const accumulatedSmallImages = [];
+  state._addFormAccumulatedMain = accumulatedMainImages;
+  state._addFormAccumulatedSmall = accumulatedSmallImages;
 
   const updateMediaCount = () => {
-    const mainCount = mainInput?.files?.length || 0;
-    const smallCount = smallInput?.files?.length || 0;
+    const mainCount = accumulatedMainImages.length;
+    const smallCount = accumulatedSmallImages.length;
     const total = mainCount + smallCount;
-    const max = 1 + 5; // visual hint (main + up to 5 thumbs)
+    const max = 1 + 5;
     if (mediaCount) mediaCount.textContent = `${total}/${max} Files`;
   };
 
   if (mainInput) {
     mainInput.addEventListener("change", () => {
-      renderThumbs(mainInput.files, mainThumbs, 1);
+      const newFiles = Array.from(mainInput.files || []);
+      if (newFiles.length > 0) {
+        accumulatedMainImages.length = 0;
+        accumulatedMainImages.push(newFiles[0]);
+      }
+      renderAccumulatedThumbs(accumulatedMainImages, mainThumbs, 1, updateMediaCount);
       updateMediaCount();
     });
   }
   if (smallInput) {
     smallInput.addEventListener("change", () => {
-      renderThumbs(smallInput.files, smallThumbs, 5);
+      const newFiles = Array.from(smallInput.files || []);
+      newFiles.forEach(function(f) {
+        if (accumulatedSmallImages.length < 5) {
+          accumulatedSmallImages.push(f);
+        }
+      });
+      renderAccumulatedThumbs(accumulatedSmallImages, smallThumbs, 5, updateMediaCount);
       updateMediaCount();
     });
   }
