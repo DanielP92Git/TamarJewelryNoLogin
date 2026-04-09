@@ -87,7 +87,7 @@ class CartView extends View {
           // Re-render cart with new currency
           const cartNum = await model.checkCartNumber();
           const lng = localStorage.getItem('language') || 'eng';
-          await this._render(cartNum, lng);
+          this.render(cartNum);
           await this._renderSummary(cartNum, lng);
         } catch (err) {
           console.error('[CartView] Error handling currency change:', err);
