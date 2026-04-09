@@ -3,7 +3,7 @@ const Product = require('./models/Product');
 
 async function check() {
   try {
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/jewelry');
+    await mongoose.connect(process.env.MONGO_URL || 'mongodb://localhost:27017/jewelry');
     const p = await Product.findOne({ id: 106 }).lean();
     console.log('=== Database images[0] ===');
     console.log(JSON.stringify(p.images?.[0], null, 2));
