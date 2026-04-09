@@ -410,6 +410,9 @@ function normalizeProductForClient(productDoc) {
   const fallbackNoImage = () => toAbsoluteApiUrl('/images/no-image.svg');
 
   const localAssetExistsForUrl = urlValue => {
+    // In production, images are served from CDN — skip synchronous filesystem checks
+    if (isProd) return true;
+
     if (!urlValue || typeof urlValue !== 'string') return true;
     // We can only validate local (relative-to-API) assets
     const rel = toRelativeApiPath(urlValue);
@@ -442,27 +445,6 @@ function normalizeProductForClient(productDoc) {
 
     return true;
   };
-
-  // #region agent log
-  agentLog(
-    'A',
-    'backend/index.js:normalizeProductForClient',
-    'normalize image urls',
-    {
-      hasApiUrl: !!process.env.API_URL,
-      apiUrlPrefix:
-        typeof process.env.API_URL === 'string'
-          ? process.env.API_URL.slice(0, 60)
-          : null,
-      imageIn: obj?.image,
-      publicImageIn: obj?.publicImage,
-      directImageUrlIn: obj?.directImageUrl,
-      mainImageDesktopIn: obj?.mainImage?.desktop,
-      hasImagesArray: Array.isArray(obj?.images),
-      imagesArrayLength: Array.isArray(obj?.images) ? obj.images.length : 0,
-    }
-  );
-  // #endregion
 
   // Phase 7: Handle unified images array (new array wins per CONTEXT.md)
   if (Array.isArray(obj.images) && obj.images.length > 0) {
@@ -614,20 +596,6 @@ function normalizeProductForClient(productDoc) {
   if (obj.description_he === undefined || obj.description_he === null) {
     obj.description_he = '';
   }
-
-  // #region agent log
-  agentLog(
-    'A',
-    'backend/index.js:normalizeProductForClient:exit',
-    'normalized image urls',
-    {
-      imageOut: obj?.image,
-      publicImageOut: obj?.publicImage,
-      directImageUrlOut: obj?.directImageUrl,
-      mainImageDesktopOut: obj?.mainImage?.desktop,
-    }
-  );
-  // #endregion
 
   return obj;
 }
