@@ -10,7 +10,6 @@ const { adminRateLimiter } = require('./admin');
 const exchangeRateService = require('../services/exchangeRateService');
 const { DB_TO_URL_CATEGORY } = require('./ssrDynamic');
 const { invalidateProduct, invalidateCategory } = require('../cache/invalidation');
-const { agentLog } = require('../utils/agentLog');
 const {
   isAbsoluteHttpUrl,
   toRelativeApiPath,
@@ -114,20 +113,6 @@ router.post(
   requireAdmin,
   async (req, res) => {
     try {
-      // #region agent log
-      agentLog('A', 'routes/products.js:/addproduct:entry', 'addproduct entry', {
-        hasBody: !!req.body,
-        contentType: req.headers['content-type'] || null,
-        hasMainImage: !!req.body?.mainImage,
-        mainImageDesktop: req.body?.mainImage?.desktop || null,
-        smallImagesType: Array.isArray(req.body?.smallImages)
-          ? 'array'
-          : typeof req.body?.smallImages,
-        category: req.body?.category || null,
-        name: req.body?.name || null,
-      });
-      // #endregion
-
       // Input guards
       if (!req.body || typeof req.body !== 'object') {
         return res
@@ -251,23 +236,6 @@ router.post(
           })
         : [];
 
-      // #region agent log
-      agentLog(
-        'A',
-        'routes/products.js:/addproduct',
-        'computed image fields for product',
-        {
-          hasApiUrl: !!process.env.API_URL,
-          mainImageInputDesktop: mainImageInput?.desktop,
-          mainImageUrlsDesktop: mainImageUrls?.desktop,
-          mainImageUrlsPublicDesktop: mainImageUrls?.publicDesktop,
-          smallImagesCount: Array.isArray(smallImageUrls)
-            ? smallImageUrls.length
-            : null,
-        }
-      );
-      // #endregion
-
       // Guard: don't store a product that references non-existent LOCAL upload files
       try {
         const desktopUrl = mainImageUrls?.desktop || null;
@@ -289,20 +257,6 @@ router.post(
               );
               return fpPublic ? fs.existsSync(fpPublic) : false;
             })();
-
-          // #region agent log
-          agentLog(
-            'A',
-            'routes/products.js:/addproduct:upload-file-check',
-            'checked upload file exists',
-            {
-              mainDesktopUrl: desktopUrl,
-              mainDesktopFilename: mainDesktopFn,
-              resolvedOk: !!fp,
-              exists,
-            }
-          );
-          // #endregion
 
           if (!exists) {
             return res.status(400).json({
@@ -396,15 +350,6 @@ router.post(
         console.log('\n=== Product Saved Successfully ===');
       }
 
-      // #region agent log
-      agentLog('A', 'routes/products.js:/addproduct:save', 'product saved', {
-        productId: nextId,
-        imageStored: product?.image,
-        publicImageStored: product?.publicImage,
-        directImageUrlStored: product?.directImageUrl,
-      });
-      // #endregion
-
       // Invalidate cache
       const urlCategory = DB_TO_URL_CATEGORY[product.category];
       if (product.slug && urlCategory) {
@@ -445,12 +390,6 @@ router.post(
           code: error?.code || null,
         });
       }
-      // #region agent log
-      agentLog('A', 'routes/products.js:/addproduct:catch', 'addproduct error', {
-        message: error?.message || null,
-        name: error?.name || null,
-      });
-      // #endregion
       res.status(500).json({
         success: false,
         error: 'Failed to create product',
@@ -1363,19 +1302,6 @@ router.post(
   ]),
   async (req, res) => {
     try {
-      // #region agent log
-      agentLog('B', 'routes/products.js:/upload:entry', 'upload received', {
-        hasFiles: !!req.files,
-        mainImageCount: Array.isArray(req.files?.mainImage)
-          ? req.files.mainImage.length
-          : 0,
-        smallImagesCount: Array.isArray(req.files?.smallImages)
-          ? req.files.smallImages.length
-          : 0,
-        mainImageFilename: req.files?.mainImage?.[0]?.filename || null,
-      });
-      // #endregion
-
       if (!req.files || Object.keys(req.files).length === 0) {
         console.error('No files were uploaded.');
         return res.status(400).json({
@@ -1448,57 +1374,7 @@ router.post(
         },
       };
 
-      // #region agent log
-      agentLog('B', 'routes/products.js:/upload:exit', 'upload response urls', {
-        mainDesktopUrl: response?.mainImage?.desktop,
-        mainPublicDesktopUrl: response?.mainImage?.publicDesktop,
-        smallImagesCount: Array.isArray(response?.smallImages)
-          ? response.smallImages.length
-          : 0,
-      });
-      // #endregion
-
-      // #region agent log
-      agentLog(
-        'B',
-        'routes/products.js:/upload:before-send',
-        'calling res.json',
-        {
-          responseSize: JSON.stringify(response).length,
-          headersSent: res.headersSent,
-          writableEnded: res.writableEnded,
-        }
-      );
-      // #endregion
-
-      res.on('error', err => {
-        // #region agent log
-        agentLog(
-          'B',
-          'routes/products.js:/upload:res-error',
-          'response stream error',
-          {
-            error: err.message,
-            stack: err.stack,
-          }
-        );
-        // #endregion
-      });
-
-      const responseBody = JSON.stringify(response);
-      if (res.headersSent) {
-        res.write(responseBody);
-        res.end();
-      } else {
-        res.json(response);
-      }
-
-      // #region agent log
-      agentLog('B', 'routes/products.js:/upload:after-send', 'res.end called', {
-        headersSent: res.headersSent,
-        writableEnded: res.writableEnded,
-      });
-      // #endregion
+      res.json(response);
     } catch (error) {
       if (!isProd) console.error('Upload error:', error);
       else {

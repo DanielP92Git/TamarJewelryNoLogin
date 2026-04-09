@@ -35,7 +35,6 @@ const paymentRoutes = require('./routes/payments');
 const productRoutes = require('./routes/products');
 const { router: adminRoutes } = require('./routes/admin');
 const { cacheMiddleware } = require('./middleware/cacheMiddleware');
-const { agentLog } = require('./utils/agentLog');
 const { toOrigin, toAbsoluteApiUrl } = require('./utils/urlHelpers');
 const {
   uploadsDir,
@@ -84,49 +83,6 @@ for (const distPath of distIndexPaths) {
 // Make bundleScripts available to all EJS templates
 app.locals.bundleScripts = bundleScripts;
 
-// #region agent log
-// Request-level probe for upload/addproduct issues (CORS/network vs route failures)
-app.use((req, res, next) => {
-  try {
-    if (req.path === '/upload' || req.path === '/addproduct') {
-      agentLog('C', 'backend/index.js:probe', 'incoming', {
-        path: req.path,
-        method: req.method,
-        origin: req.headers.origin || null,
-        host: req.headers.host || null,
-        acrMethod: req.headers['access-control-request-method'] || null,
-        acrHeaders: req.headers['access-control-request-headers'] || null,
-        hasAuthHeader: typeof req.headers.authorization === 'string',
-        hasAuthTokenHeader: typeof req.headers['auth-token'] === 'string',
-      });
-      res.on('finish', () => {
-        agentLog('C', 'backend/index.js:probe:finish', 'outgoing', {
-          path: req.path,
-          method: req.method,
-          statusCode: res.statusCode,
-        });
-      });
-      res.on('close', () => {
-        agentLog('C', 'backend/index.js:probe:close', 'connection closed', {
-          path: req.path,
-          method: req.method,
-          statusCode: res.statusCode,
-          writableEnded: res.writableEnded,
-        });
-      });
-      req.on('aborted', () => {
-        agentLog('C', 'backend/index.js:probe:aborted', 'request aborted', {
-          path: req.path,
-          method: req.method,
-        });
-      });
-    }
-  } catch {
-    // ignore
-  }
-  next();
-});
-// #endregion
 
 // =============================================
 // Basic request hardening
@@ -390,43 +346,21 @@ function applyStaticCors(req, res, next) {
 // Configure static file serving for all directories with custom middleware
 app.use('/uploads', (req, res, next) => {
   if (!isProd) console.log(`[Static] Accessing: ${req.path} from uploads dir`);
-  // #region agent log
+  // Serve a placeholder instead of 404 for missing images (prevents broken icons)
   try {
     const raw = req.path || '';
     const reqFile = raw.startsWith('/') ? raw.slice(1) : raw;
     const ext = path.extname(reqFile).toLowerCase();
     if (ext) {
       const resolved = safeResolveUnder(uploadsDir, reqFile);
-      agentLog('B', 'backend/index.js:/uploads', 'static request', {
-        reqPath: raw,
-        ext,
-        resolvedOk: !!resolved,
-        exists: resolved ? fs.existsSync(resolved) : false,
-      });
-
-      // Serve a placeholder instead of 404 for missing images (prevents broken icons)
       if (resolved && !fs.existsSync(resolved)) {
         // If the file exists in the public uploads directory (but not private), serve it from there.
         const fallbackResolved = safeResolveUnder(publicUploadsDir, reqFile);
         if (fallbackResolved && fs.existsSync(fallbackResolved)) {
-          agentLog(
-            'B',
-            'backend/index.js:/uploads:fallback-public',
-            'missing in uploadsDir; serving from publicUploadsDir',
-            { reqPath: raw }
-          );
           applyStaticCors(req, res, () => {});
           res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
           return res.status(200).sendFile(fallbackResolved);
         }
-        agentLog(
-          'B',
-          'backend/index.js:/uploads:fallback',
-          'missing upload file -> no-image',
-          {
-            reqPath: raw,
-          }
-        );
         res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
         return res.status(200).type('image/svg+xml').sendFile(noImageSvgPath);
       }
@@ -434,7 +368,6 @@ app.use('/uploads', (req, res, next) => {
   } catch {
     // ignore
   }
-  // #endregion
   applyStaticCors(req, res, () =>
     express.static(uploadsDir, staticOptions)(req, res, next)
   );
@@ -442,29 +375,15 @@ app.use('/uploads', (req, res, next) => {
 
 app.use('/api/uploads', (req, res, next) => {
   if (!isProd) console.log(`[Static] Accessing: ${req.path} from api/uploads`);
-  // #region agent log
   try {
     const raw = req.path || '';
     const reqFile = raw.startsWith('/') ? raw.slice(1) : raw;
     const ext = path.extname(reqFile).toLowerCase();
     if (ext) {
       const resolved = safeResolveUnder(uploadsDir, reqFile);
-      agentLog('B', 'backend/index.js:/api/uploads', 'static request', {
-        reqPath: raw,
-        ext,
-        resolvedOk: !!resolved,
-        exists: resolved ? fs.existsSync(resolved) : false,
-      });
-
       if (resolved && !fs.existsSync(resolved)) {
         const fallbackResolved = safeResolveUnder(publicUploadsDir, reqFile);
         if (fallbackResolved && fs.existsSync(fallbackResolved)) {
-          agentLog(
-            'B',
-            'backend/index.js:/api/uploads:fallback-public',
-            'missing in uploadsDir; serving from publicUploadsDir',
-            { reqPath: raw }
-          );
           applyStaticCors(req, res, () => {});
           res.setHeader(
             'Cross-Origin-Resource-Policy',
@@ -472,12 +391,6 @@ app.use('/api/uploads', (req, res, next) => {
           );
           return res.status(200).sendFile(fallbackResolved);
         }
-        agentLog(
-          'B',
-          'backend/index.js:/api/uploads:fallback',
-          'missing upload file -> no-image',
-          { reqPath: raw }
-        );
         res.setHeader(
           'Cross-Origin-Resource-Policy',
           isProd ? 'same-site' : 'cross-origin'
@@ -863,24 +776,6 @@ app.use((err, req, res, _next) => {
     message: err?.message,
   });
 
-  // Extra signal for the specific dev issue (client reports `Failed to fetch`)
-  try {
-    if (req?.originalUrl === '/addproduct' || req?.path === '/addproduct') {
-      agentLog(
-        'A',
-        'backend/index.js:error-handler',
-        'unhandled error while handling /addproduct',
-        {
-          status,
-          code,
-          message: err?.message || null,
-        }
-      );
-    }
-  } catch {
-    // ignore
-  }
-
   return res.status(status).json({
     success: false,
     error: 'Request failed',
@@ -904,17 +799,6 @@ if (process.env.NODE_ENV !== 'test') {
         console.log('  NODE_ENV:', process.env.NODE_ENV);
       }
 
-      // #region agent log
-      agentLog('A', 'backend/index.js:app.listen', 'server started', {
-        port: process.env.SERVER_PORT || 4000,
-        hasApiUrl: !!process.env.API_URL,
-        apiUrlPrefix:
-          typeof process.env.API_URL === 'string'
-            ? process.env.API_URL.slice(0, 60)
-            : null,
-        nodeEnv: process.env.NODE_ENV || null,
-      });
-      // #endregion
     } else {
       if (!isProd) console.log('Error : ' + error);
     }

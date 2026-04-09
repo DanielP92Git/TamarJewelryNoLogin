@@ -6,7 +6,6 @@ const path = require('path');
 const sharp = require('sharp');
 const { toAbsoluteApiUrl, toRelativeApiPath } = require('./urlHelpers');
 const { uploadFileToSpaces } = require('./spaces');
-const { agentLog } = require('./agentLog');
 
 const isProd = process.env.NODE_ENV === 'production';
 
@@ -403,22 +402,6 @@ const processImage = async (inputPath, filename, isMainImage = true) => {
       mobileKey,
       mobilePath,
       'image/webp'
-    );
-
-    agentLog(
-      'B',
-      'imageHelpers.js:processImage',
-      'processed & copied image variants',
-      {
-        isMainImage,
-        desktopFilename,
-        mobileFilename,
-        desktopExists: fs.existsSync(desktopPath),
-        mobileExists: fs.existsSync(mobilePath),
-        publicDesktopExists: fs.existsSync(publicDesktopPath),
-        publicMobileExists: fs.existsSync(publicMobilePath),
-        spacesEnabled: !!desktopSpacesUrl && !!mobileSpacesUrl,
-      }
     );
 
     results.desktop = {
