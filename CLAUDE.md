@@ -139,3 +139,42 @@ app.use((req, res, next) => {
 Target: DigitalOcean (App Platform or Droplets)
 - See `DIGITALOCEAN_SETUP.md` for clean URL rewriting configuration
 - Images served from DigitalOcean Spaces CDN
+
+## Payment Integration URLs
+
+Payment return/cancel URLs must use language-aware SSR paths (`/{lang}/`, `/{lang}/cart`). Use `detectLanguage(req)` from `backend/middleware/language.js` to get the language in backend route handlers. On the frontend, map `localStorage.getItem('language')` values (`'eng'`/`'heb'`) to URL lang codes (`'en'`/`'he'`).
+
+- PayPal JS SDK popup flow: success redirect is in `frontend/js/Views/cartView.js`
+- PayPal API `return_url`/`cancel_url`: set in `createOrder()` in `backend/index.js`
+- Stripe `success_url`/`cancel_url`: set in `/create-checkout-session` route in `backend/index.js`
+- Homepage shows a bilingual success banner when `?success=true` is in the URL (`backend/views/pages/home.ejs`)
+
+## Production Performance
+
+- `isProd` variable in `backend/index.js` gates debug logging — all `console.log`/`console.warn` calls must be wrapped in `if (!isProd)`
+- `normalizeProductForClient()` skips `fs.existsSync` checks in production (images served from CDN)
+- `console.error` is NOT gated — errors should always log in production
+
+## MongoDB Backup & Recovery
+
+- **Automated daily backups** at 03:00 AM Israel time to DigitalOcean Spaces (off-region, Amsterdam)
+- **Service**: `backend/services/backupService.js` — `runBackup()` and `runRestore()`
+- **Routes**: `backend/routes/backup.js` — `POST /admin/backup`, `GET /admin/backups`, `POST /admin/restore/:key`
+- **Alert service**: `backend/services/backupAlertService.js` — EmailJS failure alerts
+- **Admin UI**: Backup panel in `admin/BisliView.js` (sidebar → Backups)
+- **Restore key format**: UI sends bare filename, `runRestore()` prepends `backups/` prefix automatically
+- **Env vars**: `BACKUP_BUCKET`, `BACKUP_SPACES_ENDPOINT`, `BACKUP_SPACES_KEY`, `BACKUP_SPACES_SECRET`, `BACKUP_RETENTION_COUNT`
+
+## Admin Image Upload
+
+- Additional images accumulate across multiple file selections (up to 5) using `File[]` arrays stored on `state._addFormAccumulatedSmall` / `state._editFormAccumulatedSmall`
+- SortableJS drag-and-drop reordering on thumbnail previews (shared `renderAccumulatedThumbs()` function)
+- Per-image remove buttons (red X on hover)
+- Form submission reads from accumulated arrays, falls back to `input.files`
+- `setupDragAndDrop()` delegates accumulation to the change handler — does NOT merge files itself
+
+## EmailJS Configuration
+
+- **Contact form** (frontend): Uses `@emailjs/browser` with `process.env.EMAILJS_PUBLIC_KEY` (Parcel build-time injection from `frontend/.env`). Service: `service_t4qcx4j`
+- **Backup alerts** (backend): Uses EmailJS REST API with `EMAILJS_PUBLIC_KEY`/`EMAILJS_PRIVATE_KEY` from backend env vars. Service: `service_yenq5yp`
+- These are two SEPARATE EmailJS services — both use the same Gmail account but independent OAuth tokens

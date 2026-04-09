@@ -211,19 +211,15 @@ Planning next milestone. Run `/gsd-new-milestone` to define v1.7.
 
 **Known Issues/Tech Debt:**
 - Monolithic backend remains (large single file) — refactoring deferred to future
-- 147+ console.log statements not conditional on environment
-- Incomplete error handling in catch blocks (silent failures)
+- Incomplete error handling in catch blocks (silent failures) — IN PROGRESS
 - Input validation documented but not sanitized (exploratory testing approach)
 - No structured logging (console.log/error scattered throughout)
 - No audit logging for admin actions
 - Currency-changed event handler bug (calls non-existent this._render() method)
 - Payment sandbox integration deferred to future (real API testing with test mode)
-- Product slugs not populated in production database (migration script exists, needs manual run)
-- Payment return URLs hardcoded to old paths (update needed)
 - CRAWL-07 partial: Google Search Console requires post-deployment manual setup
-- robots.txt missing Sitemap: directive (minor SEO best practice)
 - SCHEMA-02: Migration script not executed (runtime normalization covers functionality)
-- normalizeProductForClient performance overhead (field copy on every API response)
+- MONGO_URL and MONGODB_URI both exist in .env — consolidate to one (code uses MONGO_URL, migrate-mongo uses MONGODB_URI)
 
 ## Constraints
 
