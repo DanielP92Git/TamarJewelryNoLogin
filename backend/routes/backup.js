@@ -199,6 +199,12 @@ router.post(
       });
     }
 
+    // Validate backup key format (alphanumeric, hyphens, underscores, dots only)
+    const key = req.params.key;
+    if (typeof key !== 'string' || !/^[\w.\-/]+$/.test(key) || key.includes('..')) {
+      return res.status(400).json({ success: false, error: 'Invalid backup key format' });
+    }
+
     // D-12: Unified concurrency lock
     if (getActiveOperation() !== null) {
       const msg = getActiveOperation() === 'backup'

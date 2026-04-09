@@ -19,6 +19,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
 const fs = require('fs');
 const sharp = require('sharp');
 const AWS = require('aws-sdk');
@@ -731,6 +732,7 @@ app.use(trailingSlashRedirect);
 // Legacy .html redirects (must be before SSR routes)
 app.use(legacyRedirectMiddleware);
 
+app.use(mongoSanitize());
 app.use(express.urlencoded({ extended: false }));
 app.use(
   express.json({
@@ -3581,9 +3583,18 @@ app.post(
   }
 );
 
+// Valid product categories (DB values)
+const VALID_CATEGORIES = [
+  'necklaces', 'crochet-necklaces', 'hoop-earrings',
+  'dangle-earrings', 'bracelets', 'unisex',
+];
+
 app.post('/productsByCategory', async (req, res) => {
   const category = req.body.category;
-  const page = req.body.page;
+  if (typeof category !== 'string' || !VALID_CATEGORIES.includes(category)) {
+    return res.status(400).json({ error: 'Invalid category' });
+  }
+  const page = parseInt(req.body.page) || 1;
   const limit = 6;
 
   try {
@@ -3616,7 +3627,10 @@ app.post('/chunkProducts', async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
   const skip = (page - 1) * limit;
-  let category = req.body.checkCategory;
+  const category = req.body.checkCategory;
+  if (typeof category !== 'string' || !VALID_CATEGORIES.includes(category)) {
+    return res.status(400).json({ error: 'Invalid category' });
+  }
   try {
     // Storefront listing: hide out-of-stock and unavailable items
     const products = await Product.find({
@@ -3640,6 +3654,9 @@ app.post('/chunkProducts', async (req, res) => {
 
 app.post('/getAllProductsByCategory', async (req, res) => {
   const category = req.body.category;
+  if (typeof category !== 'string' || !VALID_CATEGORIES.includes(category)) {
+    return res.status(400).json({ error: 'Invalid category' });
+  }
 
   try {
     if (!isProd) console.log('Fetching all products for category:', category);
@@ -3679,8 +3696,12 @@ app.post('/getcart', fetchUser, async (req, res) => {
 });
 
 app.post('/addtocart', fetchUser, async (req, res) => {
+  const itemId = Number(req.body.itemId);
+  if (!Number.isInteger(itemId) || itemId < 0) {
+    return res.status(400).json({ error: 'Invalid itemId' });
+  }
   let userData = await Users.findOne({ _id: req.user.id });
-  userData.cartData[req.body.itemId] += 1;
+  userData.cartData[itemId] += 1;
   await Users.findOneAndUpdate(
     { _id: req.user.id },
     { cartData: userData.cartData }
@@ -3689,9 +3710,13 @@ app.post('/addtocart', fetchUser, async (req, res) => {
 });
 
 app.post('/removefromcart', fetchUser, async (req, res) => {
+  const itemId = Number(req.body.itemId);
+  if (!Number.isInteger(itemId) || itemId < 0) {
+    return res.status(400).json({ error: 'Invalid itemId' });
+  }
   let userData = await Users.findOne({ _id: req.user.id });
-  if (userData.cartData[req.body.itemId] > 0)
-    userData.cartData[req.body.itemId] -= 1;
+  if (userData.cartData[itemId] > 0)
+    userData.cartData[itemId] -= 1;
   await Users.findOneAndUpdate(
     { _id: req.user.id },
     { cartData: userData.cartData }
