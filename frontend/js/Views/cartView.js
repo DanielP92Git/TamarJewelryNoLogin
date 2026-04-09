@@ -722,7 +722,8 @@ class CartView extends View {
                     ?.authorizations?.[0];
 
                 // Redirect to success page or show confirmation
-                window.location = `${process.env.HOST}/index.html?success=true`;
+                const urlLang = localStorage.getItem('language') === 'heb' ? 'he' : 'en';
+                window.location = `${process.env.HOST}/${urlLang}/?success=true`;
               }
             } catch (error) {
               console.error('PayPal capture error:', error);

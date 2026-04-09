@@ -50,6 +50,29 @@
   <body id="home">
     <%- include('../partials/header', { lang, dir, urlLang }) %>
 
+    <% if (typeof require !== 'undefined' || true) { %>
+    <script>
+    (function() {
+      if (new URLSearchParams(window.location.search).get('success') !== 'true') return;
+      var isHe = '<%= urlLang %>' === 'he';
+      var banner = document.createElement('div');
+      banner.id = 'order-success-banner';
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#16a34a;color:#fff;text-align:center;padding:14px 40px;font-size:16px;font-weight:600;direction:' + (isHe ? 'rtl' : 'ltr');
+      banner.textContent = isHe ? 'ההזמנה בוצעה בהצלחה! תודה רבה' : 'Order placed successfully! Thank you';
+      var close = document.createElement('button');
+      close.textContent = '\u00d7';
+      close.style.cssText = 'position:absolute;top:50%;right:12px;transform:translateY(-50%);background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px 8px';
+      close.onclick = function() { banner.remove(); };
+      banner.appendChild(close);
+      document.body.prepend(banner);
+      // Auto-dismiss after 8 seconds
+      setTimeout(function() { if (banner.parentNode) banner.remove(); }, 8000);
+      // Clean URL
+      history.replaceState(null, '', window.location.pathname);
+    })();
+    </script>
+    <% } %>
+
     <section class="hero-section">
       <picture>
         <source

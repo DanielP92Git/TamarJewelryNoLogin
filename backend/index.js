@@ -1539,7 +1539,7 @@ const generateAccessToken = async () => {
   }
 };
 
-const createOrder = async cart => {
+const createOrder = async (cart, lang = 'en') => {
   try {
     if (!isProd) {
       console.log(
@@ -1627,8 +1627,8 @@ const createOrder = async cart => {
         },
       ],
       application_context: {
-        return_url: `${process.env.API_URL}/complete-order`,
-        cancel_url: `${process.env.HOST}/html/cart.html`,
+        return_url: `${process.env.API_URL}/${lang}/?success=true`,
+        cancel_url: `${process.env.API_URL}/${lang}/cart`,
         user_action: 'PAY_NOW',
         brand_name: 'Tamar Kfir Jewelry',
       },
@@ -4104,8 +4104,8 @@ app.post('/create-checkout-session', async (req, res) => {
           },
         },
       ],
-      success_url: `${req.protocol}://${req.get('host')}/`,
-      cancel_url: `${req.protocol}://${req.get('host')}/en/cart`,
+      success_url: `${req.protocol}://${req.get('host')}/${detectLanguage(req)}/?success=true`,
+      cancel_url: `${req.protocol}://${req.get('host')}/${detectLanguage(req)}/cart`,
       metadata: {
         productId: requestedProductId.toString(),
         currency: stripeCurrency,
@@ -4145,7 +4145,8 @@ app.post('/orders', paymentRateLimiter, async (req, res) => {
       );
     }
 
-    const result = await createOrder(cart);
+    const lang = detectLanguage(req);
+    const result = await createOrder(cart, lang);
     if (!isProd)
       console.log('PayPal order creation successful:', result.httpStatusCode);
     res.status(result.httpStatusCode).json(result.jsonResponse);
