@@ -710,7 +710,7 @@ const allowedOriginList = [
 
 const allowedOriginsSet = new Set(allowedOriginList);
 
-console.log('Allowed origins:', [...allowedOriginsSet]);
+if (!isProd) console.log('Allowed origins:', [...allowedOriginsSet]);
 
 const corsOptions = {
   origin(origin, callback) {
@@ -785,18 +785,18 @@ app.use(
 // Initialize exchange rate on database connection
 async function initializeExchangeRate() {
   try {
-    console.log('Initializing exchange rate...');
+    if (!isProd) console.log('Initializing exchange rate...');
     // Check if we have a stored rate
     const storedRate = await exchangeRateService.getStoredRate();
     const isStale = await exchangeRateService.isRateStale(24);
 
     if (!storedRate || isStale) {
       // Fetch fresh rate from API
-      console.log('Fetching current exchange rate from API...');
+      if (!isProd) console.log('Fetching current exchange rate from API...');
       try {
         const { rate, source } = await exchangeRateService.fetchCurrentRate();
         await exchangeRateService.updateRate(rate, source);
-        console.log(`✓ Exchange rate initialized: ${rate} (source: ${source})`);
+        if (!isProd) console.log(`✓ Exchange rate initialized: ${rate} (source: ${source})`);
       } catch (error) {
         console.warn(
           'Failed to fetch exchange rate from API, using fallback:',
@@ -804,10 +804,10 @@ async function initializeExchangeRate() {
         );
         // Will use fallback from getExchangeRate
         const fallbackRate = await exchangeRateService.getExchangeRate();
-        console.log(`✓ Using fallback exchange rate: ${fallbackRate}`);
+        if (!isProd) console.log(`✓ Using fallback exchange rate: ${fallbackRate}`);
       }
     } else {
-      console.log(`✓ Using stored exchange rate: ${storedRate}`);
+      if (!isProd) console.log(`✓ Using stored exchange rate: ${storedRate}`);
     }
 
     // Start the daily job
@@ -931,22 +931,22 @@ const noImageSvgPath = path.join(__dirname, 'public/images/no-image.svg');
 // Ensure all directories exist
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
-  console.log('Created uploads directory:', uploadsDir);
+  if (!isProd) console.log('Created uploads directory:', uploadsDir);
 }
 
 if (!fs.existsSync(smallImagesDir)) {
   fs.mkdirSync(smallImagesDir, { recursive: true });
-  console.log('Created smallImages directory:', smallImagesDir);
+  if (!isProd) console.log('Created smallImages directory:', smallImagesDir);
 }
 
 if (!fs.existsSync(publicUploadsDir)) {
   fs.mkdirSync(publicUploadsDir, { recursive: true });
-  console.log('Created public uploads directory:', publicUploadsDir);
+  if (!isProd) console.log('Created public uploads directory:', publicUploadsDir);
 }
 
 if (!fs.existsSync(publicSmallImagesDir)) {
   fs.mkdirSync(publicSmallImagesDir, { recursive: true });
-  console.log('Created public smallImages directory:', publicSmallImagesDir);
+  if (!isProd) console.log('Created public smallImages directory:', publicSmallImagesDir);
 }
 
 // Enhanced static file serving options with better CORS support
@@ -1434,7 +1434,7 @@ async function handleCheckoutSession(session) {
     return;
   }
 
-  console.log(
+  if (!isProd) console.log(
     `Product ${productId} quantity reduced. New quantity: ${updated.quantity}`
   );
 
@@ -1442,7 +1442,7 @@ async function handleCheckoutSession(session) {
   // Do not delete products when inventory reaches 0.
   // Out-of-stock items should be temporarily hidden from the storefront but remain editable/restockable in admin.
   if (updated.quantity === 0) {
-    console.log(
+    if (!isProd) console.log(
       `Product ${productId} is now out of stock (quantity=0). It will be hidden from storefront listings.`
     );
   }
@@ -2389,7 +2389,7 @@ app.post(
 
       // Process main image if uploaded
       if (req.files && req.files.mainImage && req.files.mainImage.length > 0) {
-        console.log('Processing new main image');
+        if (!isProd) console.log('Processing new main image');
         const mainImage = req.files.mainImage[0];
 
         try {
@@ -2445,7 +2445,7 @@ app.post(
           }
 
           mainImageUpdated = true;
-          console.log('Main image updated');
+          if (!isProd) console.log('Main image updated');
         } catch (error) {
           console.error('Error processing main image:', error);
           // Continue without updating image if processing fails
@@ -2458,7 +2458,7 @@ app.post(
         req.files.smallImages &&
         req.files.smallImages.length > 0
       ) {
-        console.log(
+        if (!isProd) console.log(
           `Processing ${req.files.smallImages.length} new small images`
         );
 
@@ -2505,7 +2505,7 @@ app.post(
           images = [...images, ...newSmallImages].filter(Boolean);
 
           smallImagesUpdated = true;
-          console.log('Small images updated');
+          if (!isProd) console.log('Small images updated');
         } catch (error) {
           console.error('Error processing small images:', error);
           // Continue without updating small images if processing fails
@@ -2558,7 +2558,7 @@ app.post(
               product.smallImages = reorderedImages.slice(1);
             }
 
-            console.log('[updateproduct] Reordered images:', {
+            if (!isProd) console.log('[updateproduct] Reordered images:', {
               productId: product.id,
               newOrder: reorderedImages.map(img => img.desktop || img.publicDesktop).slice(0, 3)
             });
@@ -2571,7 +2571,7 @@ app.post(
 
       // Save the updated product
       await product.save();
-      console.log('Product updated successfully');
+      if (!isProd) console.log('Product updated successfully');
 
       // Invalidate cache for product and its category
       const urlCategory = DB_TO_URL_CATEGORY[product.category];
@@ -4584,7 +4584,7 @@ app.use((err, req, res, _next) => {
 if (process.env.NODE_ENV !== 'test') {
   app.listen(process.env.SERVER_PORT || 4000, error => {
     if (!error) {
-      console.log('Server Running on Port ' + (process.env.SERVER_PORT || 4000));
+      if (!isProd) console.log('Server Running on Port ' + (process.env.SERVER_PORT || 4000));
       if (process.env.NODE_ENV !== 'production') {
         console.log('Environment Variables (dev):');
         console.log('  API_URL:', process.env.API_URL);
@@ -4604,7 +4604,7 @@ if (process.env.NODE_ENV !== 'test') {
       });
       // #endregion
     } else {
-      console.log('Error : ' + error);
+      if (!isProd) console.log('Error : ' + error);
     }
   });
 }
