@@ -355,6 +355,8 @@ h1 {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   position: relative;
   transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .pricing-card::after {
@@ -382,8 +384,13 @@ h1 {
   font-family: var(--font-secondary);
   font-size: 1.5rem;
   font-weight: 400;
+  line-height: 1.2;
   color: rgba(68, 68, 68, 0.95);
   margin: 0 0 0.5rem 0;
+  min-height: 2.4em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pricing-card-price {
@@ -392,12 +399,20 @@ h1 {
   font-weight: 200;
   color: rgba(30, 30, 30, 0.95);
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.pricing-card-per {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: #888888;
+  display: block;
 }
 
 .pricing-card-bottom {
   padding: 1.5rem 2rem 2.5rem;
   text-align: center;
+  margin-top: auto;
 }
 
 .pricing-card-desc {

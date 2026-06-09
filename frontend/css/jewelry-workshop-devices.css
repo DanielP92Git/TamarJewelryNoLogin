@@ -412,7 +412,14 @@ h1 {
   font-weight: 200;
   color: rgba(30, 30, 30, 0.95);
   display: block;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.pricing-card-per {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: #888888;
+  display: block;
 }
 
 .pricing-card-bottom {

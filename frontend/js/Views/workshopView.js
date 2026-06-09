@@ -208,18 +208,20 @@ class WorkshopView extends View {
     if (lng === 'eng') {
       if (cards[0]) {
         cards[0].querySelector('.pricing-card-title').textContent = 'One-on-One Workshop';
-        cards[0].querySelector('.pricing-card-price').textContent = '450 NIS';
+        cards[0].querySelector('.pricing-card-price').textContent = '550 NIS';
         cards[0].querySelector('.pricing-card-desc').textContent = 'A personal and focused experience. All attention is dedicated to you.';
       }
       if (cards[1]) {
         cards[1].querySelector('.pricing-card-title').textContent = '2 Participants';
-        cards[1].querySelector('.pricing-card-price').textContent = '220 NIS';
-        cards[1].querySelector('.pricing-card-desc').textContent = 'A couples or friends workshop. Per participant.';
+        cards[1].querySelector('.pricing-card-price').textContent = '350 NIS';
+        cards[1].querySelector('.pricing-card-per').textContent = 'Per participant';
+        cards[1].querySelector('.pricing-card-desc').textContent = 'A couples or friends workshop.';
       }
       if (cards[2]) {
         cards[2].querySelector('.pricing-card-title').textContent = '3+ Participants';
-        cards[2].querySelector('.pricing-card-price').textContent = '200 NIS';
-        cards[2].querySelector('.pricing-card-desc').textContent = 'A group workshop, festive and fun. Per participant.';
+        cards[2].querySelector('.pricing-card-price').textContent = '280 NIS';
+        cards[2].querySelector('.pricing-card-per').textContent = 'Per participant';
+        cards[2].querySelector('.pricing-card-desc').textContent = 'A group workshop, festive and fun.';
       }
       if (noteEl) noteEl.textContent = "*Each workshop takes an hour and a half. For any questions please don't hesitate to contact me.";
       if (contactLabels[0]) contactLabels[0].textContent = 'Whatsapp:';
@@ -231,18 +233,20 @@ class WorkshopView extends View {
     } else if (lng === 'heb') {
       if (cards[0]) {
         cards[0].querySelector('.pricing-card-title').textContent = 'סדנא אחת על אחת';
-        cards[0].querySelector('.pricing-card-price').textContent = '450 ש"ח';
+        cards[0].querySelector('.pricing-card-price').textContent = '550 ש"ח';
         cards[0].querySelector('.pricing-card-desc').textContent = 'חוויה אישית וממוקדת. כל תשומת הלב מוקדשת לך.';
       }
       if (cards[1]) {
         cards[1].querySelector('.pricing-card-title').textContent = '2 משתתפות';
-        cards[1].querySelector('.pricing-card-price').textContent = '220 ש"ח';
-        cards[1].querySelector('.pricing-card-desc').textContent = 'סדנא זוגית או עם חברה. לכל משתתפת.';
+        cards[1].querySelector('.pricing-card-price').textContent = '350 ש"ח';
+        cards[1].querySelector('.pricing-card-per').textContent = 'לכל משתתפת';
+        cards[1].querySelector('.pricing-card-desc').textContent = 'סדנא זוגית או עם חברה.';
       }
       if (cards[2]) {
         cards[2].querySelector('.pricing-card-title').textContent = '3 משתתפות ומעלה';
-        cards[2].querySelector('.pricing-card-price').textContent = '200 ש"ח';
-        cards[2].querySelector('.pricing-card-desc').textContent = 'סדנא קבוצתית, חגיגית וכיפית. לכל משתתפת.';
+        cards[2].querySelector('.pricing-card-price').textContent = '280 ש"ח';
+        cards[2].querySelector('.pricing-card-per').textContent = 'לכל משתתפת';
+        cards[2].querySelector('.pricing-card-desc').textContent = 'סדנא קבוצתית, חגיגית וכיפית.';
       }
       if (noteEl) noteEl.textContent = '*כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי.';
       if (contactLabels[0]) contactLabels[0].textContent = 'וואטסאפ:';
