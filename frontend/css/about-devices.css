@@ -303,37 +303,33 @@ html[dir='rtl'] #page-title::after {
   margin-top: 2rem;
 }
 
-/* English copy: Montserrat, LTR */
+/* Body copy — matches the workshop page typography */
 .aboutme-description p {
   font-family: var(--font-secondary);
-  font-size: 1rem;
-  line-height: 1.8;
-  color: #333333;
+  font-size: 1.2rem;
+  line-height: 1.6rem;
+  color: rgba(68, 68, 68, 0.9);
+  letter-spacing: 0.5px;
   margin-bottom: 1.4em;
   margin-top: 0;
 }
 
-/* Hebrew copy: Rubik, RTL — inherits dir="rtl" from <html> */
+/* Hebrew copy: same font family as workshop, right-aligned (inherits dir="rtl") */
 html[dir='rtl'] .aboutme-description p {
-  font-family: var(--font-accent);
-  font-size: 1.05rem;
-  line-height: 1.9;
   text-align: right;
 }
 
 /* Opening lead line — slightly larger, lighter colour */
 .aboutme-description p.aboutme-lead {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   color: #666666;
   font-style: italic;
   margin-bottom: 1.6em;
 }
 
 html[dir='rtl'] .aboutme-description p.aboutme-lead {
-  font-size: 1.1rem;
   font-style: normal;
   font-weight: 400;
-  color: #666666;
 }
 
 /* Portrait image — integrated look, not dumped at the bottom */

@@ -106,38 +106,34 @@ html[dir='rtl'] #page-title::after {
   padding: 0;
 }
 
-/* All paragraphs */
+/* Body copy — matches the workshop page typography */
 .aboutme-description p {
   font-family: var(--font-secondary);
-  font-size: 0.95rem;
-  line-height: 1.85;
-  color: #333333;
+  font-size: 0.9rem;
+  line-height: 1.8rem;
+  color: rgba(68, 68, 68, 0.9);
+  letter-spacing: 0.5px;
+  word-spacing: 0.5rem;
   margin-bottom: 1.4em;
   margin-top: 0;
-  word-spacing: 0.03em;
 }
 
-/* Hebrew copy: Rubik, inherits dir="rtl" from <html> */
+/* Hebrew copy: same font family as workshop, right-aligned */
 html[dir='rtl'] .aboutme-description p {
-  font-family: var(--font-accent);
-  font-size: 1rem;
-  line-height: 1.9;
   text-align: right;
 }
 
 /* Opening lead line — slightly larger, lighter colour */
 .aboutme-description p.aboutme-lead {
-  font-size: 1.05rem;
+  font-size: 1rem;
   color: #666666;
   font-style: italic;
   margin-bottom: 1.8em;
 }
 
 html[dir='rtl'] .aboutme-description p.aboutme-lead {
-  font-size: 1.05rem;
   font-style: normal;
   font-weight: 400;
-  color: #666666;
 }
 
 /* Back-to-top button */

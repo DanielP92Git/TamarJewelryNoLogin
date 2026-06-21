@@ -37,7 +37,20 @@ body {
 }
 
 #page-title {
-  font-size: 2.5rem;
+  font-size: 1.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+}
+
+/* Gold hairline divider under the title — matches the About page */
+#page-title::after {
+  content: '';
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  background-color: #c5a572;
+  margin: 0.75rem auto 0;
 }
 
 .main-nav-tab {
