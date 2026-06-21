@@ -231,59 +231,125 @@ input[type='checkbox']:checked + .menu {
 
 /* ===== END OF MENU SETTINGS==== */
 
+/* =========================================================
+   About page — content styles (mobile, <800px)
+   Consistent with the site's minimalist luxury aesthetic:
+   grayscale palette, generous whitespace, Montserrat/Rubik fonts,
+   subtle gold accent (#c5a572) from the footer to tie the page together.
+   ========================================================= */
+
 main {
   display: flex;
   flex-flow: column;
   align-items: center;
-
-  max-height: 160rem;
   width: 100%;
-  padding-bottom: 3rem;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(37, 136, 228); */
+  padding-top: 2rem;
+  padding-bottom: 4rem;
+  background-color: #ffffff;
 }
 
+/* Page title */
+#page-title,
 h1 {
-  font-weight: 100;
   font-family: var(--font-secondary);
+  font-weight: 100;
+  font-size: 1.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #1a1a1a;
   width: 100%;
   margin-top: 0;
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
 
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 2px solid rgb(40, 228, 37); */
+/* Gold hairline divider under the title */
+#page-title::after {
+  content: '';
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  background-color: #c5a572;
+  margin: 0.75rem auto 0;
+}
+
+/* RTL: keep divider centred for Hebrew */
+html[dir='rtl'] #page-title::after {
+  margin: 0.75rem auto 0;
 }
 
 .first-row-container {
   display: flex;
   flex-flow: column;
   align-items: center;
+  width: 100%;
 }
 
 .title-and-text-container {
   display: flex;
   flex-flow: column;
   align-items: center;
+  width: 100%;
+  padding: 0 1.25rem;
+  box-sizing: border-box;
 }
 
+/* Body copy wrapper */
 .aboutme-description {
-  width: 95%;
-  font-size: 1.2rem;
-  padding: 0 1.5rem 1.5rem 1.5rem;
-  line-height: 1.6rem;
+  width: 100%;
+  max-width: 640px;
   box-sizing: border-box;
+  padding: 0;
+  margin-top: 2rem;
+}
+
+/* English copy: Montserrat, LTR */
+.aboutme-description p {
   font-family: var(--font-secondary);
-  color: rgba(68, 68, 68, 0.9);
-  letter-spacing: 0.5px;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #333333;
+  margin-bottom: 1.4em;
+  margin-top: 0;
+}
+
+/* Hebrew copy: Rubik, RTL — inherits dir="rtl" from <html> */
+html[dir='rtl'] .aboutme-description p {
+  font-family: var(--font-accent);
+  font-size: 1.05rem;
+  line-height: 1.9;
+  text-align: right;
+}
+
+/* Opening lead line — slightly larger, lighter colour */
+.aboutme-description p.aboutme-lead {
+  font-size: 1.1rem;
+  color: #666666;
+  font-style: italic;
+  margin-bottom: 1.6em;
+}
+
+html[dir='rtl'] .aboutme-description p.aboutme-lead {
+  font-size: 1.1rem;
+  font-style: normal;
+  font-weight: 400;
+  color: #666666;
+}
+
+/* Portrait image — integrated look, not dumped at the bottom */
+.image-container {
+  width: calc(100% - 2.5rem);
+  max-width: 480px;
+  margin: 2rem auto 0;
 }
 
 .description-img {
-  width: calc(100% - 2rem);
-  margin: 3rem auto 0 auto;
+  width: 100%;
+  height: auto;
   display: block;
-  box-sizing: border-box;
+  border-radius: 8px;
+  object-fit: cover;
+  object-position: center 20%;
 }
 
 .go-to-top {
@@ -294,9 +360,6 @@ h1 {
   background: transparent;
   padding: 0;
   margin: 30px;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 3px solid rgb(4, 255, 0); */
 }
 
 .arrow-up {
