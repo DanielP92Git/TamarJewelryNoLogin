@@ -87,6 +87,21 @@ app.use((req, res, next) => {
 });
 ```
 
+## SSR + Client Dual-Render (IMPORTANT — read before changing any page's design)
+
+Static pages are rendered **twice**: once server-side by an EJS template, and again client-side by the matching frontend View, which **destructively overwrites the SSR DOM on load** (and on the in-page language toggle). If you change a page's SSR markup/design but not its JS twin, the JS will silently revert your change a split-second after load. This has already bitten the footer, the About title, and the About copy.
+
+**Rule: any change to an SSR template's content/structure MUST be mirrored in the matching frontend View (and vice-versa).**
+
+Page ↔ View ↔ overwrite map:
+- **Footer** (`backend/views/partials/footer.ejs`) ↔ `frontend/js/View.js` → `handleFooterMarkup()` runs `footer.innerHTML = setFooterLng(lng)` on every page. Social links / footer markup live in **both** places.
+- **About** (`backend/views/pages/about.ejs`) ↔ `frontend/js/Views/aboutView.js` → `setAboutDesc()` rewrites `.aboutme-description`; `setHeaderLng()` rewrites `#page-title`. Keep paragraph markup and title alignment in sync with the EJS/CSS.
+- **Workshop** (`workshop.ejs`) ↔ `workshopView.js` → `setWorkshopLng()` rebuilds `.workshop-description`; `setCostsLng()` rewrites the pricing/contact text; `setHeaderLng()` rewrites `#page-title` (note: it does **not** set `text-align`, so the title is safe).
+- **Contact** (`contact.ejs`) ↔ `contactMeView.js` → `setFormLng()` rebuilds `.contact-form`; `setContactTitleLng()` rewrites the title/subtitle. **Do not remove the on-load `setFormLng()` call** — it re-grabs `#submit` and attaches the send handler (the class-field `_submitBtn` is null at import time), so the submit button depends on it.
+- **Policies** (`policies.ejs`) ↔ `policiesView.js` → `setPoliciesContent()` replaces all of `<main>` via `getPoliciesMarkup()`, but only on the language **toggle** (not on load). Keep `getPoliciesMarkup()` in sync with the EJS.
+
+Title styling note: page titles use `#page-title` with a shared treatment (light weight, centered, uppercase, gold `#c5a572` `::after` hairline). If a View's `setHeaderLng()` sets inline styles on `#page-title`, they must match the CSS (e.g. `text-align: center`, not `left`/`right`).
+
 ## SSR Caching
 
 - **In-memory page cache** via `node-cache` (1-hour TTL) in `backend/cache/pageCache.js`
