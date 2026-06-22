@@ -116,67 +116,7 @@ class WorkshopView extends View {
     }
   };
 
-  handleWorkshopLng(lng) {
-    const descriptionContainer = document.querySelector(
-      '.workshop-description',
-    );
-    if (lng === 'eng') {
-      descriptionContainer.style.direction = 'ltr';
-      descriptionContainer.style.textAlign = 'left';
-      return `I am delighted to invite you to a jewelry workshop for women and
-          girls. In this workshop you will make your own unique jewelry. From a
-          young age, jewelry design has given me a place for creation, freedom
-          and love of working with my hands and making new things. I want to
-          share this experience with as many women and girls as I can, so they
-          too can create on their own and know that there is no limit to
-          creativity. I work with jewelry from a place of belief in our ability
-          to cure ourselves through our hands. <br />
-          <br /><br />
-          In the workshop I will teach and support you in your process of making
-          jewelry, and I also share how you can continue making new pieces at
-          home. I will teach you which materials you need to buy and how to do
-          so cost-effectively. I will give you the knowledge and tools needed to
-          continue creating unique piece on your own. In the workshop we will
-          create some earrings and a necklace or a bracelet (depends on time),
-          and you will learn some techniques of working with several materials,
-          including beads and metal. <br /><br /><br />This workshop does not
-          require any former knowledge in making jewelry. All materials will be
-          provided by me. You can also make a special surprise for someone and
-          buy the jewelry workshop as a gift card`;
-    } else if (lng === 'heb') {
-      descriptionContainer.style.direction = 'rtl';
-      descriptionContainer.style.textAlign = 'right';
-      return `אני שמחה להזמין אותך לסדנת תכשיטים לנשים ולנערות. בסדנה הזו תכיני תכשיטים ייחודיים משלך. מגיל צעיר, עיצוב תכשיטים נתן לי מקום ליצירה, חופש ואהבה לעבודה עם הידיים וליצירת דברים חדשים. אני רוצה לחלוק את החוויה הזו עם כמה שיותר נשים ונערות, כדי שגם הן יוכלו ליצור בעצמן ולדעת שאין גבול ליצירתיות. אני עובדת עם תכשיטים מתוך אמונה ביכולת שלנו לרפא את עצמנו דרך הידיים.
-<br /><br /><br />
-בסדנה אלמד ואלווה אותך בתהליך יצירת התכשיטים, ואשתף איך תוכלי להמשיך ליצור פריטים חדשים גם בבית. אלמד אותך אילו חומרים כדאי לקנות ואיך לעשות זאת בצורה חסכונית. אתן לך את הידע והכלים הדרושים כדי שתוכלי להמשיך ליצור פריטים ייחודיים משלך. בסדנה נכין עגילים וכמו כן שרשרת או צמיד (תלוי בזמן), ותלמדי כמה טכניקות עבודה עם חומרים שונים, כולל חרוזים ומתכת.
-<br /><br /><br />
-הסדנה אינה דורשת ידע קודם ביצירת תכשיטים. כל החומרים יינתנו על ידי. את גם יכולה להכין הפתעה מיוחדת למישהו ולרכוש את סדנת התכשיטים ככרטיס מתנה.`;
-    }
-  }
-
   setWorkshopLng(lng) {
-    const descriptionContainer = document.querySelector(
-      '.workshop-description',
-    );
-    const containerParent = document.querySelector(
-      '.workshop-description-container',
-    );
-
-    descriptionContainer.innerHTML = '';
-    const markup = this.handleWorkshopLng(lng);
-    descriptionContainer.insertAdjacentHTML('afterbegin', markup);
-
-    // Set text alignment and direction
-    if (lng === 'heb') {
-      descriptionContainer.style.direction = 'rtl';
-      descriptionContainer.style.textAlign = 'right';
-      // containerParent?.classList.add('rtl-layout');
-    } else {
-      descriptionContainer.style.direction = 'ltr';
-      descriptionContainer.style.textAlign = 'left';
-      containerParent?.classList.remove('rtl-layout');
-    }
-
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
 
