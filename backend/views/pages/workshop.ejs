@@ -54,137 +54,48 @@
 הסדנה אינה דורשת ידע קודם ביצירת תכשיטים. כל החומרים יינתנו על ידי. את גם יכולה להכין הפתעה מיוחדת למישהו ולרכוש את סדנת התכשיטים ככרטיס מתנה.
         <% } %>
       </div>
-      <div class="slides-area">
-      <section class="slide-images-container">
-        <!-- Add Slider Buttons -->
-        
-
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop5(Medium).webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Jewelry workshop session' : 'סדנת תכשיטים' %>"
-          />
-        </div>
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop10.webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Workshop participants creating jewelry' : 'משתתפות סדנה יוצרות תכשיטים' %>"
-          />
-        </div>
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop11.webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Handmade jewelry workshop' : 'סדנת תכשיטים בעבודת יד' %>"
-          />
-        </div>
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop12.webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Workshop materials and tools' : 'חומרים וכלים לסדנה' %>"
-          />
-        </div>
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop13.webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Jewelry making process' : 'תהליך יצירת תכשיטים' %>"
-          />
-        </div>
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop14.webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Workshop finished pieces' : 'יצירות מוגמרות מהסדנה' %>"
-          />
-        </div>
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop15.webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Participants learning techniques' : 'משתתפות לומדות טכניקות' %>"
-          />
-        </div>
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop16.webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Workshop creative session' : 'מפגש יצירתי בסדנה' %>"
-          />
-        </div>
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop17.webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Jewelry workshop experience' : 'חווית סדנת תכשיטים' %>"
-          />
-        </div>
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop18.webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Workshop group activity' : 'פעילות קבוצתית בסדנה' %>"
-          />
-        </div>
-        <div class="slide-image">
-          <img
-            src="/imgs/website-images/workshop/workshop19.webp"
-            class="slide-image-img"
-            alt="<%= lang === 'eng' ? 'Workshop final creations' : 'יצירות סופיות מהסדנה' %>"
-          />
-        </div>
-
-        <div class="logo"></div>
-      </section>
-      <div class="slider-nav"> 
-        <button
-        class="slider-btn slider-btn--right"
-        aria-label="<%= lang === 'eng' ? 'Next image' : 'תמונה הבאה' %>"
-        ></button>
-        <button
-        class="slider-btn slider-btn--left"
-        aria-label="<%= lang === 'eng' ? 'Previous image' : 'תמונה קודמת' %>"
-        ></button>
-      </div>
-      </div>
     </div>
-    <div class="workshop-costs">
-      <div class="pricing-cards-section">
-        <div class="pricing-cards">
-          <div class="pricing-card">
-            <div class="pricing-card-top">
-              <h3 class="pricing-card-title"><%= lang === 'eng' ? 'One-on-One Workshop' : 'סדנא אחת על אחת' %></h3>
-              <span class="pricing-card-price"><%= lang === 'eng' ? '550 NIS' : '550 ש"ח' %></span>
+
+    <section class="workshop-cards-section">
+      <div
+        class="workshop-cards"
+        data-form-url="<%= workshops.form.baseUrl %>"
+        data-form-entry="<%= workshops.form.entryId %>"
+      >
+        <% workshops.items.forEach(function (w) {
+             const nm = lang === 'eng' ? w.name.eng : w.name.heb;
+             const href = workshops.form.baseUrl + '?usp=pp_url&' + workshops.form.entryId + '=' + encodeURIComponent(nm); %>
+          <article
+            class="workshop-card"
+            data-name-en="<%= w.name.eng %>"
+            data-name-he="<%= w.name.heb %>"
+            data-title-en="<%= w.title.eng %>"
+            data-title-he="<%= w.title.heb %>"
+            data-desc-en="<%= w.desc.eng %>"
+            data-desc-he="<%= w.desc.heb %>"
+          >
+            <div class="workshop-card-image">
+              <img
+                src="<%= w.image %>"
+                alt="<%= lang === 'eng' ? w.title.eng : w.title.heb %>"
+                loading="lazy"
+                onerror="this.closest('.workshop-card-image').classList.add('is-empty'); this.remove();"
+              />
             </div>
-            <div class="pricing-card-bottom">
-              <p class="pricing-card-desc"><%= lang === 'eng' ? 'A personal and focused experience. All attention is dedicated to you.' : 'חוויה אישית וממוקדת. כל תשומת הלב מוקדשת לך.' %></p>
-            </div>
-          </div>
-          <div class="pricing-card">
-            <div class="pricing-card-top">
-              <h3 class="pricing-card-title"><%= lang === 'eng' ? '2 Participants' : '2 משתתפות' %></h3>
-              <span class="pricing-card-price"><%= lang === 'eng' ? '350 NIS' : '350 ש"ח' %></span>
-              <span class="pricing-card-per"><%= lang === 'eng' ? 'Per participant' : 'לכל משתתפת' %></span>
-            </div>
-            <div class="pricing-card-bottom">
-              <p class="pricing-card-desc"><%= lang === 'eng' ? 'A couples or friends workshop.' : 'סדנא זוגית או עם חברה.' %></p>
-            </div>
-          </div>
-          <div class="pricing-card">
-            <div class="pricing-card-top">
-              <h3 class="pricing-card-title"><%= lang === 'eng' ? '3+ Participants' : '3 משתתפות ומעלה' %></h3>
-              <span class="pricing-card-price"><%= lang === 'eng' ? '280 NIS' : '280 ש"ח' %></span>
-              <span class="pricing-card-per"><%= lang === 'eng' ? 'Per participant' : 'לכל משתתפת' %></span>
-            </div>
-            <div class="pricing-card-bottom">
-              <p class="pricing-card-desc"><%= lang === 'eng' ? 'A group workshop, festive and fun.' : 'סדנא קבוצתית, חגיגית וכיפית.' %></p>
-            </div>
-          </div>
-        </div>
+            <h3 class="workshop-card-title"><%= lang === 'eng' ? w.title.eng : w.title.heb %></h3>
+            <p class="workshop-card-desc"><%= lang === 'eng' ? w.desc.eng : w.desc.heb %></p>
+            <a
+              class="workshop-card-btn"
+              href="<%= href %>"
+              target="_blank"
+              rel="noopener noreferrer"
+            ><%= lang === 'eng' ? 'More Details' : 'לפרטים נוספים' %></a>
+          </article>
+        <% }); %>
       </div>
+    </section>
+
+    <div class="workshop-costs">
       <div class="contact-container">
         <div class="contact-block">
           <a href="https://wa.me/972524484763" class="whatsapp-atr">

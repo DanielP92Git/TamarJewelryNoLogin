@@ -1,5 +1,6 @@
 // SSR route handlers for static pages
 const metaConfig = require('../config/meta');
+const workshops = require('../config/workshops');
 
 /**
  * Build common pageData for SSR rendering
@@ -91,6 +92,7 @@ function renderWorkshopPage(req, res) {
     { href: '/css/mobile-menu.css', media: '(max-width: 799.9px)' },
   ]);
 
+  pageData.workshops = workshops;
   res.render('pages/workshop', pageData);
 }
 

@@ -263,11 +263,130 @@ h1 {
   letter-spacing: 0.5px;
   text-align: left; /* Default for English/LTR */
 
-  width: 50%;
+  /* Slider removed — the intro now stands alone, centered and full-width. */
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
   max-height: 100%;
 
   /* ~~~~ FOR DEBUGGING~~~~ */
   /* border: 2px solid rgb(37, 155, 228); */
+}
+
+/* ============================================================
+   Workshop cards grid (replaces the old slider + pricing cards)
+   ============================================================ */
+.workshop-cards-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 1rem 2rem 4rem;
+  box-sizing: border-box;
+}
+
+.workshop-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  width: 100%;
+  max-width: 1100px;
+}
+
+.workshop-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #f5f5f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.workshop-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.workshop-card-image {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background-color: #fafafa;
+}
+
+.workshop-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.workshop-card:hover .workshop-card-image img {
+  transform: scale(1.04);
+}
+
+/* Fallback well while a photo is missing (onerror flags .is-empty) */
+.workshop-card-image.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.workshop-card-image.is-empty::after {
+  content: '';
+  width: 3rem;
+  height: 1px;
+  background-color: #c5a572;
+}
+
+.workshop-card-title {
+  font-family: var(--font-secondary);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+  padding: 1.25rem 1.25rem 0.5rem;
+}
+
+.workshop-card-desc {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: #555;
+  padding: 0 1.25rem 1.25rem;
+  flex: 1; /* push the button to a shared baseline across cards */
+}
+
+.workshop-card-btn {
+  display: block;
+  margin: 0 1.25rem 1.5rem;
+  padding: 0.85rem 1rem;
+  background-color: #c5a572;
+  color: #1f2937;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 0;
+  transition: background-color 0.3s ease, transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.workshop-card-btn:hover {
+  background-color: #bca366;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(197, 165, 114, 0.25);
+}
+
+/* RTL: right-align card text for Hebrew (mirrors .category-name pattern) */
+html[dir='rtl'] .workshop-card-title,
+html[dir='rtl'] .workshop-card-desc {
+  text-align: right;
 }
 
 /* RTL support - when description is RTL, reverse flex order to keep carousel on right */

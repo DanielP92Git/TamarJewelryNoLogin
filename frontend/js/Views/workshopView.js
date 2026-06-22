@@ -181,7 +181,46 @@ class WorkshopView extends View {
     this._categoriesList = document.querySelector('.categories-list');
 
     this.setHeaderLng(lng);
+    this.setWorkshopCardsLng(lng);
     this.setCostsLng(lng);
+  }
+
+  /**
+   * Localize the workshop cards. Copy is NOT duplicated here — the EJS renders
+   * both languages into data-* attributes; we just swap the visible text,
+   * direction, and the form button's prefilled workshop name on toggle.
+   */
+  setWorkshopCardsLng(lng) {
+    const grid = document.querySelector('.workshop-cards');
+    if (!grid) return;
+
+    const isHeb = lng === 'heb';
+    const formUrl = grid.dataset.formUrl || '';
+    const formEntry = grid.dataset.formEntry || '';
+
+    grid.querySelectorAll('.workshop-card').forEach((card) => {
+      const title = isHeb ? card.dataset.titleHe : card.dataset.titleEn;
+      const desc = isHeb ? card.dataset.descHe : card.dataset.descEn;
+      const name = isHeb ? card.dataset.nameHe : card.dataset.nameEn;
+
+      const titleEl = card.querySelector('.workshop-card-title');
+      const descEl = card.querySelector('.workshop-card-desc');
+      const btnEl = card.querySelector('.workshop-card-btn');
+
+      if (titleEl && title != null) titleEl.textContent = title;
+      if (descEl && desc != null) descEl.textContent = desc;
+      if (btnEl) {
+        btnEl.textContent = isHeb ? 'לפרטים נוספים' : 'More Details';
+        if (formUrl && formEntry && name != null) {
+          btnEl.href = `${formUrl}?usp=pp_url&${formEntry}=${encodeURIComponent(
+            name,
+          )}`;
+        }
+      }
+
+      card.style.direction = isHeb ? 'rtl' : 'ltr';
+      card.style.textAlign = isHeb ? 'right' : 'left';
+    });
   }
 
   setHeaderLng(lng) {
@@ -200,29 +239,11 @@ class WorkshopView extends View {
     const costsContainer = document.querySelector('.workshop-costs');
     if (!costsContainer) return;
 
-    const cards = costsContainer.querySelectorAll('.pricing-card');
     const noteEl = costsContainer.querySelector('.workshop-cost-note');
     const contactLabels = costsContainer.querySelectorAll('.contact-label');
     const contactValues = costsContainer.querySelectorAll('.contact-value');
 
     if (lng === 'eng') {
-      if (cards[0]) {
-        cards[0].querySelector('.pricing-card-title').textContent = 'One-on-One Workshop';
-        cards[0].querySelector('.pricing-card-price').textContent = '550 NIS';
-        cards[0].querySelector('.pricing-card-desc').textContent = 'A personal and focused experience. All attention is dedicated to you.';
-      }
-      if (cards[1]) {
-        cards[1].querySelector('.pricing-card-title').textContent = '2 Participants';
-        cards[1].querySelector('.pricing-card-price').textContent = '350 NIS';
-        cards[1].querySelector('.pricing-card-per').textContent = 'Per participant';
-        cards[1].querySelector('.pricing-card-desc').textContent = 'A couples or friends workshop.';
-      }
-      if (cards[2]) {
-        cards[2].querySelector('.pricing-card-title').textContent = '3+ Participants';
-        cards[2].querySelector('.pricing-card-price').textContent = '280 NIS';
-        cards[2].querySelector('.pricing-card-per').textContent = 'Per participant';
-        cards[2].querySelector('.pricing-card-desc').textContent = 'A group workshop, festive and fun.';
-      }
       if (noteEl) noteEl.textContent = "*Each workshop takes an hour and a half. For any questions please don't hesitate to contact me.";
       if (contactLabels[0]) contactLabels[0].textContent = 'Whatsapp:';
       if (contactLabels[1]) contactLabels[1].textContent = 'Tel.:';
@@ -231,23 +252,6 @@ class WorkshopView extends View {
       if (contactValues[1]) contactValues[1].textContent = '+972-524484763';
       if (contactValues[2]) contactValues[2].textContent = 'tamarkfir91@gmail.com';
     } else if (lng === 'heb') {
-      if (cards[0]) {
-        cards[0].querySelector('.pricing-card-title').textContent = 'סדנא אחת על אחת';
-        cards[0].querySelector('.pricing-card-price').textContent = '550 ש"ח';
-        cards[0].querySelector('.pricing-card-desc').textContent = 'חוויה אישית וממוקדת. כל תשומת הלב מוקדשת לך.';
-      }
-      if (cards[1]) {
-        cards[1].querySelector('.pricing-card-title').textContent = '2 משתתפות';
-        cards[1].querySelector('.pricing-card-price').textContent = '350 ש"ח';
-        cards[1].querySelector('.pricing-card-per').textContent = 'לכל משתתפת';
-        cards[1].querySelector('.pricing-card-desc').textContent = 'סדנא זוגית או עם חברה.';
-      }
-      if (cards[2]) {
-        cards[2].querySelector('.pricing-card-title').textContent = '3 משתתפות ומעלה';
-        cards[2].querySelector('.pricing-card-price').textContent = '280 ש"ח';
-        cards[2].querySelector('.pricing-card-per').textContent = 'לכל משתתפת';
-        cards[2].querySelector('.pricing-card-desc').textContent = 'סדנא קבוצתית, חגיגית וכיפית.';
-      }
       if (noteEl) noteEl.textContent = '*כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי.';
       if (contactLabels[0]) contactLabels[0].textContent = 'וואטסאפ:';
       if (contactLabels[1]) contactLabels[1].textContent = 'נייד:';
