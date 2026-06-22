@@ -82,7 +82,7 @@ module.exports = {
       },
       desc: {
         eng: "Looking for an original, stylish and fun way to celebrate with your closest friends? A festive, pampering birthday workshop combining quality crafting, good music, fine wine and a generous spread. We'll create in a relaxed, bonding atmosphere and everyone leaves with a stunning handmade piece and the perfect memento. (Additional 30 ₪ per participant for wine & refreshments.)",
-        heb: 'מחפשת דרך מקורית, מעוצבת וכיפית לחגוג עם החברות הכי טובות? סדנת יום הולדת חגיגית ומפנקת שמשלבת יצירה איכותית, מוזיקה טובה, יין משובח וכיבוד עשיר. נשב יחד באווירה משחררת ומגבשת, נלמד טכניקות עיצוב ייחודיות וכל אחת תצא עם תכשיט או פריט מהמם מעשה ידיה ומזכרת מושלמת מהאירוע. (תוספת של 30 ₪ למשתתפת עבור יין וכיבוד)',
+        heb: 'מחפשת דרך מקורית, מעוצבת וכיפית לחגוג עם החברות הכי טובות? סדנת יום הולדת חגיגית ומפנקת שמשלבת יצירה איכותית, מוזיקה טובה, יין משובח וכיבוד עשיר. נשב יחד באווירה משחררת ומגבשת, נלמד טכניקות עיצוב ייחודיות וכל אחת תצא עם תכשיט או פריט מהמם מעשה ידיה ומזכרת מושלמת מהאירוע.',
       },
     },
     {
