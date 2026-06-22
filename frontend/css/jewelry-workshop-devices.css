@@ -271,7 +271,9 @@ main {
   flex-flow: column;
   align-items: center;
 
-  max-height: 160rem;
+  /* No max-height: the bilingual workshop cards make this page much taller
+     than the old slider layout. A fixed cap (was 160rem) clipped the flow so
+     the footer painted over the lower cards on mobile. Let main grow to fit. */
   width: 100%;
   padding-bottom: 3rem;
 
