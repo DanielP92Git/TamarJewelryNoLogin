@@ -27,14 +27,21 @@
     <section class="workshop-cards-section">
       <div
         class="workshop-cards"
-        data-form-url="<%= workshops.form.baseUrl %>"
-        data-form-entry="<%= workshops.form.entryId %>"
+        data-form-url-en="<%= workshops.form.eng.baseUrl %>"
+        data-form-entry-en="<%= workshops.form.eng.entryId %>"
+        data-form-url-he="<%= workshops.form.heb.baseUrl %>"
+        data-form-entry-he="<%= workshops.form.heb.entryId %>"
       >
+        <% const wf = lang === 'eng' ? workshops.form.eng : workshops.form.heb; %>
         <% workshops.items.forEach(function (w) {
-             const nm = lang === 'eng' ? w.name.eng : w.name.heb;
-             const href = workshops.form.baseUrl + '?usp=pp_url&' + workshops.form.entryId + '=' + encodeURIComponent(nm); %>
+             const fv = w.formValue ? (lang === 'eng' ? w.formValue.eng : w.formValue.heb) : '';
+             const href = fv
+               ? wf.baseUrl + '?usp=pp_url&' + wf.entryId + '=' + encodeURIComponent(fv)
+               : wf.baseUrl; %>
           <article
             class="workshop-card"
+            data-form-value-en="<%= w.formValue ? w.formValue.eng : '' %>"
+            data-form-value-he="<%= w.formValue ? w.formValue.heb : '' %>"
             data-name-en="<%= w.name.eng %>"
             data-name-he="<%= w.name.heb %>"
             data-title-en="<%= w.title.eng %>"
