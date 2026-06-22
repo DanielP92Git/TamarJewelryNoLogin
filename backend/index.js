@@ -73,10 +73,23 @@ const distIndexPaths = [
 for (const distPath of distIndexPaths) {
   if (fs.existsSync(distPath)) {
     const distHtml = fs.readFileSync(distPath, 'utf-8');
-    const importMapMatch = distHtml.match(/<script type="importmap">[\s\S]*?<\/script>/);
-    const bundleMatch = distHtml.match(/<script type="module" src="[^"]*" defer(?:="")?\s*><\/script>/);
-    const nomoduleMatch = distHtml.match(/<script src="[^"]*" defer(?:="")? nomodule\s*><\/script>/);
-    bundleScripts = (importMapMatch ? importMapMatch[0] : '') + (bundleMatch ? bundleMatch[0] : '') + (nomoduleMatch ? nomoduleMatch[0] : '');
+    // Parcel 2's minified output uses UNQUOTED attributes and self-closes the
+    // script tag (e.g. `<script type=module src=/main.abc.js defer>`), while
+    // unminified output uses quoted attributes with a closing tag. Match either
+    // form, then re-emit canonical quoted tags so the SSR HTML is always valid.
+    const importMapMatch = distHtml.match(
+      /<script\s+type=["']?importmap["']?\s*>[\s\S]*?<\/script>/i,
+    );
+    const moduleSrc = distHtml.match(
+      /<script\s+type=["']?module["']?\s+src=["']?([^"'\s>]+)["']?[^>]*>/i,
+    );
+    const nomoduleSrc = distHtml.match(
+      /<script\s+src=["']?([^"'\s>]+)["']?[^>]*\bnomodule\b[^>]*>/i,
+    );
+    bundleScripts =
+      (importMapMatch ? importMapMatch[0] : '') +
+      (moduleSrc ? `<script type="module" src="${moduleSrc[1]}" defer></script>` : '') +
+      (nomoduleSrc ? `<script src="${nomoduleSrc[1]}" defer nomodule></script>` : '');
     break;
   }
 }

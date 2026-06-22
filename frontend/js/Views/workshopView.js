@@ -3,11 +3,15 @@ import View from '../View.js';
 class WorkshopView extends View {
   addWorkshopHandler(handler) {
     window.addEventListener('load', () => {
-      let lng = localStorage.getItem('language');
-      if (!lng) {
-        localStorage.setItem('language', 'eng');
-        lng = 'eng';
-      }
+      // Trust the language the page was SSR-rendered in (derived from the URL)
+      // over localStorage. Otherwise a stale localStorage value from a previous
+      // visit makes an English page flip to the Hebrew form/content (and vice
+      // versa) the moment the client view re-renders on load.
+      const docLang = document.documentElement.lang;
+      const ssrLng =
+        docLang === 'he' ? 'heb' : docLang === 'en' ? 'eng' : null;
+      const lng = ssrLng || localStorage.getItem('language') || 'eng';
+      localStorage.setItem('language', lng);
 
       handler(lng);
     });
@@ -116,72 +120,60 @@ class WorkshopView extends View {
     }
   };
 
-  handleWorkshopLng(lng) {
-    const descriptionContainer = document.querySelector(
-      '.workshop-description',
-    );
-    if (lng === 'eng') {
-      descriptionContainer.style.direction = 'ltr';
-      descriptionContainer.style.textAlign = 'left';
-      return `I am delighted to invite you to a jewelry workshop for women and
-          girls. In this workshop you will make your own unique jewelry. From a
-          young age, jewelry design has given me a place for creation, freedom
-          and love of working with my hands and making new things. I want to
-          share this experience with as many women and girls as I can, so they
-          too can create on their own and know that there is no limit to
-          creativity. I work with jewelry from a place of belief in our ability
-          to cure ourselves through our hands. <br />
-          <br /><br />
-          In the workshop I will teach and support you in your process of making
-          jewelry, and I also share how you can continue making new pieces at
-          home. I will teach you which materials you need to buy and how to do
-          so cost-effectively. I will give you the knowledge and tools needed to
-          continue creating unique piece on your own. In the workshop we will
-          create some earrings and a necklace or a bracelet (depends on time),
-          and you will learn some techniques of working with several materials,
-          including beads and metal. <br /><br /><br />This workshop does not
-          require any former knowledge in making jewelry. All materials will be
-          provided by me. You can also make a special surprise for someone and
-          buy the jewelry workshop as a gift card`;
-    } else if (lng === 'heb') {
-      descriptionContainer.style.direction = 'rtl';
-      descriptionContainer.style.textAlign = 'right';
-      return `אני שמחה להזמין אותך לסדנת תכשיטים לנשים ולנערות. בסדנה הזו תכיני תכשיטים ייחודיים משלך. מגיל צעיר, עיצוב תכשיטים נתן לי מקום ליצירה, חופש ואהבה לעבודה עם הידיים וליצירת דברים חדשים. אני רוצה לחלוק את החוויה הזו עם כמה שיותר נשים ונערות, כדי שגם הן יוכלו ליצור בעצמן ולדעת שאין גבול ליצירתיות. אני עובדת עם תכשיטים מתוך אמונה ביכולת שלנו לרפא את עצמנו דרך הידיים.
-<br /><br /><br />
-בסדנה אלמד ואלווה אותך בתהליך יצירת התכשיטים, ואשתף איך תוכלי להמשיך ליצור פריטים חדשים גם בבית. אלמד אותך אילו חומרים כדאי לקנות ואיך לעשות זאת בצורה חסכונית. אתן לך את הידע והכלים הדרושים כדי שתוכלי להמשיך ליצור פריטים ייחודיים משלך. בסדנה נכין עגילים וכמו כן שרשרת או צמיד (תלוי בזמן), ותלמדי כמה טכניקות עבודה עם חומרים שונים, כולל חרוזים ומתכת.
-<br /><br /><br />
-הסדנה אינה דורשת ידע קודם ביצירת תכשיטים. כל החומרים יינתנו על ידי. את גם יכולה להכין הפתעה מיוחדת למישהו ולרכוש את סדנת התכשיטים ככרטיס מתנה.`;
-    }
-  }
-
   setWorkshopLng(lng) {
-    const descriptionContainer = document.querySelector(
-      '.workshop-description',
-    );
-    const containerParent = document.querySelector(
-      '.workshop-description-container',
-    );
-
-    descriptionContainer.innerHTML = '';
-    const markup = this.handleWorkshopLng(lng);
-    descriptionContainer.insertAdjacentHTML('afterbegin', markup);
-
-    // Set text alignment and direction
-    if (lng === 'heb') {
-      descriptionContainer.style.direction = 'rtl';
-      descriptionContainer.style.textAlign = 'right';
-      // containerParent?.classList.add('rtl-layout');
-    } else {
-      descriptionContainer.style.direction = 'ltr';
-      descriptionContainer.style.textAlign = 'left';
-      containerParent?.classList.remove('rtl-layout');
-    }
-
     this._categoriesTab = document.querySelector('.categories-tab');
     this._categoriesList = document.querySelector('.categories-list');
 
     this.setHeaderLng(lng);
+    this.setWorkshopCardsLng(lng);
     this.setCostsLng(lng);
+  }
+
+  /**
+   * Localize the workshop cards. Copy is NOT duplicated here — the EJS renders
+   * both languages into data-* attributes; we just swap the visible text,
+   * direction, and the form button's prefilled workshop name on toggle.
+   */
+  setWorkshopCardsLng(lng) {
+    const grid = document.querySelector('.workshop-cards');
+    if (!grid) return;
+
+    const isHeb = lng === 'heb';
+    // Each language opens its own Google Form, so the URL/entry switch too.
+    const formUrl =
+      (isHeb ? grid.dataset.formUrlHe : grid.dataset.formUrlEn) || '';
+    const formEntry =
+      (isHeb ? grid.dataset.formEntryHe : grid.dataset.formEntryEn) || '';
+
+    grid.querySelectorAll('.workshop-card').forEach((card) => {
+      const title = isHeb ? card.dataset.titleHe : card.dataset.titleEn;
+      const desc = isHeb ? card.dataset.descHe : card.dataset.descEn;
+      // The form prefill value is the exact checkbox option string for the
+      // active language's form (empty when the card has no matching option).
+      const formValue =
+        (isHeb ? card.dataset.formValueHe : card.dataset.formValueEn) || '';
+
+      const titleEl = card.querySelector('.workshop-card-title');
+      const descEl = card.querySelector('.workshop-card-desc');
+      const btnEl = card.querySelector('.workshop-card-btn');
+
+      if (titleEl && title != null) titleEl.textContent = title;
+      if (descEl && desc != null) descEl.textContent = desc;
+      if (btnEl) {
+        btnEl.textContent = isHeb ? 'לפרטים נוספים' : 'More Details';
+        if (formUrl) {
+          btnEl.href =
+            formEntry && formValue
+              ? `${formUrl}?usp=pp_url&${formEntry}=${encodeURIComponent(
+                  formValue,
+                )}`
+              : formUrl;
+        }
+      }
+
+      card.style.direction = isHeb ? 'rtl' : 'ltr';
+      card.style.textAlign = isHeb ? 'right' : 'left';
+    });
   }
 
   setHeaderLng(lng) {
@@ -200,29 +192,11 @@ class WorkshopView extends View {
     const costsContainer = document.querySelector('.workshop-costs');
     if (!costsContainer) return;
 
-    const cards = costsContainer.querySelectorAll('.pricing-card');
     const noteEl = costsContainer.querySelector('.workshop-cost-note');
     const contactLabels = costsContainer.querySelectorAll('.contact-label');
     const contactValues = costsContainer.querySelectorAll('.contact-value');
 
     if (lng === 'eng') {
-      if (cards[0]) {
-        cards[0].querySelector('.pricing-card-title').textContent = 'One-on-One Workshop';
-        cards[0].querySelector('.pricing-card-price').textContent = '550 NIS';
-        cards[0].querySelector('.pricing-card-desc').textContent = 'A personal and focused experience. All attention is dedicated to you.';
-      }
-      if (cards[1]) {
-        cards[1].querySelector('.pricing-card-title').textContent = '2 Participants';
-        cards[1].querySelector('.pricing-card-price').textContent = '350 NIS';
-        cards[1].querySelector('.pricing-card-per').textContent = 'Per participant';
-        cards[1].querySelector('.pricing-card-desc').textContent = 'A couples or friends workshop.';
-      }
-      if (cards[2]) {
-        cards[2].querySelector('.pricing-card-title').textContent = '3+ Participants';
-        cards[2].querySelector('.pricing-card-price').textContent = '280 NIS';
-        cards[2].querySelector('.pricing-card-per').textContent = 'Per participant';
-        cards[2].querySelector('.pricing-card-desc').textContent = 'A group workshop, festive and fun.';
-      }
       if (noteEl) noteEl.textContent = "*Each workshop takes an hour and a half. For any questions please don't hesitate to contact me.";
       if (contactLabels[0]) contactLabels[0].textContent = 'Whatsapp:';
       if (contactLabels[1]) contactLabels[1].textContent = 'Tel.:';
@@ -231,23 +205,6 @@ class WorkshopView extends View {
       if (contactValues[1]) contactValues[1].textContent = '+972-524484763';
       if (contactValues[2]) contactValues[2].textContent = 'tamarkfir91@gmail.com';
     } else if (lng === 'heb') {
-      if (cards[0]) {
-        cards[0].querySelector('.pricing-card-title').textContent = 'סדנא אחת על אחת';
-        cards[0].querySelector('.pricing-card-price').textContent = '550 ש"ח';
-        cards[0].querySelector('.pricing-card-desc').textContent = 'חוויה אישית וממוקדת. כל תשומת הלב מוקדשת לך.';
-      }
-      if (cards[1]) {
-        cards[1].querySelector('.pricing-card-title').textContent = '2 משתתפות';
-        cards[1].querySelector('.pricing-card-price').textContent = '350 ש"ח';
-        cards[1].querySelector('.pricing-card-per').textContent = 'לכל משתתפת';
-        cards[1].querySelector('.pricing-card-desc').textContent = 'סדנא זוגית או עם חברה.';
-      }
-      if (cards[2]) {
-        cards[2].querySelector('.pricing-card-title').textContent = '3 משתתפות ומעלה';
-        cards[2].querySelector('.pricing-card-price').textContent = '280 ש"ח';
-        cards[2].querySelector('.pricing-card-per').textContent = 'לכל משתתפת';
-        cards[2].querySelector('.pricing-card-desc').textContent = 'סדנא קבוצתית, חגיגית וכיפית.';
-      }
       if (noteEl) noteEl.textContent = '*כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי.';
       if (contactLabels[0]) contactLabels[0].textContent = 'וואטסאפ:';
       if (contactLabels[1]) contactLabels[1].textContent = 'נייד:';
