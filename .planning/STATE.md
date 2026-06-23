@@ -3,8 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Homepage / Global-Chrome Redesign Rollout
 status: planning
-last_updated: "2026-06-23T12:00:00.000Z"
-last_activity: 2026-06-23
+stopped_at: Phase 39 context gathered
+last_updated: "2026-06-23T16:50:14.810Z"
+last_activity: 2026-06-23 — Roadmap created for v1.7 (Phases 39-42)
 progress:
   total_phases: 4
   completed_phases: 0
@@ -55,12 +56,14 @@ All milestone decisions are logged in PROJECT.md Key Decisions table and phase s
 See milestone archives in `.planning/milestones/` for detailed decision history.
 
 **v1.7 design constraints (from CLAUDE.md + prototype integration):**
+
 - SSR chrome (header/footer) is static — do NOT reintroduce destructive `View.setLanguage` innerHTML rewrites
 - `View.js` is Parcel-bundled: any changes require `npm run build` in `/frontend` + backend restart
 - `homepage.js` is served raw via `GET /js/homepage.js` (not bundled) — edits take effect immediately without a build step
 - Chrome changes must work bilingually: EN (`/en`) and HE (`/he`) with RTL styling
 
 **v1.7 file map by workstream:**
+
 - HEADER: `backend/views/partials/header.ejs`, `frontend/css/homepage.css`
 - CURR: `frontend/js/homepage.js` (remove hardcoded ILS), `frontend/js/View.js` (initCurrencyPersistence, `currency-changed` listener), `frontend/js/Views/cartView.js` (`_getCurrencySymbol`, `_getItemPrice`)
 - FOOT: `backend/views/partials/footer.ejs` (+ scoped CSS in `homepage.css`)
@@ -79,8 +82,8 @@ See milestone archives in `.planning/milestones/` for detailed decision history.
 
 ## Session Continuity
 
-Last session: 2026-06-23 — v1.7 roadmap created
-Stopped at: Roadmap approved, phases 39-42 defined
+Last session: 2026-06-23T16:50:14.797Z
+Stopped at: Phase 39 context gathered
 Resume: `/gsd-plan-phase 39` to plan Phase 39 (Header Utilities Layout)
 
 ## Quick Tasks Completed
