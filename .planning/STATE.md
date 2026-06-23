@@ -3,10 +3,10 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Homepage / Global-Chrome Redesign Rollout
 status: planning
-last_updated: "2026-06-23T11:55:04.090Z"
+last_updated: "2026-06-23T12:00:00.000Z"
 last_activity: 2026-06-23
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -17,30 +17,34 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-04)
+See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers — with true bilingual content so Hebrew and English visitors each see products in their language
-**Current focus:** Phase 38 — phase-35-verification-audit-cleanup
+**Current focus:** Phase 39 — Header Utilities Layout (next to plan)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 39 (not yet started — roadmap just created)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-06-23 — Milestone v1.7 started
+Status: Ready to plan Phase 39
+Last activity: 2026-06-23 — Roadmap created for v1.7 (Phases 39-42)
+
+```
+Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (0/4 phases)
+```
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 113 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 19, v1.5: 12)
+- Total plans completed: 113 (v1.0: 5, v1.1: 33, v1.2: 25, v1.3: 14, v1.4: 19, v1.5: 12, v1.6: 11)
 - Average duration: ~5 min/plan
 - Total execution time: ~29 hours 37 min
 
 **Recent Trend:**
 
+- v1.6: 11 plans completed (2026-04-04 → 2026-04-08)
 - v1.5: 12 plans completed in 3 days (2026-02-14 → 2026-02-16)
-- v1.4: 18 plans in 3 days (2026-02-10 → 2026-02-12)
 
 ## Accumulated Context
 
@@ -50,35 +54,34 @@ All milestone decisions are logged in PROJECT.md Key Decisions table and phase s
 
 See milestone archives in `.planning/milestones/` for detailed decision history.
 
-- [Phase 33]: Use execFileSync for binary check — no shell spawning, throws cleanly on non-zero exit
-- [Phase 33]: Fail loud (throw) in production for missing binary, warn in dev — D-06
-- [Phase 33]: node-cron for backup scheduling (D-01), no distributed lock (D-02) — single App Platform instance
-- [Phase 33]: Extracted verifyMongodumpBinary to utils/backupBinaryCheck.js for testability — dependency injection pattern for execFileSync
-- [Phase 34]: runBackup() returns result object so Phase 35 manual trigger endpoint can return it directly as API response (D-07)
-- [Phase 34]: Retention failure does not change backup status to failed — nested try/catch per D-09; retentionError is separate log field
+**v1.7 design constraints (from CLAUDE.md + prototype integration):**
+- SSR chrome (header/footer) is static — do NOT reintroduce destructive `View.setLanguage` innerHTML rewrites
+- `View.js` is Parcel-bundled: any changes require `npm run build` in `/frontend` + backend restart
+- `homepage.js` is served raw via `GET /js/homepage.js` (not bundled) — edits take effect immediately without a build step
+- Chrome changes must work bilingually: EN (`/en`) and HE (`/he`) with RTL styling
+
+**v1.7 file map by workstream:**
+- HEADER: `backend/views/partials/header.ejs`, `frontend/css/homepage.css`
+- CURR: `frontend/js/homepage.js` (remove hardcoded ILS), `frontend/js/View.js` (initCurrencyPersistence, `currency-changed` listener), `frontend/js/Views/cartView.js` (`_getCurrencySymbol`, `_getItemPrice`)
+- FOOT: `backend/views/partials/footer.ejs` (+ scoped CSS in `homepage.css`)
+- NAV: `backend/views/partials/header.ejs` + CSS breakpoint rules + small JS toggle (non-destructive)
 
 ### Pending Todos
 
-- Phase 33: Decide between App Platform Scheduled Jobs vs. in-process node-cron with distributed lock before writing scheduler
-- Phase 33: Provision dedicated BACKUP_BUCKET in a different DO region before Phase 34 uploads begin
-- Phase 34: `backupService.js` must create its own S3 client (monolithic index.js does not export its s3 instance)
-- Phase 34: Never log spawn args containing the MongoDB URI — redact before any logging
-- Phase 36: Run end-to-end restore test against real Atlas cluster before marking Phase 36 complete
+- Plan Phase 39 next (`/gsd-plan-phase 39`)
+- Phase 40 note: `currency-changed` event is currently broken (calls non-existent `this._render()` — existing tech debt); fix must be part of CURR wiring
 
 ### Blockers/Concerns
 
-- Product slugs not populated in production database (migration script exists, needs manual run)
-- Payment return URLs hardcoded to old paths (update needed)
-- CRAWL-07: Google Search Console requires post-deployment manual setup
-- robots.txt missing Sitemap: directive (minor)
+- Product slugs not populated in production database (pre-existing; migration script exists, needs manual run)
 - SCHEMA-02: Migration script not executed (runtime normalization covers functionality)
-- **NEW (v1.6):** Aptfile binary PATH on App Platform is MEDIUM confidence — Phase 33 must log `which mongodump` from a deployed container to confirm actual path before hardcoding
+- `currency-changed` event handler bug in View.js (calls non-existent `this._render()`) — must be resolved in Phase 40
 
 ## Session Continuity
 
-Last session: 2026-04-08T19:01:10.549Z
-Stopped at: Phase 37 UI-SPEC approved
-Resume: `/gsd:plan-phase 33` to plan Phase 33 (Environment Setup & Binary Verification)
+Last session: 2026-06-23 — v1.7 roadmap created
+Stopped at: Roadmap approved, phases 39-42 defined
+Resume: `/gsd-plan-phase 39` to plan Phase 39 (Header Utilities Layout)
 
 ## Quick Tasks Completed
 

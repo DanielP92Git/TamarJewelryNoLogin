@@ -9,6 +9,7 @@
 - ✅ **v1.4 SEO & Marketing Foundation** — Phases 23-26 (shipped 2026-02-12) — [archive](.planning/milestones/v1.4-ROADMAP.md)
 - ✅ **v1.5 Bilingual Product Content** — Phases 27-32 (shipped 2026-02-17) — [archive](.planning/milestones/v1.5-ROADMAP.md)
 - ✅ **v1.6 MongoDB Backup & Recovery System** — Phases 33-38 (shipped 2026-04-08) — [archive](.planning/milestones/v1.6-ROADMAP.md)
+- 🔄 **v1.7 Homepage / Global-Chrome Redesign Rollout** — Phases 39-42 (in progress)
 
 ## Phases
 
@@ -106,11 +107,68 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 
 </details>
 
+### v1.7 Homepage / Global-Chrome Redesign Rollout (Phases 39-42)
+
+- [ ] **Phase 39: Header Utilities Layout** - Flag pill, styled currency dropdown, cart icon + count in approved order and spacing; RTL-correct on `/he`
+- [ ] **Phase 40: Currency Selector Wiring** - `currency-changed` event drives all price displays; remove hardcoded ILS from `homepage.js`; currency persists across navigation
+- [ ] **Phase 41: Footer Social Restore** - Instagram and Facebook links in prototype `.tk-footer` with correct URLs and RTL styling
+- [ ] **Phase 42: Mobile Navigation** - Hamburger toggle below 800px; mobile menu open/close; language and currency accessible on mobile; non-destructive and RTL-correct
+
+## Phase Details
+
+### Phase 39: Header Utilities Layout
+**Goal**: Visitors see polished header utilities in the approved visual design — flag pill, styled dropdown, cart — in the correct order and RTL-mirrored on Hebrew pages
+**Depends on**: Nothing (first phase of this milestone)
+**Requirements**: HEADER-01, HEADER-02, HEADER-03, HEADER-04
+**Success Criteria** (what must be TRUE):
+  1. Visitor sees a single rounded pill containing both IL and US flags side by side in the header utilities area on both `/en` and `/he` pages
+  2. The currency selector renders as a styled dropdown matching the approved `.tk-*` design (not an unstyled native `<select>`)
+  3. On all pages the header utilities row displays cart icon + item count, currency dropdown, and flag pill in the approved left-to-right sequence with correct spacing
+  4. On `/he` pages the utilities row mirrors for RTL — flag pill at the left, cart at the right — without breaking the nav link centering or the TK logo position
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 40: Currency Selector Wiring
+**Goal**: Changing the currency selector immediately updates all displayed prices and the chosen currency persists across page loads
+**Depends on**: Phase 39 (currency dropdown lives in the header markup finalized in Phase 39)
+**Requirements**: CURR-01, CURR-02, CURR-03, CURR-04, CURR-05
+**Success Criteria** (what must be TRUE):
+  1. Selecting a different currency in the header dropdown instantly updates all product prices visible on the current page without a page reload or URL change
+  2. The `currency-changed` event dispatched from the dropdown triggers price re-renders in every subscribing component on the page
+  3. Home featured product grid prices read from `localStorage.currency` on load and update immediately when currency changes (hardcoded `CURRENCY='ILS'` constant removed from `homepage.js`)
+  4. Cart drawer prices read from `localStorage.currency` on load and update when currency changes (hardcoded ILS removed from `cartView.js` price helpers)
+  5. Reloading the page or navigating to a different page retains the previously selected currency
+**Plans**: TBD
+
+### Phase 41: Footer Social Restore
+**Goal**: The prototype footer displays working social links styled in the `.tk-footer` visual language for both LTR and RTL pages
+**Depends on**: Nothing (footer is independent of header and nav work)
+**Requirements**: FOOT-01, FOOT-02, FOOT-03
+**Success Criteria** (what must be TRUE):
+  1. Visitor sees Instagram and Facebook social links rendered inside the `.tk-footer` section on every page
+  2. Clicking the Instagram link opens `https://www.instagram.com/tamar_kfir_jewelry` (correct profile URL)
+  3. Clicking the Facebook link opens `https://www.facebook.com/tamarkfirjewelry` (correct profile URL)
+  4. The social section uses the prototype footer's visual style (icon treatment, spacing, colors) and lays out correctly in RTL on `/he` pages
+**Plans**: TBD
+**UI hint**: yes
+
+### Phase 42: Mobile Navigation
+**Goal**: Visitors on screens narrower than 800px can open a full nav menu from a hamburger button and still reach language and currency controls
+**Depends on**: Phase 39 (mobile toggle attaches to the header markup finalized in Phase 39)
+**Requirements**: NAV-01, NAV-02, NAV-03, NAV-04, NAV-05
+**Success Criteria** (what must be TRUE):
+  1. On screens narrower than 800px a hamburger button appears in the header nav (full desktop nav links are hidden)
+  2. Tapping the hamburger button opens a mobile menu that exposes all navigation links
+  3. The mobile menu can be dismissed by tapping the hamburger again, a dedicated close button, or tapping outside the menu
+  4. Language switcher and currency selector remain reachable on mobile — either always visible in the collapsed header bar or inside the open mobile menu
+  5. The mobile menu renders correctly in RTL on `/he` pages and opens/closes without triggering destructive `innerHTML` rewrites to the chrome
+**Plans**: TBD
+**UI hint**: yes
 
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
+Phases execute in numeric order: 39 → 40 → 41 → 42
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -121,5 +179,9 @@ Phases execute in numeric order: 33 → 34 → 35 → 36 → 37
 | 23-26. SEO & Marketing | v1.4 | Complete | Complete | 2026-02-12 |
 | 27-32. Bilingual Content | v1.5 | Complete | Complete | 2026-02-17 |
 | 33-38. MongoDB Backup & Recovery | v1.6 | 11/11 | Complete | 2026-04-08 |
+| 39. Header Utilities Layout | v1.7 | 0/TBD | Not started | - |
+| 40. Currency Selector Wiring | v1.7 | 0/TBD | Not started | - |
+| 41. Footer Social Restore | v1.7 | 0/TBD | Not started | - |
+| 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |
 
-*Last updated: 2026-04-09 after v1.6 milestone complete*
+*Last updated: 2026-06-23 — v1.7 roadmap created (Phases 39-42)*

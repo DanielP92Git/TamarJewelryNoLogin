@@ -65,29 +65,29 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HEADER-01 | TBD | Pending |
-| HEADER-02 | TBD | Pending |
-| HEADER-03 | TBD | Pending |
-| HEADER-04 | TBD | Pending |
-| CURR-01 | TBD | Pending |
-| CURR-02 | TBD | Pending |
-| CURR-03 | TBD | Pending |
-| CURR-04 | TBD | Pending |
-| CURR-05 | TBD | Pending |
-| FOOT-01 | TBD | Pending |
-| FOOT-02 | TBD | Pending |
-| FOOT-03 | TBD | Pending |
-| NAV-01 | TBD | Pending |
-| NAV-02 | TBD | Pending |
-| NAV-03 | TBD | Pending |
-| NAV-04 | TBD | Pending |
-| NAV-05 | TBD | Pending |
+| HEADER-01 | Phase 39 | Pending |
+| HEADER-02 | Phase 39 | Pending |
+| HEADER-03 | Phase 39 | Pending |
+| HEADER-04 | Phase 39 | Pending |
+| CURR-01 | Phase 40 | Pending |
+| CURR-02 | Phase 40 | Pending |
+| CURR-03 | Phase 40 | Pending |
+| CURR-04 | Phase 40 | Pending |
+| CURR-05 | Phase 40 | Pending |
+| FOOT-01 | Phase 41 | Pending |
+| FOOT-02 | Phase 41 | Pending |
+| FOOT-03 | Phase 41 | Pending |
+| NAV-01 | Phase 42 | Pending |
+| NAV-02 | Phase 42 | Pending |
+| NAV-03 | Phase 42 | Pending |
+| NAV-04 | Phase 42 | Pending |
+| NAV-05 | Phase 42 | Pending |
 
 **Coverage:**
 - v1.7 requirements: 17 total
-- Mapped to phases: 0 (pending roadmap)
-- Unmapped: 17 ⚠️
+- Mapped to phases: 17
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-06-23*
-*Last updated: 2026-06-23 after initial definition*
+*Last updated: 2026-06-23 — traceability populated after roadmap creation (Phases 39-42)*
