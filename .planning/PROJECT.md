@@ -158,9 +158,17 @@ A discoverable, professional online jewelry store that ranks in search engines, 
 - ✓ Admin backup listing via GET endpoint — v1.6
 - ✓ Auto-delete backups exceeding retention count — v1.6
 
-## Current Milestone
+## Current Milestone: v1.7 Homepage / Global-Chrome Redesign Rollout
 
-Planning next milestone. Run `/gsd-new-milestone` to define v1.7.
+**Goal:** Finish the approved homepage/global-chrome prototype rollout — polish the new `.tk-*` header/footer chrome and make it fully functional (currency, social, mobile) across the bilingual site.
+
+**Target features:**
+- Header utilities layout polish — flags as one rounded pill (IL+US), styled currency dropdown, cart+count in correct order/spacing in `.tk-nav__utils`, RTL-correct on `/he`
+- Currency selector wiring — `currency-changed` re-renders prices everywhere; home featured grid + cart drawer (hardcoded `CURRENCY='ILS'` in `homepage.js`) respect `localStorage.currency` + the event
+- Footer social restore — Instagram/Facebook links returned to the prototype `.tk-footer` in its visual language
+- Mobile nav — hamburger menu for the prototype nav below 800px, keeping `View.js` chrome non-destructive
+
+**Key context:** Builds directly on the approved `.tk-*` prototype integration (2026-06-23). Hard constraint: keep SSR-static chrome — do NOT reintroduce destructive `View.setLanguage` rewrites (dual-render rule in CLAUDE.md). `View.js` is bundled by Parcel (rebuild + restart backend); `homepage.js` is served raw via `GET /js/homepage.js`. Deferred/out of scope: real catalogue/cart/checkout/newsletter endpoint, all-products "Shop" route, inner-page body layout restyle, RTL drawer-from-left mirroring.
 
 ### Out of Scope
 
@@ -293,4 +301,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-09 after v1.6 milestone complete (MongoDB Backup & Recovery System — 6 phases, 11 plans, 14/14 requirements)*
+*Last updated: 2026-06-23 — started milestone v1.7 (Homepage / Global-Chrome Redesign Rollout)*

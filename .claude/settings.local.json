@@ -5,7 +5,11 @@
       "Bash(git commit:*)",
       "WebSearch",
       "Bash(git tag:*)",
-      "Bash(git check-ignore:*)"
+      "Bash(git check-ignore:*)",
+      "Bash(node --check index.js)",
+      "Bash(node --check routes/products.js)",
+      "Bash(node --check utils/imageHelpers.js)",
+      "Bash(npm list:*)"
     ]
   }
 }
