@@ -9,9 +9,9 @@
 
 ### Header Utilities Layout (HEADER)
 
-- [ ] **HEADER-01**: Visitor sees EN/HE flags as a single rounded pill (IL + US) in the header utilities cluster
+- [ ] **HEADER-01**: Visitor sees EN/HE as two separate refined flag icons (US + IL) in the header utilities cluster — active flag full color, inactive dimmed (no ring)
 - [ ] **HEADER-02**: Currency selector renders as a styled dropdown matching the approved design
-- [ ] **HEADER-03**: Header utilities show cart icon + item count, currency dropdown, and flag pill in the approved order and spacing; nav links centered with TK logo at the far end
+- [ ] **HEADER-03**: Header utilities show cart icon + item count, currency dropdown, and flags in the approved order Flags → Currency → Cart and spacing; nav links centered with TK logo at the far end
 - [ ] **HEADER-04**: Header utilities layout mirrors correctly for RTL on `/he` pages
 
 ### Currency Selector Wiring (CURR)

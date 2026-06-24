@@ -121,17 +121,17 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 **Depends on**: Nothing (first phase of this milestone)
 **Requirements**: HEADER-01, HEADER-02, HEADER-03, HEADER-04
 **Success Criteria** (what must be TRUE):
-  1. Visitor sees a single rounded pill containing both IL and US flags side by side in the header utilities area on both `/en` and `/he` pages
+  1. Visitor sees two separate round flag icons (US + IL) in the header utilities area on both `/en` and `/he` — the active language's flag is full color, the inactive one is dimmed (~0.4 opacity, no ring).
   2. The currency selector renders as a styled dropdown matching the approved `.tk-*` design (not an unstyled native `<select>`)
-  3. On all pages the header utilities row displays cart icon + item count, currency dropdown, and flag pill in the approved left-to-right sequence with correct spacing
-  4. On `/he` pages the utilities row mirrors for RTL — flag pill at the left, cart at the right — without breaking the nav link centering or the TK logo position
+  3. On all pages the header utilities row displays the utilities in the approved left-to-right sequence Flags → Currency → Cart (cart icon + item count at the far right edge) with correct spacing.
+  4. On `/he` pages the utilities row mirrors for RTL as a true mirror — cart at the left, flags at the right (order Cart → Currency → Flags) — without breaking the nav link centering or the TK logo position.
 **Plans**: 3 plans
   - [ ] 39-01-PLAN.md — homepage.css: flag opacity states, currency custom chevron + dead-code removal, RTL header mirror block
   - [ ] 39-02-PLAN.md — header.ejs `$ USD`/`₪ ILS` labels + flag a11y; View.js currency-label mirror + hydration audit
   - [ ] 39-03-PLAN.md — doc-sync: amend ROADMAP criteria 1/3/4 + REQUIREMENTS HEADER-01 to match locked decisions
 **UI hint**: yes
 
-> Note: Success Criteria 1/3/4 above and REQUIREMENTS HEADER-01 are STALE (they describe a "single rounded pill" and a cart-leftmost order). The locked decisions in 39-CONTEXT.md (D-01 two separate flag icons; D-04 Flags→Currency→Cart; D-09 RTL true mirror cart-left/flags-right) override them. Plan 39-03 amends this wording.
+> Note: Success Criteria 1/3/4 above and REQUIREMENTS HEADER-01/HEADER-03 were amended (Plan 39-03) to match the locked decisions in 39-CONTEXT.md: D-01 two separate refined flag icons (active full color / inactive dimmed, no ring); D-04 LTR order Flags → Currency → Cart (cart at the far right); D-09 RTL true mirror — cart at the left, flags at the right.
 
 ### Phase 40: Currency Selector Wiring
 **Goal**: Changing the currency selector immediately updates all displayed prices and the chosen currency persists across page loads
