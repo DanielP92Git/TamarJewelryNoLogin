@@ -17,7 +17,6 @@ class CartView extends View {
   _stripeText = document.querySelector('.stripe-checkout-text');
   _stripeTrust = document.querySelector('.stripe-trust-copy');
   _host = process.env.API_URL || '';
-  _rate = process.env.USD_ILS_RATE || 3.7;
 
   // Get current selected currency
   _getCurrentCurrency() {
