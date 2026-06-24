@@ -459,6 +459,11 @@ img { display: block; }
   border: 1px solid var(--tk-border-strong);
   border-radius: var(--tk-radius-xs);
   padding: 4px 24px 4px 8px;
+  /* Fixed width so the control is identical on /en and /he. The browser
+     otherwise auto-sizes to the widest <option>, which differs by language
+     (EN "Currency" vs HE "מטבע") and by the RTL Hebrew-font remap. The open
+     dropdown popup still expands to show full option text. */
+  width: 6.5rem;
   cursor: pointer;
   color: var(--tk-text-muted);
 }
@@ -470,9 +475,13 @@ img { display: block; }
 /* Dropdown options render on a white menu, so keep their text dark. */
 .tk-nav__currency-select option { color: var(--tk-text); }
 
-/* RTL header mirror (Hebrew /he) */
-[dir="rtl"] .tk-nav            { flex-direction: row-reverse; }
-[dir="rtl"] .tk-nav__utils     { flex-direction: row-reverse; }
+/* RTL header mirror (Hebrew /he)
+   NOTE: `<html dir="rtl">` (set server-side on /he) already reverses every
+   `flex-direction: row` container natively, so .tk-nav (logo↔utils) and
+   .tk-nav__utils (flags↔cart) mirror on their own. Do NOT add
+   `flex-direction: row-reverse` here — it double-reverses and cancels the
+   native mirror, leaving the cluster visually LTR. Only the physical,
+   dir-agnostic properties below need explicit flipping. */
 [dir="rtl"] .tk-nav__count     { right: auto; left: -8px; }
 [dir="rtl"] .tk-nav__currency-select {
   background-position: left 6px center;
