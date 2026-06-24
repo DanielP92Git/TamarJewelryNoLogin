@@ -1,36 +1,57 @@
-<header>
-  <div class="site-header" data-purpose="site-header">
-    <div class="site-header__left">
-      <div class="icons-container">
-        <img
-          src="/imgs/svgs/bars-solid.svg"
-          alt=""
-          class="menubars-svg menubars-toggle close"
-        />
+<%
+  // Global prototype chrome. `heroNav` => transparent nav over the hero (home);
+  // otherwise solid. `activeNav` highlights the current top-level item.
+  var _hero = (typeof heroNav !== 'undefined') && heroNav;
+  var _active = (typeof activeNav !== 'undefined') ? activeNav : '';
+  var _eng = lang === 'eng';
+%>
+<header class="tk-nav <%= _hero ? 'tk-nav--transparent' : 'tk-nav--solid' %>">
+  <a class="tk-nav__logo" href="/<%= urlLang %>/" data-nav="Home" aria-label="Tamar Kfir Jewelry">
+    <img src="/imgs/homepage/logo/tamar-logo.webp" alt="Tamar Kfir Jewelry" />
+  </a>
+
+  <nav class="tk-nav__links" aria-label="Primary">
+    <a class="tk-nav__link<%= _active === 'Home' ? ' is-active' : '' %>" href="/<%= urlLang %>"><% if (_eng) { %>Home<% } else { %>בית<% } %></a>
+    <a class="tk-nav__link<%= _active === 'Shop' ? ' is-active' : '' %>" href="/<%= urlLang %>/necklaces"><% if (_eng) { %>Shop<% } else { %>חנות<% } %></a>
+    <a class="tk-nav__link<%= _active === 'Jewelry Workshop' ? ' is-active' : '' %>" href="/<%= urlLang %>/workshop"><% if (_eng) { %>Jewelry Workshop<% } else { %>סדנת תכשיטים<% } %></a>
+    <a class="tk-nav__link<%= _active === 'About' ? ' is-active' : '' %>" href="/<%= urlLang %>/about"><% if (_eng) { %>About<% } else { %>אודות<% } %></a>
+    <a class="tk-nav__link<%= _active === 'Contact Me' ? ' is-active' : '' %>" href="/<%= urlLang %>/contact"><% if (_eng) { %>Contact Me<% } else { %>צור קשר<% } %></a>
+  </nav>
+
+  <div class="tk-nav__utils">
+    <div class="tk-lang flag-dropdown" role="group" aria-label="Language">
+      <div class="flag-icon flag-eng<%= _eng ? ' selected' : '' %>" data-lang="eng" role="button" tabindex="0" aria-label="English" title="English"<% if (_eng) { %> aria-current="true"<% } %>>
+        <svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-us" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+          <path fill="#bd3d44" d="M0 0h512v512H0"/>
+          <path stroke="#fff" stroke-width="40" d="M0 58h512M0 137h512M0 216h512M0 295h512M0 374h512M0 453h512"/>
+          <path fill="#192f5d" d="M0 0h390v275H0z"/>
+        </svg>
       </div>
-
-      <a class="site-brand" href="/<%= urlLang %>/">
-        <img src="/imgs/arvin-logo.webp" alt="Tamar Kfir Jewelry" class="site-logo" />
-      </a>
-    </div>
-
-    <div class="site-header__center">
-      <nav class="menu" aria-label="Primary"></nav>
-    </div>
-
-    <div class="site-header__right" data-purpose="header-utilities">
-      <div class="icons-container icons-container-right">
-        <div class="shoppingcart-container">
-          <a href="/<%= urlLang %>/cart">
-            <img
-              src="/imgs/svgs/shopping-bag-outline-black.svg"
-              alt=""
-              class="shoppingcart-mobile"
-            />
-          </a>
-        </div>
-        <span class="cart-number-mobile cart-number-mobile-header">0</span>
+      <div class="flag-icon flag-heb<%= !_eng ? ' selected' : '' %>" data-lang="heb" role="button" tabindex="0" aria-label="עברית" title="עברית"<% if (!_eng) { %> aria-current="true"<% } %>>
+        <svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-il" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+          <defs><clipPath id="il-a"><path fill-opacity=".7" d="M0 0h512v512H0z"/></clipPath></defs>
+          <g fill-rule="evenodd" clip-path="url(#il-a)">
+            <path fill="#fff" d="M619.4 512H-112V0h731.4z"/>
+            <path fill="#0038b8" d="M619.4 115.2H-112V48h731.4zm0 350.5H-112v-67.2h731.4zm-483-275 110.1 191.6L359 191.6z"/>
+            <path fill="#fff" d="m225.8 317.8 20.9 35.5 21.4-35.3z"/>
+            <path fill="#0038b8" d="M136 320.6 246.2 129l112.4 190.8z"/>
+            <path fill="#fff" d="m225.8 191.6 20.9-35.5 21.4 35.4zM182 271.1l-21.7 36 41-.1-19.3-36zm-21.3-66.5 41.2.3-19.8 36.3zm151.2 67 20.9 35.5-41.7-.5zm20.5-67-41.2.3 19.8 36.3zm-114.3 0L189.7 256l28.8 50.3 52.8 1.2 32-51.5-29.6-52z"/>
+          </g>
+        </svg>
       </div>
     </div>
+
+    <select name="currency" id="currency-desktop" class="header-currency-selector tk-nav__currency-select" aria-label="Currency"<% if (!_eng) { %> dir="rtl"<% } %>>
+      <option value="default" class="currency-option"><% if (_eng) { %>Currency<% } else { %>מטבע<% } %></option>
+      <option value="usd" class="currency-option">$ USD</option>
+      <option value="ils" class="currency-option">₪ ILS</option>
+    </select>
+
+    <a class="tk-nav__cart" id="tk-cart-open" href="/<%= urlLang %>/cart" aria-label="Cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+        <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round"></path>
+      </svg>
+      <span class="tk-nav__count cart-number-mobile" id="tk-cart-count">0</span>
+    </a>
   </div>
 </header>
