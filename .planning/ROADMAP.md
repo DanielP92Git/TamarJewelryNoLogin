@@ -109,7 +109,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 
 ### v1.7 Homepage / Global-Chrome Redesign Rollout (Phases 39-42)
 
-- [ ] **Phase 39: Header Utilities Layout** - Flag pill, styled currency dropdown, cart icon + count in approved order and spacing; RTL-correct on `/he`
+- [ ] **Phase 39: Header Utilities Layout** - Two refined flag icons, styled currency dropdown, cart icon + count in approved order (Flags → Currency → Cart) and spacing; RTL-correct (true mirror) on `/he`
 - [ ] **Phase 40: Currency Selector Wiring** - `currency-changed` event drives all price displays; remove hardcoded ILS from `homepage.js`; currency persists across navigation
 - [ ] **Phase 41: Footer Social Restore** - Instagram and Facebook links in prototype `.tk-footer` with correct URLs and RTL styling
 - [ ] **Phase 42: Mobile Navigation** - Hamburger toggle below 800px; mobile menu open/close; language and currency accessible on mobile; non-destructive and RTL-correct
@@ -117,7 +117,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 ## Phase Details
 
 ### Phase 39: Header Utilities Layout
-**Goal**: Visitors see polished header utilities in the approved visual design — flag pill, styled dropdown, cart — in the correct order and RTL-mirrored on Hebrew pages
+**Goal**: Visitors see polished header utilities in the approved visual design — two refined flag icons, styled dropdown, cart — in the correct order and RTL-mirrored on Hebrew pages
 **Depends on**: Nothing (first phase of this milestone)
 **Requirements**: HEADER-01, HEADER-02, HEADER-03, HEADER-04
 **Success Criteria** (what must be TRUE):
@@ -125,8 +125,13 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
   2. The currency selector renders as a styled dropdown matching the approved `.tk-*` design (not an unstyled native `<select>`)
   3. On all pages the header utilities row displays cart icon + item count, currency dropdown, and flag pill in the approved left-to-right sequence with correct spacing
   4. On `/he` pages the utilities row mirrors for RTL — flag pill at the left, cart at the right — without breaking the nav link centering or the TK logo position
-**Plans**: TBD
+**Plans**: 3 plans
+  - [ ] 39-01-PLAN.md — homepage.css: flag opacity states, currency custom chevron + dead-code removal, RTL header mirror block
+  - [ ] 39-02-PLAN.md — header.ejs `$ USD`/`₪ ILS` labels + flag a11y; View.js currency-label mirror + hydration audit
+  - [ ] 39-03-PLAN.md — doc-sync: amend ROADMAP criteria 1/3/4 + REQUIREMENTS HEADER-01 to match locked decisions
 **UI hint**: yes
+
+> Note: Success Criteria 1/3/4 above and REQUIREMENTS HEADER-01 are STALE (they describe a "single rounded pill" and a cart-leftmost order). The locked decisions in 39-CONTEXT.md (D-01 two separate flag icons; D-04 Flags→Currency→Cart; D-09 RTL true mirror cart-left/flags-right) override them. Plan 39-03 amends this wording.
 
 ### Phase 40: Currency Selector Wiring
 **Goal**: Changing the currency selector immediately updates all displayed prices and the chosen currency persists across page loads
@@ -179,9 +184,9 @@ Phases execute in numeric order: 39 → 40 → 41 → 42
 | 23-26. SEO & Marketing | v1.4 | Complete | Complete | 2026-02-12 |
 | 27-32. Bilingual Content | v1.5 | Complete | Complete | 2026-02-17 |
 | 33-38. MongoDB Backup & Recovery | v1.6 | 11/11 | Complete | 2026-04-08 |
-| 39. Header Utilities Layout | v1.7 | 0/TBD | Not started | - |
+| 39. Header Utilities Layout | v1.7 | 0/3 | Planned | - |
 | 40. Currency Selector Wiring | v1.7 | 0/TBD | Not started | - |
 | 41. Footer Social Restore | v1.7 | 0/TBD | Not started | - |
 | 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |
 
-*Last updated: 2026-06-23 — v1.7 roadmap created (Phases 39-42)*
+*Last updated: 2026-06-24 — Phase 39 planned (3 plans, all wave 1)*
