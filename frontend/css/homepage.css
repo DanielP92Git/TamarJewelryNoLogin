@@ -1,0 +1,471 @@
+/* =========================================================
+   Tamar Kfir Jewelry — Homepage styles (vanilla)
+   Component recreations (NavBar, Button, CategoryTile,
+   ProductCard, PriceTag, Footer, cart drawer) + page layout.
+   Faithful to the design-system component specs. Hover/press
+   handled in pure CSS instead of React state.
+   ========================================================= */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--tk-white);
+  font-family: var(--tk-font-body);
+  color: var(--tk-text);
+}
+img { display: block; }
+
+.tk-home { position: relative; width: 100%; overflow-x: hidden; }
+
+/* ---------- Buttons ---------- */
+.tk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  font-family: var(--tk-font-body);
+  font-weight: var(--tk-weight-semibold);
+  letter-spacing: var(--tk-track-wide);
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all var(--tk-dur) var(--tk-ease);
+  padding: 0.85rem 2rem;       /* size md */
+  font-size: 0.78rem;
+}
+.tk-btn--lg { padding: 1.05rem 2.6rem; font-size: 0.82rem; }
+.tk-btn--sm { padding: 0.6rem 1.4rem; font-size: 0.7rem; }
+.tk-btn--full { width: 100%; }
+.tk-btn[disabled] { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+
+.tk-btn--primary {
+  background: var(--tk-ink);
+  color: #fff;
+  border-radius: var(--tk-radius-none);
+}
+.tk-btn--primary:hover { background: var(--tk-ink-deep); }
+
+.tk-btn--gold {
+  background: var(--tk-gold);
+  color: var(--tk-ink);
+  border-radius: var(--tk-radius-none);
+}
+.tk-btn--gold:hover { background: var(--tk-gold-hover); }
+
+.tk-btn--outline {
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--tk-gold);
+  border-color: var(--tk-gold);
+  border-radius: var(--tk-radius-pill);
+}
+.tk-btn--outline:hover {
+  background: #fff;
+  transform: var(--tk-lift);
+  box-shadow: var(--tk-shadow-pill);
+}
+
+.tk-btn--ghost {
+  background: transparent;
+  color: var(--tk-text-muted);
+  border-color: transparent;
+  border-radius: var(--tk-radius-none);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--tk-border-strong);
+}
+.tk-btn--ghost:hover { color: var(--tk-text); }
+
+/* ---------- NavBar ---------- */
+.tk-nav {
+  position: relative;
+  z-index: var(--tk-z-header);
+  width: 100%;
+  height: var(--tk-header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2.5rem;
+  font-family: var(--tk-font-body);
+}
+.tk-nav--transparent { background: transparent; border-bottom: none; }
+.tk-nav--solid {
+  background: var(--tk-white);
+  border-bottom: 1px solid var(--tk-border-light);
+}
+.tk-nav__logo { display: flex; align-items: center; flex: 0 0 auto; text-decoration: none; }
+.tk-nav__logo img { height: 52px; width: auto; }
+.tk-nav--transparent .tk-nav__logo img { filter: invert(1) brightness(2); }
+
+.tk-nav__links { display: flex; gap: 2.2rem; align-items: center; }
+.tk-nav__link {
+  font-size: var(--tk-size-label);
+  font-weight: var(--tk-weight-medium);
+  letter-spacing: var(--tk-track-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  opacity: 0.85;
+  transition: color var(--tk-dur) var(--tk-ease), opacity var(--tk-dur) var(--tk-ease);
+}
+.tk-nav--transparent .tk-nav__link { color: #fff; }
+.tk-nav--solid .tk-nav__link { color: var(--tk-text-muted); }
+.tk-nav__link:hover, .tk-nav__link.is-active { opacity: 1; }
+.tk-nav--solid .tk-nav__link:hover, .tk-nav--solid .tk-nav__link.is-active { color: var(--tk-text); }
+
+.tk-nav__utils { display: flex; align-items: center; gap: 1.4rem; flex: 0 0 auto; }
+.tk-nav__currency {
+  font-size: var(--tk-size-label);
+  letter-spacing: var(--tk-track-body);
+  text-transform: uppercase;
+}
+.tk-nav--transparent .tk-nav__currency { color: #fff; }
+.tk-nav--solid .tk-nav__currency { color: var(--tk-text-muted); }
+
+.tk-nav__cart {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+.tk-nav__cart svg { width: 22px; height: 22px; }
+.tk-nav--transparent .tk-nav__cart svg { stroke: #fff; }
+.tk-nav--solid .tk-nav__cart svg { stroke: var(--tk-text); }
+.tk-nav__count {
+  position: absolute;
+  top: -6px; right: -8px;
+  min-width: 18px; height: 18px;
+  padding: 0 4px;
+  border-radius: var(--tk-radius-round);
+  font-size: 0.62rem;
+  font-weight: var(--tk-weight-semibold);
+  display: flex; align-items: center; justify-content: center;
+}
+.tk-nav--transparent .tk-nav__count { background: rgba(255,255,255,0.95); color: var(--tk-ink); }
+.tk-nav--solid .tk-nav__count { background: var(--tk-ink); color: #fff; }
+
+/* ---------- Hero ---------- */
+.tk-hero {
+  position: relative;
+  height: 88vh;
+  min-height: 600px;
+  overflow: hidden;
+}
+.tk-hero__img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: cover; object-position: center 18%;
+}
+.tk-hero__scrim {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.30) 0%, rgba(0,0,0,0.06) 38%, rgba(0,0,0,0.42) 100%);
+}
+.tk-hero__nav { position: relative; z-index: 10; }
+.tk-hero__copy {
+  position: absolute; left: 0; right: 0; bottom: 13%;
+  z-index: 5; text-align: center; color: #fff; padding: 0 1.5rem;
+}
+.tk-hero__eyebrow {
+  margin: 0 0 0.6rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  font-weight: 400;
+  opacity: 0.9;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+}
+.tk-hero__title {
+  margin: 0 0 2rem;
+  font-family: var(--tk-font-body);
+  font-weight: var(--tk-weight-thin);
+  font-size: clamp(2rem, 4.2vw, 3.6rem);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  line-height: 1.15;
+  text-shadow: 0 3px 18px rgba(0,0,0,0.55);
+}
+
+/* ---------- Section scaffolding ---------- */
+.tk-section { max-width: 1120px; margin: 0 auto; padding: 5.5rem 2rem 1rem; }
+.tk-section--wide { max-width: 1240px; }
+.tk-eyebrow {
+  margin: 0 0 0.7rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--tk-gold-hover);
+  font-weight: var(--tk-weight-medium);
+}
+.tk-h2 {
+  margin: 0;
+  font-family: var(--tk-font-serif);
+  font-weight: var(--tk-weight-medium);
+  font-size: 2.4rem;
+  color: var(--tk-ink);
+  letter-spacing: 0.01em;
+}
+.tk-center { text-align: center; }
+
+/* ---------- CategoryTile ---------- */
+.tk-cat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+  margin-top: 3rem;
+}
+.tk-cat {
+  position: relative;
+  display: block;
+  height: 320px;
+  overflow: hidden;
+  border-radius: var(--tk-radius-sm);
+  text-decoration: none;
+  transition: transform var(--tk-dur) var(--tk-ease);
+}
+.tk-cat:hover { transform: translateY(-4px); }
+.tk-cat img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  transition: transform var(--tk-dur-slow) var(--tk-ease);
+}
+.tk-cat:hover img { transform: scale(1.05); }
+.tk-cat__label {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: 2.5rem 1.5rem 1.5rem;
+  background: var(--tk-scrim-bottom);
+  color: #fff;
+  font-family: var(--tk-font-serif);
+  font-weight: var(--tk-weight-light);
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+  letter-spacing: var(--tk-track-hero);
+  text-transform: uppercase;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+  text-align: center;
+  transition: letter-spacing var(--tk-dur-slow) var(--tk-ease);
+}
+.tk-cat:hover .tk-cat__label { letter-spacing: 0.3em; }
+
+/* ---------- Maker story ---------- */
+.tk-story { background: var(--tk-surface-beige); margin-top: 5.5rem; }
+.tk-story__inner {
+  max-width: 1180px; margin: 0 auto; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr;
+  align-items: stretch; min-height: 540px;
+}
+.tk-story__media { position: relative; overflow: hidden; min-height: 380px; }
+.tk-story__media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.tk-story__body { display: flex; flex-direction: column; justify-content: center; padding: 4.5rem 5rem; }
+.tk-story__title {
+  margin: 0 0 1.6rem;
+  font-family: var(--tk-font-serif);
+  font-weight: var(--tk-weight-medium);
+  font-size: 2.5rem; line-height: 1.18;
+  color: var(--tk-ink);
+}
+.tk-story__p { margin: 0 0 1.1rem; font-size: 1rem; line-height: var(--tk-leading-body); color: var(--tk-text-soft); }
+.tk-story__p:last-of-type { margin-bottom: 2.2rem; }
+
+/* ---------- ProductCard ---------- */
+.tk-prod-grid {
+  display: flex; flex-wrap: wrap;
+  justify-content: center; gap: 28px;
+  margin-top: 3rem;
+}
+.tk-prod {
+  width: 20rem; max-width: 100%;
+  display: flex; flex-direction: column;
+  background: var(--tk-surface-beige);
+  border-radius: var(--tk-radius-sm);
+  overflow: hidden; cursor: pointer;
+  box-shadow: var(--tk-shadow-card);
+  transition: transform var(--tk-dur-fast) var(--tk-ease), box-shadow var(--tk-dur-fast) var(--tk-ease);
+}
+.tk-prod:hover { transform: var(--tk-lift); box-shadow: var(--tk-shadow-card-hover); }
+.tk-prod__media { position: relative; width: 100%; height: 20rem; overflow: hidden; background: var(--tk-surface); }
+.tk-prod__media img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--tk-dur-slow) var(--tk-ease); }
+.tk-prod:hover .tk-prod__media img { transform: scale(1.04); }
+.tk-prod__badge { position: absolute; top: 0.85rem; left: 0.85rem; }
+.tk-prod__title-wrap { padding: 1rem 0.75rem 0.5rem; text-align: center; }
+.tk-prod__title { margin: 0; font-size: var(--tk-size-title); font-weight: var(--tk-weight-medium); color: var(--tk-text); line-height: var(--tk-leading-snug); }
+.tk-prod__price { margin: 0.25rem 0 0.85rem; }
+.tk-prod__add {
+  width: 90%; margin: 0 auto 1rem; height: 40px;
+  border: none; background: var(--tk-ink); color: #fff;
+  font-family: var(--tk-font-body); font-size: 0.78rem;
+  font-weight: var(--tk-weight-semibold);
+  letter-spacing: var(--tk-track-label);
+  text-transform: uppercase; cursor: pointer;
+  transition: background var(--tk-dur) var(--tk-ease);
+}
+.tk-prod__add:hover { background: var(--tk-ink-deep); }
+
+/* ---------- Badge ---------- */
+.tk-badge {
+  display: inline-flex; align-items: center;
+  font-family: var(--tk-font-body);
+  font-size: var(--tk-size-caption);
+  font-weight: var(--tk-weight-semibold);
+  letter-spacing: var(--tk-track-label);
+  text-transform: uppercase;
+  padding: 0.35rem 0.7rem; line-height: 1; white-space: nowrap;
+}
+.tk-badge--gold { background: var(--tk-gold); color: var(--tk-ink); }
+.tk-badge--soft { background: var(--tk-gold-tint); color: var(--tk-gold-hover); }
+.tk-badge--neutral { background: var(--tk-ink); color: #fff; }
+
+/* ---------- PriceTag ---------- */
+.tk-price { display: flex; align-items: baseline; justify-content: center; gap: 0.6rem; font-family: var(--tk-font-body); }
+.tk-price__now { font-size: 1.2rem; font-weight: var(--tk-weight-semibold); color: var(--tk-text); letter-spacing: var(--tk-track-tight); }
+.tk-price__now.is-sale { color: var(--tk-gold-hover); }
+.tk-price__was { font-size: 0.9rem; color: var(--tk-text-faint); text-decoration: line-through; opacity: 0.7; }
+
+/* ---------- Newsletter ---------- */
+.tk-news { margin-top: 5.5rem; background: var(--tk-surface); }
+.tk-news__inner { max-width: 620px; margin: 0 auto; padding: 4.5rem 2rem; text-align: center; }
+.tk-news__h { margin: 0 0 1rem; font-family: var(--tk-font-serif); font-weight: var(--tk-weight-medium); font-size: 2rem; color: var(--tk-ink); }
+.tk-news__p { margin: 0 0 2rem; font-size: 0.95rem; line-height: var(--tk-leading-body); color: var(--tk-text-soft); }
+.tk-news__form { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; align-items: stretch; }
+.tk-news__input {
+  flex: 1; min-width: 240px; max-width: 360px; height: 48px;
+  padding: 0 1rem; border: 1px solid var(--tk-border-strong);
+  border-radius: var(--tk-radius-xs); font-family: var(--tk-font-body);
+  font-size: 0.9rem; color: var(--tk-text); outline: none; background: #fff;
+  transition: border-color var(--tk-dur) var(--tk-ease), box-shadow var(--tk-dur) var(--tk-ease);
+}
+.tk-news__input:focus { border-color: var(--tk-gold); box-shadow: 0 0 0 3px rgba(197,165,114,0.12); }
+
+/* ---------- Footer ---------- */
+.tk-footer { width: 100%; background: var(--tk-white); border-top: 1px solid var(--tk-border); font-family: var(--tk-font-body); }
+.tk-footer__cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4rem; max-width: 760px; margin: 0 auto; padding: 4rem 2rem 3.5rem; }
+.tk-footer__col { display: flex; flex-direction: column; }
+.tk-footer__heading { font-size: var(--tk-size-label); font-weight: var(--tk-weight-semibold); letter-spacing: var(--tk-track-label); text-transform: uppercase; color: var(--tk-text); margin-bottom: 1rem; }
+.tk-footer__link { font-size: 0.8rem; letter-spacing: var(--tk-track-body); text-transform: uppercase; text-decoration: none; color: var(--tk-text-muted); line-height: 1.8; margin-bottom: 0.6rem; transition: color var(--tk-dur) var(--tk-ease); }
+.tk-footer__link:hover { color: var(--tk-text); }
+.tk-footer__bar { background: var(--tk-black); color: #fff; text-align: center; padding: 1.5rem 2rem; font-size: var(--tk-size-caption); letter-spacing: var(--tk-track-tight); }
+
+/* ---------- Cart drawer ---------- */
+.tk-overlay {
+  position: fixed; inset: 0; z-index: 1100;
+  background: rgba(0,0,0,0.45);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--tk-dur) var(--tk-ease);
+}
+.tk-overlay.is-open { opacity: 1; pointer-events: auto; }
+.tk-drawer {
+  position: fixed; top: 0; right: 0; height: 100%;
+  width: 420px; max-width: 90vw; z-index: 1101;
+  background: #fff; box-shadow: -8px 0 30px rgba(0,0,0,0.12);
+  display: flex; flex-direction: column;
+  font-family: var(--tk-font-body);
+  transform: translateX(100%);
+  transition: transform var(--tk-dur-slow) var(--tk-ease);
+}
+.tk-drawer.is-open { transform: translateX(0); }
+.tk-drawer__head { padding: 24px 28px; border-bottom: 1px solid var(--tk-border); display: flex; align-items: center; justify-content: space-between; }
+.tk-drawer__title { font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: var(--tk-weight-semibold); color: var(--tk-ink); }
+.tk-drawer__close { background: none; border: none; font-size: 26px; line-height: 1; cursor: pointer; color: var(--tk-ink); }
+.tk-drawer__body { flex: 1; overflow-y: auto; padding: 8px 28px; }
+.tk-drawer__empty { color: var(--tk-text-muted); font-size: 0.9rem; margin-top: 56px; text-align: center; }
+.tk-line { display: flex; gap: 16px; padding: 20px 0; border-bottom: 1px solid var(--tk-border-light); }
+.tk-line__media { width: 78px; height: 78px; flex: none; background: var(--tk-surface); overflow: hidden; }
+.tk-line__media img { width: 100%; height: 100%; object-fit: cover; }
+.tk-line__main { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.tk-line__row { display: flex; justify-content: space-between; gap: 8px; }
+.tk-line__name { font-size: 0.98rem; color: var(--tk-text); font-family: var(--tk-font-serif); font-weight: var(--tk-weight-semibold); }
+.tk-line__total { font-size: 0.9rem; font-weight: var(--tk-weight-semibold); white-space: nowrap; }
+.tk-line__meta { display: flex; align-items: center; justify-content: space-between; }
+.tk-line__qty { font-size: 0.8rem; color: var(--tk-text-muted); }
+.tk-line__remove { background: none; border: none; cursor: pointer; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tk-text-faint); text-decoration: underline; text-underline-offset: 3px; }
+.tk-drawer__foot { padding: 22px 28px 26px; border-top: 1px solid var(--tk-border); }
+.tk-drawer__subtotal { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.9rem; color: var(--tk-text); }
+.tk-drawer__subtotal b { font-weight: var(--tk-weight-semibold); }
+.tk-drawer__note { margin: 0 0 18px; font-size: 0.74rem; color: var(--tk-text-muted); }
+
+/* ---------- Floating WhatsApp ---------- */
+.tk-whatsapp {
+  position: fixed; right: 26px; bottom: 26px; z-index: 1200;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #25D366; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.22); text-decoration: none;
+}
+.tk-whatsapp img { width: 28px; height: 28px; filter: brightness(0) invert(1); }
+
+/* ---------- Toast ---------- */
+.tk-toast {
+  position: fixed; left: 50%; bottom: 30px;
+  transform: translateX(-50%) translateY(14px);
+  z-index: 2000; background: var(--tk-ink); color: #fff;
+  padding: 12px 22px; border-radius: 2px;
+  font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  opacity: 0; pointer-events: none; white-space: nowrap;
+  transition: all var(--tk-dur) var(--tk-ease);
+}
+.tk-toast.is-open { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 860px) {
+  .tk-nav { padding: 0 1.25rem; }
+  .tk-nav__links { display: none; }
+  .tk-story__inner { grid-template-columns: 1fr; }
+  .tk-story__media { min-height: 320px; }
+  .tk-story__body { padding: 3rem 1.75rem; }
+  .tk-cat-grid { grid-template-columns: 1fr; }
+  .tk-footer__cols { gap: 2rem; }
+}
+
+/* =========================================================
+   MVC integration — global chrome
+   The prototype nav was a hero-only overlay. As global chrome
+   the transparent variant overlays the hero on the home page,
+   and the language flags + currency selector (preserved from
+   the live site) live inside .tk-nav__utils. Behavior is wired
+   in View.js (hydratePrototypeChrome) and homepage.js.
+   ========================================================= */
+
+/* Transparent header overlays the hero on home (solid stays in flow). */
+.tk-nav--transparent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Language flags */
+.tk-lang { display: flex; align-items: center; gap: 0.5rem; }
+.flag-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: var(--tk-radius-round);
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.4;
+  flex: 0 0 auto;
+  transition: opacity var(--tk-dur) var(--tk-ease);
+}
+.flag-icon svg { width: 100%; height: 100%; object-fit: cover; }
+.flag-icon:hover { opacity: 0.85; }
+.flag-icon.selected { opacity: 1; }
+
+/* Currency selector */
+.tk-nav__currency-select {
+  font-family: var(--tk-font-body);
+  font-size: var(--tk-size-label);
+  letter-spacing: var(--tk-track-body);
+  text-transform: uppercase;
+  background: transparent;
+  border: 1px solid var(--tk-border-strong);
+  border-radius: var(--tk-radius-xs);
+  padding: 4px 6px;
+  cursor: pointer;
+  color: var(--tk-text-muted);
+}
+.tk-nav--transparent .tk-nav__currency-select {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.6);
+}
+/* Dropdown options render on a white menu, so keep their text dark. */
+.tk-nav__currency-select option { color: var(--tk-text); }
