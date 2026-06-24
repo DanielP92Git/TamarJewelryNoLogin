@@ -113,6 +113,14 @@ img { display: block; }
 .tk-nav__link:hover, .tk-nav__link.is-active { opacity: 1; }
 .tk-nav--solid .tk-nav__link:hover, .tk-nav--solid .tk-nav__link.is-active { color: var(--tk-text); }
 
+/* Guard the new chrome against the legacy `desktop-menu.css` bare rule
+   `a { width: 100%; display: flex }`, which is loaded on non-home SSR pages
+   (category/product/cart/about/...) and otherwise forces every nav <a> (logo,
+   links, cart) to full width — blowing the nav apart and overflowing the page
+   horizontally. homepage.css is linked site-wide, so this fixes the nav on all
+   pages at once. No-op on the homepage (it never loads desktop-menu.css). */
+.tk-nav a { width: auto; }
+
 .tk-nav__utils { display: flex; align-items: center; gap: 1.4rem; flex: 0 0 auto; }
 
 .tk-nav__cart {

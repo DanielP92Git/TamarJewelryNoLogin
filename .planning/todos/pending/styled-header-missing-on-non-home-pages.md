@@ -35,14 +35,31 @@ carries old `header { height: 90vh/30%; background-image: <hero> }` rules from w
 `body#categories.<cat> header { background-image }`) hijack the new `.tk-nav`
 element, stretching it into a full-screen photo banner and burying the nav.
 
+There were TWO independent legacy-CSS conflicts:
+
+**(1) Per-page hero `header {}` rules** (category-only so far): old
+`header { height: 90vh/30%; background-image: <category hero> }` stretched the
+new nav into a full-screen photo. Fixed for category (see Status below).
+
+**(2) `desktop-menu.css` bare `a { width: 100%; display: flex }`** (lines 55–61) —
+this is the SYSTEMIC cause across ALL non-home pages. `desktop-menu.css` is loaded
+on category/product/cart/about/contact/workshop/policies (NOT homepage) and its
+bare `a` rule forces every nav `<a>` (logo, links, cart) to full width, blowing the
+nav apart and overflowing the page horizontally. **Fixed site-wide 2026-06-24** by
+adding `.tk-nav a { width: auto; }` to `homepage.css` (linked on every page; scoped
+to `.tk-nav` so product-card / footer links are untouched; no-op on homepage).
+
 ### Status by page
 - **Category** (`categories-800plus.css` / `categories-devices.css`): **FIXED 2026-06-24**
   — removed the stale `header {}` hero + `body#categories.* header` background rules
-  during Phase 40 execution (blocker for currency-selector testing).
-- **Product, cart, about, contact, workshop, policies**: likely the SAME pattern in
-  their own page CSS (`product`/`cart`/`about-*`/`contact-me-*`/`jewelry-workshop-*`/
-  `policies-*`.css). Each needs a per-file audit for old `header { ... background-image }`
-  rules and the same removal. **STILL PENDING.**
+  (cause 1), AND the `.tk-nav a` guard fixes the nav overflow (cause 2). Verified
+  during Phase 40 execution.
+- **Product, cart, about, contact, workshop, policies**: cause (2) now fixed for them
+  too via the shared `.tk-nav a` guard. Still need a per-page check for cause (1)
+  (legacy `header { ... background-image }` hero rules in their own page CSS:
+  `product`/`cart`/`about-*`/`contact-me-*`/`jewelry-workshop-*`/`policies-*`.css)
+  and any other page-specific `body { display:flex; align-items:center }` quirks.
+  **PARTIALLY RESOLVED — nav no longer overflows; per-page hero audit PENDING.**
 
 ## Scope / why it's tracked separately
 
