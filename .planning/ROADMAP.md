@@ -204,7 +204,7 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 | 27-32. Bilingual Content | v1.5 | Complete | Complete | 2026-02-17 |
 | 33-38. MongoDB Backup & Recovery | v1.6 | 11/11 | Complete | 2026-04-08 |
 | 39. Header Utilities Layout | v1.7 | 3/3 | Complete    | 2026-06-24 |
-| 40. Currency Selector Wiring | v1.7 | 2/2 | Complete   | 2026-06-24 |
+| 40. Currency Selector Wiring | v1.7 | 2/2 | Complete    | 2026-06-24 |
 | 40.1. Homepage Featured Products | v1.7 | 0/TBD | Not started | - |
 | 41. Footer Social Restore | v1.7 | 0/TBD | Not started | - |
 | 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |

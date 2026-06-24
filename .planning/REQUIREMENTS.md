@@ -19,7 +19,7 @@
 - [x] **CURR-01**: Changing the currency selector updates all displayed prices without a URL language switch
 - [x] **CURR-02**: The `currency-changed` event re-renders prices across the page (header-driven)
 - [ ] **CURR-03**: Home featured product grid prices respect `localStorage.currency` and update on currency change (remove hardcoded ILS in `homepage.js`)
-- [ ] **CURR-04**: Cart drawer prices respect `localStorage.currency` and update on currency change (remove hardcoded ILS)
+- [x] **CURR-04**: Cart drawer prices respect `localStorage.currency` and update on currency change (remove hardcoded ILS)
 - [x] **CURR-05**: Selected currency persists across page loads and navigation
 
 ### Footer Social Restore (FOOT)
@@ -72,7 +72,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | CURR-01 | Phase 40 | Complete |
 | CURR-02 | Phase 40 | Complete |
 | CURR-03 | Phase 40.1 | Pending |
-| CURR-04 | Phase 40 | Pending |
+| CURR-04 | Phase 40 | Complete |
 | CURR-05 | Phase 40 | Complete |
 | FOOT-01 | Phase 41 | Pending |
 | FOOT-02 | Phase 41 | Pending |
