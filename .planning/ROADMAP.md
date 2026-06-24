@@ -110,7 +110,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 ### v1.7 Homepage / Global-Chrome Redesign Rollout (Phases 39-42)
 
 - [x] **Phase 39: Header Utilities Layout** - Two refined flag icons, styled currency dropdown, cart icon + count in approved order (Flags → Currency → Cart) and spacing; RTL-correct (true mirror) on `/he` (completed 2026-06-24)
-- [ ] **Phase 40: Currency Selector Wiring** - `currency-changed` event reliably drives cart + category price re-renders; dropdown reflects saved currency on load (GeoIP default); currency persists across navigation
+- [x] **Phase 40: Currency Selector Wiring** - `currency-changed` event reliably drives cart + category price re-renders; dropdown reflects saved currency on load (GeoIP default); currency persists across navigation (completed 2026-06-24)
 - [ ] **Phase 40.1: Homepage Featured Products** (INSERTED) - `isFeatured` flag + admin toggle; SSR featured grid with dual prices; `homepage.js` reads real data and re-prices on currency change (removes hardcoded `CURRENCY='ILS'` + demo `PRODUCTS`)
 - [ ] **Phase 41: Footer Social Restore** - Instagram and Facebook links in prototype `.tk-footer` with correct URLs and RTL styling
 - [ ] **Phase 42: Mobile Navigation** - Hamburger toggle below 800px; mobile menu open/close; language and currency accessible on mobile; non-destructive and RTL-correct
@@ -146,7 +146,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
   5. On load the currency dropdown reflects the resolved currency (never the blank "default" placeholder); first-load default follows existing GeoIP locale detection
 **Plans**: 2 plans
 - [x] 40-01-PLAN.md — Currency event reliability: category re-price, persistence, dropdown reflects resolved currency on load (GeoIP default)
-- [ ] 40-02-PLAN.md — Cart drawer re-price + persistence hardening; preserve reload fallback; dual-encoding consistency
+- [x] 40-02-PLAN.md — Cart drawer re-price + persistence hardening; preserve reload fallback; dual-encoding consistency
 
 > Note: The homepage featured grid (former Success Criterion 3 / requirement CURR-03 — `homepage.js` currency wiring) was split out into **Phase 40.1: Homepage Featured Products** per `40-CONTEXT.md` D-01/D-02. That work depends on real featured-product data (a new capability) and is out of Phase 40 scope. Criterion 5 above was added to capture 40-CONTEXT D-04 (dropdown reflects saved currency) and D-03 (GeoIP default).
 
@@ -204,7 +204,7 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 | 27-32. Bilingual Content | v1.5 | Complete | Complete | 2026-02-17 |
 | 33-38. MongoDB Backup & Recovery | v1.6 | 11/11 | Complete | 2026-04-08 |
 | 39. Header Utilities Layout | v1.7 | 3/3 | Complete    | 2026-06-24 |
-| 40. Currency Selector Wiring | v1.7 | 1/2 | In Progress|  |
+| 40. Currency Selector Wiring | v1.7 | 2/2 | Complete   | 2026-06-24 |
 | 40.1. Homepage Featured Products | v1.7 | 0/TBD | Not started | - |
 | 41. Footer Social Restore | v1.7 | 0/TBD | Not started | - |
 | 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |
