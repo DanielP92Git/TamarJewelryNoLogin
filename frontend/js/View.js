@@ -230,6 +230,7 @@ export default class View {
 
   stickyMenuFn = function () {
     const menu = document.querySelector('.menu');
+    if (!menu || !this._header) return; // global prototype chrome has no `.menu`
     const stickyMenu = function (entries) {
       const [entry] = entries;
       if (window.innerWidth < 800) return;
@@ -274,6 +275,7 @@ export default class View {
    */
   //////////////////////////////////////////////////
   _moveToTopHandler = function () {
+    if (!this._goToTop) return; // global prototype home has no `.go-to-top`
     this._goToTop.addEventListener('click', this.movePageTop.bind(this));
   };
 
@@ -747,7 +749,11 @@ export default class View {
     // Update menu innerHTML first
     const menu = document.querySelector('.menu');
     if (!menu) {
-      console.error('[DEBUG] Menu element not found');
+      // No legacy `.menu` host => the global prototype chrome (header.ejs /
+      // footer.ejs) is SSR-static. Don't destructively rewrite it; just wire
+      // the behavior it needs (language toggle, currency labels, cart count)
+      // and run any page-specific language setup.
+      await this.hydratePrototypeChrome(lng, cartNum);
       return;
     }
 
@@ -969,6 +975,46 @@ export default class View {
     }
   }
 
+  // Behavior wiring for the global SSR-static prototype chrome. The header/footer
+  // markup is rendered server-side (header.ejs / footer.ejs), so we only attach
+  // behavior here — no destructive innerHTML rewrites.
+  async hydratePrototypeChrome(lng, cartNum) {
+    // Language flags => full navigation to the other-language SSR URL, so the
+    // server re-renders the whole page (chrome + content) in that language.
+    document.querySelectorAll('.flag-icon[data-lang]').forEach(flag => {
+      if (flag.dataset.tkLangBound === '1') return; // avoid double-binding
+      flag.dataset.tkLangBound = '1';
+      flag.addEventListener('click', () => {
+        const target = flag.getAttribute('data-lang') === 'heb' ? 'heb' : 'eng';
+        const toUrlLang = target === 'heb' ? 'he' : 'en';
+        localStorage.setItem('language', target);
+        const path = window.location.pathname;
+        const m = path.match(/^\/(en|he)(\/|$)/);
+        const newPath = m
+          ? path.replace(/^\/(en|he)/, '/' + toUrlLang)
+          : '/' + toUrlLang;
+        window.location.assign(newPath + window.location.search);
+      });
+    });
+
+    // Currency option labels follow the page language. Selection itself is
+    // handled by the delegated `change` listener (initCurrencyPersistence).
+    document
+      .querySelectorAll('select.header-currency-selector[name="currency"]')
+      .forEach(sel => this.updateCurrencySelectorText(sel, lng));
+
+    // Cart count badge.
+    if (typeof cartNum === 'number') {
+      this.persistCartNumber(cartNum);
+    }
+
+    // Page-specific language/body setup MUST still run (e.g. contactMeView's
+    // setFormLng re-attaches the submit handler).
+    if (typeof this.setPageSpecificLanguage === 'function') {
+      await this.setPageSpecificLanguage(lng, cartNum);
+    }
+  }
+
   getCurrencySelectorMarkup(lng, id) {
     // Get saved currency preference or default to 'usd'
     const savedCurrency = localStorage.getItem('currency') || 'usd';
@@ -1006,13 +1052,13 @@ export default class View {
 
       if (lng === 'eng') {
         currencySelect.options[0].text = 'Currency';
-        currencySelect.options[1].text = 'USD';
-        currencySelect.options[2].text = 'ILS';
+        currencySelect.options[1].text = '$ USD';
+        currencySelect.options[2].text = '₪ ILS';
         currencySelect.removeAttribute('dir');
       } else if (lng === 'heb') {
         currencySelect.options[0].text = 'מטבע';
-        currencySelect.options[1].text = 'דולר';
-        currencySelect.options[2].text = 'שקל';
+        currencySelect.options[1].text = '$ USD';
+        currencySelect.options[2].text = '₪ ILS';
         currencySelect.setAttribute('dir', 'rtl');
       }
 
