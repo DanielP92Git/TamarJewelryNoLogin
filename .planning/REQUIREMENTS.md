@@ -9,10 +9,10 @@
 
 ### Header Utilities Layout (HEADER)
 
-- [ ] **HEADER-01**: Visitor sees EN/HE as two separate refined flag icons (US + IL) in the header utilities cluster — active flag full color, inactive dimmed (no ring)
-- [ ] **HEADER-02**: Currency selector renders as a styled dropdown matching the approved design
-- [ ] **HEADER-03**: Header utilities show cart icon + item count, currency dropdown, and flags in the approved order Flags → Currency → Cart and spacing; nav links centered with TK logo at the far end
-- [ ] **HEADER-04**: Header utilities layout mirrors correctly for RTL on `/he` pages
+- [x] **HEADER-01**: Visitor sees EN/HE as two separate refined flag icons (US + IL) in the header utilities cluster — active flag full color, inactive dimmed (no ring)
+- [x] **HEADER-02**: Currency selector renders as a styled dropdown matching the approved design
+- [x] **HEADER-03**: Header utilities show cart icon + item count, currency dropdown, and flags in the approved order Flags → Currency → Cart and spacing; nav links centered with TK logo at the far end
+- [x] **HEADER-04**: Header utilities layout mirrors correctly for RTL on `/he` pages
 
 ### Currency Selector Wiring (CURR)
 
@@ -65,10 +65,10 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HEADER-01 | Phase 39 | Pending |
-| HEADER-02 | Phase 39 | Pending |
-| HEADER-03 | Phase 39 | Pending |
-| HEADER-04 | Phase 39 | Pending |
+| HEADER-01 | Phase 39 | Complete |
+| HEADER-02 | Phase 39 | Complete |
+| HEADER-03 | Phase 39 | Complete |
+| HEADER-04 | Phase 39 | Complete |
 | CURR-01 | Phase 40 | Pending |
 | CURR-02 | Phase 40 | Pending |
 | CURR-03 | Phase 40 | Pending |
