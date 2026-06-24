@@ -469,3 +469,12 @@ img { display: block; }
 }
 /* Dropdown options render on a white menu, so keep their text dark. */
 .tk-nav__currency-select option { color: var(--tk-text); }
+
+/* RTL header mirror (Hebrew /he) */
+[dir="rtl"] .tk-nav            { flex-direction: row-reverse; }
+[dir="rtl"] .tk-nav__utils     { flex-direction: row-reverse; }
+[dir="rtl"] .tk-nav__count     { right: auto; left: -8px; }
+[dir="rtl"] .tk-nav__currency-select {
+  background-position: left 6px center;
+  padding: 4px 8px 4px 24px;
+}
