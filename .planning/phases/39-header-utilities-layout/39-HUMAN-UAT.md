@@ -1,5 +1,5 @@
 ---
-status: partial
+status: passed
 phase: 39-header-utilities-layout
 source: [39-VERIFICATION.md]
 started: "2026-06-24T00:00:00Z"
@@ -8,7 +8,7 @@ updated: "2026-06-24T00:00:00Z"
 
 ## Current Test
 
-[awaiting human testing]
+[complete — all items approved by user 2026-06-24]
 
 ## Tests
 
@@ -22,19 +22,18 @@ result: PASS (partial) — approved on the transparent/hero nav (white chevron, 
 
 ### 3. RTL header (/he) — true mirror
 expected: Utils cluster sits at the LEFT edge, order Cart → Currency → Flags. Cart count badge on the LEFT of the cart icon. Currency chevron on the LEFT. Nav links stay centered; TK logo stays at the right edge. Currency options still read `$ USD` / `₪ ILS`.
-result: FIXED — re-test pending. UAT found (a) only a partial mirror (cluster did not relocate to the left edge) and (b) the currency box was a different width on /en vs /he. Root cause: `<html dir="rtl">` already reverses flex rows natively, so the plan's explicit `flex-direction: row-reverse` on `.tk-nav`/`.tk-nav__utils` double-reversed and cancelled the mirror; width differed because the browser auto-sizes the `<select>` to its widest option, which differs by language. Fix `74765fd`: removed both row-reverse rules + pinned `width: 6.5rem`. CSS is raw-served — hard-reload /he to re-test (no build needed).
+result: PASS — re-test approved (2026-06-24) after fix `74765fd`. UAT had found (a) only a partial mirror (cluster did not relocate to the left edge) and (b) the currency box was a different width on /en vs /he. Root cause: `<html dir="rtl">` already reverses flex rows natively, so the plan's explicit `flex-direction: row-reverse` on `.tk-nav`/`.tk-nav__utils` double-reversed and cancelled the mirror; width differed because the browser auto-sizes the `<select>` to its widest option, which differs by language. Fix: removed both row-reverse rules + pinned `width: 6.5rem`.
 
 ### 4. Currency label persistence (clarification)
 expected: This is about the option LABELS, not a specific currency. Open the currency dropdown on /en and /he: the two real options must read `$ USD` and `₪ ILS` (not bare `USD`/`ILS` or Hebrew `דולר`/`שקל`), and they must STAY that way after the page settles (no flash-revert when View.js hydration runs). NOTE: View.js is Parcel-bundled, so the persistence guarantee only takes effect after `npm run build` (in /frontend) + backend restart. Until then the SSR labels are already correct; the build only protects against the hydration revert.
-result: [pending]
+result: PASS — approved (2026-06-24). Labels read `$ USD` / `₪ ILS` and persist after hydration.
 
 ## Summary
 
 total: 4
-passed: 1
+passed: 4
 issues: 0
-pending: 2
-fixed_pending_retest: 1
+pending: 0
 skipped: 0
 blocked: 0
 

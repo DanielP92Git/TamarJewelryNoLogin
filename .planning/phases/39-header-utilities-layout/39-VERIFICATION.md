@@ -1,7 +1,7 @@
 ---
 phase: 39-header-utilities-layout
 verified: 2026-06-24T00:00:00Z
-status: human_needed
+status: passed
 score: 10/10 must-haves verified (code-level); 4 visual confirmations pending
 overrides_applied: 0
 human_verification:
@@ -23,7 +23,7 @@ human_verification:
 
 **Phase Goal:** Header utilities cluster restyled to the approved `.tk-*` design — two refined flag icons (active full color / inactive dimmed ~0.4, no ring), styled currency dropdown (custom chevron, OS arrow hidden), cart icon + count in approved LTR order Flags → Currency → Cart with correct spacing; RTL-correct true mirror on `/he`.
 **Verified:** 2026-06-24
-**Status:** human_needed
+**Status:** passed (human verification approved 2026-06-24)
 **Re-verification:** No — initial verification
 
 ## Goal Achievement
