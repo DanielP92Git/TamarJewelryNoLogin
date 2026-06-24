@@ -114,13 +114,6 @@ img { display: block; }
 .tk-nav--solid .tk-nav__link:hover, .tk-nav--solid .tk-nav__link.is-active { color: var(--tk-text); }
 
 .tk-nav__utils { display: flex; align-items: center; gap: 1.4rem; flex: 0 0 auto; }
-.tk-nav__currency {
-  font-size: var(--tk-size-label);
-  letter-spacing: var(--tk-track-body);
-  text-transform: uppercase;
-}
-.tk-nav--transparent .tk-nav__currency { color: #fff; }
-.tk-nav--solid .tk-nav__currency { color: var(--tk-text-muted); }
 
 .tk-nav__cart {
   position: relative;
@@ -456,16 +449,23 @@ img { display: block; }
   font-size: var(--tk-size-label);
   letter-spacing: var(--tk-track-body);
   text-transform: uppercase;
-  background: transparent;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: transparent;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 12px 12px;
   border: 1px solid var(--tk-border-strong);
   border-radius: var(--tk-radius-xs);
-  padding: 4px 6px;
+  padding: 4px 24px 4px 8px;
   cursor: pointer;
   color: var(--tk-text-muted);
 }
 .tk-nav--transparent .tk-nav__currency-select {
   color: #fff;
   border-color: rgba(255, 255, 255, 0.6);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23ffffff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
 /* Dropdown options render on a white menu, so keep their text dark. */
 .tk-nav__currency-select option { color: var(--tk-text); }
