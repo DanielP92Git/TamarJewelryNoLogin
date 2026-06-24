@@ -114,6 +114,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 - [ ] **Phase 40.1: Homepage Featured Products** (INSERTED) - `isFeatured` flag + admin toggle; SSR featured grid with dual prices; `homepage.js` reads real data and re-prices on currency change (removes hardcoded `CURRENCY='ILS'` + demo `PRODUCTS`)
 - [ ] **Phase 41: Footer Social Restore** - Instagram and Facebook links in prototype `.tk-footer` with correct URLs and RTL styling
 - [ ] **Phase 42: Mobile Navigation** - Hamburger toggle below 800px; mobile menu open/close; language and currency accessible on mobile; non-destructive and RTL-correct
+- [ ] **Phase 43: Site-wide Cart Drawer** - Promote the homepage-only demo cart drawer into global chrome; nav cart icon opens a mini-cart on every page with real `model.js` data; honors Phase 40 currency wiring; "View cart / Checkout" CTA → `/{lang}/cart`
 
 ## Phase Details
 
@@ -208,5 +209,16 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 | 40.1. Homepage Featured Products | v1.7 | 0/TBD | Not started | - |
 | 41. Footer Social Restore | v1.7 | 0/TBD | Not started | - |
 | 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |
+| 43. Site-wide Cart Drawer | v1.7 | 0/TBD | Not started | - |
 
-*Last updated: 2026-06-24 — Phase 39 planned (3 plans, all wave 1)*
+*Last updated: 2026-06-25 — Phase 40 complete; Phase 43 (Site-wide Cart Drawer) added*
+
+### Phase 43: Site-wide Cart Drawer
+
+**Goal:** Promote the homepage-only demo cart drawer into global chrome so the nav cart icon opens a mini-cart on **every** page, rendering real `model.js` cart data (not the homepage demo data), honoring Phase 40 currency wiring for live + persisted re-pricing, with a "View cart / Checkout" CTA that routes to `/{lang}/cart`. Scope: move drawer markup from `home.ejs` into a global partial; move open/close wiring from `homepage.js` into base `View.js`; dual-render safety; cart-count badge sync; mobile + RTL. See `.planning/todos/pending/site-wide-cart-drawer.md`.
+**Requirements**: TBD (run /gsd-plan-phase 43)
+**Depends on:** Phase 40 (currency wiring)
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 43 to break down)

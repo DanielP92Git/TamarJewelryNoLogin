@@ -52,6 +52,7 @@ Progress: [████████░░] 80%
 ### Roadmap Evolution
 
 - Phase 40.1 inserted after Phase 40: Homepage Featured Products — isFeatured flag + admin toggle + SSR featured grid with dual prices; absorbs criterion 3 / CURR-03 split from Phase 40
+- Phase 43 added (end of milestone): Site-wide Cart Drawer — promote homepage-only demo drawer into global chrome; real model.js data; honors Phase 40 currency wiring; CTA → /{lang}/cart. Source: todos/pending/site-wide-cart-drawer.md
 
 ### Decisions
 
