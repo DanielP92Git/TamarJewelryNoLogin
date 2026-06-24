@@ -4,10 +4,10 @@ milestone: v1.7
 milestone_name: Homepage / Global-Chrome Redesign Rollout
 status: planning
 stopped_at: Phase 40 context gathered
-last_updated: "2026-06-24T20:05:30.468Z"
+last_updated: "2026-06-24T20:07:00.528Z"
 last_activity: 2026-06-24
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 1
   total_plans: 3
   completed_plans: 3
@@ -48,6 +48,10 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0% (0/4
 - v1.5: 12 plans completed in 3 days (2026-02-14 → 2026-02-16)
 
 ## Accumulated Context
+
+### Roadmap Evolution
+
+- Phase 40.1 inserted after Phase 40: Homepage Featured Products — isFeatured flag + admin toggle + SSR featured grid with dual prices; absorbs criterion 3 / CURR-03 split from Phase 40
 
 ### Decisions
 

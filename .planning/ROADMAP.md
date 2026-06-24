@@ -110,7 +110,8 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 ### v1.7 Homepage / Global-Chrome Redesign Rollout (Phases 39-42)
 
 - [x] **Phase 39: Header Utilities Layout** - Two refined flag icons, styled currency dropdown, cart icon + count in approved order (Flags → Currency → Cart) and spacing; RTL-correct (true mirror) on `/he` (completed 2026-06-24)
-- [ ] **Phase 40: Currency Selector Wiring** - `currency-changed` event drives all price displays; remove hardcoded ILS from `homepage.js`; currency persists across navigation
+- [ ] **Phase 40: Currency Selector Wiring** - `currency-changed` event reliably drives cart + category price re-renders; dropdown reflects saved currency on load (GeoIP default); currency persists across navigation
+- [ ] **Phase 40.1: Homepage Featured Products** (INSERTED) - `isFeatured` flag + admin toggle; SSR featured grid with dual prices; `homepage.js` reads real data and re-prices on currency change (removes hardcoded `CURRENCY='ILS'` + demo `PRODUCTS`)
 - [ ] **Phase 41: Footer Social Restore** - Instagram and Facebook links in prototype `.tk-footer` with correct URLs and RTL styling
 - [ ] **Phase 42: Mobile Navigation** - Hamburger toggle below 800px; mobile menu open/close; language and currency accessible on mobile; non-destructive and RTL-correct
 
@@ -136,14 +137,30 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 ### Phase 40: Currency Selector Wiring
 **Goal**: Changing the currency selector immediately updates all displayed prices and the chosen currency persists across page loads
 **Depends on**: Phase 39 (currency dropdown lives in the header markup finalized in Phase 39)
-**Requirements**: CURR-01, CURR-02, CURR-03, CURR-04, CURR-05
+**Requirements**: CURR-01, CURR-02, CURR-04, CURR-05
 **Success Criteria** (what must be TRUE):
   1. Selecting a different currency in the header dropdown instantly updates all product prices visible on the current page without a page reload or URL change
   2. The `currency-changed` event dispatched from the dropdown triggers price re-renders in every subscribing component on the page
-  3. Home featured product grid prices read from `localStorage.currency` on load and update immediately when currency changes (hardcoded `CURRENCY='ILS'` constant removed from `homepage.js`)
-  4. Cart drawer prices read from `localStorage.currency` on load and update when currency changes (hardcoded ILS removed from `cartView.js` price helpers)
-  5. Reloading the page or navigating to a different page retains the previously selected currency
+  3. Cart drawer prices read from `localStorage.currency` on load and update when currency changes (hardcoded ILS removed from `cartView.js` price helpers)
+  4. Reloading the page or navigating to a different page retains the previously selected currency
+  5. On load the currency dropdown reflects the resolved currency (never the blank "default" placeholder); first-load default follows existing GeoIP locale detection
 **Plans**: TBD
+
+> Note: The homepage featured grid (former Success Criterion 3 / requirement CURR-03 — `homepage.js` currency wiring) was split out into **Phase 40.1: Homepage Featured Products** per `40-CONTEXT.md` D-01/D-02. That work depends on real featured-product data (a new capability) and is out of Phase 40 scope. Criterion 5 above was added to capture 40-CONTEXT D-04 (dropdown reflects saved currency) and D-03 (GeoIP default).
+
+### Phase 40.1: Homepage Featured Products (INSERTED)
+**Goal**: The homepage featured grid shows real, admin-curated products with correct dual-currency prices that re-price on currency change — replacing the hardcoded demo data in `homepage.js`
+**Depends on**: Phase 40 (currency event/persistence wiring must be reliable before the homepage grid subscribes to it)
+**Requirements**: CURR-03 (moved from Phase 40)
+**Success Criteria** (what must be TRUE):
+  1. Products can be marked "featured" via an `isFeatured` flag (Product schema) and toggled from the admin dashboard (`admin/BisliView.js`)
+  2. The homepage featured grid (`home.ejs` `#tk-prod-grid`) is rendered server-side with real featured products and dual `usd_price`/`ils_price` values embedded in `data-*` attributes (same pattern as `category.ejs` / `ssrDynamic.js`)
+  3. `homepage.js` reads products + dual prices from the SSR DOM (hardcoded `CURRENCY='ILS'` and the demo `PRODUCTS` array removed) and renders the active currency on load from `localStorage.currency`
+  4. The homepage grid (and its cart drawer) re-prices immediately on `currency-changed`, consistent with category and cart pages
+**Plans**: TBD
+**UI hint**: yes
+
+> Note: Inserted per `40-CONTEXT.md` D-01/D-02 — split out of Phase 40 because real featured-product data (schema flag + admin toggle + SSR grid) is a new capability beyond currency wiring. Absorbs former Phase 40 Success Criterion 3 / requirement CURR-03.
 
 ### Phase 41: Footer Social Restore
 **Goal**: The prototype footer displays working social links styled in the `.tk-footer` visual language for both LTR and RTL pages
@@ -173,7 +190,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 39 → 40 → 41 → 42
+Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -186,6 +203,7 @@ Phases execute in numeric order: 39 → 40 → 41 → 42
 | 33-38. MongoDB Backup & Recovery | v1.6 | 11/11 | Complete | 2026-04-08 |
 | 39. Header Utilities Layout | v1.7 | 3/3 | Complete    | 2026-06-24 |
 | 40. Currency Selector Wiring | v1.7 | 0/TBD | Not started | - |
+| 40.1. Homepage Featured Products | v1.7 | 0/TBD | Not started | - |
 | 41. Footer Social Restore | v1.7 | 0/TBD | Not started | - |
 | 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |
 

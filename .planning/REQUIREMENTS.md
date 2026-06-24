@@ -71,7 +71,7 @@ Which phases cover which requirements. Populated during roadmap creation.
 | HEADER-04 | Phase 39 | Complete |
 | CURR-01 | Phase 40 | Pending |
 | CURR-02 | Phase 40 | Pending |
-| CURR-03 | Phase 40 | Pending |
+| CURR-03 | Phase 40.1 | Pending |
 | CURR-04 | Phase 40 | Pending |
 | CURR-05 | Phase 40 | Pending |
 | FOOT-01 | Phase 41 | Pending |
