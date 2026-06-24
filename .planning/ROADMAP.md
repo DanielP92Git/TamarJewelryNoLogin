@@ -109,7 +109,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 
 ### v1.7 Homepage / Global-Chrome Redesign Rollout (Phases 39-42)
 
-- [ ] **Phase 39: Header Utilities Layout** - Two refined flag icons, styled currency dropdown, cart icon + count in approved order (Flags → Currency → Cart) and spacing; RTL-correct (true mirror) on `/he`
+- [x] **Phase 39: Header Utilities Layout** - Two refined flag icons, styled currency dropdown, cart icon + count in approved order (Flags → Currency → Cart) and spacing; RTL-correct (true mirror) on `/he` (completed 2026-06-24)
 - [ ] **Phase 40: Currency Selector Wiring** - `currency-changed` event drives all price displays; remove hardcoded ILS from `homepage.js`; currency persists across navigation
 - [ ] **Phase 41: Footer Social Restore** - Instagram and Facebook links in prototype `.tk-footer` with correct URLs and RTL styling
 - [ ] **Phase 42: Mobile Navigation** - Hamburger toggle below 800px; mobile menu open/close; language and currency accessible on mobile; non-destructive and RTL-correct
@@ -126,9 +126,9 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
   3. On all pages the header utilities row displays the utilities in the approved left-to-right sequence Flags → Currency → Cart (cart icon + item count at the far right edge) with correct spacing.
   4. On `/he` pages the utilities row mirrors for RTL as a true mirror — cart at the left, flags at the right (order Cart → Currency → Flags) — without breaking the nav link centering or the TK logo position.
 **Plans**: 3 plans
-  - [ ] 39-01-PLAN.md — homepage.css: flag opacity states, currency custom chevron + dead-code removal, RTL header mirror block
-  - [ ] 39-02-PLAN.md — header.ejs `$ USD`/`₪ ILS` labels + flag a11y; View.js currency-label mirror + hydration audit
-  - [ ] 39-03-PLAN.md — doc-sync: amend ROADMAP criteria 1/3/4 + REQUIREMENTS HEADER-01 to match locked decisions
+  - [x] 39-01-PLAN.md — homepage.css: flag opacity states, currency custom chevron + dead-code removal, RTL header mirror block
+  - [x] 39-02-PLAN.md — header.ejs `$ USD`/`₪ ILS` labels + flag a11y; View.js currency-label mirror + hydration audit
+  - [x] 39-03-PLAN.md — doc-sync: amend ROADMAP criteria 1/3/4 + REQUIREMENTS HEADER-01 to match locked decisions
 **UI hint**: yes
 
 > Note: Success Criteria 1/3/4 above and REQUIREMENTS HEADER-01/HEADER-03 were amended (Plan 39-03) to match the locked decisions in 39-CONTEXT.md: D-01 two separate refined flag icons (active full color / inactive dimmed, no ring); D-04 LTR order Flags → Currency → Cart (cart at the far right); D-09 RTL true mirror — cart at the left, flags at the right.
@@ -184,7 +184,7 @@ Phases execute in numeric order: 39 → 40 → 41 → 42
 | 23-26. SEO & Marketing | v1.4 | Complete | Complete | 2026-02-12 |
 | 27-32. Bilingual Content | v1.5 | Complete | Complete | 2026-02-17 |
 | 33-38. MongoDB Backup & Recovery | v1.6 | 11/11 | Complete | 2026-04-08 |
-| 39. Header Utilities Layout | v1.7 | 0/3 | Planned | - |
+| 39. Header Utilities Layout | v1.7 | 3/3 | Complete   | 2026-06-24 |
 | 40. Currency Selector Wiring | v1.7 | 0/TBD | Not started | - |
 | 41. Footer Social Restore | v1.7 | 0/TBD | Not started | - |
 | 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |
