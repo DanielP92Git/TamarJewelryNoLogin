@@ -7,48 +7,11 @@ body {
   /* border: 4px solid black; */
 }
 
-header {
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: center;
-  width: 100%;
-  height: 90vh;
-  min-height: 100px;
-  padding-bottom: 30px;
-
-  /* ~~~~ FOR DEBUGGING~~~~*/
-  /* border: 4px solid rgb(177, 20, 143); */
-}
-
-/* Category-specific header backgrounds as a fallback */
-body#categories.bracelets header {
-  background-image: url('../imgs/website-images/bracelets/B3.jpg');
-  background-position: center 5%; /* Show pendant area, slightly lower than mobile */
-}
-
-body#categories.necklaces header {
-  background-image: url('../imgs/Hero-imgs/categories-images/new-hero-imgs/Necklaces-Hero.webp');
-}
-
-body#categories.hoop-earrings header {
-  background-image: url('../imgs/Hero-imgs/categories-images/new-hero-imgs/Hoop-Hero.webp');
-}
-
-body#categories.unisex header {
-  background-image: url('../imgs/Hero-imgs/IMG_0173.jpg');
-  background-position: center 30%;
-}
-
-body#categories.shalom-club header {
-  background-image: url('../imgs/Hero-imgs/shalom-club-hero.webp');
-}
-body#categories.dangle-earrings header {
-  background-image: url('../imgs/Hero-imgs/categories-images/new-hero-imgs/Dangle-Hero.webp');
-}
-
-body#categories.crochet-necklaces header {
-  background-image: url('../imgs/Hero-imgs/categories-images/new-hero-imgs/Crochet-Hero.webp');
-}
+/* v1.7 global-chrome migration: the <header> element is now the slim `.tk-nav`
+   bar (styled in homepage.css), no longer a full-height hero banner. The old
+   `header { height: 90vh; background-image: <category hero> }` rules were
+   removed because they hijacked the new nav. Per-category hero banners under
+   the new chrome are tracked as a follow-up (see .planning/todos). */
 
 .bracelet-hero {
   background-position: unset;
