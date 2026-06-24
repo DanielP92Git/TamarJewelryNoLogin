@@ -317,6 +317,19 @@ class CategoriesView extends View {
 
     // Currency is now in header
     this.setupCurrencyHandler();
+
+    // SSR renders product prices in the LANGUAGE-default currency
+    // (ssrDynamic.js: heb -> ils, eng -> usd). If the user has a persisted
+    // currency that differs from that SSR default, the SSR DOM shows the wrong
+    // currency on load. Re-render once so prices match the selector and the
+    // saved preference. Guarded so we preserve the SSR DOM when they already
+    // match (no needless re-render / DOM thrash).
+    if (this.ssrRendered) {
+      const ssrCurrency = this.lang === 'heb' ? 'ils' : 'usd';
+      if (this.selectedCurrency !== ssrCurrency) {
+        this.displayProducts();
+      }
+    }
   }
 
   // Updated method for page-specific LANGUAGE updates only
