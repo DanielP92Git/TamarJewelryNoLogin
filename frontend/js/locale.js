@@ -45,6 +45,30 @@ function guessLocaleFromBrowser() {
   return { appLang: 'eng', appCurrency: 'usd' };
 }
 
+// Mirror of View.js syncCurrencySelectors (View.js:28-40). Kept inline here so
+// locale.js stays lightweight and load-order-independent (it bootstraps before
+// the heavy View.js module). When the GeoIP override changes the persisted
+// currency on first load, the header <select> must be moved to the resolved
+// value too — otherwise the dropdown disagrees with localStorage + rendered
+// prices (D-04 / D-08). Non-destructive: only sets el.value, never innerHTML.
+function syncCurrencySelectors(appCurrency) {
+  const c = normalizeAppCurrency(appCurrency);
+  if (!c) return;
+  try {
+    document
+      .querySelectorAll('select.header-currency-selector[name="currency"]')
+      .forEach(el => {
+        try {
+          el.value = c;
+        } catch {
+          // ignore individual select failures
+        }
+      });
+  } catch {
+    // ignore
+  }
+}
+
 function setDocumentLanguage(appLang) {
   try {
     const html = document.documentElement;
@@ -171,6 +195,11 @@ export async function hydrateLocaleFromBackend() {
     }
     if (shouldOverrideCurrency && mapped.appCurrency) {
       localStorage.setItem(CURRENCY_KEY, mapped.appCurrency);
+      // Move the header dropdown to the resolved currency so the selector,
+      // localStorage, and rendered prices all agree (D-04 / D-08). The
+      // currency-changed dispatch below only re-renders subscribers; it does
+      // NOT touch the <select> value, so sync it explicitly here.
+      syncCurrencySelectors(mapped.appCurrency);
       // Notify existing currency listeners (View.js listens for this)
       window.dispatchEvent(
         new CustomEvent('currency-changed', {
