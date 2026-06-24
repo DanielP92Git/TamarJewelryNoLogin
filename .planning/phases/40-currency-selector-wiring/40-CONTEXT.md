@@ -29,8 +29,8 @@ Make the header currency dropdown reliably re-price the page and persist the cho
 ## Implementation Decisions
 
 ### Phase scope & structure
-- **D-01:** The homepage featured-products work the user wants (real catalogue data, `isFeatured` flag, admin toggle, SSR grid) is a **new capability split into its own phase** ("Homepage Featured Products"), to run **after** Phase 40. Phase 40 stays lean per the boundary above.
-- **D-02:** Because the homepage grid moves out, **roadmap Success Criterion 3 and requirement CURR-03 (homepage grid currency) must be removed from Phase 40** and re-homed in the new phase. This ROADMAP/REQUIREMENTS edit is required (flagged in Deferred).
+- **D-01 [informational]:** The homepage featured-products work the user wants (real catalogue data, `isFeatured` flag, admin toggle, SSR grid) is a **new capability split into its own phase** ("Homepage Featured Products"), to run **after** Phase 40. Phase 40 stays lean per the boundary above.
+- **D-02 [informational]:** Because the homepage grid moves out, **roadmap Success Criterion 3 and requirement CURR-03 (homepage grid currency) must be removed from Phase 40** and re-homed in the new phase. This ROADMAP/REQUIREMENTS edit is required (flagged in Deferred).
 
 ### Default / first-load currency (CURR-05)
 - **D-03:** When no currency is saved, prices follow **existing GeoIP locale detection** (`locale.js`: Israel→ILS, everyone else→USD; it already seeds `localStorage.currency` on first load). Do NOT introduce a separate fixed default or couple currency to page language. Note the existing SSR-by-language price render (`ssrDynamic.js:167`, heb→ils / eng→usd) — the client currency layer re-applies the saved/resolved currency on top, so first-paint may briefly differ from the final currency; that is acceptable and follows the established pattern.
