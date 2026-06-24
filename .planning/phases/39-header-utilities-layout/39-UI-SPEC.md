@@ -1,7 +1,7 @@
 ---
 phase: 39
 slug: header-utilities-layout
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-24
@@ -59,13 +59,13 @@ Existing gap on `.tk-nav__utils`: **1.4rem (~22.4px)**. Keep as-is — it is est
 
 ## Typography
 
-| Role | Size | Weight | Line Height | Letter-spacing | Usage |
-|------|------|--------|-------------|----------------|-------|
-| Nav label | 0.75rem (12px) | 500 (medium) | 1.0 (single-line) | 0.15em (wide) | Nav links (existing — do not change) |
-| Utils label | 0.75rem (12px) | 400 (regular) | 1.0 (single-line) | 0.04em (body) | Currency select option text |
-| Badge | 0.62rem (~9.9px) | 600 (semibold) | 1.0 | none | Cart count badge number |
+| Role | Size | Weight | Line Height | Letter-spacing | Scope | Usage |
+|------|------|--------|-------------|----------------|-------|-------|
+| Utils label | 0.75rem (12px) | 400 (regular) | 1.0 (single-line) | 0.04em (body) | introduced by this phase | Currency select option text |
+| Badge | 0.62rem (~9.9px) | 600 (semibold) | 1.0 | none | introduced by this phase | Cart count badge number |
+| Nav label | 0.75rem (12px) | 500 (medium) | 1.0 (single-line) | 0.15em (wide) | inherited — do NOT change | Nav links (existing) |
 
-**Weights used in this phase: 400 (regular) and 600 (semibold).** (500 is nav links, already established — not changed by this phase.)
+**Weights introduced by this phase: 400 (regular) and 600 (semibold) — exactly 2.** The 500 (medium) row is the existing nav-link weight, listed for reference only; this phase does not introduce or alter it.
 
 **Text transforms:**
 - Currency select: `uppercase` (matching existing `.tk-nav__currency-select`).
@@ -138,6 +138,8 @@ Existing gap on `.tk-nav__utils`: **1.4rem (~22.4px)**. Keep as-is — it is est
 | Active (selected language) | `.flag-icon.selected` | `opacity: 1.0` — NO box-shadow ring |
 
 **Change from current:** Remove `box-shadow: 0 0 0 2px var(--tk-gold)` from `.flag-icon.selected` (and the transparent-nav white-ring variant). Replace with opacity-only treatment.
+
+**Accessibility (icon-only control):** Each flag is an icon-only interactive element that switches language, so it MUST carry a text label fallback for screen readers and pointer tooltips. Apply `aria-label` to each flag element — `aria-label="English"` on the US flag, `aria-label="עברית"` on the IL flag — and mirror it with a matching `title` attribute for hover tooltips. The active flag additionally gets `aria-current="true"`. Confirm these attributes exist in `header.ejs`; add them if absent (opacity is the only visual affordance for the active state, so the accessible name is the sole non-visual cue).
 
 **RTL:** No visual change to flag icon shapes. Cluster reversal (see RTL section) moves flags to the right side of the cluster in RTL.
 
@@ -305,11 +307,11 @@ This phase delivers no page-level CTAs, empty states, or error states. The only 
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS (FLAG resolved — flag-icon `aria-label`/`title` declared in Component Inventory §1)
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS (FLAG resolved — Scope column separates inherited 500 from phase-introduced 400/600)
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** APPROVED (6/6 dimensions; 2 non-blocking FLAGs addressed in-spec)
