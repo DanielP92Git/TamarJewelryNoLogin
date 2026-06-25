@@ -17,7 +17,7 @@
  * - CategoriesTab uses `cloneNode(true)` + `replaceChild` to remove old listeners
  *
  * Key source files:
- * - frontend/js/View.js (setLanguage, handleMenuLanguage, svgHandler, cloneNode patterns)
+ * - frontend/js/View.js (setLanguage, handleMenuLanguage, _bindHamburgerMenu, cloneNode patterns)
  * - frontend/js/controller.js (init, controlXxxPage functions)
  * - frontend/js/model.js (handleLoadStorage, checkCartNumber)
  */
@@ -527,11 +527,14 @@ describe('MVC Integration: Lifecycle and Cleanup', () => {
       const menu = document.querySelector('.menu');
       menu.remove();
 
-      // setLanguage should handle gracefully (logs error but doesn't throw)
+      // setLanguage should handle gracefully without throwing (delegates to
+      // hydratePrototypeChrome which wires SSR-static chrome silently)
       await expect(view.setLanguage('eng', 0)).resolves.not.toThrow();
 
-      // Should log error
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      // No error should be logged — missing .menu is expected on SSR-static pages
+      // (svgHandler was retired in Phase 42-02; the new _bindHamburgerMenu silently
+      // returns when .tk-hamburger / #tk-mobile-nav are absent in test fixtures)
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
     });
 
     it('should handle rapid sequential language switches without race conditions', async () => {

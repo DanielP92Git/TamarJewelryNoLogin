@@ -444,108 +444,6 @@ export default class View {
   // Categories reveal END
   // `````````````````````````````````````````````````````
 
-  /**
-   * * --Switch SVG-icon menu button on mobile mode--
-   */
-
-  svgHandler() {
-    // Target the img element with class menubars-svg
-    const menuBars = document.querySelector('.menubars-svg');
-    const menu = document.querySelector('.menu');
-    const body = document.body;
-    let currentCloseIcon = null;
-
-    // Function to handle closing (called by toggle button & new close icon)
-    const closeMenu = () => {
-      if (currentCloseIcon) {
-        currentCloseIcon.remove();
-        currentCloseIcon = null;
-      }
-      menu.classList.remove('menu-open');
-      body.classList.remove('menu-active');
-    };
-
-    const toggleMenu = function (e) {
-      const isOpen = menu.classList.contains('menu-open');
-
-      if (isOpen) {
-        // --- Closing ---
-        closeMenu();
-      } else {
-        // --- Opening ---
-        menu.classList.add('menu-open');
-        body.classList.add('menu-active');
-
-        // Create and add the new close icon
-        if (!currentCloseIcon) {
-          currentCloseIcon = document.createElement('div');
-          currentCloseIcon.innerHTML = `<svg class="menu-close-icon" viewBox="0 0 100 100">
-            <path d="M 95.664918,13.635782 C 98.460227,10.752089 98.014956,6.4689567 94.650692,4.0729473 91.286428,1.6769369 86.28951,2.0586028 83.494202,4.9422952 L 49.999999,39.398187 16.505794,4.9422952 C 13.710488,2.0586028 8.713569,1.6769369 5.3493062,4.0729473 1.9850435,6.4689567 1.5397734,10.752089 4.3350801,13.635782 L 39.684575,50 4.3350801,86.364219 c -2.7953067,2.883692 -2.3500366,7.166829 1.0142261,9.562835 3.3642628,2.39601 8.3611818,2.01434 11.1564878,-0.869346 L 49.999999,60.601813 83.494202,95.057708 c 2.795308,2.883686 7.792226,3.265356 11.15649,0.869346 3.364264,-2.396006 3.809535,-6.679143 1.014226,-9.562835 L 60.315422,50 Z" />
-          </svg>`;
-          currentCloseIcon.classList.add('menu-close-container');
-          currentCloseIcon.addEventListener('click', e => {
-            e.stopPropagation();
-            closeMenu();
-          });
-          menu.prepend(currentCloseIcon);
-        }
-      }
-    };
-
-    if (menuBars) {
-      // Remove any existing listeners by replacing the element
-      const oldMenuBars = menuBars.cloneNode(true);
-      menuBars.parentNode.replaceChild(oldMenuBars, menuBars);
-
-      // Directly add inline style to ensure visibility
-      // oldMenuBars.style.display = 'block';
-      // oldMenuBars.style.visibility = 'visible';
-      // oldMenuBars.style.cursor = 'pointer';
-
-      // Add the new click handler
-      oldMenuBars.addEventListener('click', e => {
-        e.preventDefault();
-        e.stopPropagation();
-        toggleMenu(e);
-      });
-    } else {
-      console.error('[View] Menu bars button not found');
-    }
-
-    // Close menu when clicking outside (overlay)
-    document.addEventListener('click', e => {
-      if (body.classList.contains('menu-active')) {
-        const isClickInsideMenu = menu && menu.contains(e.target);
-        const isClickOnToggleButton = menuBars && menuBars.contains(e.target);
-        const isClickOnCloseButton =
-          currentCloseIcon && currentCloseIcon.contains(e.target);
-
-        if (
-          !isClickInsideMenu &&
-          !isClickOnToggleButton &&
-          !isClickOnCloseButton
-        ) {
-          closeMenu();
-        }
-      }
-    });
-
-    // Prevent clicks inside the menu from propagating to the document listener
-    // EXCEPT for clicks on actual links (which need to navigate)
-    if (menu) {
-      menu.addEventListener('click', e => {
-        // Allow clicks on links to propagate normally for navigation
-        const target = e.target;
-        const isLink = target.tagName === 'A' || target.closest('a');
-
-        // Only stop propagation if NOT clicking on a link
-        if (!isLink) {
-          e.stopPropagation();
-        }
-      });
-    }
-  }
-
   // Remove event listener logic from here
   handleLanguage() {
     // console.log("handleLanguage: (No longer attaching direct listeners here)");
@@ -757,9 +655,6 @@ export default class View {
       return;
     }
 
-    // Check if menu was open before language change
-    const wasMenuOpen = menu.classList.contains('menu-open');
-
     // Update menu content
     menu.innerHTML = this.handleMenuLanguage(lng);
 
@@ -937,35 +832,6 @@ export default class View {
       this.persistCartNumber(cartNum);
     }
 
-    // Reinitialize the mobile menu toggle after language change
-    setTimeout(() => {
-      this.svgHandler();
-
-      // Restore menu open state if it was open before
-      if (wasMenuOpen) {
-        const menu = document.querySelector('.menu');
-        const body = document.body;
-
-        // Add open classes
-        menu.classList.add('menu-open');
-        body.classList.add('menu-active');
-
-        // Add close icon again
-        const currentCloseIcon = document.createElement('div');
-        currentCloseIcon.innerHTML = `<svg class="menu-close-icon" viewBox="0 0 100 100">
-          <path d="M 95.664918,13.635782 C 98.460227,10.752089 98.014956,6.4689567 94.650692,4.0729473 91.286428,1.6769369 86.28951,2.0586028 83.494202,4.9422952 L 49.999999,39.398187 16.505794,4.9422952 C 13.710488,2.0586028 8.713569,1.6769369 5.3493062,4.0729473 1.9850435,6.4689567 1.5397734,10.752089 4.3350801,13.635782 L 39.684575,50 4.3350801,86.364219 c -2.7953067,2.883692 -2.3500366,7.166829 1.0142261,9.562835 3.3642628,2.39601 8.3611818,2.01434 11.1564878,-0.869346 L 49.999999,60.601813 83.494202,95.057708 c 2.795308,2.883686 7.792226,3.265356 11.15649,0.869346 3.364264,-2.396006 3.809535,-6.679143 1.014226,-9.562835 L 60.315422,50 Z" />
-        </svg>`;
-        currentCloseIcon.classList.add('menu-close-container');
-        currentCloseIcon.addEventListener('click', e => {
-          e.stopPropagation();
-          menu.classList.remove('menu-open');
-          body.classList.remove('menu-active');
-          currentCloseIcon.remove();
-        });
-        menu.prepend(currentCloseIcon);
-      }
-    }, 0);
-
     // Call page-specific language updates if the method exists
     if (typeof this.setPageSpecificLanguage === 'function') {
       await this.setPageSpecificLanguage(lng, cartNum);
@@ -1005,11 +871,61 @@ export default class View {
       this.persistCartNumber(cartNum);
     }
 
+    // Hamburger / mobile-nav toggle. Bound once per page load; survives language
+    // toggle because the SSR chrome is never rewritten (no innerHTML, no re-render).
+    this._bindHamburgerMenu();
+
     // Page-specific language/body setup MUST still run (e.g. contactMeView's
     // setFormLng re-attaches the submit handler).
     if (typeof this.setPageSpecificLanguage === 'function') {
       await this.setPageSpecificLanguage(lng, cartNum);
     }
+  }
+
+  _bindHamburgerMenu() {
+    const hamburger = document.querySelector('.tk-hamburger');
+    const overlay   = document.getElementById('tk-mobile-nav');
+    const closeBtn  = overlay && overlay.querySelector('.tk-mobile-nav__close');
+
+    if (!hamburger || !overlay) return; // guard: elements not present
+
+    // Double-bind guard (same pattern as flag-icon bind guard above)
+    if (hamburger.dataset.tkHamburgerBound === '1') return;
+    hamburger.dataset.tkHamburgerBound = '1';
+
+    const open = () => {
+      overlay.classList.add('is-open');
+      hamburger.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';   // body scroll lock
+      closeBtn && closeBtn.focus();              // focus trap: move to close button
+    };
+
+    const close = () => {
+      overlay.classList.remove('is-open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      hamburger.focus();                          // focus trap: return to hamburger
+    };
+
+    // Dismissal method 1: hamburger toggle (re-tap)
+    hamburger.addEventListener('click', () => {
+      overlay.classList.contains('is-open') ? close() : open();
+    });
+
+    // Dismissal method 2: close button
+    if (closeBtn) {
+      closeBtn.addEventListener('click', close);
+    }
+
+    // Dismissal method 3: scrim / outside tap (click on backdrop, not children)
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) close();
+    });
+
+    // Bonus: Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && overlay.classList.contains('is-open')) close();
+    });
   }
 
   getCurrencySelectorMarkup(lng, id) {
