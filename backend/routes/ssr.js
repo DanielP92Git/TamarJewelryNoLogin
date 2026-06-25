@@ -1,6 +1,7 @@
 // SSR route handlers for static pages
 const metaConfig = require('../config/meta');
 const workshops = require('../config/workshops');
+const Product = require('../models/Product');
 
 /**
  * Build common pageData for SSR rendering
@@ -29,6 +30,30 @@ function buildPageData(req, pageKey, pageStyles) {
     he: `${baseUrl}/he${pagePath}`,
   };
 
+  // The prototype chrome (header/footer) is global, so its stylesheet loads on
+  // every page (tokens.css is linked separately, site-wide, in meta-tags.ejs).
+  const styles = [...(pageStyles || []), { href: '/css/homepage.css' }];
+
+  // Drive the prototype header: transparent nav over the hero on home, solid
+  // elsewhere; highlight the active top-level nav item.
+  const CATEGORY_KEYS = [
+    'necklaces',
+    'crochet-necklaces',
+    'hoops',
+    'dangle',
+    'bracelets',
+    'unisex',
+  ];
+  const NAV_BY_PAGEKEY = {
+    home: 'Home',
+    workshop: 'Jewelry Workshop',
+    about: 'About',
+    contact: 'Contact Me',
+  };
+  const activeNav =
+    NAV_BY_PAGEKEY[pageKey] ||
+    (CATEGORY_KEYS.includes(pageKey) ? 'Shop' : '');
+
   return {
     lang: langKey, // 'eng' or 'heb' for content conditionals
     urlLang, // 'en' or 'he' for URLs
@@ -39,7 +64,9 @@ function buildPageData(req, pageKey, pageStyles) {
     ogImage: null, // Use default from meta-tags partial
     baseUrl,
     alternateUrl,
-    pageStyles,
+    pageStyles: styles,
+    heroNav: pageKey === 'home',
+    activeNav,
     googleSiteVerification: process.env.GOOGLE_SITE_VERIFICATION || '',
   };
 }
@@ -116,18 +143,39 @@ function renderPoliciesPage(req, res) {
 /**
  * Render Home page
  */
-function renderHomePage(req, res) {
-  const pageData = buildPageData(req, 'home', [
-    { href: '/css/standard-reset.css' },
-    { href: '/css/desktop-menu.css' },
-    { href: '/css/home-mobile.css', media: '(max-width: 799.9px)' },
-    { href: '/css/home-800plus.css', media: '(min-width: 800px)' },
-    { href: '/css/footer-desktop.css', media: '(min-width: 800px)' },
-    { href: '/css/footer-mobile.css', media: '(max-width: 799.9px)' },
-    { href: '/css/mobile-menu.css', media: '(max-width: 799.9px)' },
-  ]);
+async function renderHomePage(req, res) {
+  // Home renders the prototype design end-to-end: only tokens.css (global) +
+  // homepage.css (appended by buildPageData). The legacy home/menu/footer
+  // stylesheets are intentionally dropped here.
+  try {
+    const pageData = buildPageData(req, 'home', []);
 
-  res.render('pages/home', pageData);
+    // Featured Pieces grid: top 8 in-stock featured products by featuredOrder.
+    // Filter (available/quantity) implements D-03 (skip out-of-stock); .limit(8)
+    // implements D-02; .sort({ featuredOrder: 1 }) implements D-01 ordering.
+    // .select() MUST include `id` (real numeric field) so data-id is non-empty
+    // under .lean(). Source: ssrDynamic.js renderCategoryPage lines 65-72.
+    const featuredProducts = await Product.find({
+      isFeatured: true,
+      available: { $ne: false },
+      quantity: { $gt: 0 },
+    })
+      .sort({ featuredOrder: 1 })
+      .limit(8)
+      .select('id name slug images mainImage smallImages ils_price usd_price discount_percentage original_ils_price original_usd_price name_en name_he')
+      .lean();
+
+    pageData.featuredProducts = featuredProducts;
+
+    res.render('pages/home', pageData);
+  } catch (err) {
+    // Fall back to an empty featured list (NOT a 500) so the rest of the
+    // homepage still renders. Source: ssrDynamic.js try/catch lines 123-126.
+    console.error('Home SSR error:', err);
+    const pageData = buildPageData(req, 'home', []);
+    pageData.featuredProducts = [];
+    res.render('pages/home', pageData);
+  }
 }
 
 module.exports = {
