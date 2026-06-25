@@ -88,6 +88,9 @@ const ProductSchema = new mongoose.Schema({
     default: null,  // Will be set by pre-save hook for new products
     min: [1, 'displayOrder must be positive']
   },
+  // Phase 40.1: Homepage featured grid
+  isFeatured: { type: Boolean, default: false, index: true },
+  featuredOrder: { type: Number, index: true, default: null, min: [1, 'featuredOrder must be positive'] },
   slug: {
     type: String,
     trim: true,
@@ -118,6 +121,12 @@ ProductSchema.index(
   { name: 'category_displayOrder_available_idx' }
 );
 
+// Phase 40.1: Compound index backing the homepage featured grid query (global, cross-category)
+ProductSchema.index(
+  { isFeatured: 1, featuredOrder: 1, available: 1, quantity: 1 },
+  { name: 'featured_order_idx' }
+);
+
 // Pre-save hook: Auto-assign displayOrder for new products
 ProductSchema.pre('save', async function(next) {
   // Only assign displayOrder for new documents without one
@@ -138,6 +147,34 @@ ProductSchema.pre('save', async function(next) {
       console.error('Error assigning displayOrder:', err);
       // Continue without displayOrder if there's an error
     }
+  }
+  next();
+});
+
+// Pre-save hook: Auto-assign/clear featuredOrder (GLOBAL — not category-scoped)
+// Phase 40.1 D-09: featuredOrder auto-defaults to end-of-list when a product is featured
+ProductSchema.pre('save', async function(next) {
+  // When newly featured with no explicit order, append to the end of the global featured list
+  if (this.isFeatured === true && this.featuredOrder == null) {
+    try {
+      const Product = this.constructor;
+      // Find highest featuredOrder across ALL featured products (no category filter)
+      const maxProduct = await Product.findOne({ isFeatured: true })
+        .sort({ featuredOrder: -1 })
+        .select('featuredOrder')
+        .lean();
+
+      // Assign next gap-based value (10 higher than max, or 10 if first)
+      this.featuredOrder = maxProduct?.featuredOrder
+        ? maxProduct.featuredOrder + 10
+        : 10;
+    } catch (err) {
+      console.error('Error assigning featuredOrder:', err);
+      // Continue without featuredOrder if there's an error
+    }
+  } else if (!this.isFeatured && this.featuredOrder != null) {
+    // Clear order when a product is un-featured
+    this.featuredOrder = null;
   }
   next();
 });
