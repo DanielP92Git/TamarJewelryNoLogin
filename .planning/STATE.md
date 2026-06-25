@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Homepage / Global-Chrome Redesign Rollout
-status: completed
-stopped_at: Phase 42 context gathered
-last_updated: "2026-06-25T20:11:25.009Z"
-last_activity: 2026-06-25 -- Phase 41 execution complete (footer social column + non-home CSS fix + dead footer JS retired)
+status: executing
+stopped_at: Phase 42 UI-SPEC approved
+last_updated: "2026-06-25T20:55:27.404Z"
+last_activity: 2026-06-25 -- Phase 42 planning complete
 progress:
   total_phases: 6
   completed_phases: 4
-  total_plans: 12
+  total_plans: 15
   completed_plans: 12
-  percent: 100
+  percent: 80
 ---
 
 # Project State
@@ -27,8 +27,8 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 
 Phase: 41 (footer-social-restore) — COMPLETE (2/2 plans, verified; FOOT-01/02/03 satisfied)
 Plan: 2 of 2 complete
-Status: Phase 41 done — next: Phase 42 (Mobile Navigation)
-Last activity: 2026-06-25 -- Phase 41 execution complete (footer social column + non-home CSS fix + dead footer JS retired)
+Status: Ready to execute
+Last activity: 2026-06-25 -- Phase 42 planning complete
 
 ```
 Progress: [█████████░] 90%
@@ -93,8 +93,8 @@ See milestone archives in `.planning/milestones/` for detailed decision history.
 
 ## Session Continuity
 
-Last session: 2026-06-25T20:11:24.984Z
-Stopped at: Phase 42 context gathered
+Last session: 2026-06-25T20:30:43.273Z
+Stopped at: Phase 42 UI-SPEC approved
 Resume: `/gsd-plan-phase 39` to plan Phase 39 (Header Utilities Layout)
 
 ## Quick Tasks Completed
