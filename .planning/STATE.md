@@ -4,8 +4,8 @@ milestone: v1.7
 milestone_name: Homepage / Global-Chrome Redesign Rollout
 status: executing
 stopped_at: Phase 42 UI-SPEC approved
-last_updated: "2026-06-25T20:55:27.404Z"
-last_activity: 2026-06-25 -- Phase 42 planning complete
+last_updated: "2026-06-25T21:02:03.907Z"
+last_activity: 2026-06-25 -- Phase 42 execution started
 progress:
   total_phases: 6
   completed_phases: 4
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers — with true bilingual content so Hebrew and English visitors each see products in their language
-**Current focus:** Phase 41 complete & verified; next up: Phase 42 — Mobile Navigation
+**Current focus:** Phase 42 — mobile-navigation
 
 ## Current Position
 
-Phase: 41 (footer-social-restore) — COMPLETE (2/2 plans, verified; FOOT-01/02/03 satisfied)
-Plan: 2 of 2 complete
-Status: Ready to execute
-Last activity: 2026-06-25 -- Phase 42 planning complete
+Phase: 42 (mobile-navigation) — EXECUTING
+Plan: 1 of 3
+Status: Executing Phase 42
+Last activity: 2026-06-25 -- Phase 42 execution started
 
 ```
 Progress: [█████████░] 90%
