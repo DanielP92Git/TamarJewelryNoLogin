@@ -301,4 +301,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-23 — started milestone v1.7 (Homepage / Global-Chrome Redesign Rollout)*
+*Last updated: 2026-06-25 — v1.7 in progress: Phase 40.1 (Homepage Featured Products) complete — admin-curated featured grid with dual-currency SSR + hydration replaces homepage.js demo data (CURR-03 validated). Phases 41–42 remain.*
