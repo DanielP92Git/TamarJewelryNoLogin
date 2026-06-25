@@ -179,7 +179,9 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
   2. Clicking the Instagram link opens `https://www.instagram.com/tamar_kfir_jewelry` (correct profile URL)
   3. Clicking the Facebook link opens `https://www.facebook.com/tamarkfirjewelry` (correct profile URL)
   4. The social section uses the prototype footer's visual style (icon treatment, spacing, colors) and lays out correctly in RTL on `/he` pages
-**Plans**: TBD
+**Plans**: 2 plans
+  - [ ] 41-01-PLAN.md — footer.ejs 4th "Follow Me" social column (ported IG/FB SVGs) + homepage.css 3→4 grid, .tk-footer__social styles, mobile 2x2 reflow
+  - [ ] 41-02-PLAN.md — retire dead footer JS: remove setFooterLng/handleFooterMarkup from View.js + 4 subclass call sites + home.test.js mock/assertion
 **UI hint**: yes
 
 ### Phase 42: Mobile Navigation
