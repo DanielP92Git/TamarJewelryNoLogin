@@ -340,11 +340,15 @@ img { display: block; }
 
 /* ---------- Footer ---------- */
 .tk-footer { width: 100%; background: var(--tk-white); border-top: 1px solid var(--tk-border); font-family: var(--tk-font-body); }
-.tk-footer__cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4rem; max-width: 760px; margin: 0 auto; padding: 4rem 2rem 3.5rem; }
+.tk-footer__cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3rem; max-width: 920px; margin: 0 auto; padding: 4rem 2rem 3.5rem; }
 .tk-footer__col { display: flex; flex-direction: column; }
 .tk-footer__heading { font-size: var(--tk-size-label); font-weight: var(--tk-weight-semibold); letter-spacing: var(--tk-track-label); text-transform: uppercase; color: var(--tk-text); margin-bottom: 1rem; }
 .tk-footer__link { font-size: 0.8rem; letter-spacing: var(--tk-track-body); text-transform: uppercase; text-decoration: none; color: var(--tk-text-muted); line-height: 1.8; margin-bottom: 0.6rem; transition: color var(--tk-dur) var(--tk-ease); }
 .tk-footer__link:hover { color: var(--tk-text); }
+.tk-footer__social { display: flex; gap: 1rem; margin-top: 0.2rem; }
+.tk-footer__social-link { display: inline-flex; color: var(--tk-text-muted); transition: color var(--tk-dur) var(--tk-ease); }
+.tk-footer__social-link:hover { color: var(--tk-text); }
+.tk-footer__social-link svg { width: 20px; height: 20px; }
 .tk-footer__bar { background: var(--tk-black); color: #fff; text-align: center; padding: 1.5rem 2rem; font-size: var(--tk-size-caption); letter-spacing: var(--tk-track-tight); }
 
 /* ---------- Cart drawer ---------- */
@@ -415,7 +419,7 @@ img { display: block; }
   .tk-story__media { min-height: 320px; }
   .tk-story__body { padding: 3rem 1.75rem; }
   .tk-cat-grid { grid-template-columns: 1fr; }
-  .tk-footer__cols { gap: 2rem; }
+  .tk-footer__cols { gap: 2rem; grid-template-columns: repeat(2, 1fr); }
 }
 
 /* =========================================================
