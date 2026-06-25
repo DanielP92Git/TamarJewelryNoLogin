@@ -54,4 +54,81 @@
       <span class="tk-nav__count cart-number-mobile" id="tk-cart-count">0</span>
     </a>
   </div>
+
+  <%# Hamburger button — hidden on desktop (>=800px), shown on mobile (<800px) %>
+  <button
+    type="button"
+    class="tk-hamburger"
+    aria-expanded="false"
+    aria-controls="tk-mobile-nav"
+    aria-label="<%= _eng ? 'Open navigation menu' : 'פתח תפריט ניווט' %>"
+  >
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="1.5" stroke-linecap="round" width="24" height="24" aria-hidden="true">
+      <line x1="3" y1="6"  x2="21" y2="6"/>
+      <line x1="3" y1="12" x2="21" y2="12"/>
+      <line x1="3" y1="18" x2="21" y2="18"/>
+    </svg>
+  </button>
 </header>
+
+<%# Full-screen mobile navigation overlay — always in DOM; JS toggles .is-open %>
+<div id="tk-mobile-nav" role="dialog" aria-modal="true"
+     aria-label="<%= _eng ? 'Mobile navigation' : 'ניווט מובייל' %>">
+
+  <%# Top strip: close button %>
+  <div class="tk-mobile-nav__top">
+    <button
+      type="button"
+      class="tk-mobile-nav__close"
+      aria-label="<%= _eng ? 'Close navigation menu' : 'סגור תפריט ניווט' %>"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="var(--tk-ink)"
+           stroke-width="1.5" stroke-linecap="round" width="24" height="24" aria-hidden="true">
+        <line x1="6" y1="6"  x2="18" y2="18"/>
+        <line x1="18" y1="6" x2="6"  y2="18"/>
+      </svg>
+    </button>
+  </div>
+
+  <%# Center: nav links (reuse href / is-active from .tk-nav__links) %>
+  <nav class="tk-mobile-nav__links" aria-label="Mobile primary">
+    <a class="tk-mobile-nav__link<%= _active === 'Home'             ? ' is-active' : '' %>" href="/<%= urlLang %>"><%=           _eng ? 'Home'             : 'בית'          %></a>
+    <a class="tk-mobile-nav__link<%= _active === 'Shop'             ? ' is-active' : '' %>" href="/<%= urlLang %>/necklaces"><%= _eng ? 'Shop'             : 'חנות'         %></a>
+    <a class="tk-mobile-nav__link<%= _active === 'Jewelry Workshop' ? ' is-active' : '' %>" href="/<%= urlLang %>/workshop"><%=  _eng ? 'Jewelry Workshop' : 'סדנת תכשיטים' %></a>
+    <a class="tk-mobile-nav__link<%= _active === 'About'            ? ' is-active' : '' %>" href="/<%= urlLang %>/about"><%=     _eng ? 'About'            : 'אודות'        %></a>
+    <a class="tk-mobile-nav__link<%= _active === 'Contact Me'       ? ' is-active' : '' %>" href="/<%= urlLang %>/contact"><%=   _eng ? 'Contact Me'       : 'צור קשר'      %></a>
+  </nav>
+
+  <%# Bottom strip: flags + currency relocated from .tk-nav__utils for mobile %>
+  <%# D-04: currency select uses currency-mobile ID (distinct from currency-desktop) %>
+  <div class="tk-mobile-nav__controls">
+    <div class="tk-lang flag-dropdown" role="group" aria-label="Language">
+      <div class="flag-icon flag-eng<%= _eng ? ' selected' : '' %>" data-lang="eng" role="button" tabindex="0" aria-label="English" title="English"<% if (_eng) { %> aria-current="true"<% } %>>
+        <svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-us" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+          <path fill="#bd3d44" d="M0 0h512v512H0"/>
+          <path stroke="#fff" stroke-width="40" d="M0 58h512M0 137h512M0 216h512M0 295h512M0 374h512M0 453h512"/>
+          <path fill="#192f5d" d="M0 0h390v275H0z"/>
+        </svg>
+      </div>
+      <div class="flag-icon flag-heb<%= !_eng ? ' selected' : '' %>" data-lang="heb" role="button" tabindex="0" aria-label="עברית" title="עברית"<% if (!_eng) { %> aria-current="true"<% } %>>
+        <svg xmlns="http://www.w3.org/2000/svg" id="flag-icons-il" viewBox="0 0 512 512" preserveAspectRatio="xMidYMid meet">
+          <defs><clipPath id="il-a"><path fill-opacity=".7" d="M0 0h512v512H0z"/></clipPath></defs>
+          <g fill-rule="evenodd" clip-path="url(#il-a)">
+            <path fill="#fff" d="M619.4 512H-112V0h731.4z"/>
+            <path fill="#0038b8" d="M619.4 115.2H-112V48h731.4zm0 350.5H-112v-67.2h731.4zm-483-275 110.1 191.6L359 191.6z"/>
+            <path fill="#fff" d="m225.8 317.8 20.9 35.5 21.4-35.3z"/>
+            <path fill="#0038b8" d="M136 320.6 246.2 129l112.4 190.8z"/>
+            <path fill="#fff" d="m225.8 191.6 20.9-35.5 21.4 35.4zM182 271.1l-21.7 36 41-.1-19.3-36zm-21.3-66.5 41.2.3-19.8 36.3zm151.2 67 20.9 35.5-41.7-.5zm20.5-67-41.2.3 19.8 36.3zm-114.3 0L189.7 256l28.8 50.3 52.8 1.2 32-51.5-29.6-52z"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+    <select name="currency" id="currency-mobile" class="header-currency-selector tk-nav__currency-select" aria-label="Currency"<% if (!_eng) { %> dir="rtl"<% } %>>
+      <option value="default" class="currency-option"><%= _eng ? 'Currency' : 'מטבע' %></option>
+      <option value="usd" class="currency-option">$ USD</option>
+      <option value="ils" class="currency-option">₪ ILS</option>
+    </select>
+  </div>
+
+</div>
