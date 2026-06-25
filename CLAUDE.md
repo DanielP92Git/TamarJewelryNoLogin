@@ -94,7 +94,7 @@ Static pages are rendered **twice**: once server-side by an EJS template, and ag
 **Rule: any change to an SSR template's content/structure MUST be mirrored in the matching frontend View (and vice-versa).**
 
 Page ↔ View ↔ overwrite map:
-- **Footer** (`backend/views/partials/footer.ejs`) ↔ `frontend/js/View.js` → `handleFooterMarkup()` runs `footer.innerHTML = setFooterLng(lng)` on every page. Social links / footer markup live in **both** places.
+- **Footer** (`backend/views/partials/footer.ejs`) — **SSR-only.** Its old JS twin (the footer language-rewrite methods in `View.js`) was retired in Phase 41; social links and all footer markup now live only in `footer.ejs`. The dual-render trap no longer applies to the footer — edit the EJS partial directly.
 - **About** (`backend/views/pages/about.ejs`) ↔ `frontend/js/Views/aboutView.js` → `setAboutDesc()` rewrites `.aboutme-description`; `setHeaderLng()` rewrites `#page-title`. Keep paragraph markup and title alignment in sync with the EJS/CSS.
 - **Workshop** (`workshop.ejs`) ↔ `workshopView.js` → `setWorkshopLng()` rebuilds `.workshop-description`; `setCostsLng()` rewrites the pricing/contact text; `setHeaderLng()` rewrites `#page-title` (note: it does **not** set `text-align`, so the title is safe).
 - **Contact** (`contact.ejs`) ↔ `contactMeView.js` → `setFormLng()` rebuilds `.contact-form`; `setContactTitleLng()` rewrites the title/subtitle. **Do not remove the on-load `setFormLng()` call** — it re-grabs `#submit` and attaches the send handler (the class-field `_submitBtn` is null at import time), so the submit button depends on it.
