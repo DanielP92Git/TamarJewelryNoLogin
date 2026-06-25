@@ -871,11 +871,61 @@ export default class View {
       this.persistCartNumber(cartNum);
     }
 
+    // Hamburger / mobile-nav toggle. Bound once per page load; survives language
+    // toggle because the SSR chrome is never rewritten (no innerHTML, no re-render).
+    this._bindHamburgerMenu();
+
     // Page-specific language/body setup MUST still run (e.g. contactMeView's
     // setFormLng re-attaches the submit handler).
     if (typeof this.setPageSpecificLanguage === 'function') {
       await this.setPageSpecificLanguage(lng, cartNum);
     }
+  }
+
+  _bindHamburgerMenu() {
+    const hamburger = document.querySelector('.tk-hamburger');
+    const overlay   = document.getElementById('tk-mobile-nav');
+    const closeBtn  = overlay && overlay.querySelector('.tk-mobile-nav__close');
+
+    if (!hamburger || !overlay) return; // guard: elements not present
+
+    // Double-bind guard (same pattern as flag-icon bind guard above)
+    if (hamburger.dataset.tkHamburgerBound === '1') return;
+    hamburger.dataset.tkHamburgerBound = '1';
+
+    const open = () => {
+      overlay.classList.add('is-open');
+      hamburger.setAttribute('aria-expanded', 'true');
+      document.body.style.overflow = 'hidden';   // body scroll lock
+      closeBtn && closeBtn.focus();              // focus trap: move to close button
+    };
+
+    const close = () => {
+      overlay.classList.remove('is-open');
+      hamburger.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+      hamburger.focus();                          // focus trap: return to hamburger
+    };
+
+    // Dismissal method 1: hamburger toggle (re-tap)
+    hamburger.addEventListener('click', () => {
+      overlay.classList.contains('is-open') ? close() : open();
+    });
+
+    // Dismissal method 2: close button
+    if (closeBtn) {
+      closeBtn.addEventListener('click', close);
+    }
+
+    // Dismissal method 3: scrim / outside tap (click on backdrop, not children)
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) close();
+    });
+
+    // Bonus: Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && overlay.classList.contains('is-open')) close();
+    });
   }
 
   getCurrencySelectorMarkup(lng, id) {
