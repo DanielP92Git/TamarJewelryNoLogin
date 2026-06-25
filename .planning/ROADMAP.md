@@ -112,7 +112,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 - [x] **Phase 39: Header Utilities Layout** - Two refined flag icons, styled currency dropdown, cart icon + count in approved order (Flags → Currency → Cart) and spacing; RTL-correct (true mirror) on `/he` (completed 2026-06-24)
 - [x] **Phase 40: Currency Selector Wiring** - `currency-changed` event reliably drives cart + category price re-renders; dropdown reflects saved currency on load (GeoIP default); currency persists across navigation (completed 2026-06-24)
 - [x] **Phase 40.1: Homepage Featured Products** (INSERTED) - `isFeatured` flag + admin toggle; SSR featured grid with dual prices; `homepage.js` reads real data and re-prices on currency change (removes hardcoded `CURRENCY='ILS'` + demo `PRODUCTS`) (completed 2026-06-25)
-- [ ] **Phase 41: Footer Social Restore** - Instagram and Facebook links in prototype `.tk-footer` with correct URLs and RTL styling
+- [x] **Phase 41: Footer Social Restore** - Instagram and Facebook links in prototype `.tk-footer` with correct URLs and RTL styling (completed 2026-06-25)
 - [ ] **Phase 42: Mobile Navigation** - Hamburger toggle below 800px; mobile menu open/close; language and currency accessible on mobile; non-destructive and RTL-correct
 - [ ] **Phase 43: Site-wide Cart Drawer** - Promote the homepage-only demo cart drawer into global chrome; nav cart icon opens a mini-cart on every page with real `model.js` data; honors Phase 40 currency wiring; "View cart / Checkout" CTA → `/{lang}/cart`
 
@@ -181,7 +181,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
   4. The social section uses the prototype footer's visual style (icon treatment, spacing, colors) and lays out correctly in RTL on `/he` pages
 **Plans**: 2 plans
   - [x] 41-01-PLAN.md — footer.ejs 4th "Follow Me" social column (ported IG/FB SVGs) + homepage.css 3→4 grid, .tk-footer__social styles, mobile 2x2 reflow
-  - [ ] 41-02-PLAN.md — retire dead footer JS: remove setFooterLng/handleFooterMarkup from View.js + 4 subclass call sites + home.test.js mock/assertion
+  - [x] 41-02-PLAN.md — retire dead footer JS: remove setFooterLng/handleFooterMarkup from View.js + 4 subclass call sites + home.test.js mock/assertion
 **UI hint**: yes
 
 ### Phase 42: Mobile Navigation
@@ -214,7 +214,7 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 | 39. Header Utilities Layout | v1.7 | 3/3 | Complete    | 2026-06-24 |
 | 40. Currency Selector Wiring | v1.7 | 2/2 | Complete    | 2026-06-24 |
 | 40.1. Homepage Featured Products | v1.7 | 5/5 | Complete    | 2026-06-25 |
-| 41. Footer Social Restore | v1.7 | 1/2 | In Progress|  |
+| 41. Footer Social Restore | v1.7 | 2/2 | Complete   | 2026-06-25 |
 | 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |
 | 43. Site-wide Cart Drawer | v1.7 | 0/TBD | Not started | - |
 
@@ -225,7 +225,7 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 **Goal:** Promote the homepage-only demo cart drawer into global chrome so the nav cart icon opens a mini-cart on **every** page, rendering real `model.js` cart data (not the homepage demo data), honoring Phase 40 currency wiring for live + persisted re-pricing, with a "View cart / Checkout" CTA that routes to `/{lang}/cart`. Scope: move drawer markup from `home.ejs` into a global partial; move open/close wiring from `homepage.js` into base `View.js`; dual-render safety; cart-count badge sync; mobile + RTL. See `.planning/todos/pending/site-wide-cart-drawer.md`.
 **Requirements**: TBD (run /gsd-plan-phase 43)
 **Depends on:** Phase 40 (currency wiring) and Phase 42 (mobile navigation — drawer mobile/RTL behavior builds on it)
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] TBD (run /gsd-plan-phase 43 to break down)
