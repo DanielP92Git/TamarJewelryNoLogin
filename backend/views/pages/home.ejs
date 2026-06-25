@@ -48,7 +48,7 @@
   </head>
 
   <body id="home">
-    <%- include('../partials/header', { lang, dir, urlLang }) %>
+    <%- include('../partials/header', { lang, dir, urlLang, heroNav, activeNav }) %>
 
     <% if (typeof require !== 'undefined' || true) { %>
     <script>
@@ -60,7 +60,7 @@
       banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#16a34a;color:#fff;text-align:center;padding:14px 40px;font-size:16px;font-weight:600;direction:' + (isHe ? 'rtl' : 'ltr');
       banner.textContent = isHe ? 'ההזמנה בוצעה בהצלחה! תודה רבה' : 'Order placed successfully! Thank you';
       var close = document.createElement('button');
-      close.textContent = '\u00d7';
+      close.textContent = '×';
       close.style.cssText = 'position:absolute;top:50%;right:12px;transform:translateY(-50%);background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px 8px';
       close.onclick = function() { banner.remove(); };
       banner.appendChild(close);
@@ -73,83 +73,183 @@
     </script>
     <% } %>
 
-    <section class="hero-section">
-      <picture>
-        <source
-          media="(max-width: 799.9px)"
-          srcset="/imgs/Hero-imgs/hero-test2-(small).png"
-        />
-        <img
-          src="/imgs/Hero-imgs/hero-test2.webp"
-          alt="<% if (lang === 'eng') { %>main website image<% } else { %>תמונת אתר ראשית<% } %>"
-          class="hero-background"
-          fetchpriority="high"
-        />
-      </picture>
-      <div class="hero-tagline">
-        <p class="tagline-text">One of a kind in mind</p>
-      </div>
-    </section>
+    <div class="tk-home">
 
-    <main>
-      <div class="whatsapp-container">
-        <a href="https://wa.me/972524484763" class="whatsapp-atr"
-          ><img src="/imgs/svgs/whatsapp.svg" class="whatsapp-svg" alt=""
-        /></a>
-      </div>
+      <!-- ============ HERO ============ -->
+      <section class="tk-hero">
+        <img class="tk-hero__img" id="tk-hero-img" src="/imgs/homepage/imagery/hero-main.webp" alt="" />
+        <div class="tk-hero__scrim"></div>
+        <div class="tk-hero__copy">
+          <p class="tk-hero__eyebrow"><% if (lang === 'eng') { %>Handmade in Jerusalem<% } else { %>בעבודת יד מירושלים<% } %></p>
+          <p class="tk-hero__title"><% if (lang === 'eng') { %>One of a kind<br />in mind<% } else { %>אחד ויחיד<br />במחשבה<% } %></p>
+          <a class="tk-btn tk-btn--outline tk-btn--lg" href="#tk-shop" id="tk-hero-cta"><% if (lang === 'eng') { %>Discover the Collection<% } else { %>גלו את הקולקציה<% } %></a>
+        </div>
+      </section>
 
-      <div class="categories-container" id="categories">
-        <a href="/<%= urlLang %>/crochet-necklaces" class="category-box">
-          <img
-            class="large-img-item"
-            src="/imgs/Hero-imgs/categories-images/new-hero-imgs/Crochet-Hero.webp"
-            alt="<% if (lang === 'eng') { %>Crochet Necklaces main category image<% } else { %>תמונת קטגוריה ראשית - שרשראות סרוגות<% } %>"
-            loading="lazy"
-          />
-          <span class="category-name category-name_crochet-necklaces"
-            ><% if (lang === 'eng') { %>Crochet Necklaces<% } else { %>שרשראות סרוגות<% } %></span
-          >
-        </a>
-        <a href="/<%= urlLang %>/hoops" class="category-box">
-          <img
-            class="large-img-item"
-            src="/imgs/Hero-imgs/categories-images/new-hero-imgs/Hoop-Hero.webp"
-            alt="<% if (lang === 'eng') { %>Hoop Earrings main category image<% } else { %>תמונת קטגוריה ראשית - עגילי חישוק<% } %>"
-            loading="lazy"
-          />
-          <span class="category-name category-name_hoops"><% if (lang === 'eng') { %>Hoop Earrings<% } else { %>עגילי חישוק<% } %></span>
-        </a>
-        <a href="/<%= urlLang %>/dangle" class="category-box">
-          <img
-            class="large-img-item"
-            src="/imgs/Hero-imgs/categories-images/new-hero-imgs/Dangle-Hero.webp"
-            alt="<% if (lang === 'eng') { %>Dangle Earrings main category image<% } else { %>תמונת קטגוריה ראשית - עגילים תלויים<% } %>"
-            loading="lazy"
-          />
-          <span class="category-name category-name_dangle"
-            ><% if (lang === 'eng') { %>Dangle Earrings<% } else { %>עגילים תלויים<% } %></span
-          >
-        </a>
-        <a href="/<%= urlLang %>/necklaces" class="category-box">
-          <img
-            class="large-img-item"
-            src="/imgs/Hero-imgs/categories-images/new-hero-imgs/Necklaces-Hero.webp"
-            alt="<% if (lang === 'eng') { %>Necklaces main category image<% } else { %>תמונת קטגוריה ראשית - שרשראות<% } %>"
-            loading="lazy"
-          />
-          <span class="category-name category-name_necklaces"><% if (lang === 'eng') { %>Necklaces<% } else { %>שרשראות<% } %></span>
-        </a>
-      </div>
+      <!-- ============ COLLECTIONS ============ -->
+      <section class="tk-section" id="tk-shop">
+        <div class="tk-center">
+          <p class="tk-eyebrow"><% if (lang === 'eng') { %>Collections<% } else { %>קולקציות<% } %></p>
+          <h2 class="tk-h2"><% if (lang === 'eng') { %>Shop by Category<% } else { %>קנו לפי קטגוריה<% } %></h2>
+        </div>
+        <div class="tk-cat-grid" id="tk-cat-grid">
+          <a class="tk-cat" href="/<%= urlLang %>/crochet-necklaces">
+            <img src="/imgs/homepage/categories/crochet.webp" alt="<% if (lang === 'eng') { %>Crochet Necklaces<% } else { %>שרשראות סרוגות<% } %>" />
+            <span class="tk-cat__label"><% if (lang === 'eng') { %>Crochet Necklaces<% } else { %>שרשראות סרוגות<% } %></span>
+          </a>
+          <a class="tk-cat" href="/<%= urlLang %>/hoops">
+            <img src="/imgs/homepage/categories/hoops.webp" alt="<% if (lang === 'eng') { %>Hoop Earrings<% } else { %>עגילי חישוק<% } %>" />
+            <span class="tk-cat__label"><% if (lang === 'eng') { %>Hoop Earrings<% } else { %>עגילי חישוק<% } %></span>
+          </a>
+          <a class="tk-cat" href="/<%= urlLang %>/dangle">
+            <img src="/imgs/homepage/categories/dangle.webp" alt="<% if (lang === 'eng') { %>Dangle Earrings<% } else { %>עגילים תלויים<% } %>" />
+            <span class="tk-cat__label"><% if (lang === 'eng') { %>Dangle Earrings<% } else { %>עגילים תלויים<% } %></span>
+          </a>
+          <a class="tk-cat" href="/<%= urlLang %>/necklaces">
+            <img src="/imgs/homepage/categories/necklaces.webp" alt="<% if (lang === 'eng') { %>Necklaces<% } else { %>שרשראות<% } %>" />
+            <span class="tk-cat__label"><% if (lang === 'eng') { %>Necklaces<% } else { %>שרשראות<% } %></span>
+          </a>
+        </div>
+      </section>
 
-      <button class="go-to-top">
-        <img
-          src="/imgs/svgs/arrow-up-solid-white.svg"
-          alt="arrow-up"
-          class="arrow-up"
-        />
-      </button>
-    </main>
+      <!-- ============ MAKER STORY ============ -->
+      <section class="tk-story">
+        <div class="tk-story__inner">
+          <div class="tk-story__media">
+            <img src="/imgs/homepage/imagery/hero-alt.webp" alt="<% if (lang === 'eng') { %>A handmade pendant necklace<% } else { %>שרשרת תליון בעבודת יד<% } %>" />
+          </div>
+          <div class="tk-story__body">
+            <p class="tk-eyebrow"><% if (lang === 'eng') { %>The Maker<% } else { %>היוצרת<% } %></p>
+            <h2 class="tk-story__title"><% if (lang === 'eng') { %>A bit about me<br />and my jewelry<% } else { %>קצת עליי<br />ועל התכשיטים שלי<% } %></h2>
+            <% if (lang === 'eng') { %>
+            <p class="tk-story__p">I have been making jewelry since I was twelve, and I have never really stopped. Each piece is handmade in beautiful, historic Jerusalem — crocheted with fine metallic threads and a colour combination that is never quite repeated.</p>
+            <p class="tk-story__p">It is where I find my calm, and how I get to share a little colour with appreciative customers all over the world. No two pieces sit the same way twice — and that is exactly the point.</p>
+            <% } else { %>
+            <p class="tk-story__p">אני יוצרת תכשיטים מאז גיל שתים־עשרה, ומעולם לא ממש הפסקתי. כל פריט נעשה בעבודת יד בירושלים ההיסטורית והיפה — סרוג בחוטים מתכתיים דקים ובשילוב צבעים שלעולם אינו חוזר על עצמו בדיוק.</p>
+            <p class="tk-story__p">כאן אני מוצאת את השקט שלי, וכך אני זוכה לחלוק מעט צבע עם לקוחות אוהבים מכל העולם. אין שני פריטים זהים — וזה בדיוק העניין.</p>
+            <% } %>
+            <div>
+              <a class="tk-btn tk-btn--ghost" href="/<%= urlLang %>/about"><% if (lang === 'eng') { %>Read my story<% } else { %>קראו את הסיפור שלי<% } %></a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ FEATURED ============ -->
+      <% if (featuredProducts && featuredProducts.length > 0) { %>
+      <section class="tk-section tk-section--wide">
+        <div class="tk-center">
+          <p class="tk-eyebrow"><% if (lang === 'eng') { %>New &amp; Loved<% } else { %>חדש ואהוב<% } %></p>
+          <h2 class="tk-h2"><% if (lang === 'eng') { %>Featured Pieces<% } else { %>פריטים נבחרים<% } %></h2>
+        </div>
+        <div class="tk-prod-grid" id="tk-prod-grid">
+          <% featuredProducts.forEach(function(product) { %>
+          <%
+            // Gallery image construction (copy of category.ejs lines 70-101)
+            let galleryImages = [];
+            if (Array.isArray(product.images) && product.images.length > 0) {
+              galleryImages = product.images.map(function(img) {
+                return {
+                  desktop: img.desktop || '',
+                  mobile: img.mobile || '',
+                  publicDesktop: img.publicDesktop || '',
+                  publicMobile: img.publicMobile || ''
+                };
+              });
+            } else {
+              if (product.mainImage && typeof product.mainImage === 'object') {
+                galleryImages.push({
+                  desktop: product.mainImage.desktop || '',
+                  mobile: product.mainImage.mobile || '',
+                  publicDesktop: product.mainImage.publicDesktop || '',
+                  publicMobile: product.mainImage.publicMobile || ''
+                });
+              }
+              if (Array.isArray(product.smallImages)) {
+                product.smallImages.forEach(function(si) {
+                  if (si && typeof si === 'object') {
+                    galleryImages.push({
+                      desktop: si.desktop || '',
+                      mobile: si.mobile || '',
+                      publicDesktop: si.publicDesktop || '',
+                      publicMobile: si.publicMobile || ''
+                    });
+                  }
+                });
+              }
+            }
+            const desktopImage = product.images?.[0]?.publicDesktop || product.images?.[0]?.desktop || product.mainImage?.publicDesktop || product.mainImage?.desktop || '';
+            const productName = lang === 'heb'
+              ? (product.name_he || product.name_en || product.name)
+              : (product.name_en || product.name);
+            const hasDiscount = product.discount_percentage > 0 && (product.original_usd_price > product.usd_price || product.original_ils_price > product.ils_price);
+          %>
+          <div class="tk-prod"
+               data-id="<%= product.id %>"
+               data-usd-price="<%= Math.round(product.usd_price || 0) %>"
+               data-ils-price="<%= Math.round(product.ils_price || 0) %>"
+               data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>"
+               data-original-ils-price="<%= Math.round(product.original_ils_price || product.ils_price || 0) %>"
+               data-slug="<%= product.slug %>"
+               data-name-en="<%= product.name_en || product.name %>"
+               data-name-he="<%= product.name_he || '' %>"
+               data-images="<%= JSON.stringify(galleryImages) %>">
+            <div class="tk-prod__media">
+              <img src="<%= desktopImage %>" alt="<%= productName %>" loading="lazy" />
+              <% if (hasDiscount) { %>
+              <div class="tk-prod__badge"><span class="tk-badge tk-badge--gold">Sale</span></div>
+              <% } %>
+            </div>
+            <div class="tk-prod__title-wrap"><h3 class="tk-prod__title"><%= productName %></h3></div>
+            <div class="tk-prod__price"><!-- hydrated by homepage.js --></div>
+            <button class="tk-prod__add" type="button"><% if (lang === 'eng') { %>Add to Cart<% } else { %>הוסף לעגלה<% } %></button>
+          </div>
+          <% }); %>
+        </div>
+        <div class="tk-center" style="margin-top: 3.2rem;">
+          <a class="tk-btn tk-btn--primary" href="/<%= urlLang %>/necklaces"><% if (lang === 'eng') { %>View All Jewelry<% } else { %>לכל התכשיטים<% } %></a>
+        </div>
+      </section>
+      <% } %>
+
+      <!-- ============ NEWSLETTER ============ -->
+      <section class="tk-news">
+        <div class="tk-news__inner">
+          <p class="tk-eyebrow"><% if (lang === 'eng') { %>Stay in touch<% } else { %>נשארים בקשר<% } %></p>
+          <h2 class="tk-news__h"><% if (lang === 'eng') { %>New pieces, first<% } else { %>פריטים חדשים, ראשונים<% } %></h2>
+          <p class="tk-news__p"><% if (lang === 'eng') { %>A quiet note when a new collection comes off the workbench. No noise, just colour.<% } else { %>הודעה שקטה כשקולקציה חדשה יוצאת מהשולחן. בלי רעש, רק צבע.<% } %></p>
+          <form class="tk-news__form" id="tk-news-form">
+            <input class="tk-news__input" id="tk-news-email" type="email" placeholder="you@example.com" aria-label="<% if (lang === 'eng') { %>Email address<% } else { %>כתובת אימייל<% } %>" />
+            <button class="tk-btn tk-btn--primary" type="submit" id="tk-news-submit"><% if (lang === 'eng') { %>Subscribe<% } else { %>הרשמה<% } %></button>
+          </form>
+        </div>
+      </section>
+
+      <!-- ============ CART DRAWER ============ -->
+      <div class="tk-overlay" id="tk-overlay"></div>
+      <aside class="tk-drawer" id="tk-drawer" aria-label="<% if (lang === 'eng') { %>Shopping cart<% } else { %>עגלת קניות<% } %>">
+        <div class="tk-drawer__head">
+          <span class="tk-drawer__title"><% if (lang === 'eng') { %>Shopping Cart<% } else { %>עגלת קניות<% } %></span>
+          <button class="tk-drawer__close" id="tk-cart-close" type="button" aria-label="Close">&times;</button>
+        </div>
+        <div class="tk-drawer__body" id="tk-drawer-body"><!-- lines injected --></div>
+        <div class="tk-drawer__foot">
+          <div class="tk-drawer__subtotal"><span><% if (lang === 'eng') { %>Subtotal<% } else { %>סכום ביניים<% } %></span><b id="tk-subtotal">₪0</b></div>
+          <p class="tk-drawer__note"><% if (lang === 'eng') { %>Shipping calculated at checkout.<% } else { %>המשלוח מחושב בקופה.<% } %></p>
+          <button class="tk-btn tk-btn--primary tk-btn--full" id="tk-checkout" type="button" disabled><% if (lang === 'eng') { %>Proceed to Checkout<% } else { %>מעבר לתשלום<% } %></button>
+        </div>
+      </aside>
+
+      <!-- ============ FLOATING WHATSAPP + TOAST ============ -->
+      <a class="tk-whatsapp" href="https://wa.me/972524484763" id="tk-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
+        <img src="/imgs/homepage/icons/whatsapp.svg" alt="" />
+      </a>
+      <div class="tk-toast" id="tk-toast"></div>
+
+    </div>
 
     <%- include('../partials/footer', { lang, urlLang }) %>
+
+    <script src="/js/homepage.js" defer></script>
   </body>
 </html>
