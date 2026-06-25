@@ -93,9 +93,20 @@ function invalidateAll() {
   console.log('All page cache invalidated');
 }
 
+/**
+ * Invalidate the home page cache in all language/currency variants.
+ * Use when isFeatured/featuredOrder changes (not tied to a single category).
+ */
+function invalidateHomePage() {
+  const homeKeys = ['/en:en:USD', '/en:en:ILS', '/he:he:USD', '/he:he:ILS'];
+  homeKeys.forEach(key => pageCache.del(key));
+  console.log('Cache invalidated for home page');
+}
+
 module.exports = {
   invalidateProduct,
   invalidateCategory,
   invalidateAll,
   invalidateBulkProducts,
+  invalidateHomePage,
 };
