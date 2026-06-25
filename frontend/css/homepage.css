@@ -416,7 +416,7 @@ img { display: block; }
 .tk-toast.is-open { transform: translateX(-50%) translateY(0); opacity: 1; }
 
 /* ---------- Responsive ---------- */
-@media (max-width: 860px) {
+@media (max-width: 800px) {
   .tk-nav { padding: 0 1.25rem; }
   .tk-nav__links { display: none; }
   .tk-story__inner { grid-template-columns: 1fr; }
@@ -502,4 +502,124 @@ img { display: block; }
 [dir="rtl"] .tk-nav__currency-select {
   background-position: left 6px center;
   padding: 4px 8px 4px 24px;
+}
+
+/* ---------- Hamburger button ---------- */
+.tk-hamburger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: none;              /* hidden at >=800px */
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  color: var(--tk-text);      /* currentColor for SVG stroke (solid nav) */
+  flex: 0 0 auto;
+}
+/* Guard against desktop-menu.css bare `a`/button width hijack */
+.tk-nav .tk-hamburger { width: 44px; }
+
+.tk-nav--transparent .tk-hamburger { color: #fff; }
+
+@media (max-width: 800px) {
+  /* Show hamburger; hide flags + currency in utils bar (they live in overlay) */
+  .tk-hamburger { display: flex; }
+  .tk-nav__utils .tk-lang { display: none; }
+  .tk-nav__utils .tk-nav__currency-select { display: none; }
+}
+
+/* ---------- Mobile nav overlay ---------- */
+#tk-mobile-nav {
+  position: fixed;
+  inset: 0;
+  z-index: 200;                /* above header (100); below cart drawer (1100+) */
+  background: var(--tk-white);
+  display: flex;
+  flex-direction: column;
+  font-family: var(--tk-font-body);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+  transform: scale(0.98);
+  transition:
+    opacity var(--tk-dur-fast) var(--tk-ease),
+    transform var(--tk-dur) var(--tk-ease),
+    visibility 0s linear var(--tk-dur-fast);
+}
+#tk-mobile-nav.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  transform: scale(1);
+  transition:
+    opacity var(--tk-dur) var(--tk-ease),
+    transform var(--tk-dur) var(--tk-ease),
+    visibility 0s linear 0s;
+}
+
+/* Top strip (close button area) */
+.tk-mobile-nav__top {
+  position: relative;
+  height: var(--tk-header-height);   /* 80px */
+  flex: 0 0 auto;
+}
+.tk-mobile-nav__close {
+  position: absolute;
+  inset-inline-end: 20px;            /* logical — auto-mirrors LTR/RTL */
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+}
+
+/* Nav link list (center) */
+.tk-mobile-nav__links {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--tk-xl, 32px);
+}
+.tk-mobile-nav__link {
+  font-size: var(--tk-size-body);
+  font-weight: var(--tk-weight-medium);
+  letter-spacing: var(--tk-track-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--tk-ink);
+  opacity: 0.85;
+  transition: color var(--tk-dur) var(--tk-ease), opacity var(--tk-dur) var(--tk-ease);
+}
+.tk-mobile-nav__link:hover { opacity: 1; }
+.tk-mobile-nav__link.is-active { color: var(--tk-gold); opacity: 1; }
+
+/* Guard against desktop-menu.css bare `a { width:100% }` hijack */
+#tk-mobile-nav a { width: auto; }
+
+/* Controls strip (bottom — flags + currency) */
+.tk-mobile-nav__controls {
+  flex: 0 0 auto;
+  height: var(--tk-header-height);   /* 80px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--tk-lg, 24px);
+  padding: 0 var(--tk-md, 16px);
+  border-top: 1px solid var(--tk-border-light);
+  background: var(--tk-surface);
+}
+.tk-mobile-nav__controls .tk-nav__currency-select {
+  color: var(--tk-text-muted);
+  border-color: var(--tk-border-strong);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
