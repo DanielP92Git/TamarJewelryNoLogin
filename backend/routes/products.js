@@ -9,7 +9,7 @@ const { fetchUser, requireAdmin } = require('../middleware/auth');
 const { adminRateLimiter } = require('./admin');
 const exchangeRateService = require('../services/exchangeRateService');
 const { DB_TO_URL_CATEGORY } = require('./ssrDynamic');
-const { invalidateProduct, invalidateCategory } = require('../cache/invalidation');
+const { invalidateProduct, invalidateCategory, invalidateHomePage } = require('../cache/invalidation');
 const {
   isAbsoluteHttpUrl,
   toRelativeApiPath,
@@ -318,6 +318,9 @@ router.post(
         discount_percentage: discountPercentage,
         security_margin: securityMargin,
         sku: normalizedSku,
+        // Phase 40.1: Homepage featured grid (NaN-safe coercion — D-09)
+        isFeatured: req.body.isFeatured === true || req.body.isFeatured === 'true',
+        featuredOrder: (req.body.featuredOrder != null && req.body.featuredOrder !== '' && !Number.isNaN(Number(req.body.featuredOrder))) ? Number(req.body.featuredOrder) : null,
       });
 
       if (!isProd) {
@@ -357,6 +360,8 @@ router.post(
       } else if (urlCategory) {
         invalidateCategory(urlCategory);
       }
+      // Phase 40.1: featured status affects the homepage grid
+      invalidateHomePage();
 
       res.json({
         success: true,
@@ -495,6 +500,17 @@ router.post(
         }
 
         product.sku = normalizedSku;
+      }
+
+      // Phase 40.1: Homepage featured grid (admin edit form posts multipart FormData,
+      // so isFeatured arrives as the string 'true'/'false'). NaN-safe coercion — D-09.
+      if (req.body.isFeatured !== undefined) {
+        product.isFeatured = req.body.isFeatured === true || req.body.isFeatured === 'true';
+        if (!product.isFeatured) product.featuredOrder = null;
+      }
+      if (req.body.featuredOrder !== undefined) {
+        const fo = Number(req.body.featuredOrder);
+        product.featuredOrder = (req.body.featuredOrder === '' || Number.isNaN(fo)) ? null : fo;
       }
 
       // Handle file uploads
@@ -682,6 +698,8 @@ router.post(
       } else if (urlCategory) {
         invalidateCategory(urlCategory);
       }
+      // Phase 40.1: featured status affects the homepage grid
+      invalidateHomePage();
 
       const warnings = [];
       if (mainImageError) warnings.push(`Main image: ${mainImageError}`);
