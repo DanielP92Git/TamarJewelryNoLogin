@@ -196,7 +196,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
   5. The mobile menu renders correctly in RTL on `/he` pages and opens/closes without triggering destructive `innerHTML` rewrites to the chrome
 **Plans**: 3 plans
 - [x] 42-01-PLAN.md — Hamburger button + overlay markup and CSS (breakpoint 800px, relocated flags/currency, RTL)
-- [ ] 42-02-PLAN.md — View.js toggle (_bindHamburgerMenu, three dismissals) + legacy svgHandler retirement
+- [x] 42-02-PLAN.md — View.js toggle (_bindHamburgerMenu, three dismissals) + legacy svgHandler retirement
 - [ ] 42-03-PLAN.md — Frontend rebuild + backend restart + responsive/RTL/persistence verification
 **UI hint**: yes
 
@@ -218,7 +218,7 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 | 40. Currency Selector Wiring | v1.7 | 2/2 | Complete    | 2026-06-24 |
 | 40.1. Homepage Featured Products | v1.7 | 5/5 | Complete    | 2026-06-25 |
 | 41. Footer Social Restore | v1.7 | 2/2 | Complete   | 2026-06-25 |
-| 42. Mobile Navigation | v1.7 | 1/3 | In Progress|  |
+| 42. Mobile Navigation | v1.7 | 2/3 | In Progress|  |
 | 43. Site-wide Cart Drawer | v1.7 | 0/TBD | Not started | - |
 
 *Last updated: 2026-06-25 — Phase 42 planned (3 plans, 3 waves)*
@@ -228,7 +228,7 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 **Goal:** Promote the homepage-only demo cart drawer into global chrome so the nav cart icon opens a mini-cart on **every** page, rendering real `model.js` cart data (not the homepage demo data), honoring Phase 40 currency wiring for live + persisted re-pricing, with a "View cart / Checkout" CTA that routes to `/{lang}/cart`. Scope: move drawer markup from `home.ejs` into a global partial; move open/close wiring from `homepage.js` into base `View.js`; dual-render safety; cart-count badge sync; mobile + RTL. See `.planning/todos/pending/site-wide-cart-drawer.md`.
 **Requirements**: TBD (run /gsd-plan-phase 43)
 **Depends on:** Phase 40 (currency wiring) and Phase 42 (mobile navigation — drawer mobile/RTL behavior builds on it)
-**Plans:** 1/3 plans executed
+**Plans:** 2/3 plans executed
 
 Plans:
 - [ ] TBD (run /gsd-plan-phase 43 to break down)
