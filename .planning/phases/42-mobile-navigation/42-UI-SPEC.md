@@ -1,10 +1,11 @@
 ---
 phase: 42
 slug: mobile-navigation
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-06-25
+reviewed_at: 2026-06-25T00:00:00Z
 ---
 
 # Phase 42 — UI Design Contract: Mobile Navigation
@@ -53,15 +54,14 @@ All sizes reference existing `tokens.css` custom properties. No new font sizes i
 
 | Role | Size | Weight | Line Height | Letter-spacing |
 |------|------|--------|-------------|----------------|
-| Nav count badge | 0.62rem (~10px) | 600 semibold (`--tk-weight-semibold`) | 1 | none |
 | Controls / flags label area | 0.75rem / 12px (`--tk-size-label`) | 400 regular (`--tk-weight-regular`) | 1.4 | `--tk-track-body` (0.04em) |
 | Overlay nav links | 1rem / 16px (`--tk-size-body`) | 500 medium (`--tk-weight-medium`) | 1.4 | `--tk-track-label` (0.15em) |
 
 **Transform:** Overlay nav links are `text-transform: uppercase` — matching the desktop `.tk-nav__link` convention.
 
-**Weights used this phase:** 500 medium (overlay links) + 400 regular (controls area). The 600 semibold on the count badge is pre-existing and unchanged.
+**Weights declared this phase:** 2 — 500 medium (overlay links) + 400 regular (controls area).
 
-**Note:** Count badge (0.62rem/600) is pre-existing markup and CSS — listed for completeness, no change.
+**Pre-existing context (not declared for this phase, no change):** the nav count badge renders at 0.62rem (~10px) / 600 semibold / line-height 1. It is existing markup and CSS carried into the overlay's cart control unchanged — not a new design choice for this phase.
 
 ---
 
