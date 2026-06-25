@@ -343,12 +343,16 @@ img { display: block; }
 .tk-footer__cols { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3rem; max-width: 920px; margin: 0 auto; padding: 4rem 2rem 3.5rem; }
 .tk-footer__col { display: flex; flex-direction: column; }
 .tk-footer__heading { font-size: var(--tk-size-label); font-weight: var(--tk-weight-semibold); letter-spacing: var(--tk-track-label); text-transform: uppercase; color: var(--tk-text); margin-bottom: 1rem; }
-.tk-footer__link { font-size: 0.8rem; letter-spacing: var(--tk-track-body); text-transform: uppercase; text-decoration: none; color: var(--tk-text-muted); line-height: 1.8; margin-bottom: 0.6rem; transition: color var(--tk-dur) var(--tk-ease); }
+.tk-footer__link { display: block; text-align: start; font-size: 0.8rem; letter-spacing: var(--tk-track-body); text-transform: uppercase; text-decoration: none; color: var(--tk-text-muted); line-height: 1.8; margin-bottom: 0.6rem; transition: color var(--tk-dur) var(--tk-ease); }
 .tk-footer__link:hover { color: var(--tk-text); }
 .tk-footer__social { display: flex; gap: 1rem; margin-top: 0.2rem; }
 .tk-footer__social-link { display: inline-flex; color: var(--tk-text-muted); transition: color var(--tk-dur) var(--tk-ease); }
 .tk-footer__social-link:hover { color: var(--tk-text); }
 .tk-footer__social-link svg { width: 20px; height: 20px; }
+/* Non-home pages also load legacy desktop-menu.css, whose global `a { width:100%; height:3rem; display:flex; justify-content:center; text-align:center }`
+   rule hijacks footer anchors — spreading the social icons to the column edges and centering the links. Home loads no such reset.
+   Neutralise it for .tk-footer anchors (specificity .tk-footer a = 0,1,1 > a = 0,0,1) so the footer renders identically on every page. */
+.tk-footer a { width: auto; height: auto; }
 .tk-footer__bar { background: var(--tk-black); color: #fff; text-align: center; padding: 1.5rem 2rem; font-size: var(--tk-size-caption); letter-spacing: var(--tk-track-tight); }
 
 /* ---------- Cart drawer ---------- */
