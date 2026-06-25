@@ -4157,6 +4157,27 @@ function editProduct(product) {
               </div>
             </div>
           </div>
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Homepage Featured</h3>
+            </div>
+            <div class="card__body" style="display:flex; flex-direction:column; gap:16px;">
+              <div class="field">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  <input type="checkbox" id="is-featured" name="isFeatured" ${product.isFeatured ? 'checked' : ''} />
+                  <span class="label" style="margin:0;">Featured on Homepage</span>
+                </label>
+                <div class="help">Show this product in the Featured Pieces grid on the homepage.</div>
+              </div>
+              <div class="field" id="featured-order-field" style="display:${product.isFeatured ? 'block' : 'none'};">
+                <div class="label">Featured Order</div>
+                <input class="input" type="number" id="featured-order" name="featuredOrder" value="${product.featuredOrder ?? ''}" min="1" step="1" style="width:100px;" />
+                <div class="help">Lower numbers appear first. Leave blank to append to the end of the list.</div>
+              </div>
+              <div class="help" id="featured-count-note" style="display:none; color:#92400e; background:#fef3c7; border-radius:4px; padding:8px 16px;"></div>
+            </div>
+          </div>
         </div>
 
         <div style="display:flex; flex-direction:column; gap:14px;">
@@ -5960,6 +5981,27 @@ async function loadAddProductsPage() {
                 <div class="help">Stock Keeping Unit - 2-7 alphanumeric characters (required for new products)</div>
                 <div id="sku-error" style="display:none; color: #ef4444; font-size: 13px; margin-top: 6px;"></div>
               </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__header">
+              <h3 class="card__title">Homepage Featured</h3>
+            </div>
+            <div class="card__body" style="display:flex; flex-direction:column; gap:16px;">
+              <div class="field">
+                <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                  <input type="checkbox" id="is-featured" name="isFeatured" />
+                  <span class="label" style="margin:0;">Featured on Homepage</span>
+                </label>
+                <div class="help">Show this product in the Featured Pieces grid on the homepage.</div>
+              </div>
+              <div class="field" id="featured-order-field" style="display:none;">
+                <div class="label">Featured Order</div>
+                <input class="input" type="number" id="featured-order" name="featuredOrder" value="" min="1" step="1" style="width:100px;" />
+                <div class="help">Lower numbers appear first. Leave blank to append to the end of the list.</div>
+              </div>
+              <div class="help" id="featured-count-note" style="display:none; color:#92400e; background:#fef3c7; border-radius:4px; padding:8px 16px;"></div>
             </div>
           </div>
         </div>
