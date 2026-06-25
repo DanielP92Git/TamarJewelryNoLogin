@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Homepage / Global-Chrome Redesign Rollout
 status: executing
-stopped_at: Phase 41 context gathered
-last_updated: "2026-06-25T18:06:28.466Z"
-last_activity: 2026-06-25 -- Phase 41 execution started
+stopped_at: Phase 41 complete & verified
+last_updated: "2026-06-25T19:30:00.000Z"
+last_activity: 2026-06-25 -- Phase 41 execution complete (footer social restored + dead footer JS retired)
 progress:
   total_phases: 6
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 10
-  percent: 83
+  completed_plans: 12
+  percent: 90
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers — with true bilingual content so Hebrew and English visitors each see products in their language
-**Current focus:** Phase 41 — footer-social-restore
+**Current focus:** Phase 41 complete & verified; next up: Phase 42 — Mobile Navigation
 
 ## Current Position
 
-Phase: 41 (footer-social-restore) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 41
-Last activity: 2026-06-25 -- Phase 41 execution started
+Phase: 41 (footer-social-restore) — COMPLETE (2/2 plans, verified; FOOT-01/02/03 satisfied)
+Plan: 2 of 2 complete
+Status: Phase 41 done — next: Phase 42 (Mobile Navigation)
+Last activity: 2026-06-25 -- Phase 41 execution complete (footer social column + non-home CSS fix + dead footer JS retired)
 
 ```
 Progress: [█████████░] 90%
