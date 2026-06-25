@@ -160,7 +160,12 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
   2. The homepage featured grid (`home.ejs` `#tk-prod-grid`) is rendered server-side with real featured products and dual `usd_price`/`ils_price` values embedded in `data-*` attributes (same pattern as `category.ejs` / `ssrDynamic.js`)
   3. `homepage.js` reads products + dual prices from the SSR DOM (hardcoded `CURRENCY='ILS'` and the demo `PRODUCTS` array removed) and renders the active currency on load from `localStorage.currency`
   4. The homepage grid (and its cart drawer) re-prices immediately on `currency-changed`, consistent with category and cart pages
-**Plans**: TBD
+**Plans**: 5 plans
+  - [ ] 40.1-01-PLAN.md — Backend data layer: isFeatured + featuredOrder schema/hook/index, invalidateHomePage(), admin-only write path (Wave 1)
+  - [ ] 40.1-02-PLAN.md — SSR featured grid: renderHomePage query (top 8, in-stock) + home.ejs dual-price cards + empty-state band omission (Wave 2)
+  - [ ] 40.1-03-PLAN.md — Admin featured toggle: checkbox + order input + soft >8 note + addProduct DOM reads (Wave 2)
+  - [ ] 40.1-04-PLAN.md — homepage.js: remove demo data, hydrate SSR DOM, dual-currency re-pricing, card-click nav, dual-price cart drawer (Wave 3)
+  - [ ] 40.1-05-PLAN.md — End-to-end human verification capstone (Wave 4)
 **UI hint**: yes
 
 > Note: Inserted per `40-CONTEXT.md` D-01/D-02 — split out of Phase 40 because real featured-product data (schema flag + admin toggle + SSR grid) is a new capability beyond currency wiring. Absorbs former Phase 40 Success Criterion 3 / requirement CURR-03.
@@ -206,12 +211,12 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 | 33-38. MongoDB Backup & Recovery | v1.6 | 11/11 | Complete | 2026-04-08 |
 | 39. Header Utilities Layout | v1.7 | 3/3 | Complete    | 2026-06-24 |
 | 40. Currency Selector Wiring | v1.7 | 2/2 | Complete    | 2026-06-24 |
-| 40.1. Homepage Featured Products | v1.7 | 0/TBD | Not started | - |
+| 40.1. Homepage Featured Products | v1.7 | 0/5 | Planned | - |
 | 41. Footer Social Restore | v1.7 | 0/TBD | Not started | - |
 | 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |
 | 43. Site-wide Cart Drawer | v1.7 | 0/TBD | Not started | - |
 
-*Last updated: 2026-06-25 — Phase 40 complete; Phase 43 (Site-wide Cart Drawer) added*
+*Last updated: 2026-06-25 — Phase 40.1 planned (5 plans, 4 waves)*
 
 ### Phase 43: Site-wide Cart Drawer
 
