@@ -194,7 +194,10 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
   3. The mobile menu can be dismissed by tapping the hamburger again, a dedicated close button, or tapping outside the menu
   4. Language switcher and currency selector remain reachable on mobile — either always visible in the collapsed header bar or inside the open mobile menu
   5. The mobile menu renders correctly in RTL on `/he` pages and opens/closes without triggering destructive `innerHTML` rewrites to the chrome
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 42-01-PLAN.md — Hamburger button + overlay markup and CSS (breakpoint 800px, relocated flags/currency, RTL)
+- [ ] 42-02-PLAN.md — View.js toggle (_bindHamburgerMenu, three dismissals) + legacy svgHandler retirement
+- [ ] 42-03-PLAN.md — Frontend rebuild + backend restart + responsive/RTL/persistence verification
 **UI hint**: yes
 
 ## Progress
@@ -215,10 +218,10 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 | 40. Currency Selector Wiring | v1.7 | 2/2 | Complete    | 2026-06-24 |
 | 40.1. Homepage Featured Products | v1.7 | 5/5 | Complete    | 2026-06-25 |
 | 41. Footer Social Restore | v1.7 | 2/2 | Complete   | 2026-06-25 |
-| 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |
+| 42. Mobile Navigation | v1.7 | 0/3 | Not started | - |
 | 43. Site-wide Cart Drawer | v1.7 | 0/TBD | Not started | - |
 
-*Last updated: 2026-06-25 — Phase 40.1 planned (5 plans, 4 waves)*
+*Last updated: 2026-06-25 — Phase 42 planned (3 plans, 3 waves)*
 
 ### Phase 43: Site-wide Cart Drawer
 
