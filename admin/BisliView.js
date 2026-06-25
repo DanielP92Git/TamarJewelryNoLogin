@@ -4489,6 +4489,22 @@ function editProduct(product) {
   // Attach translate button handlers
   attachTranslateHandlers();
 
+  // Homepage Featured: reveal order field on check + soft >8 note (D-09/D-10)
+  document.getElementById('is-featured')?.addEventListener('change', function () {
+    const f = document.getElementById('featured-order-field');
+    if (f) f.style.display = this.checked ? 'block' : 'none';
+  });
+  const editFeaturedCount = Array.isArray(state.products)
+    ? state.products.filter(function (p) { return p.isFeatured; }).length
+    : 0;
+  if (editFeaturedCount > 8) {
+    const editFeaturedNote = document.getElementById('featured-count-note');
+    if (editFeaturedNote) {
+      editFeaturedNote.textContent = editFeaturedCount + ' products are featured — only the first 8 by Featured Order appear on the homepage.';
+      editFeaturedNote.style.display = 'block';
+    }
+  }
+
   form.addEventListener("submit", updateProduct);
 }
 
@@ -4989,6 +5005,12 @@ async function updateProduct(e) {
   formData.append("name_he", nameHe);
   formData.append("description_en", descriptionEn);
   formData.append("description_he", descriptionHe);
+
+  // Homepage Featured (D-09): append to multipart FormData for /updateproduct/:id
+  const editIsFeatured = !!document.getElementById('is-featured')?.checked;
+  const editFeaturedOrderRaw = document.getElementById('featured-order')?.value;
+  formData.append('isFeatured', editIsFeatured);
+  formData.append('featuredOrder', editFeaturedOrderRaw ? parseInt(editFeaturedOrderRaw, 10) : '');
 
   // Add SKU to update data if changed
   if (newSkuValue !== originalSku) {
@@ -5500,6 +5522,11 @@ async function addProduct(e, data, form) {
     const applyGlobalDiscount = !!applyGlobalDiscountCheckbox?.checked;
     const sku = document.getElementById("sku-input")?.value?.trim() || "";
 
+    // Homepage Featured (D-09): read featured fields from the form
+    const isFeatured = !!document.getElementById('is-featured')?.checked;
+    const featuredOrderRaw = document.getElementById('featured-order')?.value;
+    const featuredOrder = featuredOrderRaw ? parseInt(featuredOrderRaw, 10) : null;
+
     // Validate required fields - at least one language must have a name
     if ((!nameEn && !nameHe) || !ilsPrice) {
       console.error("[addProduct] Validation failed: Missing required fields");
@@ -5630,6 +5657,9 @@ async function addProduct(e, data, form) {
       ils_price: Math.round(parseFloat(ilsPrice)),
       security_margin: securityMargin,
       apply_global_discount: applyGlobalDiscount,
+      // Homepage Featured (D-09)
+      isFeatured,
+      featuredOrder,
       // Bilingual fields (Phase 29)
       name_en: nameEn,
       name_he: nameHe,
@@ -6180,6 +6210,22 @@ async function loadAddProductsPage() {
     'label.dropzone[for="smallImages"]',
   );
   setupDragAndDrop(smallDropzone, smallInput, true);
+
+  // Homepage Featured: reveal order field on check + soft >8 note (D-09/D-10)
+  document.getElementById('is-featured')?.addEventListener('change', function () {
+    const f = document.getElementById('featured-order-field');
+    if (f) f.style.display = this.checked ? 'block' : 'none';
+  });
+  const addFeaturedCount = Array.isArray(state.products)
+    ? state.products.filter(function (p) { return p.isFeatured; }).length
+    : 0;
+  if (addFeaturedCount > 8) {
+    const addFeaturedNote = document.getElementById('featured-count-note');
+    if (addFeaturedNote) {
+      addFeaturedNote.textContent = addFeaturedCount + ' products are featured — only the first 8 by Featured Order appear on the homepage.';
+      addFeaturedNote.style.display = 'block';
+    }
+  }
 }
 
 function addProductHandler() {
