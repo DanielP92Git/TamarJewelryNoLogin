@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Homepage / Global-Chrome Redesign Rollout
 status: executing
-stopped_at: Phase 40.1 UI-SPEC approved
-last_updated: "2026-06-25T07:32:27.942Z"
+stopped_at: Completed 40.1-04-PLAN.md (homepage hydration)
+last_updated: "2026-06-25T07:45:01.941Z"
 last_activity: 2026-06-25
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 10
-  completed_plans: 8
-  percent: 80
+  completed_plans: 9
+  percent: 90
 ---
 
 # Project State
@@ -26,12 +26,12 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 ## Current Position
 
 Phase: 40.1 (homepage-featured-products) — EXECUTING
-Plan: 4 of 5
+Plan: 5 of 5
 Status: Ready to execute
 Last activity: 2026-06-25
 
 ```
-Progress: [████████░░] 80%
+Progress: [█████████░] 90%
 ```
 
 ## Performance Metrics
@@ -78,6 +78,7 @@ See milestone archives in `.planning/milestones/` for detailed decision history.
 - [Phase 40.1]: Plan 01: dedicated global featuredOrder field (D-01), displayOrder NOT reused; featuredOrder auto-defaults to end-of-list via global pre-save hook (D-09) with NaN-safe coercion storing null never NaN
 - [Phase ?]: Plan 40.1-02: homepage Featured grid server-rendered from real data — renderHomePage queries top 8 in-stock featured products by featuredOrder (D-02/D-03); home.ejs renders dual-price data-* .tk-prod cards with length-guarded empty-state band (D-04) and discount-only Sale badge (D-07); homepage.js hydration deferred to Plan 04.
 - [Phase ?]: Plan 40.1-03: Admin featured toggle UI (D-09) in add/edit forms; >8 soft note (D-10) from state.products; edit path appends featured fields to multipart FormData
+- [Phase ?]: Plan 40.1-04: homepage.js hydrates the SSR featured grid in localStorage.currency (CURR-03) and re-prices the grid + demo cart drawer on 'currency-changed'; featured cards navigate to /{lang}/product/{slug} (D-06); cart lines store dual usd/ils prices (D-08), full model.js cart deferred to Phase 43
 
 ### Pending Todos
 
@@ -92,8 +93,8 @@ See milestone archives in `.planning/milestones/` for detailed decision history.
 
 ## Session Continuity
 
-Last session: 2026-06-25T07:32:13.751Z
-Stopped at: Phase 40.1 UI-SPEC approved
+Last session: 2026-06-25T07:45:01.921Z
+Stopped at: Completed 40.1-04-PLAN.md (homepage hydration)
 Resume: `/gsd-plan-phase 39` to plan Phase 39 (Header Utilities Layout)
 
 ## Quick Tasks Completed
