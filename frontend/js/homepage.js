@@ -108,19 +108,39 @@
     cart.forEach(function (it) {
       var lineTotal = (cur === 'usd' ? it.usd_price : it.ils_price) * it.qty;
       var line = el('div', 'tk-line');
-      line.innerHTML =
-        '<div class="tk-line__media"><img src="' + it.image + '" alt="' + it.name + '" /></div>' +
-        '<div class="tk-line__main">' +
-          '<div class="tk-line__row">' +
-            '<span class="tk-line__name">' + it.name + '</span>' +
-            '<span class="tk-line__total">' + money(lineTotal, cur) + '</span>' +
-          '</div>' +
-          '<div class="tk-line__meta">' +
-            '<span class="tk-line__qty">Qty ' + it.qty + '</span>' +
-            '<button class="tk-line__remove" type="button">Remove Item</button>' +
-          '</div>' +
-        '</div>';
-      line.querySelector('.tk-line__remove').addEventListener('click', function () { removeItem(it.id); });
+
+      // Build with DOM nodes (textContent / setAttribute) rather than innerHTML so
+      // admin-sourced product names/images can't break markup or inject (WR-01).
+      var media = el('div', 'tk-line__media');
+      var img = document.createElement('img');
+      img.setAttribute('src', it.image || '');
+      img.setAttribute('alt', it.name || '');
+      media.appendChild(img);
+
+      var name = el('span', 'tk-line__name');
+      name.textContent = it.name || '';
+      var total = el('span', 'tk-line__total');
+      total.textContent = money(lineTotal, cur);
+      var row = el('div', 'tk-line__row');
+      row.appendChild(name);
+      row.appendChild(total);
+
+      var qty = el('span', 'tk-line__qty');
+      qty.textContent = 'Qty ' + it.qty;
+      var remove = el('button', 'tk-line__remove');
+      remove.setAttribute('type', 'button');
+      remove.textContent = 'Remove Item';
+      var meta = el('div', 'tk-line__meta');
+      meta.appendChild(qty);
+      meta.appendChild(remove);
+
+      var main = el('div', 'tk-line__main');
+      main.appendChild(row);
+      main.appendChild(meta);
+
+      line.appendChild(media);
+      line.appendChild(main);
+      remove.addEventListener('click', function () { removeItem(it.id); });
       body.appendChild(line);
     });
   }
