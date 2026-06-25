@@ -4490,20 +4490,34 @@ function editProduct(product) {
   attachTranslateHandlers();
 
   // Homepage Featured: reveal order field on check + soft >8 note (D-09/D-10)
+  // Count OTHER products already featured (exclude the one being edited so toggling
+  // its own checkbox doesn't double-count). The note reacts live to the checkbox so
+  // it appears the moment a 9th product is featured (7b).
+  const editFeaturedBase = Array.isArray(state.products)
+    ? state.products.filter(function (p) {
+        return p.isFeatured
+          && String(p._id) !== String(product._id)
+          && String(p.id) !== String(product.id);
+      }).length
+    : 0;
+  function refreshEditFeaturedNote() {
+    const note = document.getElementById('featured-count-note');
+    if (!note) return;
+    const checked = !!document.getElementById('is-featured')?.checked;
+    const effective = editFeaturedBase + (checked ? 1 : 0);
+    if (effective > 8) {
+      note.textContent = effective + ' products are featured — only the first 8 by Featured Order appear on the homepage.';
+      note.style.display = 'block';
+    } else {
+      note.style.display = 'none';
+    }
+  }
   document.getElementById('is-featured')?.addEventListener('change', function () {
     const f = document.getElementById('featured-order-field');
     if (f) f.style.display = this.checked ? 'block' : 'none';
+    refreshEditFeaturedNote();
   });
-  const editFeaturedCount = Array.isArray(state.products)
-    ? state.products.filter(function (p) { return p.isFeatured; }).length
-    : 0;
-  if (editFeaturedCount > 8) {
-    const editFeaturedNote = document.getElementById('featured-count-note');
-    if (editFeaturedNote) {
-      editFeaturedNote.textContent = editFeaturedCount + ' products are featured — only the first 8 by Featured Order appear on the homepage.';
-      editFeaturedNote.style.display = 'block';
-    }
-  }
+  refreshEditFeaturedNote();
 
   form.addEventListener("submit", updateProduct);
 }
@@ -6212,20 +6226,29 @@ async function loadAddProductsPage() {
   setupDragAndDrop(smallDropzone, smallInput, true);
 
   // Homepage Featured: reveal order field on check + soft >8 note (D-09/D-10)
+  // New product isn't featured yet, so the base is the full current featured count;
+  // checking the box adds this 9th product and the note reacts live (7b).
+  const addFeaturedBase = Array.isArray(state.products)
+    ? state.products.filter(function (p) { return p.isFeatured; }).length
+    : 0;
+  function refreshAddFeaturedNote() {
+    const note = document.getElementById('featured-count-note');
+    if (!note) return;
+    const checked = !!document.getElementById('is-featured')?.checked;
+    const effective = addFeaturedBase + (checked ? 1 : 0);
+    if (effective > 8) {
+      note.textContent = effective + ' products are featured — only the first 8 by Featured Order appear on the homepage.';
+      note.style.display = 'block';
+    } else {
+      note.style.display = 'none';
+    }
+  }
   document.getElementById('is-featured')?.addEventListener('change', function () {
     const f = document.getElementById('featured-order-field');
     if (f) f.style.display = this.checked ? 'block' : 'none';
+    refreshAddFeaturedNote();
   });
-  const addFeaturedCount = Array.isArray(state.products)
-    ? state.products.filter(function (p) { return p.isFeatured; }).length
-    : 0;
-  if (addFeaturedCount > 8) {
-    const addFeaturedNote = document.getElementById('featured-count-note');
-    if (addFeaturedNote) {
-      addFeaturedNote.textContent = addFeaturedCount + ' products are featured — only the first 8 by Featured Order appear on the homepage.';
-      addFeaturedNote.style.display = 'block';
-    }
-  }
+  refreshAddFeaturedNote();
 }
 
 function addProductHandler() {
