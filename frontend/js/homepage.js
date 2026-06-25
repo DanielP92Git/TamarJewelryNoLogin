@@ -64,10 +64,23 @@
   }
 
   /* ---------- Cart ---------- */
-  function addToCart(p) {
-    var found = cart.filter(function (x) { return x.id === p.id; })[0];
-    if (found) found.qty += 1;
-    else cart.push({ id: p.id, name: p.name, price: p.price, image: p.image, qty: 1 });
+  // D-08: store BOTH prices on the line so the drawer can re-price on a
+  // currency change without re-querying. Reads from the SSR card's dataset.
+  function addToCart(card) {
+    if (!card) return;
+    var id = card.dataset.id;
+    var found = cart.filter(function (x) { return x.id === id; })[0];
+    if (found) { found.qty += 1; }
+    else {
+      cart.push({
+        id: id,
+        name: card.dataset.nameEn || card.dataset.nameHe || '',
+        image: card.querySelector('img') ? card.querySelector('img').src : '',
+        qty: 1,
+        usd_price: parseInt(card.dataset.usdPrice, 10) || 0,
+        ils_price: parseInt(card.dataset.ilsPrice, 10) || 0,
+      });
+    }
     renderCart();
     openCart();
   }
@@ -76,12 +89,15 @@
     renderCart();
   }
   function renderCart() {
+    var cur = getCurrency();
     var body = $('tk-drawer-body');
     var count = cart.reduce(function (s, it) { return s + it.qty; }, 0);
-    var subtotal = cart.reduce(function (s, it) { return s + it.price * it.qty; }, 0);
+    var subtotal = cart.reduce(function (s, it) {
+      return s + (cur === 'usd' ? it.usd_price : it.ils_price) * it.qty;
+    }, 0);
 
     $('tk-cart-count').textContent = count;
-    $('tk-subtotal').textContent = money(subtotal);
+    $('tk-subtotal').textContent = money(subtotal, cur);
     $('tk-checkout').disabled = cart.length === 0;
 
     body.innerHTML = '';
@@ -90,17 +106,18 @@
       return;
     }
     cart.forEach(function (it) {
+      var lineTotal = (cur === 'usd' ? it.usd_price : it.ils_price) * it.qty;
       var line = el('div', 'tk-line');
       line.innerHTML =
         '<div class="tk-line__media"><img src="' + it.image + '" alt="' + it.name + '" /></div>' +
         '<div class="tk-line__main">' +
           '<div class="tk-line__row">' +
             '<span class="tk-line__name">' + it.name + '</span>' +
-            '<span class="tk-line__total">' + money(it.price * it.qty) + '</span>' +
+            '<span class="tk-line__total">' + money(lineTotal, cur) + '</span>' +
           '</div>' +
           '<div class="tk-line__meta">' +
             '<span class="tk-line__qty">Qty ' + it.qty + '</span>' +
-            '<button class="tk-line__remove" type="button">Remove</button>' +
+            '<button class="tk-line__remove" type="button">Remove Item</button>' +
           '</div>' +
         '</div>';
       line.querySelector('.tk-line__remove').addEventListener('click', function () { removeItem(it.id); });
@@ -160,6 +177,15 @@
         });
       });
     }
+
+    // Re-price the grid AND the (open or closed) cart drawer when the shared
+    // currency selector changes — mirrors cartView.js / categoriesView.js.
+    window.addEventListener('currency-changed', function (e) {
+      var next = e && e.detail && e.detail.currency;
+      if (next !== 'usd' && next !== 'ils') return;
+      renderProducts();
+      renderCart();
+    });
 
     // The cart control is an <a href="/{lang}/cart"> so it routes to the real
     // cart page on pages without this script; here on the home page we intercept
