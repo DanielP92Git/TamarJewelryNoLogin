@@ -931,6 +931,12 @@ router.post(
 
       await product.save();
 
+      // This legacy path can change quantity (which the featured grid filters on);
+      // refresh the cached homepage when the product is featured so the grid stays current.
+      if (product.isFeatured) {
+        invalidateHomePage();
+      }
+
       res.json({
         success: true,
       });
@@ -1091,6 +1097,12 @@ router.post(
       invalidateProduct(deleted.slug, urlCategory);
     } else if (urlCategory) {
       invalidateCategory(urlCategory);
+    }
+
+    // A deleted product may have been on the homepage featured grid; refresh the
+    // cached homepage so its card (which links to a now-404 product page) is dropped.
+    if (deleted.isFeatured) {
+      invalidateHomePage();
     }
 
     if (!isProd) console.log('Removed');
