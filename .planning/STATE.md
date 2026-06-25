@@ -4,14 +4,14 @@ milestone: v1.7
 milestone_name: Homepage / Global-Chrome Redesign Rollout
 status: executing
 stopped_at: Phase 40.1 UI-SPEC approved
-last_updated: "2026-06-25T07:04:45.941Z"
-last_activity: 2026-06-25 -- Phase 40.1 planning complete
+last_updated: "2026-06-25T07:14:54.662Z"
+last_activity: 2026-06-25
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 10
-  completed_plans: 5
-  percent: 50
+  completed_plans: 6
+  percent: 60
 ---
 
 # Project State
@@ -21,17 +21,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-06-23)
 
 **Core value:** A discoverable, professional online jewelry store that ranks in search engines, looks great when shared on social platforms, and converts visitors into customers — with true bilingual content so Hebrew and English visitors each see products in their language
-**Current focus:** Phase 40 — currency-selector-wiring
+**Current focus:** Phase 40.1 — homepage-featured-products
 
 ## Current Position
 
-Phase: 40.1
-Plan: Not started
+Phase: 40.1 (homepage-featured-products) — EXECUTING
+Plan: 2 of 5
 Status: Ready to execute
-Last activity: 2026-06-25 -- Phase 40.1 planning complete
+Last activity: 2026-06-25
 
 ```
-Progress: [████████░░] 80%
+Progress: [██████░░░░] 60%
 ```
 
 ## Performance Metrics
@@ -75,6 +75,7 @@ See milestone archives in `.planning/milestones/` for detailed decision history.
 - NAV: `backend/views/partials/header.ejs` + CSS breakpoint rules + small JS toggle (non-destructive)
 - [Phase ?]: Phase 40-01: D-05 verify-then-fix fired — category prices reverted to SSR language-default on reload/nav; fixed via a guarded one-time displayProducts() re-render in categoriesView.initialSetup()
 - [Phase ?]: Phase 40-01: GeoIP first-load selector/storage desync fixed inline in locale.js (value-only syncCurrencySelectors after the override) instead of importing heavy View.js, keeping the early bootstrap load-order-independent
+- [Phase 40.1]: Plan 01: dedicated global featuredOrder field (D-01), displayOrder NOT reused; featuredOrder auto-defaults to end-of-list via global pre-save hook (D-09) with NaN-safe coercion storing null never NaN
 
 ### Pending Todos
 
@@ -89,7 +90,7 @@ See milestone archives in `.planning/milestones/` for detailed decision history.
 
 ## Session Continuity
 
-Last session: 2026-06-24T23:06:03.535Z
+Last session: 2026-06-25T07:14:42.155Z
 Stopped at: Phase 40.1 UI-SPEC approved
 Resume: `/gsd-plan-phase 39` to plan Phase 39 (Header Utilities Layout)
 
