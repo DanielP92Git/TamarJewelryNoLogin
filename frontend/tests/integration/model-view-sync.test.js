@@ -414,22 +414,8 @@ describe('MVC Integration: Model-View Synchronization', () => {
       expect(menuText).toContain('אודות'); // About
     });
 
-    it('should update footer when language switches from English to Hebrew', async () => {
-      // Start with English
-      await view.setLanguage('eng', 0);
-      const footerEng = document.querySelector('.footer');
-      expect(footerEng.innerHTML.length).toBeGreaterThan(0);
-      const engContent = footerEng.innerHTML;
-
-      // Switch to Hebrew
-      await view.setLanguage('heb', 0);
-      const footerHeb = document.querySelector('.footer');
-      const hebContent = footerHeb.innerHTML;
-
-      // Verify footer content changed between languages
-      expect(hebContent).not.toBe(engContent);
-      expect(hebContent.length).toBeGreaterThan(0);
-    });
+    // Note: 'should update footer when language switches from English to Hebrew' removed in Phase 41.
+    // The footer JS twin was retired; footer is now SSR-static. See 41-02-SUMMARY.md.
 
     it('should update ALL currency selector text when language switches', async () => {
       // English

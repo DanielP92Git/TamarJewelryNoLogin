@@ -100,16 +100,8 @@ describe('MVC Integration: Lifecycle and Cleanup', () => {
       expect(ulHeb).toBeTruthy();
     });
 
-    it('should initialize footer with correct language on first mount', async () => {
-      await view.setLanguage('eng', 0);
-
-      const footer = document.querySelector('.footer');
-      expect(footer).toBeTruthy();
-      expect(footer.innerHTML.length).toBeGreaterThan(0);
-
-      // Footer should contain navigation links
-      expect(footer.innerHTML).toContain('Home');
-    });
+    // Note: 'should initialize footer with correct language on first mount' removed in Phase 41.
+    // The footer JS twin was retired in Phase 41; footer is now SSR-static. See 41-02-SUMMARY.md.
 
     it('should initialize flag click handlers on mount', async () => {
       // Spy on changeToHeb BEFORE setLanguage (to capture the handler attached during render)
@@ -178,19 +170,8 @@ describe('MVC Integration: Lifecycle and Cleanup', () => {
       expect(ulHeb).toBeTruthy();
     });
 
-    it('should replace footer content on language switch', async () => {
-      await view.setLanguage('eng', 0);
-      const footer = document.querySelector('.footer');
-      const englishContent = footer.innerHTML;
-      expect(englishContent).toContain('Home');
-
-      await view.setLanguage('heb', 0);
-      const hebrewContent = footer.innerHTML;
-
-      // Content should have changed (Hebrew text different from English)
-      expect(hebrewContent).not.toBe(englishContent);
-      expect(hebrewContent.length).toBeGreaterThan(0);
-    });
+    // Note: 'should replace footer content on language switch' removed in Phase 41.
+    // The footer JS twin was retired in Phase 41; footer is now SSR-static. See 41-02-SUMMARY.md.
 
     it('should update cart number on re-render', async () => {
       // Initial render with cart number 0
@@ -338,11 +319,6 @@ describe('MVC Integration: Lifecycle and Cleanup', () => {
       const ulHeb = menu.querySelector('.ul-heb');
       const hasExactlyOne = (ulEng && !ulHeb) || (!ulEng && ulHeb);
       expect(hasExactlyOne).toBeTruthy();
-
-      // Footer should still render correctly
-      const footer = document.querySelector('.footer');
-      expect(footer).toBeTruthy();
-      expect(footer.innerHTML.length).toBeGreaterThan(0);
 
       // Cart badge should still show correct number (last render was 0)
       const cartBadge = document.querySelector('.cart-number-mobile');

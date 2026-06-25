@@ -325,43 +325,6 @@ describe('Header Menu Rendering and Navigation', () => {
     });
   });
 
-  describe('Footer Updates on Language Change (VIEW-10)', () => {
-    it('should render English footer content', async () => {
-      await view.setLanguage('eng', 0);
-
-      const footer = document.querySelector('.footer');
-      expect(footer.textContent).toContain('Shipping & Cancellation Policy');
-      expect(footer.textContent).toContain('Tamar Kfir Jewelry. All Rights Reserved');
-    });
-
-    it('should render Hebrew footer content', async () => {
-      await view.setLanguage('heb', 0);
-
-      const footer = document.querySelector('.footer');
-      expect(footer.textContent).toContain('מדיניות משלוחים וביטולים');
-      expect(footer.textContent).toContain('תמר כפיר תכשיטים. כל הזכויות שמורות');
-    });
-
-    it('should update footer when language changes from English to Hebrew', async () => {
-      await view.setLanguage('eng', 0);
-      let footer = document.querySelector('.footer');
-      expect(footer.textContent).toContain('Shipping & Cancellation Policy');
-
-      await view.setLanguage('heb', 0);
-      footer = document.querySelector('.footer');
-      expect(footer.textContent).toContain('מדיניות משלוחים וביטולים');
-      expect(footer.textContent).not.toContain('Shipping & Cancellation Policy');
-    });
-
-    it('should update footer when language changes from Hebrew to English', async () => {
-      await view.setLanguage('heb', 0);
-      let footer = document.querySelector('.footer');
-      expect(footer.textContent).toContain('מדיניות משלוחים וביטולים');
-
-      await view.setLanguage('eng', 0);
-      footer = document.querySelector('.footer');
-      expect(footer.textContent).toContain('Shipping & Cancellation Policy');
-      expect(footer.textContent).not.toContain('מדיניות משלוחים וביטולים');
-    });
-  });
 });
+// Note: VIEW-10 Footer Updates tests removed in Phase 41 — the footer JS twin was retired;
+// the footer is now SSR-static (no JS twin). See 41-02-SUMMARY.md.

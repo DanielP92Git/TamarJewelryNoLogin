@@ -95,14 +95,12 @@ class AboutView extends View {
     localStorage.setItem('language', `heb`);
     this.setAboutDesc(`heb`);
     this.setLanguage('heb');
-    this.setFooterLng('heb');
   };
 
   changeToEng = function () {
     localStorage.setItem('language', `eng`);
     this.setAboutDesc('eng');
     this.setLanguage('eng');
-    this.setFooterLng('eng');
   };
 
   setAboutDesc(lng) {

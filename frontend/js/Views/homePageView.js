@@ -53,7 +53,6 @@ class HomePageView extends View {
     super.changeToHeb();
     // Then do homepage-specific updates
     this.setHomeLanguage('heb');
-    this.setFooterLng('heb');
     // Ensure cart icon is visible after language change
     setTimeout(() => {
       this.ensureCartIconVisibility();
@@ -66,7 +65,6 @@ class HomePageView extends View {
     super.changeToEng();
     // Then do homepage-specific updates
     this.setHomeLanguage('eng');
-    this.setFooterLng('eng');
     // Ensure cart icon is visible after language change
     setTimeout(() => {
       this.ensureCartIconVisibility();
@@ -136,7 +134,6 @@ class HomePageView extends View {
   setHomeLanguage(lng) {
     // Page-specific language setup
     this.setCategoriesLng(lng);
-    this.handleFooterMarkup(lng);
   }
 
   setCategoriesLng(lng) {

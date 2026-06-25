@@ -7,7 +7,6 @@ class PoliciesView extends View {
     document.documentElement.dir = 'rtl';
     this.setPoliciesContent('heb');
     this.setLanguage('heb', 0);
-    this.setFooterLng('heb');
     this._updateUrlLang('he');
   };
 
@@ -17,7 +16,6 @@ class PoliciesView extends View {
     document.documentElement.dir = 'ltr';
     this.setPoliciesContent('eng');
     this.setLanguage('eng', 0);
-    this.setFooterLng('eng');
     this._updateUrlLang('en');
   };
 

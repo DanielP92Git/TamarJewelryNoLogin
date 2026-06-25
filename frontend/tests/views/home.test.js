@@ -92,9 +92,6 @@ describe('Home Page View', () => {
     });
 
     it('should set page-specific language via setPageSpecificLanguage', () => {
-      // Mock handleFooterMarkup to avoid footer rendering issues
-      const handleFooterMock = vi.spyOn(homePageView, 'handleFooterMarkup').mockImplementation(() => {});
-
       // Call setPageSpecificLanguage (which calls setCategoriesLng internally)
       homePageView.setPageSpecificLanguage('eng', 0);
 
@@ -107,9 +104,6 @@ describe('Home Page View', () => {
 
       // Verify categories are now in Hebrew
       expect(necklaces.textContent).toBe('שרשראות');
-
-      // Verify handleFooterMarkup was called
-      expect(handleFooterMock).toHaveBeenCalled();
     });
   });
 });

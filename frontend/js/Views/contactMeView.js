@@ -188,7 +188,6 @@ class ContactMeView extends View {
     localStorage.setItem('language', `heb`);
     this.setFormLng(`heb`);
     this.setLanguage('heb');
-    this.setFooterLng('heb');
     this.setContactTitleLng('heb');
   };
 
@@ -196,7 +195,6 @@ class ContactMeView extends View {
     localStorage.setItem('language', `eng`);
     this.setFormLng('eng');
     this.setLanguage('eng');
-    this.setFooterLng('eng');
     this.setContactTitleLng('eng');
   };
 
