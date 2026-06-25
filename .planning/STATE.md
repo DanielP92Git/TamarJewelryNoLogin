@@ -4,14 +4,14 @@ milestone: v1.7
 milestone_name: Homepage / Global-Chrome Redesign Rollout
 status: executing
 stopped_at: Phase 40.1 UI-SPEC approved
-last_updated: "2026-06-25T07:14:54.662Z"
+last_updated: "2026-06-25T07:22:31.986Z"
 last_activity: 2026-06-25
 progress:
   total_phases: 6
   completed_phases: 2
   total_plans: 10
-  completed_plans: 6
-  percent: 60
+  completed_plans: 7
+  percent: 70
 ---
 
 # Project State
@@ -26,12 +26,12 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 ## Current Position
 
 Phase: 40.1 (homepage-featured-products) — EXECUTING
-Plan: 2 of 5
+Plan: 3 of 5
 Status: Ready to execute
 Last activity: 2026-06-25
 
 ```
-Progress: [██████░░░░] 60%
+Progress: [███████░░░] 70%
 ```
 
 ## Performance Metrics
@@ -76,6 +76,7 @@ See milestone archives in `.planning/milestones/` for detailed decision history.
 - [Phase ?]: Phase 40-01: D-05 verify-then-fix fired — category prices reverted to SSR language-default on reload/nav; fixed via a guarded one-time displayProducts() re-render in categoriesView.initialSetup()
 - [Phase ?]: Phase 40-01: GeoIP first-load selector/storage desync fixed inline in locale.js (value-only syncCurrencySelectors after the override) instead of importing heavy View.js, keeping the early bootstrap load-order-independent
 - [Phase 40.1]: Plan 01: dedicated global featuredOrder field (D-01), displayOrder NOT reused; featuredOrder auto-defaults to end-of-list via global pre-save hook (D-09) with NaN-safe coercion storing null never NaN
+- [Phase ?]: Plan 40.1-02: homepage Featured grid server-rendered from real data — renderHomePage queries top 8 in-stock featured products by featuredOrder (D-02/D-03); home.ejs renders dual-price data-* .tk-prod cards with length-guarded empty-state band (D-04) and discount-only Sale badge (D-07); homepage.js hydration deferred to Plan 04.
 
 ### Pending Todos
 
@@ -90,7 +91,7 @@ See milestone archives in `.planning/milestones/` for detailed decision history.
 
 ## Session Continuity
 
-Last session: 2026-06-25T07:14:42.155Z
+Last session: 2026-06-25T07:20:34.059Z
 Stopped at: Phase 40.1 UI-SPEC approved
 Resume: `/gsd-plan-phase 39` to plan Phase 39 (Header Utilities Layout)
 

@@ -162,7 +162,7 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
   4. The homepage grid (and its cart drawer) re-prices immediately on `currency-changed`, consistent with category and cart pages
 **Plans**: 5 plans
   - [x] 40.1-01-PLAN.md — Backend data layer: isFeatured + featuredOrder schema/hook/index, invalidateHomePage(), admin-only write path (Wave 1)
-  - [ ] 40.1-02-PLAN.md — SSR featured grid: renderHomePage query (top 8, in-stock) + home.ejs dual-price cards + empty-state band omission (Wave 2)
+  - [x] 40.1-02-PLAN.md — SSR featured grid: renderHomePage query (top 8, in-stock) + home.ejs dual-price cards + empty-state band omission (Wave 2)
   - [ ] 40.1-03-PLAN.md — Admin featured toggle: checkbox + order input + soft >8 note + addProduct DOM reads (Wave 2)
   - [ ] 40.1-04-PLAN.md — homepage.js: remove demo data, hydrate SSR DOM, dual-currency re-pricing, card-click nav, dual-price cart drawer (Wave 3)
   - [ ] 40.1-05-PLAN.md — End-to-end human verification capstone (Wave 4)
@@ -211,7 +211,7 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 | 33-38. MongoDB Backup & Recovery | v1.6 | 11/11 | Complete | 2026-04-08 |
 | 39. Header Utilities Layout | v1.7 | 3/3 | Complete    | 2026-06-24 |
 | 40. Currency Selector Wiring | v1.7 | 2/2 | Complete    | 2026-06-24 |
-| 40.1. Homepage Featured Products | v1.7 | 1/5 | In Progress|  |
+| 40.1. Homepage Featured Products | v1.7 | 2/5 | In Progress|  |
 | 41. Footer Social Restore | v1.7 | 0/TBD | Not started | - |
 | 42. Mobile Navigation | v1.7 | 0/TBD | Not started | - |
 | 43. Site-wide Cart Drawer | v1.7 | 0/TBD | Not started | - |
@@ -223,7 +223,7 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 **Goal:** Promote the homepage-only demo cart drawer into global chrome so the nav cart icon opens a mini-cart on **every** page, rendering real `model.js` cart data (not the homepage demo data), honoring Phase 40 currency wiring for live + persisted re-pricing, with a "View cart / Checkout" CTA that routes to `/{lang}/cart`. Scope: move drawer markup from `home.ejs` into a global partial; move open/close wiring from `homepage.js` into base `View.js`; dual-render safety; cart-count badge sync; mobile + RTL. See `.planning/todos/pending/site-wide-cart-drawer.md`.
 **Requirements**: TBD (run /gsd-plan-phase 43)
 **Depends on:** Phase 40 (currency wiring) and Phase 42 (mobile navigation — drawer mobile/RTL behavior builds on it)
-**Plans:** 1/5 plans executed
+**Plans:** 2/5 plans executed
 
 Plans:
 - [ ] TBD (run /gsd-plan-phase 43 to break down)
