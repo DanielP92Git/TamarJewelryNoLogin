@@ -1,7 +1,7 @@
 ---
 id: todo-styled-header-missing-non-home
 type: bug
-status: pending
+status: resolved
 priority: high
 created: "2026-06-24"
 source: 39-HUMAN-UAT.md (Phase 39 human verification, item 2)
@@ -54,12 +54,8 @@ to `.tk-nav` so product-card / footer links are untouched; no-op on homepage).
   — removed the stale `header {}` hero + `body#categories.* header` background rules
   (cause 1), AND the `.tk-nav a` guard fixes the nav overflow (cause 2). Verified
   during Phase 40 execution.
-- **Product, cart, about, contact, workshop, policies**: cause (2) now fixed for them
-  too via the shared `.tk-nav a` guard. Still need a per-page check for cause (1)
-  (legacy `header { ... background-image }` hero rules in their own page CSS:
-  `product`/`cart`/`about-*`/`contact-me-*`/`jewelry-workshop-*`/`policies-*`.css)
-  and any other page-specific `body { display:flex; align-items:center }` quirks.
-  **PARTIALLY RESOLVED — nav no longer overflows; per-page hero audit PENDING.**
+- **About, contact, workshop, cart**: **FIXED 2026-06-28** — removed bare `header { display:flex; flex-flow:column; ... }` blocks from `about-800plus.css`, `about-devices.css`, `contact-me-devices.css`, `jewelry-workshop-800plus.css`, `jewelry-workshop-devices.css`, `cart-devices.css`, `cart-800plus.css`. No background-image rules existed in these files.
+- **Product, policies**: no bare `header {}` rules found — already clean.
 
 ## Scope / why it's tracked separately
 

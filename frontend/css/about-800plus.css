@@ -11,13 +11,6 @@ body {
   align-items: center;
 }
 
-header {
-  display: flex;
-  flex-flow: column;
-  align-items: center;
-  width: 100%;
-}
-
 /* Menu styles centralised in desktop-menu.css */
 
 main {

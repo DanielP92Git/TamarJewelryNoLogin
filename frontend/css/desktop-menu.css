@@ -483,10 +483,8 @@ html[dir='rtl'] .site-header .category-item .attrib {
     --site-header-pad-x: 48px;
   }
 
-  /* Prevent fixed header overlap on non-home pages */
-  body:not(#home) {
-    padding-top: var(--site-header-height);
-  }
+  /* v1.7: removed `body:not(#home) { padding-top }` — obsolete fixed-header offset.
+     The new `.tk-nav` header is in-flow, so the body needs no top padding. */
 
   .site-header {
     position: fixed;

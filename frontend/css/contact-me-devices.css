@@ -31,12 +31,6 @@ body {
   background-color: var(--minimal-bg);
 }
 
-header {
-  display: flex;
-  flex-flow: column;
-  width: 100%;
-}
-
 main {
   display: flex;
   flex-flow: column;

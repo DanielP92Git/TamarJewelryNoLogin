@@ -136,7 +136,7 @@ img { display: block; }
 .tk-nav--solid .tk-nav__cart svg { stroke: var(--tk-text); }
 .tk-nav__count {
   position: absolute;
-  top: -6px; right: -8px;
+  top: -6px; right: -8px; left: auto;   /* left:auto neutralizes legacy .cart-number-mobile { left:55% } in *-devices.css */
   min-width: 18px; height: 18px;
   padding: 0 4px;
   border-radius: var(--tk-radius-round);
@@ -146,6 +146,20 @@ img { display: block; }
 }
 .tk-nav--transparent .tk-nav__count { background: rgba(255,255,255,0.95); color: var(--tk-ink); }
 .tk-nav--solid .tk-nav__count { background: var(--tk-ink); color: #fff; }
+
+/* --- Cart badge: neutralize legacy .cart-number-mobile rules (desktop-menu.css) ---
+   The SSR badge span carries both `.tk-nav__count` (prototype) and `.cart-number-mobile`
+   (legacy JS hook used by View.js to update the count). On non-home pages desktop-menu.css
+   matches the legacy class and forces a transparent background + parenthesised "(0)" content,
+   breaking the circular badge. These rules restore the prototype look site-wide. */
+.tk-nav__count::before,
+.tk-nav__count::after { content: none; }
+/* Only the solid variant needs !important: desktop-menu.css (with its !important
+   transparent-bg rule) loads exclusively on non-home pages, where the nav is always
+   .tk-nav--solid. The transparent (home) badge has no such competitor, so it is left
+   to the base rule (line 147) and the mobile-collapse override (in the <800px block),
+   which would otherwise be beaten by an !important here. */
+.tk-nav--solid .tk-nav__count { background: var(--tk-ink) !important; color: #fff !important; }
 
 /* ---------- Hero ---------- */
 .tk-hero {
@@ -449,6 +463,9 @@ img { display: block; }
 }
 /* Override the existing flat rule above (same specificity — appears later, wins) */
 .tk-drawer__body .tk-drawer__empty { margin-top: 56px; }
+/* `display: flex` above beats the UA `[hidden] { display: none }` rule, so the
+   empty state stayed visible behind real line items. Restore hide-on-hidden. */
+.tk-drawer__empty[hidden] { display: none !important; }
 #tk-cart-continue {
   margin-top: 4px;
   padding: 10px 24px;
@@ -598,6 +615,27 @@ img { display: block; }
   .tk-hamburger { display: flex; }
   .tk-nav__utils .tk-lang { display: none; }
   .tk-nav__utils .tk-nav__currency-select { display: none; }
+  /* Opposite-edge layout: hamburger on start edge, cart on end edge.
+     [dir="rtl"] flex-reversal mirrors this automatically — no extra RTL rule needed. */
+  .tk-hamburger  { order: 1; }
+  .tk-nav__logo  { order: 2; }
+  .tk-nav__utils { order: 3; }
+
+  /* Collapse transparent home nav to solid white on mobile — the overlay
+     look works on desktop but on mobile we always want a clean white strip
+     with black logo letters (the logo file is black-on-white; the desktop
+     invert filter would show a black background on mobile). */
+  .tk-nav--transparent {
+    position: relative;           /* override position:absolute; hero flows below nav */
+    background: var(--tk-white);
+    border-bottom: 1px solid var(--tk-border-light);
+  }
+  .tk-nav--transparent .tk-nav__logo img { filter: none; }
+  .tk-nav--transparent .tk-nav__cart svg { stroke: var(--tk-text); }
+  .tk-nav--transparent .tk-nav__count   { background: var(--tk-ink); color: #fff; }
+  .tk-nav--transparent .tk-hamburger    { color: var(--tk-text); }
+
+
 }
 
 /* ---------- Mobile nav overlay ---------- */

@@ -504,14 +504,28 @@ app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist'), {
 }));
 
 // Serve frontend CSS (referenced by EJS templates as /css/...)
+// `no-cache` = browser may cache but must revalidate each load via ETag/Last-Modified,
+// so edits to hand-written CSS show on a normal reload (cheap 304s when unchanged).
+// These files aren't content-hashed like the Parcel dist/ bundles, so they can't be
+// cached long-lived without a busting scheme.
 app.use('/css', express.static(path.join(__dirname, '..', 'frontend', 'css'), {
-  maxAge: '7d'
+  etag: true,
+  lastModified: true,
+  setHeaders: (res) => {
+    res.setHeader('Cache-Control', 'no-cache');
+  }
 }));
 
 // Serve frontend images
 app.use('/imgs', express.static(path.join(__dirname, '..', 'frontend', 'imgs'), {
   maxAge: '7d'
 }));
+
+// Serve the standalone homepage interactions script (prototype homepage).
+// Single-file route so the rest of frontend/js is not exposed.
+app.get('/js/homepage.js', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'frontend', 'js', 'homepage.js'));
+});
 
 // Serve favicon
 app.use('/favicon.ico', express.static(path.join(__dirname, '..', 'frontend', 'favicon.ico')));

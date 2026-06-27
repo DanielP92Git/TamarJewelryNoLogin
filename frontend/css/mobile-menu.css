@@ -364,10 +364,9 @@ body.menu-active::before {
   display: none !important;
 }
 
-/* Mobile Header Icons */
-body:not(#home) {
-  padding-top: var(--site-header-height, 56px);
-}
+/* v1.7 global-chrome migration: removed `body:not(#home) { padding-top: 56px }`.
+   It offset the old fixed `.site-header`; the new `.tk-nav` header is in-flow, so this
+   padding only pushed the header down, creating a gap from the top on non-home pages. */
 
 .site-header {
   position: fixed;
@@ -741,9 +740,7 @@ html[dir='rtl'] .menu .menu-close-container {
     max-height: 52px;
   }
 
-  body:not(#home) {
-    padding-top: 52px;
-  }
+  /* v1.7: removed `body:not(#home) { padding-top: 52px }` — obsolete fixed-header offset. */
 
   .site-logo {
     height: 36px;
