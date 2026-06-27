@@ -577,4 +577,100 @@ describe('MVC Integration: Lifecycle and Cleanup', () => {
       expect(String(cartBadge.textContent)).toBe('7');
     });
   });
+
+  // Phase 42 (WR-06): the mobile-nav hamburger toggle is the core deliverable of
+  // this phase but had zero coverage because every other test renders a `.menu`
+  // fixture (legacy branch) and never reaches hydratePrototypeChrome →
+  // _bindHamburgerMenu. These tests render the SSR-chrome fixture instead.
+  describe('Mobile navigation hamburger toggle (Phase 42)', () => {
+    // SSR-chrome fixture: hamburger + #tk-mobile-nav overlay with close button,
+    // a nav link, an empty top strip (scrim target), and a flag control. The flag
+    // intentionally omits `data-lang` so hydratePrototypeChrome does not bind a
+    // navigation handler to it — we only need it to exercise the WR-03 scrim guard
+    // (flags are `role="button"`, not real <button>s).
+    const CHROME_FIXTURE = `
+      <header class="tk-nav">
+        <button class="tk-hamburger" aria-expanded="false" aria-controls="tk-mobile-nav"></button>
+      </header>
+      <div id="tk-mobile-nav" role="dialog" aria-modal="true">
+        <div class="tk-mobile-nav__top">
+          <button class="tk-mobile-nav__close" aria-label="Close"></button>
+        </div>
+        <nav class="tk-mobile-nav__links">
+          <a class="tk-mobile-nav__link" href="/en">Home</a>
+        </nav>
+        <div class="tk-mobile-nav__controls">
+          <div class="flag-icon flag-eng" role="button" tabindex="0" aria-label="English"></div>
+        </div>
+      </div>
+    `;
+
+    beforeEach(async () => {
+      render(CHROME_FIXTURE);
+      await view.hydratePrototypeChrome('eng', 0);
+    });
+
+    it('opens on hamburger click: adds is-open and sets aria-expanded=true', () => {
+      const hamburger = document.querySelector('.tk-hamburger');
+      const overlay = document.getElementById('tk-mobile-nav');
+
+      expect(overlay.classList.contains('is-open')).toBe(false);
+      simulateClick(hamburger);
+
+      expect(overlay.classList.contains('is-open')).toBe(true);
+      expect(hamburger.getAttribute('aria-expanded')).toBe('true');
+    });
+
+    it('closes on close-button click and restores aria-expanded=false', () => {
+      const hamburger = document.querySelector('.tk-hamburger');
+      const overlay = document.getElementById('tk-mobile-nav');
+
+      simulateClick(hamburger); // open
+      simulateClick(document.querySelector('.tk-mobile-nav__close'));
+
+      expect(overlay.classList.contains('is-open')).toBe(false);
+      expect(hamburger.getAttribute('aria-expanded')).toBe('false');
+    });
+
+    it('closes on Escape key', () => {
+      const overlay = document.getElementById('tk-mobile-nav');
+
+      simulateClick(document.querySelector('.tk-hamburger')); // open
+      expect(overlay.classList.contains('is-open')).toBe(true);
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })
+      );
+
+      expect(overlay.classList.contains('is-open')).toBe(false);
+    });
+
+    it('closes on empty-space (scrim) tap', () => {
+      const overlay = document.getElementById('tk-mobile-nav');
+
+      simulateClick(document.querySelector('.tk-hamburger')); // open
+      simulateClick(document.querySelector('.tk-mobile-nav__top')); // non-interactive strip
+
+      expect(overlay.classList.contains('is-open')).toBe(false);
+    });
+
+    it('does NOT close when a flag control is tapped (WR-03)', () => {
+      const overlay = document.getElementById('tk-mobile-nav');
+
+      simulateClick(document.querySelector('.tk-hamburger')); // open
+      expect(overlay.classList.contains('is-open')).toBe(true);
+
+      simulateClick(document.querySelector('.flag-icon')); // role="button", not <button>
+
+      expect(overlay.classList.contains('is-open')).toBe(true); // still open
+    });
+
+    it('locks body scroll on open and unlocks on close', () => {
+      simulateClick(document.querySelector('.tk-hamburger')); // open
+      expect(document.body.style.overflow).toBe('hidden');
+
+      simulateClick(document.querySelector('.tk-mobile-nav__close')); // close
+      expect(document.body.style.overflow).toBe('');
+    });
+  });
 });
