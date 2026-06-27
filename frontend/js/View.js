@@ -958,6 +958,15 @@ export default class View {
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape' && overlay.classList.contains('is-open')) close();
     });
+
+    // Crossing the 800px breakpoint while open (rotate, window resize, devtools)
+    // re-shows the desktop nav and hides the hamburger. CSS alone can hide the
+    // overlay but leaves body scroll locked, so close() here to also clear the
+    // overflow lock and is-open state.
+    const desktopMq = window.matchMedia('(min-width: 800px)');
+    desktopMq.addEventListener('change', e => {
+      if (e.matches && overlay.classList.contains('is-open')) close();
+    });
   }
 
   getCurrencySelectorMarkup(lng, id) {

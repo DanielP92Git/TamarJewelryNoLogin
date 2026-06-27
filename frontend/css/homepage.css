@@ -531,6 +531,12 @@ img { display: block; }
 }
 
 /* ---------- Mobile nav overlay ---------- */
+/* Belt-and-suspenders: never show the mobile overlay on desktop. The matchMedia
+   listener in View.js (_bindHamburgerMenu) handles the body scroll-lock release
+   when crossing the breakpoint while open; this rule hides the visual overlay. */
+@media (min-width: 800px) {
+  #tk-mobile-nav { display: none; }
+}
 #tk-mobile-nav {
   position: fixed;
   inset: 0;
