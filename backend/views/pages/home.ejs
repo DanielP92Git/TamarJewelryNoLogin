@@ -186,6 +186,7 @@
           %>
           <div class="tk-prod"
                data-id="<%= product.id %>"
+               data-quant="<%= product.quantity %>"
                data-usd-price="<%= Math.round(product.usd_price || 0) %>"
                data-ils-price="<%= Math.round(product.ils_price || 0) %>"
                data-original-usd-price="<%= Math.round(product.original_usd_price || product.usd_price || 0) %>"
