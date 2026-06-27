@@ -900,15 +900,37 @@ export default class View {
       overlay.classList.add('is-open');
       hamburger.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';   // body scroll lock
-      closeBtn && closeBtn.focus();              // focus trap: move to close button
+      closeBtn && closeBtn.focus();              // move initial focus into the dialog
     };
 
     const close = () => {
       overlay.classList.remove('is-open');
       hamburger.setAttribute('aria-expanded', 'false');
       document.body.style.overflow = '';
-      hamburger.focus();                          // focus trap: return to hamburger
+      hamburger.focus();                          // restore focus to the trigger
     };
+
+    // Real focus trap: keep Tab / Shift+Tab cycling within the overlay while it is
+    // open, so keyboard/AT users cannot Tab out into the page underneath. This is
+    // what makes the dialog's `aria-modal="true"` honest.
+    overlay.addEventListener('keydown', e => {
+      if (e.key !== 'Tab' || !overlay.classList.contains('is-open')) return;
+      const focusable = Array.from(
+        overlay.querySelectorAll(
+          'a[href], button:not([disabled]), select, input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    });
 
     // Dismissal method 1: hamburger toggle (re-tap)
     hamburger.addEventListener('click', () => {
