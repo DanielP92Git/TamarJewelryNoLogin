@@ -1,7 +1,8 @@
 ---
 phase: 43-site-wide-cart-drawer
 verified: 2026-06-28T12:00:00Z
-status: human_needed
+status: passed
+human_verified: 2026-06-28T15:00:00Z (all 9 UAT items confirmed; 8 bugs found & fixed — see 43-HUMAN-UAT.md)
 score: 10/10
 overrides_applied: 0
 human_verification:

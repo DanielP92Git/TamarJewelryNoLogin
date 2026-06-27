@@ -1,14 +1,14 @@
 ---
-status: partial
+status: passed
 phase: 43-site-wide-cart-drawer
 source: [43-VERIFICATION.md]
 started: 2026-06-28T12:00:00Z
-updated: 2026-06-28T14:30:00Z
+updated: 2026-06-28T15:00:00Z
 ---
 
 ## Current Test
 
-[3 items remain — RTL mirror, breakpoint persistence, three-way dismiss]
+[complete — all 9 items passed]
 
 ## Tests
 
@@ -18,11 +18,11 @@ result: passed — scroll lock fixed (locked on <html>+<body>); user confirmed "
 
 ### 2. RTL mirror on /he
 expected: On any /he/ URL, opening the drawer slides it in from the LEFT (the `[dir="rtl"] .tk-drawer` rule applies), not the right.
-result: [pending]
+result: passed — user confirmed.
 
 ### 3. No auto-close at 800px breakpoint
 expected: With the drawer open, resizing the browser across the 800px boundary leaves the drawer open; only ✕ / scrim / Esc / icon-toggle close it (unlike the hamburger menu).
-result: [pending]
+result: passed — user confirmed.
 
 ### 4. Add-to-cart auto-open (D-04) from all entry points
 expected: Adding an item from (a) the homepage featured grid, (b) a category page card, and (c) the product/modal Add-to-Cart each auto-opens the drawer showing the newly added item in the persisted currency, and the badge increments.
@@ -46,14 +46,14 @@ result: passed — cart-page total now multiplies price × quantity; navigation 
 
 ### 9. Three-way dismiss (D-06)
 expected: An open drawer can be dismissed via the ✕ close button, clicking the scrim/overlay, and pressing Esc.
-result: [pending]
+result: passed — user confirmed (✕ / scrim / Esc).
 
 ## Summary
 
 total: 9
-passed: 6
+passed: 9
 issues: 0
-pending: 3
+pending: 0
 skipped: 0
 blocked: 0
 
