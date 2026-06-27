@@ -113,7 +113,8 @@ See [v1.6-ROADMAP.md](.planning/milestones/v1.6-ROADMAP.md) for full phase detai
 - [x] **Phase 40: Currency Selector Wiring** - `currency-changed` event reliably drives cart + category price re-renders; dropdown reflects saved currency on load (GeoIP default); currency persists across navigation (completed 2026-06-24)
 - [x] **Phase 40.1: Homepage Featured Products** (INSERTED) - `isFeatured` flag + admin toggle; SSR featured grid with dual prices; `homepage.js` reads real data and re-prices on currency change (removes hardcoded `CURRENCY='ILS'` + demo `PRODUCTS`) (completed 2026-06-25)
 - [x] **Phase 41: Footer Social Restore** - Instagram and Facebook links in prototype `.tk-footer` with correct URLs and RTL styling (completed 2026-06-25)
-- [x] **Phase 42: Mobile Navigation** - Hamburger toggle below 800px; mobile menu open/close; language and currency accessible on mobile; non-destructive and RTL-correct (completed 2026-06-27)
+- [x] **Phase 42: Mobile Navigation** - Hamburger toggle below 800px; mobile menu open/close; language and currency accessible on mobile; non-destructive and RTL-correct
+ (completed 2026-06-27)
 - [ ] **Phase 43: Site-wide Cart Drawer** - Promote the homepage-only demo cart drawer into global chrome; nav cart icon opens a mini-cart on every page with real `model.js` data; honors Phase 40 currency wiring; "View cart / Checkout" CTA → `/{lang}/cart`
 
 ## Phase Details
@@ -226,9 +227,12 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 ### Phase 43: Site-wide Cart Drawer
 
 **Goal:** Promote the homepage-only demo cart drawer into global chrome so the nav cart icon opens a mini-cart on **every** page, rendering real `model.js` cart data (not the homepage demo data), honoring Phase 40 currency wiring for live + persisted re-pricing, with a "View cart / Checkout" CTA that routes to `/{lang}/cart`. Scope: move drawer markup from `home.ejs` into a global partial; move open/close wiring from `homepage.js` into base `View.js`; dual-render safety; cart-count badge sync; mobile + RTL. See `.planning/todos/pending/site-wide-cart-drawer.md`.
-**Requirements**: TBD (run /gsd-plan-phase 43)
+**Requirements**: D-01..D-10 (43-CONTEXT.md decisions — REQUIREMENTS.md unmapped for this phase)
 **Depends on:** Phase 40 (currency wiring) and Phase 42 (mobile navigation — drawer mobile/RTL behavior builds on it)
-**Plans:** 3/3 plans complete
+**Plans:** 4 plans, 3 waves
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 43 to break down)
+- [ ] 43-01-PLAN.md — Drawer global partial + footer include + site-wide/RTL CSS (D-01/D-02/D-10) [wave 1]
+- [ ] 43-02-PLAN.md — model.js quantity mutators for in-drawer editing (D-07/D-08) [wave 1]
+- [ ] 43-03-PLAN.md — View.js global open/close + render real cart + currency + editing (D-03/D-05/D-06/D-07/D-08/D-09/D-10) [wave 2]
+- [ ] 43-04-PLAN.md — Retire homepage.js demo cart + auto-open on add across entry points (D-04/D-09) [wave 3]
