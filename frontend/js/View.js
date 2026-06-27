@@ -291,7 +291,9 @@ export default class View {
 
   increaseCartNumber() {
     // Get fixed cart count elements
-    const cartNumberElements = document.querySelectorAll('.cart-number-mobile');
+    const cartNumberElements = document.querySelectorAll(
+      '.tk-nav__count, .cart-number-mobile'
+    );
 
     cartNumberElements.forEach(cartNum => {
       this._cartNewValue = +cartNum.textContent + 1;
@@ -302,7 +304,9 @@ export default class View {
 
   decreaseCartNumber() {
     // Get fixed cart count elements
-    const cartNumberElements = document.querySelectorAll('.cart-number-mobile');
+    const cartNumberElements = document.querySelectorAll(
+      '.tk-nav__count, .cart-number-mobile'
+    );
 
     cartNumberElements.forEach(cartNum => {
       this._cartNewValue = +cartNum.textContent - 1;
@@ -313,7 +317,9 @@ export default class View {
 
   persistCartNumber(num) {
     // Select the fixed cart count elements
-    const cartNumberElements = document.querySelectorAll('.cart-number-mobile');
+    const cartNumberElements = document.querySelectorAll(
+      '.tk-nav__count, .cart-number-mobile'
+    );
 
     if (cartNumberElements.length === 0) {
       return;
@@ -1053,6 +1059,7 @@ export default class View {
     const close = () => {
       overlay.classList.remove('is-open');
       drawer.classList.remove('is-open');
+      document.documentElement.style.overflow = '';
       document.body.style.overflow = '';
       trigger.focus();
     };
@@ -1156,6 +1163,9 @@ export default class View {
     if (overlay.classList.contains('is-open')) return; // already open — no-op
     overlay.classList.add('is-open');
     drawer.classList.add('is-open');
+    // Lock scroll on BOTH <html> and <body> — the document element is the real
+    // scroller on these pages, so locking body alone left the page scrolling.
+    document.documentElement.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
     if (closeBtn) requestAnimationFrame(() => closeBtn.focus());
   }
@@ -1255,6 +1265,10 @@ export default class View {
       plusBtn.classList.add('tk-line__qty-btn', 'tk-line__qty-btn--plus');
       plusBtn.textContent = '+';
       plusBtn.dataset.id = itemId;
+      // Disable at the stock cap so the user gets clear feedback instead of a
+      // silent no-op. `quantity` is the line's stock; many items are one-of-a-kind.
+      const stockCap = Number(item.quantity) || Infinity;
+      if ((Number(item.amount) || 1) >= stockCap) plusBtn.disabled = true;
 
       qtyRow.appendChild(minusBtn);
       qtyRow.appendChild(qtyVal);
@@ -1309,11 +1323,17 @@ export default class View {
         this._renderCartDrawer();
         return;
       }
-      // Minus stepper (D-07)
+      // Minus stepper (D-07). At quantity 1, a further decrement removes the
+      // line entirely (the model floors decreaseAmount at 1 and never removes).
       const minusBtn = e.target.closest('.tk-line__qty-btn--minus');
       if (minusBtn) {
         const id = minusBtn.dataset.id;
-        await model.decreaseAmount(id);
+        const item = model.cart.find(el => el.id == id);
+        if (item && (Number(item.amount) || 1) <= 1) {
+          await model.removeFromUserCart(id);
+        } else {
+          await model.decreaseAmount(id);
+        }
         this._renderCartDrawer();
         return;
       }

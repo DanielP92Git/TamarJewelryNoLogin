@@ -429,8 +429,8 @@ class CartView extends View {
     // Use _getItemPrice to respect localStorage currency setting
     const total = model.cart
       .map(itm => {
-        // Get price based on current currency selection
-        return this._getItemPrice(itm, false);
+        // Get price based on current currency selection, multiplied by line quantity
+        return this._getItemPrice(itm, false) * (Number(itm.amount) || 1);
       })
       .reduce((x, y) => x + y, 0);
 
@@ -448,8 +448,8 @@ class CartView extends View {
     // Calculate original total using stored prices based on current currency
     const total = model.cart
       .map(itm => {
-        // Use stored original price for current currency
-        return this._getItemPrice(itm, true);
+        // Use stored original price for current currency, multiplied by line quantity
+        return this._getItemPrice(itm, true) * (Number(itm.amount) || 1);
       })
       .reduce((x, y) => x + y, 0);
 

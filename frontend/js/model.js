@@ -217,9 +217,16 @@ export const addToLocalStorage = async function (data) {
   //   }
   // });
 
-  // Safely get the image element
-  const frontImageEl = data.querySelector('.front-image');
-  const itemImage = frontImageEl ? frontImageEl.src : '';
+  // Safely get the image element. Different entry points use different markup:
+  // category cards use `.front-image`, the modal mockElement maps `.front-image`,
+  // and the homepage featured grid (.tk-prod) nests its image in `.tk-prod__media`.
+  // Fall back through the known containers so the drawer image is never blank.
+  const pickImg = sel => {
+    const el = data.querySelector(sel);
+    return el && el.src ? el.src : '';
+  };
+  const itemImage =
+    pickImg('.front-image') || pickImg('.tk-prod__media img') || pickImg('img');
 
   // Safely get the title element
   const titleEl = data.querySelector('.item-title');

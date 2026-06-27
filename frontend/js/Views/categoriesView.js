@@ -413,7 +413,7 @@ class CategoriesView extends View {
   increaseCartNumber() {
     // First select ALL cart number elements including mobile version
     this._cartNumber = document.querySelectorAll(
-      '.cart-number, .cart-number-mobile'
+      '.cart-number, .cart-number-mobile, .tk-nav__count'
     );
 
     if (!this._cartNumber || this._cartNumber.length === 0) {
@@ -470,7 +470,7 @@ class CategoriesView extends View {
 
     // Select ALL cart number elements including mobile version
     this._cartNumber = document.querySelectorAll(
-      '.cart-number, .cart-number-mobile'
+      '.cart-number, .cart-number-mobile, .tk-nav__count'
     );
 
     this.increaseCartNumber();
@@ -499,7 +499,7 @@ class CategoriesView extends View {
   async addFromPrev(data) {
     // Select cart number elements before increasing
     this._cartNumber = document.querySelectorAll(
-      '.cart-number, .cart-number-mobile'
+      '.cart-number, .cart-number-mobile, .tk-nav__count'
     );
 
     // Now increase the cart number
@@ -605,6 +605,11 @@ class CategoriesView extends View {
       }, 2000);
       return;
     }
+
+    // Close the product modal first so its overlay doesn't sit on top of the
+    // cart drawer (the drawer is z-index 1101; the modal overlay is higher).
+    // The drawer auto-opening is now the user's add-to-cart confirmation.
+    if (typeof this.closeModal === 'function') this.closeModal();
 
     // D-04: notify global drawer to re-render and auto-open (View.js listener).
     window.dispatchEvent(new CustomEvent('cart:item-added'));
@@ -1815,6 +1820,15 @@ class CategoriesView extends View {
             price: addToCartBtn.dataset.price,
             currency:
               this.selectedCurrency || addToCartBtn.dataset.currency || 'ils',
+            // Forward dual-currency prices from the full product object so the
+            // drawer/cart don't fall back to 0 (the modal button only carries a
+            // single `data-price`). Mirrors the category card's data-*-price attrs.
+            usdPrice: productData?.usd_price ?? null,
+            ilsPrice: productData?.ils_price ?? null,
+            originalUsdPrice:
+              productData?.original_usd_price ?? productData?.usd_price ?? null,
+            originalIlsPrice:
+              productData?.original_ils_price ?? productData?.ils_price ?? null,
             nameEn: productData?.name_en || productData?.name || '',
             nameHe: productData?.name_he || '',
           },
