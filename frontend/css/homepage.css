@@ -737,3 +737,117 @@ img { display: block; }
   border-color: var(--tk-border-strong);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23666666' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
+
+/* =========================================================
+   Featured-product modal — parity with the category-page
+   product modal (categoriesView), built/populated by
+   homepage.js openProductModal(). Mobile-first; desktop is a
+   thumbnails | image | specs row. RTL via [dir] on content.
+   ========================================================= */
+.tk-modal { display: none; }
+.tk-modal.is-open { display: block; }
+
+.tk-modal__overlay {
+  position: fixed; inset: 0; z-index: 1000;   /* above header(100)/mobile-nav(200), below cart drawer(1100) */
+  background: var(--tk-overlay);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 1rem; overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tk-modal__content {
+  position: relative; margin: auto;
+  width: 100%; max-width: 920px;
+  max-height: calc(100vh - 2rem);
+  background: var(--tk-white);
+  border-radius: var(--tk-radius-sm);
+  box-shadow: var(--tk-shadow-pill);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+
+.tk-modal__close {
+  position: absolute; top: 8px; right: 12px; z-index: 2;
+  width: 36px; height: 36px;
+  border: none; background: transparent;
+  font-size: 1.8rem; line-height: 1; color: var(--tk-text-muted);
+  cursor: pointer;
+}
+.tk-modal__close:hover { color: var(--tk-ink); }
+.tk-modal__content[dir="rtl"] .tk-modal__close { right: auto; left: 12px; }
+
+.tk-modal__layout { display: flex; flex-direction: column; overflow-y: auto; }
+
+/* Thumbnails — horizontal strip on mobile */
+.tk-modal__thumbs {
+  display: flex; flex-direction: row; gap: 8px;
+  padding: 1rem 1rem 0; overflow-x: auto;
+}
+.tk-modal__thumb {
+  flex: 0 0 auto; width: 64px; height: 64px; padding: 0;
+  border: 1px solid var(--tk-border); border-radius: var(--tk-radius-xs);
+  background: var(--tk-surface); cursor: pointer; overflow: hidden;
+  transition: border-color var(--tk-dur-fast) var(--tk-ease);
+}
+.tk-modal__thumb.is-active { border-color: var(--tk-gold); }
+.tk-modal__thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.tk-modal__media { padding: 1rem; display: flex; align-items: center; justify-content: center; }
+.tk-modal__big {
+  width: 100%; height: auto; max-height: 52vh;
+  object-fit: contain; border-radius: var(--tk-radius-xs);
+}
+.tk-modal__noimg {
+  width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  color: var(--tk-text-faint); background: var(--tk-surface);
+}
+
+.tk-modal__specs { padding: 0 1.5rem 1.5rem; font-family: var(--tk-font-body); }
+.tk-modal__title {
+  margin: 0 0 0.75rem;
+  font-family: var(--tk-font-serif); font-weight: var(--tk-weight-medium);
+  font-size: 1.6rem; color: var(--tk-ink);
+}
+.tk-modal__details { margin-bottom: 1.25rem; }
+.tk-modal__desc {
+  font-size: 0.95rem; line-height: var(--tk-leading-body);
+  color: var(--tk-text-soft); margin-bottom: 1rem;
+}
+.tk-modal__sku {
+  font-size: var(--tk-size-small); color: var(--tk-text-muted);
+  letter-spacing: var(--tk-track-body);
+}
+.tk-modal__sku-label { font-weight: var(--tk-weight-semibold); }
+
+.tk-modal__actions { border-top: 1px solid var(--tk-border-light); padding-top: 1.25rem; }
+.tk-modal__price { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 1rem; }
+.tk-modal__price-label {
+  font-size: var(--tk-size-small); color: var(--tk-text-muted);
+  letter-spacing: var(--tk-track-body); text-transform: uppercase;
+}
+.tk-modal__price .tk-price { justify-content: flex-start; }
+.tk-modal__add {
+  width: 100%; height: 48px;
+  border: none; background: var(--tk-ink); color: #fff;
+  font-family: var(--tk-font-body); font-size: 0.8rem;
+  font-weight: var(--tk-weight-semibold); letter-spacing: var(--tk-track-label);
+  text-transform: uppercase; cursor: pointer;
+  transition: background var(--tk-dur) var(--tk-ease);
+}
+.tk-modal__add:hover { background: var(--tk-ink-deep); }
+
+/* Desktop — thumbnails (column) | image | specs */
+@media (min-width: 800px) {
+  .tk-modal__layout { flex-direction: row; align-items: stretch; }
+  .tk-modal__thumbs {
+    flex-direction: column; flex: 0 0 84px;
+    padding: 1.5rem 0 1.5rem 1.5rem; overflow-x: visible; overflow-y: auto;
+  }
+  .tk-modal__content[dir="rtl"] .tk-modal__thumbs { padding: 1.5rem 1.5rem 1.5rem 0; }
+  .tk-modal__media { flex: 1 1 auto; min-width: 0; padding: 1.5rem; }
+  .tk-modal__big { max-height: 70vh; }
+  .tk-modal__specs {
+    flex: 0 0 320px; padding: 2.5rem 2rem 2rem;
+    display: flex; flex-direction: column; overflow-y: auto;
+  }
+  .tk-modal__actions { margin-top: auto; }
+}

@@ -25,6 +25,12 @@
 
   /* ---------- helpers ---------- */
   function $(id) { return document.getElementById(id); }
+  // HTML-escape user/content strings before innerHTML injection.
+  function esc(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
 
   /* ---------- PriceTag markup ---------- */
   function priceHTML(p, cur) {
@@ -33,6 +39,145 @@
       '<span class="tk-price__now' + (onSale ? ' is-sale' : '') + '">' + money(p.price, cur) + '</span>' +
       (onSale ? '<span class="tk-price__was">' + money(p.original, cur) + '</span>' : '') +
       '</div>';
+  }
+
+  /* ---------- Product modal ----------
+     Self-contained product detail modal for featured-grid cards, matching the
+     category-page modal (categoriesView.generatePreview) for consistency. All
+     data is read from the clicked .tk-prod card's dataset — no API call. Styled
+     by homepage.css (.tk-modal*). Add-to-Cart reuses window.tkAddToCart. */
+  let modalScrollY = 0;
+
+  // Best available URL for a gallery image entry {desktop, mobile, public*}.
+  function bestImg(img) {
+    if (!img) return '';
+    return img.publicDesktop || img.desktop || img.publicMobile || img.mobile || '';
+  }
+
+  function lockBodyScroll() {
+    modalScrollY = window.pageYOffset || document.documentElement.scrollTop || 0;
+    document.body.style.overflow = 'hidden';
+    document.body.style.position = 'fixed';
+    document.body.style.top = '-' + modalScrollY + 'px';
+    document.body.style.width = '100%';
+  }
+  function unlockBodyScroll() {
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    window.scrollTo(0, modalScrollY);
+  }
+
+  function escClose(e) { if (e.key === 'Escape') closeProductModal(); }
+
+  function closeProductModal() {
+    const modal = $('tk-modal');
+    if (!modal || !modal.innerHTML) return;
+    modal.innerHTML = '';
+    modal.classList.remove('is-open');
+    document.removeEventListener('keydown', escClose);
+    unlockBodyScroll();
+  }
+
+  function openProductModal(card) {
+    const modal = $('tk-modal');
+    if (!modal) return;
+
+    const isHe = (document.documentElement.lang || 'en') === 'he';
+    const dir = isHe ? 'rtl' : 'ltr';
+    const title = (isHe ? card.dataset.nameHe : card.dataset.nameEn) ||
+      card.dataset.nameEn || card.dataset.nameHe || '';
+    const desc = (isHe ? card.dataset.descriptionHe : card.dataset.descriptionEn) ||
+      card.dataset.descriptionEn || '';
+    const sku = card.dataset.sku || '';
+
+    // Gallery images (same JSON shape as category cards; index 0 = main).
+    let images = [];
+    try { images = JSON.parse(card.dataset.images || '[]'); } catch (err) { images = []; }
+    const urls = images.map(bestImg).filter(Boolean);
+    const mainUrl = urls[0] || '';
+
+    // Price (reuse grid helpers so formatting/sale matches the card).
+    const cur = getCurrency();
+    const usdP = parseInt(card.dataset.usdPrice, 10) || 0;
+    const ilsP = parseInt(card.dataset.ilsPrice, 10) || 0;
+    const oUsd = parseInt(card.dataset.originalUsdPrice, 10) || usdP;
+    const oIls = parseInt(card.dataset.originalIlsPrice, 10) || ilsP;
+    const price = cur === 'usd' ? usdP : ilsP;
+    const orig = cur === 'usd' ? oUsd : oIls;
+    const onSale = orig > price && orig > 0;
+    const priceMarkup = priceHTML({ price: price, original: onSale ? orig : null }, cur);
+
+    const priceLabel = isHe ? 'מחיר:' : 'Price:';
+    const addText = isHe ? 'הוסף לעגלה' : 'Add to Cart';
+    const skuLabel = isHe ? 'מק״ט:' : 'SKU:';
+
+    const thumbsHTML = urls.length > 1
+      ? '<div class="tk-modal__thumbs">' + urls.map(function (u, i) {
+          return '<button type="button" class="tk-modal__thumb' + (i === 0 ? ' is-active' : '') +
+            '" data-index="' + i + '"><img src="' + u + '" alt="' + esc(title) + ' ' + (i + 1) +
+            '" loading="lazy" /></button>';
+        }).join('') + '</div>'
+      : '';
+
+    const mediaHTML = mainUrl
+      ? '<img class="tk-modal__big" src="' + mainUrl + '" alt="' + esc(title) + '" />'
+      : '<div class="tk-modal__noimg">' + (isHe ? 'אין תמונה' : 'No image') + '</div>';
+
+    const descHTML = desc
+      ? '<div class="tk-modal__desc" dir="' + dir + '">' + esc(desc).replace(/\n/g, '<br>') + '</div>'
+      : '';
+    const skuHTML = sku
+      ? '<div class="tk-modal__sku"><span class="tk-modal__sku-label">' + skuLabel +
+        '</span> <span class="tk-modal__sku-value" dir="ltr">' + esc(sku) + '</span></div>'
+      : '';
+
+    modal.innerHTML =
+      '<div class="tk-modal__overlay">' +
+        '<div class="tk-modal__content" dir="' + dir + '">' +
+          '<button type="button" class="tk-modal__close" aria-label="Close">&times;</button>' +
+          '<div class="tk-modal__layout">' +
+            thumbsHTML +
+            '<div class="tk-modal__media">' + mediaHTML + '</div>' +
+            '<div class="tk-modal__specs" dir="' + dir + '">' +
+              '<h2 class="tk-modal__title">' + esc(title) + '</h2>' +
+              (descHTML || skuHTML ? '<div class="tk-modal__details">' + descHTML + skuHTML + '</div>' : '') +
+              '<div class="tk-modal__actions">' +
+                '<div class="tk-modal__price"><span class="tk-modal__price-label">' + priceLabel + '</span>' + priceMarkup + '</div>' +
+                '<button type="button" class="tk-modal__add">' + addText + '</button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+    modal.classList.add('is-open');
+    lockBodyScroll();
+    document.addEventListener('keydown', escClose);
+
+    // Close: X button + backdrop click.
+    modal.querySelector('.tk-modal__close').addEventListener('click', closeProductModal);
+    modal.querySelector('.tk-modal__overlay').addEventListener('click', function (e) {
+      if (e.target === e.currentTarget) closeProductModal();
+    });
+
+    // Thumbnail swap.
+    const big = modal.querySelector('.tk-modal__big');
+    modal.querySelectorAll('.tk-modal__thumb').forEach(function (thumb) {
+      thumb.addEventListener('click', function () {
+        const idx = parseInt(thumb.dataset.index, 10) || 0;
+        if (big && urls[idx]) big.src = urls[idx];
+        modal.querySelectorAll('.tk-modal__thumb').forEach(function (t) { t.classList.remove('is-active'); });
+        thumb.classList.add('is-active');
+      });
+    });
+
+    // Add to Cart — reuse the same global the grid button uses, then close
+    // (the cart drawer auto-opens via the cart:item-added event).
+    modal.querySelector('.tk-modal__add').addEventListener('click', function () {
+      if (window.tkAddToCart) window.tkAddToCart(card);
+      closeProductModal();
+    });
   }
 
   /* ---------- Grid hydration ----------
@@ -88,8 +233,10 @@
         if (e.target.closest('.tk-prod__add')) return; // let Add-to-Cart handle it
         const card = e.target.closest('.tk-prod');
         if (!card || !card.dataset.slug) return;
-        const lang = document.documentElement.lang || 'en';
-        window.location.href = '/' + lang + '/product/' + card.dataset.slug;
+        // Open the product modal (replaces the old hard-nav to /lang/product/slug)
+        // for parity with the category page. Source card carries all data the
+        // modal needs (data-images / names / descriptions / sku / prices).
+        openProductModal(card);
       });
       // D-04: re-pointed at the real model via window.tkAddToCart (wired by
       // View.js _bindCartDrawer). Dispatches cart:item-added to auto-open the

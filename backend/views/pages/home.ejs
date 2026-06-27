@@ -194,6 +194,9 @@
                data-slug="<%= product.slug %>"
                data-name-en="<%= product.name_en || product.name %>"
                data-name-he="<%= product.name_he || '' %>"
+               data-description-en="<%= product.description_en || product.description || '' %>"
+               data-description-he="<%= product.description_he || '' %>"
+               data-sku="<%= product.sku || '' %>"
                data-images="<%= JSON.stringify(galleryImages) %>">
             <div class="tk-prod__media">
               <img src="<%= desktopImage %>" alt="<%= productName %>" loading="lazy" />
@@ -235,6 +238,9 @@
     </div>
 
     <%- include('../partials/footer', { lang, urlLang }) %>
+
+    <!-- Featured-product modal shell (populated by homepage.js openProductModal) -->
+    <div class="tk-modal" id="tk-modal"></div>
 
     <script src="/js/homepage.js" defer></script>
   </body>
