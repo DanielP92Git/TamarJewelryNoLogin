@@ -393,6 +393,76 @@ img { display: block; }
 .tk-drawer__subtotal b { font-weight: var(--tk-weight-semibold); }
 .tk-drawer__note { margin: 0 0 18px; font-size: 0.74rem; color: var(--tk-text-muted); }
 
+/* ---------- Cart drawer — RTL mirror (/he) ----------
+   On /en the drawer slides in from the RIGHT (right:0, translateX(100%)).
+   On /he (dir="rtl") mirror to the LEFT (left:0, translateX(-100%)) so it
+   opens from the cart-icon side — Phase 39 D-09 / Phase 42 RTL true-mirror. */
+[dir="rtl"] .tk-drawer {
+  right: auto;
+  left: 0;
+  box-shadow: 8px 0 30px rgba(0,0,0,0.12);
+  transform: translateX(-100%);
+}
+[dir="rtl"] .tk-drawer.is-open { transform: translateX(0); }
+
+/* ---------- Cart drawer — quantity stepper (D-07 contract) ----------
+   Plan 03 renders: <div class="tk-line__qty">
+     <button class="tk-line__qty-btn tk-line__qty-btn--minus">−</button>
+     <span class="tk-line__qty-val">2</span>
+     <button class="tk-line__qty-btn tk-line__qty-btn--plus">+</button>
+   </div>
+   This file defines the visual contract; Plan 03 binds behaviour. */
+.tk-line__qty {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tk-line__qty-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  background: none;
+  border: 1px solid var(--tk-border);
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--tk-text);
+  transition: border-color var(--tk-dur) var(--tk-ease), color var(--tk-dur) var(--tk-ease);
+}
+.tk-line__qty-btn:hover { border-color: var(--tk-ink); color: var(--tk-ink); }
+.tk-line__qty-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.tk-line__qty-val { font-size: 0.85rem; color: var(--tk-text); min-width: 18px; text-align: center; }
+
+/* ---------- Cart drawer — empty state (D-10) ---------- */
+.tk-drawer__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-top: 56px;
+  text-align: center;
+  color: var(--tk-text-muted);
+  font-size: 0.9rem;
+}
+/* Override the existing flat rule above (same specificity — appears later, wins) */
+.tk-drawer__body .tk-drawer__empty { margin-top: 56px; }
+#tk-cart-continue {
+  margin-top: 4px;
+  padding: 10px 24px;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: none;
+  border: 1px solid var(--tk-border-strong, var(--tk-border));
+  color: var(--tk-text);
+  cursor: pointer;
+  transition: border-color var(--tk-dur) var(--tk-ease), color var(--tk-dur) var(--tk-ease);
+}
+#tk-cart-continue:hover { border-color: var(--tk-ink); color: var(--tk-ink); }
+
 /* ---------- Floating WhatsApp ---------- */
 .tk-whatsapp {
   position: fixed; right: 26px; bottom: 26px; z-index: 1200;
