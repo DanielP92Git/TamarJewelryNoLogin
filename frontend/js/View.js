@@ -900,7 +900,13 @@ export default class View {
       overlay.classList.add('is-open');
       hamburger.setAttribute('aria-expanded', 'true');
       document.body.style.overflow = 'hidden';   // body scroll lock
-      closeBtn && closeBtn.focus();              // move initial focus into the dialog
+      // Defer initial focus to the next frame. The overlay is `visibility:hidden`
+      // until `.is-open` applies; a synchronous `.focus()` on a still-hidden,
+      // not-yet-focusable element is a silent no-op, so focus would never enter
+      // the dialog and Tab would walk the page behind it (the focus trap below
+      // only fires once activeElement is inside the overlay). rAF runs after the
+      // style recalc, when closeBtn is genuinely visible and focusable.
+      if (closeBtn) requestAnimationFrame(() => closeBtn.focus());
     };
 
     const close = () => {
