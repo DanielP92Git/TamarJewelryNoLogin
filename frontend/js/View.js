@@ -917,9 +917,14 @@ export default class View {
       closeBtn.addEventListener('click', close);
     }
 
-    // Dismissal method 3: scrim / outside tap (click on backdrop, not children)
+    // Dismissal method 3: scrim / outside tap — close on any tap that is not an
+    // interactive control. The overlay is a flex column whose children fill it
+    // (top strip + flex:1 link list + controls), so `e.target === overlay` never
+    // fires; instead detect "empty white space" by the absence of an interactive
+    // ancestor (links, close button, flags, currency select).
     overlay.addEventListener('click', e => {
-      if (e.target === overlay) close();
+      if (e.target.closest('a, button, select, input, label')) return;
+      close();
     });
 
     // Bonus: Escape key
