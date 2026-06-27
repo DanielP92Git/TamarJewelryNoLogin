@@ -480,6 +480,8 @@ class CategoriesView extends View {
 
     try {
       await model.handleAddToCart(item);
+      // D-04: notify global drawer to re-render and auto-open (View.js listener).
+      window.dispatchEvent(new CustomEvent('cart:item-added'));
     } catch (err) {
       console.error('Failed to add item to cart:', err);
       this.decreaseCartNumber();
@@ -603,6 +605,9 @@ class CategoriesView extends View {
       }, 2000);
       return;
     }
+
+    // D-04: notify global drawer to re-render and auto-open (View.js listener).
+    window.dispatchEvent(new CustomEvent('cart:item-added'));
 
     // Update button text on success
     if (addToCartBtn) {
