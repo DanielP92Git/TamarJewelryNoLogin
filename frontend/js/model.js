@@ -327,6 +327,56 @@ export const removeFromUserCart = async function (itemId) {
   }
 };
 
+// D-07/D-08: change a cart line's quantity (the `amount` field). Min 1; capped
+// at the line's stock (`quantity`). Persists via the existing createLocalStorage
+// for guests; for logged-in users mirrors the existing add path so the server
+// count stays in sync on increase.
+//
+// Verified: backend /addtocart (routes/cart.js) does `userData.cartData[itemId] += 1`
+// with only req.body.itemId — it DOES increment on a bare {itemId}, so we keep the
+// server POST for the logged-in increase path.
+//
+// Logged-in DECREASE limitation (D-08 known): there is no server decrement route
+// and none is added (out of scope). For logged-in users, decreaseAmount updates
+// model.cart in-session but does NOT sync to the server. Documented in 43-02-SUMMARY.
+export const increaseAmount = async function (itemId) {
+  const item = cart.find(el => el.id == itemId);          // == : id may be String/Number
+  if (!item) return;
+  const stock = Number(item.quantity) || Infinity;        // quantity is the stock cap
+  if ((Number(item.amount) || 1) >= stock) return item.amount; // at cap, no-op
+  item.amount = (Number(item.amount) || 1) + 1;
+  if (!localStorage.getItem('auth-token')) {
+    createLocalStorage();
+  } else {
+    try {
+      await fetch(`${host}/addtocart`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/form-data',
+          'auth-token': `${localStorage.getItem('auth-token')}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ itemId }),
+      });
+    } catch (e) {
+      console.error('increaseAmount sync failed', e);
+    }
+  }
+  return item.amount;
+};
+
+export const decreaseAmount = async function (itemId) {
+  const item = cart.find(el => el.id == itemId);
+  if (!item) return;
+  if ((Number(item.amount) || 1) <= 1) return item.amount; // min 1, never auto-remove
+  item.amount = (Number(item.amount) || 1) - 1;
+  if (!localStorage.getItem('auth-token')) createLocalStorage();
+  // Logged-in decrement: no server decrement route exists and none is added (out of
+  // scope). The local model.cart — which drives the /cart page and checkout — is
+  // updated in-session. See known_limitations in 43-02-PLAN.md.
+  return item.amount;
+};
+
 export const deleteAll = async function () {
   if (!localStorage.getItem('auth-token')) {
     cart.length = 0;
