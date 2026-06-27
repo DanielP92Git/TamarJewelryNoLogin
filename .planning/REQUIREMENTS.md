@@ -30,11 +30,11 @@
 
 ### Mobile Navigation (NAV)
 
-- [ ] **NAV-01**: A hamburger menu button appears in the prototype nav below 800px
-- [ ] **NAV-02**: Tapping the hamburger opens a mobile menu exposing the nav links
-- [ ] **NAV-03**: Mobile menu can be dismissed (toggle, close button, or outside tap)
-- [ ] **NAV-04**: Language and currency controls remain accessible on mobile screens
-- [ ] **NAV-05**: Mobile nav works without destructive `View.setLanguage` rewrites and renders correctly in RTL
+- [x] **NAV-01**: A hamburger menu button appears in the prototype nav below 800px
+- [x] **NAV-02**: Tapping the hamburger opens a mobile menu exposing the nav links
+- [x] **NAV-03**: Mobile menu can be dismissed (toggle, close button, or outside tap)
+- [x] **NAV-04**: Language and currency controls remain accessible on mobile screens
+- [x] **NAV-05**: Mobile nav works without destructive `View.setLanguage` rewrites and renders correctly in RTL
 
 ## Future Requirements
 
@@ -77,11 +77,11 @@ Which phases cover which requirements. Populated during roadmap creation.
 | FOOT-01 | Phase 41 | Pending |
 | FOOT-02 | Phase 41 | Pending |
 | FOOT-03 | Phase 41 | Pending |
-| NAV-01 | Phase 42 | Pending |
-| NAV-02 | Phase 42 | Pending |
-| NAV-03 | Phase 42 | Pending |
-| NAV-04 | Phase 42 | Pending |
-| NAV-05 | Phase 42 | Pending |
+| NAV-01 | Phase 42 | Complete |
+| NAV-02 | Phase 42 | Complete |
+| NAV-03 | Phase 42 | Complete |
+| NAV-04 | Phase 42 | Complete |
+| NAV-05 | Phase 42 | Complete |
 
 **Coverage:**
 - v1.7 requirements: 17 total

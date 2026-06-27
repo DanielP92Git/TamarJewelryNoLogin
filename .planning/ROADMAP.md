@@ -218,7 +218,7 @@ Phases execute in numeric order: 39 → 40 → 40.1 → 41 → 42
 | 40. Currency Selector Wiring | v1.7 | 2/2 | Complete    | 2026-06-24 |
 | 40.1. Homepage Featured Products | v1.7 | 5/5 | Complete    | 2026-06-25 |
 | 41. Footer Social Restore | v1.7 | 2/2 | Complete   | 2026-06-25 |
-| 42. Mobile Navigation | v1.7 | 3/3 | Complete   | 2026-06-27 |
+| 42. Mobile Navigation | v1.7 | 3/3 | Complete    | 2026-06-27 |
 | 43. Site-wide Cart Drawer | v1.7 | 0/TBD | Not started | - |
 
 *Last updated: 2026-06-25 — Phase 42 planned (3 plans, 3 waves)*
