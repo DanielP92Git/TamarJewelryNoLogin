@@ -926,7 +926,9 @@ export default class View {
     // fires; instead detect "empty white space" by the absence of an interactive
     // ancestor (links, close button, flags, currency select).
     overlay.addEventListener('click', e => {
-      if (e.target.closest('a, button, select, input, label')) return;
+      // Flags are `<div class="flag-icon" role="button">` (not real <button>s),
+      // so include both selectors or a tap on a flag falls through to close().
+      if (e.target.closest('a, button, select, input, label, .flag-icon, [role="button"]')) return;
       close();
     });
 
