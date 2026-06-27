@@ -301,4 +301,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-06-25 — v1.7 in progress: Phase 40.1 (Homepage Featured Products) complete — admin-curated featured grid with dual-currency SSR + hydration replaces homepage.js demo data (CURR-03 validated). Phases 41–42 remain.*
+*Last updated: 2026-06-27 — v1.7 in progress: Phase 42 (Mobile Navigation) complete — hamburger button + full-screen `#tk-mobile-nav` overlay below 800px, wired non-destructively via `_bindHamburgerMenu()` in `hydratePrototypeChrome`; three dismissals (close button, outside/scrim tap, Escape — re-tap intentionally dropped), relocated flags+currency, RTL-mirrored on `/he` (NAV-01…NAV-05 validated). Next: Phase 43 (site-wide cart drawer).*
