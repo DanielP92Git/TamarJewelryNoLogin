@@ -225,21 +225,6 @@
         </div>
       </section>
 
-      <!-- ============ CART DRAWER ============ -->
-      <div class="tk-overlay" id="tk-overlay"></div>
-      <aside class="tk-drawer" id="tk-drawer" aria-label="<% if (lang === 'eng') { %>Shopping cart<% } else { %>עגלת קניות<% } %>">
-        <div class="tk-drawer__head">
-          <span class="tk-drawer__title"><% if (lang === 'eng') { %>Shopping Cart<% } else { %>עגלת קניות<% } %></span>
-          <button class="tk-drawer__close" id="tk-cart-close" type="button" aria-label="Close">&times;</button>
-        </div>
-        <div class="tk-drawer__body" id="tk-drawer-body"><!-- lines injected --></div>
-        <div class="tk-drawer__foot">
-          <div class="tk-drawer__subtotal"><span><% if (lang === 'eng') { %>Subtotal<% } else { %>סכום ביניים<% } %></span><b id="tk-subtotal">₪0</b></div>
-          <p class="tk-drawer__note"><% if (lang === 'eng') { %>Shipping calculated at checkout.<% } else { %>המשלוח מחושב בקופה.<% } %></p>
-          <button class="tk-btn tk-btn--primary tk-btn--full" id="tk-checkout" type="button" disabled><% if (lang === 'eng') { %>Proceed to Checkout<% } else { %>מעבר לתשלום<% } %></button>
-        </div>
-      </aside>
-
       <!-- ============ FLOATING WHATSAPP + TOAST ============ -->
       <a class="tk-whatsapp" href="https://wa.me/972524484763" id="tk-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">
         <img src="/imgs/homepage/icons/whatsapp.svg" alt="" />

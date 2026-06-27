@@ -1,0 +1,27 @@
+<%
+  // Global cart-drawer partial. Included once via footer.ejs — renders on every page.
+  // `lang` and `urlLang` are forwarded from each page's footer include.
+  // Defensive locals guard: if urlLang is not passed, derive it from lang.
+  var _urlLang = (typeof urlLang !== 'undefined') ? urlLang : (lang === 'heb' ? 'he' : 'en');
+  var _eng = lang === 'eng';
+%>
+<!-- ============ CART DRAWER (global partial) ============ -->
+<div class="tk-overlay" id="tk-overlay"></div>
+<aside class="tk-drawer" id="tk-drawer" aria-label="<% if (_eng) { %>Shopping cart<% } else { %>עגלת קניות<% } %>">
+  <div class="tk-drawer__head">
+    <span class="tk-drawer__title"><% if (_eng) { %>Shopping Cart<% } else { %>עגלת קניות<% } %></span>
+    <button class="tk-drawer__close" id="tk-cart-close" type="button" aria-label="Close">&times;</button>
+  </div>
+  <div class="tk-drawer__body" id="tk-drawer-body">
+    <div class="tk-drawer__empty" id="tk-cart-empty" hidden>
+      <p><% if (_eng) { %>Your cart is empty<% } else { %>העגלה שלך ריקה<% } %></p>
+      <button class="tk-btn tk-btn--ghost" id="tk-cart-continue" type="button"><% if (_eng) { %>Continue shopping<% } else { %>המשך בקנייה<% } %></button>
+    </div>
+    <!-- lines injected -->
+  </div>
+  <div class="tk-drawer__foot">
+    <div class="tk-drawer__subtotal"><span><% if (_eng) { %>Subtotal<% } else { %>סכום ביניים<% } %></span><b id="tk-subtotal">₪0</b></div>
+    <p class="tk-drawer__note"><% if (_eng) { %>Shipping calculated at checkout.<% } else { %>המשלוח מחושב בקופה.<% } %></p>
+    <button class="tk-btn tk-btn--primary tk-btn--full" id="tk-checkout" type="button" disabled data-cart-url="/<%= _urlLang %>/cart"><% if (_eng) { %>Proceed to Checkout<% } else { %>מעבר לתשלום<% } %></button>
+  </div>
+</aside>

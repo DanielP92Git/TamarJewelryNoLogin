@@ -42,3 +42,4 @@
   </div>
   <div class="tk-footer__bar">&copy; <%= new Date().getFullYear() %> <% if (_eng) { %>Tamar Kfir Jewelry. All Rights Reserved.<% } else { %>תכשיטי תמר כפיר. כל הזכויות שמורות.<% } %></div>
 </footer>
+<%- include('cart-drawer', { lang: lang, urlLang: (typeof urlLang !== 'undefined' ? urlLang : (lang === 'heb' ? 'he' : 'en')) }) %>
