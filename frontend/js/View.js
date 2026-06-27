@@ -234,9 +234,10 @@ export default class View {
     const stickyMenu = function (entries) {
       const [entry] = entries;
       if (window.innerWidth < 800) return;
-      if (!entry.isIntersecting)
-        menu.classList.add('sticky') + menu.classList.remove('hidden');
-      else menu.classList.remove('sticky');
+      if (!entry.isIntersecting) {
+        menu.classList.add('sticky');
+        menu.classList.remove('hidden');
+      } else menu.classList.remove('sticky');
     };
 
     const headerObserver = new IntersectionObserver(stickyMenu, {
@@ -255,8 +256,10 @@ export default class View {
     const hideMenu = function (entries) {
       const [entry] = entries;
       if (window.innerWidth < 800) return;
-      if (!entry.isIntersecting)
-        menu.classList.add('hidden') + menu.classList.remove('sticky');
+      if (!entry.isIntersecting) {
+        menu.classList.add('hidden');
+        menu.classList.remove('sticky');
+      }
     };
 
     const headerObserverTwo = new IntersectionObserver(hideMenu, {
