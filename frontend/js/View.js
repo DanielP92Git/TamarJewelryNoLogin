@@ -878,6 +878,11 @@ export default class View {
     // toggle because the SSR chrome is never rewritten (no innerHTML, no re-render).
     this._bindHamburgerMenu();
 
+    // Cart drawer — open/close + rendering. Bound once per page load via the same
+    // double-bind guard as the hamburger. Survives language toggle (SSR chrome is
+    // never rewritten). Wires against Plan 01 markup + Plan 02 model mutators.
+    this._bindCartDrawer();
+
     // Page-specific language/body setup MUST still run (e.g. contactMeView's
     // setFormLng re-attaches the submit handler).
     if (typeof this.setPageSpecificLanguage === 'function') {
@@ -972,6 +977,318 @@ export default class View {
     const desktopMq = window.matchMedia('(min-width: 800px)');
     desktopMq.addEventListener('change', e => {
       if (e.matches && overlay.classList.contains('is-open')) close();
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Cart-drawer currency / name helpers (base View — needed on every page so
+  // non-cart pages can render the global mini-cart). Mirrors cartView.js helpers.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _getCurrentCurrency() {
+    const saved = localStorage.getItem('currency') || 'usd';
+    return saved === 'ils' ? 'ils' : 'usd';
+  }
+
+  _getItemPrice(item, useOriginal = false) {
+    const currency = this._getCurrentCurrency();
+    if (currency === 'usd') {
+      return useOriginal
+        ? Math.round(
+            item.originalUsdPrice ||
+              item.originalPrice ||
+              item.usdPrice ||
+              item.price ||
+              0
+          )
+        : Math.round(item.usdPrice || item.price || 0);
+    } else {
+      return useOriginal
+        ? Math.round(
+            item.originalIlsPrice ||
+              item.originalPrice ||
+              item.ilsPrice ||
+              item.price ||
+              0
+          )
+        : Math.round(item.ilsPrice || item.price || 0);
+    }
+  }
+
+  _getCurrencySymbol() {
+    return this._getCurrentCurrency() === 'usd' ? '$' : '₪';
+  }
+
+  _getDrawerItemName(item) {
+    const lng = localStorage.getItem('language') || 'eng';
+    if (lng === 'heb') {
+      return item.name_he || item.name_en || item.title || '';
+    }
+    return item.name_en || item.title || '';
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Cart drawer — open/close/three-way dismissal (D-05/D-06)
+  // Non-destructive bind: only attaches handlers, never rewrites drawer chrome.
+  // Mirrors _bindHamburgerMenu above.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _bindCartDrawer() {
+    const trigger  = document.getElementById('tk-cart-open');
+    const overlay  = document.getElementById('tk-overlay');
+    const drawer   = document.getElementById('tk-drawer');
+    const closeBtn = document.getElementById('tk-cart-close');
+
+    if (!trigger || !overlay || !drawer) return; // guard: elements not in DOM
+
+    // Double-bind guard — survives language toggle (SSR chrome is never rewritten)
+    if (trigger.dataset.tkCartBound === '1') return;
+    trigger.dataset.tkCartBound = '1';
+
+    const open = () => {
+      overlay.classList.add('is-open');
+      drawer.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      this._renderCartDrawer();
+      if (closeBtn) requestAnimationFrame(() => closeBtn.focus());
+    };
+
+    const close = () => {
+      overlay.classList.remove('is-open');
+      drawer.classList.remove('is-open');
+      document.body.style.overflow = '';
+      trigger.focus();
+    };
+
+    // D-05: preventDefault preserves the <a href="/{lang}/cart"> no-JS fallback
+    // while intercepting it on every page (incl. /cart itself) to open the drawer.
+    trigger.addEventListener('click', e => {
+      e.preventDefault();
+      overlay.classList.contains('is-open') ? close() : open();
+    });
+
+    // D-06 dismissal method 1: close button
+    if (closeBtn) {
+      closeBtn.addEventListener('click', close);
+    }
+
+    // D-06 dismissal method 2: scrim / outside tap — close unless the tap target
+    // is an interactive control inside the drawer.
+    overlay.addEventListener('click', e => {
+      if (e.target.closest('a, button, select, input, label, [role="button"]')) return;
+      close();
+    });
+
+    // D-06 dismissal method 3: Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && overlay.classList.contains('is-open')) close();
+    });
+
+    // NOTE: No matchMedia(800px) close binding here. The cart drawer is a valid
+    // feature at every viewport width (unlike the mobile-only hamburger). It is
+    // dismissed ONLY by the three explicit actions above (✕ / scrim / Esc / icon-toggle).
+
+    // D-10: Continue-shopping closes the drawer; no routing.
+    const continueBtn = document.getElementById('tk-cart-continue');
+    if (continueBtn) {
+      continueBtn.addEventListener('click', close);
+    }
+
+    // D-01/D-03: Checkout button navigates to /{lang}/cart when enabled.
+    const checkoutBtn = document.getElementById('tk-checkout');
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener('click', () => {
+        if (checkoutBtn.disabled) return;
+        // T-43-02: validate the data-cart-url against ^/(en|he)/cart$ before navigating.
+        const dataUrl = checkoutBtn.getAttribute('data-cart-url') || '';
+        const validUrl = /^\/(en|he)\/cart$/.test(dataUrl) ? dataUrl : null;
+        const fallbackLang = { eng: 'en', heb: 'he' }[localStorage.getItem('language') || 'eng'] || 'en';
+        window.location.assign(validUrl || `/${fallbackLang}/cart`);
+      });
+    }
+
+    // D-09: re-price on currency-changed. Register once per page (idempotent guard).
+    if (!this._drawerCurrencyBound) {
+      this._drawerCurrencyBound = true;
+      window.addEventListener('currency-changed', e => {
+        const c = e && e.detail && e.detail.currency;
+        if (c !== 'usd' && c !== 'ils') return;
+        try {
+          this._renderCartDrawer();
+        } catch (err) {
+          console.error('[View] cart drawer currency-changed re-render failed', err);
+        }
+      });
+    }
+
+    // D-07/D-08: Wire in-drawer editing via event delegation (registered once).
+    this._bindCartDrawerEditing();
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Cart drawer — render line items from model.cart (D-07/D-08/D-09/D-10)
+  // Reads model.cart; rebuilds ONLY the .tk-line nodes inside #tk-drawer-body.
+  // Never rewrites drawer chrome (CLAUDE.md dual-render rule).
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _renderCartDrawer() {
+    const body = document.getElementById('tk-drawer-body');
+    if (!body) return;
+
+    const emptyEl   = document.getElementById('tk-cart-empty');
+    const subtotalEl = document.getElementById('tk-subtotal');
+    const checkoutBtn = document.getElementById('tk-checkout');
+    const footEl    = body.parentElement && body.parentElement.querySelector('.tk-drawer__foot');
+
+    // Remove previously-injected line nodes only; leave #tk-cart-empty in place.
+    Array.from(body.querySelectorAll('.tk-line')).forEach(el => el.remove());
+
+    const cart = model.cart;
+    const sym  = this._getCurrencySymbol();
+
+    // D-10: empty state
+    if (!cart || cart.length === 0) {
+      if (emptyEl)    emptyEl.removeAttribute('hidden');
+      if (footEl)     footEl.setAttribute('hidden', '');
+      if (checkoutBtn) checkoutBtn.disabled = true;
+      if (subtotalEl) subtotalEl.textContent = sym + '0';
+      this.persistCartNumber(0);
+      return;
+    }
+
+    // Non-empty: hide empty-state, show foot, enable checkout
+    if (emptyEl)    emptyEl.setAttribute('hidden', '');
+    if (footEl)     footEl.removeAttribute('hidden');
+    if (checkoutBtn) checkoutBtn.disabled = false;
+
+    // Build line nodes using DOM APIs — textContent/setAttribute only (XSS-safe, T-43-01).
+    // Event delegation on body handles +/−/remove so re-renders do not leak handlers.
+    cart.forEach(item => {
+      const itemId   = item.id;
+      const itemName = this._getDrawerItemName(item);
+      const linePrice = this._getItemPrice(item) * (Number(item.amount) || 1);
+
+      const line = document.createElement('div');
+      line.classList.add('tk-line');
+      line.dataset.id = itemId;
+
+      // Media
+      const media = document.createElement('div');
+      media.classList.add('tk-line__media');
+      const img = document.createElement('img');
+      img.setAttribute('src', item.image || '');
+      img.setAttribute('alt', itemName);
+      // NO crossorigin attr — CLAUDE.md CORS rule: DO spacescdn breaks localhost if set
+      media.appendChild(img);
+
+      // Main: name row + meta row
+      const main = document.createElement('div');
+      main.classList.add('tk-line__main');
+
+      const row = document.createElement('div');
+      row.classList.add('tk-line__row');
+      const nameEl = document.createElement('span');
+      nameEl.classList.add('tk-line__name');
+      nameEl.textContent = itemName;
+      const totalEl = document.createElement('span');
+      totalEl.classList.add('tk-line__total');
+      totalEl.textContent = sym + linePrice;
+      row.appendChild(nameEl);
+      row.appendChild(totalEl);
+
+      // D-07: quantity stepper row
+      const meta = document.createElement('div');
+      meta.classList.add('tk-line__meta');
+
+      const qtyRow = document.createElement('div');
+      qtyRow.classList.add('tk-line__qty');
+
+      // Minus button — must carry BOTH base class + modifier (plan class contract)
+      const minusBtn = document.createElement('button');
+      minusBtn.setAttribute('type', 'button');
+      minusBtn.classList.add('tk-line__qty-btn', 'tk-line__qty-btn--minus');
+      minusBtn.textContent = '−';
+      minusBtn.dataset.id = itemId;
+
+      const qtyVal = document.createElement('span');
+      qtyVal.classList.add('tk-line__qty-val');
+      qtyVal.textContent = String(Number(item.amount) || 1);
+
+      // Plus button — must carry BOTH base class + modifier (plan class contract)
+      const plusBtn = document.createElement('button');
+      plusBtn.setAttribute('type', 'button');
+      plusBtn.classList.add('tk-line__qty-btn', 'tk-line__qty-btn--plus');
+      plusBtn.textContent = '+';
+      plusBtn.dataset.id = itemId;
+
+      qtyRow.appendChild(minusBtn);
+      qtyRow.appendChild(qtyVal);
+      qtyRow.appendChild(plusBtn);
+
+      // Remove button
+      const removeBtn = document.createElement('button');
+      removeBtn.setAttribute('type', 'button');
+      removeBtn.classList.add('tk-line__remove');
+      const lng = localStorage.getItem('language') || 'eng';
+      removeBtn.textContent = lng === 'heb' ? 'הסר' : 'Remove';
+      removeBtn.dataset.id = itemId;
+
+      meta.appendChild(qtyRow);
+      meta.appendChild(removeBtn);
+
+      main.appendChild(row);
+      main.appendChild(meta);
+
+      line.appendChild(media);
+      line.appendChild(main);
+
+      body.appendChild(line);
+    });
+
+    // D-09: subtotal in the persisted currency (no hardcoded rate)
+    const subtotal = cart.reduce((s, it) => s + this._getItemPrice(it) * (Number(it.amount) || 1), 0);
+    if (subtotalEl) subtotalEl.textContent = sym + subtotal;
+
+    // Badge: sum all amounts
+    const totalItems = cart.reduce((s, it) => s + (Number(it.amount) || 1), 0);
+    this.persistCartNumber(totalItems);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Cart drawer — event delegation for +/−/remove handlers (D-07/D-08)
+  // Called once from _bindCartDrawer; uses delegation so re-renders do not
+  // leak per-node listeners.
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _bindCartDrawerEditing() {
+    const body = document.getElementById('tk-drawer-body');
+    if (!body || body.dataset.tkEditBound === '1') return;
+    body.dataset.tkEditBound = '1';
+
+    body.addEventListener('click', async e => {
+      // Plus stepper (D-07)
+      const plusBtn = e.target.closest('.tk-line__qty-btn--plus');
+      if (plusBtn) {
+        const id = plusBtn.dataset.id;
+        await model.increaseAmount(id);
+        this._renderCartDrawer();
+        return;
+      }
+      // Minus stepper (D-07)
+      const minusBtn = e.target.closest('.tk-line__qty-btn--minus');
+      if (minusBtn) {
+        const id = minusBtn.dataset.id;
+        await model.decreaseAmount(id);
+        this._renderCartDrawer();
+        return;
+      }
+      // Remove button (D-08)
+      const removeBtn = e.target.closest('.tk-line__remove');
+      if (removeBtn) {
+        const id = removeBtn.dataset.id;
+        await model.removeFromUserCart(id);
+        this._renderCartDrawer();
+      }
     });
   }
 
