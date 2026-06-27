@@ -1046,11 +1046,8 @@ export default class View {
     trigger.dataset.tkCartBound = '1';
 
     const open = () => {
-      overlay.classList.add('is-open');
-      drawer.classList.add('is-open');
-      document.body.style.overflow = 'hidden';
       this._renderCartDrawer();
-      if (closeBtn) requestAnimationFrame(() => closeBtn.focus());
+      this._openCartDrawer();
     };
 
     const close = () => {
@@ -1123,6 +1120,44 @@ export default class View {
 
     // D-07/D-08: Wire in-drawer editing via event delegation (registered once).
     this._bindCartDrawerEditing();
+
+    // D-04: auto-open when any Add-to-Cart entry point fires cart:item-added.
+    // Registered once per page to prevent duplicate handlers on language toggle.
+    if (!this._cartAddedBound) {
+      this._cartAddedBound = true;
+      window.addEventListener('cart:item-added', () => {
+        this._renderCartDrawer();
+        this._openCartDrawer();
+      });
+    }
+
+    // Expose a global hook so homepage.js (plain IIFE, cannot import model) can
+    // call the real model.handleAddToCart and trigger the auto-open (D-04).
+    // Contract: window.tkAddToCart(cardEl) — cardEl is a .tk-prod DOM element.
+    if (!window.tkAddToCart) {
+      window.tkAddToCart = (el) =>
+        model.handleAddToCart(el).then(() =>
+          window.dispatchEvent(new CustomEvent('cart:item-added'))
+        );
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Cart drawer — open: shared entry point for icon-click (via open() closure
+  // in _bindCartDrawer) and cart:item-added auto-open. Queries elements fresh
+  // each call; no-ops if already open (idempotent).
+  // ─────────────────────────────────────────────────────────────────────────
+
+  _openCartDrawer() {
+    const overlay  = document.getElementById('tk-overlay');
+    const drawer   = document.getElementById('tk-drawer');
+    const closeBtn = document.getElementById('tk-cart-close');
+    if (!overlay || !drawer) return;
+    if (overlay.classList.contains('is-open')) return; // already open — no-op
+    overlay.classList.add('is-open');
+    drawer.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    if (closeBtn) requestAnimationFrame(() => closeBtn.focus());
   }
 
   // ─────────────────────────────────────────────────────────────────────────
