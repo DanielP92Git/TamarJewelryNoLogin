@@ -162,7 +162,7 @@ async function renderHomePage(req, res) {
     })
       .sort({ featuredOrder: 1 })
       .limit(8)
-      .select('id name slug quantity images mainImage smallImages ils_price usd_price discount_percentage original_ils_price original_usd_price name_en name_he')
+      .select('id name slug quantity images mainImage smallImages ils_price usd_price discount_percentage original_ils_price original_usd_price name_en name_he description description_en description_he sku')
       .lean();
 
     pageData.featuredProducts = featuredProducts;
