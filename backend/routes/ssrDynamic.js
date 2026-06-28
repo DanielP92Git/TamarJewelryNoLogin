@@ -172,7 +172,7 @@ async function renderProductPage(req, res) {
       ? (productDescription.length > 158
           ? productDescription.substring(0, 158).trim() + '...'
           : productDescription)
-      : `View ${productName} at Tamar Kfir Jewelry. Handmade with love in Jerusalem.`;
+      : `View ${productName} at Tamar Kfir Jewelry. Handmade with love.`;
 
     // Get product image for OG tags
     const mainImg = (Array.isArray(product.images) && product.images.length > 0)
