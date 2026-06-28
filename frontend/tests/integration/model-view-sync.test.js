@@ -424,17 +424,17 @@ describe('MVC Integration: Model-View Synchronization', () => {
       expect(selectorEng).toBeTruthy();
       const optionsEng = Array.from(selectorEng.options).map(opt => opt.text);
       expect(optionsEng).toContain('Currency');
-      expect(optionsEng).toContain('USD');
-      expect(optionsEng).toContain('ILS');
+      expect(optionsEng).toContain('$ USD');
+      expect(optionsEng).toContain('₪ ILS');
 
       // Hebrew
       await view.setLanguage('heb', 0);
       const selectorHeb = document.querySelector('select.header-currency-selector[name="currency"]');
       expect(selectorHeb).toBeTruthy();
       const optionsHeb = Array.from(selectorHeb.options).map(opt => opt.text);
-      expect(optionsHeb).toContain('מטבע'); // Currency
-      expect(optionsHeb).toContain('דולר'); // USD
-      expect(optionsHeb).toContain('שקל'); // ILS
+      expect(optionsHeb).toContain('מטבע'); // Currency (default label stays localized)
+      expect(optionsHeb).toContain('$ USD'); // symbol-prefixed, mirrored across languages
+      expect(optionsHeb).toContain('₪ ILS');
     });
 
     it('should set document direction to RTL for Hebrew', () => {

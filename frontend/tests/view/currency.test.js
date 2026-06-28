@@ -53,13 +53,13 @@ describe('Currency Selector Tests', () => {
       expect(options[0].value).toBe('default');
       expect(options[0].text).toBe('Currency');
 
-      // Verify USD option
+      // Verify USD option (symbol-prefixed label, mirrored in both languages — Phase 39-02)
       expect(options[1].value).toBe('usd');
-      expect(options[1].text).toBe('USD');
+      expect(options[1].text).toBe('$ USD');
 
       // Verify ILS option
       expect(options[2].value).toBe('ils');
-      expect(options[2].text).toBe('ILS');
+      expect(options[2].text).toBe('₪ ILS');
     });
 
     it('should render currency selector with Hebrew labels in Hebrew', async () => {
@@ -70,10 +70,11 @@ describe('Currency Selector Tests', () => {
 
       const options = selector.options;
 
-      // Verify Hebrew labels
-      expect(options[0].text).toBe('מטבע'); // "Currency" in Hebrew
-      expect(options[1].text).toBe('דולר');  // "Dollar" in Hebrew
-      expect(options[2].text).toBe('שקל');   // "Shekel" in Hebrew
+      // Verify Hebrew default label; currency labels are symbol-prefixed in both
+      // languages (Phase 39-02 mirrors $ USD / ₪ ILS on hydration).
+      expect(options[0].text).toBe('מטבע');  // "Currency" in Hebrew
+      expect(options[1].text).toBe('$ USD');
+      expect(options[2].text).toBe('₪ ILS');
 
       // Verify RTL direction attribute
       expect(selector.getAttribute('dir')).toBe('rtl');
@@ -116,7 +117,7 @@ describe('Currency Selector Tests', () => {
       // Verify the ILS option exists and has correct properties
       const ilsOption = selector.options[2];
       expect(ilsOption.value).toBe('ils');
-      expect(ilsOption.text).toBe('ILS');
+      expect(ilsOption.text).toBe('₪ ILS');
     });
 
     it('should default to USD when no saved currency exists', async () => {
@@ -287,8 +288,8 @@ describe('Currency Selector Tests', () => {
       expect(selectorHeb.value).toBe('ils');
       expect(localStorage.getItem('currency')).toBe('ils');
 
-      // Verify Hebrew labels are applied
-      expect(selectorHeb.options[2].text).toBe('שקל'); // ILS in Hebrew
+      // Verify symbol-prefixed labels are applied (mirrored across languages)
+      expect(selectorHeb.options[2].text).toBe('₪ ILS');
     });
 
     it('should preserve USD preference when switching from Hebrew to English', async () => {
@@ -299,7 +300,7 @@ describe('Currency Selector Tests', () => {
 
       const selectorHeb = document.querySelector('select.header-currency-selector[name="currency"]');
       expect(selectorHeb.value).toBe('usd');
-      expect(selectorHeb.options[1].text).toBe('דולר'); // USD in Hebrew
+      expect(selectorHeb.options[1].text).toBe('$ USD');
 
       // Switch to English
       await view.setLanguage('eng', 0);
@@ -309,7 +310,7 @@ describe('Currency Selector Tests', () => {
       // Currency should still be USD with English labels
       expect(selectorEng.value).toBe('usd');
       expect(localStorage.getItem('currency')).toBe('usd');
-      expect(selectorEng.options[1].text).toBe('USD');
+      expect(selectorEng.options[1].text).toBe('$ USD');
     });
 
     it('should handle rapid currency changes with correct event sequence', async () => {
