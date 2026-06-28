@@ -123,7 +123,9 @@ img { display: block; }
   vertical-align: middle;
   line-height: 1;
 }
-.tk-nav__item--has-submenu.is-open .tk-nav__caret { transform: rotate(180deg); }
+.tk-nav__item--has-submenu.is-open .tk-nav__caret,
+.tk-nav__item--has-submenu:hover .tk-nav__caret,
+.tk-nav__item--has-submenu:focus-within .tk-nav__caret { transform: rotate(180deg); }
 .tk-nav__submenu {
   display: none;
   position: absolute;
@@ -139,7 +141,19 @@ img { display: block; }
   list-style: none;
   margin: 0;
 }
-.tk-nav__item--has-submenu.is-open .tk-nav__submenu { display: block; }
+/* Desktop reveal: hover or keyboard focus (plus .is-open kept for any JS path) */
+.tk-nav__item--has-submenu.is-open .tk-nav__submenu,
+.tk-nav__item--has-submenu:hover .tk-nav__submenu,
+.tk-nav__item--has-submenu:focus-within .tk-nav__submenu { display: block; }
+/* Transparent bridge over the 8px gap so moving the cursor from "Shop" down
+   into the dropdown doesn't drop the :hover and snap it shut */
+.tk-nav__submenu::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  inset-inline: 0;
+  height: 8px;
+}
 .tk-nav__submenu-link {
   display: block;
   padding: 0.55rem 1.1rem;

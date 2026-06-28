@@ -1005,49 +1005,19 @@ export default class View {
       if (desktopTrigger.dataset.tkSubmenuBound !== '1') {
         desktopTrigger.dataset.tkSubmenuBound = '1';
 
-        const openDesktop = () => {
-          desktopItem.classList.add('is-open');
-          desktopTrigger.setAttribute('aria-expanded', 'true');
-        };
-        const closeDesktop = () => {
-          desktopItem.classList.remove('is-open');
-          desktopTrigger.setAttribute('aria-expanded', 'false');
-        };
+        // Desktop reveal is HOVER/FOCUS-driven (CSS :hover / :focus-within).
+        // The Shop trigger is a non-navigating affordance — disable its click
+        // navigation so tapping/clicking "Shop" only opens the categories
+        // submenu instead of jumping to the necklaces page.
+        desktopTrigger.addEventListener('click', e => e.preventDefault());
 
-        // Toggle on trigger click (no-JS fallback: href still navigates to /necklaces)
-        desktopTrigger.addEventListener('click', e => {
-          e.preventDefault();
-          desktopItem.classList.contains('is-open') ? closeDesktop() : openDesktop();
-        });
-
-        // Close when a submenu category link is clicked (allow navigation)
-        const desktopSubmenu = desktopItem.querySelector('.tk-nav__submenu');
-        if (desktopSubmenu) {
-          desktopSubmenu.addEventListener('click', e => {
-            if (e.target.closest('.tk-nav__submenu-link')) closeDesktop();
-          });
-        }
-
-        // Close on outside click
-        document.addEventListener('click', e => {
-          if (desktopItem.classList.contains('is-open') && !desktopItem.contains(e.target)) {
-            closeDesktop();
-          }
-        });
-
-        // Close on Escape
-        document.addEventListener('keydown', e => {
-          if (e.key === 'Escape' && desktopItem.classList.contains('is-open')) {
-            closeDesktop();
-            desktopTrigger.focus();
-          }
-        });
-
-        // Close when crossing to mobile (<800px) — mirrors _bindHamburgerMenu pattern
-        const mobileMq = window.matchMedia('(max-width: 799.9px)');
-        mobileMq.addEventListener('change', e => {
-          if (e.matches) closeDesktop();
-        });
+        // Keep aria-expanded in sync with the hover/focus visual state.
+        const syncAria = open =>
+          desktopTrigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        desktopItem.addEventListener('mouseenter', () => syncAria(true));
+        desktopItem.addEventListener('mouseleave', () => syncAria(false));
+        desktopItem.addEventListener('focusin', () => syncAria(true));
+        desktopItem.addEventListener('focusout', () => syncAria(false));
       }
     }
 
