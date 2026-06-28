@@ -31,11 +31,7 @@
     <%- include('../partials/header', { lang, dir, urlLang }) %>
 
     <main>
-      <div class="whatsapp-container">
-        <a href="https://wa.me/972524484763" class="whatsapp-atr"
-          ><img src="/imgs/svgs/whatsapp.svg" class="whatsapp-svg" alt=""
-        /></a>
-      </div>
+      <%- include('../partials/whatsapp-float') %>
 
       <h1 class="category-title" style="<%= lang === 'eng' ? 'font-family: Raleway, sans-serif; font-size: 1.5rem;' : 'font-family: Rubik, sans-serif; font-size: 2.3rem;' %>"><%= categoryDisplayName %></h1>
 

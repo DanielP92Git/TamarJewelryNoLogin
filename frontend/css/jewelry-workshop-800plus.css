@@ -582,32 +582,6 @@ html[dir='rtl'] .workshop-card-desc {
 
 }
 
-.go-to-top {
-  align-self: center;
-  display: inline-block;
-  width: auto;
-  height: auto;
-  margin: 4rem;
-  border: none;
-  background: transparent;
-  padding: 0;
-  color: rgb(62, 62, 62);
-}
-
-.arrow-up {
-  width: 2rem;
-  height: auto;
-  display: block;
-
-  /* ~~~~ FOR DEBUGGING~~~~ */
-  /* border: 2px solid rgb(37, 155, 228); */
-}
-
-.go-to-top:hover {
-  cursor: pointer;
-  background: transparent;
-}
-
 /* Footer styles are now imported from footer-desktop.css */
 
 /* Styles removed, buttons will now be visible by default */

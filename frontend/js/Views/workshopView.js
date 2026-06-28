@@ -3,11 +3,15 @@ import View from '../View.js';
 class WorkshopView extends View {
   addWorkshopHandler(handler) {
     window.addEventListener('load', () => {
-      let lng = localStorage.getItem('language');
-      if (!lng) {
-        localStorage.setItem('language', 'eng');
-        lng = 'eng';
-      }
+      // Trust the language the page was SSR-rendered in (derived from the URL)
+      // over localStorage. Otherwise a stale localStorage value from a previous
+      // visit makes an English page flip to the Hebrew form/content (and vice
+      // versa) the moment the client view re-renders on load.
+      const docLang = document.documentElement.lang;
+      const ssrLng =
+        docLang === 'he' ? 'heb' : docLang === 'en' ? 'eng' : null;
+      const lng = ssrLng || localStorage.getItem('language') || 'eng';
+      localStorage.setItem('language', lng);
 
       handler(lng);
     });
@@ -135,13 +139,19 @@ class WorkshopView extends View {
     if (!grid) return;
 
     const isHeb = lng === 'heb';
-    const formUrl = grid.dataset.formUrl || '';
-    const formEntry = grid.dataset.formEntry || '';
+    // Each language opens its own Google Form, so the URL/entry switch too.
+    const formUrl =
+      (isHeb ? grid.dataset.formUrlHe : grid.dataset.formUrlEn) || '';
+    const formEntry =
+      (isHeb ? grid.dataset.formEntryHe : grid.dataset.formEntryEn) || '';
 
     grid.querySelectorAll('.workshop-card').forEach((card) => {
       const title = isHeb ? card.dataset.titleHe : card.dataset.titleEn;
       const desc = isHeb ? card.dataset.descHe : card.dataset.descEn;
-      const name = isHeb ? card.dataset.nameHe : card.dataset.nameEn;
+      // The form prefill value is the exact checkbox option string for the
+      // active language's form (empty when the card has no matching option).
+      const formValue =
+        (isHeb ? card.dataset.formValueHe : card.dataset.formValueEn) || '';
 
       const titleEl = card.querySelector('.workshop-card-title');
       const descEl = card.querySelector('.workshop-card-desc');
@@ -151,10 +161,13 @@ class WorkshopView extends View {
       if (descEl && desc != null) descEl.textContent = desc;
       if (btnEl) {
         btnEl.textContent = isHeb ? 'לפרטים נוספים' : 'More Details';
-        if (formUrl && formEntry && name != null) {
-          btnEl.href = `${formUrl}?usp=pp_url&${formEntry}=${encodeURIComponent(
-            name,
-          )}`;
+        if (formUrl) {
+          btnEl.href =
+            formEntry && formValue
+              ? `${formUrl}?usp=pp_url&${formEntry}=${encodeURIComponent(
+                  formValue,
+                )}`
+              : formUrl;
         }
       }
 

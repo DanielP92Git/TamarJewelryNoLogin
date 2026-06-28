@@ -210,7 +210,12 @@ async function renderProductPage(req, res) {
         { href: '/css/footer-desktop.css', media: '(min-width: 800px)' },
         { href: '/css/footer-mobile.css', media: '(max-width: 799.9px)' },
         { href: '/css/mobile-menu.css', media: '(max-width: 799.9px)' },
+        // Global prototype chrome (header/footer) styling.
+        { href: '/css/homepage.css' },
       ],
+      // Prototype header: solid nav, "Shop" highlighted (product lives under a category).
+      heroNav: false,
+      activeNav: 'Shop',
       product: product,
       productName: productName,
       productDescription: productDescription,

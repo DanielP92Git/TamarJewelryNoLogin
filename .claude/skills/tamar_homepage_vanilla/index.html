@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tamar Kfir Jewelry — Handmade in Jerusalem</title>
+  <link rel="icon" href="assets/logo/favicon.svg" />
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/homepage.css" />
+</head>
+<body>
+  <div class="tk-home">
+
+    <!-- ============ HERO ============ -->
+    <section class="tk-hero">
+      <img class="tk-hero__img" id="tk-hero-img" src="assets/imagery/hero-main.webp" alt="" />
+      <div class="tk-hero__scrim"></div>
+
+      <div class="tk-hero__nav">
+        <!-- NavBar (transparent over hero) -->
+        <header class="tk-nav tk-nav--transparent">
+          <a class="tk-nav__logo" href="#" data-nav="Home">
+            <img src="assets/logo/tamar-logo.webp" alt="Tamar Kfir Jewelry" />
+          </a>
+          <nav class="tk-nav__links">
+            <a class="tk-nav__link is-active" href="#" data-nav="Home">Home</a>
+            <a class="tk-nav__link" href="#" data-nav="Shop">Shop</a>
+            <a class="tk-nav__link" href="#" data-nav="Jewelry Workshop">Jewelry Workshop</a>
+            <a class="tk-nav__link" href="#" data-nav="About">About</a>
+            <a class="tk-nav__link" href="#" data-nav="Contact Me">Contact Me</a>
+          </nav>
+          <div class="tk-nav__utils">
+            <span class="tk-nav__currency">ILS</span>
+            <button class="tk-nav__cart" id="tk-cart-open" type="button" aria-label="Cart">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5">
+                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span class="tk-nav__count" id="tk-cart-count">0</span>
+            </button>
+          </div>
+        </header>
+      </div>
+
+      <div class="tk-hero__copy">
+        <p class="tk-hero__eyebrow">Handmade in Jerusalem</p>
+        <p class="tk-hero__title">One of a kind<br />in mind</p>
+        <a class="tk-btn tk-btn--outline tk-btn--lg" href="#tk-shop" id="tk-hero-cta">Discover the Collection</a>
+      </div>
+    </section>
+
+    <!-- ============ COLLECTIONS ============ -->
+    <section class="tk-section" id="tk-shop">
+      <div class="tk-center">
+        <p class="tk-eyebrow">Collections</p>
+        <h2 class="tk-h2">Shop by Category</h2>
+      </div>
+      <div class="tk-cat-grid" id="tk-cat-grid">
+        <!-- CategoryTile -->
+        <a class="tk-cat" href="#" data-category="Crochet Necklaces">
+          <img src="assets/categories/crochet.webp" alt="Crochet Necklaces" />
+          <span class="tk-cat__label">Crochet Necklaces</span>
+        </a>
+        <a class="tk-cat" href="#" data-category="Hoop Earrings">
+          <img src="assets/categories/hoops.webp" alt="Hoop Earrings" />
+          <span class="tk-cat__label">Hoop Earrings</span>
+        </a>
+        <a class="tk-cat" href="#" data-category="Dangle Earrings">
+          <img src="assets/categories/dangle.webp" alt="Dangle Earrings" />
+          <span class="tk-cat__label">Dangle Earrings</span>
+        </a>
+        <a class="tk-cat" href="#" data-category="Necklaces">
+          <img src="assets/categories/necklaces.webp" alt="Necklaces" />
+          <span class="tk-cat__label">Necklaces</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- ============ MAKER STORY ============ -->
+    <section class="tk-story">
+      <div class="tk-story__inner">
+        <div class="tk-story__media">
+          <img src="assets/imagery/hero-alt.webp" alt="A handmade pendant necklace" />
+        </div>
+        <div class="tk-story__body">
+          <p class="tk-eyebrow">The Maker</p>
+          <h2 class="tk-story__title">A bit about me<br />and my jewelry</h2>
+          <p class="tk-story__p">I have been making jewelry since I was twelve, and I have never really stopped. Each piece is handmade in beautiful, historic Jerusalem — crocheted with fine metallic threads and a colour combination that is never quite repeated.</p>
+          <p class="tk-story__p">It is where I find my calm, and how I get to share a little colour with appreciative customers all over the world. No two pieces sit the same way twice — and that is exactly the point.</p>
+          <div>
+            <a class="tk-btn tk-btn--ghost" href="#" data-nav="About">Read my story</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ FEATURED ============ -->
+    <section class="tk-section tk-section--wide">
+      <div class="tk-center">
+        <p class="tk-eyebrow">New &amp; Loved</p>
+        <h2 class="tk-h2">Featured Pieces</h2>
+      </div>
+      <div class="tk-prod-grid" id="tk-prod-grid"><!-- ProductCards injected by homepage.js --></div>
+      <div class="tk-center" style="margin-top: 3.2rem;">
+        <a class="tk-btn tk-btn--primary" href="#" data-nav="Shop">View All Jewelry</a>
+      </div>
+    </section>
+
+    <!-- ============ NEWSLETTER ============ -->
+    <section class="tk-news">
+      <div class="tk-news__inner">
+        <p class="tk-eyebrow">Stay in touch</p>
+        <h2 class="tk-news__h">New pieces, first</h2>
+        <p class="tk-news__p">A quiet note when a new collection comes off the workbench. No noise, just colour.</p>
+        <form class="tk-news__form" id="tk-news-form">
+          <input class="tk-news__input" id="tk-news-email" type="email" placeholder="you@example.com" aria-label="Email address" />
+          <button class="tk-btn tk-btn--primary" type="submit" id="tk-news-submit">Subscribe</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="tk-footer">
+      <div class="tk-footer__cols">
+        <div class="tk-footer__col">
+          <span class="tk-footer__heading">Shop</span>
+          <a class="tk-footer__link" href="#" data-nav="Necklaces">Necklaces</a>
+          <a class="tk-footer__link" href="#" data-nav="Crochet Necklaces">Crochet Necklaces</a>
+          <a class="tk-footer__link" href="#" data-nav="Hoop Earrings">Hoop Earrings</a>
+          <a class="tk-footer__link" href="#" data-nav="Dangle Earrings">Dangle Earrings</a>
+        </div>
+        <div class="tk-footer__col">
+          <span class="tk-footer__heading">Customer Care</span>
+          <a class="tk-footer__link" href="#" data-nav="Shipping & Cancellation">Shipping &amp; Cancellation</a>
+          <a class="tk-footer__link" href="#" data-nav="Contact Me">Contact Me</a>
+        </div>
+        <div class="tk-footer__col">
+          <span class="tk-footer__heading">Info</span>
+          <a class="tk-footer__link" href="#" data-nav="Jewelry Workshop">Jewelry Workshop</a>
+          <a class="tk-footer__link" href="#" data-nav="About">About</a>
+        </div>
+      </div>
+      <div class="tk-footer__bar">© 2024 Tamar Kfir Jewelry. All Rights Reserved.</div>
+    </footer>
+
+    <!-- ============ CART DRAWER ============ -->
+    <div class="tk-overlay" id="tk-overlay"></div>
+    <aside class="tk-drawer" id="tk-drawer" aria-label="Shopping cart">
+      <div class="tk-drawer__head">
+        <span class="tk-drawer__title">Shopping Cart</span>
+        <button class="tk-drawer__close" id="tk-cart-close" type="button" aria-label="Close">&times;</button>
+      </div>
+      <div class="tk-drawer__body" id="tk-drawer-body"><!-- lines injected --></div>
+      <div class="tk-drawer__foot">
+        <div class="tk-drawer__subtotal"><span>Subtotal</span><b id="tk-subtotal">₪0</b></div>
+        <p class="tk-drawer__note">Shipping calculated at checkout.</p>
+        <button class="tk-btn tk-btn--primary tk-btn--full" id="tk-checkout" type="button" disabled>Proceed to Checkout</button>
+      </div>
+    </aside>
+
+    <!-- ============ FLOATING WHATSAPP + TOAST ============ -->
+    <a class="tk-whatsapp" href="#" id="tk-whatsapp" aria-label="Chat on WhatsApp">
+      <img src="assets/icons/whatsapp.svg" alt="" />
+    </a>
+    <div class="tk-toast" id="tk-toast"></div>
+
+  </div>
+
+  <script src="js/homepage.js"></script>
+</body>
+</html>

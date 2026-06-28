@@ -1,0 +1,112 @@
+/* =========================================================
+   Tamar Kfir Jewelry — Design Tokens (vanilla copy)
+   Lifted verbatim from the design system: colors, typography,
+   spacing/radius/shadow/motion, and the Google-Fonts import.
+   Drop this in once; everything else reads var(--tk-*).
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+
+:root {
+  /* ---- Brand gold (the one accent) ---- */
+  --tk-gold: #c5a572;
+  --tk-gold-hover: #bca366;
+  --tk-gold-soft: #cfb577;
+  --tk-gold-tint: #f3ede2;
+
+  /* ---- Ink / actions ---- */
+  --tk-ink: #1f2937;
+  --tk-ink-deep: #111827;
+  --tk-black: #000000;
+
+  /* ---- Neutral text ---- */
+  --tk-text: #333333;
+  --tk-text-soft: #555555;
+  --tk-text-muted: #666666;
+  --tk-text-faint: #999999;
+
+  /* ---- Surfaces ---- */
+  --tk-white: #ffffff;
+  --tk-surface: #fafafa;
+  --tk-surface-beige: #f5f5f0;
+  --tk-overlay: rgba(0, 0, 0, 0.8);
+
+  /* ---- Lines ---- */
+  --tk-border: #e5e5e5;
+  --tk-border-strong: #d8d8d2;
+  --tk-border-light: #f0f0f0;
+
+  /* ---- Image overlay scrim ---- */
+  --tk-scrim-bottom: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.65) 0%,
+    rgba(0, 0, 0, 0.45) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
+
+  /* ---- Families ---- */
+  --tk-font-display: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --tk-font-body: 'Montserrat', 'Helvetica Neue', Arial, sans-serif;
+  --tk-font-serif: 'Cormorant Garamond', 'Times New Roman', serif;
+  --tk-font-hebrew: 'Rubik', 'Helvetica Neue', Arial, sans-serif;
+
+  /* ---- Weights ---- */
+  --tk-weight-thin: 200;
+  --tk-weight-light: 300;
+  --tk-weight-regular: 400;
+  --tk-weight-medium: 500;
+  --tk-weight-semibold: 600;
+
+  /* ---- Sizes ---- */
+  --tk-size-title: 1.1rem;
+  --tk-size-body: 1rem;
+  --tk-size-small: 0.875rem;
+  --tk-size-label: 0.75rem;
+  --tk-size-caption: 0.7rem;
+
+  /* ---- Letter-spacing (the signature) ---- */
+  --tk-track-tight: 0.02em;
+  --tk-track-body: 0.04em;
+  --tk-track-label: 0.15em;
+  --tk-track-wide: 0.2em;
+  --tk-track-hero: 0.25em;
+
+  /* ---- Line heights ---- */
+  --tk-leading-tight: 1.12;
+  --tk-leading-snug: 1.4;
+  --tk-leading-body: 1.7;
+
+  /* ---- Radius ---- */
+  --tk-radius-none: 0;
+  --tk-radius-xs: 4px;
+  --tk-radius-sm: 8px;
+  --tk-radius-pill: 50px;
+  --tk-radius-round: 50%;
+
+  /* ---- Shadows ---- */
+  --tk-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --tk-shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --tk-shadow-pill: 0 10px 30px rgba(0, 0, 0, 0.18);
+
+  /* ---- Layout ---- */
+  --tk-header-height: 80px;
+
+  /* ---- Motion ---- */
+  --tk-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --tk-dur-fast: 0.2s;
+  --tk-dur: 0.3s;
+  --tk-dur-slow: 0.4s;
+  --tk-lift: translateY(-3px);
+
+  /* ---- Z-index ---- */
+  --tk-z-header: 100;
+}
+
+/* RTL / Hebrew: remap families inside any dir="rtl" subtree */
+[dir='rtl'] {
+  --tk-font-display: var(--tk-font-hebrew);
+  --tk-font-body: var(--tk-font-hebrew);
+  --tk-font-serif: var(--tk-font-hebrew);
+}

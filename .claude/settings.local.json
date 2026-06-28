@@ -9,7 +9,9 @@
       "Bash(node --check index.js)",
       "Bash(node --check routes/products.js)",
       "Bash(node --check utils/imageHelpers.js)",
-      "Bash(npm list:*)"
+      "Bash(npm list:*)",
+      "Read(//c/c/Development/Online/frontend/**)",
+      "Read(//c/c/Development/Online/frontend/imgs/**)"
     ]
   }
 }
