@@ -5,19 +5,33 @@
 // this copy — it reads the bilingual text straight off the `data-*` attributes
 // the EJS renders, so EN/HE never drift out of sync.
 //
-// Each card's button opens ONE shared Google Form, prefilled with the workshop
-// name so submissions record which workshop was clicked.
+// A card's button opens a Google Form, prefilled with the workshop selection so
+// submissions record which workshop was clicked. There are TWO forms — one
+// English, one Hebrew — and the button opens the one matching the site language.
+//
+// The "Which workshop?" question is a CHECKBOX group (entry.1891989711, same id
+// in both forms). To pre-check an option, the prefill value must be the EXACT
+// option string that form defines — so each item carries a per-language
+// `formValue` copied verbatim from the matching form. A card with
+// `formValue: null` (e.g. the intimate workshop, which has no matching form
+// option) just opens the form with nothing pre-checked.
 
 module.exports = {
-  // Shared Google Form. Replace the placeholders below with the real values:
-  //   baseUrl  — the form's /viewform URL
-  //   entryId  — the prefill field id for the "Which workshop?" question
-  //              (open the form → ⋮ → "Get pre-filled link", fill the field,
-  //               and copy the `entry.XXXXXXXXX` token from the generated URL).
-  // Until then the cards still work structurally and carry the prefill param.
+  // Google Forms for workshop applications — one per site language.
+  //   baseUrl  — the form's published /viewform URL
+  //   entryId  — the prefill field id for the "Which workshop?" checkbox question
+  //              (the form's inner entry id, NOT the question item id)
   form: {
-    baseUrl: 'https://docs.google.com/forms/d/e/REPLACE_FORM_ID/viewform',
-    entryId: 'entry.REPLACE_FIELD_ID',
+    eng: {
+      baseUrl:
+        'https://docs.google.com/forms/d/e/1FAIpQLSdNk0isSomO4hjd7sfCXisXpJrel0N5maVXx_Y4yh7jrs-HUg/viewform',
+      entryId: 'entry.1891989711',
+    },
+    heb: {
+      baseUrl:
+        'https://docs.google.com/forms/d/e/1FAIpQLSedLNM0QSmApkqXmX3fpceo16CFct_YkJnxNi0k6ZCEgzO7Ew/viewform',
+      entryId: 'entry.1891989711',
+    },
   },
 
   items: [
@@ -27,6 +41,11 @@ module.exports = {
       name: {
         eng: 'Necklaces Workshop',
         heb: 'סדנת שרשראות',
+      },
+      // Exact checkbox option string from each Google Form (do not edit).
+      formValue: {
+        eng: 'Necklace-Making Workshop',
+        heb: 'סדנת הכנת שרשראות',
       },
       title: {
         eng: 'Personally Designed Necklaces',
@@ -44,6 +63,11 @@ module.exports = {
         eng: 'Earrings Workshop',
         heb: 'סדנת עגילים',
       },
+      // Exact checkbox option string from each Google Form (do not edit).
+      formValue: {
+        eng: 'Earring-Making Workshop',
+        heb: 'סדנת הכנת עגילים',
+      },
       title: {
         eng: 'Earrings in Your Style',
         heb: 'עגילים בסטייל שלך',
@@ -59,6 +83,11 @@ module.exports = {
       name: {
         eng: 'Metal Bending Workshop',
         heb: 'סדנת כיפוף מתכת',
+      },
+      // Exact checkbox option string from each Google Form (do not edit).
+      formValue: {
+        eng: 'Metal Art Workshop: Creating 2D Designs in Metal',
+        heb: 'סדנת פיסול במתכות- ציורי דו מימד',
       },
       title: {
         eng: 'The Magic of Metal Bending',
@@ -76,13 +105,18 @@ module.exports = {
         eng: "Women's Birthday Workshop",
         heb: 'סדנת יום הולדת לנשים',
       },
+      // Exact checkbox option string from each Google Form (do not edit).
+      formValue: {
+        eng: '( Women\'s Birthday Party Workshop (with Wine and Refreshments',
+        heb: 'סדנת יום הולדת נשים/ עם יין וכיבוד',
+      },
       title: {
         eng: 'Celebrate in Style: Creating, Wine & Treats',
         heb: 'חוגגות בסטייל: יצירה, יין ונשנושים',
       },
       desc: {
         eng: "Looking for an original, stylish and fun way to celebrate with your closest friends? A festive, pampering birthday workshop combining quality crafting, good music, fine wine and a generous spread. We'll create in a relaxed, bonding atmosphere and everyone leaves with a stunning handmade piece and the perfect memento. (Additional 30 ₪ per participant for wine & refreshments.)",
-        heb: 'מחפשת דרך מקורית, מעוצבת וכיפית לחגוג עם החברות הכי טובות? סדנת יום הולדת חגיגית ומפנקת שמשלבת יצירה איכותית, מוזיקה טובה, יין משובח וכיבוד עשיר. נשב יחד באווירה משחררת ומגבשת, נלמד טכניקות עיצוב ייחודיות וכל אחת תצא עם תכשיט או פריט מהמם מעשה ידיה ומזכרת מושלמת מהאירוע. (תוספת של 30 ₪ למשתתפת עבור יין וכיבוד)',
+        heb: 'מחפשת דרך מקורית, מעוצבת וכיפית לחגוג עם החברות הכי טובות? סדנת יום הולדת חגיגית ומפנקת שמשלבת יצירה איכותית, מוזיקה טובה, יין וכיבוד עשיר. נשב יחד באווירה משחררת ומגבשת, נלמד טכניקות עיצוב ייחודיות וכל אחת תצא עם תכשיט או פריט מהמם מעשה ידיה ומזכרת מושלמת מהאירוע.',
       },
     },
     {
@@ -91,6 +125,11 @@ module.exports = {
       name: {
         eng: "Girls' Birthday Workshop",
         heb: 'סדנת יום הולדת לילדות',
+      },
+      // Exact checkbox option string from each Google Form (do not edit).
+      formValue: {
+        eng: "Girls' Birthday Party Workshop",
+        heb: 'סדנת יום הולדת ילדות',
       },
       title: {
         eng: 'A Magical, Unforgettable Creative Celebration!',
@@ -108,6 +147,8 @@ module.exports = {
         eng: 'Intimate Workshop',
         heb: 'סדנאות אינטימיות',
       },
+      // No matching option in the Google Form — button opens it un-prefilled.
+      formValue: null,
       title: {
         eng: 'Quality Time in an Intimate Workshop',
         heb: 'זמן איכות בסדנה אינטימית',

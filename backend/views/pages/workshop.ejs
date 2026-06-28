@@ -27,14 +27,21 @@
     <section class="workshop-cards-section">
       <div
         class="workshop-cards"
-        data-form-url="<%= workshops.form.baseUrl %>"
-        data-form-entry="<%= workshops.form.entryId %>"
+        data-form-url-en="<%= workshops.form.eng.baseUrl %>"
+        data-form-entry-en="<%= workshops.form.eng.entryId %>"
+        data-form-url-he="<%= workshops.form.heb.baseUrl %>"
+        data-form-entry-he="<%= workshops.form.heb.entryId %>"
       >
+        <% const wf = lang === 'eng' ? workshops.form.eng : workshops.form.heb; %>
         <% workshops.items.forEach(function (w) {
-             const nm = lang === 'eng' ? w.name.eng : w.name.heb;
-             const href = workshops.form.baseUrl + '?usp=pp_url&' + workshops.form.entryId + '=' + encodeURIComponent(nm); %>
+             const fv = w.formValue ? (lang === 'eng' ? w.formValue.eng : w.formValue.heb) : '';
+             const href = fv
+               ? wf.baseUrl + '?usp=pp_url&' + wf.entryId + '=' + encodeURIComponent(fv)
+               : wf.baseUrl; %>
           <article
             class="workshop-card"
+            data-form-value-en="<%= w.formValue ? w.formValue.eng : '' %>"
+            data-form-value-he="<%= w.formValue ? w.formValue.heb : '' %>"
             data-name-en="<%= w.name.eng %>"
             data-name-he="<%= w.name.heb %>"
             data-title-en="<%= w.title.eng %>"
@@ -97,14 +104,6 @@
         </div>
       </div>
       <span class="workshop-cost-note"><%= lang === 'eng' ? "*Each workshop takes an hour and a half. For any questions please don't hesitate to contact me." : '*כל סדנה נמשכת שעה וחצי. לכל שאלה, אל תהססי לפנות אלי.' %></span>    </div>
-
-    <button class="go-to-top">
-      <img
-        src="/imgs/svgs/arrow-up-solid-white.svg"
-        alt="<%= lang === 'eng' ? 'arrow-up' : 'חץ למעלה' %>"
-        class="arrow-up"
-      />
-    </button>
   </main>
   <%- include('../partials/footer', { lang, urlLang }) %>
 </body>

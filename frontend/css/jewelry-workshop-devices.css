@@ -260,7 +260,6 @@ main {
   flex-flow: column;
   align-items: center;
 
-  max-height: 160rem;
   width: 100%;
   padding-bottom: 3rem;
 
@@ -441,7 +440,7 @@ html[dir='rtl'] .workshop-card-desc {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  margin-bottom: 3rem;
+  margin-bottom: 0;
 }
 
 .pricing-cards-section {
@@ -552,9 +551,11 @@ html[dir='rtl'] .workshop-card-desc {
 .contact-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  width: 90%;
+  width: 100%;
+  max-width: 440px;
   margin-top: 0;
-  padding: 3rem 0;
+  padding: 3rem 0.75rem;
+  box-sizing: border-box;
   border-top: 1px solid rgba(168, 162, 158, 0.5);
 }
 
@@ -562,9 +563,10 @@ html[dir='rtl'] .workshop-card-desc {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.3rem;
+  min-width: 0;
   border-inline-end: 1px solid rgba(68, 68, 68, 0.2);
-  padding: 0.5rem 0.25rem;
+  padding: 0.5rem 0.5rem;
 }
 
 .contact-block-last {
@@ -605,40 +607,23 @@ html[dir='rtl'] .workshop-card-desc {
 }
 
 .contact-label {
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
   color: rgba(50, 50, 50, 0.95);
-  letter-spacing: 0.4px;
+  letter-spacing: 0.3px;
+  text-align: center;
 }
 
 .contact-value {
-  font-size: 0.85rem;
+  font-size: 0.72rem;
+  line-height: 1.35;
   color: rgba(68, 68, 68, 0.85);
-  letter-spacing: 0.3px;
+  letter-spacing: 0;
   margin: 0;
-  overflow-wrap: break-word;
-  word-break: break-all;
-}
-
-.go-to-top {
-  align-self: center;
-  display: inline-block;
-  width: auto;
-  height: auto;
-  margin: 4rem;
-  border: none;
-  background: transparent;
-  padding: 0;
-  color: rgb(62, 62, 62);
-
-  /* ~~~~ FOR DEBUGGING~~~~ */
-  /* border: 2px solid rgb(37, 155, 228); */
-}
-
-.arrow-up {
-  width: 2rem;
-  height: auto;
-  display: block;
+  width: 100%;
+  text-align: center;
+  overflow-wrap: anywhere;
+  word-break: normal;
 }
 
 /* Footer styles are now imported from footer-mobile.css */
