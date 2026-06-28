@@ -41,9 +41,14 @@ const storage = multer.diskStorage({
     }
   },
   filename: function (req, file, cb) {
+    // Include a random suffix so multiple files in the SAME request (e.g. several
+    // `smallImages`) never collide on filename when Date.now() returns the same
+    // millisecond. A collision would make two concurrent processImage() calls
+    // write/read the same paths and unlink each other's input mid-stream (500s).
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     return cb(
       null,
-      `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
+      `${file.fieldname}-${uniqueSuffix}${path.extname(file.originalname)}`
     );
   },
 });
