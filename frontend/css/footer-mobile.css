@@ -232,16 +232,6 @@ html[dir='rtl'] .attrib-footer,
   opacity: 0.5;
 }
 
-.whatsapp-container {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  position: fixed;
-  top: 85vh;
-  width: 100%;
-  z-index: 10;
-}
-
 .whatsapp-atr {
   display: flex;
   justify-content: center;
