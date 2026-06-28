@@ -1670,7 +1670,7 @@ function showLoginPage(errorMessage) {
         // Show error message
         const errorMsg = document.createElement("div");
         errorMsg.className = "login-error";
-        errorMsg.textContent = data.message || "Invalid credentials";
+        errorMsg.textContent = data.message || data.error || data.errors || "Invalid credentials";
         errorMsg.style.cssText = `
             color: #ff3860;
             margin-top: 15px;
@@ -2474,7 +2474,9 @@ async function loadProductsPage(data) {
           <p class="page__subtitle">Monitor stock levels, track reorder points, and manage product availability.</p>
         </div>
         <div class="page__actions">
-          <button type="button" class="btn" id="export-products-btn">Export</button>
+          <button type="button" class="btn" id="export-products-btn">Export JSON</button>
+          <button type="button" class="btn" id="import-products-btn">Import JSON</button>
+          <input type="file" id="import-products-file" accept=".json" style="display:none;" />
           <button type="button" class="btn btn--primary" id="go-add-product-btn">Add Product</button>
           <button type="button" class="btn btn--primary reorder-toggle-btn" id="reorderToggleBtn">
             <span class="btn-icon">↕</span> Reorder Products
@@ -2579,7 +2581,12 @@ async function loadProductsPage(data) {
 
   const exportBtn = document.getElementById("export-products-btn");
   if (exportBtn) {
-    exportBtn.addEventListener("click", () => exportProductsCSV(data));
+    exportBtn.addEventListener("click", () => exportProductsJSON());
+  }
+
+  const importBtn = document.getElementById("import-products-btn");
+  if (importBtn) {
+    importBtn.addEventListener("click", () => importProductsJSON());
   }
 
   // Reorder mode button handlers
@@ -3552,6 +3559,87 @@ function exportProductsCSV(data) {
   } catch (e) {
     console.error("Export failed:", e);
   }
+}
+
+async function exportProductsJSON() {
+  try {
+    const response = await fetch(`${API_URL}/export-products`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+      },
+    });
+    if (!response.ok) throw new Error(`Export failed: ${response.status}`);
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `products-export-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showSuccessToast("Products exported successfully");
+  } catch (e) {
+    console.error("JSON export failed:", e);
+    showErrorToast("Export failed: " + e.message);
+  }
+}
+
+function importProductsJSON() {
+  const fileInput = document.getElementById("import-products-file");
+  fileInput.click();
+
+  fileInput.onchange = async function () {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const products = JSON.parse(text);
+
+      if (!Array.isArray(products) || products.length === 0) {
+        showErrorToast("Invalid file: expected a JSON array of products");
+        return;
+      }
+
+      if (
+        !confirm(
+          `Import ${products.length} products? This will add them to the database.`,
+        )
+      ) {
+        fileInput.value = "";
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/import-products`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("auth-token")}`,
+        },
+        body: JSON.stringify({ products }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        showSuccessToast(`Successfully imported ${result.inserted} products`);
+        fetchInfo();
+      } else if (result.inserted > 0) {
+        showSuccessToast(
+          `Partially imported: ${result.inserted} added, ${result.failed} failed`,
+        );
+        fetchInfo();
+      } else {
+        showErrorToast("Import failed: " + (result.error || "Unknown error"));
+      }
+    } catch (e) {
+      console.error("Import failed:", e);
+      showErrorToast("Import failed: " + e.message);
+    }
+
+    fileInput.value = "";
+  };
 }
 
 async function bulkDeleteProducts() {
