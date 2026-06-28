@@ -95,7 +95,10 @@ img { display: block; }
 }
 .tk-nav__logo { display: flex; align-items: center; flex: 0 0 auto; text-decoration: none; }
 .tk-nav__logo img { height: 52px; width: auto; }
-.tk-nav--transparent .tk-nav__logo img { filter: invert(1) brightness(2); }
+/* The logo file is black ink on a transparent background. Over the dark hero
+   we want it white: brightness(0) forces the ink black, invert(1) flips it to
+   white — the transparent background is untouched (no blend mode needed). */
+.tk-nav--transparent .tk-nav__logo img { filter: brightness(0) invert(1); }
 
 .tk-nav__links { display: flex; gap: 2.2rem; align-items: center; }
 .tk-nav__link {
@@ -684,9 +687,9 @@ img { display: block; }
   .tk-nav__utils { order: 3; }
 
   /* Collapse transparent home nav to solid white on mobile — the overlay
-     look works on desktop but on mobile we always want a clean white strip
-     with black logo letters (the logo file is black-on-white; the desktop
-     invert filter would show a black background on mobile). */
+     look works on desktop but on mobile we always want a clean white strip.
+     The white nav means white logo ink would be invisible, so revert the
+     logo to its native black ink (drop the white-paint filter). */
   .tk-nav--transparent {
     position: relative;           /* override position:absolute; hero flows below nav */
     background: var(--tk-white);
