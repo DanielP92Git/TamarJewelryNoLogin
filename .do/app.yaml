@@ -9,8 +9,11 @@ services:
     #   branch: master
     #   deploy_on_push: true
 
-    # Build frontend, copy assets to backend/public for runtime access, then install backend
-    build_command: cd ../frontend && npm ci --include=dev && npm run build && cp -r css ../backend/public/css && cp -r imgs ../backend/public/imgs && cp -r dist/* ../backend/public/ && cp favicon.ico ../backend/public/favicon.ico && mkdir -p ../backend/public/js && cp js/homepage.js ../backend/public/js/homepage.js && cd ../backend && npm ci
+    # Build frontend, copy assets (css/imgs/dist/favicon + homepage.js) to
+    # backend/public for runtime access, install backend deps, and fetch the
+    # MongoDB database tools (mongodump/mongorestore) used by the backup service.
+    # NOTE: keep this in sync with the live build command in the DO dashboard.
+    build_command: cd ../frontend && npm ci --include=dev && npm run build && cp -r css ../backend/public/css && cp -r imgs ../backend/public/imgs && cp -r dist/* ../backend/public/ && cp favicon.ico ../backend/public/favicon.ico && cd ../backend && npm ci && wget -q https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2204-x86_64-100.10.0.deb -O /tmp/mongo-tools.deb && dpkg -x /tmp/mongo-tools.deb /tmp/mongo-tools && cp /tmp/mongo-tools/usr/bin/mongodump . && cp /tmp/mongo-tools/usr/bin/mongorestore . && mkdir -p public/js && cp ../frontend/js/homepage.js public/js/homepage.js
 
     # Start the Express server from the backend directory
     run_command: cd backend && npm start
