@@ -272,12 +272,16 @@
       a.addEventListener('click', function (e) { e.preventDefault(); flash(a.getAttribute('data-category') + ' — coming soon'); });
     });
 
-    // newsletter
-    $('tk-news-form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const email = $('tk-news-email').value.trim();
-      if (email) { $('tk-news-submit').textContent = 'Thank you'; flash('You’re on the list — thank you'); }
-    });
+    // newsletter ("Stay in touch") — section temporarily removed from home.ejs;
+    // guard so init() doesn't throw when the form is absent. Restore-safe.
+    const newsForm = $('tk-news-form');
+    if (newsForm) {
+      newsForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const email = $('tk-news-email').value.trim();
+        if (email) { $('tk-news-submit').textContent = 'Thank you'; flash('You’re on the list — thank you'); }
+      });
+    }
 
     // WhatsApp is a real wa.me link (target=_blank) — let it open; no toast stub.
   }
