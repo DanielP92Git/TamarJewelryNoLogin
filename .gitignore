@@ -17,5 +17,7 @@ backend/credentials/
 # Uploaded product images (runtime data, served from CDN)
 backend/uploads/
 backend/smallImages/
+backend/public/uploads/
+backend/public/smallImages/
 public/uploads/
 public/smallImages/
