@@ -113,6 +113,54 @@ img { display: block; }
 .tk-nav__link:hover, .tk-nav__link.is-active { opacity: 1; }
 .tk-nav--solid .tk-nav__link:hover, .tk-nav--solid .tk-nav__link.is-active { color: var(--tk-text); }
 
+/* ---------- Shop categories dropdown (desktop, >=800px) ---------- */
+.tk-nav__item--has-submenu { position: relative; }
+.tk-nav__caret {
+  display: inline-block;
+  font-size: 0.7em;
+  margin-inline-start: 0.25em;
+  transition: transform var(--tk-dur) var(--tk-ease);
+  vertical-align: middle;
+  line-height: 1;
+}
+.tk-nav__item--has-submenu.is-open .tk-nav__caret { transform: rotate(180deg); }
+.tk-nav__submenu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-start: 0;       /* logical — left in LTR, right in RTL */
+  min-width: 180px;
+  background: var(--tk-white, #fff);
+  border: 1px solid var(--tk-border-light, #e8e0d5);
+  border-radius: var(--tk-radius, 6px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.10);
+  z-index: 110;                /* above nav (100) */
+  padding: 0.5rem 0;
+  list-style: none;
+  margin: 0;
+}
+.tk-nav__item--has-submenu.is-open .tk-nav__submenu { display: block; }
+.tk-nav__submenu-link {
+  display: block;
+  padding: 0.55rem 1.1rem;
+  font-size: var(--tk-size-label);
+  font-weight: var(--tk-weight-medium);
+  letter-spacing: var(--tk-track-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--tk-text-muted);
+  white-space: nowrap;
+  transition: color var(--tk-dur) var(--tk-ease), background var(--tk-dur) var(--tk-ease);
+}
+.tk-nav__submenu-link:hover {
+  color: var(--tk-text);
+  background: var(--tk-surface, #fafafa);
+}
+/* Guard submenu links against legacy desktop-menu.css `a { width:100% }` hijack */
+.tk-nav__submenu-link { width: auto; }
+/* RTL: dropdown panel text right-aligned */
+[dir="rtl"] .tk-nav__submenu { text-align: right; }
+
 /* Guard the new chrome against the legacy `desktop-menu.css` bare rule
    `a { width: 100%; display: flex }`, which is loaded on non-home SSR pages
    (category/product/cart/about/...) and otherwise forces every nav <a> (logo,
@@ -719,6 +767,46 @@ img { display: block; }
 
 /* Guard against desktop-menu.css bare `a { width:100% }` hijack */
 #tk-mobile-nav a { width: auto; }
+
+/* ---------- Shop categories accordion (mobile, <800px) ---------- */
+.tk-mobile-nav__item--has-submenu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.tk-mobile-nav__caret {
+  display: inline-block;
+  font-size: 0.75em;
+  margin-inline-start: 0.3em;
+  transition: transform var(--tk-dur) var(--tk-ease);
+  vertical-align: middle;
+  line-height: 1;
+}
+.tk-mobile-nav__item--has-submenu.is-expanded .tk-mobile-nav__caret { transform: rotate(180deg); }
+.tk-mobile-nav__submenu {
+  display: none;
+  list-style: none;
+  margin: 0.5rem 0 0 0;
+  padding: 0;
+}
+.tk-mobile-nav__item--has-submenu.is-expanded .tk-mobile-nav__submenu { display: block; }
+.tk-mobile-nav__submenu li { text-align: center; }
+.tk-mobile-nav__submenu-link {
+  display: block;
+  padding: 0.4rem 1.25rem;
+  font-size: calc(var(--tk-size-body, 1rem) * 0.82);
+  font-weight: var(--tk-weight-medium);
+  letter-spacing: var(--tk-track-label);
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--tk-text-muted);
+  opacity: 0.85;
+  transition: color var(--tk-dur) var(--tk-ease), opacity var(--tk-dur) var(--tk-ease);
+}
+.tk-mobile-nav__submenu-link:hover { opacity: 1; color: var(--tk-ink); }
+/* RTL: sub-links indented from the right when in RTL mode */
+[dir="rtl"] .tk-mobile-nav__submenu-link { padding-inline-end: 1.75rem; padding-inline-start: 0.75rem; }
 
 /* Controls strip (bottom — flags + currency) */
 .tk-mobile-nav__controls {

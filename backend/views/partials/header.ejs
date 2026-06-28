@@ -5,6 +5,19 @@
   var _active = (typeof activeNav !== 'undefined') ? activeNav : '';
   var _eng = lang === 'eng';
 %>
+<%
+  // Shop categories submenu.
+  // Source of truth: backend/config/meta.js categoryDisplayNames + backend/routes/ssrDynamic.js URL_TO_DB_CATEGORY.
+  // Mirror here when categories change.
+  var cats = [
+    { slug: 'necklaces',         en: 'Necklaces',         he: 'שרשראות' },
+    { slug: 'crochet-necklaces', en: 'Crochet Necklaces', he: 'שרשראות סרוגות' },
+    { slug: 'hoops',             en: 'Hoop Earrings',     he: 'עגילי חישוק' },
+    { slug: 'dangle',            en: 'Dangle Earrings',   he: 'עגילים תלויים' },
+    { slug: 'bracelets',         en: 'Bracelets',         he: 'צמידים' },
+    { slug: 'unisex',            en: 'Unisex Jewelry',    he: 'תכשיטים יוניסקס' }
+  ];
+%>
 <header class="tk-nav <%= _hero ? 'tk-nav--transparent' : 'tk-nav--solid' %>">
   <a class="tk-nav__logo" href="/<%= urlLang %>/" data-nav="Home" aria-label="Tamar Kfir Jewelry">
     <img src="/imgs/homepage/logo/tamar-logo.webp" alt="Tamar Kfir Jewelry" />
@@ -12,7 +25,20 @@
 
   <nav class="tk-nav__links" aria-label="Primary">
     <a class="tk-nav__link<%= _active === 'Home' ? ' is-active' : '' %>" href="/<%= urlLang %>"><% if (_eng) { %>Home<% } else { %>בית<% } %></a>
-    <a class="tk-nav__link<%= _active === 'Shop' ? ' is-active' : '' %>" href="/<%= urlLang %>/necklaces"><% if (_eng) { %>Shop<% } else { %>חנות<% } %></a>
+    <div class="tk-nav__item tk-nav__item--has-submenu">
+      <a class="tk-nav__link tk-nav__submenu-trigger<%= _active === 'Shop' ? ' is-active' : '' %>"
+         href="/<%= urlLang %>/necklaces"
+         aria-haspopup="true" aria-expanded="false">
+        <% if (_eng) { %>Shop<% } else { %>חנות<% } %>
+        <span class="tk-nav__caret" aria-hidden="true">&#9662;</span>
+      </a>
+      <ul class="tk-nav__submenu" role="menu">
+        <% cats.forEach(function(c){ %>
+          <li role="none"><a role="menuitem" class="tk-nav__submenu-link"
+             href="/<%= urlLang %>/<%= c.slug %>"><%= _eng ? c.en : c.he %></a></li>
+        <% }); %>
+      </ul>
+    </div>
     <a class="tk-nav__link<%= _active === 'Jewelry Workshop' ? ' is-active' : '' %>" href="/<%= urlLang %>/workshop"><% if (_eng) { %>Jewelry Workshop<% } else { %>סדנת תכשיטים<% } %></a>
     <a class="tk-nav__link<%= _active === 'About' ? ' is-active' : '' %>" href="/<%= urlLang %>/about"><% if (_eng) { %>About<% } else { %>אודות<% } %></a>
     <a class="tk-nav__link<%= _active === 'Contact Me' ? ' is-active' : '' %>" href="/<%= urlLang %>/contact"><% if (_eng) { %>Contact Me<% } else { %>צור קשר<% } %></a>
@@ -94,7 +120,19 @@
   <%# Center: nav links (reuse href / is-active from .tk-nav__links) %>
   <nav class="tk-mobile-nav__links" aria-label="Mobile primary">
     <a class="tk-mobile-nav__link<%= _active === 'Home'             ? ' is-active' : '' %>" href="/<%= urlLang %>"><%=           _eng ? 'Home'             : 'בית'          %></a>
-    <a class="tk-mobile-nav__link<%= _active === 'Shop'             ? ' is-active' : '' %>" href="/<%= urlLang %>/necklaces"><%= _eng ? 'Shop'             : 'חנות'         %></a>
+    <div class="tk-mobile-nav__item tk-mobile-nav__item--has-submenu">
+      <a class="tk-mobile-nav__link tk-mobile-nav__submenu-trigger<%= _active === 'Shop' ? ' is-active' : '' %>"
+         href="/<%= urlLang %>/necklaces" aria-haspopup="true" aria-expanded="false">
+        <%= _eng ? 'Shop' : 'חנות' %>
+        <span class="tk-mobile-nav__caret" aria-hidden="true">&#9662;</span>
+      </a>
+      <ul class="tk-mobile-nav__submenu">
+        <% cats.forEach(function(c){ %>
+          <li><a class="tk-mobile-nav__submenu-link"
+             href="/<%= urlLang %>/<%= c.slug %>"><%= _eng ? c.en : c.he %></a></li>
+        <% }); %>
+      </ul>
+    </div>
     <a class="tk-mobile-nav__link<%= _active === 'Jewelry Workshop' ? ' is-active' : '' %>" href="/<%= urlLang %>/workshop"><%=  _eng ? 'Jewelry Workshop' : 'סדנת תכשיטים' %></a>
     <a class="tk-mobile-nav__link<%= _active === 'About'            ? ' is-active' : '' %>" href="/<%= urlLang %>/about"><%=     _eng ? 'About'            : 'אודות'        %></a>
     <a class="tk-mobile-nav__link<%= _active === 'Contact Me'       ? ' is-active' : '' %>" href="/<%= urlLang %>/contact"><%=   _eng ? 'Contact Me'       : 'צור קשר'      %></a>
