@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-23)
 Phase: 43 (site-wide-cart-drawer) — EXECUTING
 Plan: 1 of 4
 Status: Executing Phase 43
-Last activity: 2026-06-27 -- Phase 43 execution started
+Last activity: 2026-06-28 -- Completed quick task 260628-e7w: Shop categories submenu (awaiting human verify)
 
 ```
 Progress: [█████████░] 90%
@@ -105,3 +105,9 @@ Quick tasks are maintenance/bug fixes separate from planned phases:
    - Added .catch() for network errors, try-catch for storage quota
    - Commits: bfa6d54 (fix), 667d621 (test)
    - Summary: .planning/quick/001-fix-error-handling-bugs-in-model-js-add/001-SUMMARY.md
+
+2. **quick-260628-e7w** (2026-06-28): Added categories submenu to the "Shop" nav button (desktop dropdown + mobile accordion)
+   - Shared `cats` array in header.ejs renders 6 bilingual category links in both menus; behavior in View.js `_bindShopSubmenu()`; dropdown/accordion + RTL styling in homepage.css
+   - Commits: 927712f (markup+CSS), b46cb7e (View.js + rebuild)
+   - Status: Awaiting human visual verification (restart backend, then test desktop/mobile/RTL/lang-toggle)
+   - Summary: .planning/quick/260628-e7w-add-categories-submenu-to-shop-button-in/260628-e7w-SUMMARY.md
