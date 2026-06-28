@@ -10,7 +10,7 @@ services:
     #   deploy_on_push: true
 
     # Build frontend, copy assets to backend/public for runtime access, then install backend
-    build_command: cd ../frontend && npm ci --include=dev && npm run build && cp -r css ../backend/public/css && cp -r imgs ../backend/public/imgs && cp -r dist/* ../backend/public/ && cp favicon.ico ../backend/public/favicon.ico && cd ../backend && npm ci
+    build_command: cd ../frontend && npm ci --include=dev && npm run build && cp -r css ../backend/public/css && cp -r imgs ../backend/public/imgs && cp -r dist/* ../backend/public/ && cp favicon.ico ../backend/public/favicon.ico && mkdir -p ../backend/public/js && cp js/homepage.js ../backend/public/js/homepage.js && cd ../backend && npm ci
 
     # Start the Express server from the backend directory
     run_command: cd backend && npm start
