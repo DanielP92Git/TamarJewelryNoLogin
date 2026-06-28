@@ -884,6 +884,11 @@ export default class View {
     // toggle because the SSR chrome is never rewritten (no innerHTML, no re-render).
     this._bindHamburgerMenu();
 
+    // Shop categories submenu — desktop dropdown + mobile accordion. Bound once per
+    // page load via the same double-bind guard; survives language toggle (SSR chrome
+    // is never rewritten, so markup persists across toggles).
+    this._bindShopSubmenu();
+
     // Cart drawer — open/close + rendering. Bound once per page load via the same
     // double-bind guard as the hamburger. Survives language toggle (SSR chrome is
     // never rewritten). Wires against Plan 01 markup + Plan 02 model mutators.
@@ -984,6 +989,86 @@ export default class View {
     desktopMq.addEventListener('change', e => {
       if (e.matches && overlay.classList.contains('is-open')) close();
     });
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Shop categories submenu
+  // Desktop: click-to-toggle dropdown (.is-open). Mobile: accordion (.is-expanded).
+  // Both guards use a dataset flag so repeated setLanguage() calls never re-bind.
+  // ─────────────────────────────────────────────────────────────────────────
+  _bindShopSubmenu() {
+    // ── Desktop dropdown ──────────────────────────────────────────────────
+    const desktopItem    = document.querySelector('.tk-nav__item--has-submenu');
+    const desktopTrigger = desktopItem && desktopItem.querySelector('.tk-nav__submenu-trigger');
+
+    if (desktopItem && desktopTrigger) {
+      if (desktopTrigger.dataset.tkSubmenuBound !== '1') {
+        desktopTrigger.dataset.tkSubmenuBound = '1';
+
+        const openDesktop = () => {
+          desktopItem.classList.add('is-open');
+          desktopTrigger.setAttribute('aria-expanded', 'true');
+        };
+        const closeDesktop = () => {
+          desktopItem.classList.remove('is-open');
+          desktopTrigger.setAttribute('aria-expanded', 'false');
+        };
+
+        // Toggle on trigger click (no-JS fallback: href still navigates to /necklaces)
+        desktopTrigger.addEventListener('click', e => {
+          e.preventDefault();
+          desktopItem.classList.contains('is-open') ? closeDesktop() : openDesktop();
+        });
+
+        // Close when a submenu category link is clicked (allow navigation)
+        const desktopSubmenu = desktopItem.querySelector('.tk-nav__submenu');
+        if (desktopSubmenu) {
+          desktopSubmenu.addEventListener('click', e => {
+            if (e.target.closest('.tk-nav__submenu-link')) closeDesktop();
+          });
+        }
+
+        // Close on outside click
+        document.addEventListener('click', e => {
+          if (desktopItem.classList.contains('is-open') && !desktopItem.contains(e.target)) {
+            closeDesktop();
+          }
+        });
+
+        // Close on Escape
+        document.addEventListener('keydown', e => {
+          if (e.key === 'Escape' && desktopItem.classList.contains('is-open')) {
+            closeDesktop();
+            desktopTrigger.focus();
+          }
+        });
+
+        // Close when crossing to mobile (<800px) — mirrors _bindHamburgerMenu pattern
+        const mobileMq = window.matchMedia('(max-width: 799.9px)');
+        mobileMq.addEventListener('change', e => {
+          if (e.matches) closeDesktop();
+        });
+      }
+    }
+
+    // ── Mobile accordion ──────────────────────────────────────────────────
+    const mobileItem    = document.querySelector('.tk-mobile-nav__item--has-submenu');
+    const mobileTrigger = mobileItem && mobileItem.querySelector('.tk-mobile-nav__submenu-trigger');
+
+    if (mobileItem && mobileTrigger) {
+      if (mobileTrigger.dataset.tkMobileSubmenuBound !== '1') {
+        mobileTrigger.dataset.tkMobileSubmenuBound = '1';
+
+        mobileTrigger.addEventListener('click', e => {
+          e.preventDefault();
+          const expanded = mobileItem.classList.toggle('is-expanded');
+          mobileTrigger.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        });
+
+        // Tapping a category link: allow navigation naturally (no preventDefault)
+        // The overlay close-on-nav is handled by the browser navigating away.
+      }
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────────────
